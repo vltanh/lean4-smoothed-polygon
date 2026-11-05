@@ -10,6 +10,8 @@ public import Mathlib.Analysis.Calculus.ContDiff.RCLike
 public import SmoothedPolygons.AppA.MatrixIdentities
 public import Mathlib.Analysis.Calculus.Deriv.Shift
 public import Mathlib.Algebra.Field.Periodic
+public import Mathlib.Analysis.Complex.RealDeriv
+public import SmoothedPolygons.Ch3.Jacobi
 
 /-!
 # State dynamics in the Lie group (§3.1)
@@ -688,12 +690,10 @@ theorem corollary3_1_10 (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2
 `det X ≠ 0` on `[a, b]` (the setting of Proposition 3.1.9), `det X` is constant if and only if
 `X + X⁻¹X' ∈ 𝔰𝔩₂(ℝ)` almost everywhere.
 
-The book's proof cites Jacobi's formula (Lemma 3.1.12, `lemma3_1_12`, stated for `GL_n(ℂ)`);
-for the real `2 × 2` matrices here its `2 × 2` instance is `HasDerivAtEntrywise.det_fin_two`
-together with `det X · tr(X⁻¹X') = tr(adj(X) X')`, which is what is used. The derivative `X'`
-exists almost everywhere by Rademacher's theorem, and the converse uses that the Lipschitz
-function `det X` is absolutely continuous, hence constant when its derivative vanishes almost
-everywhere (left implicit in the book). -/
+Jacobi's formula (Lemma 3.1.12, `lemma3_1_12`, stated for `GL_n(ℂ)`) is applied to `X` viewed as
+a complex matrix. The derivative `X'` exists almost everywhere by Rademacher's theorem, and the
+converse uses that the Lipschitz function `det X` is absolutely continuous, hence constant when its
+derivative vanishes almost everywhere (left implicit in the book). -/
 theorem corollary3_1_11 (X : ℝ → Mat2) (a b : ℝ) (hab : a ≤ b)
     (htr : ∀ t ∈ Set.Icc a b, (X t).trace = 0) (hdet : ∀ t ∈ Set.Icc a b, (X t).det ≠ 0)
     (hLip : LipschitzOnEntrywise X (Set.Icc a b)) :
@@ -708,14 +708,30 @@ theorem corollary3_1_11 (X : ℝ → Mat2) (a b : ℝ) (hab : a ≤ b)
       exact (ht (Set.Ioo_subset_Icc_self hmem)).differentiableAt (Icc_mem_nhds hmem.1 hmem.2)
     filter_upwards [ae_all_iff.2 fun i ↦ ae_all_iff.2 (h i)] with t ht hmem i j
     exact (ht i j hmem).hasDerivAt
-  -- Jacobi's formula for `2 × 2` matrices, with `tr X = 0`
+  -- Jacobi's formula (Lemma 3.1.12) `det(X)' = det(X) tr(X⁻¹X')`, applied to `X` viewed as a
+  -- complex matrix, and `tr X = 0`
   have hjac : ∀ t ∈ Set.Ioo a b, HasDerivAtEntrywise X (derivEntrywise X t) t →
       HasDerivAt (fun s ↦ (X s).det)
         ((X t).det * (X t + (X t)⁻¹ * derivEntrywise X t).trace) t := by
     intro t ht h
-    convert h.det_fin_two using 1
-    rw [Matrix.trace_add, htr t (Set.Ioo_subset_Icc_self ht), zero_add,
-      sd_det_mul_trace_inv_mul _ _ (hdet t (Set.Ioo_subset_Icc_self ht))]
+    have hdt := hdet t (Set.Ioo_subset_Icc_self ht)
+    have hdetC : ∀ s, ((X s).map Complex.ofRealHom).det = ((X s).det : ℂ) := fun s ↦
+      (Complex.ofRealHom.map_det (X s)).symm
+    have hinvC : ((X t).map Complex.ofRealHom)⁻¹ = (X t)⁻¹.map Complex.ofRealHom := by
+      apply Matrix.inv_eq_left_inv
+      rw [← Matrix.map_mul, Matrix.nonsing_inv_mul _ (isUnit_iff_ne_zero.2 hdt), Matrix.map_one _
+        (map_zero Complex.ofRealHom) (map_one Complex.ofRealHom)]
+    have hJ := lemma3_1_12 (fun s ↦ (X s).map Complex.ofRealHom)
+      ((derivEntrywise X t).map Complex.ofRealHom) t
+      (fun i j ↦ by simpa using (h i j).ofReal_comp)
+      (by rw [hdetC]; exact (Complex.ofReal_ne_zero.2 hdt).isUnit)
+    rw [hinvC, ← Matrix.map_mul, ← AddMonoidHom.map_trace Complex.ofRealHom, hdetC] at hJ
+    simp only [hdetC] at hJ
+    -- take real parts
+    have hre := Complex.reCLM.hasFDerivAt.comp_hasDerivAt t hJ
+    simp only [Function.comp_def, Complex.reCLM_apply, Complex.ofReal_re] at hre
+    rw [Matrix.trace_add, htr t (Set.Ioo_subset_Icc_self ht), zero_add]
+    simpa only [Complex.ofRealHom_eq_coe, ← Complex.ofReal_mul, Complex.ofReal_re] using hre
   constructor
   · rintro ⟨c, hc⟩
     filter_upwards [hdiff] with t ht hmem
