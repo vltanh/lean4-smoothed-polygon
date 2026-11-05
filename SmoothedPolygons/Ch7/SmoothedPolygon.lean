@@ -366,7 +366,17 @@ theorem poly_isPontryaginExtremal (k : ℕ) (hk : 1 ≤ k) (y0 : ℝ) (hy0 : 1 /
 /-- **Theorem 7.5.6** (`thm:6k+2`). For each positive integer `k`, the smoothed `(6k+2)`-gon is a
 Pontryagin extremal given by a bang-bang control: the state trajectory with the control
 `polygonControl k` and `g(0) = I₂`, `X(0) = Φ(i y₀)` exists, its control is bang-bang, and it lifts
-to a Pontryagin extremal. -/
+to a Pontryagin extremal.
+
+The book's proof checks the transversality conditions at `t_f` from the strong transversality
+conditions of Theorem 7.5.1 and `z(z₀, t_sw) = R⁻¹ · z₀`, relying on Theorem 7.5.1, Lemma 7.5.3 and
+Lemma 7.5.5. The formal proof also fills in what the book leaves implicit: the lift on the `i`-th
+switching interval is the `R⁻ⁱ`-conjugate of the explicit lift of Theorem 7.5.1
+(`strongLift_isStrongLift`), continuous at the switching times by the strong transversality
+conditions; `H = 0` and maximality are transported by conjugation from Lemma 7.5.3; and the
+maximization over all of `U_T` reduces to the vertices because the Hamiltonian is a convex
+combination of its vertex values with weights `u_j ⟨X, Z_{e_j}⟩/⟨X, Z_u⟩ ≥ 0`
+(`poly_hamiltonian_le_of_vertices`), the argument of Lemma 7.3.1. -/
 theorem theorem7_5_6 (k : ℕ) (hk : 1 ≤ k) :
     (∃ g X : ℝ → Mat2, IsStateTrajectory (tf k) (polygonControl k) g X ∧ g 0 = 1 ∧
       X 0 = Φ 0 (y₀ k)) ∧

@@ -561,7 +561,10 @@ theorem corollary3_1_6 (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 
 /-- **Proposition 3.1.9** (`prop:reparam-lipschitz`). Let `(K, σ)` be a balanced pair with
 `σ_0` parameterized by arclength, `σ_j = g s_j*`, `X = g⁻¹g'`, and let `t ↦ s(t)` be a
 reparameterization (`s' > 0`) such that `X̃(t) = X(s(t)) s'(t)` has `det X̃ = 1`. Then `X̃` is
-Lipschitz. -/
+Lipschitz.
+
+The book defines `X̃` by `g̃' = g̃ X̃` with `g̃ = g ∘ s` and derives `X̃ = X(s) s'` by the chain
+rule; the statement takes `X̃` in that derived form. -/
 theorem proposition3_1_9 (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 → ℝ) (tf : ℝ)
     (hKσ : IsBalancedPair K σ tf)
     (harc : ∀ t, deriv (σ 0) t 0 ^ 2 + deriv (σ 0) t 1 ^ 2 = 1)

@@ -32,7 +32,8 @@ prop:trivialization	proposition	1
 lem:X-hyperbolic	lemma	1	
 lem:def-phi	lemma	0	
 lem:half-plane-lie-algebra-iso	lemma	1	
-lem:tangent-maps	lemma	1	
+# lem:tangent-maps: the proof uses "the previous lemma" (lem:half-plane-lie-algebra-iso, TeX 3461) without \ref.
+lem:tangent-maps	lemma	1	lem:half-plane-lie-algebra-iso
 lem:tf-pi3	lemma	1	
 prop:star-domain	theorem	1	cor:X-props
 lem:X-dynamics	lemma	1	
@@ -47,7 +48,8 @@ eqn:lamR	proposition	1
 cor:lam1-gen-sol	corollary	1	
 cor:control-dep-ad-alternate	corollary	1	
 lem:cotangent-space-OX	lemma	1	
-thm:plane-hamiltonian	theorem	1	
+# thm:plane-hamiltonian: the proof cites eqn:tangent-map-f1f2 (TeX 5371), established in the proof of lem:X-dynamics.
+thm:plane-hamiltonian	theorem	1	lem:X-dynamics
 thm:lamR-dynamics	theorem	1	
 cor:X-det-const	lemma	1	
 lem:Riemannian-speed	lemma	1	lem:riemannian

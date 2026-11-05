@@ -759,12 +759,21 @@ lemma poly_pow_eq_of_trace (A : Mat2) (hdet : A.det = 1) (θ' : ℝ) (hsin : Rea
 (`eqn:3k+1`), from `z₀ = i y₀`. The trajectory reaches `g(t_f) = R` at `t_f = (3k+1) t_sw`,
 provided `4/(3y₀² + 1) = 2 cos θ_k` with `θ_k = πk/(3k+1)` (`eqn:theta-k`).
 
-Proof (the book's): the trajectory is the spline (`poly_trajectory_unique`), so by the spline
+Proof: the trajectory is the spline (`poly_trajectory_unique`), so by the spline
 equations `g(t_f) = g_sw (R⁻¹ g_sw R) ⋯ (R^{-3k} g_sw R^{3k})` (`polygonG_eq_prod`), and
 `g(t_f) = R` is equivalent to `(R⁻¹ g_sw)^{3k+1} = R^{-3k} = (-I₂)^k` (`eqn:eigen`). The trace of
 `R⁻¹ g_sw` is `4/(1 + 3y₀²) = 2 cos θ_k` (`trace_segG_switchTime`), so its eigenvalues are
 `e^{±iθ_k}`, whose `(3k+1)`-th powers are `(-1)^k`; comparing eigenvalues (`poly_pow_eq_of_trace`)
-gives `(R⁻¹ g_sw)^{3k+1} = (-1)^k I₂`. -/
+gives `(R⁻¹ g_sw)^{3k+1} = (-1)^k I₂`.
+
+Departure from the paper: the book's proof argues the converse direction: from `g(t_f) = R` it
+compares eigenvalues to get `λ^{3k+1} = (-1)^k`, chooses the branch `ℓ = 0, -k`, and deduces the
+trace. That does not prove the statement, which is the sufficiency ("provided"). The formal proof
+runs the eigenvalue comparison the other way: the trace `2 cos θ_k` with `sin θ_k ≠ 0` gives the
+distinct eigenvalues `e^{±iθ_k}`, so `R⁻¹ g_sw` is diagonalizable over `ℂ` and its `(3k+1)`-th
+power is `(-1)^k I₂`; the choice of branch plays no role in this direction. It also proves that
+every trajectory with this control and these initial values is the spline, which the book takes
+for granted. -/
 theorem lemma7_5_5 (k : ℕ) (hk : 1 ≤ k) (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1)
     (hθ : 4 / (3 * y0 ^ 2 + 1) = 2 * Real.cos (θ k)) (g X : ℝ → Mat2)
     (h : IsStateTrajectory ((3 * k + 1) * switchTime y0) (polygonControlAt (switchTime y0)) g X)

@@ -1080,7 +1080,11 @@ with constant control `e₃` on `[0, t_sw]`. These solutions lift uniquely, up t
 a costate trajectory `(Λ₁, Λ_R, λ_cost)` with `Λ_R(0) ∈ X(0)^⊥`, `χ₂₃(0) = 0`, `H_{u=e₃} = 0`,
 `χ₃₁(t_sw) = 0` and the strong transversality conditions; the trajectory is normal,
 `λ_cost ≠ 0`. Here: there is such a lift with `λ_cost = -1`, and the lifts are exactly its scalar
-multiples `c • (Λ₁, Λ_R, -1)`, so a nonzero lift has `λ_cost = -c ≠ 0`. -/
+multiples `c • (Λ₁, Λ_R, -1)`, so a nonzero lift has `λ_cost = -c ≠ 0`.
+
+The proof follows the book's (`strongLift_isStrongLift`, `strongLift_unique`), with one departure
+at the step "the centralizer of `h = g(t_sw)R⁻¹` in `𝔰𝔩₂` is `ℝΛ₁₀`", which the book deduces from
+`h` being regular elliptic and the formal proof computes directly (`str_centralizer`). -/
 theorem theorem7_5_1 (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
     ∃ Λ₁ ΛR : ℝ → Mat2, IsStrongLift y0 Λ₁ ΛR (-1) ∧
       ∀ (Λ₁' ΛR' : ℝ → Mat2) (lam : ℝ), IsStrongLift y0 Λ₁' ΛR' lam ↔

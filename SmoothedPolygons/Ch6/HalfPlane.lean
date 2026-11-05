@@ -24,7 +24,9 @@ def perpSl2 (X : Mat2) : Submodule ℝ Mat2 :=
 
 /-- **Lemma 6.8.1** (`lem:cotangent-space-OX`). For `X ∈ 𝔰𝔩₂(ℝ)`, `X ≠ 0` (in the book,
 `X ∈ O_J`): `X^⊥ = {[W, X] | W ∈ 𝔰𝔩₂(ℝ)}`, and `T*_X O_X ≅ (𝔰𝔩₂(ℝ)/ℝX)* ≅ X^⊥`, the second
-isomorphism pairing `Y ∈ X^⊥` with `W + ℝX` by the trace form.
+isomorphism pairing `Y ∈ X^⊥` with `W + ℝX` by the trace form. The cotangent space `T*_X O_X` is
+the dual of `T_X O_X ≅ 𝔰𝔩₂(ℝ)/ℝX` (Lemma 4.2.3); the formal statement is about
+`(𝔰𝔩₂(ℝ)/ℝX)* ≅ X^⊥`.
 
 Proof as in the book: `⟨[W, X], X⟩ = ⟨W, [X, X]⟩ = 0` and both spaces have dimension two
 (`orb_adImage_eq_perp`); `Y ↦ (W + ℝX ↦ ⟨Y, W⟩)` is well defined since `⟨Y, X⟩ = 0`, injective
