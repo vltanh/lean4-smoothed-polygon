@@ -44,6 +44,10 @@ noncomputable def sixthRoot (j : ZMod 6) : Fin 2 → ℝ :=
 def IsMultiCurve (k : ℕ) (σ : ZMod 6 → ℝ → Fin 2 → ℝ) (tf : ℝ) : Prop :=
   (∀ j, ContDiffOn ℝ k (σ j) (Set.Icc 0 tf)) ∧ ∀ t ∈ Set.Icc 0 tf, IsMultiPoint fun j ↦ σ j t
 
+/-- A convex disk (§1.1, §2.1): a compact convex set with nonempty interior. -/
+def IsConvexDisk (K : Set (Fin 2 → ℝ)) : Prop :=
+  Convex ℝ K ∧ IsCompact K ∧ (interior K).Nonempty
+
 /-- A centrally symmetric convex disk centered at the origin (§1.1, §2.1): a compact convex set
 with nonempty interior, invariant under `x ↦ -x`. -/
 def IsCCSDisk (K : Set (Fin 2 → ℝ)) : Prop :=

@@ -45,7 +45,7 @@ noncomputable def curveX (g : ℝ → Mat2) (tf t : ℝ) : Mat2 := (g t)⁻¹ * 
 is parameterized by a regular `C¹` multi-curve `σ`, let `g` be the curve induced by a multi-point
 `s` (`σ_j(t) = g(t) s_j`, Theorem 3.1.1), and let `X = g⁻¹g'`. Then `X(t) ∈ 𝔰𝔩₂(ℝ)` and
 `σ_j'(t) = Ad_{g(t)}(X(t)) σ_j(t)` for all `j`. Part (3) is `theorem3_1_4_lipschitz`. -/
-theorem theorem3_1_4 (K : Set (Fin 2 → ℝ)) (hK : IsCCSDisk K) (σ : ZMod 6 → ℝ → Fin 2 → ℝ)
+theorem theorem3_1_4 (K : Set (Fin 2 → ℝ)) (hK : IsConvexDisk K) (σ : ZMod 6 → ℝ → Fin 2 → ℝ)
     (tf : ℝ) (htf : 0 < tf) (hσ : IsMultiCurve 1 σ tf)
     (hreg : ∀ j, ∀ t ∈ Set.Icc 0 tf, derivWithin (σ j) (Set.Icc 0 tf) t ≠ 0)
     (hbd : (⋃ j, σ j '' Set.Icc 0 tf) = frontier K)

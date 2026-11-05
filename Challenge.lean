@@ -57,10 +57,10 @@ vertex values `e₃, e₁, e₂, e₃, e₁, …` of `U_T` on the `3k+1` consecu
 `Φ(x + iy) = [[x/y, -(x² + y²)/y], [1/y, -x/y]]`.
 
 `smoothed_polygon_extremal` states that this trajectory exists and that every state trajectory
-with this control and these initial values (there is exactly one) is bang-bang and lifts to a
-Pontryagin extremal. `smoothed_octagon_density` identifies `y₀` and `t_sw` for the octagon
-(`k = 1`) with the book's values and states that the cost (the area of the smoothed octagon in the
-book's normalization, in which its critical hexagon has area `√12`) is
+with this control and these initial values (there is exactly one on `[0, t_f]`) is bang-bang and
+lifts to a Pontryagin extremal. `smoothed_octagon_density` identifies `y₀` and `t_sw` for the
+octagon (`k = 1`) with the book's values and states that the cost (the area of the smoothed
+octagon in the book's normalization, in which its critical hexagon has area `√12`) is
 `√12 (8 - √32 - ln 2)/(√8 - 1) ≈ 3.126 < π`, so that the density, the area divided by `√12`, is
 Reinhardt's value `(8 - √32 - ln 2)/(√8 - 1) ≈ 0.902414`.
 
@@ -148,7 +148,8 @@ def IsStateTrajectory (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2)
 constant multiplier `λ_cost ≤ 0`, such that
 
 * `Λ₁, Λ_R ∈ 𝔰𝔩₂(ℝ)`, `Λ_R ⊥ X` (because `Λ_R = [Λ₂, X]`), and `(λ_cost, Λ₁, Λ_R) ≠ 0` at every
-  time;
+  time (the nontriviality condition of §6.2, for the reduced costate `(Λ₁, Λ_R)` of
+  Problem 6.7.1; it excludes the spurious lift `λ_cost = 0`, `Λ₁ = 0`, `Λ₂ = X`);
 * the costate equations `Λ₁' = [Λ₁, X]` and
   `Λ_R' = [P, Λ_R] - ⟨Λ_R, P⟩ [P, X] + [-Λ₁ + (3/2) λ_cost J, X]` hold;
 * for almost every time the control maximizes the Hamiltonian over `U_T`, and the Hamiltonian
@@ -173,7 +174,8 @@ def IsPontryaginExtremal (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X Λ₁ ΛR : 
           hamiltonian lam (Λ₁ t) (ΛR t) (X t) v ≤ hamiltonian lam (Λ₁ t) (ΛR t) (X t) (u t)
 
 /-- A control is bang-bang on `[0, T]` if its values are extreme points of the control simplex
-`U_T` (Definition 7.3.2). -/
+`U_T` (Definition 7.3.2; the clause "with discontinuous switching" of the definition describes the
+switching and is not a condition). -/
 def IsBangBang (T : ℝ) (u : ℝ → Fin 3 → ℝ) : Prop :=
   ∀ t ∈ Set.Icc 0 T, u t ∈ Set.extremePoints ℝ (controlSimplex)
 

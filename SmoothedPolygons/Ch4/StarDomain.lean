@@ -75,14 +75,30 @@ theorem R_conj_controlMatrix_vertex :
       R * controlMatrix (vertex 0) * R⁻¹ = controlMatrix (vertex 2) := by
   sorry
 
-/-- §4.6: the rotation permutes the star functions, `ρ_j(R X R⁻¹) = ρ_{j-1}(X)` (indices mod 3). -/
-theorem ρ_R_conj (X : Mat2) :
+/-- §4.6: the rotation permutes the star functions, `ρ_j(R X R⁻¹) = ρ_{j-1}(X)` (indices mod 3),
+for `X ∈ 𝔰𝔩₂(ℝ)`. -/
+theorem ρ_R_conj (X : Mat2) (hX : X.trace = 0) :
     ρ₀ (R * X * R⁻¹) = ρ₂ X ∧ ρ₁ (R * X * R⁻¹) = ρ₀ X ∧ ρ₂ (R * X * R⁻¹) = ρ₁ X := by
   sorry
 
 /-- §4.6: the reflection acts on `Φ` by `z ↦ -z̄`: `ε_S S Φ(z) S⁻¹ = Φ(-z̄)`, where
 `ε_S = det S = -1`. -/
 theorem reflS_conj_Φ (x y : ℝ) (hy : 0 < y) : -(reflS * Φ x y * reflS⁻¹) = Φ (-x) y := by
+  sorry
+
+/-- §4.6: the reflection permutes the star functions, `ρ_j(ε_S S X S⁻¹) = ρ_{1-j}(X)`
+(indices mod 3), for `X ∈ 𝔰𝔩₂(ℝ)`. -/
+theorem ρ_reflS_conj (X : Mat2) (hX : X.trace = 0) :
+    ρ₀ (-(reflS * X * reflS⁻¹)) = ρ₁ X ∧ ρ₁ (-(reflS * X * reflS⁻¹)) = ρ₀ X ∧
+      ρ₂ (-(reflS * X * reflS⁻¹)) = ρ₂ X := by
+  sorry
+
+/-- §4.6: the reflection acts on the control matrices of the vertices by
+`-S Z_{e₂} S⁻¹ = Z_{e₃}`, `-S Z_{e₃} S⁻¹ = Z_{e₂}`, `-S Z_{e₁} S⁻¹ = Z_{e₁}`. -/
+theorem reflS_conj_controlMatrix_vertex :
+    -(reflS * controlMatrix (vertex 1) * reflS⁻¹) = controlMatrix (vertex 2) ∧
+      -(reflS * controlMatrix (vertex 2) * reflS⁻¹) = controlMatrix (vertex 1) ∧
+      -(reflS * controlMatrix (vertex 0) * reflS⁻¹) = controlMatrix (vertex 0) := by
   sorry
 
 end SmoothedPolygons

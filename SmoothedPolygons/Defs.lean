@@ -117,7 +117,8 @@ def IsStateTrajectory (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2)
 constant multiplier `λ_cost ≤ 0`, such that
 
 * `Λ₁, Λ_R ∈ 𝔰𝔩₂(ℝ)`, `Λ_R ⊥ X` (because `Λ_R = [Λ₂, X]`), and `(λ_cost, Λ₁, Λ_R) ≠ 0` at every
-  time;
+  time (the nontriviality condition of §6.2, for the reduced costate `(Λ₁, Λ_R)` of
+  Problem 6.7.1; it excludes the spurious lift `λ_cost = 0`, `Λ₁ = 0`, `Λ₂ = X`);
 * the costate equations `Λ₁' = [Λ₁, X]` and
   `Λ_R' = [P, Λ_R] - ⟨Λ_R, P⟩ [P, X] + [-Λ₁ + (3/2) λ_cost J, X]` hold;
 * for almost every time the control maximizes the Hamiltonian over `U_T`, and the Hamiltonian
@@ -142,7 +143,8 @@ def IsPontryaginExtremal (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X Λ₁ ΛR : 
           hamiltonian lam (Λ₁ t) (ΛR t) (X t) v ≤ hamiltonian lam (Λ₁ t) (ΛR t) (X t) (u t)
 
 /-- A control is bang-bang on `[0, T]` if its values are extreme points of the control simplex
-`U_T` (Definition 7.3.2). -/
+`U_T` (Definition 7.3.2; the clause "with discontinuous switching" of the definition describes the
+switching and is not a condition). -/
 def IsBangBang (T : ℝ) (u : ℝ → Fin 3 → ℝ) : Prop :=
   ∀ t ∈ Set.Icc 0 T, u t ∈ Set.extremePoints ℝ (controlSimplex)
 

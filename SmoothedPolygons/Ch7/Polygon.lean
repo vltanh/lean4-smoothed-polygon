@@ -42,6 +42,46 @@ noncomputable def segG (y0 t : ℝ) : Mat2 := constControlG (Φ 0 y0) (segP y0) 
 (`eqn:const-control-z-X`). -/
 noncomputable def segX (y0 t : ℝ) : Mat2 := constControlX (Φ 0 y0) (segP y0) t
 
+/-! ### The `e₃`-trajectory from `z₀ = i y₀` in closed form -/
+
+/-- `X(z₀, t) = Φ(z(t))` with `z(t) = (W - 1)/√3 + i y₀ W`, `W = exp(√3 y₀ t)`: the trajectory moves
+along the straight line from the ideal vertex `-1/√3` (§7.2). -/
+theorem segX_eq (y0 t : ℝ) (hy0 : 0 < y0) :
+    segX y0 t = Φ ((Real.exp (√3 * y0 * t) - 1) / √3) (y0 * Real.exp (√3 * y0 * t)) := by
+  sorry
+
+/-- `g₀(z₀, t)` in closed form, `W = exp(√3 y₀ t)`. -/
+theorem segG_eq (y0 t : ℝ) (hy0 : 0 < y0) :
+    segG y0 t = !![1, -(Real.exp (√3 * y0 * t) - 1) / √3;
+      (1 - (Real.exp (√3 * y0 * t))⁻¹) / (√3 * y0 ^ 2),
+      1 - (Real.exp (√3 * y0 * t) - 2 + (Real.exp (√3 * y0 * t))⁻¹) / (3 * y0 ^ 2)] := by
+  sorry
+
+/-- The `e₃`-trajectory solves the state equations with constant control `e₃`. -/
+theorem seg_solution (y0 t : ℝ) (hy0 : 0 < y0) :
+    HasDerivAtEntrywise (segG y0) (segG y0 t * segX y0 t) t ∧
+      HasDerivAtEntrywise (segX y0)
+        (controlP (vertex 2) (segX y0 t) * segX y0 t -
+          segX y0 t * controlP (vertex 2) (segX y0 t)) t ∧
+      segG y0 0 = 1 ∧ segX y0 0 = Φ 0 y0 ∧ ∀ s, (segG y0 s).det = 1 := by
+  sorry
+
+/-- On `[0, t_sw]` the `e₃`-trajectory stays in the star domain. -/
+theorem segX_star (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) (t : ℝ)
+    (ht : t ∈ Set.Icc 0 (switchTime y0)) : IsStarState (segX y0 t) := by
+  sorry
+
+/-- The strong boundary condition `z(z₀, t_sw) = R⁻¹ · z₀` (`eqn:poly-z`), in the Lie algebra:
+`X(z₀, t_sw) = R⁻¹ X₀ R`. -/
+theorem segX_switchTime (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
+    segX y0 (switchTime y0) = R⁻¹ * Φ 0 y0 * R := by
+  sorry
+
+/-- The trace of `h = g(t_sw) R⁻¹` is `4/(1 + 3y₀²)` (proof of Theorem 7.5.1). -/
+theorem trace_segG_switchTime (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
+    (segG y0 (switchTime y0) * R⁻¹).trace = 4 / (1 + 3 * y0 ^ 2) := by
+  sorry
+
 /-- The Lie algebra trajectory of the spline: `R⁻ⁱ X(z₀, t - iτ) Rⁱ` on `[iτ, (i+1)τ)`. -/
 noncomputable def polygonX (y0 τ t : ℝ) : Mat2 :=
   (R⁻¹) ^ ⌊t / τ⌋₊ * segX y0 (t - ⌊t / τ⌋₊ * τ) * R ^ ⌊t / τ⌋₊
