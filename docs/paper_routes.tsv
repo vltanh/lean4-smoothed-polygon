@@ -1,0 +1,129 @@
+# label	environment	proved	cited statements (from route_check.py extract)
+eqn:density-formula	conjecture	0	
+thm:fejes-toth-packing	theorem	0	
+lem:reinhardt-tiling	lemma	1	
+thm:frac-hexagon	theorem	1	
+lem:no-corner	lemma	1	
+lem:tri-interior	lemma	1	lem:no-corner
+lem:multi-cont	lemma	1	lem:no-corner
+thm:minkowski-inscribe	theorem	0	
+thm:mahler-circumscribe	theorem	0	
+thm:min-critical	theorem	1	thm:mahler-circumscribe
+lem:sigma2:c1	lemma	1	lem:star-conditions,lem:tri-interior
+lem:tangents-lipschitz	lemma	1	lem:sigma2:c1
+lem:multi-curve-c2	corollary	1	lem:tangents-lipschitz
+lem:star-conditions	lemma	1	
+lem:local-curvature-constrt	lemma	1	
+thm:defn-g	theorem	1	
+thm:defn-X	theorem	1	lem:tangents-lipschitz
+cor:X-props	corollary	1	lem:star-conditions
+lem:hyp-arc	lemma	1	
+prop:reparam-lipschitz	proposition	1	cor:X-props,thm:defn-X
+cor:X-diff-ae	corollary	1	prop:reparam-lipschitz
+cor:param-equiv	corollary	1	lem:Jacobi
+lem:Jacobi	lemma	1	
+lem:area-helper-1	lemma	1	
+lem:area-helper-2	lemma	1	
+lem:curvature-pos	lemma	1	cor:X-props,lem:hyp-arc,thm:X-dynamics-sl2
+lem:sl2-star-condition	lemma	1	
+lem:sl2-lemmas	lemma	0	
+thm:X-dynamics-sl2	theorem	1	cor:param-equiv,lem:sl2-lemmas
+prop:trivialization	proposition	1	
+lem:X-hyperbolic	lemma	1	
+lem:def-phi	lemma	0	
+lem:half-plane-lie-algebra-iso	lemma	1	
+lem:tangent-maps	lemma	1	
+lem:tf-pi3	lemma	1	
+prop:star-domain	theorem	1	cor:X-props
+lem:X-dynamics	lemma	1	
+th:compactification	theorem	1	
+lem:pt-to-hexagon	lemma	1	
+lem:triangle-areas	lemma	1	lem:pt-to-hexagon
+lem:geom-thales	lemma	1	
+lem:compactification-lemma	lemma	1	
+lem:control-convex	lemma	1	lem:triangle-areas
+prop:left-invariant-hams	proposition	1	prop:trivialization
+eqn:lamR	proposition	1	
+cor:lam1-gen-sol	corollary	1	
+cor:control-dep-ad-alternate	corollary	1	
+lem:cotangent-space-OX	lemma	1	
+thm:plane-hamiltonian	theorem	1	
+thm:lamR-dynamics	theorem	1	
+cor:X-det-const	lemma	1	
+lem:Riemannian-speed	lemma	1	lem:riemannian
+lem:const-control-trajectories	lemma	1	
+lem:control-face-lemma	lemma	1	
+# thm:strong-transversality: the proof also cites cor:lam1-gen-sol through \eqref (line 6123), which the extractor does not read.
+thm:strong-transversality	theorem	1	cor:lam1-gen-sol,lem:H-max-6k+2
+lem:H-max-6k+2	lemma	1	
+lem:discrete-k	lemma	1	thm:strong-transversality
+# thm:6k+2: the proof cites no label, but the text before Theorem 7.5.1 (lines 6059-6065) says that the proof of
+# extremality is broken into Theorem 7.5.1, Lemma 7.5.3 and Lemma 7.5.5, and the proof uses the strong
+# transversality conditions (7.5.1) and the boundary condition z(z0,tsw)=R^-1 z0 (eqn:poly-z).
+thm:6k+2	theorem	1	lem:H-max-6k+2,lem:discrete-k,thm:strong-transversality
+thm:oct-isolated	theorem	1	lem:H-max-6k+2
+prop:edge-extremal	proposition	1	
+thm:edge	theorem	1	
+lem:lambda2-Landau	lemma	1	thm:Gronwall
+lem:LambdaR	lemma	1	lem:control-convex,lem:control-face-lemma
+lem:Lambda1	lemma	1	
+thm:circle-singular	theorem	1	
+thm:circle-iff-singular	theorem	1	lem:Lambda1,lem:LambdaR,thm:circle-singular
+thm:no-singular-arcs	theorem	1	
+thm:avoid-singular	theorem	1	lem:LambdaR,thm:Gronwall,thm:edge
+thm:finite-bang-bang	theorem	1	thm:edge
+lem:constant-not-singular	lemma	1	
+thm:symmetries	theorem	1	
+thm:angular-momentum	theorem	1	cor:lam1-gen-sol,thm:symmetries
+lem:circle-plane-bijection	lemma	1	
+lem:boundary-circle-control	lemma	1	lem:control-face-lemma
+eqn:opt-control-constraint	proposition	1	prop:trace-quotient-sub
+prop:control-quadratic	proposition	1	lem:boundary-circle-control
+lem:hyperboloid-coords	lemma	1	
+thm:ode-hyperboloid	theorem	1	
+eqn:abss{w	corollary	1	thm:ode-hyperboloid
+eqn:quadratic-z1	lemma	1	prop:control-quadratic
+lem:maximizing-root	lemma	1	
+lem:ode-abnormal	lemma	1	
+lem:su11-invariance	lemma	1	
+thm:ode-oh	theorem	1	lem:maximizing-root
+eqn:fuller-symplectic-form	proposition	1	
+lem:fiber	lemma	1	
+thm:global	theorem	0	
+lem:00	lemma	1	
+lem:rescale	lemma	1	
+lem:discrete	lemma	1	
+lem:reversal	lemma	1	
+lem:switch-reversal	lemma	1	
+lem:first-negative-control	lemma	1	lem:reversal
+lem:first-control	lemma	1	
+cor:10	corollary	1	
+lem:nonzero	lemma	1	
+lemma:no-singular	lemma	1	
+lem:qout	lemma	1	
+lem:eigenvalues	lemma	1	
+lem:Lie-Fuller	lemma	1	
+lem:chi-asymptotic	lemma	1	
+thm:no-return	theorem	1	
+thm:basin	theorem	1	
+thm:outward-fuller	theorem	1	
+thm:mahler	theorem	1	lem:constant-not-singular,prop:edge-extremal,thm:finite-bang-bang,thm:no-chatter,thm:no-return,thm:no-singular-arcs
+thm:no-chatter	theorem	0	
+thm:Gronwall	corollary	0	
+eqn:SL2-SU11	lemma	1	
+prop:brack-brack	proposition	0	
+prop:trace-quotient-sub	proposition	1	
+prop:brack-brack-inner-prod	proposition	1	
+lem:exp-of-sl2	lemma	1	
+eqn:lie-poisson-gen	proposition	0	
+lem:X-ham-frac-deriv	proposition	1	lem:sl2-star-condition
+thm:extended-space-poisson-bracket	theorem	0	
+thm:reinhardt-poisson	theorem	1	
+lem:riemannian	lemma	1	lem:tangent-maps
+# Unlabelled lemma in §7.1 (line 5525), Lemma 7.1.3: P0 and X0+P0 have the same characteristic polynomial.
+# Label of this formalization; its proof cites lem:sl2-lemmas.
+lem:P0-charpoly	lemma	1	lem:sl2-lemmas
+# Unlabelled example before Theorem 7.5.6 (line 6336): the smoothed octagon and its density. Label of this
+# formalization. It cites no numbered result; it uses eqn:cost, eqn:const-control-z-X and the value of the
+# trace from the proof of lem:discrete-k.
+ex:smoothed-octagon	example	1	

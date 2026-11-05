@@ -1,0 +1,34 @@
+name = "SmoothedPolygons"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["Basic", "External", "SmoothedPolygons", "Challenge", "Solution"]
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.36.0-rc2"
+
+[[lean_lib]]
+name = "Basic"
+globs = ["Basic.+"]
+
+[[lean_lib]]
+name = "External"
+globs = ["External.+"]
+
+[[lean_lib]]
+name = "SmoothedPolygons"
+globs = ["SmoothedPolygons.+"]
+
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"
