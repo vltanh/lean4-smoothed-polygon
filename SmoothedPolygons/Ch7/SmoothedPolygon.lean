@@ -236,7 +236,7 @@ lemma poly_strong_hamiltonian_le {y0 : ℝ} (hy0 : 1 / √3 < y0) (hy1 : y0 < 1)
     (hs : s ∈ Icc 0 (switchTime y0)) (m : Fin 3) :
     hamiltonian (-1) (strongΛ₁ y0 s) (strongΛR y0 s) (segX y0 s) (vertex m) ≤ 0 := by
   have hH := (strongLift_perp_hamiltonian y0 hy0 s hs).2
-  have hχ := lemma7_5_3 y0 hy0 hy1 _ _ (strongLift_isStrongLift y0 hy0 hy1) s hs
+  have hχ := lemma7_5_3 y0 hy0 hy1 _ _ (strongLift_isStrongLift y0 hy0) s hs
   have h0 := poly_hamiltonian_sub (-1) (strongΛ₁ y0 s) (strongΛR y0 s) (segX y0 s) 2 0
   have h1 := poly_hamiltonian_sub (-1) (strongΛ₁ y0 s) (strongΛR y0 s) (segX y0 s) 2 1
   match m with
@@ -272,7 +272,7 @@ theorem poly_isPontryaginExtremal (k : ℕ) (hk : 1 ≤ k) (y0 : ℝ) (hy0 : 1 /
     poly_trajectory_unique y0 hy0 hy1 _ g X h hg0 hX0
   have hTpos : 0 ≤ ((3 * k + 1 : ℕ) : ℝ) * τ := by positivity
   -- the strong lift of Theorem 7.5.1 on the first switching interval
-  obtain ⟨htr, hd1, hdR, -, -, -, -, hgR, hg1⟩ := strongLift_isStrongLift y0 hy0 hy1
+  obtain ⟨htr, hd1, hdR, -, -, -, -, hgR, hg1⟩ := strongLift_isStrongLift y0 hy0
   have hc1 : ContinuousOn (strongΛ₁ y0) (Icc 0 τ) := HasDerivWithinAtEntrywise.continuousOn hd1
   have hcR : ContinuousOn (strongΛR y0) (Icc 0 τ) := HasDerivWithinAtEntrywise.continuousOn hdR
   have hcX : ContinuousOn (segX y0) (Icc 0 τ) := (poly_segX_continuous hy).continuousOn

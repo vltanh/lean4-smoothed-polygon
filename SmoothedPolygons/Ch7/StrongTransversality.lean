@@ -612,7 +612,7 @@ lemma str_hamiltonian_costateΛR (y0 l1 lR lam t : ℝ) (hy0 : 0 < y0) :
   ring_nf
 
 /-- The explicit lift satisfies the conditions of Theorem 7.5.1 with `λ_cost = -1`. -/
-theorem strongLift_isStrongLift (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
+theorem strongLift_isStrongLift (y0 : ℝ) (hy0 : 1 / √3 < y0) :
     IsStrongLift y0 (strongΛ₁ y0) (strongΛR y0) (-1) := by
   have h3 : (0 : ℝ) < √3 := by positivity
   have hy0' : 0 < y0 := lt_trans (by positivity) hy0
@@ -1090,10 +1090,10 @@ theorem theorem7_5_1 (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
       ∀ (Λ₁' ΛR' : ℝ → Mat2) (lam : ℝ), IsStrongLift y0 Λ₁' ΛR' lam ↔
         ∃ c : ℝ, lam = -c ∧
           ∀ t ∈ Set.Icc 0 (switchTime y0), Λ₁' t = c • Λ₁ t ∧ ΛR' t = c • ΛR t := by
-  refine ⟨strongΛ₁ y0, strongΛR y0, strongLift_isStrongLift y0 hy0 hy1,
+  refine ⟨strongΛ₁ y0, strongΛR y0, strongLift_isStrongLift y0 hy0,
     fun Λ₁' ΛR' lam ↦ ⟨fun h ↦ ⟨-lam, by ring, strongLift_unique y0 hy0 hy1 Λ₁' ΛR' lam h⟩, ?_⟩⟩
   rintro ⟨c, rfl, hc⟩
-  exact str_isStrongLift_smul y0 hy0 hy1 c _ _ _ _ (strongLift_isStrongLift y0 hy0 hy1) hc
+  exact str_isStrongLift_smul y0 hy0 hy1 c _ _ _ _ (strongLift_isStrongLift y0 hy0) hc
 
 /-- The values found in the proof of Theorem 7.5.1: a strong lift with `λ_cost = -1` has
 `Λ₁(0) = λ₁ Λ₁₀` and `Λ_R(0) = λ_R [[0, y₀²], [1, 0]]`, where `ℓ = ln(4/(3y₀² + 1))`,
