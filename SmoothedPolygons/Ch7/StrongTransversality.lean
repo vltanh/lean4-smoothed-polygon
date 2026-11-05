@@ -526,7 +526,7 @@ lemma str_Λ₁₀_eq (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
       ((segG y0 (switchTime y0) * R⁻¹).trace / 2) • (1 : Mat2) := by
   have h3 : (0 : ℝ) < √3 := by positivity
   have hy0' : 0 < y0 := lt_trans (by positivity) hy0
-  rw [trace_segG_switchTime y0 hy0 hy1, segG_eq _ _ hy0', str_exp_switchTime hy0', str_R_inv]
+  rw [trace_segG_switchTime y0 hy0, segG_eq _ _ hy0', str_exp_switchTime hy0', str_R_inv]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [Λ₁₀] <;> field_simp <;> ring_nf <;>
     simp only [str_sqrt3_sq] <;> ring_nf
@@ -864,7 +864,7 @@ theorem strongLift_unique (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) (Λ₁
     rw [hΛRt t ht, hl1, hlR, strongΛR, this]
 
 /-- Along the explicit lift, `Λ_R ⊥ X` and the Hamiltonian with control `e₃` vanishes. -/
-theorem strongLift_perp_hamiltonian (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
+theorem strongLift_perp_hamiltonian (y0 : ℝ) (hy0 : 1 / √3 < y0) :
     ∀ t ∈ Set.Icc 0 (switchTime y0), traceForm (strongΛR y0 t) (segX y0 t) = 0 ∧
       hamiltonian (-1) (strongΛ₁ y0 t) (strongΛR y0 t) (segX y0 t) (vertex 2) = 0 := by
   intro t _

@@ -419,7 +419,7 @@ lemma poly_segG_continuous {y0 : ℝ} (hy : 0 < y0) : Continuous (segG y0) :=
 
 lemma poly_segX_glue {y0 : ℝ} (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
     segX y0 (switchTime y0) = R⁻¹ * segX y0 0 * R := by
-  rw [segX_switchTime y0 hy0 hy1, (seg_solution y0 0 (poly_y0_pos hy0)).2.2.2.1]
+  rw [segX_switchTime y0 hy0, (seg_solution y0 0 (poly_y0_pos hy0)).2.2.2.1]
 
 lemma poly_segG_glue {y0 : ℝ} (hy : 0 < y0) (τ : ℝ) :
     segG y0 τ = segG y0 τ * R⁻¹ * segG y0 0 * R := by
@@ -804,7 +804,7 @@ theorem lemma7_5_5 (k : ℕ) (hk : 1 ≤ k) (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy
   have hA : (R⁻¹ * segG y0 τ) ^ (3 * k + 1) = (-1) ^ k := by
     refine poly_pow_eq_of_trace _ ?_ (θ k) (Real.sin_pos_of_pos_of_lt_pi hθpos hθlt).ne' ?_ _ _ ?_
     · rw [Matrix.det_mul, poly_det_Rinv, (seg_solution y0 0 hy).2.2.2.2, one_mul]
-    · rw [Matrix.trace_mul_comm, trace_segG_switchTime y0 hy0 hy1, ← hθ, add_comm]
+    · rw [Matrix.trace_mul_comm, trace_segG_switchTime y0 hy0, ← hθ, add_comm]
     · unfold θ; field_simp; push_cast; ring
   have hsemi : SemiconjBy R (R⁻¹ * segG y0 τ) (segG y0 τ * R⁻¹) := by
     unfold SemiconjBy

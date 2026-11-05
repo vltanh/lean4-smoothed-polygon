@@ -205,7 +205,7 @@ theorem theorem3_4_2 (tf : ℝ) (g g' : ℝ → Mat2)
     (corollary3_1_11 X 0 tf htf.le htrX (fun t ht ↦ by rw [hX1 t ht]; exact one_ne_zero)
       hLipX).1 ⟨1, hX1⟩
   -- `κ = κ₀ + κ₁ + κ₂ > 0` almost everywhere (Lemma 3.3.1)
-  have hpos := lemma3_3_1 tf g g' hg hdet hLip X hX hstar hcurv
+  have hpos := lemma3_3_1 tf g g' hg hdet X hX hstar hcurv
   -- `X` is differentiable almost everywhere (Rademacher's theorem for `g'`)
   have hdiff : ∀ᵐ t, t ∈ Set.Ioo 0 tf → HasDerivAtEntrywise X (derivEntrywise X t) t := by
     have h : ∀ i j, ∀ᵐ t, t ∈ Set.Icc 0 tf →

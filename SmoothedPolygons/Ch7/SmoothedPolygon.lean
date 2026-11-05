@@ -235,7 +235,7 @@ among the vertices, with maximum `0`: `H(e₃) = 0` (`strongLift_perp_hamiltonia
 lemma poly_strong_hamiltonian_le {y0 : ℝ} (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) {s : ℝ}
     (hs : s ∈ Icc 0 (switchTime y0)) (m : Fin 3) :
     hamiltonian (-1) (strongΛ₁ y0 s) (strongΛR y0 s) (segX y0 s) (vertex m) ≤ 0 := by
-  have hH := (strongLift_perp_hamiltonian y0 hy0 hy1 s hs).2
+  have hH := (strongLift_perp_hamiltonian y0 hy0 s hs).2
   have hχ := lemma7_5_3 y0 hy0 hy1 _ _ (strongLift_isStrongLift y0 hy0 hy1) s hs
   have h0 := poly_hamiltonian_sub (-1) (strongΛ₁ y0 s) (strongΛR y0 s) (segX y0 s) 2 0
   have h1 := poly_hamiltonian_sub (-1) (strongΛ₁ y0 s) (strongΛR y0 s) (segX y0 s) 2 1
@@ -310,7 +310,7 @@ theorem poly_isPontryaginExtremal (k : ℕ) (hk : 1 ≤ k) (y0 : ℝ) (hy0 : 1 /
     obtain ⟨hX, h1, hR⟩ := hpiece i t hti
     rw [(huniq t ht).2, hX, h1, hR, poly_trace_conj (poly_Rpow_mul_Rinvpow i),
       poly_trace_conj (poly_Rpow_mul_Rinvpow i), poly_traceForm_conj (poly_Rpow_mul_Rinvpow i)]
-    exact ⟨(htr _ hs).1, (htr _ hs).2, (strongLift_perp_hamiltonian y0 hy0 hy1 _ hs).1,
+    exact ⟨(htr _ hs).1, (htr _ hs).2, (strongLift_perp_hamiltonian y0 hy0 _ hs).1,
       Or.inl (by norm_num)⟩
   · -- the costate equation `Λ₁' = [Λ₁, X]`
     have hI := poly_pw_isIntegralCurve (A := R⁻¹) (B := R) hτ hg1 hc1
@@ -349,7 +349,7 @@ theorem poly_isPontryaginExtremal (k : ℕ) (hk : 1 ≤ k) (y0 : ℝ) (hy0 : 1 /
     have hH0 := poly_hamiltonian_conj (poly_Rpow_mul_Rinvpow i) (poly_conj_pow_J i)
       (poly_conj_pow_vertex_two i) (-1) (strongΛ₁ y0 (t - i * τ)) (strongΛR y0 (t - i * τ))
       (segX y0 (t - i * τ))
-    rw [(strongLift_perp_hamiltonian y0 hy0 hy1 _ hs).2] at hH0
+    rw [(strongLift_perp_hamiltonian y0 hy0 _ hs).2] at hH0
     refine ⟨hH0, fun v hv ↦ ?_⟩
     rw [hH0]
     refine poly_hamiltonian_le_of_vertices _ _ _ _ (poly_isStarState_conj_pow i (hstar _ hs)) 0
@@ -560,7 +560,7 @@ theorem example7_5_smoothedOctagon :
       (by norm_num), show 3 * ((√8 - 1) / 3) = √8 - 1 by ring]
     ring
   refine ⟨poly_θ_one, ?_, poly_y₀_one, htsw, fun g X h hg0 hX0 ↦ ?_⟩
-  · rw [Matrix.trace_mul_comm, tsw_eq_switchTime, trace_segG_switchTime _ hy0 hy1, add_comm,
+  · rw [Matrix.trace_mul_comm, tsw_eq_switchTime, trace_segG_switchTime _ hy0, add_comm,
       poly_four_div_octagon]
   -- the trajectory is the spline; the cost is four times the cost of one switching interval
   have huniq := polygon_trajectory_unique 1 le_rfl g X h hg0 hX0

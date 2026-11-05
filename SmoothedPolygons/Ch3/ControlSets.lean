@@ -207,7 +207,7 @@ derivative, and let `X = g⁻¹g'` satisfy the star inequalities and the curvatu
 `κ_j(t) > 0`. -/
 theorem lemma3_3_1 (tf : ℝ) (g g' : ℝ → Mat2)
     (hg : ∀ t ∈ Set.Icc 0 tf, HasDerivWithinAtEntrywise g (g' t) (Set.Icc 0 tf) t)
-    (hdet : ∀ t ∈ Set.Icc 0 tf, (g t).det = 1) (hLip : LipschitzOnEntrywise g' (Set.Icc 0 tf))
+    (hdet : ∀ t ∈ Set.Icc 0 tf, (g t).det = 1)
     (X : ℝ → Mat2) (hX : ∀ t, X t = (g t)⁻¹ * g' t)
     (hstar : ∀ t ∈ Set.Icc 0 tf, 0 < ρ₀ (X t) ∧ 0 < ρ₁ (X t) ∧ 0 < ρ₂ (X t))
     (hcurv : ∀ᵐ t, t ∈ Set.Ioo 0 tf → ∀ j, 0 ≤ stateCurvature (X t) (derivEntrywise X t) j) :

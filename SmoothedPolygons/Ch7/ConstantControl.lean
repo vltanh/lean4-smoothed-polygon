@@ -78,7 +78,7 @@ private theorem hasDerivWithinAt_Φ_comp {x y : ℝ → ℝ} {x' y' : ℝ} {s : 
 /-- **Lemma 7.1.2** (`lem:Riemannian-speed`). For a constant control `u ∈ U_T`, the speed
 `⟨X', X'⟩^{1/2}` of `X` is constant, and the trajectory `z = x + iy` with `X = Φ(z)` has constant
 speed `(x'² + y'²)^{1/2}/y` for the invariant Riemannian metric of the upper half-plane. -/
-theorem lemma7_1_2 (u : Fin 3 → ℝ) (hu : u ∈ controlSimplex) (X : ℝ → Mat2) (a b : ℝ)
+theorem lemma7_1_2 (u : Fin 3 → ℝ) (X : ℝ → Mat2) (a b : ℝ)
     (hstar : ∀ t ∈ Set.Icc a b, IsStarState (X t))
     (hX : ∀ t ∈ Set.Icc a b, HasDerivWithinAtEntrywise X
       (controlP u (X t) * X t - X t * controlP u (X t)) (Set.Icc a b) t) :
@@ -158,8 +158,8 @@ noncomputable def constControlX (X₀ P₀ : Mat2) (t : ℝ) : Mat2 :=
 /-- The general solutions for constant control (`eqn:const-control-g`, `eqn:const-control-z-X`):
 with `P₀ = Z_u/⟨Z_u, X₀⟩`, `g(t) = exp(t(X₀ + P₀)) exp(-tP₀)` and `X(t) = exp(tP₀) X₀ exp(-tP₀)`
 solve `g' = gX`, `X' = [Z_u, X]/⟨Z_u, X⟩` with `g(0) = I₂`, `X(0) = X₀`. -/
-theorem constControl_solution (u : Fin 3 → ℝ) (X₀ : Mat2) (hX₀ : X₀.trace = 0)
-    (hden : traceForm (controlMatrix u) X₀ ≠ 0) (t : ℝ) :
+theorem constControl_solution (u : Fin 3 → ℝ) (X₀ : Mat2)
+    (t : ℝ) :
     HasDerivAtEntrywise (constControlG X₀ (controlP u X₀))
         (constControlG X₀ (controlP u X₀) t * constControlX X₀ (controlP u X₀) t) t ∧
       HasDerivAtEntrywise (constControlX X₀ (controlP u X₀))

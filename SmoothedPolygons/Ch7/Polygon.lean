@@ -165,7 +165,7 @@ theorem seg_solution (y0 t : ℝ) (hy0 : 0 < y0) :
   have hX₀ : (Φ 0 y0).trace = 0 := by simp [Φ, Matrix.trace_fin_two]
   have hden : traceForm (controlMatrix (vertex 2)) (Φ 0 y0) ≠ 0 := by
     rw [str_traceForm_Z3_Φ]; simp [hy0.ne']
-  obtain ⟨h1, h2, h3, h4⟩ := constControl_solution (vertex 2) (Φ 0 y0) hX₀ hden t
+  obtain ⟨h1, h2, h3, h4⟩ := constControl_solution (vertex 2) (Φ 0 y0) t
   refine ⟨h1, h2, h3, h4, fun s ↦ ?_⟩
   have h3 : (0 : ℝ) < √3 := by positivity
   have hW := Real.exp_pos (√3 * y0 * s)
@@ -258,7 +258,7 @@ private lemma str_pow_mul_R_inv (A : Mat2) (n : ℕ) :
 
 /-- The strong boundary condition `z(z₀, t_sw) = R⁻¹ · z₀` (`eqn:poly-z`), in the Lie algebra:
 `X(z₀, t_sw) = R⁻¹ X₀ R`. -/
-theorem segX_switchTime (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
+theorem segX_switchTime (y0 : ℝ) (hy0 : 1 / √3 < y0) :
     segX y0 (switchTime y0) = R⁻¹ * Φ 0 y0 * R := by
   have h3 : (0 : ℝ) < √3 := by positivity
   have hy0' : 0 < y0 := lt_trans (by positivity) hy0
@@ -268,7 +268,7 @@ theorem segX_switchTime (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
     simp only [str_sqrt3_sq, str_sqrt3_pow4] <;> ring
 
 /-- The trace of `h = g(t_sw) R⁻¹` is `4/(1 + 3y₀²)` (proof of Theorem 7.5.1). -/
-theorem trace_segG_switchTime (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
+theorem trace_segG_switchTime (y0 : ℝ) (hy0 : 1 / √3 < y0) :
     (segG y0 (switchTime y0) * R⁻¹).trace = 4 / (1 + 3 * y0 ^ 2) := by
   have h3 : (0 : ℝ) < √3 := by positivity
   have hy0' : 0 < y0 := lt_trans (by positivity) hy0

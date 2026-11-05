@@ -214,7 +214,7 @@ theorem ρ_R_conj (X : Mat2) (hX : X.trace = 0) :
 
 /-- §4.6: the reflection acts on `Φ` by `z ↦ -z̄`: `ε_S S Φ(z) S⁻¹ = Φ(-z̄)`, where
 `ε_S = det S = -1`. -/
-theorem reflS_conj_Φ (x y : ℝ) (hy : 0 < y) : -(reflS * Φ x y * reflS⁻¹) = Φ (-x) y := by
+theorem reflS_conj_Φ (x y : ℝ) : -(reflS * Φ x y * reflS⁻¹) = Φ (-x) y := by
   rw [algA_reflS_inv]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [reflS, Φ] <;> ring

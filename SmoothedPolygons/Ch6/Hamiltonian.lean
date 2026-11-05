@@ -315,7 +315,7 @@ theorem proposition6_5_1 (lam : ℝ) (u : Fin 3 → ℝ) (X Λ₁ Λ₂ : ℝ �
     (X' Λ₁' Λ₂' D₁ : Mat2)
     (htr : (X t).trace = 0 ∧ (Λ₁ t).trace = 0 ∧ (Λ₂ t).trace = 0)
     (hden : traceForm (X t) (controlMatrix u) ≠ 0)
-    (hX : HasDerivAtEntrywise X X' t) (hΛ₁ : HasDerivAtEntrywise Λ₁ Λ₁' t)
+    (hX : HasDerivAtEntrywise X X' t)
     (hΛ₂ : HasDerivAtEntrywise Λ₂ Λ₂' t)
     (hHΛ₂ : HasFunctionalDerivative (fun L ↦ fullHamiltonian lam (Λ₁ t) L (X t) u) (Λ₂ t) X')
     (hHX : HasFunctionalDerivative (fun Y ↦ fullHamiltonian lam (Λ₁ t) (Λ₂ t) Y u) (X t) (-Λ₂'))
@@ -462,7 +462,7 @@ costate equation for `Λ_R` is
 `[P, Λ_R] - (⟨Λ_R, Z_u⟩/⟨X, Z_u⟩)[P, X] = ad_{Z_u} δ/δZ_u (⟨Λ_R, Z_u⟩/⟨X, Z_u⟩)`; the functional
 derivative is `(⟨X, Z_u⟩ Λ_R - ⟨Λ_R, Z_u⟩ X)/⟨X, Z_u⟩²`. -/
 theorem corollary6_5_4 (ΛR X Z : Mat2) (hΛ : ΛR.trace = 0) (hX : X.trace = 0)
-    (hZ : Z.trace = 0) (hXZ : traceForm X Z ≠ 0) :
+    (hXZ : traceForm X Z ≠ 0) :
     HasFunctionalDerivative (fun W ↦ traceForm ΛR W / traceForm X W) Z
         ((traceForm X Z ^ 2)⁻¹ • (traceForm X Z • ΛR - traceForm ΛR Z • X)) ∧
       Z * ((traceForm X Z ^ 2)⁻¹ • (traceForm X Z • ΛR - traceForm ΛR Z • X)) -

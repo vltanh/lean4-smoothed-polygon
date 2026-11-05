@@ -162,7 +162,7 @@ using `Λ_R ⊥ X` and `TΦ(f₁, f₂) = [P]` (`eqn:tangent-map-f1f2`): `[Y_z(f
 Lemma 4.5.2, which is stated along trajectories; here it is checked directly
 (`orb_bracket_tangentLift`). The hypothesis `tr Λ_R = 0` is not needed. -/
 theorem theorem6_8_2 (lam : ℝ) (Λ₁ ΛR : Mat2) (x y : ℝ) (u : Fin 3 → ℝ)
-    (hxy : (x, y) ∈ starDomain) (hu : u ∈ controlSimplex) (hΛ : ΛR.trace = 0)
+    (hxy : (x, y) ∈ starDomain) (hu : u ∈ controlSimplex)
     (hperp : traceForm ΛR (Φ x y) = 0) :
     hamiltonian lam Λ₁ ΛR (Φ x y) u =
       planeHamiltonian lam Λ₁ x y (cotangentNu x y ΛR).1 (cotangentNu x y ΛR).2 u := by
