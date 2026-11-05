@@ -657,7 +657,12 @@ lemma str_costateΛR_smul (c y0 l1 lR lam t : ℝ) :
   ext i j
   fin_cases i <;> fin_cases j <;> simp [costateΛR, costateΛR₀₀, costateΛR₀₁, costateΛR₁₀] <;> ring
 
-/-- The centralizer in `𝔰𝔩₂(ℝ)` of `B = [[0, β], [γ, 0]]` with `β ≠ 0` is `ℝB`. -/
+/-- The centralizer in `𝔰𝔩₂(ℝ)` of `B = [[0, β], [γ, 0]]` with `β ≠ 0` is `ℝB`.
+
+Departure from the paper: the book deduces that the centralizer of `h = g(t_sw)R⁻¹` in `𝔰𝔩₂(ℝ)`
+is `ℝΛ₁₀` from `h` being regular elliptic (`tr h ∈ (1, 2)`); that fact about regular elements is
+not in Mathlib, so we compute the centralizer of the explicit `Λ₁₀ = h - (tr h/2) I₂` directly
+(`str_Λ₁₀_eq`); a matrix commutes with `h` iff it commutes with `Λ₁₀`. -/
 lemma str_centralizer (A B : Mat2) (hA : A.trace = 0) (hB0 : B 0 0 = 0) (hB1 : B 1 1 = 0)
     (hB : B 0 1 ≠ 0) (hc : A * B = B * A) : A = (A 0 1 / B 0 1) • B := by
   have h00 := congrFun (congrFun hc 0) 0
