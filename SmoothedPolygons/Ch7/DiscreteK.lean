@@ -417,7 +417,7 @@ lemma poly_segX_continuous {y0 : ℝ} (hy : 0 < y0) : Continuous (segX y0) :=
 lemma poly_segG_continuous {y0 : ℝ} (hy : 0 < y0) : Continuous (segG y0) :=
   continuous_iff_continuousAt.2 fun t ↦ (seg_solution y0 t hy).1.continuousAt
 
-lemma poly_segX_glue {y0 : ℝ} (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
+lemma poly_segX_glue {y0 : ℝ} (hy0 : 1 / √3 < y0) :
     segX y0 (switchTime y0) = R⁻¹ * segX y0 0 * R := by
   rw [segX_switchTime y0 hy0, (seg_solution y0 0 (poly_y0_pos hy0)).2.2.2.1]
 
@@ -468,7 +468,7 @@ theorem poly_isStateTrajectory (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) (
     rw [poly_pw_of_mem_Ico hτ ht, poly_polygonX_eq, poly_pw_of_mem_Ico hτ ht, poly_mul_conj]
   · rw [poly_polygonX_eq]
     have hP := poly_controlP_continuousOn hXc (poly_vertex_mem 2) hsegstar
-    refine poly_pw_isIntegralCurve hτ (poly_segX_glue hy0 hy1) hXc
+    refine poly_pw_isIntegralCurve hτ (poly_segX_glue hy0) hXc
       ((hP.mul hXc).sub (hXc.mul hP)) (fun s _ ↦ (seg_solution y0 s hy).2.1) N fun i _ t ht ↦ ?_
     simp only [poly_polygonControlAt_eq, poly_floor_eq hτ ht.1 ht.2]
     rw [poly_pw_of_mem_Ico hτ ht]
@@ -517,7 +517,7 @@ lemma poly_Xp_eq {y0 τ : ℝ} (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) (hτ : τ = 
     {i : ℕ} {t : ℝ} (ht : t ∈ Icc (i * τ) ((i + 1) * τ)) : polygonX y0 τ t = poly_Xp y0 τ i t := by
   subst hτ
   rw [poly_polygonX_eq,
-    poly_pw_of_mem_Icc (poly_switchTime_pos hy0 hy1) (poly_segX_glue hy0 hy1) ht, poly_Xp]
+    poly_pw_of_mem_Icc (poly_switchTime_pos hy0 hy1) (poly_segX_glue hy0) ht, poly_Xp]
 
 lemma poly_Gp_eq {y0 τ : ℝ} (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) (hτ : τ = switchTime y0)
     {i : ℕ} {t : ℝ} (ht : t ∈ Icc (i * τ) ((i + 1) * τ)) : polygonG y0 τ t = poly_Gp y0 τ i t := by

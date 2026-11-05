@@ -277,7 +277,7 @@ theorem poly_isPontryaginExtremal (k : ℕ) (hk : 1 ≤ k) (y0 : ℝ) (hy0 : 1 /
   have hcR : ContinuousOn (strongΛR y0) (Icc 0 τ) := HasDerivWithinAtEntrywise.continuousOn hdR
   have hcX : ContinuousOn (segX y0) (Icc 0 τ) := (poly_segX_continuous hy).continuousOn
   have hstar : ∀ s ∈ Icc 0 τ, IsStarState (segX y0 s) := fun s hs ↦ segX_star y0 hy0 hy1 s hs
-  have hglX := poly_segX_glue hy0 hy1
+  have hglX := poly_segX_glue hy0
   -- the values on the closed switching intervals
   have hpiece : ∀ i : ℕ, ∀ t ∈ Icc ((i : ℝ) * τ) ((i + 1) * τ),
       polygonX y0 τ t = R⁻¹ ^ i * segX y0 (t - i * τ) * R ^ i ∧

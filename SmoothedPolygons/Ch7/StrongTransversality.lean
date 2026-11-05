@@ -521,7 +521,7 @@ lemma str_costateΛR_switchTime (y0 : ℝ) (hy0 : 0 < y0) :
     simp only [str_sqrt3_sq, str_sqrt3_pow4] <;> ring_nf
 
 /-- `Λ₁₀ = h - (tr h/2) I₂` with `h = g(t_sw)R⁻¹` (proof of Theorem 7.5.1). -/
-lemma str_Λ₁₀_eq (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
+lemma str_Λ₁₀_eq (y0 : ℝ) (hy0 : 1 / √3 < y0) :
     Λ₁₀ y0 = segG y0 (switchTime y0) * R⁻¹ -
       ((segG y0 (switchTime y0) * R⁻¹).trace / 2) • (1 : Mat2) := by
   have h3 : (0 : ℝ) < √3 := by positivity
@@ -645,7 +645,7 @@ theorem strongLift_isStrongLift (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) 
   · rw [hΛ10, strongΛ₁]
     refine str_conj_eq_of_commute _ _ ?_ ?_
     · rw [(seg_solution y0 0 hy0').2.2.2.2 (switchTime y0)]; exact isUnit_one
-    · rw [str_Λ₁₀_eq y0 hy0 hy1]
+    · rw [str_Λ₁₀_eq y0 hy0]
       simp only [Matrix.smul_mul, Matrix.mul_smul, Matrix.sub_mul, Matrix.mul_sub, one_mul,
         mul_one]
 
@@ -808,7 +808,7 @@ theorem strongLift_unique (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) (Λ₁
   have hcomm := str_commute_of_conj_eq (segG y0 (switchTime y0)) (Λ₁ 0) (hdet _)
     ((hconj _ hTm).1.symm.trans htrans1)
   have hcomm' : Λ₁ 0 * Λ₁₀ y0 = Λ₁₀ y0 * Λ₁ 0 := by
-    rw [str_Λ₁₀_eq y0 hy0 hy1]
+    rw [str_Λ₁₀_eq y0 hy0]
     simp only [Matrix.mul_sub, Matrix.sub_mul, Matrix.mul_smul, Matrix.smul_mul, mul_one, one_mul,
       hcomm]
   -- the centralizer of `h` in `𝔰𝔩₂(ℝ)` is `ℝΛ₁₀`

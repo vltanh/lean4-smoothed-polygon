@@ -251,7 +251,7 @@ private lemma sd_g_hasDerivWithin {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {tf : 
 is parameterized by a regular `C¹` multi-curve `σ`, let `g` be the curve induced by a multi-point
 `s` (`σ_j(t) = g(t) s_j`, Theorem 3.1.1), and let `X = g⁻¹g'`. Then `X(t) ∈ 𝔰𝔩₂(ℝ)` and
 `σ_j'(t) = Ad_{g(t)}(X(t)) σ_j(t)` for all `j`. Part (3) is `theorem3_1_4_lipschitz`. -/
-theorem theorem3_1_4 (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 → ℝ)
+theorem theorem3_1_4 (σ : ZMod 6 → ℝ → Fin 2 → ℝ)
     (tf : ℝ) (htf : 0 < tf) (hσ : IsMultiCurve 1 σ tf)
     (s : ZMod 6 → Fin 2 → ℝ) (hs : IsMultiPoint s) (g : ℝ → Mat2)
     (hg : ∀ t ∈ Set.Icc 0 tf, (g t).det = 1 ∧ ∀ j, σ j t = g t *ᵥ s j) :
@@ -673,7 +673,6 @@ theorem proposition3_1_9 (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 
 `det X̃ = 1`, the curve `X̃` is differentiable almost everywhere (Rademacher's theorem). -/
 theorem corollary3_1_10 (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 → ℝ) (tf : ℝ)
     (hKσ : IsBalancedPair K σ tf)
-    (harc : ∀ t, deriv (σ 0) t 0 ^ 2 + deriv (σ 0) t 1 ^ 2 = 1)
     (g : ℝ → Mat2) (hg : ∀ t j, σ j t = g t *ᵥ sixthRoot j)
     (s s' : ℝ → ℝ) (hs : ∀ t, HasDerivAt s (s' t) t) (hs' : ∀ t, 0 < s' t)
     (hdet : ∀ t, (s' t • ((g (s t))⁻¹ * derivEntrywise g (s t))).det = 1) :
