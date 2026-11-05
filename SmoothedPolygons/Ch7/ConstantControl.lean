@@ -77,7 +77,8 @@ private theorem hasDerivWithinAt_Φ_comp {x y : ℝ → ℝ} {x' y' : ℝ} {s : 
 
 /-- **Lemma 7.1.2** (`lem:Riemannian-speed`). For a constant control `u ∈ U_T`, the speed
 `⟨X', X'⟩^{1/2}` of `X` is constant, and the trajectory `z = x + iy` with `X = Φ(z)` has constant
-speed `(x'² + y'²)^{1/2}/y` for the invariant Riemannian metric of the upper half-plane. -/
+speed `(x'² + y'²)^{1/2}/y` for the invariant Riemannian metric of the upper half-plane. The
+hypothesis `u ∈ U_T` is not needed: the lemma holds for every constant `u`. -/
 theorem lemma7_1_2 (u : Fin 3 → ℝ) (X : ℝ → Mat2) (a b : ℝ)
     (hstar : ∀ t ∈ Set.Icc a b, IsStarState (X t))
     (hX : ∀ t ∈ Set.Icc a b, HasDerivWithinAtEntrywise X

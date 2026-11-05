@@ -204,7 +204,7 @@ lemma algA_stateCurvature_two_eq (X X' : Mat2) (hX : X.trace = 0) (hX' : X'.trac
 /-- **Lemma 3.3.1** (`lem:curvature-pos`). Let `g : [0, t_f] → SL₂(ℝ)` be `C¹` with Lipschitz
 derivative, and let `X = g⁻¹g'` satisfy the star inequalities and the curvature conditions
 `κ_j ≥ 0` (`eqn:state-dep-curvature`) almost everywhere. Then almost everywhere some
-`κ_j(t) > 0`. -/
+`κ_j(t) > 0`. The hypothesis that `g'` is Lipschitz is not needed, and is omitted. -/
 theorem lemma3_3_1 (tf : ℝ) (g g' : ℝ → Mat2)
     (hg : ∀ t ∈ Set.Icc 0 tf, HasDerivWithinAtEntrywise g (g' t) (Set.Icc 0 tf) t)
     (hdet : ∀ t ∈ Set.Icc 0 tf, (g t).det = 1)

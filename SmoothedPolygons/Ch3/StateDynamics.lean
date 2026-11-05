@@ -250,14 +250,17 @@ private lemma sd_g_hasDerivWithin {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {tf : 
 /-- **Theorem 3.1.4** (`thm:defn-X`), parts (1) and (2). Let `K` be a convex disk whose boundary
 is parameterized by a regular `C¹` multi-curve `σ`, let `g` be the curve induced by a multi-point
 `s` (`σ_j(t) = g(t) s_j`, Theorem 3.1.1), and let `X = g⁻¹g'`. Then `X(t) ∈ 𝔰𝔩₂(ℝ)` and
-`σ_j'(t) = Ad_{g(t)}(X(t)) σ_j(t)` for all `j`. Part (3) is `theorem3_1_4_lipschitz`. -/
+`σ_j'(t) = Ad_{g(t)}(X(t)) σ_j(t)` for all `j`. Part (3) is `theorem3_1_4_lipschitz`.
+
+The book's hypotheses that `K` is a convex disk, that `σ` is regular and that `σ` parameterizes
+the boundary of `K` are not needed for parts (1) and (2), and are omitted: the statement holds for
+every `C¹` multi-curve induced by a curve `g` in `SL₂(ℝ)`. -/
 theorem theorem3_1_4 (σ : ZMod 6 → ℝ → Fin 2 → ℝ)
     (tf : ℝ) (htf : 0 < tf) (hσ : IsMultiCurve 1 σ tf)
     (s : ZMod 6 → Fin 2 → ℝ) (hs : IsMultiPoint s) (g : ℝ → Mat2)
     (hg : ∀ t ∈ Set.Icc 0 tf, (g t).det = 1 ∧ ∀ j, σ j t = g t *ᵥ s j) :
     ∀ t ∈ Set.Icc 0 tf, (curveX g tf t).trace = 0 ∧
       ∀ j, derivWithin (σ j) (Set.Icc 0 tf) t = (g t * curveX g tf t * (g t)⁻¹) *ᵥ σ j t := by
-  -- the convexity, regularity and boundary hypotheses are not used in the proof
   intro t ht
   obtain ⟨-, hD⟩ := sd_g_hasDerivWithin hσ hs (fun t ht ↦ (hg t ht).2)
   have hu : UniqueDiffWithinAt ℝ (Set.Icc 0 tf) t := uniqueDiffOn_Icc htf t ht
@@ -562,7 +565,8 @@ reparameterization (`s' > 0`) such that `X̃(t) = X(s(t)) s'(t)` has `det X̃ = 
 Lipschitz.
 
 The book defines `X̃` by `g̃' = g̃ X̃` with `g̃ = g ∘ s` and derives `X̃ = X(s) s'` by the chain
-rule; the statement takes `X̃` in that derived form. -/
+rule; the statement takes `X̃` in that derived form. The book's hypothesis that `σ_0` is
+parameterized by arclength is not needed, and is omitted. -/
 theorem proposition3_1_9 (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 → ℝ) (tf : ℝ)
     (hKσ : IsBalancedPair K σ tf)
     (g : ℝ → Mat2) (hg : ∀ t j, σ j t = g t *ᵥ sixthRoot j)
@@ -670,7 +674,8 @@ theorem proposition3_1_9 (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 
     simp only [Matrix.smul_apply, smul_eq_mul, hXdef]).1
 
 /-- **Corollary 3.1.10** (`cor:X-diff-ae`). In the parameterization of Proposition 3.1.9 with
-`det X̃ = 1`, the curve `X̃` is differentiable almost everywhere (Rademacher's theorem). -/
+`det X̃ = 1`, the curve `X̃` is differentiable almost everywhere (Rademacher's theorem). As in
+Proposition 3.1.9, the hypothesis that `σ_0` is parameterized by arclength is not needed. -/
 theorem corollary3_1_10 (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 → ℝ) (tf : ℝ)
     (hKσ : IsBalancedPair K σ tf)
     (g : ℝ → Mat2) (hg : ∀ t j, σ j t = g t *ᵥ sixthRoot j)

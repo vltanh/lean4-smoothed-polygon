@@ -310,7 +310,8 @@ satisfying Hamilton's equations for the Hamiltonian `H(Λ₁, Λ₂, X; Z_u)` in
 cotangent bundle, `X' = δH/δΛ₂` and `Λ₂' = -δH/δX` (canonical equations on `T*𝔰𝔩₂(ℝ)`), and the
 Euler–Arnold equation `Λ₁' = -ad_{δH/δΛ₁} Λ₁` (cited from Cushman–Bates), the costate variables
 evolve as `Λ₁' = [Λ₁, X]` and `Λ_R' = [P, Λ_R] - ⟨Λ_R, P⟩[P, X] + [-Λ₁ + (3/2) λ_cost J, X]`, where
-`P = Z_u/⟨X, Z_u⟩` and `Λ_R = [Λ₂, X]`. The control `u` is the value of the control at time `t`. -/
+`P = Z_u/⟨X, Z_u⟩` and `Λ_R = [Λ₂, X]`. The control `u` is the value of the control at time `t`.
+The Euler–Arnold equation determines `Λ₁'`; that `Λ₁` is differentiable is not needed. -/
 theorem proposition6_5_1 (lam : ℝ) (u : Fin 3 → ℝ) (X Λ₁ Λ₂ : ℝ → Mat2) (t : ℝ)
     (X' Λ₁' Λ₂' D₁ : Mat2)
     (htr : (X t).trace = 0 ∧ (Λ₁ t).trace = 0 ∧ (Λ₂ t).trace = 0)
@@ -460,7 +461,8 @@ private theorem hasDerivAt_traceForm_line (A Z W : Mat2) :
 /-- **Corollary 6.5.4** (`cor:control-dep-ad-alternate`). The control-dependent term of the
 costate equation for `Λ_R` is
 `[P, Λ_R] - (⟨Λ_R, Z_u⟩/⟨X, Z_u⟩)[P, X] = ad_{Z_u} δ/δZ_u (⟨Λ_R, Z_u⟩/⟨X, Z_u⟩)`; the functional
-derivative is `(⟨X, Z_u⟩ Λ_R - ⟨Λ_R, Z_u⟩ X)/⟨X, Z_u⟩²`. -/
+derivative is `(⟨X, Z_u⟩ Λ_R - ⟨Λ_R, Z_u⟩ X)/⟨X, Z_u⟩²`. The identity holds for every matrix
+`Z` with `⟨X, Z⟩ ≠ 0`; that `Z = Z_u` is traceless is not needed. -/
 theorem corollary6_5_4 (ΛR X Z : Mat2) (hΛ : ΛR.trace = 0) (hX : X.trace = 0)
     (hXZ : traceForm X Z ≠ 0) :
     HasFunctionalDerivative (fun W ↦ traceForm ΛR W / traceForm X W) Z

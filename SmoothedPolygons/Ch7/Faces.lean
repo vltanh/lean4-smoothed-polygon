@@ -44,7 +44,8 @@ private theorem ratio_sub (α β γ δ s t : ℝ) (hs : γ * s + δ ≠ 0) (ht :
 the affine plane `u₀ + u₁ + u₂ = 1`. At each point `(g, X, Λ₁, Λ_R)` of the cotangent space (with
 `⟨X, Z_u⟩ ≠ 0` on `U`, as on the state space), the set of controls `u ∈ U` maximizing the
 Hamiltonian `H(Λ₁, Λ_R, X; Z_u)` is a face of `U`: a nonempty convex subset `F` such that
-`tx + (1-t)y ∈ F` with `x, y ∈ U`, `t ∈ (0, 1)` implies `x, y ∈ F`. -/
+`tx + (1-t)y ∈ F` with `x, y ∈ U`, `t ∈ (0, 1)` implies `x, y ∈ F`. The hypothesis that `U` lies
+in the plane `u₀ + u₁ + u₂ = 1` is not needed: the lemma holds for every compact convex `U`. -/
 theorem lemma7_3_1 (U : Set (Fin 3 → ℝ)) (hU : IsCompact U) (hconv : Convex ℝ U)
     (hne : U.Nonempty) (lam : ℝ) (Λ₁ ΛR X : Mat2)
     (hden : ∀ u ∈ U, traceForm X (controlMatrix u) ≠ 0) :
