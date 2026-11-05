@@ -31,11 +31,11 @@ from pathlib import Path
 
 # ---- configuration -------------------------------------------------------------------------
 # The Markdown documents to process.
-DOCS = ['README.md', 'REPORT.md', 'CREDITS.md']
+DOCS = ['README.md', 'REPORT.md', 'CREDITS.md', 'Basic/README.md', 'External/README.md']
 # Namespaces in which the documents name declarations without their prefix, most specific last.
-NAMESPACES = ['PaperName', 'ChallengeNamespace']
+NAMESPACES = ['Matrix', 'UpperHalfPlane', 'SmoothedPolygons', 'SmoothedPolygonsChallenge']
 # Top-level module names of the project: a code span naming such a module links to its file.
-MODULE_ROOTS = ('PaperName', 'External', 'Basic', 'Challenge', 'Solution')
+MODULE_ROOTS = ('SmoothedPolygons', 'External', 'Basic', 'Challenge', 'Solution')
 # The module whose declarations win when a name is declared in several modules.
 PREFERRED_MODULE = 'Challenge'
 # Directories, besides the repository root, against which the paths in the documents of a

@@ -212,8 +212,8 @@ theorem lemma3_3_1 (tf : ℝ) (g g' : ℝ → Mat2)
     (hstar : ∀ t ∈ Set.Icc 0 tf, 0 < ρ₀ (X t) ∧ 0 < ρ₁ (X t) ∧ 0 < ρ₂ (X t))
     (hcurv : ∀ᵐ t, t ∈ Set.Ioo 0 tf → ∀ j, 0 ≤ stateCurvature (X t) (derivEntrywise X t) j) :
     ∀ᵐ t, t ∈ Set.Ioo 0 tf → ∃ j, 0 < stateCurvature (X t) (derivEntrywise X t) j := by
-  -- The Lipschitz hypothesis `hLip` (which makes `X` differentiable almost everywhere) is not
-  -- needed here: `tr X' = 0` holds at every interior point for the entrywise `deriv`.
+  -- The book's hypothesis that `g'` is Lipschitz (which makes `X` differentiable almost
+  -- everywhere) is not needed: `tr X' = 0` holds at every interior point for the entrywise `deriv`.
   rcases le_or_gt tf 0 with htf | htf
   · exact Filter.Eventually.of_forall fun t ht ↦ absurd (ht.1.trans ht.2) (not_lt.2 htf)
   filter_upwards [hcurv] with t hκ ht

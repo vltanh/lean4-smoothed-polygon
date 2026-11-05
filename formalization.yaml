@@ -1,0 +1,192 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Smoothed polygons in the Reinhardt optimal control problem"
+  description: >-
+    A Lean 4 formalization of the control-theoretic core of Thomas Hales and Koundinya Vajjha,
+    Packings of Smoothed Polygons (arXiv:2405.04331v1, 2024). The book reformulates the
+    Reinhardt problem, which asks for the centrally symmetric convex disk whose densest packing
+    is least dense, as an optimal control problem on SL2(R), and studies its Pontryagin
+    extremals.
+
+
+    The formalization covers Chapters 3, 4, 6 and 7 of the book with Appendices A.6 and A.11:
+    the state dynamics, the cost, the upper half-plane model, the Hamiltonian and the costate
+    equations, constant and bang-bang controls. Its main results are Theorem 7.5.6, that for
+    every k >= 1 the smoothed (6k+2)-gon is a Pontryagin extremal of the Reinhardt control
+    problem with bang-bang control, and the computation of the cost of the smoothed octagon,
+    sqrt(12)(8 - sqrt(32) - ln 2)/(sqrt(8) - 1), which divided by sqrt(12) is Reinhardt's
+    density. The book's main theorem (Mahler's First conjecture) is not formalized, nor the
+    identification of the cost with the area of the disk (Green's theorem).
+  authors:
+    - "The-Anh Vu-Le"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "The-Anh Vu-Le"
+
+classification:
+  arxiv: ["math.OC", "math.MG"]
+  msc2020: ["52C15", "52A10", "49K15"]
+
+sources:
+  - title: "Packings of Smoothed Polygons"
+    authors:
+      - "Thomas Hales"
+      - "Koundinya Vajjha"
+    id: "arXiv:2405.04331v1"
+    type: "book (preprint)"
+    location: "https://arxiv.org/abs/2405.04331v1"
+    relationship: "formalizes"
+    license: "arXiv.org perpetual, non-exclusive license to distribute 1.0"
+    author_endorsement: "not-contacted"
+  - title: "The Reinhardt Conjecture as an Optimal Control Problem"
+    authors:
+      - "Thomas C. Hales"
+    id: "arXiv:1703.01352"
+    type: "preprint"
+    location: "https://arxiv.org/abs/1703.01352"
+    relationship: "background"
+    note: >-
+      Earlier preprint that introduced the control-theoretic reformulation and announced that the
+      smoothed (6k+2)-gons are Pontryagin extremals with bang-bang control; the book gives the
+      full account formalized here.
+    author_endorsement: "not-contacted"
+  - title: "Über die dichteste gitterförmige Lagerung kongruenter Bereiche in der Ebene und eine besondere Art konvexer Kurven"
+    authors:
+      - "Karl Reinhardt"
+    id: "doi:10.1007/BF02940676"
+    type: "article"
+    location: "Abh. Math. Sem. Univ. Hamburg 10 (1934) 216-230"
+    relationship: "background"
+    note: "The smoothed octagon and the Reinhardt problem; not used in the formal proofs."
+  - title: "Global aspects of classical integrable systems"
+    authors:
+      - "Richard H. Cushman"
+      - "Larry M. Bates"
+    type: "book"
+    location: "Birkhäuser, 1997"
+    relationship: "background"
+    note: >-
+      Source of the Euler-Arnold equations cited in the proof of Proposition 6.5.1. The
+      formalization reads 'Hamilton's equations in the left-trivialized cotangent bundle' as the
+      canonical equations together with the Euler-Arnold equation, which is a hypothesis of
+      proposition6_5_1 in the form the book uses; see REPORT.md, E9 and Section 6.
+
+related_formalizations:
+  - id: "https://github.com/sunfishho/reinhardt-density-bound"
+    relationship: "independent"
+    note: >-
+      Independent, unreviewed Lean 4 development (created 2 November 2026) claiming a lower bound
+      for the least packing density and formalizing parts of the book's Chapters 2, 3 and 5. It
+      does not formalize Theorem 7.5.6. This work did not consult or use it.
+
+status:
+  scope: >-
+    Formalized: every numbered result of Chapters 3, 4, 6 and 7 of the book and of Appendices
+    A.6 and A.11, with the definitions of Chapter 2 that Chapter 3 uses, except Lemma 3.1.8
+    (relies on Chapter 2), Theorem 6.1.1 (Filippov, cited), Definition 6.3.1 and Proposition
+    6.4.1 (general left-invariant systems, unused), and Theorem 7.7.1 (whose proof the book only
+    sketches). Not formalized: Chapters 1, 2 (except Definitions 2.4.1 and 2.4.7), 5 and 8-16,
+    including the main theorem (Mahler's First conjecture, Theorem 16.3.1); the area formula
+    (Green's theorem) that identifies the cost with the area of the disk; the theorem of
+    Reinhardt and Fejes Toth that identifies the density with area/sqrt(12). Pontryagin
+    extremals are defined by the conditions of the maximum principle, which is not proved and
+    not needed. No cited theorem is assumed. Six statements and definitions are formalized in
+    corrected form (REPORT.md, Section 3: E1 with a hypothesis approved by the user, E3, E4, E7,
+    E8, E13).
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code 2.1.318 (VS Code extension, Claude Agent SDK)"
+      tool_setup: "FILLED IN FROM CREDITS.md"
+      cost:
+        wall_time: "FILLED IN FROM CREDITS.md"
+        spend_usd: "not tracked"
+        hardware: "local machine (Linux) for Lean builds; models via API"
+      prompting_notes: >-
+        One request: '/formalize-math-paper https://arxiv.org/abs/2405.04331'. The user chose the
+        scope and approved two decisions (the proof of Jacobi's formula, and the hypothesis of
+        Theorem 3.1.4(3)).
+  spend_usd: "not tracked"
+  notes: "FILLED IN FROM CREDITS.md"
+
+fidelity:
+  divergences: >-
+    Corrections of statements (REPORT.md, Sections 3 and 4): E1, Theorem 3.1.4(3) is false for a
+    general convex disk and is proved under the hypothesis that the tangents are Lipschitz (the
+    standing assumption of the book's Section 2.4; approved by the user); E3, the terminal
+    condition of Problem 3.6.2 is R^-1 X(0) R (misprint R X(0) R^-1); E4, Lemma 4.2.3 needs X != 0;
+    E7, the sign of a(u) in Problem 4.5.1; E8, the nontriviality condition of a Pontryagin
+    extremal is imposed on the reduced costate (lambda_cost, Lambda_1, Lambda_R), since on the full
+    costate (Lambda_1, Lambda_2) of Section 6.2 every admissible trajectory would lift; E13, Lemma
+    7.3.1 needs <X, Z_u> != 0 on the control set. Slips in proofs corrected where they occur: E2,
+    E11.
+
+
+    Redundant hypotheses omitted from the Lean statements (REPORT.md, Section 5): Theorem 3.1.4
+    (1)-(2), Proposition 3.1.9, Corollary 3.1.10, Lemma 3.3.1, Corollary 6.5.4, Theorem 6.8.2,
+    Lemma 7.1.2, Lemma 7.3.1. The Challenge keeps the book's hypotheses.
+
+
+    Readings (REPORT.md, Section 6): matrix-valued curves are differentiated and called Lipschitz
+    entry by entry; differential equations with measurable controls are solved in Caratheodory's
+    sense; Pontryagin extremals are defined by the conditions of the maximum principle in the
+    reduced costate variables; Proposition 6.5.1 takes Hamilton's equations in the trivialized
+    cotangent bundle, including the Euler-Arnold equation (Cushman-Bates), as hypotheses; a
+    bang-bang control takes values in the vertices of the control simplex; the cost is not
+    identified with the area (Green's theorem) nor the density with area/sqrt(12) (Reinhardt,
+    Fejes Toth); Lemma 6.8.1 is stated for nonzero traceless X; Theorem 6.8.3 is proved in the
+    direction of its statement; Proposition 3.6.1 is stated without smoothness of the
+    trivialization.
+
+
+    Departures from the book's proofs (REPORT.md, Section 7): Lemma 3.1.12 (Jacobi's formula) is
+    proved by differentiating the Leibniz expansion of the determinant instead of through a
+    differentiable diagonalization on a dense set, which Mathlib lacks (approved by the user);
+    Lemma 4.3.1 compares the minimizer with the smoothed octagon (cost about 3.126 < pi) instead of
+    the unit disk, which gives only a weak inequality (gap E6). Every other proof follows the
+    book's argument; the gaps of Lemmas 4.2.3 (E5), 7.5.3 (E16), 7.5.5 (E17), Theorem 6.8.3 (E10)
+    and Theorem 7.5.6 (E18) are filled along the book's lines.
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "none (no human review of the proofs)"
+  notes: >-
+    The statements were reviewed against the book's TeX source by an independent agent before
+    the proofs were written; the proofs were compared with the book's by two further agents; the
+    findings of REPORT.md and its sections on the literature were checked against the TeX source
+    and the cited works by independent agents. No person has reviewed the proofs.
+
+alignment:
+  namespace: "SmoothedPolygonsChallenge"
+  statements:
+    - source: "Theorem 7.5.6 (thm:6k+2)"
+      lean: "SmoothedPolygonsChallenge.smoothed_polygon_extremal"
+      module: "Challenge"
+      status: "proved"
+      note: >-
+        For every k >= 1, the state trajectory with the control e3, e1, e2, ... on 3k+1 switching
+        intervals of length t_sw from g(0) = I2, X(0) = Phi(i y0) exists, and every such trajectory
+        is bang-bang and lifts to a Pontryagin extremal (IsPontryaginExtremal, the conditions of
+        the maximum principle with the corrected transversality condition X(t_f) = R^-1 X(0) R,
+        E3, and the nontriviality condition on the reduced costate, E8).
+    - source: "Example before Theorem 7.5.6 (the smoothed octagon)"
+      lean: "SmoothedPolygonsChallenge.smoothed_octagon_density"
+      module: "Challenge"
+      status: "proved"
+      note: >-
+        For k = 1: y0 = sqrt((sqrt 8 - 1)/3), t_sw = ln 2/(2 sqrt(sqrt 8 - 1)), and the cost of every
+        such trajectory is sqrt(12)(8 - sqrt 32 - ln 2)/(sqrt 8 - 1) < pi, so cost/sqrt(12) is
+        Reinhardt's density. The identification of the cost with the area (Green's theorem) and
+        of area/sqrt(12) with the packing density (Reinhardt, Fejes Toth) is not formalized.
+
+acknowledgements: >-
+  Mathlib and the Lean FRO toolchain; Palomar's Comparator. Written with Claude (Anthropic) at the
+  request of The-Anh Vu-Le; see CREDITS.md.

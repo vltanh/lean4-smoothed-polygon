@@ -1,7 +1,7 @@
 # Basic
 
 General mathematics used by the formalization, independent of the paper's objects, filed by
-field as Mathlib files it. Nothing here imports `External` or `SmoothedPolygons`.
+field as Mathlib files it. Nothing here imports [`External`](../External) or [`SmoothedPolygons`](../SmoothedPolygons).
 
 | File | Content | Possible destination |
 | --- | --- | --- |

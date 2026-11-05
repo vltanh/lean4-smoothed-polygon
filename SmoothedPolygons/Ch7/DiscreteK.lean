@@ -766,14 +766,14 @@ equations `g(t_f) = g_sw (R⁻¹ g_sw R) ⋯ (R^{-3k} g_sw R^{3k})` (`polygonG_e
 `e^{±iθ_k}`, whose `(3k+1)`-th powers are `(-1)^k`; comparing eigenvalues (`poly_pow_eq_of_trace`)
 gives `(R⁻¹ g_sw)^{3k+1} = (-1)^k I₂`.
 
-Departure from the paper: the book's proof argues the converse direction: from `g(t_f) = R` it
-compares eigenvalues to get `λ^{3k+1} = (-1)^k`, chooses the branch `ℓ = 0, -k`, and deduces the
-trace. That does not prove the statement, which is the sufficiency ("provided"). The formal proof
-runs the eigenvalue comparison the other way: the trace `2 cos θ_k` with `sin θ_k ≠ 0` gives the
-distinct eigenvalues `e^{±iθ_k}`, so `R⁻¹ g_sw` is diagonalizable over `ℂ` and its `(3k+1)`-th
-power is `(-1)^k I₂`; the choice of branch plays no role in this direction. It also proves that
-every trajectory with this control and these initial values is the spline, which the book takes
-for granted. -/
+A gap in the book's proof (E17 of the report), filled along its lines: the book's proof argues
+the converse direction: from `g(t_f) = R` it compares eigenvalues to get `λ^{3k+1} = (-1)^k`,
+chooses the branch `ℓ = 0, -k`, and deduces the trace. That does not prove the statement, which is
+the sufficiency ("provided"). The formal proof runs the same eigenvalue comparison the other way:
+the trace `2 cos θ_k` with `sin θ_k ≠ 0` gives the distinct eigenvalues `e^{±iθ_k}`, so `R⁻¹ g_sw`
+is diagonalizable over `ℂ` and its `(3k+1)`-th power is `(-1)^k I₂`; the choice of branch plays no
+role in this direction. It also proves that every trajectory with this control and these initial
+values is the spline, which the book takes for granted. -/
 theorem lemma7_5_5 (k : ℕ) (hk : 1 ≤ k) (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1)
     (hθ : 4 / (3 * y0 ^ 2 + 1) = 2 * Real.cos (θ k)) (g X : ℝ → Mat2)
     (h : IsStateTrajectory ((3 * k + 1) * switchTime y0) (polygonControlAt (switchTime y0)) g X)

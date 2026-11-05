@@ -310,19 +310,18 @@ satisfying Hamilton's equations for the Hamiltonian `H(Λ₁, Λ₂, X; Z_u)` in
 cotangent bundle, `X' = δH/δΛ₂` and `Λ₂' = -δH/δX` (canonical equations on `T*𝔰𝔩₂(ℝ)`), and the
 Euler–Arnold equation `Λ₁' = -ad_{δH/δΛ₁} Λ₁` (cited from Cushman–Bates), the costate variables
 evolve as `Λ₁' = [Λ₁, X]` and `Λ_R' = [P, Λ_R] - ⟨Λ_R, P⟩[P, X] + [-Λ₁ + (3/2) λ_cost J, X]`, where
-`P = Z_u/⟨X, Z_u⟩` and `Λ_R = [Λ₂, X]`. The control `u` is the value of the control at time `t`.
-The Euler–Arnold equation determines `Λ₁'`; that `Λ₁` is differentiable is not needed. -/
+`P = Z_u/⟨X, Z_u⟩` and `Λ_R = [Λ₂, X]`. The control `u` is the value of the control at time `t`. -/
 theorem proposition6_5_1 (lam : ℝ) (u : Fin 3 → ℝ) (X Λ₁ Λ₂ : ℝ → Mat2) (t : ℝ)
     (X' Λ₁' Λ₂' D₁ : Mat2)
     (htr : (X t).trace = 0 ∧ (Λ₁ t).trace = 0 ∧ (Λ₂ t).trace = 0)
     (hden : traceForm (X t) (controlMatrix u) ≠ 0)
-    (hX : HasDerivAtEntrywise X X' t)
+    (hX : HasDerivAtEntrywise X X' t) (hΛ₁ : HasDerivAtEntrywise Λ₁ Λ₁' t)
     (hΛ₂ : HasDerivAtEntrywise Λ₂ Λ₂' t)
     (hHΛ₂ : HasFunctionalDerivative (fun L ↦ fullHamiltonian lam (Λ₁ t) L (X t) u) (Λ₂ t) X')
     (hHX : HasFunctionalDerivative (fun Y ↦ fullHamiltonian lam (Λ₁ t) (Λ₂ t) Y u) (X t) (-Λ₂'))
     (hHΛ₁ : HasFunctionalDerivative (fun L ↦ fullHamiltonian lam L (Λ₂ t) (X t) u) (Λ₁ t) D₁)
     (hEA : Λ₁' = -(D₁ * Λ₁ t - Λ₁ t * D₁)) :
-    Λ₁' = Λ₁ t * X t - X t * Λ₁ t ∧
+    HasDerivAtEntrywise Λ₁ (Λ₁ t * X t - X t * Λ₁ t) t ∧
       HasDerivAtEntrywise (fun s ↦ Λ₂ s * X s - X s * Λ₂ s)
         (costateRHS lam (Λ₁ t) (Λ₂ t * X t - X t * Λ₂ t) (X t) u) t := by
   obtain ⟨hXtr, hΛ₁tr, hΛ₂tr⟩ := htr
@@ -393,7 +392,7 @@ theorem proposition6_5_1 (lam : ℝ) (u : Fin 3 → ℝ) (X Λ₁ Λ₂ : ℝ �
   have hD₁ : D₁ = X t := hHΛ₁.unique hdΛ₁
   have hΛ₂' : -Λ₂' = M + (Λ₂ t * P - P * Λ₂ t) - traceForm (Λ₂ t * P - P * Λ₂ t) (X t) • P :=
     hHX.unique hdX
-  refine ⟨by rw [hEA, hD₁]; noncomm_ring, ?_⟩
+  refine ⟨hΛ₁.congr_deriv (by rw [hEA, hD₁]; noncomm_ring), ?_⟩
   -- `Λ_R' = [Λ₂', X] + [Λ₂, X']`
   refine (((hΛ₂.mul hX).sub (hX.mul hΛ₂))).congr_deriv ?_
   have hκ : traceForm (Λ₂ t * P - P * Λ₂ t) (X t) =

@@ -44,7 +44,10 @@ A Pontryagin extremal (`IsPontryaginExtremal`) lifts a state trajectory by costa
 `Λ_R' = [P, Λ_R] - ⟨Λ_R, P⟩[P, X] + [-Λ₁ + (3/2)λ_cost J, X]` with `P = Z_u/⟨Z_u, X⟩`; for almost
 every `t` the control maximizes the Hamiltonian `H = ⟨Λ₁ - (3/2)λ_cost J, X⟩ - ⟨Λ_R, Z_u⟩/⟨X, Z_u⟩`
 over `U_T` and `H = 0`; and the transversality conditions (`g(0) = I₂`, `g(t_f) = R`, and `X`, `Λ₁`,
-`Λ_R` at `t_f` are `R⁻¹(·)(0)R`). A control is bang-bang if it takes values in the vertices of
+`Λ_R` at `t_f` are `R⁻¹(·)(0)R`). The nontriviality condition is imposed on the reduced costate
+`(λ_cost, Λ₁, Λ_R)`, with `Λ_R = [Λ₂, X]`: imposed on the full costate `(Λ₁, Λ₂)` of §6.2 of the
+book, it would let every state trajectory lift (`λ_cost = 0`, `Λ₁ = 0`, `Λ₂ = X`, so `Λ_R = 0`).
+A control is bang-bang if it takes values in the vertices of
 `U_T`.
 
 ## The smoothed `(6k+2)`-gon

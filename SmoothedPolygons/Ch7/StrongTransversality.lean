@@ -659,31 +659,18 @@ lemma str_costateΛR_smul (c y0 l1 lR lam t : ℝ) :
 
 /-- The centralizer in `𝔰𝔩₂(ℝ)` of `B = [[0, β], [γ, 0]]` with `β ≠ 0` is `ℝB`.
 
-Departure from the paper: the book deduces that the centralizer of `h = g(t_sw)R⁻¹` in `𝔰𝔩₂(ℝ)`
-is `ℝΛ₁₀` from `h` being regular elliptic (`tr h ∈ (1, 2)`); that fact about regular elements is
-not in Mathlib, so we compute the centralizer of the explicit `Λ₁₀ = h - (tr h/2) I₂` directly
-(`str_Λ₁₀_eq`); a matrix commutes with `h` iff it commutes with `Λ₁₀`. -/
+The proof of Theorem 7.5.1: `h = g(t_sw)R⁻¹` is regular (`tr h ∈ (1, 2)`), and its centralizer in
+`𝔰𝔩₂(ℝ)` is `ℝΛ₁₀` with `Λ₁₀ = h - (tr h/2) I₂` (`str_Λ₁₀_eq`), since a matrix commutes with `h`
+iff it commutes with `Λ₁₀ ≠ 0`, whose centralizer is `ℝΛ₁₀` (`orb_centralizer`). -/
 lemma str_centralizer (A B : Mat2) (hA : A.trace = 0) (hB0 : B 0 0 = 0) (hB1 : B 1 1 = 0)
     (hB : B 0 1 ≠ 0) (hc : A * B = B * A) : A = (A 0 1 / B 0 1) • B := by
-  have h00 := congrFun (congrFun hc 0) 0
-  have h01 := congrFun (congrFun hc 0) 1
-  simp only [Matrix.mul_apply, Fin.sum_univ_two, hB0, hB1, mul_zero, zero_mul, add_zero,
-    zero_add] at h00 h01
-  rw [Matrix.trace_fin_two] at hA
-  have ha : A 0 0 = 0 := by
-    have : 2 * A 0 0 * B 0 1 = 0 := by
-      have : A 1 1 = -A 0 0 := by linarith
-      rw [this] at h01
-      linarith
-    rcases mul_eq_zero.1 this with h | h
-    · linarith
-    · exact absurd h hB
-  ext i j
-  fin_cases i <;> fin_cases j <;> simp [hB0, hB1, ha]
-  · field_simp
-  · field_simp
-    linarith
-  · linarith
+  have hBtr : B.trace = 0 := by rw [Matrix.trace_fin_two, hB0, hB1, add_zero]
+  have hBne : B ≠ 0 := fun h ↦ hB (by rw [h]; rfl)
+  obtain ⟨k, hk⟩ := orb_centralizer B A hBtr hBne hA (sub_eq_zero.2 hc)
+  have hk' : k = A 0 1 / B 0 1 := by
+    rw [hk, Matrix.smul_apply, smul_eq_mul, mul_div_assoc, div_self hB, mul_one]
+  rw [← hk']
+  exact hk
 
 /-- The two initial conditions `Λ_R(0) ⊥ X(0)` and `χ₂₃(0) = 0` force
 `Λ_R(0) = λ_R [[0, y₀²], [1, 0]]` (proof of Theorem 7.5.1). -/
@@ -1082,9 +1069,8 @@ a costate trajectory `(Λ₁, Λ_R, λ_cost)` with `Λ_R(0) ∈ X(0)^⊥`, `χ�
 `λ_cost ≠ 0`. Here: there is such a lift with `λ_cost = -1`, and the lifts are exactly its scalar
 multiples `c • (Λ₁, Λ_R, -1)`, so a nonzero lift has `λ_cost = -c ≠ 0`.
 
-The proof follows the book's (`strongLift_isStrongLift`, `strongLift_unique`), with one departure
-at the step "the centralizer of `h = g(t_sw)R⁻¹` in `𝔰𝔩₂` is `ℝΛ₁₀`", which the book deduces from
-`h` being regular elliptic and the formal proof computes directly (`str_centralizer`). -/
+The proof follows the book's (`strongLift_isStrongLift`, `strongLift_unique`); the centralizer of
+`h = g(t_sw)R⁻¹` in `𝔰𝔩₂` is `ℝΛ₁₀` (`str_centralizer`). -/
 theorem theorem7_5_1 (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
     ∃ Λ₁ ΛR : ℝ → Mat2, IsStrongLift y0 Λ₁ ΛR (-1) ∧
       ∀ (Λ₁' ΛR' : ℝ → Mat2) (lam : ℝ), IsStrongLift y0 Λ₁' ΛR' lam ↔
