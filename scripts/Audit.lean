@@ -13,6 +13,7 @@ import all Basic.Analysis.Complex.UpperHalfPlane.GeneralizedCircle
 import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.MatrixIdentities
 import all SmoothedPolygons.AppA.Riemannian
+import all SmoothedPolygons.Ch2.BalancedCircle
 import all SmoothedPolygons.Ch2.MultiCurve
 import all SmoothedPolygons.Ch3.ControlProblem
 import all SmoothedPolygons.Ch3.ControlSets

@@ -4,6 +4,7 @@ public import Basic.Analysis.Calculus.MatrixEntrywise
 public import SmoothedPolygons.AppA.FunctionalDerivative
 public import SmoothedPolygons.AppA.MatrixIdentities
 public import SmoothedPolygons.AppA.Riemannian
+public import SmoothedPolygons.Ch2.BalancedCircle
 public import SmoothedPolygons.Ch2.MultiCurve
 public import SmoothedPolygons.Ch3.ControlProblem
 public import SmoothedPolygons.Ch3.ControlSets
