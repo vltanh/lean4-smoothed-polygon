@@ -3,6 +3,7 @@ module
 public import SmoothedPolygons.Defs
 public import Mathlib.Geometry.Manifold.Algebra.LieGroup
 public import Mathlib.Geometry.Manifold.MFDeriv.Defs
+public import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 
 /-!
 # The Reinhardt optimal control problem (§3.6)
@@ -29,7 +30,59 @@ theorem proposition3_6_1 {E H G : Type*} [NormedAddCommGroup E] [NormedSpace ℝ
     Function.Bijective (fun p : G × (TangentSpace I (1 : G) →L[ℝ] ℝ) ↦
       (⟨p.1, p.2.comp (mfderiv I I (fun h ↦ p.1⁻¹ * h) p.1)⟩ :
         Σ g : G, TangentSpace I g →L[ℝ] ℝ)) := by
-  sorry
+  have hn0 : n ≠ 0 := (lt_of_lt_of_le zero_lt_one hn).ne'
+  have hL : ∀ g h : G, MDifferentiableAt I I (fun x ↦ g * x) h := fun g h ↦
+    (contMDiff_mul_left (I := I) (n := n) (a := g)).contMDiffAt.mdifferentiableAt hn0
+  -- `T_eL_g` is an isomorphism with inverse `T_gL_{g⁻¹}`, by the chain rule applied to
+  -- `L_{g⁻¹} ∘ L_g = id` and `L_g ∘ L_{g⁻¹} = id`: first `T_gL_{g⁻¹} ∘ T_eL_g = id`
+  have hST : ∀ (g : G) (v : TangentSpace I (1 : G)),
+      mfderiv I I (fun h ↦ g⁻¹ * h) g (mfderiv I I (fun h ↦ g * h) 1 v) = v := by
+    intro g v
+    have A : mfderiv I I ((fun x ↦ g⁻¹ * x) ∘ (fun x ↦ g * x)) (1 : G) =
+        ContinuousLinearMap.id ℝ (TangentSpace I (1 : G)) := by
+      have : (fun x ↦ g⁻¹ * x) ∘ (fun x ↦ g * x) = id := by ext x; simp
+      rw [this, mfderiv_id]
+    rw [mfderiv_comp (1 : G) (hL g⁻¹ _) (hL g 1)] at A
+    have key : ∀ y : G, y = g → ∀ w : E,
+        mfderiv I I (fun h ↦ g⁻¹ * h) y w = mfderiv I I (fun h ↦ g⁻¹ * h) g w := by
+      rintro y rfl w; rfl
+    exact (key _ (mul_one g) _).symm.trans (congrArg (fun L ↦ L v) A)
+  -- and `T_eL_g ∘ T_gL_{g⁻¹} = id`
+  have hTS : ∀ (g : G) (v : TangentSpace I g),
+      mfderiv I I (fun h ↦ g * h) 1 (mfderiv I I (fun h ↦ g⁻¹ * h) g v) = v := by
+    intro g v
+    have A : mfderiv I I ((fun x ↦ g * x) ∘ (fun x ↦ g⁻¹ * x)) g =
+        ContinuousLinearMap.id ℝ (TangentSpace I g) := by
+      have : (fun x ↦ g * x) ∘ (fun x ↦ g⁻¹ * x) = id := by ext x; simp
+      rw [this, mfderiv_id]
+    rw [mfderiv_comp g (hL g _) (hL g⁻¹ g)] at A
+    have key : ∀ y : G, y = 1 → ∀ w : E,
+        mfderiv I I (fun h ↦ g * h) y w = mfderiv I I (fun h ↦ g * h) 1 w := by
+      rintro y rfl w; rfl
+    exact (key _ (inv_mul_cancel g) _).symm.trans (congrArg (fun L ↦ L v) A)
+  refine ⟨fun g ↦ ⟨fun v w hvw ↦ ?_, fun v ↦ ⟨_, hTS g v⟩⟩, ⟨?_, ?_⟩, ⟨?_, ?_⟩⟩
+  · rw [← hST g v, ← hST g w, hvw]
+  -- the trivialization of `TG` is bijective fiberwise
+  · rintro ⟨g, v⟩ ⟨g', w⟩ h
+    simp only at h
+    obtain ⟨rfl, h⟩ := Bundle.TotalSpace.mk.inj h
+    rw [← hST g v, ← hST g w, eq_of_heq h]
+  · rintro ⟨g, v⟩
+    exact ⟨(g, mfderiv I I (fun h ↦ g⁻¹ * h) g v), by simp only [hTS]⟩
+  -- dually, `p ↦ p ∘ T_gL_{g⁻¹}` is a bijection `𝔤* → T*_gG`, with inverse `q ↦ q ∘ T_eL_g`
+  · rintro ⟨g, φ⟩ ⟨g', ψ⟩ h
+    simp only [Sigma.mk.injEq] at h
+    obtain ⟨rfl, h⟩ := h
+    rw [heq_iff_eq] at h
+    simp only [Prod.mk.injEq, true_and]
+    ext v
+    rw [← hST g v]
+    exact congrArg (fun L ↦ L (mfderiv I I (fun h ↦ g * h) 1 v)) h
+  · rintro ⟨g, φ⟩
+    refine ⟨(g, φ.comp (mfderiv I I (fun h ↦ g * h) 1)), ?_⟩
+    simp only [Sigma.mk.injEq, heq_iff_eq, true_and]
+    ext v
+    exact congrArg φ (hTS g v)
 
 /-- **Problem 3.6.2** (`pbm:reinhardt-optimal-control`). An admissible trajectory of the
 Reinhardt control problem: a state trajectory on `[0, t_f]` (`g' = gX`, `X' = [Z_u, X]/⟨Z_u, X⟩`,
