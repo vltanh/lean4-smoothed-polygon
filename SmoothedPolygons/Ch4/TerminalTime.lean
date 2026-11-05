@@ -20,12 +20,78 @@ namespace SmoothedPolygons
 (`eqn:cost-upper-half-plane`). -/
 theorem cost_density_halfPlane (x y : ℝ) (hy : 0 < y) :
     -(3 / 2) * traceForm J (Φ x y) = 3 / 2 * ((x ^ 2 + y ^ 2 + 1) / y) := by
-  sorry
+  rw [poly_traceForm_J_Φ x y hy]
+  ring
+
+/-- A star state `X` has `⟨J, X⟩ < 0`: with `X = [[a, b], [c, -a]]`, the star inequalities
+`ρ₀, ρ₁ > 0` give `c > 0`, and `det X = -a² - bc = 1` gives `b < 0`, so `⟨J, X⟩ = b - c < 0`. -/
+lemma poly_traceForm_J_neg {X : Mat2} (hX : IsStarState X) : traceForm J X < 0 := by
+  obtain ⟨htr, hdet, h0, h1, -⟩ := hX
+  rw [Matrix.trace_fin_two] at htr
+  rw [Matrix.det_fin_two] at hdet
+  unfold ρ₀ at h0
+  unfold ρ₁ at h1
+  have h3 : 0 < √3 := by positivity
+  have hc : 0 < X 1 0 := by
+    have h0' := (div_pos_iff_of_pos_right h3).1 h0
+    have h1' := (div_pos_iff_of_pos_right h3).1 h1
+    linarith
+  have hd : X 1 1 = -X 0 0 := by linarith
+  rw [hd] at hdet
+  have hb : X 0 1 < 0 := by nlinarith [sq_nonneg (X 0 0)]
+  have hJX : traceForm J X = X 0 1 - X 1 0 := by
+    simp [traceForm, J, Matrix.trace_fin_two, Matrix.vecMul, dotProduct, Fin.sum_univ_two]
+    ring
+  rw [hJX]
+  linarith
 
 /-- **Lemma 4.3.1** (`lem:tf-pi3`). The global minimizer of the Reinhardt control problem has
-terminal time `t_f < π/3`. -/
+terminal time `t_f < π/3`.
+
+The book's proof: `area(K_min) < π`, and `(x² + y² + 1)/y ≥ y + 1/y ≥ 2`, so
+`π > area(K_min) = (3/2) ∫₀^{t_f} (x² + y² + 1)/y dt ≥ 3 t_f`. Here `X = Φ(x + iy)` by
+Lemmas 4.1.1 and 4.2.1 (a star state has `det X = 1` and `⟨J, X⟩ < 0`).
+
+Departure from the paper (a gap the book leaves): the book compares the minimizer with the unit
+disk, whose trajectory (`X ≡ J`, constant control `(1/3, 1/3, 1/3)`, `t_f = π/3`) is admissible
+with cost `π`; minimality gives only `area(K_min) ≤ π`, and the book does not say why the
+inequality is strict. The repair compares with the smoothed octagon instead: its trajectory is
+admissible (Theorem 7.5.6 with `k = 1`; a Pontryagin extremal satisfies the boundary conditions)
+and its cost is `≈ 3.126 < π` (the example before Theorem 7.5.6). -/
 theorem lemma4_3_1 (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2) (h : IsReinhardtMinimizer T u g X) :
     T < Real.pi / 3 := by
-  sorry
+  obtain ⟨⟨hst, -, -, -⟩, hmin⟩ := h
+  -- the minimizer costs less than the smoothed octagon, whose cost is `< π`
+  obtain ⟨⟨g', X', hst', hg0', hX0'⟩, hext⟩ := theorem7_5_6 1 le_rfl
+  obtain ⟨-, Λ₁, ΛR, lam, hP⟩ := hext g' X' hst' hg0' hX0'
+  have hadm : IsReinhardtAdmissible (tf 1) (polygonControl 1) g' X' :=
+    ⟨hst', hg0', hP.2.2.1, hP.2.2.2.1⟩
+  have hoct := (example7_5_smoothedOctagon.2.2.2.2 g' X' hst' hg0' hX0').2.2.1
+  have hlt : reinhardtCost T X < Real.pi := (hmin _ _ _ _ hadm).trans_lt hoct
+  -- `-(3/2)⟨J, X⟩ = (3/2)(x² + y² + 1)/y ≥ 3`
+  obtain ⟨hT, -, -, hstar, -, hXI⟩ := hst
+  have hXc : ContinuousOn X (Set.Icc 0 T) := Matrix.continuousOn_of_eq_add_integral hXI
+  have hJc : ContinuousOn (fun t ↦ traceForm J (X t)) (Set.Icc 0 T) :=
+    (continuous_const.matrix_mul continuous_id).matrix_trace.comp_continuousOn hXc
+  have hbound : ∀ t ∈ Set.Icc 0 T, 3 ≤ -(3 / 2) * traceForm J (X t) := by
+    intro t ht
+    have hX := (hstar t ht).2
+    have hmem : X t ∈ adjointOrbit J := by
+      rw [← lemma4_1_1]
+      exact ⟨hX.1, hX.2.1, poly_traceForm_J_neg hX⟩
+    obtain ⟨z, -, hz⟩ := lemma4_2_1.surjOn hmem
+    have hy := z.im_pos
+    rw [← hz, ΦH, cost_density_halfPlane _ _ hy]
+    have h2 : 2 ≤ (z.re ^ 2 + z.im ^ 2 + 1) / z.im := by
+      rw [le_div_iff₀ hy]
+      nlinarith [sq_nonneg z.re, sq_nonneg (z.im - 1)]
+    linarith
+  have hge : 3 * T ≤ reinhardtCost T X := by
+    have := intervalIntegral.integral_mono_on (μ := MeasureTheory.volume) hT.le
+      intervalIntegrable_const
+      ((hJc.intervalIntegrable_of_Icc hT.le).const_mul (-(3 / 2))) hbound
+    rw [intervalIntegral.integral_const, intervalIntegral.integral_const_mul] at this
+    simpa [reinhardtCost, smul_eq_mul, mul_comm] using this
+  linarith [Real.pi_pos]
 
 end SmoothedPolygons
