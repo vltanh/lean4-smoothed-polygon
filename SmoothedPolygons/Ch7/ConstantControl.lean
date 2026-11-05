@@ -8,6 +8,7 @@ public import Basic.Analysis.Calculus.MatrixEntrywiseExp
 public import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
 public import SmoothedPolygons.Ch3.LieAlgebraDynamics
 public import SmoothedPolygons.AppA.Riemannian
+public import Basic.Analysis.Complex.UpperHalfPlane.GeneralizedCircle
 
 /-!
 # Solutions for constant control (§7.1, §7.2)
@@ -24,6 +25,7 @@ generalized circles (Lemma 7.2.1).
 namespace SmoothedPolygons
 
 open Matrix
+open scoped UpperHalfPlane MatrixGroups
 
 /-- **Lemma 7.1.1** (`cor:X-det-const`). For a fixed control matrix `Z_u`, `⟨X, Z_u⟩` is a constant
 of motion along `X' = [Z_u, X]/⟨Z_u, X⟩`. -/
@@ -257,16 +259,168 @@ theorem lemma7_1_3 (X₀ Z : Mat2) (hX : X₀.trace = 0) (hZ : Z.trace = 0) (hde
     Polynomial.roots_X_sub_C, Polynomial.roots_X_sub_C, Multiset.singleton_add]
   rfl
 
+/-- The general solution `X(t) = exp((t - a)P) X(a) exp(-(t - a)P)` of `X' = [P, X]` for a constant
+matrix `P` (`eqn:const-control-z-X`, started at time `a`): it is the only solution, since
+`exp(-(t - a)P) X(t) exp((t - a)P)` has derivative zero. -/
+private theorem eq_exp_conj_of_hasDerivWithinAt {P : Mat2} {X : ℝ → Mat2} {a b : ℝ}
+    (hX : ∀ t ∈ Set.Icc a b, HasDerivWithinAtEntrywise X (P * X t - X t * P) (Set.Icc a b) t) :
+    ∀ t ∈ Set.Icc a b,
+      X t = NormedSpace.exp ((t - a) • P) * X a * NormedSpace.exp (-(t - a) • P) := by
+  have hW : ∀ t ∈ Set.Icc a b, HasDerivWithinAtEntrywise
+      (fun s ↦ NormedSpace.exp (-(s - a) • P) * X s * NormedSpace.exp ((s - a) • P)) 0
+      (Set.Icc a b) t := by
+    intro t ht
+    have hsub : HasDerivAt (fun s : ℝ ↦ s - a) 1 t := (hasDerivAt_id' t).sub_const a
+    have h1 := HasDerivAtEntrywise.scomp (h := fun s ↦ s - a) (t := t)
+      (hasDerivAtEntrywise_exp_neg_smul_const P (t - a)) hsub
+    have h2 := HasDerivAtEntrywise.scomp (h := fun s ↦ s - a) (t := t)
+      (hasDerivAtEntrywise_exp_smul_const' P (t - a)) hsub
+    refine ((h1.hasDerivWithinAtEntrywise.mul (hX t ht)).mul
+      h2.hasDerivWithinAtEntrywise).congr_deriv ?_
+    simp only [one_smul]
+    generalize NormedSpace.exp (-(t - a) • P) = F
+    generalize NormedSpace.exp ((t - a) • P) = E
+    noncomm_ring
+  have hc := constant_of_hasDerivWithinAtEntrywise_Icc_zero
+    (HasDerivWithinAtEntrywise.continuousOn hW) (fun t ht ↦ hW t (Set.Ico_subset_Icc_self ht))
+  intro t ht
+  have h := hc t ht
+  simp only [sub_self, neg_zero, zero_smul, NormedSpace.exp_zero, Matrix.one_mul,
+    Matrix.mul_one] at h
+  rw [← h]
+  simp only [← Matrix.mul_assoc]
+  rw [exp_smul_mul_exp_neg_smul, Matrix.one_mul, Matrix.mul_assoc,
+    exp_smul_mul_exp_neg_smul, Matrix.mul_one]
+
+/-- The eigenvector matrices of §7.2: for each vertex `e` of `U_T`, a matrix `A ∈ SL₂(ℝ)` whose
+columns are eigenvectors `v₊, v₋` of `-Z_e` for the eigenvalues `1/√3, -1/√3`, so that
+`Z_e A = A diag(-1/√3, 1/√3)`: `v₊ = (-1/√3, 1)`, `v₋ ∝ (1/√3, 1)` for `e = (1, 0, 0)`;
+`v₊ = (1/√3, 1)`, `v₋ ∝ (1, 0)` for `e = (0, 1, 0)`; `v₊ = (1, 0)`, `v₋ = (-1/√3, 1)` for
+`e = (0, 0, 1)`. For the last two vertices `Z_e` is upper triangular and `(1, 0)` is an
+eigenvector, so `A · ∞ = ∞` or `A · 0 = ∞`. -/
+private theorem exists_eigenvector_matrix (i : Fin 3) :
+    ∃ A : SL(2, ℝ), controlMatrix (vertex i) * (A : Mat2) =
+        (A : Mat2) * diagonal ![-(1 / √3), 1 / √3] ∧ (i ≠ 0 → A 1 0 * A 1 1 = 0) := by
+  have h3 : (0 : ℝ) < √3 := by positivity
+  have h33 : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
+  fin_cases i
+  · refine ⟨⟨!![-(1 / √3), -(1 / 2); 1, -(√3 / 2)], ?_⟩, ?_, fun h ↦ absurd rfl h⟩
+    · rw [det_fin_two_of]; field_simp; linarith
+    · ext j k
+      fin_cases j <;> fin_cases k <;>
+        simp [controlMatrix, vertex, Matrix.mul_apply, Fin.sum_univ_two]
+      all_goals field_simp
+      all_goals linarith
+  · refine ⟨⟨!![1 / √3, -1; 1, 0], ?_⟩, ?_, fun _ ↦ by simp⟩
+    · rw [det_fin_two_of]; ring
+    · ext j k
+      fin_cases j <;> fin_cases k <;>
+        simp [controlMatrix, vertex, Matrix.mul_apply, Fin.sum_univ_two]
+      all_goals field_simp
+      all_goals linarith
+  · refine ⟨⟨!![1, -(1 / √3); 0, 1], ?_⟩, ?_, fun _ ↦ by simp⟩
+    · rw [det_fin_two_of]; ring
+    · ext j k
+      fin_cases j <;> fin_cases k <;>
+        simp [controlMatrix, vertex, Matrix.mul_apply, Fin.sum_univ_two]
+      all_goals field_simp
+      all_goals linarith
+
+/-- In `SL₂(ℝ)` the inverse is the matrix inverse. -/
+private theorem coe_inv_SL (g : SL(2, ℝ)) : ((g⁻¹ : SL(2, ℝ)) : Mat2) = (g : Mat2)⁻¹ :=
+  (Matrix.inv_eq_right_inv (by
+    rw [← SpecialLinearGroup.coe_mul, mul_inv_cancel, SpecialLinearGroup.coe_one])).symm
+
 /-- **Lemma 7.2.1** (`lem:const-control-trajectories`). If the control is constant at a vertex of
 `U_T`, then the trajectories `z = x + iy` in the star domain are arcs of generalized circles
 (`A(x² + y²) + Bx + Cy + D = 0` with `(A, B, C) ≠ 0`). If the control is `(0, 0, 1)` or
-`(0, 1, 0)`, each trajectory moves along a Euclidean straight line (`A = 0`). -/
+`(0, 1, 0)`, each trajectory moves along a Euclidean straight line (`A = 0`).
+
+The book's proof environment is empty; the proof follows the discussion before the lemma (§7.1,
+§7.2). With `P₀ = Z_u/⟨Z_u, X(a)⟩` constant (Lemma 7.1.1), `X(t) = Ad_{exp((t-a)P₀)} X(a)`
+(`eqn:const-control-z-X`), so `z(t) = exp((t-a)P₀) · z(a)` (`Φ` is equivariant and injective,
+Remark 4.2.2 and Lemma 4.2.1). Diagonalizing `P₀ = A diag(λ, -λ) A⁻¹` by the matrix `A ∈ SL₂(ℝ)` of
+eigenvectors gives `z(t) = A · (exp(2(t-a)λ) z̃₀)` with `z̃₀ = A⁻¹ · z(a)`: the image under the
+linear fractional transformation `A` of a point of the ray from `0` through `z̃₀`, so `z(t)` lies on
+a generalized circle (`UpperHalfPlane.smul_ray_genCircle`). For `(0, 1, 0)` and `(0, 0, 1)` the
+matrix `Z_u` is upper triangular, `(1, 0)` is an eigenvector, `A · 0 = ∞` or `A · ∞ = ∞`, and the
+generalized circle is a line. -/
 theorem lemma7_2_1 (i : Fin 3) (X : ℝ → Mat2) (x y : ℝ → ℝ) (a b : ℝ)
     (hX : ∀ t ∈ Set.Icc a b, HasDerivWithinAtEntrywise X
       (controlP (vertex i) (X t) * X t - X t * controlP (vertex i) (X t)) (Set.Icc a b) t)
     (hxy : ∀ t ∈ Set.Icc a b, X t = Φ (x t) (y t) ∧ (x t, y t) ∈ starDomain) :
     ∃ A B C D : ℝ, (A ≠ 0 ∨ B ≠ 0 ∨ C ≠ 0) ∧ (i ≠ 0 → A = 0) ∧
       ∀ t ∈ Set.Icc a b, A * (x t ^ 2 + y t ^ 2) + B * x t + C * y t + D = 0 := by
-  sorry
+  rcases lt_or_ge b a with hba | hab
+  · exact ⟨0, 1, 0, 0, Or.inr (Or.inl one_ne_zero), fun _ ↦ rfl,
+      fun t ht ↦ absurd (ht.1.trans ht.2) (not_le.2 hba)⟩
+  have ha : a ∈ Set.Icc a b := Set.left_mem_Icc.2 hab
+  -- `P = Z_u/⟨Z_u, X⟩` is constant along the trajectory (Lemma 7.1.1)
+  have hP : ∀ t ∈ Set.Icc a b, controlP (vertex i) (X t) = controlP (vertex i) (X a) :=
+    fun t ht ↦ by
+      unfold controlP
+      rw [traceForm, Matrix.trace_mul_comm, ← traceForm, lemma7_1_1 (vertex i) X a b hX t ht,
+        traceForm, Matrix.trace_mul_comm, ← traceForm]
+  set Z := controlMatrix (vertex i) with hZ
+  set P := controlP (vertex i) (X a) with hPdef
+  set c := (traceForm Z (X a))⁻¹ with hc
+  have hPc : P = c • Z := rfl
+  -- the general solution `X(t) = exp((t - a)P₀) X(a) exp(-(t - a)P₀)` (`eqn:const-control-z-X`)
+  have hsol := eq_exp_conj_of_hasDerivWithinAt (P := P) (fun t ht ↦ by
+    rw [← hP t ht]; exact hX t ht)
+  -- `Z_u = A diag(-1/√3, 1/√3) A⁻¹` with `A ∈ SL₂(ℝ)` the matrix of eigenvectors
+  obtain ⟨A, hAZ, hA0⟩ := exists_eigenvector_matrix i
+  have hAunit : IsUnit (A : Mat2) :=
+    (isUnit_iff_isUnit_det _).2 (by rw [A.det_coe]; exact isUnit_one)
+  have hZdiag : Z = (A : Mat2) * diagonal ![-(1 / √3), 1 / √3] * (A : Mat2)⁻¹ := by
+    rw [← hAZ, Matrix.mul_assoc, Matrix.mul_nonsing_inv _ ((isUnit_iff_isUnit_det _).1 hAunit),
+      Matrix.mul_one]
+  -- the initial point `z₀ = z(a)` and `z̃₀ = A⁻¹ · z₀`
+  set za : ℍ := UpperHalfPlane.mk ⟨x a, y a⟩ (hxy a ha).2.1 with hza
+  set w₀ : ℍ := A⁻¹ • za with hw₀
+  refine ⟨w₀.im * (A 1 0 * A 1 1), -(w₀.im * (A 0 0 * A 1 1 + A 0 1 * A 1 0)), w₀.re,
+    w₀.im * (A 0 0 * A 0 1), UpperHalfPlane.smul_ray_genCircle_coeff_ne_zero A w₀,
+    fun hi ↦ by rw [hA0 hi, mul_zero], fun t ht ↦ ?_⟩
+  -- `exp((t - a)P₀) = A diag(exp(λ(t - a)), exp(-λ(t - a))) A⁻¹`
+  set s := t - a with hs
+  set e := Real.exp (s * c * -(1 / √3)) with he_def
+  have he : e ≠ 0 := (Real.exp_pos _).ne'
+  let D : SL(2, ℝ) := ⟨!![e, 0; 0, e⁻¹], by rw [det_fin_two_of]; field_simp; ring⟩
+  have hexp : NormedSpace.exp (s • P) = ((A * D * A⁻¹ : SL(2, ℝ)) : Mat2) := by
+    have hsP : s • P = (A : Mat2) * diagonal ![s * c * -(1 / √3), s * c * (1 / √3)] *
+        (A : Mat2)⁻¹ := by
+      rw [hPc, hZdiag, smul_smul, ← Matrix.smul_mul, ← Matrix.mul_smul]
+      congr 2
+      ext j k
+      fin_cases j <;> fin_cases k <;> simp
+    rw [hsP, Matrix.exp_conj _ _ hAunit, Matrix.exp_diagonal, SpecialLinearGroup.coe_mul,
+      SpecialLinearGroup.coe_mul, coe_inv_SL]
+    congr 2
+    ext j k
+    fin_cases j <;> fin_cases k <;>
+      simp [D, Pi.coe_exp, ← Real.exp_eq_exp_ℝ, he_def, Real.exp_neg]
+  have hexp' : NormedSpace.exp (-s • P) = (((A * D * A⁻¹)⁻¹ : SL(2, ℝ)) : Mat2) := by
+    rw [exp_neg_smul, hexp, coe_inv_SL]
+  -- `z(t) = exp((t - a)P₀) · z₀` (by `Φ(g · z) = g Φ(z) g⁻¹` and the injectivity of `Φ`)
+  set zt : ℍ := UpperHalfPlane.mk ⟨x t, y t⟩ (hxy t ht).2.1 with hzt_def
+  have hzt : zt = (A * D * A⁻¹) • za := by
+    apply lemma4_2_1.injOn (Set.mem_univ _) (Set.mem_univ _)
+    rw [ΦH_smul, ← hexp, ← hexp']
+    change Φ (x t) (y t) = NormedSpace.exp (s • P) * Φ (x a) (y a) * NormedSpace.exp (-s • P)
+    rw [← (hxy t ht).1, ← (hxy a ha).1]
+    exact hsol t ht
+  -- `z(t) = A · (exp(2λ(t - a)) z̃₀)`: the image under `A` of a point of the ray from `0` through
+  -- `z̃₀`, hence a point of a generalized circle
+  rw [mul_smul, mul_smul, ← hw₀] at hzt
+  have hray : ((D • w₀ : ℍ) : ℂ) = ((e ^ 2 : ℝ) : ℂ) * w₀ := by
+    rw [UpperHalfPlane.coe_specialLinearGroup_apply]
+    simp [D]
+    field_simp
+  have h := UpperHalfPlane.smul_ray_genCircle A w₀ (D • w₀) hray
+  rw [← hzt] at h
+  have hre : zt.re = x t := rfl
+  have him : zt.im = y t := rfl
+  rw [hre, him] at h
+  linear_combination h
 
 end SmoothedPolygons
