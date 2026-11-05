@@ -29,7 +29,10 @@ public import SmoothedPolygons.Defs
 /-!
 # Solution
 
-Entry point of the library. The proofs of the Challenge theorems are added in Phase 6.
+Entry point of the library: it imports every module, and restates the two theorems of
+`Challenge.lean` word for word, with their proofs from the library (`theorem7_5_6`,
+`example7_5_smoothedOctagon`). Palomar's Comparator checks that these are the Challenge's
+statements and that their proofs use only the standard axioms (`comparator.json`).
 -/
 
 @[expose] public section

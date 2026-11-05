@@ -7,6 +7,9 @@ public meta import Lean.DocString
 --   find SmoothedPolygons External Basic -name '*.lean' | sort |
 --     sed 's/\.lean$//; s#/#.#g; s/^/import all /'
 import all Basic.Analysis.Calculus.MatrixEntrywise
+import all Basic.Analysis.Calculus.MatrixEntrywiseExp
+import all Basic.Analysis.Calculus.MatrixFTC
+import all Basic.Analysis.Complex.UpperHalfPlane.GeneralizedCircle
 import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.MatrixIdentities
 import all SmoothedPolygons.AppA.Riemannian
@@ -26,6 +29,7 @@ import all SmoothedPolygons.Ch7.ConstantControl
 import all SmoothedPolygons.Ch7.DiscreteK
 import all SmoothedPolygons.Ch7.Faces
 import all SmoothedPolygons.Ch7.HMax
+import all SmoothedPolygons.Ch7.HMaxInequality
 import all SmoothedPolygons.Ch7.Polygon
 import all SmoothedPolygons.Ch7.SmoothedPolygon
 import all SmoothedPolygons.Ch7.StrongTransversality

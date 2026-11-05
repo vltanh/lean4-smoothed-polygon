@@ -1,0 +1,45 @@
+# Differences between the routes of the formal proofs and the results that the book's proofs cite
+# (docs/paper_routes.tsv), each with its reason. Checked by scripts/route_check.py.
+# LABEL	±OTHER	reason
+#
+# Facts used throughout without citation in the book
+*	+cor:X-det-const	⟨X, Z_u⟩ is constant along a constant control (Lemma 7.1.1); the book uses it implicitly wherever it solves the state equations with constant control (§7.1 general solutions) and for the uniqueness of the trajectories with a given piecewise constant control, which the book takes for granted
+*	+lem:exp-of-sl2	explicit exponentials of matrices in sl2 (Lemma A.6.4), which the book uses implicitly in every explicit solution with constant control (eqn:const-control-g, eqn:const-control-z-X)
+*	+lem:sl2-star-condition	the denominator ⟨Z_u, X⟩ is negative on the state space (Lemma 3.3.4), used implicitly wherever the book divides by it
+#
+# Chapter 3
+thm:defn-X	-lem:tangents-lipschitz	Lemma 2.4.3 (Chapter 2) is outside the scope; its conclusion (σ_j' Lipschitz) is a hypothesis of theorem3_1_4_lipschitz (user-approved correction E3)
+thm:defn-X	+thm:defn-g	the induced curve g of Theorem 3.1.1 (eqn:g-sigma, cited by equation in the statement) and its C¹ regularity
+cor:X-props	-lem:star-conditions	Lemma 2.4.5 (Chapter 2) is outside the scope; the star condition it establishes is item 5 of the definition of a balanced disk (Definition 2.4.7), which the corollary assumes
+lem:curvature-pos	-cor:X-props	the lemma assumes the star inequalities ("satisfying the star conditions"), which the book's proof takes from Corollary 3.1.6
+lem:curvature-pos	-lem:hyp-arc	the book gives three proofs; the formal proof is the first (κ₂ = √3 det X/ρ₀(X)); Lemma 3.1.8 is cited by the second proof only
+lem:curvature-pos	-thm:X-dynamics-sl2	the book gives three proofs; the formal proof is the first; Theorem 3.4.2 is cited by the third proof only
+thm:X-dynamics-sl2	+lem:curvature-pos	κ = κ₀ + κ₁ + κ₂ > 0, which the book states after Definition 3.3.2 ("the denominator is positive by Lemma 3.3.1") and uses in the proof
+#
+# Chapter 4
+lem:tf-pi3	+ex:smoothed-octagon	gap of the book (E4): area(K_min) < π is not justified; comparison with the smoothed octagon (cost ≈ 3.126 < π)
+lem:tf-pi3	+thm:6k+2	gap of the book (E4): the smoothed octagon's trajectory is admissible because it is a Pontryagin extremal (Theorem 7.5.6, k = 1)
+lem:tf-pi3	+lem:X-hyperbolic	the book writes the cost in half-plane coordinates (eqn:cost-upper-half-plane), which presupposes X = Φ(z) for a star state (Lemmas 4.1.1, 4.2.1)
+lem:tf-pi3	+lem:def-phi	the book writes the cost in half-plane coordinates (eqn:cost-upper-half-plane), which presupposes X = Φ(z) for a star state (Lemmas 4.1.1, 4.2.1)
+prop:star-domain	-cor:X-props	the formal statement is about the star inequalities themselves (IsStarState); Corollary 3.1.6 is where the book derives them for balanced disks
+lem:X-dynamics	+lem:sl2-star-condition	the denominator 2ax + b - c(x²+y²) = y⟨Z_u, X⟩ is nonzero on the star domain, which the book uses implicitly
+lem:X-dynamics	+prop:star-domain	the denominator 2ax + b - c(x²+y²) = y⟨Z_u, X⟩ is nonzero on the star domain (the state space of Theorem 4.4.1), which the book uses implicitly
+lem:X-dynamics	+lem:tangent-maps	the conclusion T Φ(f₁, f₂) = [Z_u/⟨Z_u, X⟩] (eqn:tangent-map-f1f2) is stated with the tangent map of Lemma 4.2.4
+#
+# Chapter 6
+lem:control-convex	-lem:triangle-areas	Lemma 5.0.2 (Chapter 5) is outside the scope; the positivity of the functions ρ_j(z) that the book takes from it is read off the star domain directly (they are the star functions of Corollary 3.1.6)
+thm:lamR-dynamics	+lem:tangent-maps	the book omits the proof ("long direct calculation"); the calculation uses the tangent map of Φ (Lemma 4.2.4), through which ν = T*Φ(-Λ_R) is defined
+#
+# Chapter 7
+lem:Riemannian-speed	+cor:X-det-const	the book's proof begins "By the previous lemma, P is constant" (Lemma 7.1.1, cited without \ref)
+lem:const-control-trajectories	+lem:def-phi	the book's discussion (the lemma's proof) passes from X(t) = Ad_{exp(tP₀)}X₀ to z(t) = exp(tP₀)·z₀ through the equivariance and injectivity of Φ (Remark 4.2.2, Lemma 4.2.1)
+thm:strong-transversality	-lem:H-max-6k+2	the book's last sentence ("Lemma 7.5.3 supplements the proof") concerns the maximum property, which is not part of the statement of Theorem 7.5.1; Lemma 7.5.3 is applied in Theorem 7.5.6
+lem:H-max-6k+2	+cor:lam1-gen-sol	the switching functions are those of the costate trajectory constructed in Theorem 7.5.1, which the formal proof identifies with the explicit lift (strongLift_unique, built on Corollary 6.5.3)
+lem:discrete-k	-thm:strong-transversality	the book cites Theorem 7.5.1 for the trace of h = g(t_sw)R⁻¹ computed in its proof; the formal proof uses that computation (trace_segG_switchTime), not the theorem
+lem:discrete-k	+lem:sl2-star-condition	added step (the book takes it for granted): every trajectory with the spline's control and initial values is the spline (uniqueness on each switching interval)
+thm:6k+2	-thm:strong-transversality	the formal proof uses the lift constructed for Theorem 7.5.1 (strongLift_isStrongLift, strongLift_perp_hamiltonian), the existence half of Theorem 7.5.1 with its explicit costates, rather than the theorem's statement
+thm:6k+2	+prop:star-domain	the spline stays in the state space SL₂(ℝ) × 𝔥* (Theorem 4.4.1), which the book leaves implicit
+#
+# Appendix A
+prop:brack-brack-inner-prod	+prop:trace-quotient-sub	the book's proof: "This is immediate from the previous proposition" (Proposition A.6.2, cited without \ref)
+lem:riemannian	-lem:tangent-maps	the formal statement is written with the matrices Y_z(r) = tangentLift (the representatives of TΦ of Lemma 4.2.4) directly; Lemma 4.2.4 is used where Lemma A.11.1 is applied (Lemma 7.1.2)
