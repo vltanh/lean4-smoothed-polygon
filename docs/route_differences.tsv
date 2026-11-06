@@ -31,6 +31,7 @@ lem:tangent-maps	-lem:half-plane-lie-algebra-iso	the book obtains Y_z by solving
 # Chapter 6
 lem:control-convex	-lem:triangle-areas	Lemma 5.0.4 (Chapter 5) is outside the scope; the positivity of the functions ρ_j(z) that the book takes from it is read off the star domain directly (they are the star functions of Corollary 3.1.6)
 thm:plane-hamiltonian	-lem:X-dynamics	the identity [Y_z(f₁, f₂), X] = [P, X] (eqn:tangent-map-f1f2) is pointwise algebra; Lemma 4.5.2 states it along a trajectory, so the formal proof verifies it at the given point directly
+prop:left-invariant-hams	-prop:trivialization	the left trivialization p̃ = T*L_{g⁻¹}(p) of T*G ≅ G × 𝔤* is part of the formal statement (the Hamiltonian is evaluated at the covector of the coordinates (g, p), leftTrivCovector); that these coordinates cover T*G (Proposition 3.6.1) is not needed for the identity H = ⟨p, f(e, u)⟩
 thm:lamR-dynamics	+lem:tangent-maps	the book omits the proof ("long direct calculation"); the calculation uses the tangent map of Φ (Lemma 4.2.4), through which ν = T*Φ(-Λ_R) is defined
 #
 # Chapter 7

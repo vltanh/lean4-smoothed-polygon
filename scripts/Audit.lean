@@ -28,6 +28,7 @@ import all Basic.Analysis.Convex.StarCurveConvex
 import all Basic.Analysis.Convex.TietzeNakajima
 import all External.EulerArnold
 import all External.FejesToth
+import all External.Filippov
 import all External.Gruber
 import all External.Mahler1947
 import all External.MahlerIrreducible
@@ -49,20 +50,25 @@ import all SmoothedPolygons.Ch3.AreaFormula
 import all SmoothedPolygons.Ch3.ControlProblem
 import all SmoothedPolygons.Ch3.ControlSets
 import all SmoothedPolygons.Ch3.CostFunctional
+import all SmoothedPolygons.Ch3.HyperbolicArc
 import all SmoothedPolygons.Ch3.Jacobi
 import all SmoothedPolygons.Ch3.LieAlgebraDynamics
 import all SmoothedPolygons.Ch3.StateDynamics
 import all SmoothedPolygons.Ch4.AdjointOrbit
+import all SmoothedPolygons.Ch4.IdealVertices
 import all SmoothedPolygons.Ch4.StarDomain
 import all SmoothedPolygons.Ch4.TerminalTime
 import all SmoothedPolygons.Ch6.HalfPlane
 import all SmoothedPolygons.Ch6.Hamiltonian
+import all SmoothedPolygons.Ch6.LeftInvariant
 import all SmoothedPolygons.Ch7.ConstantControl
 import all SmoothedPolygons.Ch7.DiscreteK
 import all SmoothedPolygons.Ch7.Faces
 import all SmoothedPolygons.Ch7.HMax
 import all SmoothedPolygons.Ch7.HMaxInequality
+import all SmoothedPolygons.Ch7.Isolated
 import all SmoothedPolygons.Ch7.Polygon
+import all SmoothedPolygons.Ch7.Remarks
 import all SmoothedPolygons.Ch7.SmoothedPolygon
 import all SmoothedPolygons.Ch7.SmoothedPolygonDisk
 import all SmoothedPolygons.Ch7.StrongTransversality
@@ -115,7 +121,9 @@ meta def externalResults : List (String × Name) :=
    ("Gruber, Cor. 30.1", ``External.gruber_corollary_30_1),
    ("Minkowski 1907, Mahler 1946", ``External.minkowski_mahler),
    ("Mahler 1947", ``External.mahler_1947),
-   ("Mahler 1947, Lemma 3", ``External.mahler_irreducible)]
+   ("Mahler 1947, Lemma 3", ``External.mahler_irreducible),
+   ("Mahler 1947, Lemma 3 (full)", ``External.mahler_irreducible_iff),
+   ("Filippov (Agrachev–Sachkov, Th. 10.1)", ``External.filippov)]
 
 /-- The numbered results of the paper, in the order of the paper. -/
 meta def paperResults : List (String × Name) :=
@@ -128,6 +136,7 @@ meta def paperResults : List (String × Name) :=
    ("Lemma 2.2.6", ``SmoothedPolygons.lemma2_2_6),
    ("Lemma 2.2.7", ``SmoothedPolygons.lemma2_2_7),
    ("Def 2.3.2", ``SmoothedPolygons.definition2_3_2),
+   ("Def 2.3.5 ≡ Mahler's (remark)", ``SmoothedPolygons.isIrreducible_iff_mahlerIrreducible),
    ("Thm 2.3.6", ``SmoothedPolygons.theorem2_3_6),
    ("Thm 2.3.7", ``SmoothedPolygons.theorem2_3_7),
    ("Thm 2.3.9", ``SmoothedPolygons.theorem2_3_9),
@@ -144,6 +153,7 @@ meta def paperResults : List (String × Name) :=
    ("Thm 3.1.4 (3)", ``SmoothedPolygons.theorem3_1_4_lipschitz),
    ("Def 3.1.5", ``SmoothedPolygons.definition3_1_5),
    ("Cor 3.1.6", ``SmoothedPolygons.corollary3_1_6),
+   ("Lemma 3.1.8", ``SmoothedPolygons.lemma3_1_8),
    ("Prop 3.1.9", ``SmoothedPolygons.proposition3_1_9),
    ("Cor 3.1.10", ``SmoothedPolygons.corollary3_1_10),
    ("Cor 3.1.11", ``SmoothedPolygons.corollary3_1_11),
@@ -164,7 +174,10 @@ meta def paperResults : List (String × Name) :=
    ("Lemma 4.3.1", ``SmoothedPolygons.lemma4_3_1),
    ("Thm 4.4.1", ``SmoothedPolygons.theorem4_4_1),
    ("Lemma 4.5.2", ``SmoothedPolygons.lemma4_5_2),
+   ("§4.6 R, S on ideal vertices", ``SmoothedPolygons.dihedral_smul_idealVertices),
+   ("§4.6 Dih permutes ideal vertices", ``SmoothedPolygons.dihedral_permutes_idealVertices),
    ("Lemma 6.1.2", ``SmoothedPolygons.lemma6_1_2),
+   ("Prop 6.4.1", ``SmoothedPolygons.proposition6_4_1),
    ("Prop 6.5.1", ``SmoothedPolygons.proposition6_5_1),
    ("Cor 6.5.3", ``SmoothedPolygons.corollary6_5_3),
    ("Cor 6.5.4", ``SmoothedPolygons.corollary6_5_4),
@@ -177,10 +190,13 @@ meta def paperResults : List (String × Name) :=
    ("Lemma 7.2.1", ``SmoothedPolygons.lemma7_2_1),
    ("Lemma 7.3.1", ``SmoothedPolygons.lemma7_3_1),
    ("Thm 7.5.1", ``SmoothedPolygons.theorem7_5_1),
+   ("Remark 7.5.2", ``SmoothedPolygons.remark7_5_2),
    ("Lemma 7.5.3", ``SmoothedPolygons.lemma7_5_3),
    ("Lemma 7.5.5", ``SmoothedPolygons.lemma7_5_5),
    ("Example (octagon)", ``SmoothedPolygons.example7_5_smoothedOctagon),
    ("Thm 7.5.6", ``SmoothedPolygons.theorem7_5_6),
+   ("Thm 7.7.1", ``SmoothedPolygons.theorem7_7_1),
+   ("Remark 7.6.4", ``SmoothedPolygons.remark7_6_4),
    ("Prop A.6.1", ``SmoothedPolygons.propositionA_6_1),
    ("Prop A.6.2", ``SmoothedPolygons.propositionA_6_2),
    ("Prop A.6.3", ``SmoothedPolygons.propositionA_6_3),

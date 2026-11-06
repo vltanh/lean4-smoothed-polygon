@@ -28,6 +28,7 @@ points on the boundary of `K`). `mahler_irreducible_exposed`: in particular, a b
 is the only point of `K` on some tac-line (an exposed point) belongs to a critical lattice of `K`;
 this is the "only if" half of Lemma 3 at the exposed points. When `ℓ ∩ K` is a segment, the
 theorem gives a point of a critical lattice on the segment, which need not be a given point of it.
+`mahler_irreducible_iff` states Lemma 3 in full.
 
 Departure from the source: Mahler 1947 states Lemma 3 without proof, referring to Lemmas 8 and 12
 of his paper A, whose proofs we do not have. We prove the statement above by the classical
@@ -406,5 +407,18 @@ theorem mahler_irreducible_exposed {K : Set (Fin 2 → ℝ)}
   · exact key _ h1 f1 (Or.inr h)
   · exact key _ h2 f2 (Or.inl h)
   · exact key _ h2 f2 (Or.inr h)
+
+/-- **Mahler (1947), Lemma 3.** The (symmetric) convex domain `K` is irreducible if and only if
+every boundary point of `K` belongs to a critical lattice of `K`.
+
+Mahler states the lemma without proof (footnote 3: "See Lemmas 8 and 12 of paper A", Mahler, *On
+irreducible convex domains*, Proc. Kon. Ned. Akad. Wet. 50 (1947), 98–107). All domains of the
+paper are symmetric in the origin; irreducibility is `MahlerIrreducible.IsIrreducible` (no proper
+symmetric convex subdomain has the same minimal determinant). `mahler_irreducible` and
+`mahler_irreducible_exposed` prove weak forms of the "only if" half. -/
+theorem mahler_irreducible_iff {K : Set (Fin 2 → ℝ)} (hK : IsSymmetricConvexDomain K) :
+    MahlerIrreducible.IsIrreducible K ↔
+      ∀ u ∈ frontier K, ∃ Λ, MinkowskiMahler.IsCritical K Λ ∧ u ∈ Λ := by
+  sorry
 
 end External

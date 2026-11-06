@@ -88,6 +88,18 @@ irreducible if every boundary point of `K` lies on a critical lattice of `K`. -/
 def IsIrreducible (K : Set (Fin 2 → ℝ)) : Prop :=
   IsCCSDisk K ∧ ∀ u ∈ frontier K, ∃ L, IsCriticalLattice K L ∧ u ∈ L
 
+/-- **The remark after Definition 2.3.5** (`rem:irreducible-original`, label of this
+formalization; the definition is `def:irreducible`). Definition 2.3.5 is not the original
+definition of irreducibility of a convex disk; by Mahler 1947, Lemma 3, it is equivalent to the
+original definition: a convex disk `K ∈ 𝔎_ccs` is irreducible in the sense of Definition 2.3.5 if
+and only if it is irreducible in Mahler's sense (`External.MahlerIrreducible.IsIrreducible`: every
+centrally symmetric convex disk `K' ⊆ K` other than `K` has `Δ(K') < Δ(K)`). The definitions of the
+source unfold to those of the book. -/
+theorem isIrreducible_iff_mahlerIrreducible (K : Set (Fin 2 → ℝ)) :
+    IsIrreducible K ↔ External.MahlerIrreducible.IsIrreducible K :=
+  ⟨fun h ↦ (External.mahler_irreducible_iff h.1).2 h.2,
+    fun h ↦ ⟨h.1, (External.mahler_irreducible_iff h.1).1 h⟩⟩
+
 /-! ### Theorem 2.3.6 (Minkowski, Mahler) -/
 
 /-- **Theorem 2.3.6** (Minkowski, Mahler; `thm:minkowski-inscribe`; cited). Let `L` be a critical
