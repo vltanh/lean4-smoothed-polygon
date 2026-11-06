@@ -10,6 +10,8 @@ import all Basic.Analysis.Calculus.MatrixEntrywise
 import all Basic.Analysis.Calculus.MatrixEntrywiseExp
 import all Basic.Analysis.Calculus.MatrixFTC
 import all Basic.Analysis.Complex.UpperHalfPlane.GeneralizedCircle
+import all Basic.Analysis.Convex.StarCurve
+import all Basic.Analysis.Convex.StarCurveConvex
 import all External.EulerArnold
 import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.MatrixIdentities
