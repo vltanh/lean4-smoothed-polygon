@@ -2748,7 +2748,7 @@ multi-curve parameterization of the boundary of `K = K_min ∈ 𝔎_ccs`, giving
 density. Assume that the curve `σ₀` is parameterized according to arclength. Then the tangents
 `σ_j'` are Lipschitz continuous for all `j`.
 
-Proof, as in the book (Hales 2011, Lemmas 17–18). If `σ₀` turns clockwise, reverse the time; so
+Proof, the book's (Hales 2011, Lemmas 17–18). If `σ₀` turns clockwise, reverse the time; so
 let `σ₀` be positively oriented, and then all `σ_j` are, by Lemma 2.4.2.
 * At each boundary point `x`, the arc of the hyperbola of Remark 2.2.4, whose asymptotes are the
   tangent lines at the neighbouring midpoints `s_{±1}` of the critical hexagon at `x`, lies in `K`
@@ -2767,16 +2767,20 @@ let `σ₀` be positively oriented, and then all `σ_j` are, by Lemma 2.4.2.
   denominator is bounded away from `0` by compactness. The unit tangent `T₁` is Lipschitz by the
   same estimate along `σ₁`. Finally `σ₂ = σ₁ - σ₀` and `σ_{j+3} = -σ_j`.
 
-Departures from the paper (the book sketches these steps; the TeX notes that the details of the
-final "now follows" are in handwritten notes):
-* the osculating circle of curvature `κ` is replaced by the hyperbolic arc itself;
-* the uniform bound is obtained by compactness of the multi-points with their tangents, not
-  stated separately;
-* the local bounds are turned into a global Lipschitz bound along `ℝ`;
-* the statement does not assume the orientation of `σ₀`, so the clockwise case is handled by
-  reversing time;
-* the unit tangent of `σ₁` is shown Lipschitz by the estimate along `σ₁`, instead of through the
-  arclength reparameterization `σ̃₂` of `σ₂`, and `σ₂` is handled through `σ₂ = σ₁ - σ₀`. -/
+The book sketches these steps (the TeX notes that the details of its final "now follows" are in
+handwritten notes; E9). Filled in here: the uniform bound by compactness of the multi-points with
+their tangents, the passage from local bounds to a global Lipschitz bound along `ℝ`, and, as the
+statement does not fix the orientation of `σ₀`, the clockwise case by reversing time. Two
+mechanical variants of the book's argument:
+* the book places in `K`, at each point, an osculating circle of curvature `κ` obtained from the
+  hyperbolic arcs, and uses it only through the constraint that the curve passes between the
+  tangent line and a curve `|η| ≤ κ ξ²`; the proof uses the hyperbolic arcs themselves, which
+  give this constraint directly;
+* the book treats `j ≠ 0` at `j = 2`, "by evident symmetries", through the arclength
+  reparameterization `σ̃₂` of `σ₂`; the proof makes the symmetric choice `j = 1` (then
+  `σ₂ = σ₁ - σ₀`), with the book's formula for the speed of `σ₁`, and shows the unit tangent
+  `T₁ = dσ̃₁/ds` Lipschitz in `t` by the estimate of the first part along `σ₁`, the chord
+  `|σ₁(t + h) - σ₁(t)| ≤ P h` taking the place of the arclength `s(t + h) - s(t)`. -/
 theorem lemma2_4_3 {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
     (hσ : ∀ j, ContDiff ℝ 1 (σ j)) (hσm : ∀ t, IsMultiPoint fun j ↦ σ j t)
     (hσK : ∀ j t, σ j t ∈ frontier K) (hσ₀ : range (σ 0) = frontier K)
@@ -2827,29 +2831,45 @@ theorem corollary2_4_4 {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {σ : ZMod
 
 /-! ### Convexity of multi-curves -/
 
-/-- The closed star condition (first part of the proof of Lemma 2.4.5): the tangent line at `s_j`
-supports `K`, and `K` contains the neighbors `s_{j±1}`, so `σ_j'(t)` lies in the closed cone
-spanned by `s_{j+1} - s_j = s_{j+2}` and `s_{j+1}`: `det(s_{j+1}, σ_j') ≥ 0` and
-`det(σ_j', s_{j+2}) ≥ 0`. -/
+/-- `σ_j'(t)` does not point into the hexagon `h_K(t)` (first part of the proof of Lemma 2.4.5):
+the tangent line at `s_j` supports `K`, which contains `h_K(t)` and so `s_{j+1}`, so `σ_j'(t)`
+does not cross the edge `s_j s_{j+1}`: `det(σ_j', s_{j+1} - s_j) = det(σ_j', s_{j+2}) ≥ 0`. -/
+private lemma bdy_not_into_hexagon {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K)
+    {σ : ZMod 6 → ℝ → Fin 2 → ℝ} (hσ : IsBoundaryMultiCurve K σ) (j : ZMod 6) (t : ℝ) :
+    0 ≤ det2 (deriv (σ j) t) (σ (j + 2) t) := by
+  obtain ⟨hpar, hm⟩ := hσ
+  have e1 : σ (j + 1) t = σ j t + σ (j + 2) t := bdy_mp_succ (hm t) j
+  have h := bdy_det2_deriv_sub_nonneg hK (hpar j) t (bdy_mem hK (hpar (j + 1)) t)
+  rwa [e1, add_sub_cancel_left] at h
+
+/-- The closed star condition (first part of the proof of Lemma 2.4.5): `σ_j'(t)` lies in the
+closed cone spanned by `s_{j+1} - s_j = s_{j+2}` and `s_{j+1}`. That `det(σ_j', s_{j+2}) ≥ 0` is
+`bdy_not_into_hexagon`. Dually, `σ_j'(t)` does not point beyond the ray from `s_j` through
+`s_j + s_{j+1}`, as that would force `σ_{j+1}'(t)` to point into `h_K(t)`: differentiating
+`det(σ_j, σ_{j+1}) = √3/2` gives `det(s_{j+1}, σ_j') = det(s_j, σ_{j+1}') = det(σ_{j+1}', s_{j+3})`,
+which is `≥ 0` by `bdy_not_into_hexagon` at `j + 1`. (Writing `σ_k' = α_k s_{k+2} + β_k s_{k+1}`,
+the identity is `α_j = β_{j+1}`. The book has `σ_{j+2}'` here, an index slip; E10.) -/
 private lemma bdy_cone_closed {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K)
     {σ : ZMod 6 → ℝ → Fin 2 → ℝ} (hσ : IsBoundaryMultiCurve K σ) (j : ZMod 6) (t : ℝ) :
     0 ≤ det2 (σ (j + 1) t) (deriv (σ j) t) ∧ 0 ≤ det2 (deriv (σ j) t) (σ (j + 2) t) := by
+  refine ⟨?_, bdy_not_into_hexagon hK hσ j t⟩
+  -- `σ_{j+1}'(t)` does not point into `h_K(t)`
+  have hn := bdy_not_into_hexagon hK hσ (j + 1) t
   obtain ⟨hpar, hm⟩ := hσ
-  have e1 : σ (j + 1) t = σ j t + σ (j + 2) t := bdy_mp_succ (hm t) j
-  have e5 : σ (j + 5) t = -σ (j + 2) t := by
-    have := (hm t (j + 2)).2.1
-    rwa [show j + 2 + 3 = j + 5 by ring] at this
-  have h1 := bdy_det2_deriv_sub_nonneg hK (hpar j) t (bdy_mem hK (hpar (j + 5)) t)
-  have h2 := bdy_det2_deriv_sub_nonneg hK (hpar j) t (bdy_mem hK (hpar (j + 1)) t)
-  rw [e5] at h1
-  rw [e1] at h2 ⊢
-  constructor
-  · unfold det2 at h1 ⊢
-    simp only [Pi.add_apply, Pi.neg_apply, Pi.sub_apply] at h1 ⊢
-    linarith
-  · unfold det2 at h2 ⊢
-    simp only [Pi.add_apply, Pi.sub_apply] at h2 ⊢
-    linarith
+  have hd : ∀ i, Differentiable ℝ (σ i) := fun i ↦ (hpar i).1.differentiable (by norm_num)
+  -- differentiate `det(σ_j, σ_{j+1}) = √3/2`
+  have harea : det2 (deriv (σ j) t) (σ (j + 1) t) + det2 (σ j t) (deriv (σ (j + 1)) t) = 0 := by
+    have h := bdy_hasDerivAt_det2_curves (hd j t).hasDerivAt (hd (j + 1) t).hasDerivAt
+    have hconst : (fun τ ↦ det2 (σ j τ) (σ (j + 1) τ)) = fun _ ↦ √3 / 2 :=
+      funext fun τ ↦ (hm τ j).2.2
+    rw [hconst] at h
+    exact h.unique (hasDerivAt_const t _)
+  have e3 : σ (j + 1 + 2) t = -σ j t := by
+    rw [show j + 1 + 2 = j + 3 by ring]; exact (hm t j).2.1
+  rw [e3] at hn
+  unfold det2 at harea hn ⊢
+  simp only [Pi.neg_apply] at hn
+  linarith
 
 /-- The tangent `σ_k'(t)` does not point along the edge `s_k s_{k+1}` (second part of the proof
 of Lemma 2.4.5). Otherwise the tangent line at `s_k` contains `s_{k+1}`, so it is also tangent to
@@ -2911,16 +2931,13 @@ tangent `σ_j'(t)` points into the open cone with apex `s_j` and bounding rays t
 `s_j + s_{j+1}`: `σ_j'(t) = α (s_{j+1} - s_j) + β s_{j+1}` with `α, β > 0`.
 
 Proof, as in the book. The hexagon `h_K(t)` lies in `K`, and `σ_j'(t)` cannot point into it: the
-tangent line at `s_j` supports `K` (`bdy_det2_deriv_sub_nonneg`). If `σ_j'(t)` points along the
-edge `s_j s_{j+1}`, then `σ_{j+1}'(t)` does too, and the closed cone at `j + 2` forces
-`σ_{j+2}'(t) = 0` (`bdy_det2_deriv_two_ne`). If it points along `s_j (s_j + s_{j+1})`, then
-`σ_{j-1}'(t)` points along `s_{j-1} s_j`, the first case for `j - 1`.
-
-Departure from the paper (a simpler argument for one step): the book gets the bound on the side of
-the ray through `s_j + s_{j+1}` "dually", from `σ_{j+2}'(t)`. Here both bounds of the closed cone
-(`bdy_cone_closed`) come from the support line at `s_j`: `h_K(t)` has the two edges `s_j s_{j+1}`
-and `s_j s_{j-1}` at `s_j`, with `s_{j+1} - s_j = s_{j+2}` and `s_{j-1} - s_j = -s_{j+1}`, and both
-lie to the left of the tangent line. -/
+tangent line at `s_j` supports `K` (`bdy_not_into_hexagon`). Dually, it cannot point beyond the ray
+from `s_j` through `s_j + s_{j+1}`, as that would force `σ_{j+1}'(t)` to point into `h_K(t)`
+(`bdy_cone_closed`; differentiate `det(σ_j, σ_{j+1}) = √3/2`). The book writes `σ_{j+2}'(t)`
+there; the index is corrected to `j + 1` (E10). If `σ_j'(t)` points along the edge `s_j s_{j+1}`,
+then `σ_{j+1}'(t)` does too, and the closed cone at `j + 2` forces `σ_{j+2}'(t) = 0`
+(`bdy_det2_deriv_two_ne`). If it points along `s_j (s_j + s_{j+1})`, then `σ_{j-1}'(t)` points
+along `s_{j-1} s_j`, the first case for `j - 1`. -/
 theorem lemma2_4_5 {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
     (hσ : IsBoundaryMultiCurve K σ) (j : ZMod 6) (t : ℝ) :
     ∃ α β : ℝ, 0 < α ∧ 0 < β ∧

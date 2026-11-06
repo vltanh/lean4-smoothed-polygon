@@ -8,10 +8,10 @@ public import Basic.Algebra.Module.ZLattice.PlaneCritical
 
 Cited in the remark after Definition 2.3.5 of Hales–Vajjha, *Packings of Smoothed Polygons*, from
 K. Mahler, *On the minimum determinant and the circumscribed hexagons of a convex domain*,
-Proc. Kon. Ned. Akad. Wet. 50 (1947), 692–703, Lemma 3 (quoted there from Lemma 3 of Mahler,
-*On irreducible convex domains*, Proc. Kon. Ned. Akad. Wet. 50 (1947), 98–107): *the convex domain
-`K` is irreducible if and only if every boundary point of `K` belongs to a critical lattice of
-`K`.*
+Proc. Kon. Ned. Akad. Wet. 50 (1947), 692–703, Lemma 3 (stated there without proof; its footnote 3
+reads "See Lemmas 8 and 12 of paper A", paper A being Mahler, *On irreducible convex domains*,
+Proc. Kon. Ned. Akad. Wet. 50 (1947), 98–107): *the convex domain `K` is irreducible if and only if
+every boundary point of `K` belongs to a critical lattice of `K`.*
 
 Definitions, in the terms of the source; symmetric convex domains, lattices, `Δ(K)` and critical
 lattices are those of `External.MinkowskiMahler`, tac-lines those of `External.Mahler1947`. A
@@ -20,21 +20,21 @@ symmetric convex domain `K` is irreducible (`IsIrreducible`) if every symmetric 
 
 ## What is proved
 
+A weak form of the "only if" half of Lemma 3 (a critical-lattice point on each support line).
 `mahler_irreducible`: if `K` is irreducible, then every tac-line `ℓ` of `K` passes through a point
 of a critical lattice `Λ` of `K`; the point is one of the six points `±P₀, ±P₁, ±P₂` of a
 configuration of Mahler's Lemma 2 (Minkowski: `P₀, P₁` a basis of `Λ`, `P₁ = P₀ + P₂`, the three
 points on the boundary of `K`). `mahler_irreducible_exposed`: in particular, a boundary point that
-is the only point of `K` on some tac-line (an exposed point) belongs to a critical lattice of `K`.
-This is the half "irreducible ⟹ every boundary point belongs to a critical lattice" of Lemma 3 at
-the exposed points. When `ℓ ∩ K` is a segment, the theorem gives a point of a critical lattice on
-the segment, which need not be a given point of it.
+is the only point of `K` on some tac-line (an exposed point) belongs to a critical lattice of `K`;
+this is the "only if" half of Lemma 3 at the exposed points. When `ℓ ∩ K` is a segment, the
+theorem gives a point of a critical lattice on the segment, which need not be a given point of it.
 
-Departure from the source: Mahler 1947 quotes Lemma 3 without proof, from his paper A, whose proof
-we do not have. We prove the statement above by the classical shaving argument. Shaving `K` along
-a tac-line `ℓ` only shows that `ℓ ∩ K` contains a point of a critical lattice; when `ℓ ∩ K` is a
-segment this does not reach every point of the segment, so the half "only if" is proved only at
-the exposed points (the other points lie on segments of the boundary, possibly as endpoints). The
-half "if" is not proved; it is not used.
+Departure from the source: Mahler 1947 states Lemma 3 without proof, referring to Lemmas 8 and 12
+of his paper A, whose proofs we do not have. We prove the statement above by the classical
+shaving argument. Shaving `K` along a tac-line `ℓ` only shows that `ℓ ∩ K` contains a point of a
+critical lattice; when `ℓ ∩ K` is a segment this does not reach every point of the segment, so the
+half "only if" is proved only at the exposed points (the other points lie on segments of the
+boundary, possibly as endpoints). The half "if" is not proved; it is not used.
 
 ## Proof
 
@@ -181,17 +181,18 @@ end MahlerIrreducible
 
 open Set Filter Topology MahlerIrreducible Mahler1947 MinkowskiMahler
 
-/-- **Mahler (1947), Lemma 3** (the half used: irreducible domains). Let `K` be an irreducible
-symmetric convex domain and `ℓ` a tac-line of `K`. Then a critical lattice `Λ` of `K` has a point
-on `ℓ`: there are points `P₀, P₁, P₂` of `Λ` on the boundary of `K` with `P₁ = P₀ + P₂` such that
-`P₀, P₁` is a basis of `Λ` (Mahler's Lemma 2), and one of the six points `±P₀, ±P₁, ±P₂` lies on
-`ℓ`.
+/-- **Mahler (1947), Lemma 3, weak form of the "only if" half** (a critical-lattice point on each
+support line). Let `K` be an irreducible symmetric convex domain and `ℓ` a tac-line of `K`. Then a
+critical lattice `Λ` of `K` has a point on `ℓ`: there are points `P₀, P₁, P₂` of `Λ` on the
+boundary of `K` with `P₁ = P₀ + P₂` such that `P₀, P₁` is a basis of `Λ` (Mahler's Lemma 2), and
+one of the six points `±P₀, ±P₁, ±P₂` lies on `ℓ`.
 
-Departure from the source: Mahler quotes Lemma 3 (irreducible iff every boundary point belongs to
-a critical lattice) without proof. We prove, by shaving `K` along `±ℓ`, that `ℓ ∩ K` contains a
-point of a critical lattice; for a boundary point that is the only point of `K` on a tac-line
-this is the corresponding case of Lemma 3 (`mahler_irreducible_exposed`). The other boundary
-points (on segments of the boundary) and the converse are not treated. -/
+Departure from the source: Mahler states Lemma 3 (irreducible iff every boundary point belongs to
+a critical lattice) without proof, referring to Lemmas 8 and 12 of his paper A. We prove, by
+shaving `K` along `±ℓ`, that `ℓ ∩ K` contains a point of a critical lattice; for a boundary point
+that is the only point of `K` on a tac-line this is the corresponding case of Lemma 3
+(`mahler_irreducible_exposed`). The other boundary points (on segments of the boundary) and the
+converse are not treated. -/
 theorem mahler_irreducible {K : Set (Fin 2 → ℝ)} (hK : MahlerIrreducible.IsIrreducible K)
     {ℓ : Set (Fin 2 → ℝ)} (hℓ : IsTacLine K ℓ) :
     ∃ (Λ : Submodule ℤ (Fin 2 → ℝ)) (P₀ P₁ P₂ : Fin 2 → ℝ), MinkowskiMahler.IsCritical K Λ ∧
