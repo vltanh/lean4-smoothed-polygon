@@ -15,12 +15,14 @@ import all Basic.Analysis.Convex.CellDecomposition
 import all Basic.Analysis.Convex.CellDecomposition.Defs
 import all Basic.Analysis.Convex.CellDecomposition.MaximalCells
 import all Basic.Analysis.Convex.CellDecomposition.PinwheelHoles
+import all Basic.Analysis.Convex.CellDecomposition.PolygonOfFrontier
 import all Basic.Analysis.Convex.CellDecomposition.PolygonSides
 import all Basic.Analysis.Convex.CellDecomposition.SideCount
 import all Basic.Analysis.Convex.CircumscribedPolygon
 import all Basic.Analysis.Convex.HexagonLattice
 import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.StarCurveConvex
+import all Basic.Analysis.Convex.TietzeNakajima
 import all External.EulerArnold
 import all External.FejesToth
 import all External.Gruber
