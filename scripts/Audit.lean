@@ -6,18 +6,45 @@ public meta import Lean.DocString
 -- traversal (the module system hides them from a plain `import`). Generate the lines with
 --   find SmoothedPolygons External Basic -name '*.lean' | sort |
 --     sed 's/\.lean$//; s#/#.#g; s/^/import all /'
+import all Basic.Algebra.Module.ZLattice.PlaneCritical
 import all Basic.Analysis.Calculus.MatrixEntrywise
 import all Basic.Analysis.Calculus.MatrixEntrywiseExp
 import all Basic.Analysis.Calculus.MatrixFTC
 import all Basic.Analysis.Complex.UpperHalfPlane.GeneralizedCircle
+import all Basic.Analysis.Convex.CellDecomposition
+import all Basic.Analysis.Convex.CellDecomposition.Defs
+import all Basic.Analysis.Convex.CellDecomposition.HoleStructure
+import all Basic.Analysis.Convex.CellDecomposition.MaximalCells
+import all Basic.Analysis.Convex.CellDecomposition.PinwheelHoles
+import all Basic.Analysis.Convex.CellDecomposition.PolygonOfFrontier
+import all Basic.Analysis.Convex.CellDecomposition.PolygonSides
+import all Basic.Analysis.Convex.CellDecomposition.SideCount
+import all Basic.Analysis.Convex.CircumscribedPolygon
+import all Basic.Analysis.Convex.HexagonLattice
+import all Basic.Analysis.Convex.LatticePacking
+import all Basic.Analysis.Convex.PolygonAngle
 import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.StarCurveConvex
+import all Basic.Analysis.Convex.TietzeNakajima
 import all External.EulerArnold
+import all External.FejesToth
+import all External.Gruber
+import all External.Mahler1947
+import all External.MahlerIrreducible
+import all External.MinkowskiMahler
 import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.MatrixIdentities
 import all SmoothedPolygons.AppA.Riemannian
 import all SmoothedPolygons.Ch2.BalancedCircle
+import all SmoothedPolygons.Ch2.BalancedDensity
+import all SmoothedPolygons.Ch2.Boundary
+import all SmoothedPolygons.Ch2.Density
+import all SmoothedPolygons.Ch2.Hexagon
+import all SmoothedPolygons.Ch2.Irreducible
+import all SmoothedPolygons.Ch2.Mahler
 import all SmoothedPolygons.Ch2.MultiCurve
+import all SmoothedPolygons.Ch2.Reinhardt
+import all SmoothedPolygons.Ch2.TilingCounterexample
 import all SmoothedPolygons.Ch3.AreaFormula
 import all SmoothedPolygons.Ch3.ControlProblem
 import all SmoothedPolygons.Ch3.ControlSets
@@ -83,11 +110,36 @@ or, when general, in `Basic/`, and, in a conditional formalization, the proposit
 hypotheses. The traversal
 stops at them. -/
 meta def externalResults : List (String × Name) :=
-  [("Euler–Arnold (Cushman–Bates)", ``External.euler_arnold)]
+  [("Euler–Arnold (Cushman–Bates)", ``External.euler_arnold),
+   ("Fejes Tóth 1950", ``External.fejes_toth),
+   ("Gruber, Cor. 30.1", ``External.gruber_corollary_30_1),
+   ("Minkowski 1907, Mahler 1946", ``External.minkowski_mahler),
+   ("Mahler 1947", ``External.mahler_1947),
+   ("Mahler 1947, Lemma 3", ``External.mahler_irreducible)]
 
 /-- The numbered results of the paper, in the order of the paper. -/
 meta def paperResults : List (String × Name) :=
-  [("Thm 3.1.1", ``SmoothedPolygons.theorem3_1_1),
+  [("Def 2.1.2", ``SmoothedPolygons.definition2_1_2),
+   ("Thm 2.1.3", ``SmoothedPolygons.theorem2_1_3),
+   ("Lemma 2.2.1", ``SmoothedPolygons.lemma2_2_1),
+   ("Thm 2.2.2", ``SmoothedPolygons.theorem2_2_2),
+   ("Remark 2.2.4", ``SmoothedPolygons.remark2_2_4),
+   ("Lemma 2.2.5", ``SmoothedPolygons.lemma2_2_5),
+   ("Lemma 2.2.6", ``SmoothedPolygons.lemma2_2_6),
+   ("Lemma 2.2.7", ``SmoothedPolygons.lemma2_2_7),
+   ("Def 2.3.2", ``SmoothedPolygons.definition2_3_2),
+   ("Thm 2.3.6", ``SmoothedPolygons.theorem2_3_6),
+   ("Thm 2.3.7", ``SmoothedPolygons.theorem2_3_7),
+   ("Thm 2.3.9", ``SmoothedPolygons.theorem2_3_9),
+   ("Cor 2.3.10", ``SmoothedPolygons.corollary2_3_10),
+   ("Lemma 2.4.2", ``SmoothedPolygons.lemma2_4_2),
+   ("Lemma 2.4.3", ``SmoothedPolygons.lemma2_4_3),
+   ("Cor 2.4.4", ``SmoothedPolygons.corollary2_4_4),
+   ("Lemma 2.4.5", ``SmoothedPolygons.lemma2_4_5),
+   ("Lemma 2.4.6", ``SmoothedPolygons.lemma2_4_6),
+   ("δ = area/√12 (balanced disks)",
+     ``SmoothedPolygons.greatestPackingDensity_of_isBalancedPair),
+   ("Thm 3.1.1", ``SmoothedPolygons.theorem3_1_1),
    ("Thm 3.1.4 (1,2)", ``SmoothedPolygons.theorem3_1_4),
    ("Thm 3.1.4 (3)", ``SmoothedPolygons.theorem3_1_4_lipschitz),
    ("Def 3.1.5", ``SmoothedPolygons.definition3_1_5),

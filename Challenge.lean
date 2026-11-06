@@ -10,9 +10,12 @@ public import Mathlib.Data.Matrix.Mul
 public import Mathlib.Data.ZMod.Defs
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 public import Mathlib.LinearAlgebra.Matrix.Trace
+public import Mathlib.LinearAlgebra.UnitaryGroup
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
+public import Mathlib.Order.LiminfLimsup
 public import Mathlib.Topology.EMetricSpace.Lipschitz
+public import Mathlib.Topology.Instances.ENNReal.Lemmas
 
 /-!
 # Challenge: smoothed polygons in the Reinhardt optimal control problem
@@ -266,6 +269,59 @@ def IsBalancedPair (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 → 
 def IsCircleRepresentation (σ : ZMod 6 → ℝ → Fin 2 → ℝ) : Prop :=
   ∀ j, σ j 0 = sixthRoot j
 
+/-! ### Convex disks and packing densities (Definition 2.1.1) -/
+
+/-- A convex disk (§1.1, §2.1): a compact convex set with nonempty interior. -/
+def IsConvexDisk (K : Set (Fin 2 → ℝ)) : Prop :=
+  Convex ℝ K ∧ IsCompact K ∧ (interior K).Nonempty
+
+/-- The Euclidean disk `B_r = {x | x₀² + x₁² ≤ r²}` of radius `r` centered at the origin
+(Definition 2.1.1). -/
+def euclidDisk (r : ℝ) : Set (Fin 2 → ℝ) := {x | x 0 ^ 2 + x 1 ^ 2 ≤ r ^ 2}
+
+/-- `K'` is a congruent copy of `K` (§2.1): its image `{A x + b | x ∈ K}` under a Euclidean
+isometry, with `A` an orthogonal matrix. -/
+def IsCongruentCopy (K K' : Set (Fin 2 → ℝ)) : Prop :=
+  ∃ A ∈ Matrix.orthogonalGroup (Fin 2) ℝ, ∃ b : Fin 2 → ℝ, K' = (fun x ↦ Matrix.mulVec A x + b) '' K
+
+/-- A packing (§2.1): a family of convex disks, any two distinct members of which do not overlap,
+that is, have disjoint interiors. -/
+def IsPacking (P : Set (Set (Fin 2 → ℝ))) : Prop :=
+  (∀ K' ∈ P, IsConvexDisk K') ∧ P.Pairwise fun A B ↦ Disjoint (interior A) (interior B)
+
+/-- A packing with congruent copies of `K` (Definition 2.1.1). -/
+def IsPackingOfCopies (K : Set (Fin 2 → ℝ)) (P : Set (Set (Fin 2 → ℝ))) : Prop :=
+  IsPacking P ∧ ∀ K' ∈ P, IsCongruentCopy K K'
+
+/-- The ratio `(1/area(B_r)) Σ_{K' ∈ P} area(K' ∩ B_r)` of Definition 2.1.1, in `[0, ∞]`. -/
+noncomputable def packingRatio (P : Set (Set (Fin 2 → ℝ))) (r : ℝ) : ENNReal :=
+  (∑' K' : P, volume ((K' : Set (Fin 2 → ℝ)) ∩ euclidDisk r)) / volume (euclidDisk r)
+
+/-- The upper density `limsup_{r → ∞} (1/area(B_r)) Σ_{K' ∈ P} area(K' ∩ B_r)` of a packing
+(Definition 2.1.1). -/
+noncomputable def upperDensity (P : Set (Set (Fin 2 → ℝ))) : ENNReal :=
+  Filter.limsup (packingRatio P) Filter.atTop
+
+/-- The lower density `liminf_{r → ∞} (1/area(B_r)) Σ_{K' ∈ P} area(K' ∩ B_r)` of a packing
+(Definition 2.1.1). -/
+noncomputable def lowerDensity (P : Set (Set (Fin 2 → ℝ))) : ENNReal :=
+  Filter.liminf (packingRatio P) Filter.atTop
+
+/-- The density of `P` exists (Definition 2.1.1): the upper and lower densities exist (are
+finite) and coincide. -/
+def HasDensity (P : Set (Set (Fin 2 → ℝ))) : Prop :=
+  upperDensity P ≠ ⊤ ∧ upperDensity P = lowerDensity P
+
+/-- The density `δ(K, P)` of a packing (Definition 2.1.1): the common value of the upper and
+lower densities, when the density exists (`HasDensity`). -/
+noncomputable def packingDensity (P : Set (Set (Fin 2 → ℝ))) : ℝ :=
+  (upperDensity P).toReal
+
+/-- **Definition 2.1.1** (greatest packing density).
+`δ(K) = sup {δ(K, P) | δ(K, P) exists, and P is a packing with congruent copies of K}`. -/
+noncomputable def greatestPackingDensity (K : Set (Fin 2 → ℝ)) : ℝ :=
+  sSup {d | ∃ P, IsPackingOfCopies K P ∧ HasDensity P ∧ packingDensity P = d}
+
 end SmoothedPolygons
 
 -- END SHARED DEFINITIONS
@@ -290,7 +346,8 @@ theorem smoothed_polygon_extremal (k : ℕ) (hk : 1 ≤ k) :
 of §3.2). For `k = 1`, `y₀ = √((√8 - 1)/3)` and `t_sw = ln 2/(2√(√8 - 1))`; every trajectory of
 the smoothed octagon has cost `√12 (8 - √32 - ln 2)/(√8 - 1) < π`, so cost/√12 is
 `(8 - √32 - ln 2)/(√8 - 1)`; and the trajectory defines a balanced disk `K` in circle
-representation (`σ_j(t) = g(t) s_j*`, `σ_j(t + t_f) = σ_{j+1}(t)`) whose area is that cost. -/
+representation (`σ_j(t) = g(t) s_j*`, `σ_j(t + t_f) = σ_{j+1}(t)`) whose area is that cost and whose
+greatest packing density (Definition 2.1.1) is `(8 - √32 - ln 2)/(√8 - 1)`. -/
 theorem smoothed_octagon_density :
     y₀ 1 = √((√8 - 1) / 3) ∧ tsw 1 = Real.log 2 / (2 * √(√8 - 1)) ∧
       (∀ g X : ℝ → Mat2, IsStateTrajectory (tf 1) (polygonControl 1) g X → g 0 = 1 →
@@ -302,7 +359,8 @@ theorem smoothed_octagon_density :
       IsStateTrajectory (tf 1) (polygonControl 1) g X ∧ g 0 = 1 ∧ X 0 = Φ 0 (y₀ 1) ∧
       (∀ j t, σ j t = Matrix.mulVec (g t) (sixthRoot j)) ∧ (∀ j t, σ j (t + tf 1) = σ (j + 1) t) ∧
       IsBalancedPair K σ (tf 1) ∧ IsCircleRepresentation σ ∧
-      MeasureTheory.volume K = ENNReal.ofReal (√12 * (8 - √32 - Real.log 2) / (√8 - 1)) := by
+      MeasureTheory.volume K = ENNReal.ofReal (√12 * (8 - √32 - Real.log 2) / (√8 - 1)) ∧
+      greatestPackingDensity K = (8 - √32 - Real.log 2) / (√8 - 1) := by
   sorry
 
 end SmoothedPolygonsChallenge

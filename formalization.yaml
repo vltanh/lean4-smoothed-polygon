@@ -4,21 +4,25 @@ version: "v0.4"
 project:
   name: "Smoothed polygons in the Reinhardt optimal control problem"
   description: >-
-    A Lean 4 formalization of the control-theoretic core of Thomas Hales and Koundinya Vajjha,
-    Packings of Smoothed Polygons (arXiv:2405.04331v1, 2024). The book reformulates the
-    Reinhardt problem, which asks for the centrally symmetric convex disk whose densest packing
-    is least dense, as an optimal control problem on SL2(R), and studies its Pontryagin
-    extremals.
+    A Lean 4 formalization of the smoothed-polygon core of Thomas Hales and Koundinya Vajjha,
+    Packings of Smoothed Polygons (arXiv:2405.04331v1, 2024), with its geometric foundations. The
+    book reformulates the Reinhardt problem, which asks for the centrally symmetric convex disk
+    whose densest packing is least dense, as an optimal control problem on SL2(R), and studies its
+    Pontryagin extremals.
 
 
-    The formalization covers Chapters 3, 4, 6 and 7 of the book with Appendices A.6 and A.11:
-    the state dynamics, the cost, the upper half-plane model, the Hamiltonian and the costate
-    equations, constant and bang-bang controls. Its main results are Theorem 7.5.6, that for
-    every k >= 1 the smoothed (6k+2)-gon is a Pontryagin extremal of the Reinhardt control
-    problem with bang-bang control, and the computation of the cost of the smoothed octagon,
-    sqrt(12)(8 - sqrt(32) - ln 2)/(sqrt(8) - 1), which divided by sqrt(12) is Reinhardt's
-    density. The book's main theorem (Mahler's First conjecture) is not formalized, nor the
-    identification of the cost with the area of the disk (Green's theorem).
+    The formalization covers Chapters 2, 3, 4, 6 and 7 of the book with Appendices A.6 and A.11:
+    packing and lattice packing densities, critical lattices and circumscribed hexagons, the
+    boundary of the minimizer and balanced disks, the state dynamics, the cost and its area
+    formula, the upper half-plane model, the Hamiltonian and the costate equations, constant and
+    bang-bang controls. Its main results are Theorem 7.5.6, that for every k >= 1 the smoothed
+    (6k+2)-gon is a Pontryagin extremal of the Reinhardt control problem with bang-bang control,
+    and that the smoothed octagon is a balanced disk of area sqrt(12)(8 - sqrt(32) - ln 2)/(sqrt(8)
+    - 1) whose greatest packing density is (8 - sqrt(32) - ln 2)/(sqrt(8) - 1). The cited results
+    the proofs use are proved, among them Fejes Toth's theorem that lattice packings are densest
+    for centrally symmetric disks and Mahler's theorems on critical lattices. One lemma of the book
+    (Lemma 2.2.1) is false as printed; it is refuted in Lean and proved in corrected form. The
+    book's main theorem (Mahler's First conjecture) is not formalized.
   authors:
     - "The-Anh Vu-Le"
   license: "Apache-2.0"
@@ -71,6 +75,40 @@ sources:
       Source of the Euler-Arnold equation cited in the proof of Proposition 6.5.1, proved in the
       formalization for left-invariant Hamiltonians on matrix groups (External.euler_arnold).
 
+  - title: "Some packing and covering theorems"
+    authors:
+      - "László Fejes Tóth"
+    type: "article"
+    location: "Acta Sci. Math. (Szeged) 12A (1950) 62-67"
+    relationship: "background"
+    note: >-
+      Cited as Theorem 2.1.3 (delta = delta_L for centrally symmetric disks); proved in the
+      formalization (External.fejes_toth), through Dowker's theorem and Boroczky's cell lemma.
+  - title: "Finite packing and covering"
+    authors:
+      - "Károly Böröczky Jr."
+    type: "book"
+    location: "Cambridge University Press, 2004 (and Discrete Comput. Geom. 30 (2003), Lemma 5)"
+    relationship: "background"
+    note: "Source of the cell lemma used in the proof of Fejes Toth's theorem; not cited by the book."
+  - title: "Convex and Discrete Geometry"
+    authors:
+      - "Peter M. Gruber"
+    type: "book"
+    location: "Springer, 2007, Corollary 30.1"
+    relationship: "background"
+    note: "Cited in Definition 2.1.2 (density of a lattice packing); proved (External.gruber_corollary_30_1)."
+  - title: "On the minimum determinant and the circumscribed hexagons of a convex domain"
+    authors:
+      - "Kurt Mahler"
+    type: "article"
+    location: "Proc. KNAW 50 (1947) 692-703"
+    relationship: "background"
+    note: >-
+      Cited as Theorems 2.3.6 and 2.3.7 and after Definition 2.3.5; Lemma 2 (with Minkowski),
+      Theorems 1 and 2 and the half of Lemma 3 that is used are proved (External.minkowski_mahler,
+      External.mahler_1947, External.mahler_irreducible).
+
 related_formalizations:
   - id: "https://github.com/sunfishho/reinhardt-density-bound"
     relationship: "independent"
@@ -81,18 +119,17 @@ related_formalizations:
 
 status:
   scope: >-
-    Formalized: every numbered result of Chapters 3, 4, 6 and 7 of the book and of Appendices
-    A.6 and A.11, with the definitions of Chapter 2 that Chapter 3 uses, except Lemma 3.1.8
-    (relies on Chapter 2), Theorem 6.1.1 (Filippov, cited), Definition 6.3.1 and Proposition
-    6.4.1 (general left-invariant systems, unused), and Theorem 7.7.1 (whose proof the book only
-    sketches). Not formalized: Chapters 1, 2 (except Definitions 2.4.1 and 2.4.7), 5 and 8-16,
-    including the main theorem (Mahler's First conjecture, Theorem 16.3.1); the area formula
-    (Green's theorem) that identifies the cost with the area of the disk; the theorem of
-    Reinhardt and Fejes Toth that identifies the density with area/sqrt(12). Pontryagin
-    extremals are defined by the conditions of the maximum principle, which is not proved and
-    not needed. No cited theorem is assumed. Six statements and definitions are formalized in
-    corrected form (REPORT.md, Section 3: E1 with a hypothesis approved by the user, E3, E4, E7,
-    E8, E13).
+    Formalized: every numbered result of Chapters 2, 3, 4, 6 and 7 of the book and of Appendices
+    A.6 and A.11, except Lemma 3.1.8, Theorem 6.1.1 (Filippov, cited), Definition 6.3.1 and
+    Proposition 6.4.1 (general left-invariant systems, unused), and Theorem 7.7.1 (whose proof the
+    book only sketches). Lemma 2.2.1 is false as printed (refuted in Lean) and is proved in
+    corrected form (REPORT.md, E1, approved by the user). Not formalized: Chapters 1, 5 and 8-16,
+    including the main theorem (Mahler's First conjecture, Theorem 16.3.1). Pontryagin extremals
+    are defined by the conditions of the maximum principle, which is not proved and not needed.
+    No cited theorem is assumed: Fejes Toth's theorem, Gruber's density formula, the theorems of
+    Minkowski and Mahler on critical lattices (the half of Mahler's Lemma 3 that is used), and the
+    Euler-Arnold equation are proved. Statements and definitions corrected (REPORT.md, Section 3):
+    E1 (false lemma), E6, E13 (a hypothesis approved by the user), E16, E17, E20, E21, E26.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -104,15 +141,17 @@ automation:
       framework: "Claude Code 2.1.318 (VS Code extension, Claude Agent SDK)"
       tool_setup: >-
         The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, local copy
-        dated 2026-10-17) in one Claude Code session with 16 sub-agents of the same model (at most
-        9 at once): statement review against the TeX source, parallel proofs by chapter, proof
-        reviews, verification of the audit and of its literature section, and an exploration of
-        follow-up directions. Lean builds, the axiom audit, a route check of every proof against
-        the results the book's proof cites, and Comparator were run locally.
+        dated 2026-10-17) in one Claude Code session, in two rounds, with 43 sub-agents of the same
+        model (at most 9 at once): statement reviews against the TeX source, parallel proofs by
+        chapter and by part, proof reviews, verification of the audit and of its literature
+        section, and an exploration of follow-up directions. Lean builds, the axiom audit, a route
+        check of every proof against the results the book's proof cites, and Comparator were run
+        locally.
       cost:
         wall_time: >-
-          3.2 hours elapsed from the start to the completed audit report (5 November 2026); 6.4
-          hours of sub-agent working time
+          20.5 hours elapsed from the start to the completed audit report of the second round
+          (5-6 November 2026, including a night), of which the first round took 3.2 hours; 24.3
+          hours of sub-agent working time in all
         spend_usd: "not tracked"
         hardware: "local machine (Linux) for Lean builds; models via API"
       prompting_notes: >-
@@ -121,49 +160,67 @@ automation:
         Theorem 3.1.4(3)).
   spend_usd: "not tracked"
   notes: >-
-    The-Anh Vu-Le requested the formalization, chose its scope and approved two decisions (the
-    proof of Jacobi's formula, and the hypothesis of Theorem 3.1.4(3)). Claude Opus 5.5 wrote the
-    statements, the proofs, the audit report and the packaging; independent agents reviewed the
-    statements, the proofs and the report. No person has reviewed the proofs. Details and token
-    counts in CREDITS.md.
+    The-Anh Vu-Le requested the formalization, chose its scope (first the control-theoretic core,
+    then Chapter 2 with every cited theorem proved) and made the decisions it needed (the proof of
+    Jacobi's formula, the hypothesis of Theorem 3.1.4(3), the routes for Lemmas 2.2.1 and 2.2.5,
+    and the corrected form of the false Lemma 2.2.1). Claude Opus 5.5 wrote the statements, the
+    proofs, the audit report and the packaging; independent agents reviewed the statements, the
+    proofs and the report. No person has reviewed the proofs. Details and token counts in
+    CREDITS.md.
 
 fidelity:
   divergences: >-
-    Corrections of statements (REPORT.md, Sections 3 and 4): E1, Theorem 3.1.4(3) is false for a
+    Corrections of statements (REPORT.md, Sections 3 and 4): E1, Lemma 2.2.1 is false as printed
+    (a lattice packing need not be a tiling by a hexagon containing the disk; counterexample
+    L = Z^2, K = {|2y0 + y1| <= 1, |2y1 - y0| <= 1}, refuted in Lean) and is proved in its
+    classical packing form, which is all Theorem 2.2.2 uses (approved by the user); E6, a critical
+    lattice is required to be admissible, as in the sources; E13, Theorem 3.1.4(3) is false for a
     general convex disk and is proved under the hypothesis that the tangents are Lipschitz (the
-    standing assumption of the book's Section 2.4; approved by the user); E3, the terminal
-    condition of Problem 3.6.2 is R^-1 X(0) R (misprint R X(0) R^-1); E4, Lemma 4.2.3 needs X != 0;
-    E7, the sign of a(u) in Problem 4.5.1; E8, the nontriviality condition of a Pontryagin
+    standing assumption of the book's Section 2.4; approved by the user); E16, the terminal
+    condition of Problem 3.6.2 is R^-1 X(0) R (misprint R X(0) R^-1); E17, Lemma 4.2.3 needs X != 0;
+    E20, the sign of a(u) in Problem 4.5.1; E21, the nontriviality condition of a Pontryagin
     extremal is imposed on the reduced costate (lambda_cost, Lambda_1, Lambda_R), since on the full
-    costate (Lambda_1, Lambda_2) of Section 6.2 every admissible trajectory would lift; E13, Lemma
-    7.3.1 needs <X, Z_u> != 0 on the control set. Slips in proofs corrected where they occur: E2,
-    E11.
+    costate (Lambda_1, Lambda_2) of Section 6.2 every admissible trajectory would lift; E26, Lemma
+    7.3.1 needs <X, Z_u> != 0 on the control set. Slips in proofs corrected where they occur: E8,
+    E14, E24.
 
 
     Redundant hypotheses omitted from the Lean statements (REPORT.md, Section 5): Theorem 3.1.4
     (1)-(2), Proposition 3.1.9, Corollary 3.1.10, Lemma 3.3.1, Corollary 6.5.4, Theorem 6.8.2,
-    Lemma 7.1.2, Lemma 7.3.1. The Challenge keeps the book's hypotheses.
+    Lemma 7.1.2, Lemma 7.3.1, and the packing hypothesis of Gruber's Cor. 30.1. The Challenge keeps
+    the book's hypotheses.
 
 
-    Readings (REPORT.md, Section 6): matrix-valued curves are differentiated and called Lipschitz
-    entry by entry; differential equations with measurable controls are solved in Caratheodory's
-    sense; Pontryagin extremals are defined by the conditions of the maximum principle in the
-    reduced costate variables; Proposition 6.5.1 takes Hamilton's equations in canonical
-    coordinates (g, p) of the cotangent bundle of GL2, with Lambda_1 = p g, as hypotheses; a
-    bang-bang control takes values in the vertices of the control simplex; the cost is not
-    identified with the area (Green's theorem) nor the density with area/sqrt(12) (Reinhardt,
-    Fejes Toth); Lemma 6.8.1 is stated for nonzero traceless X; Theorem 6.8.3 is proved in the
-    direction of its statement; Proposition 3.6.1 is stated without smoothness of the
-    trivialization.
+    Readings (REPORT.md, Section 6): the book's disks B_r are Euclidean disks, congruent copies
+    include reflections, densities are taken in [0, infinity] and exist when finite and equal;
+    lattices are discrete Z-submodules spanning R^2 with determinant the covolume; least-area
+    circumscribed hexagons are compared among strictly convex hexagons centred at the origin; Lemma
+    2.2.7 is formalized with polar-angle lifts, Lemma 2.4.2 literally, Lemmas 2.4.5-2.4.6 with the
+    positive orientation of Section 2.4; the area formula of Section 3.2 assumes the book's
+    normalization sigma_j(t + t_f) = sigma_{j+1}(t); matrix-valued curves are differentiated and
+    called Lipschitz entry by entry; differential equations with measurable controls are solved in
+    Caratheodory's sense; Pontryagin extremals are defined by the conditions of the maximum
+    principle in the reduced costate variables; Proposition 6.5.1 takes Hamilton's equations in
+    canonical coordinates (g, p) of the cotangent bundle of GL2, with Lambda_1 = p g, as hypotheses;
+    a bang-bang control takes values in the vertices of the control simplex; Lemma 6.8.1 is stated
+    for nonzero traceless X; Theorem 6.8.3 is proved in the direction of its statement; Proposition
+    3.6.1 is stated without smoothness of the trivialization.
 
 
-    Departures from the book's proofs (REPORT.md, Section 7): Lemma 3.1.12 (Jacobi's formula) is
-    proved by differentiating the Leibniz expansion of the determinant instead of through a
-    differentiable diagonalization on a dense set, which Mathlib lacks (approved by the user);
-    Lemma 4.3.1 compares the minimizer with the smoothed octagon (cost about 3.126 < pi) instead of
-    the unit disk, which gives only a weak inequality (gap E6). Every other proof follows the
-    book's argument; the gaps of Lemmas 4.2.3 (E5), 7.5.3 (E16), 7.5.5 (E17), Theorem 6.8.3 (E10)
-    and Theorem 7.5.6 (E18) are filled along the book's lines.
+    Departures from the book's proofs (REPORT.md, Section 7), each forced by an error or gap of the
+    book or by mathematics Mathlib lacks: Lemma 2.2.1 (its printed form is false; the corrected
+    form is proved through maximal lattice-packed symmetric bodies); Lemma 2.2.5
+    (the book's shaving argument cannot rule out corners at endpoints of flat boundary segments;
+    closed by Mahler's lattice route, chosen by the user); one step each of Lemma 2.4.2 (the
+    integral curve is not shown to stay on the boundary) and Lemma 2.4.6 (Shifrin's Proposition 3.8 is about smooth curves; a direct argument); the area
+    formula of Section 3.2 (Green's theorem replaced by its polar-coordinates form for star-shaped
+    regions); Lemma 3.1.12 (Jacobi's formula by the Leibniz expansion, approved by the user); Lemma
+    4.3.1 (comparison with the smoothed octagon). Every other proof follows the book's argument;
+    the remaining gaps are filled along the book's lines, and the index slip of Lemma 2.4.5 is
+    corrected. Proofs of the cited results follow their sources, except where a source quotes
+    another paper without proof (Mahler's Lemmas 3 and 5) and in Fejes Toth's theorem (Dowker's theorem by an alternating merge; the cell lemma by
+    Boroczky's maximal cells, with a counting argument and angle sums in place of boundary cycles
+    and Euler's formula).
 
 review:
   status: "agent-reviewed"
@@ -187,7 +244,7 @@ alignment:
         intervals of length t_sw from g(0) = I2, X(0) = Phi(i y0) exists, and every such trajectory
         is bang-bang and lifts to a Pontryagin extremal (IsPontryaginExtremal, the conditions of
         the maximum principle with the corrected transversality condition X(t_f) = R^-1 X(0) R,
-        E3, and the nontriviality condition on the reduced costate, E8).
+        E16, and the nontriviality condition on the reduced costate, E21).
     - source: "Example before Theorem 7.5.6 (the smoothed octagon)"
       lean: "SmoothedPolygonsChallenge.smoothed_octagon_density"
       module: "Challenge"
@@ -195,8 +252,11 @@ alignment:
       note: >-
         For k = 1: y0 = sqrt((sqrt 8 - 1)/3), t_sw = ln 2/(2 sqrt(sqrt 8 - 1)), and the cost of every
         such trajectory is sqrt(12)(8 - sqrt 32 - ln 2)/(sqrt 8 - 1) < pi, so cost/sqrt(12) is
-        Reinhardt's density. The identification of the cost with the area (Green's theorem) and
-        of area/sqrt(12) with the packing density (Reinhardt, Fejes Toth) is not formalized.
+        Reinhardt's density; the trajectory bounds a balanced disk K in circle representation whose
+        area is that cost and whose greatest packing density (Definition 2.1.1, Euclidean disks,
+        congruent copies) is (8 - sqrt 32 - ln 2)/(sqrt 8 - 1). The book uses this density without
+        proving that balanced disks have least circumscribed hexagon of area sqrt(12) (REPORT.md,
+        E12); the formalization proves it.
 
 acknowledgements: >-
   Mathlib and the Lean FRO toolchain; Palomar's Comparator. Written with Claude (Anthropic) at the
