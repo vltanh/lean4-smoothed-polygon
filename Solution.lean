@@ -6,6 +6,7 @@ public import SmoothedPolygons.AppA.MatrixIdentities
 public import SmoothedPolygons.AppA.Riemannian
 public import SmoothedPolygons.Ch2.BalancedCircle
 public import SmoothedPolygons.Ch2.MultiCurve
+public import SmoothedPolygons.Ch3.AreaFormula
 public import SmoothedPolygons.Ch3.ControlProblem
 public import SmoothedPolygons.Ch3.ControlSets
 public import SmoothedPolygons.Ch3.CostFunctional
@@ -24,6 +25,7 @@ public import SmoothedPolygons.Ch7.HMax
 public import SmoothedPolygons.Ch7.HMaxInequality
 public import SmoothedPolygons.Ch7.Polygon
 public import SmoothedPolygons.Ch7.SmoothedPolygon
+public import SmoothedPolygons.Ch7.SmoothedPolygonDisk
 public import SmoothedPolygons.Ch7.StrongTransversality
 public import SmoothedPolygons.Defs
 

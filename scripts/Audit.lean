@@ -16,6 +16,7 @@ import all SmoothedPolygons.AppA.MatrixIdentities
 import all SmoothedPolygons.AppA.Riemannian
 import all SmoothedPolygons.Ch2.BalancedCircle
 import all SmoothedPolygons.Ch2.MultiCurve
+import all SmoothedPolygons.Ch3.AreaFormula
 import all SmoothedPolygons.Ch3.ControlProblem
 import all SmoothedPolygons.Ch3.ControlSets
 import all SmoothedPolygons.Ch3.CostFunctional
@@ -34,6 +35,7 @@ import all SmoothedPolygons.Ch7.HMax
 import all SmoothedPolygons.Ch7.HMaxInequality
 import all SmoothedPolygons.Ch7.Polygon
 import all SmoothedPolygons.Ch7.SmoothedPolygon
+import all SmoothedPolygons.Ch7.SmoothedPolygonDisk
 import all SmoothedPolygons.Ch7.StrongTransversality
 import all SmoothedPolygons.Defs
 import all Solution
@@ -95,6 +97,7 @@ meta def paperResults : List (String × Name) :=
    ("Lemma 3.1.12 (adj)", ``SmoothedPolygons.lemma3_1_12_adjugate),
    ("Lemma 3.2.1", ``SmoothedPolygons.lemma3_2_1),
    ("Lemma 3.2.2", ``SmoothedPolygons.lemma3_2_2),
+   ("eqn:cost (§3.2)", ``SmoothedPolygons.eqn_cost),
    ("Lemma 3.3.1", ``SmoothedPolygons.lemma3_3_1),
    ("Lemma 3.3.4", ``SmoothedPolygons.lemma3_3_4),
    ("Lemma 3.4.1", ``SmoothedPolygons.lemma3_4_1),

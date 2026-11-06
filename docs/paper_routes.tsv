@@ -24,6 +24,9 @@ cor:param-equiv	corollary	1	lem:Jacobi
 lem:Jacobi	lemma	1	
 lem:area-helper-1	lemma	1	
 lem:area-helper-2	lemma	1	
+# The area formula of §3.2 (running text, line 2814, equation eqn:cost): area(K) = -(3/2)∫ tr(JX) for a
+# balanced disk. Its derivation uses Green's theorem and cites lem:area-helper-1 and lem:area-helper-2.
+eqn:cost	equation	1	lem:area-helper-1,lem:area-helper-2
 lem:curvature-pos	lemma	1	cor:X-props,lem:hyp-arc,thm:X-dynamics-sl2
 lem:sl2-star-condition	lemma	1	
 lem:sl2-lemmas	lemma	0	
