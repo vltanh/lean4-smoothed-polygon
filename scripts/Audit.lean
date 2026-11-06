@@ -20,6 +20,7 @@ import all Basic.Analysis.Convex.CellDecomposition.PolygonSides
 import all Basic.Analysis.Convex.CellDecomposition.SideCount
 import all Basic.Analysis.Convex.CircumscribedPolygon
 import all Basic.Analysis.Convex.HexagonLattice
+import all Basic.Analysis.Convex.PolygonAngle
 import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.StarCurveConvex
 import all Basic.Analysis.Convex.TietzeNakajima
