@@ -41,6 +41,9 @@ public import SmoothedPolygons.Ch7.Isolated
 public import SmoothedPolygons.Ch7.Isolated.Defs
 public import SmoothedPolygons.Ch7.Isolated.FixedPoints
 public import SmoothedPolygons.Ch7.Isolated.Hyperbolic
+public import SmoothedPolygons.Ch7.Isolated.IpcAlgebra
+public import SmoothedPolygons.Ch7.Isolated.IpcFlow
+public import SmoothedPolygons.Ch7.Isolated.IpcOctagon
 public import SmoothedPolygons.Ch7.Isolated.Poincare
 public import SmoothedPolygons.Ch7.Isolated.Return
 public import SmoothedPolygons.Ch7.Isolated.Switching

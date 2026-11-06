@@ -72,6 +72,9 @@ import all SmoothedPolygons.Ch7.Isolated
 import all SmoothedPolygons.Ch7.Isolated.Defs
 import all SmoothedPolygons.Ch7.Isolated.FixedPoints
 import all SmoothedPolygons.Ch7.Isolated.Hyperbolic
+import all SmoothedPolygons.Ch7.Isolated.IpcAlgebra
+import all SmoothedPolygons.Ch7.Isolated.IpcFlow
+import all SmoothedPolygons.Ch7.Isolated.IpcOctagon
 import all SmoothedPolygons.Ch7.Isolated.Poincare
 import all SmoothedPolygons.Ch7.Isolated.Return
 import all SmoothedPolygons.Ch7.Isolated.Switching
