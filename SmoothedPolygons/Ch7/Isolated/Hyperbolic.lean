@@ -1,6 +1,6 @@
 module
 
-public import SmoothedPolygons.Ch7.Isolated.Defs
+public import SmoothedPolygons.Ch7.Isolated.Poincare
 public import SmoothedPolygons.Ch7.SmoothedPolygon
 public import Mathlib.Analysis.Complex.Polynomial.Basic
 
@@ -8,7 +8,8 @@ public import Mathlib.Analysis.Complex.Polynomial.Basic
 # Theorem 7.7.1, step 5: the direct calculation (hyperbolicity)
 
 The derivative of the Poincaré map on the tangent space of the section at the octagon's point has
-the explicit matrix `iso_sectionMatrix` in the basis `iso_sectionBasis`, with reciprocal
+the explicit matrix `iso_sectionMatrix` in the basis `iso_sectionBasis` (`iso_fderiv_basis`, in
+`SmoothedPolygons.Ch7.Isolated.Poincare`), with reciprocal
 characteristic polynomial `z⁴ - e₁z³ + e₂z² - e₁z + 1`; the certified inequalities `-e₁ > 4` and
 `2 + 2e₁ + e₂ > 0` show that it has no eigenvalue of modulus `1`.
 -/
@@ -28,15 +29,6 @@ theorem iso_sectionBasis_mem (j : Fin 4) :
 
 theorem iso_sectionBasis_linearIndependent :
     LinearIndependent ℝ (iso_sectionBasis (y₀ 1) (ellSw (y₀ 1))) := by
-  sorry
-
-/-- **The direct calculation.** The derivative of the Poincaré map at `q_oct` maps the basis
-vectors by the matrix `iso_sectionMatrix`. -/
-theorem iso_fderiv_basis (j : Fin 4) :
-    fderiv ℝ iso_poincareMapCoords (iso_phaseCoords (iso_qFix (y₀ 1)))
-        (iso_sectionBasis (y₀ 1) (ellSw (y₀ 1)) j) =
-      ∑ i, iso_sectionMatrix (y₀ 1 ^ 2) (ellSw (y₀ 1)) i j •
-        iso_sectionBasis (y₀ 1) (ellSw (y₀ 1)) i := by
   sorry
 
 open Polynomial in

@@ -7,7 +7,9 @@ public import SmoothedPolygons.Ch7.HMax
 # Theorem 7.7.1, step 4: the Poincaré map
 
 The points `q_fix(y₀)` lie on the section, their Poincaré time is `t_sw(y₀)` and they are fixed
-points of the Poincaré map; the Poincaré map is strictly differentiable at the octagon's point.
+points of the Poincaré map; the Poincaré map is strictly differentiable at the octagon's point,
+and its derivative maps the basis `iso_sectionBasis` of the section's tangent space by the explicit
+matrix `iso_sectionMatrix` (the book's "direct calculation", used in step 5).
 -/
 
 @[expose] public section
@@ -65,6 +67,15 @@ theorem iso_poincareMapCoords_hasStrictFDerivAt :
     HasStrictFDerivAt iso_poincareMapCoords
       (fderiv ℝ iso_poincareMapCoords (iso_phaseCoords (iso_qFix (y₀ 1))))
       (iso_phaseCoords (iso_qFix (y₀ 1))) := by
+  sorry
+
+/-- **The direct calculation.** The derivative of the Poincaré map at `q_oct` maps the basis
+vectors by the matrix `iso_sectionMatrix`. -/
+theorem iso_fderiv_basis (j : Fin 4) :
+    fderiv ℝ iso_poincareMapCoords (iso_phaseCoords (iso_qFix (y₀ 1)))
+        (iso_sectionBasis (y₀ 1) (ellSw (y₀ 1)) j) =
+      ∑ i, iso_sectionMatrix (y₀ 1 ^ 2) (ellSw (y₀ 1)) i j •
+        iso_sectionBasis (y₀ 1) (ellSw (y₀ 1)) i := by
   sorry
 
 end SmoothedPolygons
