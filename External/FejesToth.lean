@@ -30,10 +30,9 @@ lattice (a discrete subgroup of `ℝ²` spanning `ℝ²`). Taking suprema of upp
 strongest form of the statement (no packing of congruent copies is denser, even in the sense of
 upper density, than the best lattice packing). Densities take values in `[0, ∞]`.
 
-Status: `fejes_toth` is proved from Fejes Tóth's cell lemma
-`PlaneConvex.exists_cell_decomposition` (`Basic/Analysis/Convex/CellDecomposition.lean`), which
-is assembled there from four lemmas left as `sorry` (the planar-topology core). The lattice
-half `|K| / t_K(6) ≤ δ_L(K)` and everything else are proved; see the section *Proof* below.
+`fejes_toth` is proved from Fejes Tóth's cell lemma `PlaneConvex.exists_cell_decomposition`
+(`Basic/Analysis/Convex/CellDecomposition.lean`), the planar-topology core, and from Dowker's
+theorem and the lattice tiling by centrally symmetric hexagons; see the section *Proof* below.
 -/
 
 @[expose] public section
@@ -111,8 +110,8 @@ infimum over `k` closed half-planes containing `K` of the area of their intersec
    `t_K(6) + 6d ≤ t_K(s) + s d` for `s ≥ 3`, `d = t_K(6) - t_K(7)`
    (`PlaneConvex.minCircumscribedArea_six_add_le`); `t_K` is invariant under Euclidean motions
    (`PlaneConvex.minCircumscribedArea_image_motion`, via `Measure.addHaar_image_linearMap`).
-3. **Fejes Tóth's cell lemma** (`PlaneConvex.exists_cell_decomposition`, in `Basic`; the only
-   `sorry`s, in its four sub-lemmas): `n ≥ 1` non-overlapping convex disks in a bounded convex
+3. **Fejes Tóth's cell lemma** (`PlaneConvex.exists_cell_decomposition`, in `Basic`, from four
+   parts): `n ≥ 1` non-overlapping convex disks in a bounded convex
    polygon `Q` cut out by `m` half-planes lie in non-overlapping convex polygons `C_i ⊆ Q`, `C_i`
    cut out by `s_i ≥ 3` half-planes, with `∑ s_i ≤ 6n + m - 6`. See
    `Basic/Analysis/Convex/CellDecomposition.lean` for the sub-lemmas and their arguments.
