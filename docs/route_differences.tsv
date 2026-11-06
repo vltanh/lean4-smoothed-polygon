@@ -8,17 +8,17 @@
 *	+lem:sl2-star-condition	the denominator ⟨Z_u, X⟩ is negative on the state space (Lemma 3.3.4), used implicitly wherever the book divides by it
 #
 # Chapter 3
-thm:defn-X	-lem:tangents-lipschitz	Lemma 2.4.3 (Chapter 2) is outside the scope; its conclusion (σ_j' Lipschitz) is a hypothesis of theorem3_1_4_lipschitz (user-approved correction E1)
+thm:defn-X	-lem:tangents-lipschitz	Lemma 2.4.3 gives Lipschitz tangents only for the minimizer K_min, and for a general convex disk the statement is false (E13); its conclusion (sigma_j' Lipschitz) is a hypothesis of theorem3_1_4_lipschitz (user-approved correction)
 thm:defn-X	+thm:defn-g	the induced curve g of Theorem 3.1.1 (eqn:g-sigma, cited by equation in the statement) and its C¹ regularity
-cor:X-props	-lem:star-conditions	Lemma 2.4.5 (Chapter 2) is outside the scope; the star condition it establishes is item 5 of the definition of a balanced disk (Definition 2.4.7), which the corollary assumes
+cor:X-props	-lem:star-conditions	the corollary assumes a balanced pair, whose item 5 (Definition 2.4.7) is the star condition that Lemma 2.4.5 establishes for K_min
 lem:curvature-pos	-cor:X-props	the lemma assumes the star inequalities ("satisfying the star conditions"), which the book's proof takes from Corollary 3.1.6
 lem:curvature-pos	-lem:hyp-arc	the book gives three proofs; the formal proof is the first (κ₂ = √3 det X/ρ₀(X)); Lemma 3.1.8 is cited by the second proof only
 lem:curvature-pos	-thm:X-dynamics-sl2	the book gives three proofs; the formal proof is the first; Theorem 3.4.2 is cited by the third proof only
 thm:X-dynamics-sl2	+lem:curvature-pos	κ = κ₀ + κ₁ + κ₂ > 0, which the book states after Definition 3.3.2 ("the denominator is positive by Lemma 3.3.1") and uses in the proof
 #
 # Chapter 4
-lem:tf-pi3	+ex:smoothed-octagon	gap of the book (E6): area(K_min) < π is not justified; comparison with the smoothed octagon (cost ≈ 3.126 < π)
-lem:tf-pi3	+thm:6k+2	gap of the book (E6): the smoothed octagon's trajectory is admissible because it is a Pontryagin extremal (Theorem 7.5.6, k = 1)
+lem:tf-pi3	+ex:smoothed-octagon	gap of the book (E19): area(K_min) < π is not justified; comparison with the smoothed octagon (cost ≈ 3.126 < π)
+lem:tf-pi3	+thm:6k+2	gap of the book (E19): the smoothed octagon's trajectory is admissible because it is a Pontryagin extremal (Theorem 7.5.6, k = 1)
 lem:tf-pi3	+lem:X-hyperbolic	the book writes the cost in half-plane coordinates (eqn:cost-upper-half-plane), which presupposes X = Φ(z) for a star state (Lemmas 4.1.1, 4.2.1)
 lem:tf-pi3	+lem:def-phi	the book writes the cost in half-plane coordinates (eqn:cost-upper-half-plane), which presupposes X = Φ(z) for a star state (Lemmas 4.1.1, 4.2.1)
 prop:star-domain	-cor:X-props	the formal statement is about the star inequalities themselves (IsStarState); Corollary 3.1.6 is where the book derives them for balanced disks

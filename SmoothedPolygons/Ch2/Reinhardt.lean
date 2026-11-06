@@ -3053,8 +3053,7 @@ parallelogram). Locally around each edge midpoint of `H_K`, `K` contains an arc 
 through that midpoint whose asymptotes are the lines through the two adjacent edges (the envelope
 of the edges obtained by sliding the edge with the area fixed).
 
-Departure from the paper: the book gives no proof. The proof follows the suggested argument with
-a separating line (Hahn–Banach) in place of the support line at the nearest point: if a point of
+The book states the remark without proof (E3 of the report). Proof: if a point of
 the hyperbola near the midpoint were outside `K`, a line separating it from `K` would cut off from
 the angle between the adjacent edge lines a larger triangle than the edge does (AM–GM), giving a
 circumscribed centrally symmetric hexagon of smaller area. -/

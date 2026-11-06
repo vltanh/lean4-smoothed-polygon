@@ -766,7 +766,7 @@ equations `g(t_f) = g_sw (R⁻¹ g_sw R) ⋯ (R^{-3k} g_sw R^{3k})` (`polygonG_e
 `e^{±iθ_k}`, whose `(3k+1)`-th powers are `(-1)^k`; comparing eigenvalues (`poly_pow_eq_of_trace`)
 gives `(R⁻¹ g_sw)^{3k+1} = (-1)^k I₂`.
 
-A gap in the book's proof (E17 of the report), filled along its lines: the book's proof argues
+A gap in the book's proof (E30 of the report), filled along its lines: the book's proof argues
 the converse direction: from `g(t_f) = R` it compares eigenvalues to get `λ^{3k+1} = (-1)^k`,
 chooses the branch `ℓ = 0, -k`, and deduces the trace. That does not prove the statement, which is
 the sufficiency ("provided"). The formal proof runs the same eigenvalue comparison the other way:

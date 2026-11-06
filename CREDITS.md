@@ -7,7 +7,7 @@ How this formalization was made, from the run log and the session transcript.
 - **Author and maintainer:** The-Anh Vu-Le, who asked for the formalization, chose its scope (the
   smoothed-polygon core of the book) and made the two decisions it needed: proving Jacobi's
   formula by the Leibniz expansion instead of the book's argument, and proving Theorem 3.1.4(3)
-  with the hypothesis that the tangents are Lipschitz (E1).
+  with the hypothesis that the tangents are Lipschitz (E13).
 - **Formalization:** Claude Opus 5.5 (`claude-opus-5-5`) in Claude Code 2.1.318 (VS Code
   extension, Claude Agent SDK), in one session, with sub-agents of the same model. There was no
   earlier draft; the project was written from scratch.
@@ -46,7 +46,7 @@ How it was made:
   Section 5.
 - **Audit:** REPORT.md written by the main session; two agents checked it, one the findings against
   the TeX source, one the literature and the suggestions. Their corrections added two findings
-  (E8, E13), withdrew two departures and corrected the account of related work. One more agent,
+  (E21, E26), withdrew two departures and corrected the account of related work. One more agent,
   started before the report was complete, explored follow-up directions.
 
 Figures, from the start (5 November 2026, 14:06 CST) to the commit that completes REPORT.md
