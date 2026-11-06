@@ -10,9 +10,12 @@ public import Mathlib.Data.Matrix.Mul
 public import Mathlib.Data.ZMod.Defs
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 public import Mathlib.LinearAlgebra.Matrix.Trace
+public import Mathlib.LinearAlgebra.UnitaryGroup
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
+public import Mathlib.Order.LiminfLimsup
 public import Mathlib.Topology.EMetricSpace.Lipschitz
+public import Mathlib.Topology.Instances.ENNReal.Lemmas
 
 /-!
 # Shared definitions
@@ -231,6 +234,59 @@ def IsBalancedPair (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 → 
 /-- A balanced pair is in circle representation (§2.4) if `σ_j(0) = s_j*` for all `j`. -/
 def IsCircleRepresentation (σ : ZMod 6 → ℝ → Fin 2 → ℝ) : Prop :=
   ∀ j, σ j 0 = sixthRoot j
+
+/-! ### Convex disks and packing densities (Definition 2.1.1) -/
+
+/-- A convex disk (§1.1, §2.1): a compact convex set with nonempty interior. -/
+def IsConvexDisk (K : Set (Fin 2 → ℝ)) : Prop :=
+  Convex ℝ K ∧ IsCompact K ∧ (interior K).Nonempty
+
+/-- The Euclidean disk `B_r = {x | x₀² + x₁² ≤ r²}` of radius `r` centered at the origin
+(Definition 2.1.1). -/
+def euclidDisk (r : ℝ) : Set (Fin 2 → ℝ) := {x | x 0 ^ 2 + x 1 ^ 2 ≤ r ^ 2}
+
+/-- `K'` is a congruent copy of `K` (§2.1): its image `{A x + b | x ∈ K}` under a Euclidean
+isometry, with `A` an orthogonal matrix. -/
+def IsCongruentCopy (K K' : Set (Fin 2 → ℝ)) : Prop :=
+  ∃ A ∈ Matrix.orthogonalGroup (Fin 2) ℝ, ∃ b : Fin 2 → ℝ, K' = (fun x ↦ Matrix.mulVec A x + b) '' K
+
+/-- A packing (§2.1): a family of convex disks, any two distinct members of which do not overlap,
+that is, have disjoint interiors. -/
+def IsPacking (P : Set (Set (Fin 2 → ℝ))) : Prop :=
+  (∀ K' ∈ P, IsConvexDisk K') ∧ P.Pairwise fun A B ↦ Disjoint (interior A) (interior B)
+
+/-- A packing with congruent copies of `K` (Definition 2.1.1). -/
+def IsPackingOfCopies (K : Set (Fin 2 → ℝ)) (P : Set (Set (Fin 2 → ℝ))) : Prop :=
+  IsPacking P ∧ ∀ K' ∈ P, IsCongruentCopy K K'
+
+/-- The ratio `(1/area(B_r)) Σ_{K' ∈ P} area(K' ∩ B_r)` of Definition 2.1.1, in `[0, ∞]`. -/
+noncomputable def packingRatio (P : Set (Set (Fin 2 → ℝ))) (r : ℝ) : ENNReal :=
+  (∑' K' : P, volume ((K' : Set (Fin 2 → ℝ)) ∩ euclidDisk r)) / volume (euclidDisk r)
+
+/-- The upper density `limsup_{r → ∞} (1/area(B_r)) Σ_{K' ∈ P} area(K' ∩ B_r)` of a packing
+(Definition 2.1.1). -/
+noncomputable def upperDensity (P : Set (Set (Fin 2 → ℝ))) : ENNReal :=
+  Filter.limsup (packingRatio P) Filter.atTop
+
+/-- The lower density `liminf_{r → ∞} (1/area(B_r)) Σ_{K' ∈ P} area(K' ∩ B_r)` of a packing
+(Definition 2.1.1). -/
+noncomputable def lowerDensity (P : Set (Set (Fin 2 → ℝ))) : ENNReal :=
+  Filter.liminf (packingRatio P) Filter.atTop
+
+/-- The density of `P` exists (Definition 2.1.1): the upper and lower densities exist (are
+finite) and coincide. -/
+def HasDensity (P : Set (Set (Fin 2 → ℝ))) : Prop :=
+  upperDensity P ≠ ⊤ ∧ upperDensity P = lowerDensity P
+
+/-- The density `δ(K, P)` of a packing (Definition 2.1.1): the common value of the upper and
+lower densities, when the density exists (`HasDensity`). -/
+noncomputable def packingDensity (P : Set (Set (Fin 2 → ℝ))) : ℝ :=
+  (upperDensity P).toReal
+
+/-- **Definition 2.1.1** (greatest packing density).
+`δ(K) = sup {δ(K, P) | δ(K, P) exists, and P is a packing with congruent copies of K}`. -/
+noncomputable def greatestPackingDensity (K : Set (Fin 2 → ℝ)) : ℝ :=
+  sSup {d | ∃ P, IsPackingOfCopies K P ∧ HasDensity P ∧ packingDensity P = d}
 
 end SmoothedPolygons
 

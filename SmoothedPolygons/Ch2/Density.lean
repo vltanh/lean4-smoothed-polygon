@@ -34,55 +34,6 @@ namespace SmoothedPolygons
 open MeasureTheory Filter Set Matrix
 open scoped ENNReal
 
-/-! ### Definition 2.1.1 -/
-
-/-- The Euclidean disk `B_r = {x | x₀² + x₁² ≤ r²}` of radius `r` centered at the origin
-(Definition 2.1.1). -/
-def euclidDisk (r : ℝ) : Set (Fin 2 → ℝ) := {x | x 0 ^ 2 + x 1 ^ 2 ≤ r ^ 2}
-
-/-- `K'` is a congruent copy of `K` (§2.1): its image `{A x + b | x ∈ K}` under a Euclidean
-isometry, with `A` an orthogonal matrix. -/
-def IsCongruentCopy (K K' : Set (Fin 2 → ℝ)) : Prop :=
-  ∃ A ∈ Matrix.orthogonalGroup (Fin 2) ℝ, ∃ b : Fin 2 → ℝ, K' = (fun x ↦ A *ᵥ x + b) '' K
-
-/-- A packing (§2.1): a family of convex disks, any two distinct members of which do not overlap,
-that is, have disjoint interiors. -/
-def IsPacking (P : Set (Set (Fin 2 → ℝ))) : Prop :=
-  (∀ K' ∈ P, IsConvexDisk K') ∧ P.Pairwise fun A B ↦ Disjoint (interior A) (interior B)
-
-/-- A packing with congruent copies of `K` (Definition 2.1.1). -/
-def IsPackingOfCopies (K : Set (Fin 2 → ℝ)) (P : Set (Set (Fin 2 → ℝ))) : Prop :=
-  IsPacking P ∧ ∀ K' ∈ P, IsCongruentCopy K K'
-
-/-- The ratio `(1/area(B_r)) Σ_{K' ∈ P} area(K' ∩ B_r)` of Definition 2.1.1, in `[0, ∞]`. -/
-noncomputable def packingRatio (P : Set (Set (Fin 2 → ℝ))) (r : ℝ) : ℝ≥0∞ :=
-  (∑' K' : P, volume ((K' : Set (Fin 2 → ℝ)) ∩ euclidDisk r)) / volume (euclidDisk r)
-
-/-- The upper density `limsup_{r → ∞} (1/area(B_r)) Σ_{K' ∈ P} area(K' ∩ B_r)` of a packing
-(Definition 2.1.1). -/
-noncomputable def upperDensity (P : Set (Set (Fin 2 → ℝ))) : ℝ≥0∞ :=
-  limsup (packingRatio P) atTop
-
-/-- The lower density `liminf_{r → ∞} (1/area(B_r)) Σ_{K' ∈ P} area(K' ∩ B_r)` of a packing
-(Definition 2.1.1). -/
-noncomputable def lowerDensity (P : Set (Set (Fin 2 → ℝ))) : ℝ≥0∞ :=
-  liminf (packingRatio P) atTop
-
-/-- The density of `P` exists (Definition 2.1.1): the upper and lower densities exist (are
-finite) and coincide. -/
-def HasDensity (P : Set (Set (Fin 2 → ℝ))) : Prop :=
-  upperDensity P ≠ ∞ ∧ upperDensity P = lowerDensity P
-
-/-- The density `δ(K, P)` of a packing (Definition 2.1.1): the common value of the upper and
-lower densities, when the density exists (`HasDensity`). -/
-noncomputable def packingDensity (P : Set (Set (Fin 2 → ℝ))) : ℝ :=
-  (upperDensity P).toReal
-
-/-- **Definition 2.1.1** (greatest packing density).
-`δ(K) = sup {δ(K, P) | δ(K, P) exists, and P is a packing with congruent copies of K}`. -/
-noncomputable def greatestPackingDensity (K : Set (Fin 2 → ℝ)) : ℝ :=
-  sSup {d | ∃ P, IsPackingOfCopies K P ∧ HasDensity P ∧ packingDensity P = d}
-
 /-! ### Definition 2.1.2 -/
 
 /-- A lattice (§2.1): a discrete additive subgroup of `ℝ²` of full rank, that is, a discrete

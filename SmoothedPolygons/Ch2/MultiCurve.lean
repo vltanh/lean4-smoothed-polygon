@@ -29,8 +29,4 @@ open MeasureTheory
 def IsMultiCurve (k : ℕ) (σ : ZMod 6 → ℝ → Fin 2 → ℝ) (tf : ℝ) : Prop :=
   (∀ j, ContDiffOn ℝ k (σ j) (Set.Icc 0 tf)) ∧ ∀ t ∈ Set.Icc 0 tf, IsMultiPoint fun j ↦ σ j t
 
-/-- A convex disk (§1.1, §2.1): a compact convex set with nonempty interior. -/
-def IsConvexDisk (K : Set (Fin 2 → ℝ)) : Prop :=
-  Convex ℝ K ∧ IsCompact K ∧ (interior K).Nonempty
-
 end SmoothedPolygons
