@@ -56,19 +56,28 @@ theorem smoothed_polygon_extremal (k : ℕ) (hk : 1 ≤ k) :
           IsPontryaginExtremal (tf k) (polygonControl k) g X Λ₁ ΛR lam := by
   exact theorem7_5_6 k hk
 
-/-- **The smoothed octagon** (the example before Theorem 7.5.6). For `k = 1`,
-`y₀ = √((√8 - 1)/3)` and `t_sw = ln 2/(2√(√8 - 1))`, and the trajectory of the smoothed octagon has
-cost (area) `√12 (8 - √32 - ln 2)/(√8 - 1) < π`, hence density
-`(8 - √32 - ln 2)/(√8 - 1)`. -/
+/-- **The smoothed octagon** (the example before Theorem 7.5.6, with the area formula `eqn:cost`
+of §3.2). For `k = 1`, `y₀ = √((√8 - 1)/3)` and `t_sw = ln 2/(2√(√8 - 1))`; every trajectory of
+the smoothed octagon has cost `√12 (8 - √32 - ln 2)/(√8 - 1) < π`, so cost/√12 is
+`(8 - √32 - ln 2)/(√8 - 1)`; and the trajectory defines a balanced disk `K` in circle
+representation (`σ_j(t) = g(t) s_j*`, `σ_j(t + t_f) = σ_{j+1}(t)`) whose area is that cost. -/
 theorem smoothed_octagon_density :
     y₀ 1 = √((√8 - 1) / 3) ∧ tsw 1 = Real.log 2 / (2 * √(√8 - 1)) ∧
-      ∀ g X : ℝ → Mat2, IsStateTrajectory (tf 1) (polygonControl 1) g X → g 0 = 1 →
+      (∀ g X : ℝ → Mat2, IsStateTrajectory (tf 1) (polygonControl 1) g X → g 0 = 1 →
         X 0 = Φ 0 (y₀ 1) →
         reinhardtCost (tf 1) X = √12 * (8 - √32 - Real.log 2) / (√8 - 1) ∧
           reinhardtCost (tf 1) X < Real.pi ∧
-          reinhardtCost (tf 1) X / √12 = (8 - √32 - Real.log 2) / (√8 - 1) := by
+          reinhardtCost (tf 1) X / √12 = (8 - √32 - Real.log 2) / (√8 - 1)) ∧
+    ∃ (g X : ℝ → Mat2) (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 → ℝ),
+      IsStateTrajectory (tf 1) (polygonControl 1) g X ∧ g 0 = 1 ∧ X 0 = Φ 0 (y₀ 1) ∧
+      (∀ j t, σ j t = Matrix.mulVec (g t) (sixthRoot j)) ∧ (∀ j t, σ j (t + tf 1) = σ (j + 1) t) ∧
+      IsBalancedPair K σ (tf 1) ∧ IsCircleRepresentation σ ∧
+      MeasureTheory.volume K = ENNReal.ofReal (√12 * (8 - √32 - Real.log 2) / (√8 - 1)) := by
   obtain ⟨-, -, h1, h2, h3⟩ := example7_5_smoothedOctagon
-  exact ⟨h1, h2, fun g X h hg0 hX0 ↦ (h3 g X h hg0 hX0).2⟩
+  obtain ⟨-, -, g, X, K, σ, hst, hg0, hX0, hσ, hshift, hbal, hcirc, hvol, -⟩ :=
+    smoothedOctagon_isBalancedPair_area
+  exact ⟨h1, h2, fun g X h hg0 hX0 ↦ (h3 g X h hg0 hX0).2,
+    g, X, K, σ, hst, hg0, hX0, hσ, hshift, hbal, hcirc, hvol⟩
 
 end SmoothedPolygonsChallenge
 

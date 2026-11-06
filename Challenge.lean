@@ -1,12 +1,18 @@
 module
 
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+public import Mathlib.Analysis.Calculus.Deriv.Basic
 public import Mathlib.Analysis.Convex.Extreme
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Mathlib.Data.Matrix.Mul
+public import Mathlib.Data.ZMod.Defs
 public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 public import Mathlib.LinearAlgebra.Matrix.Trace
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
+public import Mathlib.Topology.EMetricSpace.Lipschitz
 
 /-!
 # Challenge: smoothed polygons in the Reinhardt optimal control problem
@@ -207,6 +213,59 @@ noncomputable def tf (k : ℕ) : ℝ := (3 * k + 1) * tsw k
 noncomputable def polygonControl (k : ℕ) (t : ℝ) : Fin 3 → ℝ :=
   Pi.single (⟨(2 + ⌊t / tsw k⌋₊) % 3, Nat.mod_lt _ (by norm_num)⟩ : Fin 3) 1
 
+/-! ### Multi-points and balanced disks (Definitions 2.4.1, 2.4.7) -/
+
+/-- The determinant `det(v, w) = v₁w₂ - v₂w₁` of the `2 × 2` matrix with columns `v, w`. -/
+def det2 (v w : Fin 2 → ℝ) : ℝ := v 0 * w 1 - v 1 * w 0
+
+/-- A multi-point (Definition 2.4.1): `s : ℤ/6ℤ → ℝ²` with `s₀ + s₂ + s₄ = 0`,
+`s_{j+3} = -s_j` and `det(s_j, s_{j+1}) = √3/2` for all `j` (equations `eqn:multi`,
+`eqn:sqrt12`); the first condition is imposed for every shift `j`, as in equation
+`eqn:multi-point-properties`. -/
+def IsMultiPoint (s : ZMod 6 → Fin 2 → ℝ) : Prop :=
+  ∀ j : ZMod 6, s j + s (j + 2) + s (j + 4) = 0 ∧ s (j + 3) = -s j ∧
+    det2 (s j) (s (j + 1)) = √3 / 2
+
+/-- The sixth roots of unity `s_j* = exp(2πij/6)`, as points of `ℝ²`. -/
+noncomputable def sixthRoot (j : ZMod 6) : Fin 2 → ℝ :=
+  ![Real.cos (Real.pi * j.val / 3), Real.sin (Real.pi * j.val / 3)]
+
+/-- A centrally symmetric convex disk centered at the origin (§1.1, §2.1): a compact convex set
+with nonempty interior, invariant under `x ↦ -x`. -/
+def IsCCSDisk (K : Set (Fin 2 → ℝ)) : Prop :=
+  Convex ℝ K ∧ IsCompact K ∧ (interior K).Nonempty ∧ ∀ x ∈ K, -x ∈ K
+
+/-- A balanced pair `(K, σ)` (Definition 2.4.7): `K` is a centrally symmetric convex disk and
+`σ` is a multi-curve of six regular `C¹` curves `σ_j : ℝ → ℝ²` such that
+
+1. each `σ_j` is `C¹` and regular;
+2. each derivative `σ_j'` is Lipschitz;
+3. `j ↦ σ_j(t)` is a multi-point for every `t`;
+4. the curvature constraint `det(σ_j'(t), σ_j''(t)) ≥ 0` holds for almost every `t`;
+5. (star condition) `σ_j'(t)` points into the open cone with apex `σ_j(t)` and rays through
+   `σ_{j+1}(t)` and `σ_j(t) + σ_{j+1}(t)`, that is, `σ_j' = α (σ_{j+1} - σ_j) + β σ_{j+1}` with
+   `α, β > 0`;
+6. the curves are periodic with the common period `6 t_f`, and each `σ_j` restricted to one
+   period is a simple closed curve whose image is the boundary of `K`.
+
+The counterclockwise orientation required by item 1 of the definition follows from items 3 and 5
+(`det(σ_j, σ_j') > 0`). -/
+def IsBalancedPair (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 → ℝ) (tf : ℝ) : Prop :=
+  IsCCSDisk K ∧
+    (∀ j, ContDiff ℝ 1 (σ j) ∧ ∀ t, deriv (σ j) t ≠ 0) ∧
+    (∀ j, ∃ C, LipschitzWith C (deriv (σ j))) ∧
+    (∀ t, IsMultiPoint fun j ↦ σ j t) ∧
+    (∀ j, ∀ᵐ t, 0 ≤ det2 (deriv (σ j) t) (deriv (deriv (σ j)) t)) ∧
+    (∀ j t, ∃ α β : ℝ, 0 < α ∧ 0 < β ∧
+      deriv (σ j) t = α • (σ (j + 1) t - σ j t) + β • σ (j + 1) t) ∧
+    0 < tf ∧ (∀ j t, σ j (t + 6 * tf) = σ j t) ∧
+    (∀ j, Set.InjOn (σ j) (Set.Ico 0 (6 * tf))) ∧
+    (∀ j, σ j '' Set.Ico 0 (6 * tf) = frontier K)
+
+/-- A balanced pair is in circle representation (§2.4) if `σ_j(0) = s_j*` for all `j`. -/
+def IsCircleRepresentation (σ : ZMod 6 → ℝ → Fin 2 → ℝ) : Prop :=
+  ∀ j, σ j 0 = sixthRoot j
+
 end SmoothedPolygons
 
 -- END SHARED DEFINITIONS
@@ -227,17 +286,23 @@ theorem smoothed_polygon_extremal (k : ℕ) (hk : 1 ≤ k) :
           IsPontryaginExtremal (tf k) (polygonControl k) g X Λ₁ ΛR lam := by
   sorry
 
-/-- **The smoothed octagon** (the example before Theorem 7.5.6). For `k = 1`,
-`y₀ = √((√8 - 1)/3)` and `t_sw = ln 2/(2√(√8 - 1))`, and the trajectory of the smoothed octagon has
-cost (area) `√12 (8 - √32 - ln 2)/(√8 - 1) < π`, hence density
-`(8 - √32 - ln 2)/(√8 - 1)`. -/
+/-- **The smoothed octagon** (the example before Theorem 7.5.6, with the area formula `eqn:cost`
+of §3.2). For `k = 1`, `y₀ = √((√8 - 1)/3)` and `t_sw = ln 2/(2√(√8 - 1))`; every trajectory of
+the smoothed octagon has cost `√12 (8 - √32 - ln 2)/(√8 - 1) < π`, so cost/√12 is
+`(8 - √32 - ln 2)/(√8 - 1)`; and the trajectory defines a balanced disk `K` in circle
+representation (`σ_j(t) = g(t) s_j*`, `σ_j(t + t_f) = σ_{j+1}(t)`) whose area is that cost. -/
 theorem smoothed_octagon_density :
     y₀ 1 = √((√8 - 1) / 3) ∧ tsw 1 = Real.log 2 / (2 * √(√8 - 1)) ∧
-      ∀ g X : ℝ → Mat2, IsStateTrajectory (tf 1) (polygonControl 1) g X → g 0 = 1 →
+      (∀ g X : ℝ → Mat2, IsStateTrajectory (tf 1) (polygonControl 1) g X → g 0 = 1 →
         X 0 = Φ 0 (y₀ 1) →
         reinhardtCost (tf 1) X = √12 * (8 - √32 - Real.log 2) / (√8 - 1) ∧
           reinhardtCost (tf 1) X < Real.pi ∧
-          reinhardtCost (tf 1) X / √12 = (8 - √32 - Real.log 2) / (√8 - 1) := by
+          reinhardtCost (tf 1) X / √12 = (8 - √32 - Real.log 2) / (√8 - 1)) ∧
+    ∃ (g X : ℝ → Mat2) (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 → ℝ),
+      IsStateTrajectory (tf 1) (polygonControl 1) g X ∧ g 0 = 1 ∧ X 0 = Φ 0 (y₀ 1) ∧
+      (∀ j t, σ j t = Matrix.mulVec (g t) (sixthRoot j)) ∧ (∀ j t, σ j (t + tf 1) = σ (j + 1) t) ∧
+      IsBalancedPair K σ (tf 1) ∧ IsCircleRepresentation σ ∧
+      MeasureTheory.volume K = ENNReal.ofReal (√12 * (8 - √32 - Real.log 2) / (√8 - 1)) := by
   sorry
 
 end SmoothedPolygonsChallenge
