@@ -141,15 +141,17 @@ automation:
       framework: "Claude Code 2.1.318 (VS Code extension, Claude Agent SDK)"
       tool_setup: >-
         The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, local copy
-        dated 2026-10-17) in one Claude Code session with 16 sub-agents of the same model (at most
-        9 at once): statement review against the TeX source, parallel proofs by chapter, proof
-        reviews, verification of the audit and of its literature section, and an exploration of
-        follow-up directions. Lean builds, the axiom audit, a route check of every proof against
-        the results the book's proof cites, and Comparator were run locally.
+        dated 2026-10-17) in one Claude Code session, in two rounds, with 43 sub-agents of the same
+        model (at most 9 at once): statement reviews against the TeX source, parallel proofs by
+        chapter and by part, proof reviews, verification of the audit and of its literature
+        section, and an exploration of follow-up directions. Lean builds, the axiom audit, a route
+        check of every proof against the results the book's proof cites, and Comparator were run
+        locally.
       cost:
         wall_time: >-
-          3.2 hours elapsed from the start to the completed audit report (5 November 2026); 6.4
-          hours of sub-agent working time
+          20.5 hours elapsed from the start to the completed audit report of the second round
+          (5-6 November 2026, including a night), of which the first round took 3.2 hours; 24.3
+          hours of sub-agent working time in all
         spend_usd: "not tracked"
         hardware: "local machine (Linux) for Lean builds; models via API"
       prompting_notes: >-
@@ -158,11 +160,13 @@ automation:
         Theorem 3.1.4(3)).
   spend_usd: "not tracked"
   notes: >-
-    The-Anh Vu-Le requested the formalization, chose its scope and approved two decisions (the
-    proof of Jacobi's formula, and the hypothesis of Theorem 3.1.4(3)). Claude Opus 5.5 wrote the
-    statements, the proofs, the audit report and the packaging; independent agents reviewed the
-    statements, the proofs and the report. No person has reviewed the proofs. Details and token
-    counts in CREDITS.md.
+    The-Anh Vu-Le requested the formalization, chose its scope (first the control-theoretic core,
+    then Chapter 2 with every cited theorem proved) and made the decisions it needed (the proof of
+    Jacobi's formula, the hypothesis of Theorem 3.1.4(3), the routes for Lemmas 2.2.1 and 2.2.5,
+    and the corrected form of the false Lemma 2.2.1). Claude Opus 5.5 wrote the statements, the
+    proofs, the audit report and the packaging; independent agents reviewed the statements, the
+    proofs and the report. No person has reviewed the proofs. Details and token counts in
+    CREDITS.md.
 
 fidelity:
   divergences: >-
@@ -248,8 +252,11 @@ alignment:
       note: >-
         For k = 1: y0 = sqrt((sqrt 8 - 1)/3), t_sw = ln 2/(2 sqrt(sqrt 8 - 1)), and the cost of every
         such trajectory is sqrt(12)(8 - sqrt 32 - ln 2)/(sqrt 8 - 1) < pi, so cost/sqrt(12) is
-        Reinhardt's density. The identification of the cost with the area (Green's theorem) and
-        of area/sqrt(12) with the packing density (Reinhardt, Fejes Toth) is not formalized.
+        Reinhardt's density; the trajectory bounds a balanced disk K in circle representation whose
+        area is that cost and whose greatest packing density (Definition 2.1.1, Euclidean disks,
+        congruent copies) is (8 - sqrt 32 - ln 2)/(sqrt 8 - 1). The book uses this density without
+        proving that balanced disks have least circumscribed hexagon of area sqrt(12) (REPORT.md,
+        E12); the formalization proves it.
 
 acknowledgements: >-
   Mathlib and the Lean FRO toolchain; Palomar's Comparator. Written with Claude (Anthropic) at the
