@@ -1498,7 +1498,7 @@ lemma rein_latticeDet_eq_of_tiling {H : Set (Fin 2 → ℝ)} (hHc : Convex ℝ H
 /-- The arithmetic of the hexagonal lattice packing: a nonzero lattice vector `p (2 m₀) + q (2 m₁)`
 leaves one of the three strips of the hexagon of twice the width. -/
 lemma rein_lattice_arith {D1 D2 D3 : ℝ} (h1 : 0 < D1) (h2 : 0 < D2) (h3 : 0 < D3)
-    (h4 : D3 < D1 + D2) (h5 : D1 < D2 + D3) (h6 : D2 < D1 + D3) {p q : ℤ}
+    (h5 : D1 < D2 + D3) (h6 : D2 < D1 + D3) {p q : ℤ}
     (hpq : ¬(p = 0 ∧ q = 0))
     (g0 : |2 * p * D1 + q * (D1 + D3 - D2)| < 2 * D1)
     (g1 : |p * (D2 + D3 - D1) + 2 * q * D2| < 2 * D2)
@@ -1643,7 +1643,7 @@ lemma rein_hex_lattice {v : ZMod 6 → Fin 2 → ℝ} (hv : IsCSHexagon v) :
     obtain ⟨s1, s2, s3⟩ := hs1
     obtain ⟨t1, t2, t3⟩ := hs2
     rw [abs_lt] at s1 s2 s3 t1 t2 t3
-    refine rein_lattice_arith h1 h2 h3 h4 h5 h6 (p := p) (q := q) ?_ ?_ ?_ ?_
+    refine rein_lattice_arith h1 h2 h3 h5 h6 (p := p) (q := q) ?_ ?_ ?_ ?_
     · rintro ⟨rfl, rfl⟩
       simp only [Int.cast_zero, zero_smul, add_zero] at hpq
       exact hne (sub_eq_zero.1 hpq.symm).symm
@@ -5989,7 +5989,7 @@ lemma rein_det2_hexMidpoint_two {v : ZMod 6 → Fin 2 → ℝ} (hv : IsCSHexagon
   rw [this, rein_det2_sub_right, rein_det2_self, sub_zero]
   exact rein_det2_hexMidpoint_pos hv
 
-lemma rein_φ_spec {j : ZMod 6} (hj : j = 1 ∨ j = 2) (θ : ℝ) :
+lemma rein_φ_spec {j : ZMod 6} (θ : ℝ) :
     ∃ r : ℝ, 0 < r ∧ hexMidpoint (V θ) j = r • rein_dir (rein_φ V K j θ) := by
   have hg := rein_gauge_pos hG.1 (rein_dir_ne_zero θ)
   have hy : hexMidpoint (V θ) j ≠ 0 := by
@@ -6021,8 +6021,8 @@ lemma rein_φ_add_int {j : ZMod 6} (θ : ℝ) (n : ℤ) :
 lemma rein_strictMono_φ {j : ZMod 6} (hj : j = 1 ∨ j = 2) : StrictMono (rein_φ V K j) := by
   have hinj : Function.Injective (rein_φ V K j) := by
     intro θ θ' h
-    obtain ⟨r, hr, hm⟩ := rein_φ_spec hG hV hVm hj θ
-    obtain ⟨r', hr', hm'⟩ := rein_φ_spec hG hV hVm hj θ'
+    obtain ⟨r, hr, hm⟩ := rein_φ_spec hG hV hVm θ
+    obtain ⟨r', hr', hm'⟩ := rein_φ_spec hG hV hVm θ'
     rw [← h] at hm'
     have e1 := rein_eq_bd hG.1 (rein_hexMidpoint_mem_frontier hG.1 (hV θ) j) hr hm
     have e2 := rein_eq_bd hG.1 (rein_hexMidpoint_mem_frontier hG.1 (hV θ') j) hr' hm'
@@ -6110,8 +6110,8 @@ theorem lemma2_2_7 {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) :
           fun θ ↦ by show rein_φ V K 2 (θ + 2 * π) + π = rein_φ V K 2 θ + π + 2 * π
                      rw [h2π θ, hp2 θ 1]; push_cast; ring⟩
     · have hg := inv_pos.2 (rein_gauge_pos hK' (rein_dir_ne_zero θ))
-      obtain ⟨r1, hr1, e1⟩ := rein_φ_spec hG hV hVm (j := 1) (Or.inl rfl) θ
-      obtain ⟨r2, hr2, e2⟩ := rein_φ_spec hG hV hVm (j := 2) (Or.inr rfl) θ
+      obtain ⟨r1, hr1, e1⟩ := rein_φ_spec hG hV hVm (j := 1) θ
+      obtain ⟨r2, hr2, e2⟩ := rein_φ_spec hG hV hVm (j := 2) θ
       have n3 := rein_hexMidpoint_add_three (hV θ).1 0
       have n4 := rein_hexMidpoint_add_three (hV θ).1 1
       have n5 := rein_hexMidpoint_add_three (hV θ).1 2

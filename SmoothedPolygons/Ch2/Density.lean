@@ -165,7 +165,7 @@ theorem definition2_1_2 {K : Set (Fin 2 → ℝ)} (hK : IsConvexDisk K)
     refine tsum_congr fun l ↦ ?_
     rw [inter_comm]
     rfl
-  obtain ⟨h1, h2⟩ := External.gruber_corollary_30_1 hK hpack
+  obtain ⟨h1, h2⟩ := External.gruber_corollary_30_1 hK
   rw [External.Gruber.upperDensity, hratio, hdet] at h1
   rw [External.Gruber.lowerDensity, hratio, hdet] at h2
   exact ⟨h1, h2⟩

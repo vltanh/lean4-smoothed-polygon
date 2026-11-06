@@ -318,7 +318,7 @@ open Gruber in
 lattice such that `{C + l | l ∈ L}` is a packing, then its upper and lower densities are both
 equal to `V(C)/d(L)`. -/
 theorem gruber_corollary_30_1 {ι : Type*} [Fintype ι] [DecidableEq ι] {C : Set (ι → ℝ)}
-    (hC : IsConvexBody C) {b : Module.Basis ι ℝ (ι → ℝ)} (hCb : IsLatticePacking C b) :
+    (hC : IsConvexBody C) {b : Module.Basis ι ℝ (ι → ℝ)} :
     upperDensity C b = ENNReal.ofReal (volume.real C / latticeDet b) ∧
       lowerDensity C b = ENNReal.ofReal (volume.real C / latticeDet b) := by
   -- The count below uses only that `C` is compact with nonempty interior: the sums count the
