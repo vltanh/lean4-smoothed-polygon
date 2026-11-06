@@ -29,6 +29,13 @@ import re
 import sys
 from pathlib import Path
 
+def git_ignored(path):
+    """Whether git ignores `path`: such files (private notes, build outputs) are not published,
+    so a link to them would be broken in the repository."""
+    import subprocess
+    return subprocess.run(['git', 'check-ignore', '-q', path], cwd=ROOT).returncode == 0
+
+
 # ---- configuration -------------------------------------------------------------------------
 # The Markdown documents to process.
 DOCS = ['README.md', 'REPORT.md', 'CREDITS.md', 'Basic/README.md', 'External/README.md']
@@ -120,7 +127,7 @@ class Linker:
         if path and not path.startswith(('/', '.')) and ' ' not in path:
             for base in [''] + PATH_BASES.get(doc_dir, []):
                 candidate = os.path.normpath(os.path.join(base, path))
-                if (ROOT / candidate).exists():
+                if (ROOT / candidate).exists() and not git_ignored(candidate):
                     return candidate
         if not IDENT.match(text):
             return None
@@ -153,7 +160,8 @@ class Linker:
             dest = old[1:-1] if old.startswith('<') else old
             recompute = LINE_LINK.match(dest) or dest == mathlib_page(text) or (
                 not dest.startswith(('http:', 'https:', 'mailto:', '#'))
-                and not (ROOT / doc_dir / dest.partition('#')[0]).exists())
+                and (not (ROOT / doc_dir / dest.partition('#')[0]).exists()
+                     or git_ignored(os.path.join(doc_dir, dest.partition('#')[0]))))
             if not recompute:
                 return match.group(0)
             new = self.link(text, doc_dir)
