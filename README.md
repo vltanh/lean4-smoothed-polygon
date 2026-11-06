@@ -1,5 +1,7 @@
 # Smoothed polygons in the Reinhardt control problem, in Lean
 
+[![Lean Action CI](https://github.com/vltanh/lean4-smoothed-polygon/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/vltanh/lean4-smoothed-polygon/actions/workflows/lean_action_ci.yml)
+
 A Lean 4 formalization of the control-theoretic core of Thomas Hales and Koundinya Vajjha,
 *Packings of Smoothed Polygons* ([arXiv:2405.04331v1](https://arxiv.org/abs/2405.04331), 2024).
 The book reformulates the Reinhardt problem, which asks for the centrally symmetric convex disk
