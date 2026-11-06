@@ -444,7 +444,9 @@ Crossref, GitHub, and the Isabelle AFP index. Google Scholar could not be querie
   2687–2693): the smoothed octagon is a local minimum. Published.
 - T. C. Hales, [*On the Reinhardt conjecture*](https://arxiv.org/abs/1103.4518), Vietnam J. Math.
   39 (2011) 287–307: the problem as a problem of Bolza; a minimizer has a `C¹` boundary with
-  Lipschitz derivative; a piecewise analytic minimizer is a smoothed polygon. Published.
+  Lipschitz derivative; a piecewise analytic minimizer is a smoothed polygon; and two conjectures
+  (Five Link, Link Reduction, §7.6) that would reduce the problem for smoothed polygons to a
+  finite-dimensional computation. Published.
 - T. C. Hales, [*The Reinhardt conjecture as an optimal control problem*](https://arxiv.org/abs/1703.01352),
   preprint (3 March 2017; version 1 only, no journal version): the reformulation as an optimal
   control problem; it claims that the smoothed octagon and the smoothed `(6k+2)`-gons are
@@ -482,6 +484,9 @@ claims progress on the Reinhardt conjecture since; the only claim we found is M.
 Lean repository below (lower bound `0.8950112`, above Tammela's `0.892656`). OpenAlex lists one work
 citing the book (B. Grechuk, *One Hundred Open Problems*, in *Landscape of 21st Century
 Mathematics*, Springer 2026, pp. 565–607), which we did not read; Semantic Scholar lists none.
+Informal: J. Kim's expository notes on the book
+([github.com/dylan0301/UnderstandingReinhardt](https://github.com/dylan0301/UnderstandingReinhardt),
+August 2026) include a chapter of open problems.
 
 ### Formalizations
 
@@ -507,7 +512,7 @@ Mathematics*, Springer 2026, pp. 565–607), which we did not read; Semantic Sch
 
 ## 11. What's next
 
-Plans for follow-up papers are kept in `NEXT.md`, which is not published.
+Plans for follow-up papers are kept in [`NEXT.md`](NEXT.md), which is not published.
 
 ### Open directions
 
@@ -526,6 +531,9 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   fixed point in closed form ([`costateΛR`](SmoothedPolygons/Ch7/StrongTransversality.lean#L111), [`strongL₁`](SmoothedPolygons/Ch7/StrongTransversality.lean#L64), [`strongLR`](SmoothedPolygons/Ch7/StrongTransversality.lean#L68)); the Jacobian also needs the
   general constant-control flow of §7.1 in every direction of the section, the implicit derivative
   of the switching time, and certified eigenvalue bounds.
+- **The other smoothed `(6k+2)`-gons.** Hales's 2017 preprint (Remark 49) asks whether the
+  smoothed `(6k+2)`-gons with `k ≥ 2` are local minima in the sense in which it shows the octagon to
+  be one; neither the preprint nor the book answers it.
 - **The smoothed `(6k−2)`-gons.** Remark 7.6.3 says they seem to satisfy every condition of an
   extremal except the sign of `λ_cost`, and the 2023–24 posters of Song and Sluis-Cremer
   (Section 10) state, without a published proof, that they are extremals of the area-maximization
