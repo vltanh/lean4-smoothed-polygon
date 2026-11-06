@@ -1,6 +1,7 @@
 module
 
 public import Basic.Analysis.Convex.CellDecomposition.Defs
+public import Basic.Analysis.Convex.CellDecomposition.HoleStructure
 public import Basic.Analysis.Convex.CellDecomposition.PolygonOfFrontier
 public import Basic.Analysis.Convex.TietzeNakajima
 public import Mathlib.Analysis.Convex.Join
@@ -8,7 +9,11 @@ public import Mathlib.Analysis.Convex.Join
 /-!
 # (B) The holes of a maximal family are pinwheels
 
-Part of the proof of the cell lemma (`Basic.Analysis.Convex.CellDecomposition`).
+Part of the proof of the cell lemma (`Basic.Analysis.Convex.CellDecomposition`). The core of the
+argument (`PlaneConvex.hole_structure`) and the polygon facts it uses (`pin_local_cone`,
+`pin_conic_halfPlanesInter`, `pin_inter_interior_eq_empty`, `pin_frontier_halfPlanesInter_subset`,
+the definition `pin_HasRotationProperty`, ...) are in
+`Basic.Analysis.Convex.CellDecomposition.HoleStructure`.
 -/
 
 @[expose] public section
@@ -64,16 +69,6 @@ theorem pin_volume_diff_pos {C D : Set (Fin 2 → ℝ)} (hC : IsClosed C)
         _ = dist z y + r := by ring
     calc t * ‖u - y‖ ≤ t * (dist z y + r) := mul_le_mul_of_nonneg_left h1 ht.le
       _ < s := hts
-
-theorem pin_convex_of_isConvexPolygon {P : Set (Fin 2 → ℝ)} (hP : IsConvexPolygon P) :
-    Convex ℝ P := by
-  obtain ⟨⟨k, a, c, rfl⟩, -, -⟩ := hP
-  exact convex_halfPlanesInter a c
-
-theorem pin_isClosed_of_isConvexPolygon {P : Set (Fin 2 → ℝ)} (hP : IsConvexPolygon P) :
-    IsClosed P := by
-  obtain ⟨⟨k, a, c, rfl⟩, -, -⟩ := hP
-  exact isClosed_halfPlanesInter a c
 
 /-- The *one-point enlargement property* of a family of cells in `Q`: no cell `C i` can be
 replaced by the convex hull of `C i` and a point `y ∈ Q \ C i` without overlapping another cell.
@@ -242,33 +237,6 @@ theorem pin_frontier_hole_subset {Q : Set (Fin 2 → ℝ)} (hQcl : IsClosed Q) {
     rw [hQcl.frontier_eq]
     exact ⟨hpQ, hpint⟩
 
-/-- The frontier of an intersection of half-planes lies on the lines with nonzero normal. -/
-theorem pin_frontier_halfPlanesInter_subset {ι : Type*} [Finite ι] (a : ι → Fin 2 → ℝ)
-    (c : ι → ℝ) : frontier (halfPlanesInter a c) ⊆ ⋃ l, ⋃ (_ : a l ≠ 0), {x | a l ⬝ᵥ x = c l} := by
-  intro p hp
-  have hpS : p ∈ halfPlanesInter a c := (isClosed_halfPlanesInter a c).frontier_subset hp
-  by_contra hcon
-  simp only [mem_iUnion, mem_ofPred_eq, not_exists] at hcon
-  apply hp.2
-  set O := ⋂ l, {x : Fin 2 → ℝ | a l ≠ 0 → a l ⬝ᵥ x < c l}
-  have hO : IsOpen O := by
-    refine isOpen_iInter_of_finite fun l ↦ ?_
-    by_cases hl : a l = 0
-    · have : {x : Fin 2 → ℝ | a l ≠ 0 → a l ⬝ᵥ x < c l} = univ := by ext; simp [hl]
-      rw [this]; exact isOpen_univ
-    · have : {x : Fin 2 → ℝ | a l ≠ 0 → a l ⬝ᵥ x < c l} = {x | a l ⬝ᵥ x < c l} := by
-        ext; simp [hl]
-      rw [this]; exact isOpen_lt (by fun_prop) continuous_const
-  have hOS : O ⊆ halfPlanesInter a c := by
-    intro x hx l
-    by_cases hl : a l = 0
-    · have := hpS l
-      simp only [hl, zero_dotProduct] at this ⊢
-      exact this
-    · exact (mem_iInter.1 hx l hl).le
-  have hpO : p ∈ O := mem_iInter.2 fun l hl ↦ lt_of_le_of_ne (hpS l) (hcon l hl)
-  exact mem_interior.2 ⟨O, hOS, hO, hpO⟩
-
 /-! ### The rotation property -/
 
 /-- A point violating only the constraint `l` of a polygon sees only the side on the line `l`:
@@ -359,31 +327,6 @@ theorem pin_convexHull_insert_subset {ι : Type*} (a : ι → Fin 2 → ℝ) (c 
         simp only [u]; module
     _ = s' • y' + t • w := by rw [e1, e2, add_comm]
 
-/-- A point of a cell is not in the interior of another cell. -/
-theorem pin_inter_interior_eq_empty {n : ℕ} {C : Fin n → Set (Fin 2 → ℝ)}
-    (hC : ∀ i, IsConvexPolygon (C i)) (hdisj : NonOverlapping C) {i j : Fin n} (hij : i ≠ j) :
-    C i ∩ interior (C j) = ∅ := by
-  rw [Set.eq_empty_iff_forall_notMem]
-  rintro z ⟨hzi, hzj⟩
-  have hcl : z ∈ closure (interior (C i)) := by
-    rw [(pin_convex_of_isConvexPolygon (hC i)).closure_interior_eq_closure_of_nonempty_interior
-      (hC i).2.2]
-    exact subset_closure hzi
-  obtain ⟨w, hw1, hw2⟩ := mem_closure_iff.1 hcl _ isOpen_interior hzj
-  exact Set.disjoint_left.1 (hdisj hij) hw2 hw1
-
-/-- The *rotation property* of a family of cells in `Q`: if a point `y ∈ Q` violates exactly one
-constraint `l` of a cell `C i = halfPlanesInter a c` (so that `conv (C i ∪ {y})` adds to `C i` the
-triangle-like set `conv (S ∪ {y})` over the side `S = C i ∩ {⟨a l, x⟩ = c l}`), then the interior of
-some other cell meets `conv (S ∪ {y})`. Rotating the side `S` outwards about one of its endpoints
-is the case where `y` lies on the line of the adjacent side. -/
-def pin_HasRotationProperty {n : ℕ} (Q : Set (Fin 2 → ℝ)) (C : Fin n → Set (Fin 2 → ℝ)) :
-    Prop :=
-  ∀ i, ∀ {k : ℕ} (a : Fin k → Fin 2 → ℝ) (c : Fin k → ℝ), C i = halfPlanesInter a c →
-    ∀ l, ∀ y ∈ Q, c l < a l ⬝ᵥ y → (∀ m, m ≠ l → a m ⬝ᵥ y ≤ c m) →
-      ∃ j, j ≠ i ∧ (interior (C j) ∩
-        convexHull ℝ (insert y (C i ∩ {x | a l ⬝ᵥ x = c l}))).Nonempty
-
 theorem pin_hasRotationProperty_of_enlargement {n : ℕ} {Q : Set (Fin 2 → ℝ)}
     {C : Fin n → Set (Fin 2 → ℝ)} (hC : ∀ i, IsConvexPolygon (C i)) (hdisj : NonOverlapping C)
     (henl : pin_HasEnlargementProperty Q C) : pin_HasRotationProperty Q C := by
@@ -399,60 +342,7 @@ theorem pin_hasRotationProperty_of_enlargement {n : ℕ} {Q : Set (Fin 2 → ℝ
       (by rw [pin_inter_interior_eq_empty hC hdisj (Ne.symm hji)]; exact Set.notMem_empty _)
   · exact h
 
-/-- **Local cone structure of a polygon.** Near a point `p` of `halfPlanesInter a c`, only the
-constraints active at `p` matter. -/
-theorem pin_local_cone {ι : Type*} [Finite ι] (a : ι → Fin 2 → ℝ) (c : ι → ℝ) {p : Fin 2 → ℝ}
-    (hp : p ∈ halfPlanesInter a c) :
-    ∃ r > 0, ∀ x ∈ Metric.ball p r,
-      (x ∈ halfPlanesInter a c ↔ ∀ l, a l ⬝ᵥ p = c l → a l ⬝ᵥ (x - p) ≤ 0) := by
-  set O := ⋂ l, {x : Fin 2 → ℝ | a l ⬝ᵥ p < c l → a l ⬝ᵥ x < c l}
-  have hO : IsOpen O := by
-    refine isOpen_iInter_of_finite fun l ↦ ?_
-    by_cases hl : a l ⬝ᵥ p < c l
-    · have : {x : Fin 2 → ℝ | a l ⬝ᵥ p < c l → a l ⬝ᵥ x < c l} = {x | a l ⬝ᵥ x < c l} := by
-        ext x; simp only [mem_ofPred_eq]; exact ⟨fun h ↦ h hl, fun h _ ↦ h⟩
-      rw [this]; exact isOpen_lt (by fun_prop) continuous_const
-    · have : {x : Fin 2 → ℝ | a l ⬝ᵥ p < c l → a l ⬝ᵥ x < c l} = univ := by
-        ext x; simp only [mem_ofPred_eq, mem_univ, iff_true]; exact fun h ↦ absurd h hl
-      rw [this]; exact isOpen_univ
-  obtain ⟨r, hr, hrO⟩ := Metric.isOpen_iff.1 hO p (mem_iInter.2 fun l h ↦ h)
-  refine ⟨r, hr, fun x hx ↦ ⟨fun hxP l hl ↦ ?_, fun h l ↦ ?_⟩⟩
-  · rw [dotProduct_sub, hl]; linarith [hxP l]
-  · by_cases hl : a l ⬝ᵥ p = c l
-    · have := h l hl
-      rw [dotProduct_sub, hl] at this
-      linarith
-    · exact (mem_iInter.1 (hrO hx) l (lt_of_le_of_ne (hp l) hl)).le
-
-/-! ### The remaining steps -/
-
-/-- A scaled point stays in the ball. -/
-theorem pin_mem_ball_scale {p x : Fin 2 → ℝ} {r t : ℝ} (hx : x ∈ Metric.ball p r) (ht : 0 < t)
-    (ht1 : t ≤ 1) : p + t • (x - p) ∈ Metric.ball p r := by
-  rw [Metric.mem_ball, dist_eq_norm] at hx ⊢
-  rw [add_sub_cancel_left, norm_smul, Real.norm_eq_abs, abs_of_pos ht]
-  calc t * ‖x - p‖ ≤ 1 * ‖x - p‖ := mul_le_mul_of_nonneg_right ht1 (norm_nonneg _)
-    _ < r := by rw [one_mul]; exact hx
-
-/-- An intersection of half-planes is conic near any point. -/
-theorem pin_conic_halfPlanesInter {ι : Type*} [Finite ι] (a : ι → Fin 2 → ℝ) (c : ι → ℝ)
-    (p : Fin 2 → ℝ) : ∃ r > 0, ∀ x ∈ Metric.ball p r, ∀ t : ℝ, 0 < t → t ≤ 1 →
-      (x ∈ halfPlanesInter a c ↔ p + t • (x - p) ∈ halfPlanesInter a c) := by
-  by_cases hp : p ∈ halfPlanesInter a c
-  · obtain ⟨r, hr, hcone⟩ := pin_local_cone a c hp
-    refine ⟨r, hr, fun x hx t ht ht1 ↦ ?_⟩
-    rw [hcone x hx, hcone _ (pin_mem_ball_scale hx ht ht1)]
-    simp only [add_sub_cancel_left, dotProduct_smul, smul_eq_mul]
-    refine forall_congr' fun l ↦ imp_congr_right fun _ ↦ ?_
-    constructor
-    · intro h; nlinarith
-    · intro h
-      by_contra h'
-      push Not at h'
-      nlinarith
-  · obtain ⟨r, hr, hball⟩ := Metric.isOpen_iff.1 (isClosed_halfPlanesInter a c).isOpen_compl p hp
-    refine ⟨r, hr, fun x hx t ht ht1 ↦ ?_⟩
-    exact iff_of_false (hball hx) (hball (pin_mem_ball_scale hx ht ht1))
+/-! ### Holes are locally conic; the structure of the holes -/
 
 /-- **Holes are locally conic.** For `p` in a hole `H = closure U` (`U` a connected component of
 `F = Q \ ⋃ C i`), `H` coincides near `p` with a cone at `p`: for some `r > 0`, every
@@ -556,49 +446,47 @@ theorem pin_hole_locally_conic {m n : ℕ} (b : Fin m → Fin 2 → ℝ) (d : Fi
 /-- **The core of Böröczky's Lemma 5.** Let `Q = halfPlanesInter b d` be bounded and
 `C 0, …, C (n-1)`, `n ≥ 1`, non-overlapping convex polygons in `Q` with the one-point enlargement
 property, in its rotation form (`pin_HasRotationProperty`). Then every hole `H` (closure of a
-connected component of `Q \ ⋃ C i`) lies in `interior Q`, is locally convex, and has every
+connected component `U` of `Q \ ⋃ C i`) lies in `interior Q`, is locally convex, and has every
 extreme point a side point of some cell. (That `H` has nonempty interior and polygonal frontier is
 proved separately:
 `pin_interior_hole_nonempty`, `pin_frontier_hole_subset`, `pin_frontier_halfPlanesInter_subset`.)
 
-Argument. *Local structure.* Near any point `p`, each polygon coincides with its tangent cone at
-`p` (only the half-planes active at `p` matter, `pin_local_cone`), so `H` is locally conic at `p`
-(`pin_hole_locally_conic`) and `H` near `p` is a finite union of closed
-sectors at `p`, bounded by rays on sides of cells or of `Q`. The frontier of `H` is a finite union
-of maximal segments, each on a side of a cell (*cell segments*) or of `Q`; at each *corner* (a
-point `v` together with one sector of `H` at `v`) two segment ends meet.
+Proof (`PlaneConvex.hole_structure`, in `Basic.Analysis.Convex.CellDecomposition.HoleStructure`,
+which also proves that `H` is convex).
 
-*Rotation lemma.* A cell segment `s` on a side `e = [p, q] = C i ∩ {⟨a l, x⟩ = c l}` of `C i` is
-not all of `e`. Otherwise let `y` be the point on the extension, beyond `q`, of the side of `C i`
-adjacent at `q`, at small distance; `y` violates only the constraint `l`, and the thin triangle
-`conv {p, q, y} = conv (e ∪ {y})` lies, apart from `e`, in `H` (no other cell meets the relative
-interior of `e`; the other cells at `p` and `q` lie outside the thin angle; the remaining cells
-are at positive distance from `e`), so it meets no other cell's interior, contradicting
-`pin_HasRotationProperty`. So every cell segment has an end in the relative
-interior of its side.
+*Rotation lemma* (`hole_Cfg.rotation_contra`). A side `e = [p, q] = C i ∩ {⟨a l, x⟩ = c l}` of a
+cell does not have a thin triangle over it (outside `C i`) inside `Q \ ⋃ C j`: the point `y` above
+the midpoint of `e` violates only the constraint `l` (after dropping the constraints duplicating
+`l`), and `conv (e ∪ {y})` would meet no other cell's interior, contradicting
+`pin_HasRotationProperty`.
 
-*Counting.* At a corner `v` at most one incident segment has `v` in the relative interior of its
-side (a side through `v` fills an angle `π` at `v`), and none if `v ∈ ∂Q` (the angle of `Q` at
-`v` is `≤ π`). Counting segment ends (`#cell segments ≤ #corners off ∂Q`, and
-`#segments = #corners`) forces: every corner off `∂Q` is a T-junction (a side of one cell passes
-through `v`, the other segment starts at `v` along a side of another cell, and the sector of `H`
-at `v` is `< π`), and the segments on `∂Q` form whole boundary cycles. The remaining global
-configurations are excluded by turning (or by `pin_convex_of_isClosed_of_isConnected` applied to
-`H`, which is then locally convex): two sectors of `H` at one corner, or a boundary cycle along
-all of `∂Q`, or an island of cells inside `H`, would give a closed polygon all of whose angles
-seen from `H` are convex while it encloses cells, which is impossible (`H` would be convex and
-contain those cells). Hence `H ⊆ interior Q`, `H` is locally convex (a half-plane near points of
-segments, a sector `< π` near corners), and each extreme point of `H` is a corner, a side point of
-a cell (`IsSidePoint`, with `ε` less than the distance from `v` to the other lines of that cell).
+*Darts.* A *state* is a side of a cell traversed from its first endpoint `q` with the cell on the
+right and `U` on the left near `q`. Along it `U` borders the side up to the first point `q'` met
+by another cell; by the rotation lemma `q'` lies in the relative interior of the side, so `q'` is
+a side point of the cell, and turning at `q'` from the side towards the cell met there gives a new
+state starting at `q'` (the T-junction).
 
-Available ingredients (proved above): `pin_local_cone`, `pin_hole_locally_conic` (the local
-sector structure), `pin_convexHull_insert_subset`, `pin_inter_interior_eq_empty`,
-`pin_frontier_hole_subset`, `pin_interior_hole_nonempty`, and the Tietze–Nakajima theorem
-`pin_convex_of_isClosed_of_isConnected`. What remains is to extract the segments and corners of
-`frontier H` from the local cones, the rotation lemma (choosing `y` and checking that the thin
-triangle lies in `U ∪ e`), the counting, and the turning step.
+*Counting.* The end point `q'` of the dart of a state determines the state (the cell with a side
+point at `q'` bordering `U`, and its side, are unique). So `state ↦ end point` is an injection
+from the finite set of states into the set of base points of states which are side points, and
+every base point of a state is a side point. Hence every point of `H` in a cell is a side point of
+some cell (otherwise turning around it gives a state at a point which is no side point).
 
-Estimated size: 1200–2000 lines. -/
+*Consequences.* A point of `H ∩ ∂Q` is not a side point, so no cell meets `H ∩ ∂Q`; then `H`
+contains a neighbourhood in `Q` of each of its points of `∂Q`, so `∂Q ⊆ H` if `H` meets `∂Q`
+(`∂Q` is connected), and the lexicographically largest point of the cells would be a point of `H`
+in a cell which is not a side point. So `H ⊆ interior Q`, `U` is open, every point of `H \ U` is a
+side point of a cell, and `U` (hence `H`) is convex: a segment of `H` leaving `U` at a side point
+of `C k` would enter the interior of `C k`. Extreme points of `H` lie in `H \ U`.
+
+Departure from the paper: Böröczky counts segment ends around the boundary cycles of `H` (each
+cell segment has an end in the relative interior of its side, at most one per corner) and
+excludes the remaining configurations (pinched corners, a cycle along `∂Q`, islands of cells) by
+a turning argument. We use the same two local facts (the rotation lemma and the T-junction at the
+end of a segment), but replace the boundary cycles by the injectivity of `state ↦ end point`
+(which needs no Jordan-curve or turning argument), and obtain convexity directly from the
+connectedness of the open set `U` (pinched corners included); the case of `∂Q` uses the
+connectedness of `∂Q` and an extreme point of the union of the cells. -/
 theorem pin_hole_structure_of_rotation {m n : ℕ} (hn : 1 ≤ n) (b : Fin m → Fin 2 → ℝ)
     (d : Fin m → ℝ)
     (hQ : Bornology.IsBounded (halfPlanesInter b d)) (C : Fin n → Set (Fin 2 → ℝ))
@@ -608,7 +496,8 @@ theorem pin_hole_structure_of_rotation {m n : ℕ} (hn : 1 ≤ n) (b : Fin m →
     H ⊆ interior (halfPlanesInter b d) ∧
       (∀ p ∈ H, ∃ r > 0, Convex ℝ (H ∩ Metric.ball p r)) ∧
       (∀ v ∈ extremePoints ℝ H, ∃ i, IsSidePoint (C i) v) := by
-  sorry
+  obtain ⟨hHQ, hconv, hext⟩ := hole_structure hn b d hQ C hC hCQ hdisj hrot hH
+  exact ⟨hHQ, fun p _ ↦ ⟨1, one_pos, hconv.inter (convex_ball p 1)⟩, hext⟩
 
 /-- **The core of Böröczky's Lemma 5**, for families with the one-point enlargement property:
 reduced to its rotation form (`pin_hasRotationProperty_of_enlargement`) and

@@ -13,6 +13,7 @@ import all Basic.Analysis.Calculus.MatrixFTC
 import all Basic.Analysis.Complex.UpperHalfPlane.GeneralizedCircle
 import all Basic.Analysis.Convex.CellDecomposition
 import all Basic.Analysis.Convex.CellDecomposition.Defs
+import all Basic.Analysis.Convex.CellDecomposition.HoleStructure
 import all Basic.Analysis.Convex.CellDecomposition.MaximalCells
 import all Basic.Analysis.Convex.CellDecomposition.PinwheelHoles
 import all Basic.Analysis.Convex.CellDecomposition.PolygonOfFrontier
