@@ -1,5 +1,6 @@
 module
 
+public import Basic.Analysis.ODE.ControlSystem
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import Mathlib.Analysis.Convex.Basic
 public import Mathlib.Analysis.Calculus.ContDiff.Defs
@@ -36,9 +37,11 @@ control, which is a measurable function).
   the velocity sets are linear images of the original ones, hence convex, and trajectories starting
   on `M` stay on `M`. Measurable controls on manifolds would need machinery Mathlib lacks.
 * **Control system** (Agrachev–Sachkov's standing assumptions): `f : ℝⁿ × ℝᵐ → ℝⁿ` continuous,
-  and smooth in `q` for each control value. Admissible controls are measurable `u : [0, T] → U`
-  (bounded, since `U` is compact); the trajectory is a solution in Carathéodory's sense
-  (`q(t) = q₀ + ∫₀ᵗ f(q(s), u(s)) ds`, as in the project's `IsIntegralCurve`).
+  smooth in `q` for each control value, with `∂f/∂q` continuous jointly in `(q, u)`. Admissible
+  controls are measurable `u : [0, T] → U` (bounded, since `U` is compact); the trajectory is a
+  solution in Carathéodory's sense (`q(t) = q₀ + ∫₀ᵗ f(q(s), u(s)) ds`, as in the project's
+  `IsIntegralCurve`). The smoothness assumptions give existence and uniqueness of trajectories for
+  a given control; the proof of the theorem does not use them.
 * **Compact support.** "The support of `f` is a compact subset of `M × U`" is, `U` being compact,
   the source's "there is a compact `K` with `f(q, u) = 0` for `q ∉ K`, `u ∈ U`".
 * **Attainable sets.** `A_{q₀}(T)`, the endpoints at time `T` of the admissible trajectories from
@@ -48,11 +51,28 @@ control, which is a measurable function).
   that depend on the control: on `ℝ`, `q' = u ψ(q)` with `U = [-1, 1]` and a bump `ψ = 1` on
   `[-1, 1]`, minimizing `∫₀¹ (q² + 1 - u²) dt` from `q(0) = 0` to `q(1) = 0` has infimum `0`
   (chattering `u = ±1`) and no minimizer (cost `0` forces `q = 0`, hence `u = 0` a.e., of cost `1`).
-  We state the existence of an optimal control in the source's form, for the fixed-time problem
-  `q(0) = q₀`, `q(T) = q₁`, `∫₀ᵀ φ(q, u) dt → min` with `φ` continuous, under the convexity of the
-  extended velocity sets `{(f(q, u), φ(q, u)) | u ∈ U}`; when `φ` does not depend on `u` (as for the
-  Reinhardt problem, whose cost `-(3/2)⟨J, X⟩` is a function of the state), this is the book's
-  convexity hypothesis.
+  We state the existence of an optimal control in the source's form, for the problem
+  `q(0) = q₀`, `q(t_f) = q₁`, `∫₀^{t_f} φ(q, u) dt → min` with `φ` continuous, under the convexity
+  of the extended velocity sets `{(f(q, u), φ(q, u)) | u ∈ U}`; when `φ` does not depend on `u` (as
+  for the Reinhardt problem, whose cost `-(3/2)⟨J, X⟩` is a function of the state), this is the
+  book's convexity hypothesis. Both the fixed terminal time `t_f = T` and the free terminal time
+  `t_f ∈ [0, T]` are covered (the book applies the theorem with free terminal time `t_f ≤ π/3`); the
+  latter follows from the compactness of the extended attainable set `A^{≤T}`.
+
+## Proof
+
+The general theory is in `Basic/Analysis/ODE/ControlSystem.lean` (for a control system on a
+finite-dimensional space): Filippov's compactness theorem
+(`ControlSystem.isCompact_reachableSet`, `ControlSystem.isCompact_reachableSetLE`) and the existence
+of optimal controls through the system extended by the cost coordinate
+(`ControlSystem.exists_optimal_fixedTime`, `ControlSystem.exists_optimal_freeTime`). The compact
+support of `f` bounds the velocities. The proof is the standard one: a sequence of
+trajectories with endpoints converging has a limit trajectory, which is Lipschitz, has its velocity
+in the convex set `f(q, U)` almost everywhere, and is driven by a measurable control obtained by a
+measurable selection (Filippov's lemma, `MeasureTheory.exists_measurable_forall_mem_ae_eq_zero` in
+`Basic/MeasureTheory/MeasurableSelection.lean`). The limit is extracted by Tychonoff's theorem
+(pointwise convergence along a filter finer than `atTop`) rather than Arzelà–Ascoli; since the
+trajectories are equi-Lipschitz, pointwise convergence is all the argument needs.
 
 The application in §6.1 (an optimal control exists for the Reinhardt problem, TeX 4553–4600) uses
 the compactification of the state space (Theorem 5.0.2 of Chapter 5, `th:compactification`), which
@@ -104,23 +124,32 @@ open scoped ContDiff
 
 variable {n m : ℕ}
 
+set_option linter.unusedVariables false in
 /-- **Filippov's theorem** (Theorem 6.1.1 of the book; Agrachev–Sachkov, *Control Theory from the
 Geometric Viewpoint*, Theorem 10.1, and its consequence for problems with integral cost), on `ℝⁿ`.
-Let `q' = f(q, u)` be a control system on `ℝⁿ` with `f` continuous and smooth in `q`, with a
-compact control set `U ⊆ ℝᵐ`; assume that the velocity sets `f(q, U)` are convex and that `f` has
-compact support (`f(q, u) = 0` for `q` outside a compact set and `u ∈ U`). Then
+Let `q' = f(q, u)` be a control system on `ℝⁿ` with `f` continuous and smooth in `q` (with
+`∂f/∂q` continuous in `(q, u)`), with a compact control set `U ⊆ ℝᵐ`; assume that the velocity
+sets `f(q, U)` are convex and that `f` has compact support (`f(q, u) = 0` for `q` outside a compact
+set and `u ∈ U`). Then
 
 1. the attainable sets `A_{q₀}(T)` and `A_{q₀}^{≤T}` are compact, for all `q₀` and `T ≥ 0`;
 2. an optimal control exists: for a continuous cost `φ(q, u)` whose extended velocity sets
-   `{(f(q, u), φ(q, u)) | u ∈ U}` are convex, and every `q₁ ∈ A_{q₀}(T)`, some admissible pair
-   from `q₀` to `q₁` at time `T` has the least cost `∫₀ᵀ φ(q, u) dt` among all such pairs.
+   `{(f(q, u), φ(q, u)) | u ∈ U}` are convex,
+   * (fixed terminal time) for every `q₁ ∈ A_{q₀}(T)`, some admissible pair from `q₀` to `q₁` at
+     time `T` has the least cost `∫₀ᵀ φ(q, u) dt` among all such pairs;
+   * (free terminal time) for every `q₁ ∈ A_{q₀}^{≤T}`, some admissible pair from `q₀` to `q₁` at
+     a time `τ ∈ [0, T]` has the least cost `∫₀^τ φ(q, u) dt` among all admissible pairs from `q₀`
+     to `q₁` at times `τ' ∈ [0, T]`.
 
-See the module docstring for the reading (state space `ℝⁿ`; the extended convexity in part 2,
-without which part 2 is false, and which is the book's hypothesis when `φ` does not depend on `u`).
+The smoothness assumptions on `f` are Agrachev–Sachkov's standing assumptions; the proof does not
+use them. See the module docstring for the reading (state space `ℝⁿ`; the extended convexity in
+part 2, without which part 2 is false, and which is the book's hypothesis when `φ` does not depend
+on `u`).
 -/
 theorem filippov (f : (Fin n → ℝ) → (Fin m → ℝ) → Fin n → ℝ) (U : Set (Fin m → ℝ))
     (hU : IsCompact U) (hf : Continuous fun p : (Fin n → ℝ) × (Fin m → ℝ) ↦ f p.1 p.2)
     (hfq : ∀ u ∈ U, ContDiff ℝ ∞ fun q ↦ f q u)
+    (hfq' : Continuous fun p : (Fin n → ℝ) × (Fin m → ℝ) ↦ fderiv ℝ (fun q ↦ f q p.2) p.1)
     (hsupp : ∃ K : Set (Fin n → ℝ), IsCompact K ∧ ∀ q ∉ K, ∀ u ∈ U, f q u = 0)
     (hconv : ∀ q, Convex ℝ (f q '' U)) :
     (∀ (q₀ : Fin n → ℝ) (T : ℝ), 0 ≤ T →
@@ -128,9 +157,32 @@ theorem filippov (f : (Fin n → ℝ) → (Fin m → ℝ) → Fin n → ℝ) (U 
     ∀ φ : (Fin n → ℝ) → (Fin m → ℝ) → ℝ,
       (Continuous fun p : (Fin n → ℝ) × (Fin m → ℝ) ↦ φ p.1 p.2) →
       (∀ q, Convex ℝ ((fun u ↦ (f q u, φ q u)) '' U)) →
-      ∀ (q₀ q₁ : Fin n → ℝ) (T : ℝ), 0 ≤ T → q₁ ∈ attainableSet f U q₀ T →
-        ∃ u q, IsAdmissiblePair f U q₀ T u q ∧ q T = q₁ ∧
-          ∀ u' q', IsAdmissiblePair f U q₀ T u' q' → q' T = q₁ → cost φ T u q ≤ cost φ T u' q' := by
-  sorry
+      ∀ (q₀ q₁ : Fin n → ℝ) (T : ℝ), 0 ≤ T →
+        (q₁ ∈ attainableSet f U q₀ T →
+          ∃ u q, IsAdmissiblePair f U q₀ T u q ∧ q T = q₁ ∧
+            ∀ u' q', IsAdmissiblePair f U q₀ T u' q' → q' T = q₁ →
+              cost φ T u q ≤ cost φ T u' q') ∧
+        (q₁ ∈ attainableSetLE f U q₀ T →
+          ∃ τ ∈ Set.Icc 0 T, ∃ u q, IsAdmissiblePair f U q₀ τ u q ∧ q τ = q₁ ∧
+            ∀ τ' ∈ Set.Icc 0 T, ∀ u' q', IsAdmissiblePair f U q₀ τ' u' q' → q' τ' = q₁ →
+              cost φ τ u q ≤ cost φ τ' u' q') := by
+  -- the smoothness of `f` in `q` (`hfq`, `hfq'`: existence and uniqueness of trajectories) is
+  -- not needed
+  -- the velocities are bounded, `f` being continuous with compact support
+  obtain ⟨K, hK, hfK⟩ := hsupp
+  obtain ⟨C, hC⟩ := (hK.prod hU).exists_bound_of_continuousOn hf.continuousOn
+  have hM : ∀ q, ∀ u ∈ U, ‖f q u‖ ≤ max C 0 := by
+    intro q u hu
+    by_cases hq : q ∈ K
+    · exact (hC (q, u) ⟨hq, hu⟩).trans (le_max_left _ _)
+    · rw [hfK q hq u hu, norm_zero]
+      exact le_max_right _ _
+  refine ⟨fun q₀ T hT ↦ ⟨?_, ?_⟩, fun φ hφ hconvφ q₀ q₁ T hT ↦ ⟨fun h₁ ↦ ?_, fun h₁ ↦ ?_⟩⟩
+  · exact ControlSystem.isCompact_reachableSet hf hU hconv hT (le_max_right _ _)
+      fun u q h s hs ↦ hM _ _ (h.2.1 s hs)
+  · exact ControlSystem.isCompact_reachableSetLE hf hU hconv (le_max_right _ _)
+      fun τ _ u q h s hs ↦ hM _ _ (h.2.1 s hs)
+  · exact ControlSystem.exists_optimal_fixedTime hf hU hφ hconvφ hM hT h₁
+  · exact ControlSystem.exists_optimal_freeTime hf hU hφ hconvφ hM h₁
 
 end External
