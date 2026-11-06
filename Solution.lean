@@ -5,7 +5,12 @@ public import SmoothedPolygons.AppA.FunctionalDerivative
 public import SmoothedPolygons.AppA.MatrixIdentities
 public import SmoothedPolygons.AppA.Riemannian
 public import SmoothedPolygons.Ch2.BalancedCircle
+public import SmoothedPolygons.Ch2.BalancedDensity
+public import SmoothedPolygons.Ch2.Boundary
+public import SmoothedPolygons.Ch2.Density
+public import SmoothedPolygons.Ch2.Mahler
 public import SmoothedPolygons.Ch2.MultiCurve
+public import SmoothedPolygons.Ch2.Reinhardt
 public import SmoothedPolygons.Ch3.AreaFormula
 public import SmoothedPolygons.Ch3.ControlProblem
 public import SmoothedPolygons.Ch3.ControlSets
