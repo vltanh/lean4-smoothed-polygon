@@ -16,8 +16,9 @@ circumscribed hexagons (Theorems 2.3.6 and 2.3.7, cited), Mahler's critical hexa
 (Definition 2.3.8), and their relation to Reinhardt's (Theorem 2.3.9, Corollary 2.3.10). The
 proof of Theorem 2.3.9 needs the existence of a critical lattice (`crit_exists_critical`, Mahler's
 compactness theorem, `Basic.Algebra.Module.ZLattice.PlaneCritical`) and some geometry of
-centrally symmetric hexagons (their area and edge midpoints, `SmoothedPolygons.Ch2.Hexagon`; the
-lines of their edges, `mm_*`, `crit_*`).
+centrally symmetric hexagons (their area and edge midpoints, `SmoothedPolygons.Ch2.Reinhardt` and
+`SmoothedPolygons.Ch2.Hexagon`; the lines of their edges, `mm_*`, `crit_*`, and
+`irr_eq_of_line_eq` of `SmoothedPolygons.Ch2.Irreducible`).
 
 Conventions. A support line of a centrally symmetric convex disk `K` at a boundary point does not
 pass through the origin, an interior point of `K`, so it is `{x | a · x = 1}` for a unique vector
@@ -194,8 +195,8 @@ The proof compares a least-area hexagon `H_K` with the critical hexagon of a cri
 `K`. That a critical lattice exists is Mahler's compactness theorem in the plane
 (`crit_exists_critical`, from `PlaneLattice.exists_admissible_covolume_le`), which the book does
 not state. The comparison uses the geometry of centrally symmetric hexagons: their area and the
-position of the edge midpoints of a least-area hexagon (`SmoothedPolygons.Ch2.Hexagon`), and the
-lines of their edges (below). -/
+position of the edge midpoints of a least-area hexagon (`SmoothedPolygons.Ch2.Reinhardt`,
+`SmoothedPolygons.Ch2.Hexagon`), and the lines of their edges (below). -/
 
 /-- **Existence of critical lattices.** Every `K ∈ 𝔎_ccs` has a critical lattice: the infimum
 `Δ(K)` of Definition 2.3.3 is attained. The book uses a critical lattice of `K` in the proof of
@@ -264,11 +265,11 @@ lemma mm_normal_dot_le_iff (hv : IsCSHexagon v) (j : ZMod 6) (x : Fin 2 → ℝ)
 
 /-- The hexagon is the intersection of the half-planes `a_j · x ≤ 1` of its edges. -/
 lemma mm_polarHexagon_normal (hv : IsCSHexagon v) : polarHexagon (mm_normal v) = hexagonOf v := by
-  obtain ⟨a, b, c, rfl⟩ : ∃ a b c, v = hex_mk a b c := ⟨_, _, _, hex_eq_mk hv⟩
-  have h := hex_isCSHexagon_mk_iff.1 hv
+  obtain ⟨a, b, c, rfl⟩ : ∃ a b c, v = rein_hex3 a b c := ⟨_, _, _, rein_eq_hex3 hv⟩
+  have h := rein_isCSHexagon_iff_hexCond.1 hv
   obtain ⟨f01, f11, f21, f31, f41, f51, -⟩ := hex_zmod_facts
   ext x
-  rw [hex_mem_hexagonOf_iff h, polarHexagon, mem_ofPred_eq]
+  rw [rein_mem_hexagonOf_iff_strips h, polarHexagon, mem_ofPred_eq]
   simp only [mm_normal_dot_le_iff hv]
   constructor
   · intro hx
@@ -278,17 +279,17 @@ lemma mm_polarHexagon_normal (hv : IsCSHexagon v) : polarHexagon (mm_normal v) =
     have e3 := hx 3
     have e4 := hx 4
     have e5 := hx 5
-    simp only [f01, f11, f21, f31, f41, f51, hex_mk_zero, hex_mk_one, hex_mk_two,
-      hex_mk_three, hex_mk_four, hex_mk_five] at e0 e1 e2 e3 e4 e5
-    simp only [hex_strips, abs_le]
+    simp only [f01, f11, f21, f31, f41, f51, rein_hex3_zero, rein_hex3_one, rein_hex3_two,
+      rein_hex3_three, rein_hex3_four, rein_hex3_five] at e0 e1 e2 e3 e4 e5
+    simp only [rein_strips, abs_le]
     simp only [det2, Pi.sub_apply, Pi.neg_apply, Pi.add_apply] at *
     refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩, ⟨?_, ?_⟩⟩ <;> linarith
   · rintro ⟨s0, s1, s2⟩ j
     rw [abs_le] at s0 s1 s2
     simp only [det2, Pi.sub_apply, Pi.add_apply] at s0 s1 s2
-    rcases hex_cases j with rfl | rfl | rfl | rfl | rfl | rfl <;>
-      simp only [f01, f11, f21, f31, f41, f51, hex_mk_zero, hex_mk_one, hex_mk_two,
-        hex_mk_three, hex_mk_four, hex_mk_five, det2, Pi.sub_apply, Pi.neg_apply] <;>
+    rcases rein_zmod6_cases j with rfl | rfl | rfl | rfl | rfl | rfl <;>
+      simp only [f01, f11, f21, f31, f41, f51, rein_hex3_zero, rein_hex3_one, rein_hex3_two,
+        rein_hex3_three, rein_hex3_four, rein_hex3_five, det2, Pi.sub_apply, Pi.neg_apply] <;>
       linarith
 
 lemma mm_normal_dot_le (hv : IsCSHexagon v) (j : ZMod 6) {x : Fin 2 → ℝ}
@@ -313,46 +314,6 @@ lemma mm_normal_ne_zero (hv : IsCSHexagon v) (j : ZMod 6) : mm_normal v j ≠ 0 
   have := (mm_normal_dot_self hv j).1
   rw [h, zero_dotProduct] at this
   exact zero_ne_one this
-
-/-- Two lines `{a · x = 1}`, `{b · x = 1}` that coincide have `a = b`. -/
-lemma mm_eq_of_line_subset {a b : Fin 2 → ℝ} (ha : a ≠ 0)
-    (h : {x : Fin 2 → ℝ | a ⬝ᵥ x = 1} ⊆ {x | b ⬝ᵥ x = 1}) : b = a := by
-  have hN : 0 < a 0 ^ 2 + a 1 ^ 2 := by
-    by_contra hle
-    apply ha
-    ext i; fin_cases i <;> simp <;> nlinarith [sq_nonneg (a 0), sq_nonneg (a 1)]
-  have hN' := hN.ne'
-  have hp : a ⬝ᵥ ![a 0 / (a 0 ^ 2 + a 1 ^ 2), a 1 / (a 0 ^ 2 + a 1 ^ 2)] = 1 := by
-    simp only [dotProduct, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
-    field_simp
-  have hq : a ⬝ᵥ ![a 0 / (a 0 ^ 2 + a 1 ^ 2) - a 1, a 1 / (a 0 ^ 2 + a 1 ^ 2) + a 0] = 1 := by
-    simp only [dotProduct, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
-    field_simp
-    ring
-  have hbp : b ⬝ᵥ _ = 1 := h hp
-  have hbq : b ⬝ᵥ _ = 1 := h hq
-  simp only [dotProduct, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one] at hbp hbq
-  have e1 : b 0 * a 0 + b 1 * a 1 = a 0 ^ 2 + a 1 ^ 2 := by
-    field_simp at hbp
-    linarith
-  have e2 : b 1 * a 0 - b 0 * a 1 = 0 := by linarith
-  have h0 : b 0 = a 0 := by
-    apply mul_right_cancel₀ hN'
-    linear_combination a 0 * e1 - a 1 * e2
-  have h1 : b 1 = a 1 := by
-    apply mul_right_cancel₀ hN'
-    linear_combination a 1 * e1 + a 0 * e2
-  ext i; fin_cases i
-  · exact h0
-  · exact h1
-
-lemma mm_eq_of_line_eq {a b : Fin 2 → ℝ}
-    (h : {x : Fin 2 → ℝ | a ⬝ᵥ x = 1} = {x | b ⬝ᵥ x = 1}) : a = b := by
-  by_cases ha : a = 0
-  · by_cases hb : b = 0
-    · rw [ha, hb]
-    · exact (mm_eq_of_line_subset hb h.symm.subset)
-  · exact (mm_eq_of_line_subset ha h.subset).symm
 
 end mm_edges
 
@@ -390,14 +351,6 @@ lemma mm_det2_eq_zero_of_parallel {p x y : Fin 2 → ℝ} (hp : p ≠ 0) (hx : d
   · have : p 0 * (x 0 * y 1 - x 1 * y 0) = 0 := by linear_combination x 0 * hy - y 0 * hx
     exact (mul_eq_zero.1 this).resolve_left h0
 
-/-- The edge midpoints of a centrally symmetric hexagon are centrally symmetric. -/
-lemma mm_hexMidpoint_add_three (hv : IsCSHexagon v) (j : ZMod 6) :
-    hexMidpoint v (j + 3) = -hexMidpoint v j := by
-  have h1 := (hv j).1
-  have h2 := (hv (j + 1)).1
-  simp only [hexMidpoint, show j + 3 + 1 = j + 1 + 3 by ring, h1, h2, midpoint_eq_smul_add]
-  rw [← neg_add, smul_neg]
-
 /-- The line of an edge of a least-area circumscribed hexagon is a support line of `K` at the
 midpoint of the edge. -/
 lemma mm_isSupportLine_normal (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) (j : ZMod 6) :
@@ -407,10 +360,7 @@ lemma mm_isSupportLine_normal (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) (
   · have h1 := mm_normal_dot_le hv.1 j (hv.2.1 hx)
     have h2 := mm_normal_dot_le hv.1 j (hv.2.1 hy)
     nlinarith
-  · exact External.MinkowskiMahler.mm_mem_of_frontier hK (hex_hexMidpoint_mem_frontier hK hv j)
-
-lemma mm_isCompact_hexagonOf (v : ZMod 6 → Fin 2 → ℝ) : IsCompact (hexagonOf v) :=
-  (Set.finite_range v).isCompact_convexHull (𝕜 := ℝ)
+  · exact External.MinkowskiMahler.mm_mem_of_frontier hK (rein_hexMidpoint_mem_frontier hK hv j)
 
 /-- A vertex `v_j` is the only point of the hexagon on both lines of the edges at `v_j`. -/
 lemma mm_eq_vertex (hv : IsCSHexagon v) (j : ZMod 6) {x : Fin 2 → ℝ}
@@ -488,7 +438,7 @@ lemma mm_not_isParallelogram (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) :
       rw [hmem₀]
       simp
   set D := det2 u w with hDdef
-  have hHfin : volume (hexagonOf v) ≠ ⊤ := (mm_isCompact_hexagonOf v).measure_lt_top.ne
+  have hHfin : volume (hexagonOf v) ≠ ⊤ := (rein_isCompact_hexagonOf v).measure_lt_top.ne
   -- the comparison hexagons
   have hcomp : ∀ r : ℝ, 1 < r → volume.real (hexagonOf v) ≤ (3 * r ^ 2 + 2 * r - 1) * D := by
     intro r hr
@@ -499,13 +449,13 @@ lemma mm_not_isParallelogram (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) :
     have dAC : det2 (r • u + (-r) • w) ((1 : ℝ) • u + r • w) = (r ^ 2 + r) * D := by
       rw [mm_det2_comb]; ring
     have hr2 : 0 < r ^ 2 - 1 := by nlinarith
-    have hcond : hex_Cond (r • u + (-r) • w) (r • u + (1 : ℝ) • w) ((1 : ℝ) • u + r • w) := by
+    have hcond : rein_HexCond (r • u + (-r) • w) (r • u + (1 : ℝ) • w) ((1 : ℝ) • u + r • w) := by
       refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> simp only [dAB, dBC, dAC] <;> nlinarith
-    have hsub : K ⊆ hexagonOf (hex_mk (r • u + (-r) • w) (r • u + (1 : ℝ) • w)
+    have hsub : K ⊆ hexagonOf (rein_hex3 (r • u + (-r) • w) (r • u + (1 : ℝ) • w)
         ((1 : ℝ) • u + r • w)) := by
       intro x hx
       obtain ⟨s, t, hs, ht, rfl⟩ := (hmem x).1 hx
-      rw [hex_mem_hexagonOf_iff hcond]
+      rw [rein_mem_hexagonOf_iff_strips hcond]
       rw [abs_le] at hs ht
       have eAB : r • u + (-r) • w - (r • u + (1 : ℝ) • w) = (0 : ℝ) • u + (-r - 1) • w := by
         module
@@ -528,9 +478,9 @@ lemma mm_not_isParallelogram (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) :
         constructor
         · nlinarith [mul_nonneg (mul_nonneg hr1 hD.le) (show 0 ≤ t + r by linarith)]
         · nlinarith [mul_nonneg (mul_nonneg hr1 hD.le) (show 0 ≤ r - t by linarith)]
-    have hle := hv.2.2 _ (hex_isCSHexagon_mk_iff.2 hcond) hsub
-    have hfin : volume (hexagonOf (hex_mk (r • u + (-r) • w) (r • u + (1 : ℝ) • w)
-        ((1 : ℝ) • u + r • w))) ≠ ⊤ := (mm_isCompact_hexagonOf _).measure_lt_top.ne
+    have hle := hv.2.2 _ (rein_isCSHexagon_iff_hexCond.2 hcond) hsub
+    have hfin : volume (hexagonOf (rein_hex3 (r • u + (-r) • w) (r • u + (1 : ℝ) • w)
+        ((1 : ℝ) • u + r • w))) ≠ ⊤ := (rein_isCompact_hexagonOf _).measure_lt_top.ne
     have := ENNReal.toReal_mono hfin hle
     rw [← measureReal_def, ← measureReal_def, hex_volume_real_mk hcond, dAB, dBC, dAC] at this
     linarith
@@ -734,7 +684,7 @@ lemma crit_normal_injective (hv : IsCSHexagon v) {i j : ZMod 6} (hij : i ≠ j) 
   have hneg' : ∀ k, mm_normal v k ⬝ᵥ v (k + 4) = -1 := fun k ↦ by
     rw [show k + 4 = k + 1 + 3 by ring, (hv (k + 1)).1, dotProduct_neg,
       (mm_normal_dot_self hv k).2]
-  rcases hex_cases d with rfl | rfl | rfl | rfl | rfl | rfl
+  rcases rein_zmod6_cases d with rfl | rfl | rfl | rfl | rfl | rfl
   · exact hij (by simp)
   · have := crit_normal_dot_sub_one_lt hv (i + 1)
     rw [show i + 1 - 1 = i by ring, ← heq, self.1] at this
@@ -766,7 +716,7 @@ lemma crit_dot_le_one (hK : IsCCSDisk K) {a : Fin 2 → ℝ} (ha : IsSupportLine
     have : (0 : Fin 2 → ℝ) ∈ {x : Fin 2 → ℝ | a ⬝ᵥ x = 1} := by rw [hℓ]; simp
     simp at this
   have hba : c⁻¹ • b = a := by
-    refine mm_eq_of_line_eq (Set.ext fun y ↦ ?_)
+    refine irr_eq_of_line_eq (Set.ext fun y ↦ ?_)
     have := Set.ext_iff.1 hℓ y
     simp only [mem_ofPred_eq] at this ⊢
     rw [smul_dotProduct, smul_eq_mul, inv_mul_eq_one₀ hc, this, eq_comm]
@@ -791,7 +741,7 @@ lemma crit_hexagon_of_dots {e f a₀ a₁ a₂ : Fin 2 → ℝ} {α₀ α₁ α�
     (h0 : 0 < α₀) (h0' : α₀ < 1) (h1 : 0 < α₁) (h1' : α₁ < 1) (h2 : 0 < α₂) (h2' : α₂ < 1)
     (d0e : a₀ ⬝ᵥ e = 1) (d0f : a₀ ⬝ᵥ f = α₀ - 1) (d1e : a₁ ⬝ᵥ e = 1 - α₁) (d1f : a₁ ⬝ᵥ f = α₁)
     (d2e : a₂ ⬝ᵥ e = -α₂) (d2f : a₂ ⬝ᵥ f = 1) :
-    ∃ w₀ w₁ w₂ : Fin 2 → ℝ, hex_Cond w₀ w₁ w₂ ∧ a₀ ⬝ᵥ w₀ = 1 ∧ a₀ ⬝ᵥ w₁ = 1 ∧
+    ∃ w₀ w₁ w₂ : Fin 2 → ℝ, rein_HexCond w₀ w₁ w₂ ∧ a₀ ⬝ᵥ w₀ = 1 ∧ a₀ ⬝ᵥ w₁ = 1 ∧
       a₁ ⬝ᵥ w₁ = 1 ∧ a₁ ⬝ᵥ w₂ = 1 ∧ a₂ ⬝ᵥ w₂ = 1 ∧ a₂ ⬝ᵥ -w₀ = 1 := by
   -- the vertices `w₀ = ℓ₅ ∩ ℓ₀`, `w₁ = ℓ₀ ∩ ℓ₁`, `w₂ = ℓ₁ ∩ ℓ₂`
   obtain ⟨D₀, hD₀def⟩ : ∃ x : ℝ, x = 1 - α₀ + α₀ * α₁ := ⟨_, rfl⟩
@@ -920,7 +870,7 @@ lemma crit_exists_isCSHexagon (hK : IsCCSDisk K) {s a : ZMod 6 → Fin 2 → ℝ
   have hlt : ∀ k j, k ≠ j → a k ⬝ᵥ s j < 1 := by
     intro k j hkj
     refine (hle k j).lt_of_ne fun heq ↦ hdist k j hkj ?_
-    exact mm_eq_of_line_eq (huniq j _ (hsupp k).1 heq)
+    exact irr_eq_of_line_eq (huniq j _ (hsupp k).1 heq)
   -- the points in the basis `e = s₀`, `f = s₂`
   have hs1 : s 1 = s 0 + s 2 := by rw [← sub_eq_zero, ← neg_eq_zero, ← h012]; abel
   have hs3 : s 3 = -s 0 := hsymm 0
@@ -956,8 +906,8 @@ lemma crit_exists_isCSHexagon (hK : IsCCSDisk K) {s a : ZMod 6 → Fin 2 → ℝ
   obtain ⟨w₀, w₁, w₂, hc, l00, l01, l11, l12, l22, l23⟩ :=
     crit_hexagon_of_dots hD h0 h0' h1 h1' h2 h2' d0e d0f d1e rfl d2e d2f
   -- the hexagon `w` and its edge lines
-  have hw : IsCSHexagon (hex_mk w₀ w₁ w₂) := hex_isCSHexagon_mk_iff.2 hc
-  set w := hex_mk w₀ w₁ w₂ with hwdef
+  have hw : IsCSHexagon (rein_hex3 w₀ w₁ w₂) := rein_isCSHexagon_iff_hexCond.2 hc
+  set w := rein_hex3 w₀ w₁ w₂ with hwdef
   have hline3 : ∀ j, a j ⬝ᵥ w j = 1 ∧ a j ⬝ᵥ w (j + 1) = 1 →
       a (j + 3) ⬝ᵥ w (j + 3) = 1 ∧ a (j + 3) ⬝ᵥ w (j + 3 + 1) = 1 := by
     rintro j ⟨e1, e2⟩
@@ -969,7 +919,7 @@ lemma crit_exists_isCSHexagon (hK : IsCCSDisk K) {s a : ZMod 6 → Fin 2 → ℝ
   have hl2 : a 2 ⬝ᵥ w 2 = 1 ∧ a 2 ⬝ᵥ w (2 + 1) = 1 := ⟨l22, l23⟩
   have hline : ∀ j, a j ⬝ᵥ w j = 1 ∧ a j ⬝ᵥ w (j + 1) = 1 := by
     intro j
-    rcases hex_cases j with rfl | rfl | rfl | rfl | rfl | rfl
+    rcases rein_zmod6_cases j with rfl | rfl | rfl | rfl | rfl | rfl
     · exact hl0
     · exact hl1
     · exact hl2
@@ -1001,9 +951,9 @@ lemma crit_six_points (hK : IsCCSDisk K) {L : Submodule ℤ (Fin 2 → ℝ)}
     fun x hx ↦ External.MinkowskiMahler.mm_neg_mem_frontier hK hx
   obtain ⟨f01, f11, f21, f31, f41, f51, -, -, -, -, -, -, f03, f13, f23, f33, f43, f53⟩ :=
     hex_zmod_facts
-  have hsym : ∀ a b c : Fin 2 → ℝ, ∀ j, hex_mk a b c (j + 3) = -hex_mk a b c j := by
+  have hsym : ∀ a b c : Fin 2 → ℝ, ∀ j, rein_hex3 a b c (j + 3) = -rein_hex3 a b c j := by
     intro a b c j
-    rcases hex_cases j with rfl | rfl | rfl | rfl | rfl | rfl
+    rcases rein_zmod6_cases j with rfl | rfl | rfl | rfl | rfl | rfl
     · rw [f03]; rfl
     · rw [f13]; rfl
     · rw [f23]; rfl
@@ -1011,9 +961,9 @@ lemma crit_six_points (hK : IsCCSDisk K) {L : Submodule ℤ (Fin 2 → ℝ)}
     · rw [f43]; exact (neg_neg b).symm
     · rw [f53]; exact (neg_neg c).symm
   have hall : ∀ (P : (Fin 2 → ℝ) → Prop) (a b c : Fin 2 → ℝ), (∀ x, P x → P (-x)) → P a → P b →
-      P c → ∀ j, P (hex_mk a b c j) := by
+      P c → ∀ j, P (rein_hex3 a b c j) := by
     intro P a b c hP ha hb hc j
-    rcases hex_cases j with rfl | rfl | rfl | rfl | rfl | rfl
+    rcases rein_zmod6_cases j with rfl | rfl | rfl | rfl | rfl | rfl
     · exact ha
     · exact hb
     · exact hc
@@ -1022,7 +972,7 @@ lemma crit_six_points (hK : IsCCSDisk K) {L : Submodule ℤ (Fin 2 → ℝ)}
     · exact hP _ hc
   rcases lt_or_gt_of_ne hne with hlt | hgt
   · -- clockwise: take `s₀, -s₂, -s₁`
-    refine ⟨hex_mk s₀ (-s₂) (-s₁), hall (· ∈ L) _ _ _ (fun x hx ↦ L.neg_mem hx) h0L
+    refine ⟨rein_hex3 s₀ (-s₂) (-s₁), hall (· ∈ L) _ _ _ (fun x hx ↦ L.neg_mem hx) h0L
       (L.neg_mem h2L) (L.neg_mem h1L), hall (· ∈ frontier K) _ _ _ hneg h0K (hneg _ h2K)
       (hneg _ h1K), ?_, hsym _ _ _, ?_⟩
     · change s₀ - -s₂ + -s₁ = 0
@@ -1031,7 +981,7 @@ lemma crit_six_points (hK : IsCCSDisk K) {L : Submodule ℤ (Fin 2 → ℝ)}
       have : det2 s₀ (-s₂) = -det2 s₀ s₁ := by
         rw [h1]; simp only [det2, Pi.neg_apply, Pi.add_apply]; ring
       rw [this]; linarith
-  · refine ⟨hex_mk s₀ s₁ s₂, hall (· ∈ L) _ _ _ (fun x hx ↦ L.neg_mem hx) h0L h1L h2L,
+  · refine ⟨rein_hex3 s₀ s₁ s₂, hall (· ∈ L) _ _ _ (fun x hx ↦ L.neg_mem hx) h0L h1L h2L,
       hall (· ∈ frontier K) _ _ _ hneg h0K h1K h2K, ?_, hsym _ _ _, hgt⟩
     change s₀ - s₁ + s₂ = 0
     rw [h1]; abel
@@ -1080,16 +1030,16 @@ lemma mm_leastArea_critical (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) :
   have hpar := mm_not_isParallelogram hK hv
   -- the edge midpoints `s_j` lie on the boundary of `K` and satisfy the multi-point conditions
   set s := hexMidpoint v with hs
-  have hsymm : ∀ j, s (j + 3) = -s j := mm_hexMidpoint_add_three hv.1
+  have hsymm : ∀ j, s (j + 3) = -s j := rein_hexMidpoint_add_three hv.1
   have hsub : s 1 - s 0 = s 2 := hex_hexMidpoint_sub hv.1
   have h012 : s 0 - s 1 + s 2 = 0 := by rw [← hsub]; abel
   have h1 : s 1 = s 0 + s 2 := by rw [← hsub]; abel
-  have hfr : ∀ j, s j ∈ frontier K := hex_hexMidpoint_mem_frontier hK hv
+  have hfr : ∀ j, s j ∈ frontier K := rein_hexMidpoint_mem_frontier hK hv
   -- `L = ℤ s₀ + ℤ s₁` is admissible (Mahler's Lemma 1)
   have hadm : IsAdmissible K (latticeSpan (s 0) (s 1)) := by
     have := External.MinkowskiMahler.mm_isAdmissible hK (hfr 0) (hfr 2) (by rw [← h1]; exact hfr 1)
     rwa [← h1] at this
-  have hpos : 0 < det2 (s 0) (s 1) := hex_det2_hexMidpoint_pos hv.1
+  have hpos : 0 < det2 (s 0) (s 1) := rein_det2_hexMidpoint_pos hv.1
   have hlat : IsPlaneLattice (latticeSpan (s 0) (s 1)) :=
     External.MinkowskiMahler.mm_isLattice_span hpos.ne'
   -- `area(H_K) = 4 det(L)`, and `area(H_K) = 4Δ(K)`: `L` is critical
@@ -1104,7 +1054,7 @@ lemma mm_leastArea_critical (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) :
   have m1 : s 1 ∈ latticeSpan (s 0) (s 1) := Submodule.subset_span (by simp)
   have m2 : s 2 ∈ latticeSpan (s 0) (s 1) := by
     rw [← hsub]; exact Submodule.sub_mem _ m1 m0
-  rcases hex_cases j with rfl | rfl | rfl | rfl | rfl | rfl
+  rcases rein_zmod6_cases j with rfl | rfl | rfl | rfl | rfl | rfl
   · exact m0
   · exact m1
   · exact m2
@@ -1119,7 +1069,7 @@ hexagon of least area circumscribing `K`. Then `H_K` is a critical hexagon in th
 Definition 2.3.8.
 
 Proof (the book's, `mm_leastArea_critical`). The edge midpoints `s_j` of `H_K` lie on the boundary
-of `K` (`hex_hexMidpoint_mem_frontier`) and satisfy the multi-point conditions;
+of `K` (`rein_hexMidpoint_mem_frontier`) and satisfy the multi-point conditions;
 `L = ℤ s₀ + ℤ s₁` is `K`-admissible, and `area(H_K) = det(2L) = 4 det(L)`
 (`hex_volume_hexagonOf`). `L` is critical (`crit_volume_eq`): let `L̃` be a critical lattice of
 `K` (`crit_exists_critical`), with six points on the boundary of `K` (Theorem 2.3.6) and critical
@@ -1158,7 +1108,7 @@ theorem theorem2_3_9 {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {v : ZMod 6 �
     h012 hsymm
   have hna : a = mm_normal v := by
     funext j
-    exact mm_eq_of_line_eq (ha.2.2.1 j _ (mm_isSupportLine_normal hK hv j)
+    exact irr_eq_of_line_eq (ha.2.2.1 j _ (mm_isSupportLine_normal hK hv j)
       (mm_normal_dot_midpoint hv.1 j)).symm
   refine ⟨hpar, _, hexMidpoint v, a, hcrit, hmem, h012, hsymm, ha, ?_⟩
   rw [hna, mm_polarHexagon_normal hv.1]

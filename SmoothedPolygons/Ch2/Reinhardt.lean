@@ -646,8 +646,9 @@ lemma rein_volume_hexagonOf_hex3 {a b c : Fin 2 → ℝ} (h : IsCSHexagon (rein_
 
 /-! ### Edge midpoints of a least-area hexagon
 
-The rotation argument below is adapted from `SmoothedPolygons.Ch2.BalancedDensity` (which is
-downstream of this file); it uses the strip description of the hexagon. -/
+The rotation argument below uses the strip description of the hexagon. It is the only copy:
+`SmoothedPolygons.Ch2.Hexagon`, `SmoothedPolygons.Ch2.Mahler` and
+`SmoothedPolygons.Ch2.BalancedDensity` (downstream of this file) use these lemmas. -/
 
 /-- The conditions on `a, b, c` that make `rein_hex3 a b c` a convex hexagon. -/
 structure rein_HexCond (a b c : Fin 2 → ℝ) : Prop where
@@ -1129,7 +1130,7 @@ lemma rein_hex_bound {K : Set (Fin 2 → ℝ)} {r : ℝ} (hr : 0 < r)
   have q3 := hin ![0, r / 2] (by intro j; fin_cases j <;> simpa)
   have q4 := hin ![0, -(r / 2)] (by intro j; fin_cases j <;> simpa)
   simp only [rein_InHex, det2, Pi.sub_apply, Pi.neg_apply, Matrix.cons_val_zero,
-    Matrix.cons_val_one, Matrix.head_cons] at q1 q2 q3 q4 h1 h2 h3
+    Matrix.cons_val_one] at q1 q2 q3 q4 h1 h2 h3
   obtain ⟨a1, a2, a3, -, -, -⟩ := q1
   obtain ⟨b1, b2, b3, -, -, -⟩ := q2
   obtain ⟨c1, c2, c3, -, -, -⟩ := q3
@@ -1391,7 +1392,7 @@ lemma rein_exists_hex_superset {K : Set (Fin 2 → ℝ)} (hK : IsCompact K) :
   set c : Fin 2 → ℝ := ![-(2 * R'), 2 * R']
   have hw : IsCSHexagon (rein_hex3 a b c) := by
     rw [rein_isCSHexagon_hex3_iff]
-    simp only [a, b, c, det2, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+    simp only [a, b, c, det2, Matrix.cons_val_zero, Matrix.cons_val_one]
     refine ⟨by nlinarith, by nlinarith, by nlinarith, by nlinarith, by nlinarith, by nlinarith⟩
   refine ⟨_, hw, fun x hx ↦ ?_⟩
   have hx' := hR hx
@@ -1401,7 +1402,7 @@ lemma rein_exists_hex_superset {K : Set (Fin 2 → ℝ)} (hK : IsCompact K) :
   rw [abs_le] at h0 h1
   rw [rein_mem_hexagonOf_hex3 hw]
   simp only [rein_InHex, a, b, c, det2, Pi.sub_apply, Pi.neg_apply, Matrix.cons_val_zero,
-    Matrix.cons_val_one, Matrix.head_cons]
+    Matrix.cons_val_one]
   refine ⟨by nlinarith, by nlinarith, by nlinarith, by nlinarith, by nlinarith, by nlinarith⟩
 
 /-- **Existence of a least-area circumscribed hexagon**, for a centrally symmetric convex disk that
@@ -1457,7 +1458,7 @@ lemma rein_latticeDet_eq_of_tiling {H : Set (Fin 2 → ℝ)} (hHc : Convex ℝ H
     {L : Submodule ℤ (Fin 2 → ℝ)} (hL : IsPlaneLattice L) (hT : IsLatticeTiling H L) :
     latticeDet L = volume.real H := by
   obtain ⟨hd, hs⟩ := hL
-  haveI : IsZLattice ℝ L := ⟨hs⟩
+  have : IsZLattice ℝ L := ⟨hs⟩
   rw [latticeDet]
   apply ZLattice.covolume_eq_measure_fundamentalDomain
   have himg : ∀ g : L, g +ᵥ H = (fun x ↦ x + (g : Fin 2 → ℝ)) '' H := by
@@ -1636,9 +1637,9 @@ lemma rein_hex_lattice {v : ZMod 6 → Fin 2 → ℝ} (hv : IsCSHexagon v) :
     have v1b : det2 (b - c) u2 = 2 * det2 b c := by
       simp only [hu2, det2, Pi.sub_apply, Pi.add_apply]; ring
     have v2a : det2 (c + a) u1 = det2 a b - det2 b c - det2 a c := by
-      simp only [hu1, det2, Pi.sub_apply, Pi.add_apply]; ring
+      simp only [hu1, det2, Pi.add_apply]; ring
     have v2b : det2 (c + a) u2 = det2 a b + det2 a c - det2 b c := by
-      simp only [hu2, det2, Pi.sub_apply, Pi.add_apply]; ring
+      simp only [hu2, det2, Pi.add_apply]; ring
     rw [v0a, v0b, v1a, v1b, v2a, v2b] at hs2
     obtain ⟨s1, s2, s3⟩ := hs1
     obtain ⟨t1, t2, t3⟩ := hs2
@@ -1677,7 +1678,7 @@ lemma rein_volume_parallelogram {u v : Fin 2 → ℝ} (huv : 0 < det2 u v) :
   rw [this, abs_of_pos huv]
   simp only [Pi.one_apply, Pi.neg_apply, sub_neg_eq_add, Fin.prod_univ_two]
   rw [ENNReal.toReal_mul, ENNReal.toReal_mul]
-  simp; norm_num
+  simp only [nonneg_add_self_iff, zero_le_one, ENNReal.toReal_ofReal]; norm_num
   rw [ENNReal.toReal_ofReal huv.le]; ring
 
 lemma rein_parallelogram_convex_compact (u v : Fin 2 → ℝ) :
@@ -2227,7 +2228,8 @@ lemma rein_PosLin.linearMap_det (he : rein_PosLin e d) :
   have := he.det (Pi.single 0 1) (Pi.single 1 1)
   simp only [det2, Pi.single_apply] at this
   simp only [LinearMap.toMatrix'_apply]
-  simp at this
+  simp only [Fin.isValue, ↓reduceIte, mul_one, one_ne_zero, zero_ne_one, mul_zero,
+    sub_zero] at this
   change e (Pi.single 0 1) 0 * e (Pi.single 1 1) 1 - e (Pi.single 1 1) 0 * e (Pi.single 0 1) 1 = d
   linarith
 
@@ -2337,7 +2339,8 @@ lemma rein_supportLine_normal {K ℓ : Set (Fin 2 → ℝ)} (h : IsSupportLine K
   by_cases hpos : ∃ x ∈ K, c < a ⬝ᵥ x
   · obtain ⟨x, hx, hxc⟩ := hpos
     refine ⟨-a, neg_ne_zero.2 ha, -c, ?_, fun y hy ↦ ?_⟩
-    · ext z; simp [neg_dotProduct]
+    · ext z
+      simp only [vec2_dotProduct, Fin.isValue, mem_ofPred_eq, neg_dotProduct, neg_add_rev]
       constructor <;> intro h <;> linarith
     · have := hsep x hx y hy
       rw [neg_dotProduct]
@@ -2456,7 +2459,7 @@ lemma rein_good_image {e : (Fin 2 → ℝ) ≃L[ℝ] (Fin 2 → ℝ)} {d : ℝ} 
     have := image_segment ℝ (e : (Fin 2 → ℝ) →ₗ[ℝ] (Fin 2 → ℝ)).toAffineMap (v j) (v (j + 1))
     have hseg : segment ℝ (e (v j)) (e (v (j + 1))) = e '' segment ℝ (v j) (v (j + 1)) :=
       this.symm
-    show segment ℝ (e (v j)) (e (v (j + 1))) ⊆ ℓ
+    change segment ℝ (e (v j)) (e (v (j + 1))) ⊆ ℓ
     rw [hseg, ← himg ℓ]
     exact image_mono hj
 
@@ -3096,14 +3099,13 @@ lemma rein_sqrt3_pos : 0 < √3 := by positivity
 lemma rein_sixthRoot_rel (j : ZMod 6) :
     sixthRoot (j + 3) = -sixthRoot j ∧ sixthRoot (j + 1) = sixthRoot j + sixthRoot (j + 2) ∧
       det2 (sixthRoot j) (sixthRoot (j + 1)) = √3 / 2 := by
-  have h3 := rein_sqrt3_sq
   rcases rein_zmod6_cases j with rfl | rfl | rfl | rfl | rfl | rfl <;> rein_z6 <;>
   simp only [rein_sixthRoot_zero, rein_sixthRoot_one, rein_sixthRoot_two, rein_sixthRoot_three,
     rein_sixthRoot_four, rein_sixthRoot_five, det2] <;>
   refine ⟨?_, ?_, ?_⟩ <;>
   first
-    | (ext i; fin_cases i <;> simp <;> ring_nf)
-    | (simp <;> nlinarith)
+    | (ext i; fin_cases i <;> norm_num)
+    | (simp only [Matrix.cons_val_zero, Matrix.cons_val_one]; ring)
 
 lemma rein_det2_sixthRoot_pos (j : ZMod 6) : 0 < det2 (sixthRoot j) (sixthRoot (j + 1)) := by
   rw [(rein_sixthRoot_rel j).2.2]; positivity
@@ -3839,7 +3841,7 @@ lemma rein_mem_convexHull_triple {p q x : Fin 2 → ℝ} (hpq : 0 < det2 p q) :
       (by intro i _; fin_cases i <;> simp <;> linarith)
       (by simp only [Fin.sum_univ_three, Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one,
           Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons]; ring)
-      (by intro i _; fin_cases i <;> simp <;> apply subset_convexHull <;> simp)
+      (by intro i _; apply subset_convexHull; fin_cases i <;> simp)
     simpa [Fin.sum_univ_three, add_assoc] using this
 
 
@@ -3913,7 +3915,9 @@ lemma rein_eq_coord (x : Fin 2 → ℝ) :
   have h3' := rein_sqrt3_pos
   have h3 := rein_sqrt3_sq
   rw [rein_cA_eq, rein_cB_eq]
-  ext i; fin_cases i <;> simp <;> field_simp <;> ring
+  ext i; fin_cases i
+  · simp; field_simp; ring
+  · simp; field_simp
 
 lemma rein_det2_coord (x y : Fin 2 → ℝ) :
     det2 x y = √3 / 2 * (rein_cA x * rein_cB y - rein_cB x * rein_cA y) := by
@@ -3962,7 +3966,8 @@ lemma rein_coord_sixthRoot :
   have h3' := rein_sqrt3_pos
   simp only [rein_cA_eq, rein_cB_eq, rein_sixthRoot_zero, rein_sixthRoot_one, rein_sixthRoot_two,
     rein_sixthRoot_three, rein_sixthRoot_four, rein_sixthRoot_five]
-  simp
+  simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, cons_val_zero, cons_val_one,
+    cons_val_fin_one, zero_div, sub_zero, mul_zero, and_self, one_div, mul_neg, true_and]
   refine ⟨?_, ?_, ?_, ?_, ?_⟩ <;> (try constructor) <;> field_simp <;> ring
 
 /-- The triangles `T_k` in coordinates. -/
@@ -5185,7 +5190,7 @@ lemma rein_unique_std {K : Set (Fin 2 → ℝ)} (hG : rein_Good K) {w : ZMod 6 �
       rcases rein_zmod6_cases k with rfl | rfl | rfl | rfl | rfl | rfl <;>
       simp only [rein_InT_zero, rein_InT_one, rein_InT_two, rein_InT_three, rein_InT_four,
         rein_InT_five] at hk ⊢ <;> obtain ⟨c1, c2, c3⟩ := hk <;>
-      first | exact ⟨c1, c2, c3⟩ | (exfalso; linarith) | (refine ⟨?_, ?_, ?_⟩ <;> linarith)
+      first | exact ⟨c1, c2, c3⟩ | (exfalso; linarith)
     set v' : ZMod 6 → Fin 2 → ℝ := fun i ↦ v (i + 1) with hv'def
     have hv' : IsLeastAreaHexagon K v' := rein_isLeastAreaHexagon_shift hv 1
     have hm : ∀ i, hexMidpoint v' i = hexMidpoint v (i + 1) := fun i ↦ rein_hexMidpoint_shift v 1 i
@@ -5267,15 +5272,15 @@ noncomputable def rein_bd (K : Set (Fin 2 → ℝ)) (θ : ℝ) : Fin 2 → ℝ :
   (gauge K (rein_dir θ))⁻¹ • rein_dir θ
 
 lemma rein_det2_dir (α β : ℝ) : det2 (rein_dir α) (rein_dir β) = Real.sin (β - α) := by
-  simp only [rein_dir, det2, Matrix.cons_val_zero, Matrix.cons_val_one, Real.sin_sub,
-    Matrix.head_cons]
+  simp only [rein_dir, det2, Matrix.cons_val_zero, Matrix.cons_val_one, Real.sin_sub]
   ring
 
 lemma rein_dir_ne_zero (θ : ℝ) : rein_dir θ ≠ 0 := by
   intro h
   have h0 := congrFun h 0
   have h1 := congrFun h 1
-  simp [rein_dir] at h0 h1
+  simp only [rein_dir, Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Pi.zero_apply] at h0 h1
   have := Real.sin_sq_add_cos_sq θ
   rw [h0, h1] at this; norm_num at this
 
@@ -5598,9 +5603,9 @@ lemma rein_arc_straight {K : Set (Fin 2 → ℝ)} (hG : rein_Good K) {p q : Fin 
       rw [rein_det2_bd_pos_iff hK]; exact Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
     obtain ⟨ℓz, ⟨hℓz, hzℓ⟩, -⟩ := hU _ hz
     rcases H _ hz h1 h2 ℓz hℓz hzℓ with hpz | hqz
-    · left; show rein_bd K ψ ∈ ℓp
+    · left; change rein_bd K ψ ∈ ℓp
       rw [← huniq _ hp _ _ hℓz hpz hℓp hpℓ]; exact hzℓ
-    · right; show rein_bd K ψ ∈ ℓq
+    · right; change rein_bd K ψ ∈ ℓq
       rw [← huniq _ hq _ _ hℓz hqz hℓq hqℓ]; exact hzℓ
   obtain ⟨ψ, -, hψp, hψq⟩ := isPreconnected_closed_iff.1 isPreconnected_Icc _ _
     ((rein_isClosed_supportLine hℓp).preimage (rein_continuous_bd hK))
@@ -5989,6 +5994,7 @@ lemma rein_det2_hexMidpoint_two {v : ZMod 6 → Fin 2 → ℝ} (hv : IsCSHexagon
   rw [this, rein_det2_sub_right, rein_det2_self, sub_zero]
   exact rein_det2_hexMidpoint_pos hv
 
+omit hVm in
 lemma rein_φ_spec {j : ZMod 6} (θ : ℝ) :
     ∃ r : ℝ, 0 < r ∧ hexMidpoint (V θ) j = r • rein_dir (rein_φ V K j θ) := by
   have hg := rein_gauge_pos hG.1 (rein_dir_ne_zero θ)
@@ -6021,8 +6027,8 @@ lemma rein_φ_add_int {j : ZMod 6} (θ : ℝ) (n : ℤ) :
 lemma rein_strictMono_φ {j : ZMod 6} (hj : j = 1 ∨ j = 2) : StrictMono (rein_φ V K j) := by
   have hinj : Function.Injective (rein_φ V K j) := by
     intro θ θ' h
-    obtain ⟨r, hr, hm⟩ := rein_φ_spec hG hV hVm θ
-    obtain ⟨r', hr', hm'⟩ := rein_φ_spec hG hV hVm θ'
+    obtain ⟨r, hr, hm⟩ := rein_φ_spec hG hV θ
+    obtain ⟨r', hr', hm'⟩ := rein_φ_spec hG hV θ'
     rw [← h] at hm'
     have e1 := rein_eq_bd hG.1 (rein_hexMidpoint_mem_frontier hG.1 (hV θ) j) hr hm
     have e2 := rein_eq_bd hG.1 (rein_hexMidpoint_mem_frontier hG.1 (hV θ') j) hr' hm'
@@ -6096,22 +6102,22 @@ theorem lemma2_2_7 {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) :
       rcases rein_zmod6_cases j with rfl | rfl | rfl | rfl | rfl | rfl
       · exact ⟨continuous_id, strictMono_id, fun θ ↦ rfl⟩
       · exact ⟨c1, m1, fun θ ↦ by
-          show rein_φ V K 1 (θ + 2 * π) = rein_φ V K 1 θ + 2 * π
+          change rein_φ V K 1 (θ + 2 * π) = rein_φ V K 1 θ + 2 * π
           rw [h2π θ, hp1 θ 1]; push_cast; ring⟩
       · exact ⟨c2, m2, fun θ ↦ by
-          show rein_φ V K 2 (θ + 2 * π) = rein_φ V K 2 θ + 2 * π
+          change rein_φ V K 2 (θ + 2 * π) = rein_φ V K 2 θ + 2 * π
           rw [h2π θ, hp2 θ 1]; push_cast; ring⟩
       · exact ⟨continuous_id.add continuous_const, strictMono_id.add_const π,
-          fun θ ↦ by show θ + 2 * π + π = θ + π + 2 * π; ring⟩
+          fun θ ↦ by change θ + 2 * π + π = θ + π + 2 * π; ring⟩
       · exact ⟨c1.add continuous_const, m1.add_const π,
-          fun θ ↦ by show rein_φ V K 1 (θ + 2 * π) + π = rein_φ V K 1 θ + π + 2 * π
+          fun θ ↦ by change rein_φ V K 1 (θ + 2 * π) + π = rein_φ V K 1 θ + π + 2 * π
                      rw [h2π θ, hp1 θ 1]; push_cast; ring⟩
       · exact ⟨c2.add continuous_const, m2.add_const π,
-          fun θ ↦ by show rein_φ V K 2 (θ + 2 * π) + π = rein_φ V K 2 θ + π + 2 * π
+          fun θ ↦ by change rein_φ V K 2 (θ + 2 * π) + π = rein_φ V K 2 θ + π + 2 * π
                      rw [h2π θ, hp2 θ 1]; push_cast; ring⟩
     · have hg := inv_pos.2 (rein_gauge_pos hK' (rein_dir_ne_zero θ))
-      obtain ⟨r1, hr1, e1⟩ := rein_φ_spec hG hV hVm (j := 1) θ
-      obtain ⟨r2, hr2, e2⟩ := rein_φ_spec hG hV hVm (j := 2) θ
+      obtain ⟨r1, hr1, e1⟩ := rein_φ_spec hG hV (j := 1) θ
+      obtain ⟨r2, hr2, e2⟩ := rein_φ_spec hG hV (j := 2) θ
       have n3 := rein_hexMidpoint_add_three (hV θ).1 0
       have n4 := rein_hexMidpoint_add_three (hV θ).1 1
       have n5 := rein_hexMidpoint_add_three (hV θ).1 2
@@ -6121,13 +6127,13 @@ theorem lemma2_2_7 {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) :
       · exact ⟨r1, hr1, e1⟩
       · exact ⟨r2, hr2, e2⟩
       · refine ⟨_, hg, ?_⟩
-        show hexMidpoint (V θ) 3 = _ • rein_dir (θ + π)
+        change hexMidpoint (V θ) 3 = _ • rein_dir (θ + π)
         rw [n3, hVm θ, rein_dir_add_pi, smul_neg]; rfl
       · refine ⟨r1, hr1, ?_⟩
-        show hexMidpoint (V θ) (1 + 3) = r1 • rein_dir (rein_φ V K 1 θ + π)
+        change hexMidpoint (V θ) (1 + 3) = r1 • rein_dir (rein_φ V K 1 θ + π)
         rw [n4, e1, rein_dir_add_pi, smul_neg]
       · refine ⟨r2, hr2, ?_⟩
-        show hexMidpoint (V θ) (2 + 3) = r2 • rein_dir (rein_φ V K 2 θ + π)
+        change hexMidpoint (V θ) (2 + 3) = r2 • rein_dir (rein_φ V K 2 θ + π)
         rw [n5, e2, rein_dir_add_pi, smul_neg]
 
 end SmoothedPolygons

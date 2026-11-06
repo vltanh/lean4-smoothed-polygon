@@ -23,7 +23,8 @@ disk, such as the smoothed octagon, has `area(H_K) = √12`. The gap is filled b
 recorded in the helper lemmas below:
 
 * the edge midpoints `m_j` of a least-area hexagon lie on the boundary of `K` (§2.2, stated in the
-  book; `hex_hexMidpoint_mem_frontier`), and `area(H_K) = 4 det(m₀, m₁)` (`hex_volume_hexagonOf`);
+  book; `rein_hexMidpoint_mem_frontier`), and `area(H_K) = 4 det(m₀, m₁)`
+  (`hex_volume_hexagonOf`);
 * the multi-point `σ(t)` with `σ₀(t) = m₀` gives a second inscribed configuration with the same
   first point; for a centrally symmetric convex disk, the value `det(u, p)` with `u, p, p - u` on
   the boundary and `det(u, p) > 0` depends only on `u` (`ch2_det2_eq_of_inscribed`: the chords
@@ -31,8 +32,9 @@ recorded in the helper lemmas below:
   `det(m₀, m₁) = det(σ₀(t), σ₁(t)) = √3/2` and `area(H_K) = 2√3 = √12`.
 
 How the helper lemmas are proved. The first two, on centrally symmetric hexagons, are in
-`SmoothedPolygons.Ch2.Hexagon` (`hex_volume_hexagonOf`: the hexagon is cut into six triangles;
-`hex_hexMidpoint_mem_frontier`: the book's rotation argument).
+`SmoothedPolygons.Ch2.Reinhardt` and `SmoothedPolygons.Ch2.Hexagon` (`hex_volume_hexagonOf`, from
+`rein_volume_hexagonOf`: the hexagon is cut into six triangles; `rein_hexMidpoint_mem_frontier`:
+the book's rotation argument).
 
 * `ch2_det2_eq_of_inscribed`. Suppose `0 < det(u, p) < det(u, q)` and put
   `θ = det(u, p)/det(u, q) ∈ (0, 1)`. The point `θ q` is interior (it is between `0` and `q`), and
@@ -54,18 +56,6 @@ open MeasureTheory Set
 
 /-! ### Chords parallel to a vector -/
 
-/-- A centrally symmetric convex disk contains the origin in its interior. -/
-lemma bal_zero_mem_interior {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) :
-    (0 : Fin 2 → ℝ) ∈ interior K := by
-  obtain ⟨hconv, -, ⟨x, hx⟩, hsymm⟩ := hK
-  have hneg : -interior K ⊆ interior K := by
-    refine interior_maximal (fun y hy ↦ ?_) (isOpen_interior.neg)
-    simpa using hsymm _ (interior_subset (Set.mem_neg.1 hy))
-  have hx' : -x ∈ interior K := hneg (by simpa using hx)
-  have := hconv.interior hx hx' (by norm_num : (0 : ℝ) ≤ 1 / 2) (by norm_num : (0 : ℝ) ≤ 1 / 2)
-    (by norm_num)
-  simpa [smul_neg] using this
-
 /-- If `det(u, y) = 0` and `det(u, w) ≠ 0`, then `y` is a multiple of `u`. -/
 lemma bal_eq_smul_of_det2_eq_zero {u y w : Fin 2 → ℝ} (hw : det2 u w ≠ 0) (hy : det2 u y = 0) :
     y = (det2 y w / det2 u w) • u := by
@@ -79,7 +69,7 @@ interior of `K`: the chord of `K` through `p` parallel to `u` is longer than `|u
 lemma bal_not_lt_of_inscribed {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {u p q : Fin 2 → ℝ}
     (hu : u ∈ K) (hp : p ∈ frontier K) (hpu : p - u ∈ frontier K) (hq : q ∈ K) (hqu : q - u ∈ K)
     (hup : 0 < det2 u p) (hlt : det2 u p < det2 u q) : False := by
-  have h0 := bal_zero_mem_interior hK
+  have h0 := rein_zero_mem_interior hK
   obtain ⟨hconv, hcomp, -, hsymm⟩ := hK
   have hpK : p ∈ K := hcomp.isClosed.frontier_subset hp
   have hpuK : p - u ∈ K := hcomp.isClosed.frontier_subset hpu
@@ -250,7 +240,7 @@ theorem greatestPackingDensity_of_isBalancedPair {K : Set (Fin 2 → ℝ)}
   have himage : ∀ j, σ j '' Ico 0 (6 * tf) = frontier K := h.2.2.2.2.2.2.2.2.2
   obtain ⟨⟨v, hv⟩, hδ⟩ := theorem2_2_2 hK (ch2_not_isParallelogram_of_isBalancedPair h)
   rw [hδ v hv, hex_volume_hexagonOf hv.1]
-  have hm : ∀ j, hexMidpoint v j ∈ frontier K := hex_hexMidpoint_mem_frontier hK hv
+  have hm : ∀ j, hexMidpoint v j ∈ frontier K := rein_hexMidpoint_mem_frontier hK hv
   obtain ⟨t, ht, ht0⟩ : hexMidpoint v 0 ∈ σ 0 '' Ico 0 (6 * tf) := (himage 0).symm ▸ hm 0
   have hσ1 : σ 1 t ∈ frontier K := himage 1 ▸ mem_image_of_mem _ ht
   have hσ2 : σ 2 t ∈ frontier K := himage 2 ▸ mem_image_of_mem _ ht
@@ -262,7 +252,7 @@ theorem greatestPackingDensity_of_isBalancedPair {K : Set (Fin 2 → ℝ)}
     rw [eq_comm, ← sub_eq_zero, ← h024]
     abel
   have heq := ch2_det2_eq_of_inscribed hK (hm 0) (hm 1) (hex_hexMidpoint_sub hv.1 ▸ hm 2)
-    (q := σ 1 t) hσ1 (ht0 ▸ h21 ▸ hσ2) (hex_det2_hexMidpoint_pos hv.1)
+    (q := σ 1 t) hσ1 (ht0 ▸ h21 ▸ hσ2) (rein_det2_hexMidpoint_pos hv.1)
     (ht0 ▸ hdet ▸ by positivity)
   rw [heq, ← ht0, hdet]
   congr 1
