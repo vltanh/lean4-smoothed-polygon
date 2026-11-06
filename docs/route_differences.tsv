@@ -46,3 +46,12 @@ thm:6k+2	+prop:star-domain	the spline stays in the state space SL₂(ℝ) × �
 # Appendix A
 prop:brack-brack-inner-prod	+prop:trace-quotient-sub	the book's proof: "This is immediate from the previous proposition" (Proposition A.6.2, cited without \ref)
 lem:riemannian	-lem:tangent-maps	the formal statement is written with the matrices Y_z(r) = tangentLift (the representatives of TΦ of Lemma 4.2.4) directly; Lemma 4.2.4 is used where Lemma A.11.1 is applied (Lemma 7.1.2)
+#
+# Chapter 2
+*	+thm:fejes-toth-packing	results stated for a disk with the worst greatest packing density delta whose arguments are about lattice packings: Theorem 2.1.3 (delta = delta_L) converts, as the book says at TeX 1226 ("in view of Fejes Toth's theorem, results about greatest lattice packing density actually imply results about greatest packing density")
+thm:frac-hexagon	+lem:reinhardt-tiling	the book's proof: "By the previous lemma, the lattice packing K+L is obtained by tiling" (Lemma 2.2.1, cited without \ref; in its corrected form, E-item)
+lem:no-corner	+lem:reinhardt-tiling	gap of the book: the existence of K_min by Blaschke selection needs a bound on delta_L of the limit; the formal proof's lower-semicontinuity bound uses Lemma 2.2.1 (area of a circumscribed hexagon <= det L)
+thm:min-critical	+thm:minkowski-inscribe	the critical hexagon of the critical lattice L~ that the book's proof takes (Theorem 2.3.7) is built on the six boundary points of L~ given by Theorem 2.3.6
+lem:sigma2:c1	-lem:star-conditions	the book's proof only says "(Compare the proof of Lemma 2.4.5)"; it does not use the lemma
+lem:sigma2:c1	+lem:multi-cont	cited in the paragraph between the statement and the proof (TeX 2031: "By Lemma 2.2.7, the curves sigma_j(t) are continuous")
+lem:tangents-lipschitz	+lem:multi-cont	the book's "by continuity over the compact boundary" (the curvature bound of the hyperbolas) needs the continuity of the critical midpoints, Lemma 2.2.7
