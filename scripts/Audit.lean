@@ -29,6 +29,7 @@ import all External.EulerArnold
 import all External.FejesToth
 import all External.Gruber
 import all External.Mahler1947
+import all External.MahlerIrreducible
 import all External.MinkowskiMahler
 import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.MatrixIdentities
@@ -38,6 +39,7 @@ import all SmoothedPolygons.Ch2.BalancedDensity
 import all SmoothedPolygons.Ch2.Boundary
 import all SmoothedPolygons.Ch2.Density
 import all SmoothedPolygons.Ch2.Hexagon
+import all SmoothedPolygons.Ch2.Irreducible
 import all SmoothedPolygons.Ch2.Mahler
 import all SmoothedPolygons.Ch2.MultiCurve
 import all SmoothedPolygons.Ch2.Reinhardt
@@ -110,7 +112,8 @@ meta def externalResults : List (String × Name) :=
    ("Fejes Tóth 1950", ``External.fejes_toth),
    ("Gruber, Cor. 30.1", ``External.gruber_corollary_30_1),
    ("Minkowski 1907, Mahler 1946", ``External.minkowski_mahler),
-   ("Mahler 1947", ``External.mahler_1947)]
+   ("Mahler 1947", ``External.mahler_1947),
+   ("Mahler 1947, Lemma 3", ``External.mahler_irreducible)]
 
 /-- The numbered results of the paper, in the order of the paper. -/
 meta def paperResults : List (String × Name) :=

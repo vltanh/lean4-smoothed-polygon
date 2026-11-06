@@ -1,6 +1,7 @@
 module
 
 public import SmoothedPolygons.Ch2.Density
+public import SmoothedPolygons.Ch2.Irreducible
 public import Mathlib.Analysis.Convex.Hull
 public import Mathlib.Analysis.Convex.Segment
 public import Mathlib.LinearAlgebra.AffineSpace.Midpoint
@@ -3371,7 +3372,34 @@ lemma rein_exists_worst : ∃ K, IsWorstLatticeDisk K := by
 /-- **Lemma 2.2.5** (`lem:no-corner`). A disk `K_min` with the worst greatest density lattice
 packing exists. `K_min` has no corners, that is, there is a unique support line to `K_min` at each
 boundary point. Moreover, the support line of each boundary point of `K_min` contains an edge of
-some critical hexagon. -/
+some critical hexagon.
+
+Existence is the book's argument: Reinhardt's use of the Blaschke selection theorem
+(`rein_exists_worst`).
+
+Departure from the paper: the book proves the other two claims by shaving, which has a gap.
+Shaving `K` near a boundary point only shows that the part `ℓ ∩ K` of `K` on a support line `ℓ`
+meets the boundary of some critical hexagon. This gives nothing at an endpoint of a segment of the
+boundary lying on an edge of a critical hexagon away from the edge's midpoint, and the book's step
+"each endpoint of the segment is the midpoint of an edge of a critical hexagon, for otherwise it
+can be shaved" cannot be repaired along its lines without a quantitative expansion that the book
+does not have. We follow Mahler's lattice route instead:
+1. `K_min` is irreducible in Mahler's sense (`irr_isIrreducible_of_worst`): since
+   `δ_L(K) = area(K)/(4Δ(K))` (`irr_glpd_eq`; `K + L` is a packing iff `½L` is `K`-admissible), a
+   proper symmetric convex subdomain with the same `Δ` would have a smaller density. `K_min` is
+   not a parallelogram (`irr_not_isParallelogram_of_worst`: the Euclidean disk has `δ_L < 1`).
+2. Mahler's Lemma 3 (`External.mahler_irreducible`, by shaving along `±ℓ`): every support line `ℓ`
+   passes through a point `x` of a critical lattice, one of the six points `s_j` of Mahler's
+   Lemma 2.
+3. Mahler's Theorem 2 (`External.mahler_1947`): `ℓ` is the only support line at `x`, and it is the
+   line of an edge of the hexagon bounded by the support lines at the `s_j`, which contains `K`
+   and has area at most `4Δ(K)` (`irr_main`). Every centrally symmetric hexagon around `K` has
+   area at least `4Δ(K)` (its lattice tiling, `rein_hex_lattice`, packs `K`), so this hexagon is
+   critical.
+
+No corners: if `{b · x = 1}` and `{c · x = 1}` are support lines at `u`, the support line
+`{(b + c)/2 · x = 1}` at `u` passes through a point `x` of a critical lattice, `x` lies on both
+lines, and there is only one support line at `x`. -/
 theorem lemma2_2_5 :
     (∃ K, IsWorstLatticeDisk K) ∧
       ∀ K, IsWorstLatticeDisk K →
@@ -3379,12 +3407,65 @@ theorem lemma2_2_5 :
         ∀ u ∈ frontier K, ∀ ℓ, IsSupportLine K ℓ → u ∈ ℓ →
           ∃ v, IsLeastAreaHexagon K v ∧ ∃ j, segment ℝ (v j) (v (j + 1)) ⊆ ℓ := by
   -- existence, by the Blaschke selection theorem
-  refine ⟨rein_exists_worst, ?_⟩
-  -- Open: no corners, and every support line contains an edge of a critical hexagon (the
-  -- shaving argument). The book's step "each endpoint of a boundary segment is the midpoint of an
-  -- edge of a critical hexagon, for otherwise it can be shaved" does not follow from the
-  -- closedness argument when the endpoint lies on a critical edge away from its midpoint.
-  sorry
+  refine ⟨rein_exists_worst, fun K hK ↦ ?_⟩
+  have hK1 : IsCCSDisk K := hK.1
+  -- every centrally symmetric hexagon around `K` has area at least `4Δ(K)`: its lattice tiling
+  -- packs `K`, and `K + L` is a packing only if `½L` is `K`-admissible
+  have hlow : ∀ w, IsCSHexagon w → K ⊆ hexagonOf w →
+      4 * External.MinkowskiMahler.minimalDeterminant K ≤ volume.real (hexagonOf w) := by
+    intro w hw hKw
+    obtain ⟨L0, hL0, hdet0, hpack0⟩ := rein_hex_lattice hw
+    rw [← hdet0]
+    exact irr_four_mul_le_latticeDet hK1 hL0 (rein_isLatticePacking_mono hKw hpack0)
+  -- a support line `{b · x = 1}` passes through a point `x` of `K` at which it is the only
+  -- support line, and it contains an edge of a critical hexagon (Mahler's Lemma 3 and Theorem 2)
+  have key : ∀ b : Fin 2 → ℝ, (∀ x ∈ K, b ⬝ᵥ x ≤ 1) → (∃ u ∈ K, b ⬝ᵥ u = 1) →
+      ∃ x ∈ K, b ⬝ᵥ x = 1 ∧ (∀ c : Fin 2 → ℝ, (∀ y ∈ K, c ⬝ᵥ y ≤ 1) → c ⬝ᵥ x = 1 → c = b) ∧
+        ∃ v, IsLeastAreaHexagon K v ∧ ∃ j, segment ℝ (v j) (v (j + 1)) ⊆ {y | b ⬝ᵥ y = 1} := by
+    intro b hb hbu
+    obtain ⟨x, hxK, hbx, huniq, w₀, w₁, w₂, j, hc, hstrip, hsum, hj0, hj1⟩ :=
+      irr_main hK hb hbu
+    have hC : rein_HexCond w₀ w₁ w₂ :=
+      ⟨hc.1, hc.2.1, hc.2.2.1, hc.2.2.2.1, hc.2.2.2.2.1, hc.2.2.2.2.2⟩
+    refine ⟨x, hxK, hbx, huniq, rein_hex3 w₀ w₁ w₂, ⟨rein_isCSHexagon_iff_hexCond.2 hC,
+      fun y hy ↦ (rein_mem_hexagonOf_iff_strips hC).2 (hstrip y hy), fun w hw hKw ↦ ?_⟩, j, ?_⟩
+    · rw [rein_volume_hexagonOf_hex3' hC,
+        ← ENNReal.ofReal_toReal (rein_isCompact_hexagonOf w).measure_lt_top.ne]
+      exact ENNReal.ofReal_le_ofReal (hsum.trans (hlow w hw hKw))
+    · rintro y ⟨s, t, hs, ht, hst, rfl⟩
+      change b ⬝ᵥ (s • irr_hex3 w₀ w₁ w₂ j + t • irr_hex3 w₀ w₁ w₂ (j + 1)) = 1
+      rw [dotProduct_add, dotProduct_smul, dotProduct_smul, hj0, hj1, smul_eq_mul, smul_eq_mul,
+        mul_one, mul_one, hst]
+  refine ⟨fun u hu ↦ ?_, fun u hu ℓ hℓ huℓ ↦ ?_⟩
+  · -- a support line at `u`
+    obtain ⟨b, hb, hbu⟩ := irr_exists_normal hK1 hu
+    have huK := rein_frontier_subset hK1 hu
+    have hb0 : b ≠ 0 := by rintro rfl; simp at hbu
+    refine ⟨{y | b ⬝ᵥ y = 1}, ⟨rein_isSupportLine_of hb0 hb huK hbu, hbu⟩, ?_⟩
+    -- uniqueness: for two support lines `{b · x = 1}`, `{c · x = 1}` at `u`, the support line
+    -- `{(b + c)/2 · x = 1}` at `u` passes through a point of a critical lattice which lies on
+    -- both lines, and at which there is only one support line
+    rintro ℓ ⟨hℓ, huℓ⟩
+    obtain ⟨c, rfl, hc⟩ := irr_normal hK1 (rein_supportLine_normal hℓ)
+    have hcu : c ⬝ᵥ u = 1 := huℓ
+    set d : Fin 2 → ℝ := (1 / 2 : ℝ) • (b + c) with hd
+    have hdK : ∀ y ∈ K, d ⬝ᵥ y ≤ 1 := by
+      intro y hy
+      rw [hd, smul_dotProduct, add_dotProduct, smul_eq_mul]
+      linarith [hb y hy, hc y hy]
+    have hdu : d ⬝ᵥ u = 1 := by
+      rw [hd, smul_dotProduct, add_dotProduct, smul_eq_mul, hbu, hcu]; norm_num
+    obtain ⟨x, hxK, hdx, huniq, -⟩ := key d hdK ⟨u, huK, hdu⟩
+    rw [hd, smul_dotProduct, add_dotProduct, smul_eq_mul] at hdx
+    have hbx : b ⬝ᵥ x = 1 := by linarith [hb x hxK, hc x hxK]
+    have hcx : c ⬝ᵥ x = 1 := by linarith [hb x hxK, hc x hxK]
+    have e1 := huniq c hc hcx
+    have e2 := huniq b hb hbx
+    rw [e1, e2]
+  · -- every support line contains an edge of a critical hexagon
+    obtain ⟨b, rfl, hb⟩ := irr_normal hK1 (rein_supportLine_normal hℓ)
+    obtain ⟨-, -, -, -, v, hv, j, hj⟩ := key b hb ⟨u, rein_frontier_subset hK1 hu, huℓ⟩
+    exact ⟨v, hv, j, hj⟩
 
 /-- The triangle `T_j` with vertices `s_j*`, `s_{j+1}*` and `s_j* + s_{j+1}*` (§2.2). -/
 noncomputable def sixthTriangle (j : ZMod 6) : Set (Fin 2 → ℝ) :=
