@@ -21,6 +21,7 @@ import all Basic.Analysis.Convex.CellDecomposition.PolygonSides
 import all Basic.Analysis.Convex.CellDecomposition.SideCount
 import all Basic.Analysis.Convex.CircumscribedPolygon
 import all Basic.Analysis.Convex.HexagonLattice
+import all Basic.Analysis.Convex.LatticePacking
 import all Basic.Analysis.Convex.PolygonAngle
 import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.StarCurveConvex
@@ -43,6 +44,7 @@ import all SmoothedPolygons.Ch2.Irreducible
 import all SmoothedPolygons.Ch2.Mahler
 import all SmoothedPolygons.Ch2.MultiCurve
 import all SmoothedPolygons.Ch2.Reinhardt
+import all SmoothedPolygons.Ch2.TilingCounterexample
 import all SmoothedPolygons.Ch3.AreaFormula
 import all SmoothedPolygons.Ch3.ControlProblem
 import all SmoothedPolygons.Ch3.ControlSets

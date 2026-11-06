@@ -1,6 +1,7 @@
 module
 
 public import Basic.Analysis.Calculus.MatrixEntrywise
+public import Basic.Analysis.Convex.LatticePacking
 public import External.MahlerIrreducible
 public import SmoothedPolygons.AppA.FunctionalDerivative
 public import SmoothedPolygons.AppA.MatrixIdentities
@@ -14,6 +15,7 @@ public import SmoothedPolygons.Ch2.Irreducible
 public import SmoothedPolygons.Ch2.Mahler
 public import SmoothedPolygons.Ch2.MultiCurve
 public import SmoothedPolygons.Ch2.Reinhardt
+public import SmoothedPolygons.Ch2.TilingCounterexample
 public import SmoothedPolygons.Ch3.AreaFormula
 public import SmoothedPolygons.Ch3.ControlProblem
 public import SmoothedPolygons.Ch3.ControlSets

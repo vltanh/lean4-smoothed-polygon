@@ -2,6 +2,7 @@ module
 
 public import SmoothedPolygons.Ch2.Density
 public import SmoothedPolygons.Ch2.Irreducible
+public import Basic.Analysis.Convex.LatticePacking
 public import Mathlib.Analysis.Convex.Hull
 public import Mathlib.Analysis.Convex.Segment
 public import Mathlib.LinearAlgebra.AffineSpace.Midpoint
@@ -14,7 +15,7 @@ public import Mathlib.Topology.MetricSpace.Closeds
 /-!
 # Reinhardt's approach (§2.2)
 
-Lattice packings of a centrally symmetric convex disk by tiles (Lemma 2.2.1), the formula
+Lattice packings of a centrally symmetric convex disk inside hexagons (Lemma 2.2.1), the formula
 `δ(K) = area(K)/area(H_K)` with `H_K` a least-area centrally symmetric circumscribed hexagon
 (Theorem 2.2.2), support lines (Definition 2.2.3), the hyperbolic arcs at the edge midpoints of
 `H_K` (Remark 2.2.4), and Reinhardt's properties of a worst disk `K_min` (Lemmas 2.2.5–2.2.7).
@@ -1738,17 +1739,335 @@ lemma rein_least_le {K : Set (Fin 2 → ℝ)} {v w : ZMod 6 → Fin 2 → ℝ}
     volume.real (hexagonOf v) ≤ volume.real (hexagonOf w) :=
   ENNReal.toReal_mono (rein_isCompact_hexagonOf w).measure_lt_top.ne (hv.2.2 w hw hKw)
 
+/-! ### Strips, parallelograms and hexagons (for Lemma 2.2.1) -/
+
+/-- The dual basis `u, v` of two independent functionals `a, b`: `x = ⟨a, x⟩ u + ⟨b, x⟩ v`. -/
+lemma tile_dual {a b : Fin 2 → ℝ} (hab : a 0 * b 1 - a 1 * b 0 ≠ 0) :
+    ∃ u v : Fin 2 → ℝ, det2 u v = (a 0 * b 1 - a 1 * b 0)⁻¹ ∧
+      (∀ x, det2 x v = (a 0 * b 1 - a 1 * b 0)⁻¹ * (a ⬝ᵥ x)) ∧
+      (∀ x, det2 u x = (a 0 * b 1 - a 1 * b 0)⁻¹ * (b ⬝ᵥ x)) ∧
+      (∀ x, x = (a ⬝ᵥ x) • u + (b ⬝ᵥ x) • v) ∧
+      a ⬝ᵥ u = 1 ∧ b ⬝ᵥ u = 0 ∧ a ⬝ᵥ v = 0 ∧ b ⬝ᵥ v = 1 := by
+  have hk : (a 0 * b 1 - a 1 * b 0) * (a 0 * b 1 - a 1 * b 0)⁻¹ = 1 := mul_inv_cancel₀ hab
+  refine ⟨(a 0 * b 1 - a 1 * b 0)⁻¹ • ![b 1, -b 0], (a 0 * b 1 - a 1 * b 0)⁻¹ • ![-a 1, a 0],
+    ?_, fun x ↦ ?_, fun x ↦ ?_, fun x ↦ ?_, ?_, ?_, ?_, ?_⟩
+  · simp only [det2, Pi.smul_apply, smul_eq_mul, cons_val_zero, cons_val_one]
+    linear_combination (a 0 * b 1 - a 1 * b 0)⁻¹ * hk
+  · simp only [det2, Pi.smul_apply, smul_eq_mul, cons_val_zero, cons_val_one,
+      PlaneLattice.dotProduct_two]
+    ring
+  · simp only [det2, Pi.smul_apply, smul_eq_mul, cons_val_zero, cons_val_one,
+      PlaneLattice.dotProduct_two]
+    ring
+  · ext i
+    fin_cases i <;>
+      simp only [PlaneLattice.dotProduct_two, Pi.add_apply, Pi.smul_apply, smul_eq_mul,
+        cons_val_zero, cons_val_one, Fin.zero_eta, Fin.mk_one]
+    · linear_combination (-x 0) * hk
+    · linear_combination (-x 1) * hk
+  all_goals
+    simp only [PlaneLattice.dotProduct_two, Pi.smul_apply, smul_eq_mul, cons_val_zero,
+      cons_val_one]
+  · linear_combination hk
+  · ring
+  · ring
+  · linear_combination hk
+
+/-- Two independent strips cut out a centrally symmetric parallelogram. -/
+lemma tile_isCSParallelogram {a b : Fin 2 → ℝ} (hab : a 0 * b 1 - a 1 * b 0 ≠ 0) :
+    IsCSParallelogram {x | |a ⬝ᵥ x| ≤ 1 ∧ |b ⬝ᵥ x| ≤ 1} := by
+  obtain ⟨u, v, huv, -, -, hx, hau, hbu, hav, hbv⟩ := tile_dual hab
+  refine ⟨u, v, by rw [huv]; exact inv_ne_zero hab, ?_⟩
+  ext x
+  constructor
+  · rintro ⟨h1, h2⟩
+    exact ⟨_, _, h1, h2, hx x⟩
+  · rintro ⟨s, t, hs, ht, rfl⟩
+    simp only [mem_ofPred_eq, dotProduct_add, dotProduct_smul, hau, hbu, hav, hbv,
+      smul_eq_mul, mul_one, mul_zero, add_zero, zero_add]
+    exact ⟨hs, ht⟩
+
+/-- The centrally symmetric hexagon with vertices `u - v`, `u + k v`, `k' u + v` and their
+negatives (`det(u, v) > 0`), as an intersection of three strips. -/
+lemma tile_hex_core {u v : Fin 2 → ℝ} {k k' : ℝ} (hD : 0 < det2 u v) (h1 : 0 < 1 + k)
+    (h2 : 0 < 1 + k') (h3 : k * k' < 1) (h4 : k' - k + k * k' < 1)
+    (h5 : k - k' + k * k' < 1) :
+    IsCSHexagon (rein_hex3 (u - v) (u + k • v) (k' • u + v)) ∧
+      ∀ x, x ∈ hexagonOf (rein_hex3 (u - v) (u + k • v) (k' • u + v)) ↔
+        (|det2 x v| ≤ det2 u v ∧ |(1 - k) * det2 x v + (1 - k') * det2 u x| ≤
+          (1 - k * k') * det2 u v ∧ |det2 u x| ≤ det2 u v) := by
+  set D := det2 u v
+  have eAB : det2 (u - v) (u + k • v) = (1 + k) * D := by
+    simp only [D, det2, Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+  have eBC : det2 (u + k • v) (k' • u + v) = (1 - k * k') * D := by
+    simp only [D, det2, Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+  have eAC : det2 (u - v) (k' • u + v) = (1 + k') * D := by
+    simp only [D, det2, Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+  have hc : rein_HexCond (u - v) (u + k • v) (k' • u + v) := by
+    refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+    · rw [eAB]; exact mul_pos h1 hD
+    · rw [eBC]; exact mul_pos (sub_pos.2 h3) hD
+    · rw [eAC]; exact mul_pos h2 hD
+    · rw [eAC, eAB, eBC]
+      nlinarith [mul_pos (by linarith : (0 : ℝ) < 1 - (k' - k + k * k')) hD]
+    · rw [eAB, eBC, eAC]
+      nlinarith [mul_pos (by linarith : (0 : ℝ) < 1 - (k - k' + k * k')) hD]
+    · rw [eBC, eAB, eAC]
+      nlinarith [mul_pos (mul_pos h1 h2) hD]
+  refine ⟨rein_isCSHexagon_iff_hexCond.2 hc, fun x ↦ ?_⟩
+  rw [rein_mem_hexagonOf_iff_strips hc, rein_strips, eAB, eBC, eAC]
+  have e1 : det2 (u - v - (u + k • v)) x = (1 + k) * det2 x v := by
+    simp only [det2, Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+  have e2 : det2 (u + k • v - (k' • u + v)) x = (1 - k) * det2 x v + (1 - k') * det2 u x := by
+    simp only [det2, Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+  have e3 : det2 (k' • u + v + (u - v)) x = (1 + k') * det2 u x := by
+    simp only [det2, Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+  rw [e1, e2, e3, abs_mul, abs_of_pos h1, abs_mul, abs_of_pos h2,
+    mul_le_mul_iff_of_pos_left h1, mul_le_mul_iff_of_pos_left h2]
+
+/-- Three strips `|⟨a, x⟩|, |⟨b, x⟩|, |⟨α a + β b, x⟩| ≤ 1` with `det(a, b) > 0`, `α, β > 0`,
+`|α - β| < 1 < α + β` cut out a centrally symmetric hexagon. -/
+lemma tile_hex_of_pos {a b : Fin 2 → ℝ} (hD : 0 < a 0 * b 1 - a 1 * b 0) {α β : ℝ}
+    (hα : 0 < α) (hβ : 0 < β) (h1 : α + β > 1) (h2 : α < 1 + β) (h3 : β < 1 + α) :
+    ∃ v, IsCSHexagon v ∧
+      {x | |a ⬝ᵥ x| ≤ 1 ∧ |b ⬝ᵥ x| ≤ 1 ∧ |(α • a + β • b) ⬝ᵥ x| ≤ 1} = hexagonOf v := by
+  obtain ⟨u, v, huv, hxv, hux, -, -, -, -, -⟩ := tile_dual hD.ne'
+  set D := a 0 * b 1 - a 1 * b 0
+  set k := (1 - α) / β
+  set k' := (1 - β) / α
+  have hk : k * β = 1 - α := div_mul_cancel₀ _ hβ.ne'
+  have hk' : k' * α = 1 - β := div_mul_cancel₀ _ hα.ne'
+  have g1 : 0 < 1 + k := by
+    have : (1 + k) * β = β + 1 - α := by rw [add_mul, hk]; ring
+    nlinarith
+  have g2 : 0 < 1 + k' := by
+    have : (1 + k') * α = α + 1 - β := by rw [add_mul, hk']; ring
+    nlinarith
+  have hkk : (k * k') * (α * β) = (1 - α) * (1 - β) := by
+    rw [show k * k' * (α * β) = (k * β) * (k' * α) by ring, hk, hk']
+  have hab : 0 < α * β := mul_pos hα hβ
+  have g3 : k * k' < 1 := by nlinarith
+  have g4 : k' - k + k * k' < 1 := by
+    have : (k' - k + k * k') * (α * β) = β * (1 - β) - α * (1 - α) + (1 - α) * (1 - β) := by
+      rw [show (k' - k + k * k') * (α * β) = (k' * α) * β - (k * β) * α + k * k' * (α * β) by
+        ring, hk, hk', hkk]
+      ring
+    nlinarith
+  have g5 : k - k' + k * k' < 1 := by
+    have : (k - k' + k * k') * (α * β) = α * (1 - α) - β * (1 - β) + (1 - α) * (1 - β) := by
+      rw [show (k - k' + k * k') * (α * β) = (k * β) * α - (k' * α) * β + k * k' * (α * β) by
+        ring, hk, hk', hkk]
+      ring
+    nlinarith
+  have hDuv : 0 < det2 u v := by rw [huv]; exact inv_pos.2 hD
+  obtain ⟨hhex, hmem⟩ := tile_hex_core hDuv g1 g2 g3 g4 g5
+  refine ⟨_, hhex, ?_⟩
+  ext x
+  rw [hmem x, huv, hxv x, hux x]
+  simp only [mem_ofPred_eq, add_dotProduct, smul_dotProduct, smul_eq_mul]
+  have hDi : 0 < D⁻¹ := inv_pos.2 hD
+  have e : (1 - k) * (D⁻¹ * (a ⬝ᵥ x)) + (1 - k') * (D⁻¹ * (b ⬝ᵥ x)) =
+      ((1 - k * k') * D⁻¹) * (α * (a ⬝ᵥ x) + β * (b ⬝ᵥ x)) := by
+    have e1 : 1 - k = (1 - k * k') * α := by
+      have : (1 - k) * β = (1 - k * k') * α * β := by linear_combination (-1 : ℝ) * hk + hkk
+      exact mul_right_cancel₀ hβ.ne' this
+    have e2 : 1 - k' = (1 - k * k') * β := by
+      have : (1 - k') * α = (1 - k * k') * β * α := by
+        linear_combination (-1 : ℝ) * hk' + hkk
+      exact mul_right_cancel₀ hα.ne' this
+    rw [e1, e2]; ring
+  rw [e, abs_mul (D⁻¹), abs_mul (D⁻¹), abs_of_pos hDi, mul_le_iff_le_one_right hDi,
+    mul_le_iff_le_one_right hDi, abs_mul, abs_of_pos (mul_pos (sub_pos.2 g3) hDi),
+    mul_le_iff_le_one_right (mul_pos (sub_pos.2 g3) hDi)]
+  tauto
+
+/-- Three strips `|⟨a, x⟩|, |⟨b, x⟩|, |⟨α a + β b, x⟩| ≤ 1` (`a, b` independent, `α, β ≥ 0`) cut
+out a centrally symmetric parallelogram or hexagon. -/
+lemma tile_shape_nonneg {a b : Fin 2 → ℝ} (hD : a 0 * b 1 - a 1 * b 0 ≠ 0) {α β : ℝ}
+    (hα : 0 ≤ α) (hβ : 0 ≤ β) :
+    IsCSParallelogram {x | |a ⬝ᵥ x| ≤ 1 ∧ |b ⬝ᵥ x| ≤ 1 ∧ |(α • a + β • b) ⬝ᵥ x| ≤ 1} ∨
+      ∃ v, IsCSHexagon v ∧
+        {x | |a ⬝ᵥ x| ≤ 1 ∧ |b ⬝ᵥ x| ≤ 1 ∧ |(α • a + β • b) ⬝ᵥ x| ≤ 1} = hexagonOf v := by
+  have hc : ∀ x, (α • a + β • b) ⬝ᵥ x = α * (a ⬝ᵥ x) + β * (b ⬝ᵥ x) := fun x ↦ by
+    simp only [add_dotProduct, smul_dotProduct, smul_eq_mul]
+  by_cases hA : α + β ≤ 1
+  · -- the third strip is implied
+    left
+    convert tile_isCSParallelogram hD using 1
+    ext x
+    simp only [mem_ofPred_eq, hc]
+    constructor
+    · rintro ⟨h1, h2, -⟩; exact ⟨h1, h2⟩
+    · rintro ⟨h1, h2⟩
+      refine ⟨h1, h2, (abs_add_le _ _).trans ?_⟩
+      rw [abs_mul, abs_mul, abs_of_nonneg hα, abs_of_nonneg hβ]
+      nlinarith [abs_nonneg (a ⬝ᵥ x), abs_nonneg (b ⬝ᵥ x)]
+  by_cases hB : 1 + β ≤ α
+  · -- the first strip is implied
+    left
+    have hD' : b 0 * (α • a + β • b) 1 - b 1 * (α • a + β • b) 0 ≠ 0 := by
+      simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+      have : b 0 * (α * a 1 + β * b 1) - b 1 * (α * a 0 + β * b 0) =
+          -α * (a 0 * b 1 - a 1 * b 0) := by ring
+      rw [this]; exact mul_ne_zero (by linarith) hD
+    convert tile_isCSParallelogram hD' using 1
+    ext x
+    simp only [mem_ofPred_eq, hc]
+    constructor
+    · rintro ⟨-, h2, h3⟩; exact ⟨h2, h3⟩
+    · rintro ⟨h2, h3⟩
+      refine ⟨?_, h2, h3⟩
+      have h4 : α * |a ⬝ᵥ x| ≤ 1 + β := by
+        calc α * |a ⬝ᵥ x| = |α * (a ⬝ᵥ x) + β * (b ⬝ᵥ x) - β * (b ⬝ᵥ x)| := by
+              rw [add_sub_cancel_right, abs_mul, abs_of_nonneg hα]
+          _ ≤ |α * (a ⬝ᵥ x) + β * (b ⬝ᵥ x)| + |β * (b ⬝ᵥ x)| := abs_sub _ _
+          _ ≤ 1 + β := by rw [abs_mul, abs_of_nonneg hβ]; nlinarith
+      by_contra hcon
+      push Not at hcon
+      nlinarith
+  by_cases hC : 1 + α ≤ β
+  · -- the second strip is implied
+    left
+    have hD' : a 0 * (α • a + β • b) 1 - a 1 * (α • a + β • b) 0 ≠ 0 := by
+      simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+      have : a 0 * (α * a 1 + β * b 1) - a 1 * (α * a 0 + β * b 0) =
+          β * (a 0 * b 1 - a 1 * b 0) := by ring
+      rw [this]; exact mul_ne_zero (by linarith) hD
+    convert tile_isCSParallelogram hD' using 1
+    ext x
+    simp only [mem_ofPred_eq, hc]
+    constructor
+    · rintro ⟨h1, -, h3⟩; exact ⟨h1, h3⟩
+    · rintro ⟨h1, h3⟩
+      refine ⟨h1, ?_, h3⟩
+      have h4 : β * |b ⬝ᵥ x| ≤ 1 + α := by
+        calc β * |b ⬝ᵥ x| = |α * (a ⬝ᵥ x) + β * (b ⬝ᵥ x) - α * (a ⬝ᵥ x)| := by
+              rw [add_sub_cancel_left, abs_mul, abs_of_nonneg hβ]
+          _ ≤ |α * (a ⬝ᵥ x) + β * (b ⬝ᵥ x)| + |α * (a ⬝ᵥ x)| := abs_sub _ _
+          _ ≤ 1 + α := by rw [abs_mul, abs_of_nonneg hα]; nlinarith
+      by_contra hcon
+      push Not at hcon
+      nlinarith
+  push Not at hA hB hC
+  right
+  have hα' : 0 < α := by
+    rcases eq_or_lt_of_le hα with h | h
+    · rw [← h] at hA hC; linarith
+    · exact h
+  have hβ' : 0 < β := by
+    rcases eq_or_lt_of_le hβ with h | h
+    · rw [← h] at hA hB; linarith
+    · exact h
+  rcases lt_or_gt_of_ne hD with hneg | hpos
+  · have hpos' : 0 < b 0 * a 1 - b 1 * a 0 := by linarith
+    obtain ⟨v, hv, he⟩ := tile_hex_of_pos hpos' hβ' hα' (by linarith) hC hB
+    refine ⟨v, hv, ?_⟩
+    rw [← he]
+    ext x
+    simp only [mem_ofPred_eq, add_comm (α • a)]
+    tauto
+  · exact tile_hex_of_pos hpos hα' hβ' hA hB hC
+
+/-- Three strips `|⟨a, x⟩|, |⟨b, x⟩|, |⟨c, x⟩| ≤ 1` with `a, b` independent cut out a centrally
+symmetric parallelogram or hexagon. -/
+lemma tile_shape {a b : Fin 2 → ℝ} (hD : a 0 * b 1 - a 1 * b 0 ≠ 0) (c : Fin 2 → ℝ) :
+    IsCSParallelogram {x | |a ⬝ᵥ x| ≤ 1 ∧ |b ⬝ᵥ x| ≤ 1 ∧ |c ⬝ᵥ x| ≤ 1} ∨
+      ∃ v, IsCSHexagon v ∧ {x | |a ⬝ᵥ x| ≤ 1 ∧ |b ⬝ᵥ x| ≤ 1 ∧ |c ⬝ᵥ x| ≤ 1} = hexagonOf v := by
+  have hk : (a 0 * b 1 - a 1 * b 0) * (a 0 * b 1 - a 1 * b 0)⁻¹ = 1 := mul_inv_cancel₀ hD
+  set α₀ := (c 0 * b 1 - c 1 * b 0) / (a 0 * b 1 - a 1 * b 0)
+  set β₀ := (a 0 * c 1 - a 1 * c 0) / (a 0 * b 1 - a 1 * b 0)
+  have hc : c = α₀ • a + β₀ • b := by
+    ext i
+    fin_cases i <;>
+      simp only [α₀, β₀, Pi.add_apply, Pi.smul_apply, smul_eq_mul, div_eq_mul_inv,
+        Fin.zero_eta, Fin.mk_one]
+    · linear_combination (-c 0) * hk
+    · linear_combination (-c 1) * hk
+  -- normalize the signs of the coefficients
+  set σ : ℝ := if 0 ≤ α₀ then 1 else -1
+  set τ : ℝ := if 0 ≤ β₀ then 1 else -1
+  have hσ : σ * σ = 1 := by simp only [σ]; split_ifs <;> norm_num
+  have hτ : τ * τ = 1 := by simp only [τ]; split_ifs <;> norm_num
+  have hσα : 0 ≤ σ * α₀ := by simp only [σ]; split_ifs with h <;> linarith
+  have hτβ : 0 ≤ τ * β₀ := by simp only [τ]; split_ifs with h <;> linarith
+  have hD' : (σ • a) 0 * (τ • b) 1 - (σ • a) 1 * (τ • b) 0 ≠ 0 := by
+    simp only [Pi.smul_apply, smul_eq_mul]
+    have : σ * a 0 * (τ * b 1) - σ * a 1 * (τ * b 0) = (σ * τ) * (a 0 * b 1 - a 1 * b 0) := by
+      ring
+    rw [this]
+    refine mul_ne_zero ?_ hD
+    intro h0; have : σ * τ * (σ * τ) = 1 := by rw [show σ * τ * (σ * τ) = (σ * σ) * (τ * τ)
+      by ring, hσ, hτ, one_mul]
+    rw [h0, zero_mul] at this; norm_num at this
+  have hc' : c = (σ * α₀) • (σ • a) + (τ * β₀) • (τ • b) := by
+    rw [hc, smul_smul, smul_smul, show σ * α₀ * σ = (σ * σ) * α₀ by ring,
+      show τ * β₀ * τ = (τ * τ) * β₀ by ring, hσ, hτ, one_mul, one_mul]
+  have hσa : ∀ x, |(σ • a) ⬝ᵥ x| = |a ⬝ᵥ x| := fun x ↦ by
+    rw [smul_dotProduct, smul_eq_mul, abs_mul]
+    simp only [σ]; split_ifs <;> simp
+  have hτb : ∀ x, |(τ • b) ⬝ᵥ x| = |b ⬝ᵥ x| := fun x ↦ by
+    rw [smul_dotProduct, smul_eq_mul, abs_mul]
+    simp only [τ]; split_ifs <;> simp
+  have hset : {x | |a ⬝ᵥ x| ≤ 1 ∧ |b ⬝ᵥ x| ≤ 1 ∧ |c ⬝ᵥ x| ≤ 1} =
+      {x | |(σ • a) ⬝ᵥ x| ≤ 1 ∧ |(τ • b) ⬝ᵥ x| ≤ 1 ∧
+        |((σ * α₀) • (σ • a) + (τ * β₀) • (τ • b)) ⬝ᵥ x| ≤ 1} := by
+    ext x; simp only [mem_ofPred_eq, hσa, hτb, ← hc']
+  rw [hset]
+  exact tile_shape_nonneg hD' hσα hτβ
+
+/-- **Blichfeldt**: a convex set whose translates by a lattice `L` pack has area at most
+`det(L)`. -/
+lemma rein_volume_le_latticeDet {H : Set (Fin 2 → ℝ)} (hHc : Convex ℝ H)
+    {L : Submodule ℤ (Fin 2 → ℝ)} (hL : IsPlaneLattice L) (hP : IsLatticePacking H L) :
+    volume.real H ≤ latticeDet L := by
+  have := hL.1
+  have : IsZLattice ℝ L := ⟨hL.2⟩
+  exact PlaneLattice.volume_real_le_covolume L hHc hP
+
 /-! ### Lemma 2.2.1 and Theorem 2.2.2 -/
 
-/-- **Lemma 2.2.1** (`lem:reinhardt-tiling`). Let `K` be a centrally symmetric convex disk and
-`K + L` a lattice packing of `K`. The packing `K + L` is realized by placing `K` inside an
-appropriate parallelogram or centrally symmetric convex hexagon `H_K`, tiling the plane with
-translates of `H_K` by `L`, then placing a copy of `K` inside each translate of `H_K`. -/
+/-- **Lemma 2.2.1** (`lem:reinhardt-tiling`), corrected. Let `K` be a centrally symmetric convex
+disk and `K + L` a lattice packing of `K`. Then `K` lies in a parallelogram or a centrally
+symmetric convex hexagon `H_K` (centered at the origin) whose translates `H_K + L` form a packing;
+in particular `area(H_K) ≤ det(L)` (`rein_volume_le_latticeDet`).
+
+Statement correction: the book states that the packing `K + L` "is realized by placing `K` inside
+an appropriate parallelogram or centrally symmetric convex hexagon `H_K`, tiling the plane with
+translates of `H_K`, then placing a copy of `K` inside each translate of `H_K`" (conclusion
+`IsLatticeTiling H L` in place of `IsLatticePacking H L`). That statement is false: for `L = ℤ²`
+and the parallelogram `K = {y | |2y₀ + y₁| ≤ 1, |2y₁ - y₀| ≤ 1}` (area `4/5`), the translates
+`K + L` pack, and the half-lattice points `(±1/2, 0)`, `(0, ±1/2)` lie in the relative interiors
+of the four edges of `K`; so every convex `H ⊇ K` whose `L`-translates pack keeps them on its
+boundary with the same support lines, hence `H ⊆ K`, while `(1/2, 1/2)` is not covered by
+`K + L` (`lemma2_2_1_false_as_printed` in `SmoothedPolygons.Ch2.TilingCounterexample`). The
+corrected statement is the classical form of Reinhardt's lemma, and it is all that Theorem 2.2.2
+uses (`det(L) ≥ area(H_K)` for every packing lattice).
+
+Departure from the paper: the book's argument (expand `K`, separate touching translates by lines,
+crop, repeat until the plane is tiled; at most six edges by an Euler characteristic count) is an
+argument for the false tiling statement (in the example it is stuck at `K` from the start), so
+the corrected statement is proved differently (`PlaneLattice.exists_halfLatticeFree_eq_strips`):
+a maximal (Zorn's lemma) centrally symmetric convex set `C ⊇ K` with no point of `½L \ {0}` in
+its interior is cut out by the strips of the support lines that are the only support line at some
+point of `½L`; two such points with different lines span a lattice triangle with no other point of
+`½L`, so they form a basis of `½L`, and four vectors cannot pairwise form bases. Hence `C` is
+cut out by two or three strips: a parallelogram or a centrally symmetric hexagon
+(`tile_isCSParallelogram`, `tile_shape`). -/
 theorem lemma2_2_1 {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {L : Submodule ℤ (Fin 2 → ℝ)}
     (hL : IsPlaneLattice L) (hKL : IsLatticePacking K L) :
     ∃ H, (IsCSParallelogram H ∨ ∃ v, IsCSHexagon v ∧ H = hexagonOf v) ∧ K ⊆ H ∧
-      IsLatticeTiling H L := by
-  sorry
+      IsLatticePacking H L := by
+  have := hL.1
+  have : IsZLattice ℝ L := ⟨hL.2⟩
+  obtain ⟨C, hCc, -, hKC, hCs, hCL, a, b, hab, hC⟩ :=
+    PlaneLattice.exists_halfLatticeFree_eq_strips L hK.1 hK.2.1 (rein_zero_mem_interior hK)
+      hK.2.2.2 (PlaneLattice.halfLatticeFree_of_isPacking hK.2.2.2 hKL)
+  refine ⟨C, ?_, hKC, PlaneLattice.isPacking_of_halfLatticeFree hCc hCs hCL⟩
+  rcases hC with rfl | ⟨c, rfl⟩
+  · exact Or.inl (tile_isCSParallelogram hab)
+  · rcases tile_shape hab c with h | ⟨v, hv, he⟩
+    · exact Or.inl h
+    · exact Or.inr ⟨v, hv, he⟩
 
 /-- **Theorem 2.2.2** (Reinhardt–Fejes Tóth; `thm:frac-hexagon`, equation
 `eqn:reinhardt-fejes-toth`). If `K ⊂ ℝ²` is a centrally symmetric convex disk that is not a
@@ -1759,9 +2078,10 @@ exists.
 Departure from the paper: the book takes a lattice `L` attaining `δ_L(K)`, which it does not
 justify. Here a least-area hexagon `H_K` is shown to exist by compactness (`rein_exists_least`;
 a degenerate limit is a parallelogram, whose corners are clipped), every packing lattice has
-`det(L) ≥ area(H_K)` by Lemma 2.2.1 (a parallelogram tile is clipped,
-`rein_parallelogram_clip`), and the lattice tiling by `H_K` attains `area(K)/area(H_K)`
-(`rein_hex_lattice`); so the supremum is attained, by the lattice of `H_K`. -/
+`det(L) ≥ area(H_K)` by Lemma 2.2.1 and Blichfeldt's bound `area(H) ≤ det(L)` for a packing
+`H + L` (`rein_volume_le_latticeDet`; a parallelogram is clipped, `rein_parallelogram_clip`),
+and the lattice tiling by `H_K` attains `area(K)/area(H_K)` (`rein_hex_lattice`); so the supremum
+is attained, by the lattice of `H_K`. -/
 theorem theorem2_2_2 {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) (hpar : ¬ IsParallelogram K) :
     (∃ v, IsLeastAreaHexagon K v) ∧
       ∀ v, IsLeastAreaHexagon K v →
@@ -1783,10 +2103,9 @@ theorem theorem2_2_2 {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) (hpar : ¬ IsP
     · obtain ⟨w, hw, hKw, hlt⟩ := rein_parallelogram_clip hK hnp hpar' hKH
       obtain ⟨u, u', -, rfl⟩ := hpar'
       have hcc := rein_parallelogram_convex_compact u u'
-      rw [rein_latticeDet_eq_of_tiling hcc.1 hcc.2 hL hT]
-      linarith [rein_least_le hv hw hKw]
-    · rw [rein_latticeDet_eq_of_tiling (convex_convexHull ℝ _) (rein_isCompact_hexagonOf w) hL hT]
-      exact rein_least_le hv hw hKH
+      linarith [rein_least_le hv hw hKw, rein_volume_le_latticeDet hcc.1 hL hT]
+    · exact (rein_least_le hv hw hKH).trans
+        (rein_volume_le_latticeDet (convex_convexHull ℝ _) hL hT)
   -- the hexagonal lattice packing of `H_K` attains `area(K)/area(H_K)`
   obtain ⟨L0, hL0, hdet0, hpack0⟩ := rein_hex_lattice hv.1
   have hpackK : IsLatticePacking K L0 := rein_isLatticePacking_mono hv.2.1 hpack0
@@ -2938,9 +3257,9 @@ lemma rein_glpd_nonneg (K : Set (Fin 2 → ℝ)) : 0 ≤ greatestLatticePackingD
   Real.sSup_nonneg fun _ ⟨_, _, _, hd⟩ ↦ hd ▸ ENNReal.toReal_nonneg
 
 /-- The density of a lattice packing of `K` is at most `area(K)/A` when every centrally symmetric
-hexagon containing `K` has area at least `A` (Lemma 2.2.1: the packing is a tiling by a
-parallelogram or hexagon containing `K` of area `det(L)`; a parallelogram is padded to a
-hexagon). -/
+hexagon containing `K` has area at least `A` (Lemma 2.2.1: `K` lies in a parallelogram or hexagon
+whose `L`-translates pack, so of area at most `det(L)`, `rein_volume_le_latticeDet`; a
+parallelogram is padded to a hexagon). -/
 lemma rein_density_le {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {A : ℝ} (hA : 0 < A)
     (hhex : ∀ w, IsCSHexagon w → K ⊆ hexagonOf w → A ≤ volume.real (hexagonOf w))
     {L : Submodule ℤ (Fin 2 → ℝ)} (hL : IsPlaneLattice L) (hKL : IsLatticePacking K L) :
@@ -2953,7 +3272,7 @@ lemma rein_density_le {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {A : ℝ} (hA
     · have hP' := hP
       obtain ⟨u, u', -, rfl⟩ := hP'
       have hcc := rein_parallelogram_convex_compact u u'
-      rw [rein_latticeDet_eq_of_tiling hcc.1 hcc.2 hL hT]
+      refine le_trans ?_ (rein_volume_le_latticeDet hcc.1 hL hT)
       apply rein_le_of_forall_sq
       intro ε hε
       obtain ⟨w, hw, hPw, hvol⟩ := rein_par_pad hP hε
@@ -2962,8 +3281,7 @@ lemma rein_density_le {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {A : ℝ} (hA
           {x : Fin 2 → ℝ | ∃ s t : ℝ, |s| ≤ 1 ∧ |t| ≤ 1 ∧ x = s • u + t • u'} :=
         measureReal_nonneg
       nlinarith [mul_nonneg hε.le hV]
-    · rw [rein_latticeDet_eq_of_tiling (convex_convexHull ℝ _) (rein_isCompact_hexagonOf w) hL hT]
-      exact hhex w hw hKH
+    · exact (hhex w hw hKH).trans (rein_volume_le_latticeDet (convex_convexHull ℝ _) hL hT)
   exact div_le_div_of_nonneg_left measureReal_nonneg hA hdet
 
 lemma rein_glpd_le {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {A : ℝ} (hA : 0 < A)
