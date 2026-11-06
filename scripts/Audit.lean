@@ -15,7 +15,6 @@ import all External.FejesToth
 import all External.Gruber
 import all External.Mahler1947
 import all External.MinkowskiMahler
-import all External.Shifrin
 import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.MatrixIdentities
 import all SmoothedPolygons.AppA.Riemannian
@@ -95,8 +94,7 @@ meta def externalResults : List (String × Name) :=
    ("Fejes Tóth 1950", ``External.fejes_toth),
    ("Gruber, Cor. 30.1", ``External.gruber_corollary_30_1),
    ("Minkowski 1907, Mahler 1946", ``External.minkowski_mahler),
-   ("Mahler 1947", ``External.mahler_1947),
-   ("Shifrin, Prop. 3.8", ``External.shifrin_proposition_3_8)]
+   ("Mahler 1947", ``External.mahler_1947)]
 
 /-- The numbered results of the paper, in the order of the paper. -/
 meta def paperResults : List (String × Name) :=
