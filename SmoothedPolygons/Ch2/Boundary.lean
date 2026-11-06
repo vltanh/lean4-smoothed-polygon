@@ -4,6 +4,7 @@ public import SmoothedPolygons.Ch2.Mahler
 public import Mathlib.Analysis.Calculus.Deriv.Basic
 public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import Mathlib.Analysis.Calculus.ContDiff.Deriv
+public import Mathlib.Analysis.Calculus.MeanValue
 public import Mathlib.Analysis.Calculus.DerivativeTest
 public import Mathlib.Analysis.Calculus.Rademacher
 public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
@@ -23,7 +24,10 @@ parameterization; the differentiability of a boundary curve subject to an area c
 (`bdy_hasDerivAt_of_det2_const`, the core of Lemma 2.4.2); the invariance of worst disks and
 critical hexagons under orientation-preserving linear maps, used to apply Lemma 2.2.6 (stated in
 circle representation); and the identification of a multi-point on the boundary of a worst disk
-with the edge midpoints of a critical hexagon (`bdy_eq_hexMidpoint`).
+with the edge midpoints of a critical hexagon (`bdy_eq_hexMidpoint`). For Lemma 2.4.3: the local
+equation of the hyperbolic arc of Remark 2.2.4 (`bdy_hyperbola_mem`), the resulting bound on the
+turning of the tangent (`bdy_tangent_local`), the uniform bound by compactness
+(`bdy_curvBound_le`), and the passage from local to global Lipschitz bounds.
 
 Conventions. As in §2.4, a parameterization of the boundary traverses it counterclockwise (the
 *positive orientation*); for a curve `γ` on the boundary of a centrally symmetric convex disk, this
@@ -1429,6 +1433,849 @@ lemma bdy_isPositiveBoundaryParam_neg {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk 
     simp only [det2, Pi.neg_apply] at this ⊢
     linarith
 
+/-! ### Hyperbolic arcs and the curvature of the boundary -/
+
+/-- **Local solutions of the hyperbola equation.** If `c ≠ 0`, then for every small `ξ` the equation
+`c η + k ξ² + a ξ η + b η² = 0` has a solution `η` with `|η| ≤ M ξ²`, `M = 2|k|/|c| + 1`. -/
+lemma bdy_hyperbola_local {c k a b : ℝ} (hc : c ≠ 0) :
+    ∀ᶠ ξ in 𝓝 (0 : ℝ), ∃ η, |η| ≤ (2 * |k| / |c| + 1) * ξ ^ 2 ∧
+      c * η + k * ξ ^ 2 + a * ξ * η + b * η ^ 2 = 0 := by
+  set M := 2 * |k| / |c| + 1 with hM
+  have hcpos : 0 < |c| := abs_pos.2 hc
+  have hM0 : 0 ≤ M := by positivity
+  have hcM : |c| * M = 2 * |k| + |c| := by rw [hM]; field_simp
+  set D := |a| * M + |b| * M ^ 2 + 1 with hD
+  have hD0 : 0 < D := by positivity
+  have hδ : 0 < min 1 ((|k| + |c|) / D) := lt_min one_pos (div_pos (by positivity) hD0)
+  filter_upwards [Metric.ball_mem_nhds 0 hδ] with ξ hξ
+  rw [Metric.mem_ball, Real.dist_eq, sub_zero] at hξ
+  have hξ1 : |ξ| < 1 := lt_of_lt_of_le hξ (min_le_left _ _)
+  have hξD : |ξ| * D < |k| + |c| := by
+    have := lt_of_lt_of_le hξ (min_le_right _ _)
+    rwa [lt_div_iff₀ hD0] at this
+  set g : ℝ → ℝ := fun η ↦ c * η + k * ξ ^ 2 + a * ξ * η + b * η ^ 2 with hg
+  have hgc : Continuous g := by simp only [hg]; fun_prop
+  -- the remainder `a ξ η + b η²` is small for `|η| ≤ M ξ²`
+  have hR : ∀ η, |η| ≤ M * ξ ^ 2 → |a * ξ * η + b * η ^ 2| ≤ |ξ| * D * ξ ^ 2 := by
+    intro η hη
+    have hξ2 : ξ ^ 2 = |ξ| ^ 2 := (sq_abs ξ).symm
+    have h1 : |a * ξ * η| ≤ |a| * M * |ξ| ^ 3 := by
+      rw [abs_mul, abs_mul]
+      calc |a| * |ξ| * |η| ≤ |a| * |ξ| * (M * ξ ^ 2) := by gcongr
+        _ = |a| * M * |ξ| ^ 3 := by rw [hξ2]; ring
+    have h2 : |b * η ^ 2| ≤ |b| * M ^ 2 * |ξ| ^ 3 := by
+      rw [abs_mul, abs_pow]
+      have : |η| ^ 2 ≤ (M * ξ ^ 2) ^ 2 := pow_le_pow_left₀ (abs_nonneg _) hη 2
+      calc |b| * |η| ^ 2 ≤ |b| * (M * ξ ^ 2) ^ 2 := by gcongr
+        _ = |b| * M ^ 2 * |ξ| ^ 4 := by rw [hξ2]; ring
+        _ ≤ |b| * M ^ 2 * |ξ| ^ 3 := by
+          have : |ξ| ^ 4 ≤ |ξ| ^ 3 := by
+            have h0 := abs_nonneg ξ
+            nlinarith [pow_le_pow_left₀ h0 hξ1.le 3, pow_nonneg h0 3]
+          gcongr
+    calc |a * ξ * η + b * η ^ 2| ≤ |a * ξ * η| + |b * η ^ 2| := abs_add_le _ _
+      _ ≤ |a| * M * |ξ| ^ 3 + |b| * M ^ 2 * |ξ| ^ 3 := add_le_add h1 h2
+      _ ≤ |ξ| * D * ξ ^ 2 := by
+          rw [hD, hξ2]; nlinarith [pow_nonneg (abs_nonneg ξ) 3, abs_nonneg ξ]
+  have hη : ∀ η, |η| ≤ M * ξ ^ 2 →
+      |k * ξ ^ 2 + a * ξ * η + b * η ^ 2| ≤ (2 * |k| + |c|) * ξ ^ 2 := by
+    intro η hη
+    have := hR η hη
+    have hk : |k * ξ ^ 2| = |k| * ξ ^ 2 := by rw [abs_mul, abs_of_nonneg (sq_nonneg ξ)]
+    have hξD' : |ξ| * D * ξ ^ 2 ≤ (|k| + |c|) * ξ ^ 2 :=
+      mul_le_mul_of_nonneg_right hξD.le (sq_nonneg ξ)
+    calc |k * ξ ^ 2 + a * ξ * η + b * η ^ 2| = |k * ξ ^ 2 + (a * ξ * η + b * η ^ 2)| := by ring_nf
+      _ ≤ |k * ξ ^ 2| + |a * ξ * η + b * η ^ 2| := abs_add_le _ _
+      _ ≤ (2 * |k| + |c|) * ξ ^ 2 := by rw [hk]; nlinarith [sq_nonneg ξ, abs_nonneg k]
+  have hMx : 0 ≤ M * ξ ^ 2 := by positivity
+  have hlo : |(-(M * ξ ^ 2))| ≤ M * ξ ^ 2 := by rw [abs_neg, abs_of_nonneg hMx]
+  have hhi : |M * ξ ^ 2| ≤ M * ξ ^ 2 := by rw [abs_of_nonneg hMx]
+  have e1 := hη _ hlo
+  have e2 := hη _ hhi
+  have hcMx : |c| * (M * ξ ^ 2) = (2 * |k| + |c|) * ξ ^ 2 := by rw [← mul_assoc, hcM]
+  rcases lt_or_gt_of_ne hc with hneg | hpos
+  · -- `c < 0`: `g` goes from `≥ 0` to `≤ 0`
+    have hcx : c * (M * ξ ^ 2) = -((2 * |k| + |c|) * ξ ^ 2) := by
+      rw [← hcMx, abs_of_neg hneg]; ring
+    have g1 : 0 ≤ g (-(M * ξ ^ 2)) := by
+      have := (abs_le.1 e1).1
+      simp only [g]
+      linarith
+    have g2 : g (M * ξ ^ 2) ≤ 0 := by
+      have := (abs_le.1 e2).2
+      simp only [g]
+      linarith
+    obtain ⟨η, hηI, hη0⟩ := intermediate_value_Icc' (by linarith) hgc.continuousOn ⟨g2, g1⟩
+    exact ⟨η, abs_le.2 ⟨hηI.1, hηI.2⟩, hη0⟩
+  · have hcx : c * (M * ξ ^ 2) = (2 * |k| + |c|) * ξ ^ 2 := by
+      rw [← hcMx, abs_of_pos hpos]
+    have g1 : g (-(M * ξ ^ 2)) ≤ 0 := by
+      have := (abs_le.1 e1).2
+      simp only [g]
+      linarith
+    have g2 : 0 ≤ g (M * ξ ^ 2) := by
+      have := (abs_le.1 e2).1
+      simp only [g]
+      linarith
+    obtain ⟨η, hηI, hη0⟩ := intermediate_value_Icc (by linarith) hgc.continuousOn ⟨g1, g2⟩
+    exact ⟨η, abs_le.2 ⟨hηI.1, hηI.2⟩, hη0⟩
+
+/-- The edges of a centrally symmetric hexagon support it: the hexagon lies to the left of each
+directed edge. -/
+lemma bdy_hexagon_left_of_edge {v : ZMod 6 → Fin 2 → ℝ} (hv : IsCSHexagon v) (j : ZMod 6) :
+    ∀ z ∈ hexagonOf v, 0 ≤ det2 (v (j + 1) - v j) (z - v j) := by
+  have h3 := (hv j).1
+  have h4 := (hv (j + 1)).1
+  have h5 := (hv (j + 2)).1
+  have d01 := (hv j).2.1
+  have L0 := (hv j).2.2
+  have L5 := (hv (j + 5)).2.2
+  rw [show j + 1 + 3 = j + 4 by ring] at h4
+  rw [show j + 2 + 3 = j + 5 by ring] at h5
+  rw [show j + 5 + 1 = j + 3 + 3 by ring, show j + 5 + 2 = j + 1 + 3 + 3 by ring] at L5
+  have h6 : v (j + 3 + 3) = v j := by rw [(hv (j + 3)).1, h3, neg_neg]
+  have h7 : v (j + 1 + 3 + 3) = v (j + 1) := by
+    rw [(hv (j + 1 + 3)).1, (hv (j + 1)).1, neg_neg]
+  rw [h6, h7, h5] at L5
+  have hconv : Convex ℝ {z | 0 ≤ det2 (v (j + 1) - v j) (z - v j)} := by
+    intro a ha b hb p q hp hq hpq
+    simp only [mem_ofPred_eq] at ha hb ⊢
+    have : det2 (v (j + 1) - v j) (p • a + q • b - v j) =
+        p * det2 (v (j + 1) - v j) (a - v j) + q * det2 (v (j + 1) - v j) (b - v j) := by
+      simp only [det2, Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+      linear_combination ((v (j + 1) 0 - v j 0) * v j 1 - (v (j + 1) 1 - v j 1) * v j 0) * hpq
+    rw [this]
+    exact add_nonneg (mul_nonneg hp ha) (mul_nonneg hq hb)
+  refine convexHull_min ?_ hconv
+  rintro _ ⟨k, rfl⟩
+  obtain ⟨i, rfl⟩ : ∃ i, k = j + i := ⟨k - j, by ring⟩
+  simp only [mem_ofPred_eq]
+  simp only [det2, Pi.sub_apply, Pi.neg_apply] at d01 L0 L5 ⊢
+  have key : ∀ i : ZMod 6, i = 0 ∨ i = 1 ∨ i = 2 ∨ i = 3 ∨ i = 4 ∨ i = 5 := by decide
+  rcases key i with rfl | rfl | rfl | rfl | rfl | rfl
+  · simp
+  · change 0 ≤ (v (j + 1) 0 - v j 0) * (v (j + 1) 1 - v j 1) -
+      (v (j + 1) 1 - v j 1) * (v (j + 1) 0 - v j 0)
+    nlinarith
+  · change 0 ≤ (v (j + 1) 0 - v j 0) * (v (j + 2) 1 - v j 1) -
+      (v (j + 1) 1 - v j 1) * (v (j + 2) 0 - v j 0)
+    nlinarith
+  · change 0 ≤ (v (j + 1) 0 - v j 0) * (v (j + 3) 1 - v j 1) -
+      (v (j + 1) 1 - v j 1) * (v (j + 3) 0 - v j 0)
+    rw [h3]; simp only [Pi.neg_apply]; nlinarith
+  · change 0 ≤ (v (j + 1) 0 - v j 0) * (v (j + 4) 1 - v j 1) -
+      (v (j + 1) 1 - v j 1) * (v (j + 4) 0 - v j 0)
+    rw [h4]; simp only [Pi.neg_apply]; nlinarith
+  · change 0 ≤ (v (j + 1) 0 - v j 0) * (v (j + 5) 1 - v j 1) -
+      (v (j + 1) 1 - v j 1) * (v (j + 5) 0 - v j 0)
+    rw [h5]; simp only [Pi.neg_apply]; nlinarith
+
+/-- At the vertex `v₀`, the edges `e₅ = v₀ - v₅` and `e₀ = v₁ - v₀` turn left, and the edges
+`e₅` and `e₁ = v₂ - v₁` are not parallel: `det(e₅, e₀) > 0`, `det(e₅, e₁) > 0`. -/
+lemma bdy_hexagon_turns {v : ZMod 6 → Fin 2 → ℝ} (hv : IsCSHexagon v) :
+    0 < det2 (v 0 - v 5) (v 1 - v 0) ∧ 0 < det2 (v 0 - v 5) (v 2 - v 1) := by
+  have L5 := (hv 5).2.2
+  have L4 := (hv 4).2.2
+  have e4 : v 4 = -v 1 := (hv 1).1
+  have e5 : v 5 = -v 2 := (hv 2).1
+  rw [show (5 : ZMod 6) + 1 = 0 from rfl, show (5 : ZMod 6) + 2 = 1 from rfl] at L5
+  rw [show (4 : ZMod 6) + 1 = 5 from rfl, show (4 : ZMod 6) + 2 = 0 from rfl, e4, e5] at L4
+  refine ⟨L5, ?_⟩
+  rw [e5]
+  simp only [det2, Pi.sub_apply, Pi.neg_apply] at L4 ⊢
+  linarith
+
+/-- The Euclidean unit vector `v/|v|` in the direction of `v`. -/
+noncomputable def bdy_eunit (v : Fin 2 → ℝ) : Fin 2 → ℝ := (√(v 0 ^ 2 + v 1 ^ 2))⁻¹ • v
+
+lemma bdy_eunit_sq {v : Fin 2 → ℝ} (hv : v ≠ 0) : bdy_eunit v 0 ^ 2 + bdy_eunit v 1 ^ 2 = 1 := by
+  have h := bdy_sq_pos hv
+  have hs := Real.sq_sqrt h.le
+  have hs0 : √(v 0 ^ 2 + v 1 ^ 2) ≠ 0 := (Real.sqrt_pos.2 h).ne'
+  simp only [bdy_eunit, Pi.smul_apply, smul_eq_mul]
+  field_simp
+  linarith
+
+lemma bdy_eunit_ne_zero {v : Fin 2 → ℝ} (hv : v ≠ 0) : bdy_eunit v ≠ 0 := by
+  intro h
+  have := bdy_eunit_sq hv
+  rw [h] at this
+  simp at this
+
+lemma bdy_eq_smul_eunit {v : Fin 2 → ℝ} (hv : v ≠ 0) :
+    v = √(v 0 ^ 2 + v 1 ^ 2) • bdy_eunit v := by
+  have hs0 : √(v 0 ^ 2 + v 1 ^ 2) ≠ 0 := (Real.sqrt_pos.2 (bdy_sq_pos hv)).ne'
+  rw [bdy_eunit, smul_smul, mul_inv_cancel₀ hs0, one_smul]
+
+lemma bdy_eunit_smul (v : Fin 2 → ℝ) {c : ℝ} (hc : 0 < c) : bdy_eunit (c • v) = bdy_eunit v := by
+  simp only [bdy_eunit, Pi.smul_apply, smul_eq_mul, smul_smul]
+  congr 1
+  have : (c * v 0) ^ 2 + (c * v 1) ^ 2 = c ^ 2 * (v 0 ^ 2 + v 1 ^ 2) := by ring
+  rw [this, Real.sqrt_mul (sq_nonneg c), Real.sqrt_sq hc.le]
+  field_simp
+
+lemma bdy_continuousAt_eunit {v : Fin 2 → ℝ} (hv : v ≠ 0) : ContinuousAt bdy_eunit v := by
+  have hs0 : √(v 0 ^ 2 + v 1 ^ 2) ≠ 0 := (Real.sqrt_pos.2 (bdy_sq_pos hv)).ne'
+  unfold bdy_eunit
+  have h1 : ContinuousAt (fun w : Fin 2 → ℝ ↦ √(w 0 ^ 2 + w 1 ^ 2)) v := by fun_prop
+  exact (h1.inv₀ hs0).smul continuousAt_id
+
+/-- A component of a Euclidean unit vector is at most `1` in absolute value. -/
+lemma bdy_abs_le_one_of_sq {u : Fin 2 → ℝ} (hu : u 0 ^ 2 + u 1 ^ 2 = 1) (i : Fin 2) :
+    |u i| ≤ 1 := by
+  fin_cases i
+  · change |u 0| ≤ 1
+    exact abs_le_one_iff_mul_self_le_one.2 (by nlinarith [sq_nonneg (u 1)])
+  · change |u 1| ≤ 1
+    exact abs_le_one_iff_mul_self_le_one.2 (by nlinarith [sq_nonneg (u 0)])
+
+/-- **The edges of a critical hexagon are tangent to the boundary.** For a critical hexagon `v` of
+`K` whose edge midpoints lie on the boundary, the edge `v_{j+1} - v_j` is a positive multiple of
+the unit tangent at its midpoint. -/
+lemma bdy_edge_eq_smul_tangent {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {γ : ℝ → Fin 2 → ℝ}
+    (hγ : IsPositiveBoundaryParam K γ) {v : ZMod 6 → Fin 2 → ℝ} (hv : IsLeastAreaHexagon K v)
+    (hvK : ∀ j, hexMidpoint v j ∈ frontier K) (j : ZMod 6) :
+    ∃ c : ℝ, 0 < c ∧ v (j + 1) - v j = c • bdy_tangent γ (hexMidpoint v j) := by
+  set e := v (j + 1) - v j with he
+  have hne : e ≠ 0 := by
+    intro h
+    have h' : v (j + 1) = v j := sub_eq_zero.1 h
+    have := (hv.1 j).2.1
+    rw [h'] at this
+    simp [det2, mul_comm] at this
+  have hn : 0 < ‖e‖ := norm_pos_iff.2 hne
+  have hsupp : ∀ z ∈ K, 0 ≤ det2 (‖e‖⁻¹ • e) (z - hexMidpoint v j) := by
+    intro z hz
+    have h1 := bdy_hexagon_left_of_edge hv.1 j z (hv.2.1 hz)
+    have hm : hexMidpoint v j = v j + (1 / 2 : ℝ) • e := by
+      simp only [hexMidpoint, midpoint_eq_smul_add, he]
+      ext i; simp only [Pi.add_apply, Pi.smul_apply, Pi.sub_apply, smul_eq_mul, invOf_eq_inv]
+      ring
+    rw [hm]
+    have : det2 (‖e‖⁻¹ • e) (z - (v j + (1 / 2 : ℝ) • e)) = ‖e‖⁻¹ * det2 e (z - v j) := by
+      simp only [det2, Pi.smul_apply, Pi.sub_apply, Pi.add_apply, smul_eq_mul]; ring
+    rw [this]
+    exact mul_nonneg (inv_nonneg.2 hn.le) h1
+  have hunit : ‖‖e‖⁻¹ • e‖ = 1 := by
+    rw [norm_smul, norm_inv, norm_norm, inv_mul_cancel₀ hn.ne']
+  have := bdy_tangent_unique hK hγ (hvK j) hunit hsupp
+  refine ⟨‖e‖, hn, ?_⟩
+  rw [← this, smul_smul, mul_inv_cancel₀ hn.ne', one_smul]
+
+/-- The formula for the curvature bound `M` of the hyperbolic arc at the midpoint `x` of an edge:
+in terms of the unit tangents `u` at `x` and `U₅, U₁` at the adjacent midpoints, and `m₅`. -/
+noncomputable def bdy_curvBound (x m₅ u U₅ U₁ : Fin 2 → ℝ) : ℝ :=
+  2 * |det2 U₅ u| ^ 2 * |det2 U₁ u| / (|det2 U₅ (x - m₅)| * |det2 U₅ U₁|) + 1
+
+/-- **A hyperbolic arc in `K`** (Remark 2.2.4). Let `v` be a critical hexagon of `K` with edge
+midpoints `m_j`, and `x = m₀`. Let `u, U₅, U₁` be Euclidean unit vectors along the edges `0, 5, 1`.
+Then for all small `ξ` there is `η` with `|η| ≤ M ξ²` such that `x + ξ u + η n ∈ K`, where
+`n = (-u₁, u₀)` and `M = bdy_curvBound x m₅ u U₅ U₁`: the hyperbola of Remark 2.2.4 is the graph
+`η(ξ)` near `x`, with `|η| ≤ M ξ²`. -/
+lemma bdy_hyperbola_mem {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {v : ZMod 6 → Fin 2 → ℝ}
+    (hv : IsLeastAreaHexagon K v) {u U₅ U₁ : Fin 2 → ℝ} (hu : u 0 ^ 2 + u 1 ^ 2 = 1)
+    {l₀ l₅ l₁ : ℝ} (hl₀ : 0 < l₀) (hl₅ : 0 < l₅) (hl₁ : 0 < l₁)
+    (he₀ : v 1 - v 0 = l₀ • u) (he₅ : v 0 - v 5 = l₅ • U₅) (he₁ : v 2 - v 1 = l₁ • U₁) :
+    ∀ᶠ ξ in 𝓝 (0 : ℝ), ∃ η, |η| ≤ bdy_curvBound (hexMidpoint v 0) (hexMidpoint v 5) u U₅ U₁ * ξ ^ 2
+      ∧ hexMidpoint v 0 + ξ • u + η • ![-u 1, u 0] ∈ K := by
+  set x := hexMidpoint v 0 with hx_def
+  set m₅ := hexMidpoint v 5 with hm₅_def
+  set n : Fin 2 → ℝ := ![-u 1, u 0] with hn_def
+  -- the vertices `v₀, v₁` and the midpoint `m₅`
+  have hv0 : v 0 = x - (l₀ / 2) • u := by
+    have : x = (1 / 2 : ℝ) • (v 0 + v 1) := by
+      simp only [x, hexMidpoint, midpoint_eq_smul_add, invOf_eq_inv, zero_add]; norm_num
+    rw [this, show v 1 = v 0 + l₀ • u by rw [← he₀]; abel]
+    ext i; simp only [Pi.sub_apply, Pi.smul_apply, Pi.add_apply, smul_eq_mul]; ring
+  have hv1 : v 1 = x + (l₀ / 2) • u := by
+    rw [show v 1 = v 0 + l₀ • u by rw [← he₀]; abel, hv0]
+    ext i; simp only [Pi.sub_apply, Pi.smul_apply, Pi.add_apply, smul_eq_mul]; ring
+  have hm5 : det2 U₅ (x - m₅) = l₀ / 2 * det2 U₅ u := by
+    have : m₅ = v 0 - (l₅ / 2) • U₅ := by
+      have h5 : m₅ = (1 / 2 : ℝ) • (v 5 + v 0) := by
+        simp only [m₅, hexMidpoint, midpoint_eq_smul_add, invOf_eq_inv]
+        rw [show (5 : ZMod 6) + 1 = 0 from rfl]; norm_num
+      rw [h5, show v 5 = v 0 - l₅ • U₅ by rw [← he₅]; abel]
+      ext i; simp only [Pi.sub_apply, Pi.smul_apply, Pi.add_apply, smul_eq_mul]; ring
+    rw [this, hv0]
+    simp only [det2, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]; ring
+  -- the turns of the hexagon at `v₀`
+  obtain ⟨t1, t2⟩ := bdy_hexagon_turns hv.1
+  rw [he₅, he₀] at t1
+  rw [he₅, he₁] at t2
+  have hα₁ : 0 < det2 U₅ u := by
+    have : det2 (l₅ • U₅) (l₀ • u) = l₅ * l₀ * det2 U₅ u := by
+      simp only [det2, Pi.smul_apply, smul_eq_mul]; ring
+    rw [this] at t1
+    exact pos_of_mul_pos_right t1 (mul_pos hl₅ hl₀).le
+  have hD : 0 < det2 U₅ U₁ := by
+    have : det2 (l₅ • U₅) (l₁ • U₁) = l₅ * l₁ * det2 U₅ U₁ := by
+      simp only [det2, Pi.smul_apply, smul_eq_mul]; ring
+    rw [this] at t2
+    exact pos_of_mul_pos_right t2 (mul_pos hl₅ hl₁).le
+  -- the hyperbola of Remark 2.2.4 in the coordinates `x + ξ u + η n`
+  obtain ⟨ε, hε, hrem⟩ := remark2_2_4 hK hv 0
+  set c := l₀ / 2 * det2 U₅ U₁ with hc_def
+  have hc : c ≠ 0 := (mul_pos (by linarith) hD).ne'
+  have hF : ∀ ξ η : ℝ, hexHyperbolaFun v 0 (x + ξ • u + η • n) - hexHyperbolaFun v 0 x =
+      l₅ * l₁ * (c * η + (det2 U₅ u * det2 U₁ u) * ξ ^ 2 +
+        (det2 U₅ u * det2 U₁ n + det2 U₅ n * det2 U₁ u) * ξ * η +
+        (det2 U₅ n * det2 U₁ n) * η ^ 2) := by
+    intro ξ η
+    simp only [hexHyperbolaFun, show (0 : ZMod 6) - 1 = 5 from rfl,
+      show (0 : ZMod 6) + 2 = 2 from rfl, show (0 : ZMod 6) + 1 = 1 from rfl]
+    rw [he₅, he₁, hv0, hv1, hc_def]
+    simp only [n, det2, Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_fin_one]
+    linear_combination (l₅ * l₁ * (l₀ / 2) * η * (U₅ 0 * U₁ 1 - U₅ 1 * U₁ 0)) * hu
+  have hloc := bdy_hyperbola_local (k := det2 U₅ u * det2 U₁ u)
+    (a := det2 U₅ u * det2 U₁ n + det2 U₅ n * det2 U₁ u) (b := det2 U₅ n * det2 U₁ n) hc
+  have hM : 2 * |det2 U₅ u * det2 U₁ u| / |c| + 1 = bdy_curvBound x m₅ u U₅ U₁ := by
+    rw [bdy_curvBound, hm5, hc_def, abs_mul, abs_mul, abs_mul, abs_of_pos hα₁, abs_of_pos hD,
+      abs_of_pos (by linarith : (0 : ℝ) < l₀ / 2)]
+    field_simp
+  -- small `ξ`: the point is within `ε` of `x`
+  set M := bdy_curvBound x m₅ u U₅ U₁
+  have hsmall : ∀ᶠ ξ in 𝓝 (0 : ℝ), |ξ| < ε / 2 ∧ M * ξ ^ 2 < ε / 2 := by
+    have h1 : Tendsto (fun ξ : ℝ ↦ |ξ|) (𝓝 0) (𝓝 0) := by
+      simpa using (continuous_abs.tendsto (0 : ℝ))
+    have h2 : Tendsto (fun ξ : ℝ ↦ M * ξ ^ 2) (𝓝 0) (𝓝 0) := by
+      have : Continuous (fun ξ : ℝ ↦ M * ξ ^ 2) := by fun_prop
+      simpa using this.tendsto 0
+    exact (h1.eventually (gt_mem_nhds (by linarith))).and
+      (h2.eventually (gt_mem_nhds (by linarith)))
+  have hu1 : ‖u‖ ≤ 1 := (pi_norm_le_iff_of_nonneg zero_le_one).2 fun i ↦ by
+    rw [Real.norm_eq_abs]; exact bdy_abs_le_one_of_sq hu i
+  have hn1 : ‖n‖ ≤ 1 := by
+    have hn : n 0 ^ 2 + n 1 ^ 2 = 1 := by simp only [n, Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.cons_val_fin_one]; linarith
+    exact (pi_norm_le_iff_of_nonneg zero_le_one).2 fun i ↦ by
+      rw [Real.norm_eq_abs]; exact bdy_abs_le_one_of_sq hn i
+  filter_upwards [hloc, hsmall] with ξ ⟨η, hη, heq⟩ ⟨hξ1, hξ2⟩
+  rw [hM] at hη
+  refine ⟨η, hη, hrem _ ?_ ?_⟩
+  · rw [dist_eq_norm, show x + ξ • u + η • n - x = ξ • u + η • n by abel]
+    calc ‖ξ • u + η • n‖ ≤ ‖ξ • u‖ + ‖η • n‖ := norm_add_le _ _
+      _ = |ξ| * ‖u‖ + |η| * ‖n‖ := by rw [norm_smul, norm_smul, Real.norm_eq_abs,
+          Real.norm_eq_abs]
+      _ ≤ |ξ| * 1 + |η| * 1 := by gcongr
+      _ < ε := by linarith
+  · have := hF ξ η
+    rw [heq, mul_zero, sub_eq_zero] at this
+    exact this
+
+/-- **Tangents squeezed by a hyperbolic arc** (the curvature bound in the proof of Lemma 2.4.3).
+Let `u, w` be the unit tangents at boundary points `x, y` of a convex set `K` (`K` lies to the left
+of the tangent lines), with `⟨w, u⟩ ≥ 0` and `X = ⟨y - x, u⟩ > 0`. If the point
+`x + 2X u + η n` (`n = (-u₁, u₀)`) of the inner arc with `|η| ≤ M (2X)²` lies in `K`, then the
+tangent turns by at most `|w - u| ≤ 16 M |y - x|`: the tangent line at `y` must pass between `x`
+and that point. -/
+lemma bdy_tangent_diff_le {K : Set (Fin 2 → ℝ)} {x y u w : Fin 2 → ℝ} {η M : ℝ}
+    (hu : u 0 ^ 2 + u 1 ^ 2 = 1) (hw : w 0 ^ 2 + w 1 ^ 2 = 1)
+    (hux : ∀ z ∈ K, 0 ≤ det2 u (z - x)) (hwy : ∀ z ∈ K, 0 ≤ det2 w (z - y))
+    (hx : x ∈ K) (hy : y ∈ K) (hwu : 0 ≤ w 0 * u 0 + w 1 * u 1)
+    (hX : 0 < (y 0 - x 0) * u 0 + (y 1 - x 1) * u 1)
+    (hp : x + (2 * ((y 0 - x 0) * u 0 + (y 1 - x 1) * u 1)) • u + η • ![-u 1, u 0] ∈ K)
+    (hη : |η| ≤ M * (2 * ((y 0 - x 0) * u 0 + (y 1 - x 1) * u 1)) ^ 2) :
+    ‖w - u‖ ≤ 16 * M * ‖y - x‖ := by
+  set X := (y 0 - x 0) * u 0 + (y 1 - x 1) * u 1 with hX_def
+  set a := w 0 * u 0 + w 1 * u 1 with ha_def
+  set b := u 0 * w 1 - u 1 * w 0 with hb_def
+  set Y := u 0 * (y 1 - x 1) - u 1 * (y 0 - x 0) with hY_def
+  have hY : 0 ≤ Y := by
+    have := hux y hy; simp only [det2, Pi.sub_apply] at this; exact this
+  have h1 : 0 ≤ a * (η - Y) - b * X := by
+    have := hwy _ hp
+    simp only [det2, Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_fin_one] at this
+    have e : w 0 * (x 1 + 2 * X * u 1 + η * u 0 - y 1) - w 1 * (x 0 + 2 * X * u 0 + η * -u 1 - y 0)
+        = a * (η - Y) - b * X := by
+      simp only [ha_def, hb_def, hY_def, hX_def]
+      linear_combination (w 0 * (y 1 - x 1) - w 1 * (y 0 - x 0)) * hu
+    linarith
+  have h2 : 0 ≤ b * X - a * Y := by
+    have := hwy x hx
+    simp only [det2, Pi.sub_apply] at this
+    have e : w 0 * (x 1 - y 1) - w 1 * (x 0 - y 0) = b * X - a * Y := by
+      simp only [ha_def, hb_def, hY_def, hX_def]
+      linear_combination (w 0 * (y 1 - x 1) - w 1 * (y 0 - x 0)) * hu
+    linarith
+  have hab : a ^ 2 + b ^ 2 = 1 := by
+    simp only [ha_def, hb_def]
+    linear_combination (w 0 ^ 2 + w 1 ^ 2) * hu + hw
+  have ha1 : a ≤ 1 := by
+    have : a * a ≤ 1 := by nlinarith [sq_nonneg b]
+    exact (abs_le.1 (abs_le_one_iff_mul_self_le_one.2 this)).2
+  have hb0 : 0 ≤ b := by
+    have : 0 ≤ b * X := by linarith [mul_nonneg hwu hY]
+    exact (mul_nonneg_iff_of_pos_right hX).1 this
+  have hb1 : b ≤ 1 := by
+    have : b * b ≤ 1 := by nlinarith [sq_nonneg a]
+    exact (abs_le.1 (abs_le_one_iff_mul_self_le_one.2 this)).2
+  have haη : a * η ≤ |η| := by
+    calc a * η ≤ |a * η| := le_abs_self _
+      _ = |a| * |η| := abs_mul _ _
+      _ ≤ 1 * |η| := by gcongr; exact abs_le.2 ⟨by linarith, ha1⟩
+      _ = |η| := one_mul _
+  have hbX : b * X ≤ |η| := by linarith [mul_nonneg hwu hY]
+  have hX2 : 0 < (2 * X) ^ 2 := by positivity
+  have hM0 : 0 ≤ M := (mul_nonneg_iff_of_pos_right hX2).1 ((abs_nonneg η).trans hη)
+  have hb : b ≤ 4 * M * X := by
+    have : b * X ≤ 4 * M * X * X := by
+      calc b * X ≤ |η| := hbX
+        _ ≤ M * (2 * X) ^ 2 := hη
+        _ = 4 * M * X * X := by ring
+    exact le_of_mul_le_mul_right this hX
+  have h1a : 1 - a ≤ b := by
+    have e1 : 1 - a ≤ b ^ 2 := by nlinarith [mul_nonneg hwu (sub_nonneg.2 ha1)]
+    have e2 : b ^ 2 ≤ b := by nlinarith [mul_nonneg hb0 (sub_nonneg.2 hb1)]
+    linarith
+  -- the components of `w - u = (a - 1) u + b n`
+  have hu0 := bdy_abs_le_one_of_sq hu 0
+  have hu1 := bdy_abs_le_one_of_sq hu 1
+  have hw0 : w 0 = a * u 0 - b * u 1 := by
+    simp only [ha_def, hb_def]; linear_combination (-(w 0)) * hu
+  have hw1 : w 1 = a * u 1 + b * u 0 := by
+    simp only [ha_def, hb_def]; linear_combination (-(w 1)) * hu
+  have hcomp : ∀ i, |(w - u) i| ≤ 2 * b := by
+    intro i
+    fin_cases i
+    · change |w 0 - u 0| ≤ 2 * b
+      rw [hw0, show a * u 0 - b * u 1 - u 0 = -((1 - a) * u 0) - b * u 1 by ring]
+      calc |-((1 - a) * u 0) - b * u 1| ≤ |(1 - a) * u 0| + |b * u 1| := by
+            rw [sub_eq_add_neg, ← neg_add]; rw [abs_neg]; exact abs_add_le _ _
+        _ = (1 - a) * |u 0| + b * |u 1| := by
+            rw [abs_mul, abs_mul, abs_of_nonneg (by linarith), abs_of_nonneg hb0]
+        _ ≤ (1 - a) * 1 + b * 1 := by gcongr
+        _ ≤ 2 * b := by linarith
+    · change |w 1 - u 1| ≤ 2 * b
+      rw [hw1, show a * u 1 + b * u 0 - u 1 = -((1 - a) * u 1) + b * u 0 by ring]
+      calc |-((1 - a) * u 1) + b * u 0| ≤ |-((1 - a) * u 1)| + |b * u 0| := abs_add_le _ _
+        _ = (1 - a) * |u 1| + b * |u 0| := by
+            rw [abs_neg, abs_mul, abs_mul, abs_of_nonneg (by linarith), abs_of_nonneg hb0]
+        _ ≤ (1 - a) * 1 + b * 1 := by gcongr
+        _ ≤ 2 * b := by linarith
+  have hnorm : ‖w - u‖ ≤ 2 * b :=
+    (pi_norm_le_iff_of_nonneg (by linarith)).2 fun i ↦ by rw [Real.norm_eq_abs]; exact hcomp i
+  have hXle : X ≤ 2 * ‖y - x‖ := by
+    have e0 : |y 0 - x 0| ≤ ‖y - x‖ := by
+      have := norm_le_pi_norm (y - x) 0; rwa [Real.norm_eq_abs, Pi.sub_apply] at this
+    have e1 : |y 1 - x 1| ≤ ‖y - x‖ := by
+      have := norm_le_pi_norm (y - x) 1; rwa [Real.norm_eq_abs, Pi.sub_apply] at this
+    calc X ≤ |(y 0 - x 0) * u 0| + |(y 1 - x 1) * u 1| := by
+          rw [hX_def]; exact (abs_add_le _ _).trans' (le_abs_self _)
+      _ = |y 0 - x 0| * |u 0| + |y 1 - x 1| * |u 1| := by rw [abs_mul, abs_mul]
+      _ ≤ ‖y - x‖ * 1 + ‖y - x‖ * 1 := by gcongr
+      _ = 2 * ‖y - x‖ := by ring
+  have := mul_le_mul_of_nonneg_left hXle hM0
+  linarith
+
+/-- If `e = c U` with `c > 0` and `U ≠ 0`, then `e` is a positive multiple of the unit vector
+`U/|U|`. -/
+lemma bdy_smul_eunit_of_smul {e U : Fin 2 → ℝ} {c : ℝ} (hc : 0 < c) (hU : U ≠ 0)
+    (he : e = c • U) : ∃ l : ℝ, 0 < l ∧ e = l • bdy_eunit U := by
+  refine ⟨c * √(U 0 ^ 2 + U 1 ^ 2), mul_pos hc (Real.sqrt_pos.2 (bdy_sq_pos hU)), ?_⟩
+  rw [he, mul_smul, ← bdy_eq_smul_eunit hU]
+
+/-- The unit tangent `bdy_tangent γ` at a point of a positively oriented parameterization `τ` is
+the normalized derivative of `τ`. -/
+lemma bdy_tangent_eq_deriv {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {γ τ : ℝ → Fin 2 → ℝ}
+    (hγ : IsPositiveBoundaryParam K γ) (hτ : IsPositiveBoundaryParam K τ) (t : ℝ) :
+    bdy_tangent γ (τ t) = ‖deriv τ t‖⁻¹ • deriv τ t := by
+  have hn : 0 < ‖deriv τ t‖ := norm_pos_iff.2 (hτ.2.1 t)
+  refine (bdy_tangent_unique hK hγ (hτ.2.2.1 ▸ mem_range_self t) ?_ fun z hz ↦ ?_).symm
+  · rw [norm_smul, norm_inv, norm_norm, inv_mul_cancel₀ hn.ne']
+  · have := bdy_det2_deriv_sub_nonneg hK hτ t hz
+    have e : det2 (‖deriv τ t‖⁻¹ • deriv τ t) (z - τ t) =
+        ‖deriv τ t‖⁻¹ * det2 (deriv τ t) (z - τ t) := by
+      simp only [det2, Pi.smul_apply, smul_eq_mul]; ring
+    rw [e]; exact mul_nonneg (inv_nonneg.2 hn.le) this
+
+/-- **Local curvature bound along a boundary curve** (proof of Lemma 2.4.3). Let `τ` be a positively
+oriented regular `C¹` parameterization of the boundary of a worst disk, and `v` the critical
+hexagon at `τ(t)` (Lemma 2.2.7). For small `h > 0` the unit tangent turns by at most
+`|T(t + h) - T(t)| ≤ 16 M |τ(t + h) - τ(t)|`, where `M` bounds the curvature of the hyperbolic arc
+of Remark 2.2.4 at `τ(t)`. -/
+lemma bdy_tangent_local {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {γ τ : ℝ → Fin 2 → ℝ}
+    (hγ : IsPositiveBoundaryParam K γ) (hτ : IsPositiveBoundaryParam K τ) (t : ℝ) :
+    ∃ v, IsLeastAreaHexagon K v ∧ (∀ j, hexMidpoint v j ∈ frontier K) ∧ hexMidpoint v 0 = τ t ∧
+      ∀ᶠ h in 𝓝[>] (0 : ℝ), ‖bdy_eunit (deriv τ (t + h)) - bdy_eunit (deriv τ t)‖ ≤
+        16 * bdy_curvBound (τ t) (hexMidpoint v 5) (bdy_eunit (deriv τ t))
+          (bdy_eunit (bdy_tangent γ (hexMidpoint v 5)))
+          (bdy_eunit (bdy_tangent γ (hexMidpoint v 1))) * ‖τ (t + h) - τ t‖ := by
+  have hK' := hK.1
+  have hx : τ t ∈ frontier K := hτ.2.2.1 ▸ mem_range_self t
+  obtain ⟨v, hv, hvK, hv0⟩ := bdy_exists_hexagon hK hx
+  refine ⟨v, hv, hvK, hv0, ?_⟩
+  have hτ' := hτ.2.1 t
+  set u := bdy_eunit (deriv τ t) with hu_def
+  have hu := bdy_eunit_sq hτ'
+  -- the edges `0, 5, 1` of the hexagon along the unit tangents
+  have hUne : ∀ j, bdy_tangent γ (hexMidpoint v j) ≠ 0 := fun j h ↦ by
+    have := (bdy_tangent_spec hK' hγ (hvK j)).1; rw [h, norm_zero] at this; exact zero_ne_one this
+  obtain ⟨c₀, hc₀, he₀⟩ := bdy_edge_eq_smul_tangent hK' hγ hv hvK 0
+  obtain ⟨c₅, hc₅, he₅⟩ := bdy_edge_eq_smul_tangent hK' hγ hv hvK 5
+  obtain ⟨c₁, hc₁, he₁⟩ := bdy_edge_eq_smul_tangent hK' hγ hv hvK 1
+  rw [show (0 : ZMod 6) + 1 = 1 from rfl] at he₀
+  rw [show (5 : ZMod 6) + 1 = 0 from rfl] at he₅
+  rw [show (1 : ZMod 6) + 1 = 2 from rfl] at he₁
+  have hn : 0 < ‖deriv τ t‖ := norm_pos_iff.2 hτ'
+  rw [hv0, bdy_tangent_eq_deriv hK' hγ hτ t, smul_smul] at he₀
+  obtain ⟨l₀, hl₀, he₀'⟩ := bdy_smul_eunit_of_smul (mul_pos hc₀ (inv_pos.2 hn)) hτ' he₀
+  obtain ⟨l₅, hl₅, he₅'⟩ := bdy_smul_eunit_of_smul hc₅ (hUne 5) he₅
+  obtain ⟨l₁, hl₁, he₁'⟩ := bdy_smul_eunit_of_smul hc₁ (hUne 1) he₁
+  have hyper := bdy_hyperbola_mem hK' hv hu hl₀ hl₅ hl₁ he₀' he₅' he₁'
+  rw [hv0] at hyper
+  set M := bdy_curvBound (τ t) (hexMidpoint v 5) u (bdy_eunit (bdy_tangent γ (hexMidpoint v 5)))
+    (bdy_eunit (bdy_tangent γ (hexMidpoint v 1)))
+  -- `X(h) = ⟨τ(t + h) - τ(t), u⟩`
+  set X : ℝ → ℝ := fun h ↦ (τ (t + h) 0 - τ t 0) * u 0 + (τ (t + h) 1 - τ t 1) * u 1 with hX_def
+  have hτc : Continuous τ := hτ.1.continuous
+  have hdiff : Differentiable ℝ τ := hτ.1.differentiable (by norm_num)
+  have hXc : Continuous X := by simp only [hX_def]; fun_prop
+  have hXlim : Tendsto (fun h ↦ 2 * X h) (𝓝[>] 0) (𝓝 0) := by
+    have : Tendsto (fun h ↦ 2 * X h) (𝓝 0) (𝓝 (2 * X 0)) := ((continuous_const.mul hXc).tendsto 0)
+    simp only [hX_def, add_zero, sub_self, zero_mul, add_zero, mul_zero] at this
+    exact this.mono_left nhdsWithin_le_nhds
+  have hXpos : ∀ᶠ h in 𝓝[>] (0 : ℝ), 0 < X h := by
+    have hs := (hdiff t).hasDerivAt.tendsto_slope_zero_right
+    have hdot : Tendsto (fun h ↦ (h⁻¹ • (τ (t + h) - τ t)) 0 * u 0 +
+        (h⁻¹ • (τ (t + h) - τ t)) 1 * u 1) (𝓝[>] 0)
+        (𝓝 (deriv τ t 0 * u 0 + deriv τ t 1 * u 1)) :=
+      ((tendsto_pi_nhds.1 hs 0).mul_const _).add ((tendsto_pi_nhds.1 hs 1).mul_const _)
+    have hpos : 0 < deriv τ t 0 * u 0 + deriv τ t 1 * u 1 := by
+      have := bdy_eq_smul_eunit hτ'
+      have hsq := Real.sqrt_pos.2 (bdy_sq_pos hτ')
+      have e : deriv τ t 0 * u 0 + deriv τ t 1 * u 1 =
+          √(deriv τ t 0 ^ 2 + deriv τ t 1 ^ 2) * (u 0 ^ 2 + u 1 ^ 2) := by
+        conv_lhs => rw [this]
+        simp only [Pi.smul_apply, smul_eq_mul, hu_def]; ring
+      rw [e, hu, mul_one]; exact hsq
+    filter_upwards [hdot.eventually (lt_mem_nhds hpos), self_mem_nhdsWithin] with h hh h0
+    have h0' : (0 : ℝ) < h := h0
+    simp only [Pi.smul_apply, Pi.sub_apply, smul_eq_mul] at hh
+    have : X h = h * (h⁻¹ * (τ (t + h) 0 - τ t 0) * u 0 + h⁻¹ * (τ (t + h) 1 - τ t 1) * u 1) := by
+      simp only [hX_def]; field_simp
+    rw [this]; exact mul_pos h0' hh
+  have hwu : ∀ᶠ h in 𝓝[>] (0 : ℝ),
+      0 < bdy_eunit (deriv τ (t + h)) 0 * u 0 + bdy_eunit (deriv τ (t + h)) 1 * u 1 := by
+    have hc : ContinuousAt (fun h ↦ bdy_eunit (deriv τ (t + h))) 0 := by
+      have h1 : ContinuousAt (fun h ↦ deriv τ (t + h)) 0 :=
+        ((hτ.1.continuous_deriv le_rfl).comp (continuous_const.add continuous_id)).continuousAt
+      have h2 : ContinuousAt bdy_eunit (deriv τ (t + 0)) := by
+        rw [add_zero]; exact bdy_continuousAt_eunit hτ'
+      exact ContinuousAt.comp (g := bdy_eunit) (f := fun h ↦ deriv τ (t + h)) h2 h1
+    have hlim : Tendsto (fun h ↦ bdy_eunit (deriv τ (t + h)) 0 * u 0 +
+        bdy_eunit (deriv τ (t + h)) 1 * u 1) (𝓝 0) (𝓝 (u 0 * u 0 + u 1 * u 1)) := by
+      have := hc.tendsto
+      simp only [add_zero] at this
+      exact ((tendsto_pi_nhds.1 this 0).mul_const _).add ((tendsto_pi_nhds.1 this 1).mul_const _)
+    have : (0 : ℝ) < u 0 * u 0 + u 1 * u 1 := by nlinarith
+    exact (hlim.eventually (lt_mem_nhds this)).filter_mono nhdsWithin_le_nhds
+  filter_upwards [hXlim.eventually hyper, hXpos, hwu] with h ⟨η, hη, hp⟩ hXh hwh
+  have hτ'' := hτ.2.1 (t + h)
+  refine bdy_tangent_diff_le (K := K) hu (bdy_eunit_sq hτ'') (fun z hz ↦ ?_) (fun z hz ↦ ?_)
+    (bdy_mem hK' hτ t) (bdy_mem hK' hτ (t + h)) hwh.le hXh hp hη
+  · have := bdy_det2_deriv_sub_nonneg hK' hτ t hz
+    have e : det2 u (z - τ t) = (√(deriv τ t 0 ^ 2 + deriv τ t 1 ^ 2))⁻¹ *
+        det2 (deriv τ t) (z - τ t) := by
+      simp only [hu_def, bdy_eunit, det2, Pi.smul_apply, smul_eq_mul]; ring
+    rw [e]; exact mul_nonneg (inv_nonneg.2 (Real.sqrt_nonneg _)) this
+  · have := bdy_det2_deriv_sub_nonneg hK' hτ (t + h) hz
+    have e : det2 (bdy_eunit (deriv τ (t + h))) (z - τ (t + h)) =
+        (√(deriv τ (t + h) 0 ^ 2 + deriv τ (t + h) 1 ^ 2))⁻¹ *
+          det2 (deriv τ (t + h)) (z - τ (t + h)) := by
+      simp only [bdy_eunit, det2, Pi.smul_apply, smul_eq_mul]; ring
+    rw [e]; exact mul_nonneg (inv_nonneg.2 (Real.sqrt_nonneg _)) this
+
+/-- If the support line of `K` through `x ∈ K` in the direction `w` contains `y ∈ K`, the midpoint
+of `x` and `y` lies on the boundary. -/
+lemma bdy_midpoint_mem_frontier {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {x y w : Fin 2 → ℝ}
+    (hx : x ∈ K) (hy : y ∈ K) (hw : w ≠ 0) (hsupp : ∀ z ∈ K, 0 ≤ det2 w (z - x))
+    (hxy : det2 w (y - x) = 0) : (1 / 2 : ℝ) • x + (1 / 2 : ℝ) • y ∈ frontier K := by
+  have hzK : (1 / 2 : ℝ) • x + (1 / 2 : ℝ) • y ∈ K :=
+    hK.1 hx hy (by norm_num) (by norm_num) (by norm_num)
+  refine ⟨subset_closure hzK, bdy_not_mem_interior hw (c := det2 w x) (fun z hz ↦ ?_) ?_⟩
+  · have := hsupp z hz
+    unfold det2 at this ⊢; simp only [Pi.sub_apply] at this; linarith
+  · simp only [det2, Pi.add_apply, Pi.smul_apply, smul_eq_mul, Pi.sub_apply] at hxy ⊢
+    linarith
+
+/-- For a multi-point `s` on the boundary of a worst disk, `det(s₀, u₁) ≠ 0` for the unit tangent
+`u₁` at `s₁`: otherwise the tangent line at `s₁` contains the edge `s₁ s₂` of the hexagon `h_K`,
+contrary to Lemma 2.2.6 (see the proof of Lemma 2.4.2). -/
+lemma bdy_det2_tangent_one_ne {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {γ : ℝ → Fin 2 → ℝ}
+    (hγ : IsPositiveBoundaryParam K γ) {s : ZMod 6 → Fin 2 → ℝ} (hs : IsMultiPoint s)
+    (hsK : ∀ j, s j ∈ frontier K) : det2 (s 0) (bdy_tangent γ (s 1)) ≠ 0 := by
+  intro h
+  have hK' := hK.1
+  obtain ⟨v, hv, hvK, hv0⟩ := bdy_exists_hexagon hK (hsK 0)
+  have hsv := bdy_eq_hexMidpoint hK hv hvK hs hsK hv0.symm
+  have hmem : ∀ j, s j ∈ K := fun j ↦ hK'.2.1.isClosed.frontier_subset (hsK j)
+  have hU := bdy_tangent_spec hK' hγ (hsK 1)
+  have hUne : bdy_tangent γ (s 1) ≠ 0 := fun h0 ↦ by
+    have := hU.1; rw [h0, norm_zero] at this; exact zero_ne_one this
+  have e1 : s 1 = s 0 + s 2 := by have := bdy_mp_succ hs 0; rwa [zero_add, zero_add] at this
+  have e21 : s 2 - s 1 = -s 0 := by rw [e1]; abel
+  have hmid := bdy_midpoint_mem_frontier hK' (hmem 1) (hmem 2) hUne hU.2.1 (by
+    rw [e21]; simp only [det2, Pi.neg_apply] at h ⊢; linarith)
+  refine bdy_not_mem_frontier_of_openSegment hK hv 1 ?_ hmid
+  rw [show (1 : ZMod 6) + 1 = 2 from rfl, ← hsv, ← hsv]
+  exact ⟨1 / 2, 1 / 2, by norm_num, by norm_num, by norm_num, rfl⟩
+
+/-! ### Compactness -/
+
+/-- The multi-points on the boundary of `K` together with unit (sup-norm) support directions at
+their points: a compact set (`bdy_isCompact_G`). -/
+def bdy_G (K : Set (Fin 2 → ℝ)) : Set ((ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ)) :=
+  {p | (∀ j, p.1 j ∈ frontier K) ∧ IsMultiPoint p.1 ∧
+    ∀ j, ‖p.2 j‖ = 1 ∧ ∀ z ∈ K, 0 ≤ det2 (p.2 j) (z - p.1 j)}
+
+lemma bdy_isCompact_G {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) : IsCompact (bdy_G K) := by
+  have hfr : IsCompact (frontier K) :=
+    hK.2.1.of_isClosed_subset isClosed_frontier hK.2.1.isClosed.frontier_subset
+  have hS : IsCompact ((univ.pi fun _ : ZMod 6 ↦ frontier K) ×ˢ
+      (univ.pi fun _ : ZMod 6 ↦ Metric.sphere (0 : Fin 2 → ℝ) 1)) :=
+    (isCompact_univ_pi fun _ ↦ hfr).prod (isCompact_univ_pi fun _ ↦ isCompact_sphere _ _)
+  refine hS.of_isClosed_subset ?_ ?_
+  · have c1 : ∀ j, Continuous fun p : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) ↦ p.1 j :=
+      fun j ↦ (continuous_apply j).comp continuous_fst
+    have c2 : ∀ j, Continuous fun p : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) ↦ p.2 j :=
+      fun j ↦ (continuous_apply j).comp continuous_snd
+    have cd : ∀ {X Y : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) → Fin 2 → ℝ},
+        Continuous X → Continuous Y → Continuous fun p ↦ det2 (X p) (Y p) := by
+      intro X Y hX hY
+      unfold det2
+      exact ((continuous_apply 0).comp hX).mul ((continuous_apply 1).comp hY) |>.sub
+        (((continuous_apply 1).comp hX).mul ((continuous_apply 0).comp hY))
+    simp only [bdy_G, IsMultiPoint, ofPred_and, ofPred_forall]
+    refine (isClosed_iInter fun j ↦ isClosed_frontier.preimage (c1 j)).inter
+      ((isClosed_iInter fun j ↦ (isClosed_eq (((c1 j).add (c1 (j + 2))).add (c1 (j + 4)))
+        continuous_const).inter ((isClosed_eq (c1 (j + 3)) (c1 j).neg).inter
+        (isClosed_eq (cd (c1 j) (c1 (j + 1))) continuous_const))).inter
+      (isClosed_iInter fun j ↦ (isClosed_eq (c2 j).norm continuous_const).inter
+        (isClosed_iInter fun z ↦ isClosed_iInter fun _ ↦
+          isClosed_le continuous_const (cd (c2 j) (continuous_const.sub (c1 j))))))
+  · rintro p ⟨h1, -, h3⟩
+    exact ⟨fun j _ ↦ h1 j, fun j _ ↦ by simpa using (h3 j).1⟩
+
+lemma bdy_mem_G {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {γ : ℝ → Fin 2 → ℝ}
+    (hγ : IsPositiveBoundaryParam K γ) {s : ZMod 6 → Fin 2 → ℝ} (hs : IsMultiPoint s)
+    (hsK : ∀ j, s j ∈ frontier K) : (s, fun j ↦ bdy_tangent γ (s j)) ∈ bdy_G K :=
+  ⟨hsK, hs, fun j ↦ ⟨(bdy_tangent_spec hK hγ (hsK j)).1, (bdy_tangent_spec hK hγ (hsK j)).2.1⟩⟩
+
+/-- A continuous function on `bdy_G K` is bounded. -/
+lemma bdy_G_bound {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K)
+    {F : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) → ℝ}
+    (hF : ∀ p ∈ bdy_G K, ContinuousAt F p) : ∃ C, ∀ p ∈ bdy_G K, |F p| ≤ C := by
+  obtain ⟨C, hC⟩ := (bdy_isCompact_G hK).exists_bound_of_continuousOn
+    fun p hp ↦ (hF p hp).continuousWithinAt
+  exact ⟨C, fun p hp ↦ by simpa using hC p hp⟩
+
+/-- The nondegeneracy facts on `bdy_G K` for a worst disk. -/
+lemma bdy_G_nondeg {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {γ : ℝ → Fin 2 → ℝ}
+    (hγ : IsPositiveBoundaryParam K γ) {p : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ)}
+    (hp : p ∈ bdy_G K) :
+    (∀ j, p.2 j ≠ 0) ∧ det2 (p.1 0) (p.2 1) ≠ 0 ∧ 0 < det2 (p.2 5) (p.2 1) ∧
+      0 < det2 (p.2 5) (p.1 0 - p.1 5) := by
+  have hK' := hK.1
+  obtain ⟨hpK, hpm, hpU⟩ := hp
+  have hU : ∀ j, p.2 j = bdy_tangent γ (p.1 j) := fun j ↦
+    bdy_tangent_unique hK' hγ (hpK j) (hpU j).1 (hpU j).2
+  have hne : ∀ j, p.2 j ≠ 0 := fun j h ↦ by
+    have := (hpU j).1; rw [h, norm_zero] at this; exact zero_ne_one this
+  refine ⟨hne, by rw [hU]; exact bdy_det2_tangent_one_ne hK hγ hpm hpK, ?_⟩
+  obtain ⟨v, hv, hvK, hv0⟩ := bdy_exists_hexagon hK (hpK 0)
+  have hsv := bdy_eq_hexMidpoint hK hv hvK hpm hpK hv0.symm
+  obtain ⟨c₀, hc₀, he₀⟩ := bdy_edge_eq_smul_tangent hK' hγ hv hvK 0
+  obtain ⟨c₅, hc₅, he₅⟩ := bdy_edge_eq_smul_tangent hK' hγ hv hvK 5
+  obtain ⟨c₁, hc₁, he₁⟩ := bdy_edge_eq_smul_tangent hK' hγ hv hvK 1
+  rw [show (0 : ZMod 6) + 1 = 1 from rfl, ← hsv, ← hU] at he₀
+  rw [show (5 : ZMod 6) + 1 = 0 from rfl, ← hsv, ← hU] at he₅
+  rw [show (1 : ZMod 6) + 1 = 2 from rfl, ← hsv, ← hU] at he₁
+  obtain ⟨t1, t2⟩ := bdy_hexagon_turns hv.1
+  rw [he₅, he₀] at t1
+  rw [he₅, he₁] at t2
+  have hm : p.1 0 - p.1 5 = (1 / 2 : ℝ) • (v 1 - v 0) + (1 / 2 : ℝ) • (v 0 - v 5) := by
+    rw [hsv, hsv]
+    simp only [hexMidpoint, midpoint_eq_smul_add, show (5 : ZMod 6) + 1 = 0 from rfl,
+      show (0 : ZMod 6) + 1 = 1 from rfl, invOf_eq_inv]
+    ext i; simp only [Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+  rw [hm, he₀, he₅]
+  constructor
+  · have : det2 (c₅ • p.2 5) (c₁ • p.2 1) = c₅ * c₁ * det2 (p.2 5) (p.2 1) := by
+      simp only [det2, Pi.smul_apply, smul_eq_mul]; ring
+    rw [this] at t2
+    exact pos_of_mul_pos_right t2 (mul_pos hc₅ hc₁).le
+  · have : det2 (c₅ • p.2 5) (c₀ • p.2 0) = c₅ * c₀ * det2 (p.2 5) (p.2 0) := by
+      simp only [det2, Pi.smul_apply, smul_eq_mul]; ring
+    rw [this] at t1
+    have h0 := pos_of_mul_pos_right t1 (mul_pos hc₅ hc₀).le
+    have : det2 (p.2 5) ((1 / 2 : ℝ) • (c₀ • p.2 0) + (1 / 2 : ℝ) • (c₅ • p.2 5)) =
+        c₀ / 2 * det2 (p.2 5) (p.2 0) := by
+      simp only [det2, Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+    rw [this]
+    exact mul_pos (by linarith) h0
+
+lemma bdy_det2_eunit_left (a w : Fin 2 → ℝ) :
+    det2 (bdy_eunit a) w = (√(a 0 ^ 2 + a 1 ^ 2))⁻¹ * det2 a w := by
+  simp only [bdy_eunit, det2, Pi.smul_apply, smul_eq_mul]; ring
+
+lemma bdy_det2_eunit_right (w a : Fin 2 → ℝ) :
+    det2 w (bdy_eunit a) = (√(a 0 ^ 2 + a 1 ^ 2))⁻¹ * det2 w a := by
+  simp only [bdy_eunit, det2, Pi.smul_apply, smul_eq_mul]; ring
+
+/-- The curvature bound as a function on `bdy_G K`. -/
+noncomputable def bdy_curvBoundG (p : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ)) : ℝ :=
+  bdy_curvBound (p.1 0) (p.1 5) (bdy_eunit (p.2 0)) (bdy_eunit (p.2 5)) (bdy_eunit (p.2 1))
+
+lemma bdy_continuousAt_curvBoundG {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K)
+    {γ : ℝ → Fin 2 → ℝ} (hγ : IsPositiveBoundaryParam K γ)
+    {p : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ)} (hp : p ∈ bdy_G K) :
+    ContinuousAt bdy_curvBoundG p := by
+  obtain ⟨hne, -, hD, hm⟩ := bdy_G_nondeg hK hγ hp
+  have hE : ∀ j, ContinuousAt (fun q : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) ↦
+      bdy_eunit (q.2 j)) p := fun j ↦
+    ContinuousAt.comp (g := bdy_eunit)
+      (f := fun q : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) ↦ q.2 j)
+      (bdy_continuousAt_eunit (hne j)) ((continuous_apply j).comp continuous_snd).continuousAt
+  have hS : ∀ j, ContinuousAt (fun q : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) ↦
+      q.1 j) p := fun j ↦ ((continuous_apply j).comp continuous_fst).continuousAt
+  have d1 : det2 (bdy_eunit (p.2 5)) (p.1 0 - p.1 5) ≠ 0 := by
+    rw [bdy_det2_eunit_left]
+    exact mul_ne_zero (inv_ne_zero (Real.sqrt_pos.2 (bdy_sq_pos (hne 5))).ne') hm.ne'
+  have d2 : det2 (bdy_eunit (p.2 5)) (bdy_eunit (p.2 1)) ≠ 0 := by
+    rw [bdy_det2_eunit_left, bdy_det2_eunit_right]
+    exact mul_ne_zero (inv_ne_zero (Real.sqrt_pos.2 (bdy_sq_pos (hne 5))).ne')
+      (mul_ne_zero (inv_ne_zero (Real.sqrt_pos.2 (bdy_sq_pos (hne 1))).ne') hD.ne')
+  have n1 := bdy_tendsto_det2 (hE 5) (hE 0)
+  have n2 := bdy_tendsto_det2 (hE 1) (hE 0)
+  have n3 := bdy_tendsto_det2 (hE 5) ((hS 0).sub (hS 5))
+  have n4 := bdy_tendsto_det2 (hE 5) (hE 1)
+  have hnum : ContinuousAt (fun q : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) ↦
+      2 * |det2 (bdy_eunit (q.2 5)) (bdy_eunit (q.2 0))| ^ 2 *
+        |det2 (bdy_eunit (q.2 1)) (bdy_eunit (q.2 0))|) p :=
+    (continuousAt_const.mul (n1.abs.pow 2)).mul n2.abs
+  have hden : ContinuousAt (fun q : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) ↦
+      |det2 (bdy_eunit (q.2 5)) (q.1 0 - q.1 5)| *
+        |det2 (bdy_eunit (q.2 5)) (bdy_eunit (q.2 1))|) p := n3.abs.mul n4.abs
+  exact (hnum.div hden (mul_ne_zero (abs_ne_zero.2 d1) (abs_ne_zero.2 d2))).add
+    continuousAt_const
+
+/-- **The uniform curvature bound** (the compactness step of the proof of Lemma 2.4.3): the
+curvature bounds `M` of the hyperbolic arcs at the boundary points of a worst disk are bounded. The
+bound is a continuous function of the multi-point and its tangents, on the compact set
+`bdy_G K`. -/
+lemma bdy_curvBound_le {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {γ : ℝ → Fin 2 → ℝ}
+    (hγ : IsPositiveBoundaryParam K γ) :
+    ∃ C, ∀ s, IsMultiPoint s → (∀ j, s j ∈ frontier K) →
+      bdy_curvBound (s 0) (s 5) (bdy_eunit (bdy_tangent γ (s 0)))
+        (bdy_eunit (bdy_tangent γ (s 5))) (bdy_eunit (bdy_tangent γ (s 1))) ≤ C := by
+  obtain ⟨C, hC⟩ := bdy_G_bound hK.1 fun p hp ↦ bdy_continuousAt_curvBoundG hK hγ hp
+  refine ⟨C, fun s hs hsK ↦ ?_⟩
+  have h := hC _ (bdy_mem_G hK.1 hγ hs hsK)
+  simp only [bdy_curvBoundG] at h
+  exact (le_abs_self _).trans h
+
+/-- **From local to global Lipschitz bounds.** A continuous curve with
+`|f(t + h) - f(t)| ≤ L h` for all small `h > 0`, at every `t`, is `L`-Lipschitz. -/
+lemma bdy_lipschitz_of_local {f : ℝ → Fin 2 → ℝ} (hf : Continuous f) {L : ℝ} (hL : 0 ≤ L)
+    (hloc : ∀ t, ∀ᶠ h in 𝓝[>] (0 : ℝ), ‖f (t + h) - f t‖ ≤ L * h) :
+    LipschitzWith (Real.toNNReal L) f := by
+  have key : ∀ a b, a ≤ b → ‖f b - f a‖ ≤ L * (b - a) := by
+    intro a b hab
+    set S := {s | ‖f s - f a‖ ≤ L * (s - a)} with hS_def
+    have hS : IsClosed S := isClosed_le ((hf.sub continuous_const).norm)
+      (continuous_const.mul (continuous_id.sub continuous_const))
+    have hsub := IsClosed.Icc_subset_of_forall_mem_nhdsWithin (a := a) (b := b)
+      (hS.inter isClosed_Icc) (by simp [S]) (fun x hx ↦ ?_)
+    · exact hsub ⟨hab, le_rfl⟩
+    · have h1 : Tendsto (fun y ↦ y - x) (𝓝[>] x) (𝓝[>] 0) := by
+        refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_ ?_
+        · exact ((continuous_id.sub continuous_const).tendsto' x 0 (sub_self x)).mono_left
+            nhdsWithin_le_nhds
+        · filter_upwards [self_mem_nhdsWithin] with y hy
+          exact mem_Ioi.2 (sub_pos.2 hy)
+      filter_upwards [h1.eventually (hloc x)] with y hy
+      rw [add_sub_cancel] at hy
+      change ‖f y - f a‖ ≤ L * (y - a)
+      calc ‖f y - f a‖ ≤ ‖f y - f x‖ + ‖f x - f a‖ := norm_sub_le_norm_sub_add_norm_sub _ _ _
+        _ ≤ L * (y - x) + L * (x - a) := add_le_add hy hx.1
+        _ = L * (y - a) := by ring
+  refine LipschitzWith.of_dist_le_mul fun x y ↦ ?_
+  rw [dist_eq_norm, Real.dist_eq, Real.coe_toNNReal _ hL]
+  rcases le_total x y with h | h
+  · rw [← norm_neg, neg_sub, abs_of_nonpos (by linarith)]
+    have := key x y h
+    linarith
+  · rw [abs_of_nonneg (by linarith)]
+    exact key y x h
+
+/-- A `C¹` curve with nonvanishing derivative on the boundary of `K ∈ 𝔎_ccs` turns about the origin
+in one direction: `det(γ, γ') ≠ 0`, since the tangent line supports `K` and avoids the interior
+point `0`. -/
+lemma bdy_det2_deriv_ne {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {γ : ℝ → Fin 2 → ℝ}
+    (hγc : ContDiff ℝ 1 γ) (hreg : ∀ t, deriv γ t ≠ 0) (hγK : ∀ t, γ t ∈ frontier K) (t : ℝ) :
+    det2 (γ t) (deriv γ t) ≠ 0 := by
+  intro h
+  obtain ⟨f, hfi, hfK⟩ := bdy_exists_support hK (hγK t)
+  have hdiff : Differentiable ℝ γ := hγc.differentiable (by norm_num)
+  have hmax : IsLocalMax (fun s ↦ f (γ s)) t :=
+    Filter.Eventually.of_forall fun s ↦ hfK _ (hK.2.1.isClosed.frontier_subset (hγK s))
+  have hfu : f (deriv γ t) = 0 :=
+    IsLocalMax.hasDerivAt_eq_zero hmax (f.hasFDerivAt.comp_hasDerivAt t (hdiff t).hasDerivAt)
+  have hy := bdy_eq_smul_of_det2_eq_zero (hreg t) h
+  have h0 := hfi 0 (bdy_zero_mem_interior hK)
+  rw [map_zero, hy, map_smul, hfu, smul_zero] at h0
+  exact lt_irrefl _ h0
+
+/-- The sign of `det(γ, γ')` is constant. -/
+lemma bdy_det2_deriv_sign {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {γ : ℝ → Fin 2 → ℝ}
+    (hγc : ContDiff ℝ 1 γ) (hreg : ∀ t, deriv γ t ≠ 0) (hγK : ∀ t, γ t ∈ frontier K) :
+    (∀ t, 0 < det2 (γ t) (deriv γ t)) ∨ ∀ t, det2 (γ t) (deriv γ t) < 0 := by
+  have hne := bdy_det2_deriv_ne hK hγc hreg hγK
+  have hg : Continuous fun t ↦ det2 (γ t) (deriv γ t) :=
+    bdy_continuous_det2 hγc.continuous (hγc.continuous_deriv le_rfl)
+  by_contra hcon
+  push Not at hcon
+  obtain ⟨⟨t₁, h₁⟩, ⟨t₂, h₂⟩⟩ := hcon
+  have h₁' := lt_of_le_of_ne h₁ (hne t₁)
+  have h₂' := lt_of_le_of_ne h₂ (Ne.symm (hne t₂))
+  obtain ⟨c, -, hc⟩ := intermediate_value_uIcc hg.continuousOn
+    (show (0 : ℝ) ∈ uIcc _ _ from Set.mem_uIcc.2 (Or.inl ⟨h₁'.le, h₂'.le⟩))
+  exact hne c hc
+
+/-- The product rule for `det(f, g)`. -/
+lemma bdy_hasDerivAt_det2_curves {f g : ℝ → Fin 2 → ℝ} {f' g' : Fin 2 → ℝ} {t : ℝ}
+    (hf : HasDerivAt f f' t) (hg : HasDerivAt g g' t) :
+    HasDerivAt (fun s ↦ det2 (f s) (g s)) (det2 f' (g t) + det2 (f t) g') t := by
+  have f0 := hasDerivAt_pi.1 hf 0
+  have f1 := hasDerivAt_pi.1 hf 1
+  have g0 := hasDerivAt_pi.1 hg 0
+  have g1 := hasDerivAt_pi.1 hg 1
+  have := (f0.mul g1).sub (f1.mul g0)
+  convert this using 1
+  · ext s; simp only [det2, Pi.sub_apply, Pi.mul_apply]
+  · simp only [det2]; ring
+
+/-- Differentiating `σ_{j+3} = -σ_j`. -/
+lemma bdy_deriv_add_three {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
+    (hd : ∀ j, Differentiable ℝ (σ j)) (hm : ∀ t, IsMultiPoint fun j ↦ σ j t) (j : ZMod 6)
+    (t : ℝ) : deriv (σ (j + 3)) t = -deriv (σ j) t := by
+  have : σ (j + 3) = fun τ ↦ -σ j τ := funext fun τ ↦ (hm τ j).2.1
+  rw [this]
+  exact (hd j t).hasDerivAt.neg.deriv
+
+/-- Differentiating `σ_j + σ_{j+2} + σ_{j+4} = 0`. -/
+lemma bdy_deriv_sum {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
+    (hd : ∀ j, Differentiable ℝ (σ j)) (hm : ∀ t, IsMultiPoint fun j ↦ σ j t) (j : ZMod 6)
+    (t : ℝ) : deriv (σ j) t + deriv (σ (j + 2)) t + deriv (σ (j + 4)) t = 0 := by
+  have h := ((hd j t).hasDerivAt.add (hd (j + 2) t).hasDerivAt).add (hd (j + 4) t).hasDerivAt
+  have hz : σ j + σ (j + 2) + σ (j + 4) = fun _ ↦ 0 :=
+    funext fun τ ↦ (hm τ j).1
+  rw [hz] at h
+  exact h.unique (hasDerivAt_const t 0)
+
 /-! ### Regularity of multi-curves -/
 
 /-- **Lemma 2.4.2** (Hales 2011; `lem:sigma2:c1`). Let `K = K_min ∈ 𝔎_ccs` be a centrally symmetric
@@ -1480,15 +2327,8 @@ theorem lemma2_4_2 {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {σ : ZMod 6 �
   -- if the line through `x ∈ ∂K` in a support direction `w` contains `y ∈ K`, the midpoint of
   -- `x` and `y` lies on the boundary
   have hline : ∀ {x y w : Fin 2 → ℝ}, x ∈ K → y ∈ K → w ≠ 0 → (∀ z ∈ K, 0 ≤ det2 w (z - x)) →
-      det2 w (y - x) = 0 → (1 / 2 : ℝ) • x + (1 / 2 : ℝ) • y ∈ frontier K := by
-    intro x y w hx hy hw hsupp hxy
-    have hzK : (1 / 2 : ℝ) • x + (1 / 2 : ℝ) • y ∈ K :=
-      hK'.1 hx hy (by norm_num) (by norm_num) (by norm_num)
-    refine ⟨subset_closure hzK, bdy_not_mem_interior hw (c := det2 w x) (fun z hz ↦ ?_) ?_⟩
-    · have := hsupp z hz
-      unfold det2 at this ⊢; simp only [Pi.sub_apply] at this; linarith
-    · simp only [det2, Pi.add_apply, Pi.smul_apply, smul_eq_mul, Pi.sub_apply] at hxy ⊢
-      linarith
+      det2 w (y - x) = 0 → (1 / 2 : ℝ) • x + (1 / 2 : ℝ) • y ∈ frontier K :=
+    fun hx hy hw hsupp hxy ↦ bdy_midpoint_mem_frontier hK' hx hy hw hsupp hxy
   -- multi-point relations
   have e1 : ∀ t, σ 1 t = σ 0 t + σ 2 t := fun t ↦ by
     have := bdy_mp_succ (hσm t) 0; rwa [zero_add, zero_add] at this
@@ -1607,16 +2447,372 @@ theorem lemma2_4_2 {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {σ : ZMod 6 �
   · exact hneg 1 hP1
   · exact hneg 2 hP2
 
+/-- `det(a, b)` of Lipschitz bounded curves is Lipschitz. -/
+lemma bdy_lip_det2 {a b : ℝ → Fin 2 → ℝ} {La Lb A B : ℝ}
+    (ha : ∀ x y, ‖a x - a y‖ ≤ La * |x - y|) (hb : ∀ x y, ‖b x - b y‖ ≤ Lb * |x - y|)
+    (hA : ∀ x, ‖a x‖ ≤ A) (hB : ∀ x, ‖b x‖ ≤ B) (hLa : 0 ≤ La) :
+    ∀ x y, |det2 (a x) (b x) - det2 (a y) (b y)| ≤ 2 * (La * B + A * Lb) * |x - y| := by
+  intro x y
+  have e : det2 (a x) (b x) - det2 (a y) (b y) =
+      det2 (a x - a y) (b x) + det2 (a y) (b x - b y) := by
+    simp only [det2, Pi.sub_apply]; ring
+  rw [e]
+  have h1 := bdy_abs_det2_le (a x - a y) (b x)
+  have h2 := bdy_abs_det2_le (a y) (b x - b y)
+  have h3 : ‖a x - a y‖ * ‖b x‖ ≤ La * |x - y| * B :=
+    mul_le_mul (ha x y) (hB x) (norm_nonneg _) (mul_nonneg hLa (abs_nonneg _))
+  have h4 : ‖a y‖ * ‖b x - b y‖ ≤ A * (Lb * |x - y|) :=
+    mul_le_mul (hA y) (hb x y) (norm_nonneg _) ((norm_nonneg _).trans (hA y))
+  calc |det2 (a x - a y) (b x) + det2 (a y) (b x - b y)|
+      ≤ |det2 (a x - a y) (b x)| + |det2 (a y) (b x - b y)| := abs_add_le _ _
+    _ ≤ 2 * ‖a x - a y‖ * ‖b x‖ + 2 * ‖a y‖ * ‖b x - b y‖ := add_le_add h1 h2
+    _ ≤ 2 * (La * |x - y| * B) + 2 * (A * (Lb * |x - y|)) := by nlinarith
+    _ = 2 * (La * B + A * Lb) * |x - y| := by ring
+
+/-- `(n/d) T` is Lipschitz for Lipschitz bounded `n`, `d`, `T` with `|d| ≥ δ > 0`. -/
+lemma bdy_lip_div_smul {n d : ℝ → ℝ} {T : ℝ → Fin 2 → ℝ} {Ln Ld LT N₀ δ : ℝ}
+    (hn : ∀ x y, |n x - n y| ≤ Ln * |x - y|) (hd : ∀ x y, |d x - d y| ≤ Ld * |x - y|)
+    (hT : ∀ x y, ‖T x - T y‖ ≤ LT * |x - y|) (hN : ∀ x, |n x| ≤ N₀) (hδ : 0 < δ)
+    (hD : ∀ x, δ ≤ |d x|) (hT1 : ∀ x, ‖T x‖ ≤ 1) (hLn : 0 ≤ Ln) (hLd : 0 ≤ Ld) :
+    ∀ x y, ‖(n x / d x) • T x - (n y / d y) • T y‖ ≤
+      (Ln / δ + N₀ * Ld / δ ^ 2 + N₀ / δ * LT) * |x - y| := by
+  intro x y
+  have hdx : 0 < |d x| := hδ.trans_le (hD x)
+  have hdy : 0 < |d y| := hδ.trans_le (hD y)
+  have hN0 : 0 ≤ N₀ := (abs_nonneg _).trans (hN x)
+  have hdx0 : d x ≠ 0 := abs_pos.1 hdx
+  have hdy0 : d y ≠ 0 := abs_pos.1 hdy
+  have hq : |n x / d x - n y / d y| ≤ (Ln / δ + N₀ * Ld / δ ^ 2) * |x - y| := by
+    have e : n x / d x - n y / d y = (n x - n y) / d x + n y * (d y - d x) / (d x * d y) := by
+      field_simp; ring
+    rw [e]
+    have h1 : |(n x - n y) / d x| ≤ Ln / δ * |x - y| := by
+      rw [abs_div, div_le_iff₀ hdx]
+      calc |n x - n y| ≤ Ln * |x - y| := hn x y
+        _ = Ln / δ * |x - y| * δ := by field_simp
+        _ ≤ Ln / δ * |x - y| * |d x| := by
+          gcongr; exact hD x
+    have h2 : |n y * (d y - d x) / (d x * d y)| ≤ N₀ * Ld / δ ^ 2 * |x - y| := by
+      rw [abs_div, abs_mul, abs_mul, div_le_iff₀ (mul_pos hdx hdy)]
+      have := hd y x
+      rw [abs_sub_comm y x] at this
+      calc |n y| * |d y - d x| ≤ N₀ * (Ld * |x - y|) :=
+            mul_le_mul (hN y) this (abs_nonneg _) hN0
+        _ = N₀ * Ld / δ ^ 2 * |x - y| * (δ * δ) := by field_simp
+        _ ≤ N₀ * Ld / δ ^ 2 * |x - y| * (|d x| * |d y|) := by
+          have : 0 ≤ N₀ * Ld / δ ^ 2 * |x - y| := by positivity
+          gcongr
+          · exact hD x
+          · exact hD y
+    calc _ ≤ |(n x - n y) / d x| + |n y * (d y - d x) / (d x * d y)| := abs_add_le _ _
+      _ ≤ Ln / δ * |x - y| + N₀ * Ld / δ ^ 2 * |x - y| := add_le_add h1 h2
+      _ = (Ln / δ + N₀ * Ld / δ ^ 2) * |x - y| := by ring
+  have hρ : |n y / d y| ≤ N₀ / δ := by
+    rw [abs_div, div_le_div_iff₀ hdy hδ]
+    calc |n y| * δ ≤ N₀ * δ := by gcongr; exact hN y
+      _ ≤ N₀ * |d y| := by gcongr; exact hD y
+  have e : (n x / d x) • T x - (n y / d y) • T y =
+      (n x / d x - n y / d y) • T x + (n y / d y) • (T x - T y) := by
+    rw [sub_smul, smul_sub]; abel
+  rw [e]
+  calc ‖(n x / d x - n y / d y) • T x + (n y / d y) • (T x - T y)‖
+      ≤ ‖(n x / d x - n y / d y) • T x‖ + ‖(n y / d y) • (T x - T y)‖ := norm_add_le _ _
+    _ = |n x / d x - n y / d y| * ‖T x‖ + |n y / d y| * ‖T x - T y‖ := by
+        rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs]
+    _ ≤ (Ln / δ + N₀ * Ld / δ ^ 2) * |x - y| * 1 + N₀ / δ * (LT * |x - y|) := by
+        gcongr
+        · exact hT1 x
+        · exact hT x y
+    _ = (Ln / δ + N₀ * Ld / δ ^ 2 + N₀ / δ * LT) * |x - y| := by ring
+
+/-- A Lipschitz bound in the form `‖f x - f y‖ ≤ L |x - y|`. -/
+lemma bdy_lipschitzWith_of_le {f : ℝ → Fin 2 → ℝ} {L : ℝ} (hL : 0 ≤ L)
+    (h : ∀ x y, ‖f x - f y‖ ≤ L * |x - y|) : LipschitzWith (Real.toNNReal L) f :=
+  LipschitzWith.of_dist_le_mul fun x y ↦ by
+    rw [dist_eq_norm, Real.dist_eq, Real.coe_toNNReal _ hL]; exact h x y
+
+lemma bdy_le_of_lipschitzWith {f : ℝ → Fin 2 → ℝ} {C : NNReal} (h : LipschitzWith C f) :
+    ∀ x y, ‖f x - f y‖ ≤ (C : ℝ) * |x - y| := fun x y ↦ by
+  rw [← dist_eq_norm, ← Real.dist_eq]; exact h.dist_le_mul x y
+
+/-- A vector with `v₀² + v₁² ≤ 1` has sup norm at most `1`. -/
+lemma bdy_norm_le_one {v : Fin 2 → ℝ} (hv : v 0 ^ 2 + v 1 ^ 2 = 1) : ‖v‖ ≤ 1 :=
+  (pi_norm_le_iff_of_nonneg zero_le_one).2 fun i ↦ by
+    rw [Real.norm_eq_abs]; exact bdy_abs_le_one_of_sq hv i
+
+/-- **Lemma 2.4.3 for a positively oriented `σ₀`.** -/
+lemma bdy_lemma2_4_3_pos {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
+    (hσ : ∀ j, ContDiff ℝ 1 (σ j)) (hσm : ∀ t, IsMultiPoint fun j ↦ σ j t)
+    (hσK : ∀ j t, σ j t ∈ frontier K) (hσ₀ : IsPositiveBoundaryParam K (σ 0))
+    (harc : ∀ t, deriv (σ 0) t 0 ^ 2 + deriv (σ 0) t 1 ^ 2 = 1) :
+    ∀ j, ∃ C, LipschitzWith C (deriv (σ j)) := by
+  have hK' := hK.1
+  -- by Lemma 2.4.2 all `σ_j` are positively oriented regular `C¹` parameterizations
+  have hP := lemma2_4_2 hK (fun j ↦ (hσ j).continuous) hσm hσK hσ₀
+  have hdiff : ∀ j, Differentiable ℝ (σ j) := fun j ↦ (hσ j).differentiable (by norm_num)
+  have hu : ∀ j t, bdy_eunit (deriv (σ j) t) = bdy_eunit (bdy_tangent (σ 0) (σ j t)) := by
+    intro j t
+    rw [bdy_tangent_eq_deriv hK' hσ₀ (hP j) t,
+      bdy_eunit_smul _ (inv_pos.2 (norm_pos_iff.2 ((hP j).2.1 t)))]
+  -- the uniform curvature bound of the hyperbolic arcs (compactness)
+  obtain ⟨C, hC⟩ := bdy_curvBound_le hK hσ₀
+  set C' := max C 0 with hC'
+  have hC'0 : 0 ≤ C' := le_max_right _ _
+  -- the local estimate of the turning of the tangent along each `σ_j`
+  have hloc : ∀ j t, ∀ᶠ h in 𝓝[>] (0 : ℝ),
+      ‖bdy_eunit (deriv (σ j) (t + h)) - bdy_eunit (deriv (σ j) t)‖ ≤
+        16 * C' * ‖σ j (t + h) - σ j t‖ := by
+    intro j t
+    obtain ⟨v, hv, hvK, hv0, hev⟩ := bdy_tangent_local hK hσ₀ (hP j) t
+    obtain ⟨t', ht'⟩ : σ j t ∈ range (σ 0) := by rw [hσ₀.2.2.1]; exact hσK j t
+    have hsv := bdy_eq_hexMidpoint hK hv hvK (hσm t') (fun k ↦ hσK k t') (by rw [ht', hv0])
+    have hb := hC _ (hσm t') (fun k ↦ hσK k t')
+    have hM : bdy_curvBound (σ j t) (hexMidpoint v 5) (bdy_eunit (deriv (σ j) t))
+        (bdy_eunit (bdy_tangent (σ 0) (hexMidpoint v 5)))
+        (bdy_eunit (bdy_tangent (σ 0) (hexMidpoint v 1))) ≤ C' := by
+      rw [hu, ← hsv 5, ← hsv 1, ← ht']
+      exact hb.trans (le_max_left _ _)
+    filter_upwards [hev] with h hh
+    exact hh.trans (by gcongr)
+  -- `σ₀'` is Lipschitz
+  have hd0 : ∀ t, bdy_eunit (deriv (σ 0) t) = deriv (σ 0) t := fun t ↦ by
+    simp only [bdy_eunit, harc t, Real.sqrt_one, inv_one, one_smul]
+  have hσ0' : ∀ t, ‖deriv (σ 0) t‖ ≤ 1 := fun t ↦ bdy_norm_le_one (harc t)
+  have hlip0 : LipschitzWith 1 (σ 0) :=
+    lipschitzWith_of_nnnorm_deriv_le (hdiff 0) fun t ↦ by
+      rw [← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_one]; exact hσ0' t
+  have hL0 : LipschitzWith (Real.toNNReal (16 * C')) (deriv (σ 0)) := by
+    refine bdy_lipschitz_of_local ((hσ 0).continuous_deriv le_rfl) (by positivity) fun t ↦ ?_
+    filter_upwards [hloc 0 t, self_mem_nhdsWithin] with h hh hpos
+    have hpos' : (0 : ℝ) < h := hpos
+    rw [hd0, hd0] at hh
+    have : ‖σ 0 (t + h) - σ 0 t‖ ≤ h := by
+      have := hlip0.dist_le_mul (t + h) t
+      rw [dist_eq_norm, Real.dist_eq, add_sub_cancel_left, abs_of_pos hpos'] at this
+      simpa using this
+    calc _ ≤ 16 * C' * ‖σ 0 (t + h) - σ 0 t‖ := hh
+      _ ≤ 16 * C' * h := by gcongr
+  have hL0' := bdy_le_of_lipschitzWith hL0
+  rw [Real.coe_toNNReal _ (by positivity)] at hL0'
+  -- bounds by compactness: `|σ_j| ≤ R` and `|det(σ₀, T₁)| ≥ δ`
+  obtain ⟨R, hR⟩ : ∃ R, ∀ z ∈ K, ‖z‖ ≤ R := hK'.2.1.isBounded.exists_norm_le
+  have hσR : ∀ k t, ‖σ k t‖ ≤ R := fun k t ↦ hR _ (bdy_mem hK' (hP k) t)
+  have hR0 : 0 ≤ R := (norm_nonneg _).trans (hσR 0 0)
+  have hFc : ∀ p ∈ bdy_G K, ContinuousAt
+      (fun p : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) ↦
+        (det2 (p.1 0) (bdy_eunit (p.2 1)))⁻¹) p := by
+    intro p hp
+    obtain ⟨hne, h1, -, -⟩ := bdy_G_nondeg hK hσ₀ hp
+    have hE1 : ContinuousAt (fun q : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) ↦
+        bdy_eunit (q.2 1)) p :=
+      ContinuousAt.comp (g := bdy_eunit)
+        (f := fun q : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) ↦ q.2 1)
+        (bdy_continuousAt_eunit (hne 1)) ((continuous_apply 1).comp continuous_snd).continuousAt
+    have hS0 : ContinuousAt (fun q : (ZMod 6 → Fin 2 → ℝ) × (ZMod 6 → Fin 2 → ℝ) ↦ q.1 0) p :=
+      ((continuous_apply 0).comp continuous_fst).continuousAt
+    have hd : det2 (p.1 0) (bdy_eunit (p.2 1)) ≠ 0 := by
+      rw [bdy_det2_eunit_right]
+      exact mul_ne_zero (inv_ne_zero (Real.sqrt_pos.2 (bdy_sq_pos (hne 1))).ne') h1
+    exact (bdy_tendsto_det2 hS0 hE1).inv₀ hd
+  obtain ⟨B, hB⟩ := bdy_G_bound hK' hFc
+  set T : ℝ → Fin 2 → ℝ := fun t ↦ bdy_eunit (deriv (σ 1) t) with hT_def
+  set D : ℝ → ℝ := fun t ↦ det2 (σ 0 t) (T t) with hD_def
+  set N : ℝ → ℝ := fun t ↦ -det2 (deriv (σ 0) t) (σ 1 t) with hN_def
+  have hDne : ∀ t, D t ≠ 0 := fun t ↦ by
+    change det2 (σ 0 t) (bdy_eunit (deriv (σ 1) t)) ≠ 0
+    rw [hu 1 t, bdy_det2_eunit_right]
+    exact mul_ne_zero (inv_ne_zero (Real.sqrt_pos.2 (bdy_sq_pos (fun h ↦ by
+      have := (bdy_tangent_spec hK' hσ₀ (hσK 1 t)).1; rw [h, norm_zero] at this
+      exact zero_ne_one this))).ne')
+      (bdy_det2_tangent_one_ne hK hσ₀ (hσm t) (fun k ↦ hσK k t))
+  have hDinv : ∀ t, |(D t)⁻¹| ≤ B := fun t ↦ by
+    have := hB _ (bdy_mem_G hK' hσ₀ (hσm t) (fun k ↦ hσK k t))
+    simp only [hD_def, hT_def, hu 1 t]
+    exact this
+  have hB0 : 0 < B := (abs_pos.2 (inv_ne_zero (hDne 0))).trans_le (hDinv 0)
+  have hδ : ∀ t, B⁻¹ ≤ |D t| := fun t ↦ by
+    have := hDinv t
+    rw [abs_inv] at this
+    exact inv_le_of_inv_le₀ (abs_pos.2 (hDne t)) this
+  -- the speed of `σ₁` from the area relation `det(σ₀, σ₁) = √3/2`
+  have harea : ∀ t, det2 (deriv (σ 0) t) (σ 1 t) + det2 (σ 0 t) (deriv (σ 1) t) = 0 := by
+    intro t
+    have hd := bdy_hasDerivAt_det2_curves (hdiff 0 t).hasDerivAt (hdiff 1 t).hasDerivAt
+    have hconst : (fun s ↦ det2 (σ 0 s) (σ 1 s)) = fun _ ↦ √3 / 2 :=
+      funext fun s ↦ (hσm s 0).2.2
+    rw [hconst] at hd
+    exact hd.unique (hasDerivAt_const t _)
+  have hσ1' : ∀ t, deriv (σ 1) t = (N t / D t) • T t := by
+    intro t
+    have hne := (hP 1).2.1 t
+    have h1 := bdy_eq_smul_eunit hne
+    have h2 : √(deriv (σ 1) t 0 ^ 2 + deriv (σ 1) t 1 ^ 2) * D t = N t := by
+      have := harea t
+      conv at this => rw [h1]
+      simp only [hD_def, hN_def, hT_def, det2, Pi.smul_apply, smul_eq_mul] at this ⊢
+      linarith
+    rw [← h2, mul_div_cancel_right₀ _ (hDne t)]
+    exact h1
+  -- bounds
+  have hN : ∀ t, |N t| ≤ 2 * R := fun t ↦ by
+    have := bdy_abs_det2_le (deriv (σ 0) t) (σ 1 t)
+    simp only [hN_def, abs_neg]
+    nlinarith [hσ0' t, hσR 1 t, norm_nonneg (deriv (σ 0) t), norm_nonneg (σ 1 t)]
+  have hT1 : ∀ t, ‖T t‖ ≤ 1 := fun t ↦ bdy_norm_le_one (bdy_eunit_sq ((hP 1).2.1 t))
+  set P := 2 * R * B with hP_def
+  have hP0 : 0 ≤ P := by positivity
+  have hσ1'b : ∀ t, ‖deriv (σ 1) t‖ ≤ P := fun t ↦ by
+    rw [hσ1', norm_smul, Real.norm_eq_abs, abs_div]
+    have h1 : |N t| / |D t| ≤ 2 * R * B := by
+      rw [div_le_iff₀ (abs_pos.2 (hDne t))]
+      have := hδ t
+      calc |N t| ≤ 2 * R := hN t
+        _ = 2 * R * B * B⁻¹ := by field_simp
+        _ ≤ 2 * R * B * |D t| := by gcongr
+    calc |N t| / |D t| * ‖T t‖ ≤ 2 * R * B * 1 :=
+          mul_le_mul h1 (hT1 t) (norm_nonneg _) (by positivity)
+      _ = P := by rw [mul_one]
+  have hlip1 : LipschitzWith (Real.toNNReal P) (σ 1) :=
+    lipschitzWith_of_nnnorm_deriv_le (hdiff 1) fun t ↦ by
+      rw [← NNReal.coe_le_coe, coe_nnnorm, Real.coe_toNNReal _ hP0]; exact hσ1'b t
+  have hl1 := bdy_le_of_lipschitzWith hlip1
+  rw [Real.coe_toNNReal _ hP0] at hl1
+  -- `T₁` is Lipschitz
+  have hTc : Continuous T := continuous_iff_continuousAt.2 fun t ↦
+    ContinuousAt.comp (g := bdy_eunit) (f := deriv (σ 1)) (bdy_continuousAt_eunit ((hP 1).2.1 t))
+      ((hσ 1).continuous_deriv le_rfl).continuousAt
+  have hLT : LipschitzWith (Real.toNNReal (16 * C' * P)) T := by
+    refine bdy_lipschitz_of_local hTc (by positivity) fun t ↦ ?_
+    filter_upwards [hloc 1 t, self_mem_nhdsWithin] with h hh hpos
+    have hpos' : (0 : ℝ) < h := hpos
+    have := hl1 (t + h) t
+    rw [add_sub_cancel_left, abs_of_pos hpos'] at this
+    calc ‖T (t + h) - T t‖ ≤ 16 * C' * ‖σ 1 (t + h) - σ 1 t‖ := hh
+      _ ≤ 16 * C' * (P * h) := by gcongr
+      _ = 16 * C' * P * h := by ring
+  have hlT := bdy_le_of_lipschitzWith hLT
+  rw [Real.coe_toNNReal _ (by positivity)] at hlT
+  -- `N` and `D` are Lipschitz
+  have hlN : ∀ x y, |N x - N y| ≤ 2 * (16 * C' * R + 1 * P) * |x - y| := fun x y ↦ by
+    have := bdy_lip_det2 hL0' hl1 hσ0' (hσR 1) (by positivity) x y
+    simp only [hN_def]
+    rw [show -det2 (deriv (σ 0) x) (σ 1 x) - -det2 (deriv (σ 0) y) (σ 1 y) =
+      -(det2 (deriv (σ 0) x) (σ 1 x) - det2 (deriv (σ 0) y) (σ 1 y)) by ring, abs_neg]
+    exact this
+  have hl0 := bdy_le_of_lipschitzWith hlip0
+  simp only [NNReal.coe_one] at hl0
+  have hlD : ∀ x y, |D x - D y| ≤ 2 * (1 * 1 + R * (16 * C' * P)) * |x - y| := fun x y ↦
+    bdy_lip_det2 hl0 hlT (hσR 0) hT1 zero_le_one x y
+  -- `σ₁' = (N/D) T₁` is Lipschitz
+  have hL1 : ∃ C, LipschitzWith C (deriv (σ 1)) := by
+    have key := bdy_lip_div_smul hlN hlD hlT hN (inv_pos.2 hB0) hδ hT1 (by positivity)
+      (by positivity)
+    set L := 2 * (16 * C' * R + 1 * P) / B⁻¹ + 2 * R * (2 * (1 * 1 + R * (16 * C' * P))) / B⁻¹ ^ 2
+      + 2 * R / B⁻¹ * (16 * C' * P) with hL_def
+    have hL : 0 ≤ L := by positivity
+    refine ⟨_, bdy_lipschitzWith_of_le (f := deriv (σ 1)) hL fun x y ↦ ?_⟩
+    rw [hσ1', hσ1']
+    exact key x y
+  obtain ⟨C₁, hL1⟩ := hL1
+  -- the other curves: `σ₂ = σ₁ - σ₀`, `σ_{j+3} = -σ_j`
+  have hd2 : ∀ t, deriv (σ 2) t = deriv (σ 1) t - deriv (σ 0) t := fun t ↦ by
+    have : σ 2 = fun s ↦ σ 1 s - σ 0 s := funext fun s ↦ by
+      have := bdy_mp_succ (hσm s) 0
+      rw [zero_add, zero_add] at this
+      change σ 2 s = σ 1 s - σ 0 s
+      rw [this]; abel
+    rw [this]
+    exact ((hdiff 1 t).hasDerivAt.sub (hdiff 0 t).hasDerivAt).deriv
+  have hL2 : LipschitzWith (C₁ + Real.toNNReal (16 * C')) (deriv (σ 2)) := by
+    have := hL1.sub hL0
+    convert this using 1
+    funext t; exact hd2 t
+  have hneg : ∀ j (C : NNReal), LipschitzWith C (deriv (σ j)) →
+      LipschitzWith C (deriv (σ (j + 3))) := by
+    intro j C hj
+    have : deriv (σ (j + 3)) = fun t ↦ -deriv (σ j) t :=
+      funext fun t ↦ bdy_deriv_add_three hdiff hσm j t
+    rw [this]
+    exact hj.neg
+  intro j
+  fin_cases j
+  · exact ⟨_, hL0⟩
+  · exact ⟨_, hL1⟩
+  · exact ⟨_, hL2⟩
+  · exact ⟨_, hneg 0 _ hL0⟩
+  · exact ⟨_, hneg 1 _ hL1⟩
+  · exact ⟨_, hneg 2 _ hL2⟩
+
 /-- **Lemma 2.4.3** (Hales 2011, Lemmas 17 and 18; `lem:tangents-lipschitz`). Let `σ` be a `C¹`
 multi-curve parameterization of the boundary of `K = K_min ∈ 𝔎_ccs`, giving worst greatest packing
 density. Assume that the curve `σ₀` is parameterized according to arclength. Then the tangents
-`σ_j'` are Lipschitz continuous for all `j`. -/
+`σ_j'` are Lipschitz continuous for all `j`.
+
+Proof, as in the book (Hales 2011, Lemmas 17–18). If `σ₀` turns clockwise, reverse the time; so
+let `σ₀` be positively oriented, and then all `σ_j` are, by Lemma 2.4.2.
+* At each boundary point `x`, the arc of the hyperbola of Remark 2.2.4, whose asymptotes are the
+  tangent lines at the neighbouring midpoints `s_{±1}` of the critical hexagon at `x`, lies in `K`
+  near `x`. In the frame `(u, n)` of the unit tangent and normal at `x`, it is a graph
+  `η(ξ)` with `|η| ≤ M(x) ξ²` (`bdy_hyperbola_local`, `bdy_hyperbola_mem`).
+* The curvature bounds `M(x)` are bounded by some `κ`. This is the book's "continuity over the
+  compact boundary", made precise: `M` is a continuous function of the multi-point at `x` and its
+  unit tangents, on a compact set of such data (`bdy_curvBound_le`).
+* The curve lies between its tangent line and the hyperbolic arc. Concretely, for `y = σ(t + h)`
+  near `x = σ(t)`, the tangent line at `y` supports `K` and so passes between `x` and the arc point
+  at `ξ = 2⟨y - x, u⟩`. This bounds the turning of the unit tangent by
+  `|T(t + h) - T(t)| ≤ 16 κ |σ(t + h) - σ(t)|` (`bdy_tangent_diff_le`, `bdy_tangent_local`), which
+  gives the Lipschitz continuity of `σ₀'` (`bdy_lipschitz_of_local`).
+* For `j ≠ 0`, differentiating `det(σ₀, σ₁) = √3/2` gives the speed of `σ₁` as
+  `-det(σ₀', σ₁)/det(σ₀, T₁)` (equation `eqn:sB`), a quotient of Lipschitz functions whose
+  denominator is bounded away from `0` by compactness. The unit tangent `T₁` is Lipschitz by the
+  same estimate along `σ₁`. Finally `σ₂ = σ₁ - σ₀` and `σ_{j+3} = -σ_j`.
+
+Departures from the paper (the book sketches these steps; the TeX notes that the details of the
+final "now follows" are in handwritten notes):
+* the osculating circle of curvature `κ` is replaced by the hyperbolic arc itself;
+* the uniform bound is obtained by compactness of the multi-points with their tangents, not
+  stated separately;
+* the local bounds are turned into a global Lipschitz bound along `ℝ`;
+* the statement does not assume the orientation of `σ₀`, so the clockwise case is handled by
+  reversing time;
+* the unit tangent of `σ₁` is shown Lipschitz by the estimate along `σ₁`, instead of through the
+  arclength reparameterization `σ̃₂` of `σ₂`, and `σ₂` is handled through `σ₂ = σ₁ - σ₀`. -/
 theorem lemma2_4_3 {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
     (hσ : ∀ j, ContDiff ℝ 1 (σ j)) (hσm : ∀ t, IsMultiPoint fun j ↦ σ j t)
     (hσK : ∀ j t, σ j t ∈ frontier K) (hσ₀ : range (σ 0) = frontier K)
     (harc : ∀ t, deriv (σ 0) t 0 ^ 2 + deriv (σ 0) t 1 ^ 2 = 1) :
     ∀ j, ∃ C, LipschitzWith C (deriv (σ j)) := by
-  sorry
+  have hK' := hK.1
+  have hreg : ∀ t, deriv (σ 0) t ≠ 0 := fun t h ↦ by
+    have := harc t; rw [h] at this; simp at this
+  -- `σ₀` turns about the origin in one direction; if it is negative, reverse the time
+  rcases bdy_det2_deriv_sign hK' (hσ 0) hreg (hσK 0) with hpos | hneg
+  · exact bdy_lemma2_4_3_pos hK hσ hσm hσK ⟨hσ 0, hreg, hσ₀, hpos⟩ harc
+  · set σ' : ZMod 6 → ℝ → Fin 2 → ℝ := fun j t ↦ σ j (-t) with hσ'_def
+    have hd' : ∀ j t, deriv (σ' j) t = -deriv (σ j) (-t) := fun j t ↦ by
+      have h := (((hσ j).differentiable (by norm_num)) (-t)).hasDerivAt.scomp t
+        (hasDerivAt_neg t)
+      rw [neg_one_smul] at h
+      exact h.deriv
+    have hP' : IsPositiveBoundaryParam K (σ' 0) := by
+      refine ⟨(hσ 0).comp contDiff_neg, fun t ↦ by rw [hd']; exact neg_ne_zero.2 (hreg _), ?_,
+        fun t ↦ ?_⟩
+      · rw [← hσ₀]
+        exact neg_surjective.range_comp (σ 0)
+      · rw [hd']
+        have := hneg (-t)
+        simp only [σ', det2, Pi.neg_apply] at this ⊢
+        linarith
+    have harc' : ∀ t, deriv (σ' 0) t 0 ^ 2 + deriv (σ' 0) t 1 ^ 2 = 1 := fun t ↦ by
+      rw [hd']; simpa using harc (-t)
+    have h' := bdy_lemma2_4_3_pos hK (σ := σ') (fun j ↦ (hσ j).comp contDiff_neg)
+      (fun t ↦ hσm (-t)) (fun j t ↦ hσK j (-t)) hP' harc'
+    intro j
+    obtain ⟨C, hC⟩ := h' j
+    refine ⟨C, LipschitzWith.of_dist_le_mul fun x y ↦ ?_⟩
+    have h := hC.dist_le_mul (-x) (-y)
+    rw [hd', hd', neg_neg, neg_neg, dist_neg_neg, dist_neg_neg] at h
+    exact h
 
 /-- **Corollary 2.4.4** (`lem:multi-curve-c2`). Under the hypotheses of Lemma 2.4.3, the functions
 `σ_j'(t)` are differentiable almost everywhere. -/
@@ -1630,24 +2826,6 @@ theorem corollary2_4_4 {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {σ : ZMod
   exact LipschitzWith.ae_differentiableAt (μ := volume) hC
 
 /-! ### Convexity of multi-curves -/
-
-/-- Differentiating `σ_{j+3} = -σ_j`. -/
-lemma bdy_deriv_add_three {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
-    (hd : ∀ j, Differentiable ℝ (σ j)) (hm : ∀ t, IsMultiPoint fun j ↦ σ j t) (j : ZMod 6)
-    (t : ℝ) : deriv (σ (j + 3)) t = -deriv (σ j) t := by
-  have : σ (j + 3) = fun τ ↦ -σ j τ := funext fun τ ↦ (hm τ j).2.1
-  rw [this]
-  exact (hd j t).hasDerivAt.neg.deriv
-
-/-- Differentiating `σ_j + σ_{j+2} + σ_{j+4} = 0`. -/
-lemma bdy_deriv_sum {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
-    (hd : ∀ j, Differentiable ℝ (σ j)) (hm : ∀ t, IsMultiPoint fun j ↦ σ j t) (j : ZMod 6)
-    (t : ℝ) : deriv (σ j) t + deriv (σ (j + 2)) t + deriv (σ (j + 4)) t = 0 := by
-  have h := ((hd j t).hasDerivAt.add (hd (j + 2) t).hasDerivAt).add (hd (j + 4) t).hasDerivAt
-  have hz : σ j + σ (j + 2) + σ (j + 4) = fun _ ↦ 0 :=
-    funext fun τ ↦ (hm τ j).1
-  rw [hz] at h
-  exact h.unique (hasDerivAt_const t 0)
 
 /-- The closed star condition (first part of the proof of Lemma 2.4.5): the tangent line at `s_j`
 supports `K`, and `K` contains the neighbors `s_{j±1}`, so `σ_j'(t)` lies in the closed cone
