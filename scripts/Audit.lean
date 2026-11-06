@@ -67,6 +67,13 @@ import all SmoothedPolygons.Ch7.Faces
 import all SmoothedPolygons.Ch7.HMax
 import all SmoothedPolygons.Ch7.HMaxInequality
 import all SmoothedPolygons.Ch7.Isolated
+import all SmoothedPolygons.Ch7.Isolated.Defs
+import all SmoothedPolygons.Ch7.Isolated.FixedPoints
+import all SmoothedPolygons.Ch7.Isolated.Hyperbolic
+import all SmoothedPolygons.Ch7.Isolated.Poincare
+import all SmoothedPolygons.Ch7.Isolated.Return
+import all SmoothedPolygons.Ch7.Isolated.Switching
+import all SmoothedPolygons.Ch7.Isolated.VertexFlow
 import all SmoothedPolygons.Ch7.Polygon
 import all SmoothedPolygons.Ch7.Remarks
 import all SmoothedPolygons.Ch7.SmoothedPolygon

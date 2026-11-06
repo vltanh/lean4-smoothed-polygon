@@ -38,6 +38,13 @@ public import SmoothedPolygons.Ch7.Faces
 public import SmoothedPolygons.Ch7.HMax
 public import SmoothedPolygons.Ch7.HMaxInequality
 public import SmoothedPolygons.Ch7.Isolated
+public import SmoothedPolygons.Ch7.Isolated.Defs
+public import SmoothedPolygons.Ch7.Isolated.FixedPoints
+public import SmoothedPolygons.Ch7.Isolated.Hyperbolic
+public import SmoothedPolygons.Ch7.Isolated.Poincare
+public import SmoothedPolygons.Ch7.Isolated.Return
+public import SmoothedPolygons.Ch7.Isolated.Switching
+public import SmoothedPolygons.Ch7.Isolated.VertexFlow
 public import SmoothedPolygons.Ch7.Polygon
 public import SmoothedPolygons.Ch7.Remarks
 public import SmoothedPolygons.Ch7.SmoothedPolygon
