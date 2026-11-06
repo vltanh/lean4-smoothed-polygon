@@ -179,11 +179,189 @@ theorem ch2_latticePackingDensity_eq {K : Set (Fin 2 → ℝ)} (hK : IsConvexDis
 
 /-! ### Theorem 2.1.3 -/
 
+/-- The image `{A x + b | x ∈ K}` of a convex set under an affine map is convex. -/
+private lemma dens_convex_image {K : Set (Fin 2 → ℝ)} (hK : Convex ℝ K)
+    (A : Matrix (Fin 2) (Fin 2) ℝ) (b : Fin 2 → ℝ) : Convex ℝ ((fun x ↦ A *ᵥ x + b) '' K) := by
+  rintro _ ⟨x, hx, rfl⟩ _ ⟨y, hy, rfl⟩ a c ha hc hac
+  refine ⟨a • x + c • y, hK hx hy ha hc hac, ?_⟩
+  change A *ᵥ (a • x + c • y) + b = a • (A *ᵥ x + b) + c • (A *ᵥ y + b)
+  rw [Matrix.mulVec_add, Matrix.mulVec_smul, Matrix.mulVec_smul, smul_add, smul_add,
+    add_add_add_comm, ← add_smul, hac, one_smul]
+
+/-- A translate `K + l` of a convex disk is a convex disk. -/
+private lemma dens_isConvexDisk_translate {K : Set (Fin 2 → ℝ)} (hK : IsConvexDisk K)
+    (l : Fin 2 → ℝ) : IsConvexDisk ((fun x ↦ x + l) '' K) := by
+  obtain ⟨hc, hcomp, hint⟩ := hK
+  refine ⟨?_, hcomp.image (continuous_id.add continuous_const), ?_⟩
+  · simpa only [Matrix.one_mulVec] using dens_convex_image hc 1 l
+  · have := (Homeomorph.addRight l).image_interior K
+    rw [Homeomorph.coe_addRight] at this
+    exact this ▸ hint.image _
+
+/-- The translates `K + l` of a nonempty compact set are distinct: if `K + l = K + l'`, then a
+point `x ∈ K` maximizing `⟨x, l - l'⟩` has `x + (l - l') ∈ K`, so `|l - l'|² ≤ 0`. -/
+private lemma dens_translate_injective {K : Set (Fin 2 → ℝ)} (hK : IsCompact K)
+    (hne : K.Nonempty) : Function.Injective fun l : Fin 2 → ℝ ↦ (fun x ↦ x + l) '' K := by
+  intro l l' h
+  obtain ⟨x, hxK, hmax⟩ := hK.exists_isMaxOn hne
+    (f := fun y : Fin 2 → ℝ ↦ y 0 * (l 0 - l' 0) + y 1 * (l 1 - l' 1))
+    (Continuous.continuousOn (by fun_prop))
+  have h' : (fun x ↦ x + l) '' K = (fun x ↦ x + l') '' K := h
+  have hx : x + l ∈ (fun y ↦ y + l') '' K := h' ▸ mem_image_of_mem _ hxK
+  obtain ⟨y, hyK, hy⟩ := hx
+  have h0 : y 0 = x 0 + l 0 - l' 0 := by
+    have := congr_fun hy 0
+    simp only [Pi.add_apply] at this
+    linarith
+  have h1 : y 1 = x 1 + l 1 - l' 1 := by
+    have := congr_fun hy 1
+    simp only [Pi.add_apply] at this
+    linarith
+  have hle := isMaxOn_iff.mp hmax y hyK
+  simp only [h0, h1] at hle
+  have hsq : (l 0 - l' 0) ^ 2 + (l 1 - l' 1) ^ 2 ≤ 0 := by nlinarith
+  have e0 : l 0 - l' 0 = 0 := (pow_eq_zero_iff (n := 2) two_ne_zero).mp
+    (le_antisymm (by nlinarith [sq_nonneg (l 1 - l' 1)]) (sq_nonneg _))
+  have e1 : l 1 - l' 1 = 0 := (pow_eq_zero_iff (n := 2) two_ne_zero).mp
+    (le_antisymm (by nlinarith [sq_nonneg (l 0 - l' 0)]) (sq_nonneg _))
+  funext i
+  fin_cases i
+  · exact sub_eq_zero.mp e0
+  · exact sub_eq_zero.mp e1
+
+/-- For convex sets with pairwise disjoint interiors, `Σ area(A ∩ D) ≤ area(D)`: the boundary of
+a convex set has measure zero (`Convex.addHaar_frontier`), and the interiors are disjoint. -/
+private lemma dens_tsum_le_volume {𝒜 : Set (Set (Fin 2 → ℝ))} (hconv : ∀ A ∈ 𝒜, Convex ℝ A)
+    (hdisj : 𝒜.Pairwise fun A B ↦ Disjoint (interior A) (interior B)) {D : Set (Fin 2 → ℝ)}
+    (hD : MeasurableSet D) : ∑' A : 𝒜, volume ((A : Set (Fin 2 → ℝ)) ∩ D) ≤ volume D := by
+  calc ∑' A : 𝒜, volume ((A : Set (Fin 2 → ℝ)) ∩ D)
+      ≤ ∑' A : 𝒜, volume (interior (A : Set (Fin 2 → ℝ)) ∩ D) := by
+        refine tsum_le_tsum fun A ↦ ?_
+        calc volume ((A : Set (Fin 2 → ℝ)) ∩ D)
+            ≤ volume (interior (A : Set (Fin 2 → ℝ)) ∩ D ∪ frontier (A : Set (Fin 2 → ℝ))) := by
+              refine measure_mono fun x ⟨hxA, hxD⟩ ↦ ?_
+              by_cases hx : x ∈ interior (A : Set (Fin 2 → ℝ))
+              · exact Or.inl ⟨hx, hxD⟩
+              · exact Or.inr ⟨subset_closure hxA, hx⟩
+          _ ≤ volume (interior (A : Set (Fin 2 → ℝ)) ∩ D) +
+              volume (frontier (A : Set (Fin 2 → ℝ))) := measure_union_le _ _
+          _ = volume (interior (A : Set (Fin 2 → ℝ)) ∩ D) := by
+              rw [Convex.addHaar_frontier volume (hconv A A.2), add_zero]
+    _ ≤ volume (⋃ A : 𝒜, interior (A : Set (Fin 2 → ℝ)) ∩ D) :=
+        tsum_meas_le_meas_iUnion_of_disjoint volume
+          (fun _ ↦ isOpen_interior.measurableSet.inter hD)
+          (fun A B hAB ↦ (hdisj A.2 B.2 fun h ↦ hAB (Subtype.ext h)).mono inter_subset_left
+            inter_subset_left)
+    _ ≤ volume D := measure_mono (iUnion_subset fun _ ↦ inter_subset_right)
+
+/-- Every family of convex sets with pairwise disjoint interiors has upper density at most `1`. -/
+private lemma dens_upperDensity_le_one {𝒜 : Set (Set (Fin 2 → ℝ))}
+    (hconv : ∀ A ∈ 𝒜, Convex ℝ A)
+    (hdisj : 𝒜.Pairwise fun A B ↦ Disjoint (interior A) (interior B)) :
+    External.FejesToth.upperDensity 𝒜 ≤ 1 := by
+  refine limsup_le_of_le (h := Eventually.of_forall fun r ↦ ENNReal.div_le_of_le_mul ?_)
+  rw [one_mul]
+  exact dens_tsum_le_volume hconv hdisj (isClosed_le (by fun_prop) continuous_const).measurableSet
+
+/-- `K + L` is a packing in the sense of the source iff the `L`-translates of `K` have disjoint
+interiors. -/
+private lemma dens_isPacking_translates_iff {K : Set (Fin 2 → ℝ)}
+    (hinj : Function.Injective fun l : Fin 2 → ℝ ↦ (fun x ↦ x + l) '' K)
+    (L : Submodule ℤ (Fin 2 → ℝ)) :
+    External.FejesToth.IsPacking (External.FejesToth.translates K L) ↔ IsLatticePacking K L := by
+  constructor
+  · intro hP l hl l' hl' hll'
+    exact hP (mem_range_self (⟨l, hl⟩ : L)) (mem_range_self (⟨l', hl'⟩ : L))
+      fun h ↦ hll' (hinj h)
+  · rintro hKL _ ⟨l, rfl⟩ _ ⟨l', rfl⟩ hne
+    exact hKL l l.2 l' l'.2 fun h ↦ hne (by simp only [h])
+
+/-- The ratio of the packing `K + L` is the ratio of the lattice packing `K + L`. -/
+private lemma dens_packingRatio_translates {K : Set (Fin 2 → ℝ)}
+    (hinj : Function.Injective fun l : Fin 2 → ℝ ↦ (fun x ↦ x + l) '' K)
+    (L : Submodule ℤ (Fin 2 → ℝ)) :
+    packingRatio (External.FejesToth.translates K L) = latticeRatio K L := by
+  funext r
+  rw [packingRatio, latticeRatio, External.FejesToth.translates,
+    tsum_range (g := fun l : L ↦ (fun x ↦ x + (l : Fin 2 → ℝ)) '' K)
+      (fun A ↦ volume (A ∩ euclidDisk r)) (hinj.comp Subtype.val_injective)]
+  congr 1
+  exact tsum_congr fun l ↦ by rw [inter_comm]
+
 /-- **Theorem 2.1.3** (Fejes Tóth; `thm:fejes-toth-packing`, equation `eqn:fejes-toth`). If
-`K ⊂ ℝ²` is a centrally symmetric convex disk, then `δ(K) = δ_L(K)`. -/
+`K ⊂ ℝ²` is a centrally symmetric convex disk, then `δ(K) = δ_L(K)`.
+
+The book cites Fejes Tóth (`External.fejes_toth`, whose `δ` and `δ_L` are suprema of upper
+densities) and Definition 2.1.2's formula `δ(K, L) = area(K)/det(L)` (`definition2_1_2`). The
+book's `δ(K)` is at most the source's `δ(K)` (a packing whose density exists has upper density
+equal to its density, and every packing ratio is at most `1`); the source's `δ(K)` is its `δ_L(K)`;
+the source's `δ_L(K)` is at most the book's `δ_L(K)`, since each lattice packing has upper density
+`area(K)/det(L)`; and the book's `δ_L(K)` is at most its `δ(K)`, since a lattice packing `K + L`
+is a packing of congruent copies of `K` whose density exists. -/
 theorem theorem2_1_3 {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) :
     greatestPackingDensity K = greatestLatticePackingDensity K := by
-  sorry
+  obtain ⟨hconv, hcomp, hint, hsymm⟩ := hK
+  have hKd : IsConvexDisk K := ⟨hconv, hcomp, hint⟩
+  have hinj := dens_translate_injective hcomp (hint.mono interior_subset)
+  have hU : ∀ L, upperDensity (External.FejesToth.translates K L) = upperLatticeDensity K L :=
+    fun L ↦ by rw [upperDensity, upperLatticeDensity, dens_packingRatio_translates hinj]
+  have hLo : ∀ L, lowerDensity (External.FejesToth.translates K L) = lowerLatticeDensity K L :=
+    fun L ↦ by rw [lowerDensity, lowerLatticeDensity, dens_packingRatio_translates hinj]
+  -- The source's `δ(K)` is at most `1`.
+  have hle1 : External.FejesToth.packingDensity K ≤ 1 := by
+    refine iSup₂_le fun 𝒜 h𝒜 ↦ iSup_le fun hcong ↦ dens_upperDensity_le_one ?_ h𝒜
+    intro A hA
+    obtain ⟨M, -, v, rfl⟩ := hcong A hA
+    exact dens_convex_image hconv M v
+  -- The book's `δ(K)` is at most the source's `δ(K)`.
+  have h1 : greatestPackingDensity K ≤ (External.FejesToth.packingDensity K).toReal := by
+    refine Real.sSup_le ?_ ENNReal.toReal_nonneg
+    rintro _ ⟨P, ⟨hP, hcop⟩, -, rfl⟩
+    exact ENNReal.toReal_mono (ne_top_of_le_ne_top ENNReal.one_ne_top hle1)
+      (le_iSup₂_of_le P hP.2 (le_iSup_of_le hcop le_rfl))
+  -- The source's `δ_L(K)` is at most the book's `δ_L(K)`.
+  have hbddL : BddAbove
+      {d | ∃ L, IsPlaneLattice L ∧ IsLatticePacking K L ∧ latticePackingDensity K L = d} := by
+    refine ⟨1, ?_⟩
+    rintro _ ⟨L, -, hKL, rfl⟩
+    have : upperLatticeDensity K L ≤ 1 := by
+      rw [← hU L]
+      refine dens_upperDensity_le_one ?_ ((dens_isPacking_translates_iff hinj L).mpr hKL)
+      rintro _ ⟨l, rfl⟩
+      exact (dens_isConvexDisk_translate hKd l).1
+    exact (ENNReal.toReal_mono ENNReal.one_ne_top this).trans_eq ENNReal.toReal_one
+  have h2 : (External.FejesToth.latticePackingDensity K).toReal ≤
+      greatestLatticePackingDensity K := by
+    refine ENNReal.toReal_le_of_le_ofReal
+      (Real.sSup_nonneg fun _ ⟨_, _, _, hd⟩ ↦ hd ▸ ENNReal.toReal_nonneg) ?_
+    refine iSup₂_le fun L hL ↦ iSup_le fun hP ↦ ?_
+    have hKL : IsLatticePacking K L := (dens_isPacking_translates_iff hinj L).mp hP
+    change upperDensity (External.FejesToth.translates K L) ≤ _
+    rw [hU, (definition2_1_2 hKd hL hKL).1]
+    refine ENNReal.ofReal_le_ofReal ?_
+    rw [← ch2_latticePackingDensity_eq hKd hL hKL]
+    exact le_csSup hbddL ⟨L, hL, hKL, rfl⟩
+  -- The book's `δ_L(K)` is at most its `δ(K)`: lattice packings are packings of congruent copies.
+  have h3 : greatestLatticePackingDensity K ≤ greatestPackingDensity K := by
+    have hbddP : BddAbove
+        {d | ∃ P, IsPackingOfCopies K P ∧ HasDensity P ∧ packingDensity P = d} := by
+      refine ⟨1, ?_⟩
+      rintro _ ⟨P, ⟨hP, -⟩, -, rfl⟩
+      exact (ENNReal.toReal_mono ENNReal.one_ne_top (dens_upperDensity_le_one
+        (fun A hA ↦ (hP.1 A hA).1) hP.2)).trans_eq ENNReal.toReal_one
+    refine Real.sSup_le ?_ (Real.sSup_nonneg fun _ ⟨_, _, _, hd⟩ ↦ hd ▸ ENNReal.toReal_nonneg)
+    rintro _ ⟨L, hL, hKL, rfl⟩
+    obtain ⟨hu, hl⟩ := definition2_1_2 hKd hL hKL
+    refine le_csSup hbddP ⟨External.FejesToth.translates K L, ⟨⟨?_, ?_⟩, ?_⟩, ?_, ?_⟩
+    · rintro _ ⟨l, rfl⟩
+      exact dens_isConvexDisk_translate hKd l
+    · exact (dens_isPacking_translates_iff hinj L).mpr hKL
+    · rintro _ ⟨l, rfl⟩
+      exact ⟨1, one_mem _, l, by simp only [Matrix.one_mulVec]⟩
+    · exact ⟨by rw [hU, hu]; exact ENNReal.ofReal_ne_top, by rw [hU, hLo, hu, hl]⟩
+    · rw [packingDensity, latticePackingDensity, hU]
+  rw [External.fejes_toth ⟨hconv, hcomp, hint⟩ hsymm] at h1
+  exact le_antisymm (h1.trans h2) h3
 
 /-! ### The minimax density and the worst disks -/
 
