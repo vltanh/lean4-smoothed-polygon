@@ -2,6 +2,7 @@ module
 
 public import SmoothedPolygons.Ch4.StarDomain
 public import SmoothedPolygons.AppA.FunctionalDerivative
+public import External.EulerArnold
 public import Basic.Analysis.Calculus.MatrixFTC
 public import Mathlib.Analysis.Calculus.Deriv.Inv
 public import Mathlib.Analysis.Convex.Hull
@@ -306,21 +307,27 @@ private theorem hasDerivAt_affine_div (a b c d : ℝ) (hc : c ≠ 0) :
   simpa using (hasDerivAt_affine a b).fun_div (hasDerivAt_affine c d) (by simpa using hc)
 
 /-- **Proposition 6.5.1** (`eqn:lamR`, Lie algebra costate variables). Along a lifted trajectory
-satisfying Hamilton's equations for the Hamiltonian `H(Λ₁, Λ₂, X; Z_u)` in the trivialized
-cotangent bundle, `X' = δH/δΛ₂` and `Λ₂' = -δH/δX` (canonical equations on `T*𝔰𝔩₂(ℝ)`), and the
-Euler–Arnold equation `Λ₁' = -ad_{δH/δΛ₁} Λ₁` (cited from Cushman–Bates), the costate variables
+satisfying Hamilton's equations for the Hamiltonian `H(Λ₁, Λ₂, X; Z_u)`, the costate variables
 evolve as `Λ₁' = [Λ₁, X]` and `Λ_R' = [P, Λ_R] - ⟨Λ_R, P⟩[P, X] + [-Λ₁ + (3/2) λ_cost J, X]`, where
-`P = Z_u/⟨X, Z_u⟩` and `Λ_R = [Λ₂, X]`. The control `u` is the value of the control at time `t`. -/
-theorem proposition6_5_1 (lam : ℝ) (u : Fin 3 → ℝ) (X Λ₁ Λ₂ : ℝ → Mat2) (t : ℝ)
-    (X' Λ₁' Λ₂' D₁ : Mat2)
+`P = Z_u/⟨X, Z_u⟩` and `Λ_R = [Λ₂, X]`. The control `u` is the value of the control at time `t`.
+
+Hamilton's equations: on `T*𝔰𝔩₂(ℝ)`, `X' = δH/δΛ₂` and `Λ₂' = -δH/δX`; on the cotangent bundle of
+the group, in canonical coordinates `(g, p)` (the covector `p` acting by `v ↦ tr(p v)`),
+`g' = ∂H/∂p` and `p' = -∂H/∂g`, where `H` depends on `(g, p)` through the left-trivialized costate
+`Λ₁ = p g` (Proposition 3.6.1). The book derives `Λ₁' = [Λ₁, X]` from the Euler–Arnold equation
+of Cushman–Bates, which is proved in `External.euler_arnold`. -/
+theorem proposition6_5_1 (lam : ℝ) (u : Fin 3 → ℝ) (X Λ₁ Λ₂ g p : ℝ → Mat2) (t : ℝ)
+    (X' Λ₂' g' p' : Mat2) (hΛ₁ : Λ₁ = fun s ↦ p s * g s)
     (htr : (X t).trace = 0 ∧ (Λ₁ t).trace = 0 ∧ (Λ₂ t).trace = 0)
     (hden : traceForm (X t) (controlMatrix u) ≠ 0)
-    (hX : HasDerivAtEntrywise X X' t) (hΛ₁ : HasDerivAtEntrywise Λ₁ Λ₁' t)
-    (hΛ₂ : HasDerivAtEntrywise Λ₂ Λ₂' t)
+    (hX : HasDerivAtEntrywise X X' t) (hΛ₂ : HasDerivAtEntrywise Λ₂ Λ₂' t)
+    (hg : HasDerivAtEntrywise g g' t) (hp : HasDerivAtEntrywise p p' t)
     (hHΛ₂ : HasFunctionalDerivative (fun L ↦ fullHamiltonian lam (Λ₁ t) L (X t) u) (Λ₂ t) X')
     (hHX : HasFunctionalDerivative (fun Y ↦ fullHamiltonian lam (Λ₁ t) (Λ₂ t) Y u) (X t) (-Λ₂'))
-    (hHΛ₁ : HasFunctionalDerivative (fun L ↦ fullHamiltonian lam L (Λ₂ t) (X t) u) (Λ₁ t) D₁)
-    (hEA : Λ₁' = -(D₁ * Λ₁ t - Λ₁ t * D₁)) :
+    (hHp : External.HasTraceGradient (fun q ↦ fullHamiltonian lam (q * g t) (Λ₂ t) (X t) u) (p t)
+      g')
+    (hHg : External.HasTraceGradient (fun k ↦ fullHamiltonian lam (p t * k) (Λ₂ t) (X t) u) (g t)
+      (-p')) :
     HasDerivAtEntrywise Λ₁ (Λ₁ t * X t - X t * Λ₁ t) t ∧
       HasDerivAtEntrywise (fun s ↦ Λ₂ s * X s - X s * Λ₂ s)
         (costateRHS lam (Λ₁ t) (Λ₂ t * X t - X t * Λ₂ t) (X t) u) t := by
@@ -351,17 +358,18 @@ theorem proposition6_5_1 (lam : ℝ) (u : Fin 3 → ℝ) (X Λ₁ Λ₂ : ℝ �
     simp only [traceForm, Matrix.smul_mul, Matrix.mul_smul, ← smul_sub, Matrix.trace_smul,
       smul_eq_mul, mul_zero, sub_zero]
     field_simp
-  -- `δH/δΛ₁ = X`
-  have hdΛ₁ : HasFunctionalDerivative (fun L ↦ fullHamiltonian lam L (Λ₂ t) (X t) u) (Λ₁ t)
-      (X t) := by
-    refine ⟨hXtr, fun W _ ↦ ?_⟩
-    have e : (fun s : ℝ ↦ fullHamiltonian lam (Λ₁ t + s • W) (Λ₂ t) (X t) u) = fun s ↦
-        (traceForm M (X t) + s * traceForm W (X t)) +
+  -- `δH/δΛ₁ = X`, for the trace pairing on all matrices
+  have hdΛ₁ : External.HasTraceGradient (fun L ↦ fullHamiltonian lam L (Λ₂ t) (X t) u)
+      (p t * g t) (X t) := by
+    intro W
+    have e : (fun s : ℝ ↦ fullHamiltonian lam (p t * g t + s • W) (Λ₂ t) (X t) u) = fun s ↦
+        (traceForm (p t * g t - (3 / 2 * lam) • J) (X t) + s * (X t * W).trace) +
           traceForm (Λ₂ t) (Z * X t - X t * Z) / traceForm (X t) Z := by
       funext s
-      simp only [fullHamiltonian, traceForm, hMdef, hZdef]
-      rw [show Λ₁ t + s • W - (3 / 2 * lam) • J = (Λ₁ t - (3 / 2 * lam) • J) + s • W by abel,
-        Matrix.add_mul, Matrix.trace_add, Matrix.smul_mul, Matrix.trace_smul, smul_eq_mul]
+      simp only [fullHamiltonian, traceForm, hZdef]
+      rw [show p t * g t + s • W - (3 / 2 * lam) • J = (p t * g t - (3 / 2 * lam) • J) + s • W by
+        abel, Matrix.add_mul, Matrix.trace_add, Matrix.smul_mul, Matrix.trace_smul, smul_eq_mul,
+        Matrix.trace_mul_comm W]
     rw [e]
     exact (hasDerivAt_affine _ _).add_const _
   -- `δH/δX = Λ₁ - (3/2)λJ + [Λ₂, P] - ⟨[Λ₂, P], X⟩P`
@@ -389,10 +397,14 @@ theorem proposition6_5_1 (lam : ℝ) (u : Fin 3 → ℝ) (X Λ₁ Λ₂ : ℝ �
     ring
   -- uniqueness of the functional derivatives
   have hX' : X' = P * X t - X t * P := hHΛ₂.unique hdΛ₂
-  have hD₁ : D₁ = X t := hHΛ₁.unique hdΛ₁
   have hΛ₂' : -Λ₂' = M + (Λ₂ t * P - P * Λ₂ t) - traceForm (Λ₂ t * P - P * Λ₂ t) (X t) • P :=
     hHX.unique hdX
-  refine ⟨hΛ₁.congr_deriv (by rw [hEA, hD₁]; noncomm_ring), ?_⟩
+  -- `Λ₁' = [Λ₁, X]`: the Euler–Arnold equation (Cushman–Bates)
+  refine ⟨?_, ?_⟩
+  · have hEA := External.euler_arnold (fun L ↦ fullHamiltonian lam L (Λ₂ t) (X t) u) g p t g' p'
+      (X t) hg hp hdΛ₁ hHp hHg
+    subst hΛ₁
+    exact hEA
   -- `Λ_R' = [Λ₂', X] + [Λ₂, X']`
   refine (((hΛ₂.mul hX).sub (hX.mul hΛ₂))).congr_deriv ?_
   have hκ : traceForm (Λ₂ t * P - P * Λ₂ t) (X t) =

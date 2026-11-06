@@ -78,8 +78,9 @@ Status of the formalization:
 
 ### Proved in `External/`
 
-None. [`External/README.md`](External/README.md) explains why: the formalized chapters use no cited theorem as a
-hypothesis.
+| Cited result | Source | Lean | Used by |
+| --- | --- | --- | --- |
+| Euler–Arnold equation for left-invariant Hamiltonians on matrix groups, `μ' = [μ, δh/δμ]` for `μ = pg` | Cushman–Bates, cited in the proof of Proposition 6.5.1 | [`External.euler_arnold`](External/EulerArnold.lean#L72) | [`proposition6_5_1`](SmoothedPolygons/Ch6/Hamiltonian.lean#L319) |
 
 ### Assumed
 
@@ -187,8 +188,9 @@ trace form "sending `ad*` to `ad`". With the book's definition of `ad*` (Appendi
 `⟨ad*_Z Y, X⟩ = ⟨Y, -ad_Z X⟩`) this identification sends `ad*_Z` to `+ad_Z`, which would give
 `Λ₁' = [X, Λ₁]`. The equation `Λ₁' = [Λ₁, X]` that the book uses is the correct one: in matrix
 coordinates on `T*GL₂`, `p' = -Xp` and `Λ₁ = pg` give `Λ₁' = [Λ₁, X]`, and it is the equation whose
-solution is `Λ₁(t) = g(t)⁻¹ Λ₁(0) g(t)` (Corollary 6.5.3). The formalization takes the Euler–Arnold
-equation in the form `Λ₁' = -ad_{δH/δΛ₁} Λ₁` as a hypothesis of [`proposition6_5_1`](SmoothedPolygons/Ch6/Hamiltonian.lean#L314).
+solution is `Λ₁(t) = g(t)⁻¹ Λ₁(0) g(t)` (Corollary 6.5.3). The formalization proves the Euler–Arnold
+equation in exactly this form, `μ' = [μ, δh/δμ]` for `μ = pg` ([`External.euler_arnold`](External/EulerArnold.lean#L72)), and
+applies it in [`proposition6_5_1`](SmoothedPolygons/Ch6/Hamiltonian.lean#L319).
 
 **E10. Theorem 6.8.3, §6.8 (TeX 5385–5402): omitted proof.** The book omits "the long direct
 calculation" and refers to Vajjha's thesis. The formalization does the calculation
@@ -287,7 +289,7 @@ book's. The Challenge statements keep the book's hypotheses.
 | Proposition 3.1.9 ([`proposition3_1_9`](SmoothedPolygons/Ch3/StateDynamics.lean#L570)) | `σ₀` parameterized by arclength | the proof uses that the tangents are Lipschitz (Definition 2.4.7, item 2), not the normalization |
 | Corollary 3.1.10 ([`corollary3_1_10`](SmoothedPolygons/Ch3/StateDynamics.lean#L679)) | the same (the standing assumption of TeX 2157, not printed in the statement) | it applies Proposition 3.1.9 |
 | Lemma 3.3.1 ([`lemma3_3_1`](SmoothedPolygons/Ch3/ControlSets.lean#L208)) | `g'` Lipschitz | the hypothesis `κ_j ≥ 0` almost everywhere already presupposes that `X'` exists almost everywhere; the first proof (if `κ₀ = κ₁ = 0` then `κ₂ = √3 det X/ρ₀(X) > 0`) uses only `tr X' = 0` where `X'` exists. (The formal `κ_j` is defined everywhere, through [`derivEntrywise`](Basic/Analysis/Calculus/MatrixEntrywise.lean#L113).) |
-| Corollary 6.5.4 ([`corollary6_5_4`](SmoothedPolygons/Ch6/Hamiltonian.lean#L465)) | `Z = Z_u` is a control matrix | the Lean statement takes any matrix `Z` with `⟨X, Z⟩ ≠ 0`: the quotient rule does not use the form of `Z_u` |
+| Corollary 6.5.4 ([`corollary6_5_4`](SmoothedPolygons/Ch6/Hamiltonian.lean#L477)) | `Z = Z_u` is a control matrix | the Lean statement takes any matrix `Z` with `⟨X, Z⟩ ≠ 0`: the quotient rule does not use the form of `Z_u` |
 | Theorem 6.8.2 ([`theorem6_8_2`](SmoothedPolygons/Ch6/HalfPlane.lean#L164)) | `Λ_R` traceless | `Λ_R` enters only through its trace form with traceless matrices |
 | Lemma 7.1.2 ([`lemma7_1_2`](SmoothedPolygons/Ch7/ConstantControl.lean#L82)) | `u ∈ U_T` | the proof uses only that `P` is constant along the trajectory (Lemma 7.1.1), which holds for every constant `u` |
 | Lemma 7.3.1 ([`lemma7_3_1`](SmoothedPolygons/Ch7/Faces.lean#L49)) | the control set lies in the plane `u₀ + u₁ + u₂ = 1` | `Z_u` is linear in `u`, so `H` is a linear-fractional function of `u` on any compact convex set on which `⟨X, Z_u⟩ ≠ 0` (hypothesis `hden`, E13) |
@@ -316,10 +318,12 @@ book's. The Challenge statements keep the book's hypotheses.
   time; and the transversality conditions of §6.6. The nontriviality condition is imposed on the
   reduced costate, because on the full costate it admits the spurious lift `λ_cost = 0`, `Λ₁ = 0`,
   `Λ₂ = X` of every trajectory (E8).
-- **Proposition 6.5.1.** "Hamilton's equations in the trivialized cotangent bundle" are hypotheses
-  of [`proposition6_5_1`](SmoothedPolygons/Ch6/Hamiltonian.lean#L314): the canonical equations `X' = δH/δΛ₂`, `Λ₂' = -δH/δX`, and the
-  Euler–Arnold equation `Λ₁' = -ad_{δH/δΛ₁} Λ₁` in the form the book uses (cited from
-  Cushman–Bates; Section 2 and E9). The conclusion is the derivative of `Λ₁` and of `Λ_R` at `t`.
+- **Proposition 6.5.1.** "Hamilton's equations" are the hypotheses of [`proposition6_5_1`](SmoothedPolygons/Ch6/Hamiltonian.lean#L319): on
+  `T*𝔰𝔩₂(ℝ)`, `X' = δH/δΛ₂` and `Λ₂' = -δH/δX`; on the cotangent bundle of the group, in canonical
+  coordinates `(g, p)` of `T*GL₂(ℝ)` (the covector `p` acting by `v ↦ tr(p v)`), `g' = ∂H/∂p` and
+  `p' = -∂H/∂g`, with `H` depending on `(g, p)` through the left-trivialized costate `Λ₁ = pg`. The
+  Euler–Arnold equation that the book cites is then proved ([`External.euler_arnold`](External/EulerArnold.lean#L72)). The conclusion
+  is the derivative of `Λ₁` and of `Λ_R` at `t`.
 - **The smoothed `(6k+2)`-gon.** The book specifies it by its control mode sequence (eqn:3k+1), the
   switching time (eqn:t1), the initial point `z₀ = i y₀` with `4/(3y₀² + 1) = 2 cos θ_k`, and
   `g(0) = I₂`. The Challenge states Theorem 7.5.6 for every state trajectory with this control and
@@ -376,7 +380,8 @@ argument is written with monotonicity of the derivative.
 
 ## 8. What each result depends on
 
-No result of the formalization uses a result from prior work ([`External/`](External) is empty), and every
+One result uses a result from prior work: Proposition 6.5.1 uses the Euler–Arnold equation, proved in
+[`External/`](External) (Section 2). Every
 declaration depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound)
 (`lake env lean scripts/Audit.lean`).
 

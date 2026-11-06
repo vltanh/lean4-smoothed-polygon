@@ -68,10 +68,8 @@ sources:
     location: "Birkhäuser, 1997"
     relationship: "background"
     note: >-
-      Source of the Euler-Arnold equations cited in the proof of Proposition 6.5.1. The
-      formalization reads 'Hamilton's equations in the left-trivialized cotangent bundle' as the
-      canonical equations together with the Euler-Arnold equation, which is a hypothesis of
-      proposition6_5_1 in the form the book uses; see REPORT.md, E9 and Section 6.
+      Source of the Euler-Arnold equation cited in the proof of Proposition 6.5.1, proved in the
+      formalization for left-invariant Hamiltonians on matrix groups (External.euler_arnold).
 
 related_formalizations:
   - id: "https://github.com/sunfishho/reinhardt-density-bound"
@@ -150,8 +148,8 @@ fidelity:
     Readings (REPORT.md, Section 6): matrix-valued curves are differentiated and called Lipschitz
     entry by entry; differential equations with measurable controls are solved in Caratheodory's
     sense; Pontryagin extremals are defined by the conditions of the maximum principle in the
-    reduced costate variables; Proposition 6.5.1 takes Hamilton's equations in the trivialized
-    cotangent bundle, including the Euler-Arnold equation (Cushman-Bates), as hypotheses; a
+    reduced costate variables; Proposition 6.5.1 takes Hamilton's equations in canonical
+    coordinates (g, p) of the cotangent bundle of GL2, with Lambda_1 = p g, as hypotheses; a
     bang-bang control takes values in the vertices of the control simplex; the cost is not
     identified with the area (Green's theorem) nor the density with area/sqrt(12) (Reinhardt,
     Fejes Toth); Lemma 6.8.1 is stated for nonzero traceless X; Theorem 6.8.3 is proved in the

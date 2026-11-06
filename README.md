@@ -17,7 +17,8 @@ bang-bang control** (Theorem 7.5.6), and the smoothed octagon's density is
 
 - Every numbered result of the formalized chapters, by the book's own arguments, with four
   exceptions that are listed, with their reasons, in [REPORT.md, Section 9](REPORT.md#9-not-formalized).
-- The formalization is unconditional: no cited theorem is assumed, and [`External/`](External) is empty
+- The formalization is unconditional: no cited theorem is assumed. The one cited result that a
+  proof uses, the Euler–Arnold equation (Cushman–Bates), is proved in [`External/`](External)
   ([External/README.md](External/README.md)). A *Pontryagin extremal* is defined by the conditions
   of the maximum principle ([`IsPontryaginExtremal`](Challenge.lean#L162)), so the maximum principle itself is not needed.
 - `lake build` succeeds; the only `sorry`s are the statements of [`Challenge.lean`](Challenge.lean). There is no
@@ -141,7 +142,7 @@ Lean `v4.36.0-rc2`, Mathlib `v4.36.0-rc2`.
 | Path | Content |
 | --- | --- |
 | [`Basic/`](Basic) | general mathematics, for Mathlib: entrywise calculus of matrix curves, the matrix exponential, FTC and Grönwall for matrix ODEs, generalized circles under `SL₂(ℝ)` ([Basic/README.md](Basic/README.md)) |
-| [`External/`](External) | cited results; empty ([External/README.md](External/README.md)) |
+| [`External/`](External) | cited results, proved: the Euler–Arnold equation ([External/README.md](External/README.md)) |
 | [`SmoothedPolygons/Defs.lean`](SmoothedPolygons/Defs.lean) | the definitions that the Challenge uses |
 | [`SmoothedPolygons/Ch2/`](SmoothedPolygons/Ch2) | multi-points, multi-curves, balanced disks (Definitions 2.4.1, 2.4.7); the unit disk is a balanced pair |
 | [`SmoothedPolygons/Ch3/`](SmoothedPolygons/Ch3) | the control problem: state dynamics, Jacobi's formula, cost, controls, Lie algebra dynamics, Proposition 3.6.1, Problem 3.6.2 |

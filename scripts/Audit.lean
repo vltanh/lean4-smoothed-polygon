@@ -10,6 +10,7 @@ import all Basic.Analysis.Calculus.MatrixEntrywise
 import all Basic.Analysis.Calculus.MatrixEntrywiseExp
 import all Basic.Analysis.Calculus.MatrixFTC
 import all Basic.Analysis.Complex.UpperHalfPlane.GeneralizedCircle
+import all External.EulerArnold
 import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.MatrixIdentities
 import all SmoothedPolygons.AppA.Riemannian
@@ -78,7 +79,7 @@ or, when general, in `Basic/`, and, in a conditional formalization, the proposit
 hypotheses. The traversal
 stops at them. -/
 meta def externalResults : List (String × Name) :=
-  []
+  [("Euler–Arnold (Cushman–Bates)", ``External.euler_arnold)]
 
 /-- The numbered results of the paper, in the order of the paper. -/
 meta def paperResults : List (String × Name) :=
