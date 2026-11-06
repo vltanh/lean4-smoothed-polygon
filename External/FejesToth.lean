@@ -8,6 +8,7 @@ public import Mathlib.Algebra.Module.ZLattice.Basic
 public import Mathlib.Analysis.Convex.Measure
 public import Basic.Analysis.Convex.CircumscribedPolygon
 public import Basic.Analysis.Convex.HexagonLattice
+public import Basic.Analysis.Convex.CellDecomposition
 
 /-!
 # Fejes Tóth's theorem: lattice packings are densest for centrally symmetric disks
@@ -29,8 +30,9 @@ lattice (a discrete subgroup of `ℝ²` spanning `ℝ²`). Taking suprema of upp
 strongest form of the statement (no packing of congruent copies is denser, even in the sense of
 upper density, than the best lattice packing). Densities take values in `[0, ∞]`.
 
-Status: `fejes_toth` is proved from Fejes Tóth's cell lemma `FejesToth.ft_cell_decomposition`,
-which is left as `sorry` (the planar-topology core; its docstring gives the argument). The lattice
+Status: `fejes_toth` is proved from Fejes Tóth's cell lemma
+`PlaneConvex.exists_cell_decomposition` (`Basic/Analysis/Convex/CellDecomposition.lean`), which
+is assembled there from four lemmas left as `sorry` (the planar-topology core). The lattice
 half `|K| / t_K(6) ≤ δ_L(K)` and everything else are proved; see the section *Proof* below.
 -/
 
@@ -109,10 +111,11 @@ infimum over `k` closed half-planes containing `K` of the area of their intersec
    `t_K(6) + 6d ≤ t_K(s) + s d` for `s ≥ 3`, `d = t_K(6) - t_K(7)`
    (`PlaneConvex.minCircumscribedArea_six_add_le`); `t_K` is invariant under Euclidean motions
    (`PlaneConvex.minCircumscribedArea_image_motion`, via `Measure.addHaar_image_linearMap`).
-3. **Fejes Tóth's cell lemma** (`ft_cell_decomposition`, **the only `sorry`**): `n ≥ 1`
-   non-overlapping convex disks in a bounded convex polygon `Q` cut out by `m` half-planes lie in
-   non-overlapping convex polygons `C_i ⊆ Q`, `C_i` cut out by `s_i ≥ 3` half-planes, with
-   `∑ s_i ≤ 6n + m - 6`. See its docstring for the argument and the infrastructure it needs.
+3. **Fejes Tóth's cell lemma** (`PlaneConvex.exists_cell_decomposition`, in `Basic`; the only
+   `sorry`s, in its four sub-lemmas): `n ≥ 1` non-overlapping convex disks in a bounded convex
+   polygon `Q` cut out by `m` half-planes lie in non-overlapping convex polygons `C_i ⊆ Q`, `C_i`
+   cut out by `s_i ≥ 3` half-planes, with `∑ s_i ≤ 6n + m - 6`. See
+   `Basic/Analysis/Convex/CellDecomposition.lean` for the sub-lemmas and their arguments.
 4. **Fejes Tóth's inequality** (`ft_card_mul_le_volume`): `n` congruent copies of `K` packed in a
    convex polygon `Q` with `m ≤ 6` sides satisfy `n t_K(6) ≤ |Q|`:
    `|Q| ≥ ∑ |C_i|` (non-overlapping convex sets, `Convex.addHaar_frontier`), `|C_i| ≥ t_K(s_i)`
@@ -150,12 +153,13 @@ and (b) the count `∑ s_i ≤ 6n + m - 6`. Neither can be had cheaply: a binary
 `∑ s_i ≤ 4n + m - 4`), does not exist in general (a pinwheel of long congruent rectangles has no
 free cut, and the hexagonal packing of discs has none), and cells of the form
 `{x | f_i(x) = max_j f_j(x)}`, `f_i` affine (power diagrams), which tile automatically, cannot
-separate a pinwheel either. The least topology we know for (b) is the angle-sum count recalled in
-the cell lemma's docstring: in the normal-angle representation the interior angles of a convex
-`s`-gon sum to `(s - 2)π` for free, so (b) reduces to the local fact that the corner angles of
-non-overlapping cells at a point sum to at most `2π` (`π` at a point interior to a side of a cell
-or on a side of `Q`), an area computation in small disks, plus the structure of the holes; it
-avoids Euler's formula and the Jordan curve theorem.
+separate a pinwheel either. The least topology we know for (b) is the angle-sum count recalled
+in the docstring of `PlaneConvex.sum_ncard_extremePoints_add_six_le`: in the normal-angle
+representation the interior angles of a convex `s`-gon sum to `(s - 2)π` for free, so (b)
+reduces to the local fact that the corner angles of non-overlapping cells at a point sum to at
+most `2π` (`π` at a point interior to a side of a cell or on a side of `Q`), an area computation
+in small disks, plus the structure of the holes; it avoids Euler's formula and the Jordan curve
+theorem.
 -/
 
 open PlaneConvex
@@ -204,58 +208,6 @@ theorem ft_isConvexDisk_of_congruent {K A : Set (Fin 2 → ℝ)} (hK : IsConvexD
   obtain ⟨x, hx⟩ := hK.2.2
   exact (Measure.measure_pos_of_nonempty_interior _ ⟨x, hx⟩).ne'
 
-/-! ### Fejes Tóth's cell lemma -/
-
-/-- **Fejes Tóth's cell lemma** (L. Fejes Tóth 1950; Böröczky 2003, Lemma 5). Let
-`Q = ⋂_{j < m} {⟨b j, x⟩ ≤ d j}` be a bounded convex polygon and `K₀, …, K_{n-1}`, `n ≥ 1`,
-pairwise non-overlapping convex disks in `Q`. Then there are convex polygons
-`C i = ⋂_{l < s i} {⟨a i l, x⟩ ≤ c i l}` with `K i ⊆ C i ⊆ Q`, pairwise non-overlapping, such that
-`∑ s i ≤ 6n + m - 6`.
-
-This is left as `sorry`: it is the planar-topology core of Fejes Tóth's theorem. The argument, as
-three lemmas to be formalized:
-
-(A) *A maximal family of cells.* For `i ≠ j` let `H_ij ⊇ K_i`, `H_ji ⊇ K_j` be the two closed
-half-planes of a line separating `K_i` and `K_j` (Hahn–Banach, `geometric_hahn_banach_open_open`
-on the interiors, then closures), and `P_i = Q ∩ ⋂_{j ≠ i} H_ij`; the `P_i` are non-overlapping
-convex polygons, and every family of non-overlapping convex sets `K_i ⊆ Φ_i ⊆ Q` is dominated by one
-of this form. The lines range over a compact set and `∑ |P_i|` is continuous in them (dominated
-convergence: the indicators converge off the lines), so a family of maximal total area exists.
-
-(B) *Holes are pinwheels* (Böröczky's Lemma 5). At a maximum, the closure of each component of
-`Q \ ⋃ P_i` is a convex polygon `R` in the interior of `Q`, each side of which lies on a side of a
-cell, and each corner `v` of which is a corner of the cell carrying the next side and lies in the
-relative interior of the side of the cell carrying the previous one; otherwise the line carrying
-a side of `R` could be rotated or moved about an endpoint so as to enlarge a cell, contradicting
-maximality. In particular the cells cover `∂Q`.
-
-(C) *The count* `∑ s_i ≤ 6n + m - 6`, by Euler's formula for the cell complex obtained by
-shrinking each hole to a point (Böröczky's Proposition 4), or, avoiding Euler's formula, by angles:
-the interior angles of a convex `s`-gon sum to `(s - 2)π` (with the normals sorted by angle, the
-exterior angles are the gaps between consecutive normals, which sum to `2π`), so
-`∑_i (s_i - 2)π = ∑_p A_p` where `A_p` is the sum of the angles of the cell corners at the point
-`p`, `c_p` their number. Locally (`area (C ∩ B(p, ε)) = θ_p(C) ε²/2` for small `ε`, and the cells
-do not overlap) `A_p = 2π` with `c_p ≥ 3`, or `A_p = π` with `c_p ≥ 2` (when `p` is interior to a
-side of a cell or of `Q`), or `A_p` is the angle of `Q` at its corner `p`, except at the corners
-of holes, where (B) gives a total of `2π` over at least three cell corners per hole. Hence
-`A_p ≤ (2/3)π c_p` outside the corners of `Q` (grouping the corners of each hole) and
-`∑ (s_i - 2)π ≤ (2/3)π (∑ s_i - m) + (m - 2)π`, which is the claim.
-
-Infrastructure: separation of convex bodies; compactness and continuity for (A); the local
-structure of convex polygons at a point (sectors) and the angle sum for (C); a perturbation
-argument for (B). Estimated size: (A) about 600 lines, (B) about 1500, (C) about 1500. -/
-theorem ft_cell_decomposition {m n : ℕ} (hn : 1 ≤ n) (b : Fin m → Fin 2 → ℝ) (d : Fin m → ℝ)
-    (hQ : Bornology.IsBounded (halfPlanesInter b d)) (Ks : Fin n → Set (Fin 2 → ℝ))
-    (hKs : ∀ i, IsConvexDisk (Ks i)) (hsub : ∀ i, Ks i ⊆ halfPlanesInter b d)
-    (hdisj : Pairwise fun i j ↦ Disjoint (interior (Ks i)) (interior (Ks j))) :
-    ∃ (s : Fin n → ℕ) (a : ∀ i, Fin (s i) → Fin 2 → ℝ) (c : ∀ i, Fin (s i) → ℝ),
-      (∀ i, 3 ≤ s i) ∧ (∀ i, Ks i ⊆ halfPlanesInter (a i) (c i)) ∧
-      (∀ i, halfPlanesInter (a i) (c i) ⊆ halfPlanesInter b d) ∧
-      (Pairwise fun i j ↦ Disjoint (interior (halfPlanesInter (a i) (c i)))
-        (interior (halfPlanesInter (a j) (c j)))) ∧
-      ∑ i, s i + 6 ≤ 6 * n + m := by
-  sorry
-
 /-! ### Fejes Tóth's inequality -/
 
 /-- **Fejes Tóth's inequality.** If `n` congruent copies of a convex disk `K` are packed in a
@@ -278,7 +230,7 @@ theorem ft_card_mul_le_volume {K : Set (Fin 2 → ℝ)} (hK : IsConvexDisk K) {m
     intro i j hij
     refine hpack (e i).2 (e j).2 fun h ↦ hij (e.injective (Subtype.ext h))
   obtain ⟨s, a, c, hs3, hKC, hCQ, hCdisj, hcount⟩ :=
-    ft_cell_decomposition hn b d hQ Ks hKs hsub hdisj
+    exists_cell_decomposition hn b d hQ Ks hKs hsub hdisj
   have harea : ∀ i, minCircumscribedArea K (s i) ≤ volume (halfPlanesInter (a i) (c i)) := by
     intro i
     rw [← ft_minCircumscribedArea_of_congruent (hF _ (e i).2)]
