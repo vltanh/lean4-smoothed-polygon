@@ -7,10 +7,11 @@ public import SmoothedPolygons.Ch2.Reinhardt
 
 The book's Lemma 2.2.1 claims that every lattice packing `K + L` of a centrally symmetric convex
 disk is realized inside a lattice *tiling* by a parallelogram or centrally symmetric hexagon
-`H ⊇ K`. This file proves the negation of that statement (`lemma2_2_1_false_as_printed`) with the
-"pinwheel" packing of the parallelogram `K = {y | |2y₀ + y₁| ≤ 1, |2y₁ - y₀| ≤ 1}` by `L = ℤ²`.
-The corrected Lemma 2.2.1 (`SmoothedPolygons.lemma2_2_1`, Reinhardt's lemma in its classical form)
-concludes that the translates `H + L` form a packing.
+`H ⊇ K`. This file refutes that statement (`lemma2_2_1_false_as_printed`) with the "pinwheel"
+packing of the parallelogram `K = {y | |2y₀ + y₁| ≤ 1, |2y₁ - y₀| ≤ 1}` by `L = ℤ²`: no convex set
+`H ⊇ K` whatsoever (centred at the origin or not) tiles the plane with `L`. The corrected
+Lemma 2.2.1 (`SmoothedPolygons.lemma2_2_1`, Reinhardt's lemma in its classical form) concludes that
+the translates `H + L` form a packing.
 -/
 
 @[expose] public section
@@ -183,23 +184,14 @@ lemma tile_ce_convex_of_shape {H : Set (Fin 2 → ℝ)}
   · exact (rein_parallelogram_convex_compact u v).1
   · exact convex_convexHull ℝ _
 
-/-- **Lemma 2.2.1 as printed is false.** The book's Lemma 2.2.1 (`lem:reinhardt-tiling`) states
-that a lattice packing `K + L` of a centrally symmetric convex disk is realized by placing `K` in
-a parallelogram or centrally symmetric hexagon `H` whose `L`-translates tile the plane. For
-`L = ℤ²` and the parallelogram `K = {y | |2y₀ + y₁| ≤ 1, |2y₁ - y₀| ≤ 1}` (area `4/5`), `K + L` is
-a ("pinwheel") lattice packing, but no convex `H ⊇ K` tiles with `L`: the half-lattice points
-`(±1/2, 0)`, `(0, ±1/2)` lie in the relative interiors of the edges of `K`, so `H` keeps them on
-its boundary with the support lines of `K` (`tile_ce_not_mem_interior`, `tile_ce_support`), hence
-`H ⊆ K`, while `(1/2, 1/2)` is not covered by `K + L`. The corrected Lemma 2.2.1 (`lemma2_2_1`)
-concludes that the translates of `H` pack. -/
-theorem lemma2_2_1_false_as_printed :
-    ¬ ∀ (K : Set (Fin 2 → ℝ)), IsCCSDisk K → ∀ (L : Submodule ℤ (Fin 2 → ℝ)), IsPlaneLattice L →
-      IsLatticePacking K L →
-      ∃ H, (IsCSParallelogram H ∨ ∃ v, IsCSHexagon v ∧ H = hexagonOf v) ∧ K ⊆ H ∧
-        IsLatticeTiling H L := by
-  intro h
-  obtain ⟨H, hHt, hKH, hT⟩ := h tile_ceK tile_ce_hK tile_ceL tile_ce_hL tile_ce_hKL
-  have hH := tile_ce_convex_of_shape hHt
+/-- No convex set `H ⊇ tile_ceK` tiles the plane with `tile_ceL = ℤ²`: the half-lattice points
+`(±1/2, 0)`, `(0, ±1/2)` lie in the relative interiors of the edges of `K = tile_ceK`, and the
+translates `H` and `H + 2x₀` pack, so `H` keeps them on its boundary
+(`tile_ce_not_mem_interior`, which uses only `-x₀ ∈ K ⊆ H`) with the support lines of `K`
+(`tile_ce_support`); hence `H ⊆ K`, while `(1/2, 1/2)` is not covered by `K + L`. -/
+lemma tile_ce_no_convex_tile {H : Set (Fin 2 → ℝ)} (hH : Convex ℝ H) (hKH : tile_ceK ⊆ H) :
+    ¬ IsLatticeTiling H tile_ceL := by
+  intro hT
   have h0 : (0 : Fin 2 → ℝ) ∈ interior H := interior_mono hKH tile_ce_zero_mem_interior_K
   have hmemK : ∀ x : Fin 2 → ℝ, |2 * x 0 + x 1| ≤ 1 → |2 * x 1 - x 0| ≤ 1 → x ∈ H :=
     fun x h1 h2 ↦ hKH ⟨h1, h2⟩
@@ -292,5 +284,33 @@ theorem lemma2_2_1_false_as_printed :
   have d3 : 1 - 4 * n + 2 * m ≤ 2 := by exact_mod_cast c3
   have d4 : 1 - 4 * n + 2 * m ≥ -2 := by exact_mod_cast c4
   omega
+
+/-- **Lemma 2.2.1 as printed is false.** The book's Lemma 2.2.1 (`lem:reinhardt-tiling`) states
+that a lattice packing `K + L` of a centrally symmetric convex disk is realized by placing `K` in
+an appropriate parallelogram or centrally symmetric convex hexagon `H` whose `L`-translates tile
+the plane. For `L = ℤ²` and the parallelogram `K = {y | |2y₀ + y₁| ≤ 1, |2y₁ - y₀| ≤ 1}` (area
+`4/5`), `K + L` is a ("pinwheel") lattice packing, but no convex `H ⊇ K` at all tiles with `L`
+(`tile_ce_no_convex_tile`). This refutes the printed statement however its tile is read: the
+book does not say that `H` is centred at the origin, and a parallelogram or a hexagon in any
+position is convex, as is every translate `H + t ⊇ K` of a tile `H` (which tiles with `L` too).
+The corrected Lemma 2.2.1 (`lemma2_2_1`) concludes that the translates of `H` pack. -/
+theorem lemma2_2_1_false_as_printed :
+    ∃ K : Set (Fin 2 → ℝ), IsCCSDisk K ∧ ∃ L : Submodule ℤ (Fin 2 → ℝ), IsPlaneLattice L ∧
+      IsLatticePacking K L ∧ ∀ H : Set (Fin 2 → ℝ), Convex ℝ H → K ⊆ H → ¬ IsLatticeTiling H L :=
+  ⟨tile_ceK, tile_ce_hK, tile_ceL, tile_ce_hL, tile_ce_hKL, fun _ hH hKH ↦
+    tile_ce_no_convex_tile hH hKH⟩
+
+/-- Lemma 2.2.1 as printed is false, in the form of the corrected `lemma2_2_1` (a parallelogram or
+centrally symmetric hexagon `H` centred at the origin) with the book's tiling conclusion: a
+corollary of `lemma2_2_1_false_as_printed`. -/
+theorem tile_lemma2_2_1_false_centred :
+    ¬ ∀ (K : Set (Fin 2 → ℝ)), IsCCSDisk K → ∀ (L : Submodule ℤ (Fin 2 → ℝ)), IsPlaneLattice L →
+      IsLatticePacking K L →
+      ∃ H, (IsCSParallelogram H ∨ ∃ v, IsCSHexagon v ∧ H = hexagonOf v) ∧ K ⊆ H ∧
+        IsLatticeTiling H L := by
+  intro h
+  obtain ⟨K, hK, L, hL, hKL, hno⟩ := lemma2_2_1_false_as_printed
+  obtain ⟨H, hHt, hKH, hT⟩ := h K hK L hL hKL
+  exact hno H (tile_ce_convex_of_shape hHt) hKH hT
 
 end SmoothedPolygons

@@ -2040,9 +2040,10 @@ and the parallelogram `K = {y | |2y₀ + y₁| ≤ 1, |2y₁ - y₀| ≤ 1}` (ar
 `K + L` pack, and the half-lattice points `(±1/2, 0)`, `(0, ±1/2)` lie in the relative interiors
 of the four edges of `K`; so every convex `H ⊇ K` whose `L`-translates pack keeps them on its
 boundary with the same support lines, hence `H ⊆ K`, while `(1/2, 1/2)` is not covered by
-`K + L` (`lemma2_2_1_false_as_printed` in `SmoothedPolygons.Ch2.TilingCounterexample`). The
-corrected statement is the classical form of Reinhardt's lemma, and it is all that Theorem 2.2.2
-uses (`det(L) ≥ area(H_K)` for every packing lattice).
+`K + L`: no convex `H ⊇ K`, centred at the origin or not, tiles with `L`
+(`lemma2_2_1_false_as_printed` in `SmoothedPolygons.Ch2.TilingCounterexample`). The corrected
+statement is the classical form of Reinhardt's lemma, and it is all that Theorem 2.2.2 uses
+(`area(H) ≤ det(L)` for the lattice `L` that realizes `δ_L(K)`).
 
 Departure from the paper: the book's argument (expand `K`, separate touching translates by lines,
 crop, repeat until the plane is tiled; at most six edges by an Euler characteristic count) is an
@@ -2076,45 +2077,76 @@ parallelogram, then its packing density is `δ(K) = area(K)/area(H_K)`, where `H
 symmetric hexagon of least area circumscribing `K`. The statement includes that such a hexagon
 exists.
 
-Departure from the paper: the book takes a lattice `L` attaining `δ_L(K)`, which it does not
-justify. Here a least-area hexagon `H_K` is shown to exist by compactness (`rein_exists_least`;
-a degenerate limit is a parallelogram, whose corners are clipped), every packing lattice has
-`det(L) ≥ area(H_K)` by Lemma 2.2.1 and Blichfeldt's bound `area(H) ≤ det(L)` for a packing
-`H + L` (`rein_volume_le_latticeDet`; a parallelogram is clipped, `rein_parallelogram_clip`),
-and the lattice tiling by `H_K` attains `area(K)/area(H_K)` (`rein_hex_lattice`); so the supremum
-is attained, by the lattice of `H_K`. -/
+The proof is the book's. By Fejes Tóth (Theorem 2.1.3), `δ(K) = δ_L(K)`. Let `L` be a lattice
+that realizes `δ_L(K)`. By Lemma 2.2.1 the packing `K + L` comes from a parallelogram or a
+centrally symmetric hexagon `H ⊇ K` whose translates `H + L` pack, so `area(H) ≤ det(L)`
+(`rein_volume_le_latticeDet`). Every centrally symmetric hexagon `H' ⊇ K` tiles
+(`rein_hex_lattice`); the lattice packing of `K` that it gives has density
+`area(K)/area(H') ≤ δ_L(K) = area(K)/det(L)`, so `det(L) ≤ area(H')`. Hence `H` is not a
+parallelogram (its corners could be clipped to a smaller hexagon containing `K`, as the book
+remarks before the theorem: `rein_parallelogram_clip`), `H` is a hexagon `H_K` of least area (so
+one exists), and every least-area `H_K` has `det(L) ≤ area(H_K) ≤ area(H) ≤ det(L)`, so the
+density of `K + L` is `δ(K) = area(K)/area(H_K)`.
+
+Gap filled: the book does not justify that some lattice `L` realizes `δ_L(K)`. Twice a critical
+lattice `Λ` of `K` (Mahler's compactness theorem gives one, `irr_exists_packing`) does: `K + 2Λ` is
+a packing of determinant `4Δ(K)`, and `δ_L(K) = area(K)/(4Δ(K))` (`irr_glpd_eq`). -/
 theorem theorem2_2_2 {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) (hpar : ¬ IsParallelogram K) :
     (∃ v, IsLeastAreaHexagon K v) ∧
       ∀ v, IsLeastAreaHexagon K v →
         greatestPackingDensity K = volume.real K / volume.real (hexagonOf v) := by
   have hnp := rein_hnp_of_not_isParallelogram hK hpar
-  refine ⟨rein_exists_least hK hnp, fun v hv ↦ ?_⟩
-  -- by Fejes Tóth, `δ(K) = δ_L(K)`
-  rw [theorem2_1_3 hK, greatestLatticePackingDensity]
   have hKc : IsConvexDisk K := ⟨hK.1, hK.2.1, hK.2.2.1⟩
-  have hvpos : 0 < volume.real (hexagonOf v) := lt_of_lt_of_le (rein_volume_real_pos hK)
-    (measureReal_mono hv.2.1 (rein_isCompact_hexagonOf v).measure_lt_top.ne)
-  -- every lattice packing of `K` is obtained by tiling with a parallelogram or a centrally
-  -- symmetric hexagon (Lemma 2.2.1), whose area `det(L)` is at least `area(H_K)`
-  have hle : ∀ L, IsPlaneLattice L → IsLatticePacking K L →
-      volume.real (hexagonOf v) ≤ latticeDet L := by
-    intro L hL hKL
-    obtain ⟨H, hHt, hKH, hT⟩ := lemma2_2_1 hK hL hKL
-    rcases hHt with hpar' | ⟨w, hw, rfl⟩
-    · obtain ⟨w, hw, hKw, hlt⟩ := rein_parallelogram_clip hK hnp hpar' hKH
-      obtain ⟨u, u', -, rfl⟩ := hpar'
-      have hcc := rein_parallelogram_convex_compact u u'
-      linarith [rein_least_le hv hw hKw, rein_volume_le_latticeDet hcc.1 hL hT]
-    · exact (rein_least_le hv hw hKH).trans
-        (rein_volume_le_latticeDet (convex_convexHull ℝ _) hL hT)
-  -- the hexagonal lattice packing of `H_K` attains `area(K)/area(H_K)`
-  obtain ⟨L0, hL0, hdet0, hpack0⟩ := rein_hex_lattice hv.1
-  have hpackK : IsLatticePacking K L0 := rein_isLatticePacking_mono hv.2.1 hpack0
-  refine IsGreatest.csSup_eq ⟨⟨L0, hL0, hpackK, ?_⟩, ?_⟩
-  · rw [ch2_latticePackingDensity_eq hKc hL0 hpackK, hdet0]
-  · rintro _ ⟨L, hL, hKL, rfl⟩
-    rw [ch2_latticePackingDensity_eq hKc hL hKL]
-    exact div_le_div_of_nonneg_left measureReal_nonneg hvpos (hle L hL hKL)
+  have hKpos := rein_volume_real_pos hK
+  -- by Fejes Tóth (Theorem 2.1.3), `δ(K) = δ_L(K)`
+  rw [theorem2_1_3 hK]
+  -- a lattice `L` that realizes `δ_L(K)`: twice a critical lattice of `K`, of determinant
+  -- `4Δ(K)`, while `δ_L(K) = area(K)/(4Δ(K))`
+  obtain ⟨L, hL, hKL, hdetL⟩ := irr_exists_packing hK
+  have hLpos : 0 < latticeDet L := hKpos.trans_le (rein_volume_le_latticeDet hK.1 hL hKL)
+  have hδ : greatestLatticePackingDensity K = volume.real K / latticeDet L := by
+    rw [irr_glpd_eq hK, hdetL]
+  -- by Lemma 2.2.1, `K` lies in a parallelogram or a centrally symmetric hexagon `H` whose
+  -- translates `H + L` pack (so `area(H) ≤ det(L)`)
+  obtain ⟨H, hHt, hKH, hHL⟩ := lemma2_2_1 hK hL hKL
+  -- every centrally symmetric hexagon `H' ⊇ K` tiles, and the lattice packing of `K` it gives
+  -- has density `area(K)/area(H') ≤ δ_L(K) = area(K)/det(L)`: so `det(L) ≤ area(H')`
+  have hbdd : BddAbove
+      {d | ∃ L, IsPlaneLattice L ∧ IsLatticePacking K L ∧ latticePackingDensity K L = d} := by
+    refine ⟨1, ?_⟩
+    rintro _ ⟨L', hL', hKL', rfl⟩
+    have h := rein_volume_le_latticeDet hK.1 hL' hKL'
+    rw [ch2_latticePackingDensity_eq hKc hL' hKL']
+    exact div_le_one_of_le₀ h (measureReal_nonneg.trans h)
+  have hmin : ∀ w, IsCSHexagon w → K ⊆ hexagonOf w →
+      latticeDet L ≤ volume.real (hexagonOf w) := by
+    intro w hw hKw
+    obtain ⟨L', hL', hdet', hpack'⟩ := rein_hex_lattice hw
+    have hKL' := rein_isLatticePacking_mono hKw hpack'
+    have h1 : latticePackingDensity K L' ≤ greatestLatticePackingDensity K :=
+      le_csSup hbdd ⟨L', hL', hKL', rfl⟩
+    rw [ch2_latticePackingDensity_eq hKc hL' hKL', hdet', hδ] at h1
+    have hwpos : 0 < volume.real (hexagonOf w) := hKpos.trans_le
+      (measureReal_mono hKw (rein_isCompact_hexagonOf w).measure_lt_top.ne)
+    exact (div_le_div_iff_of_pos_left hKpos hwpos hLpos).1 h1
+  rcases hHt with hHpar | ⟨v, hv, rfl⟩
+  · -- `H` is not a parallelogram: clipping its corners gives a hexagon `H' ⊇ K` with
+    -- `area(H') < area(H) ≤ det(L) ≤ area(H')`
+    exfalso
+    obtain ⟨w, hw, hKw, hlt⟩ := rein_parallelogram_clip hK hnp hHpar hKH
+    obtain ⟨u, u', -, rfl⟩ := hHpar
+    linarith [hmin w hw hKw,
+      rein_volume_le_latticeDet (rein_parallelogram_convex_compact u u').1 hL hHL]
+  -- the hexagon `H` has least area: `area(H) ≤ det(L) ≤ area(H')`
+  have hHdet := rein_volume_le_latticeDet (convex_convexHull ℝ (range v)) hL hHL
+  have hleast : IsLeastAreaHexagon K v := by
+    refine ⟨hv, hKH, fun w hw hKw ↦ ?_⟩
+    exact (ENNReal.toReal_le_toReal (rein_isCompact_hexagonOf v).measure_lt_top.ne
+      (rein_isCompact_hexagonOf w).measure_lt_top.ne).1 (hHdet.trans (hmin w hw hKw))
+  -- for every least-area `H_K`, `det(L) ≤ area(H_K) ≤ area(H) ≤ det(L)`, so the density of
+  -- `K + L` is `area(K)/area(H_K)`
+  refine ⟨⟨v, hleast⟩, fun v' hv' ↦ ?_⟩
+  rw [hδ, le_antisymm (hmin v' hv'.1 hv'.2.1) ((rein_least_le hv' hv hKH).trans hHdet)]
 
 /-! ### Support lines and hyperbolic arcs -/
 
