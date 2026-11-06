@@ -6,6 +6,7 @@ public meta import Lean.DocString
 -- traversal (the module system hides them from a plain `import`). Generate the lines with
 --   find SmoothedPolygons External Basic -name '*.lean' | sort |
 --     sed 's/\.lean$//; s#/#.#g; s/^/import all /'
+import all Basic.Algebra.Module.ZLattice.PlaneCritical
 import all Basic.Analysis.Calculus.MatrixEntrywise
 import all Basic.Analysis.Calculus.MatrixEntrywiseExp
 import all Basic.Analysis.Calculus.MatrixFTC
@@ -32,6 +33,7 @@ import all SmoothedPolygons.Ch2.BalancedCircle
 import all SmoothedPolygons.Ch2.BalancedDensity
 import all SmoothedPolygons.Ch2.Boundary
 import all SmoothedPolygons.Ch2.Density
+import all SmoothedPolygons.Ch2.Hexagon
 import all SmoothedPolygons.Ch2.Mahler
 import all SmoothedPolygons.Ch2.MultiCurve
 import all SmoothedPolygons.Ch2.Reinhardt

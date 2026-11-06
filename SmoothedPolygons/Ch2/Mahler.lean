@@ -1,6 +1,8 @@
 module
 
 public import SmoothedPolygons.Ch2.Reinhardt
+public import SmoothedPolygons.Ch2.Hexagon
+public import Basic.Algebra.Module.ZLattice.PlaneCritical
 public import External.Mahler1947
 public import External.MinkowskiMahler
 public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
@@ -12,8 +14,10 @@ Admissible and critical lattices, the minimal determinant `Δ(K)` and irreducibl
 (Definitions 2.3.1–2.3.5), the theorems of Minkowski and Mahler on critical lattices and
 circumscribed hexagons (Theorems 2.3.6 and 2.3.7, cited), Mahler's critical hexagons
 (Definition 2.3.8), and their relation to Reinhardt's (Theorem 2.3.9, Corollary 2.3.10). The
-proof of Theorem 2.3.9 needs some geometry of centrally symmetric hexagons (their area, their
-description by the lines of their edges, `mm_*`).
+proof of Theorem 2.3.9 needs the existence of a critical lattice (`crit_exists_critical`, Mahler's
+compactness theorem, `Basic.Algebra.Module.ZLattice.PlaneCritical`) and some geometry of
+centrally symmetric hexagons (their area and edge midpoints, `SmoothedPolygons.Ch2.Hexagon`; the
+lines of their edges, `mm_*`, `crit_*`).
 
 Conventions. A support line of a centrally symmetric convex disk `K` at a boundary point does not
 pass through the origin, an interior point of `K`, so it is `{x | a · x = 1}` for a unique vector
@@ -186,437 +190,57 @@ def IsCriticalHexagon (K H : Set (Fin 2 → ℝ)) : Prop :=
 
 /-! ### The proof of Theorem 2.3.9
 
-The hexagon toolkit below (`mm_hex`, `mm_mem_hexagonOf_iff`, `mm_volume_hexagonOf`, …) is a copy
-of the one of `SmoothedPolygons/Ch2/BalancedDensity.lean` (`bal_hex`, `bal_mem_hexagonOf_iff`,
-`ch2_volume_hexagonOf`, …), which is downstream of this file; the two can be merged once the
-toolkit is moved upstream. -/
+The proof compares a least-area hexagon `H_K` with the critical hexagon of a critical lattice of
+`K`. That a critical lattice exists is Mahler's compactness theorem in the plane
+(`crit_exists_critical`, from `PlaneLattice.exists_admissible_covolume_le`), which the book does
+not state. The comparison uses the geometry of centrally symmetric hexagons: their area and the
+position of the edge midpoints of a least-area hexagon (`SmoothedPolygons.Ch2.Hexagon`), and the
+lines of their edges (below). -/
 
-/-- The edge midpoints of a centrally symmetric hexagon satisfy `m₁ - m₀ = m₂`. -/
-lemma mm_hexMidpoint_sub {v : ZMod 6 → Fin 2 → ℝ} (hv : IsCSHexagon v) :
-    hexMidpoint v 1 - hexMidpoint v 0 = hexMidpoint v 2 := by
-  have h3 : v 3 = -v 0 := by simpa using (hv 0).1
-  have h21 : (2 : ZMod 6) + 1 = 3 := by decide
-  have h11 : (1 : ZMod 6) + 1 = 2 := by decide
-  simp only [hexMidpoint, midpoint_eq_smul_add, h21, h11, zero_add, h3]
-  ext i
-  simp only [Pi.sub_apply, Pi.smul_apply, Pi.add_apply, Pi.neg_apply, smul_eq_mul]
-  ring
-
-/-- The edge midpoints of a centrally symmetric hexagon turn counterclockwise:
-`det(m₀, m₁) > 0`. -/
-lemma mm_det2_hexMidpoint_pos {v : ZMod 6 → Fin 2 → ℝ} (hv : IsCSHexagon v) :
-    0 < det2 (hexMidpoint v 0) (hexMidpoint v 1) := by
-  have h3 : v 3 = -v 0 := by simpa using (hv 0).1
-  have h01 := (hv 0).2.1
-  have h12 := (hv 1).2.1
-  have h23 := (hv 2).2.1
-  have h21 : (2 : ZMod 6) + 1 = 3 := by decide
-  have h11 : (1 : ZMod 6) + 1 = 2 := by decide
-  simp only [zero_add, h11, h21, h3] at h01 h12 h23
-  simp only [hexMidpoint, midpoint_eq_smul_add, zero_add, h11]
-  simp only [det2, Pi.smul_apply, Pi.add_apply, Pi.neg_apply, smul_eq_mul, invOf_eq_inv] at *
-  nlinarith [h01, h12, h23]
-
-/-! ### Triangles and their areas -/
-
-/-- The standard triangle `{p | 0 ≤ p₀, 0 ≤ p₁, p₀ + p₁ ≤ 1}`. -/
-def mm_stdTri : Set (Fin 2 → ℝ) := {p | 0 ≤ p 0 ∧ 0 ≤ p 1 ∧ p 0 + p 1 ≤ 1}
-
-/-- The linear map `p ↦ p₀ u + p₁ w`. -/
-noncomputable def mm_lin (u w : Fin 2 → ℝ) : (Fin 2 → ℝ) →ₗ[ℝ] (Fin 2 → ℝ) :=
-  Matrix.toLin' !![u 0, w 0; u 1, w 1]
-
-lemma mm_lin_apply (u w p : Fin 2 → ℝ) : mm_lin u w p = p 0 • u + p 1 • w := by
-  ext i
-  fin_cases i <;> simp [mm_lin, Matrix.mulVec, dotProduct, Fin.sum_univ_two] <;> ring
-
-lemma mm_det_lin (u w : Fin 2 → ℝ) : LinearMap.det (mm_lin u w) = det2 u w := by
-  rw [mm_lin, LinearMap.det_toLin', Matrix.det_fin_two_of, det2]
-  ring
-
-/-- The triangle with vertices `0, u, w`. -/
-noncomputable def mm_tri (u w : Fin 2 → ℝ) : Set (Fin 2 → ℝ) := mm_lin u w '' mm_stdTri
-
-/-- The points of `[0, u, w]` are the combinations `s u + t w`, `s, t ≥ 0`, `s + t ≤ 1`. -/
-lemma mm_mem_tri {u w x : Fin 2 → ℝ} :
-    x ∈ mm_tri u w ↔ ∃ s t : ℝ, 0 ≤ s ∧ 0 ≤ t ∧ s + t ≤ 1 ∧ x = s • u + t • w := by
-  constructor
-  · rintro ⟨p, ⟨h0, h1, h2⟩, rfl⟩
-    exact ⟨p 0, p 1, h0, h1, h2, mm_lin_apply ..⟩
-  · rintro ⟨s, t, hs, ht, hst, rfl⟩
-    refine ⟨![s, t], ⟨hs, ht, hst⟩, ?_⟩
-    rw [mm_lin_apply]
+/-- **Existence of critical lattices.** Every `K ∈ 𝔎_ccs` has a critical lattice: the infimum
+`Δ(K)` of Definition 2.3.3 is attained. The book uses a critical lattice of `K` in the proof of
+Theorem 2.3.9 without showing that one exists. This is Mahler's compactness theorem in the plane
+(`PlaneLattice.exists_admissible_covolume_le`, for the open set `interior K`); the lattice
+`R ℤ²` is admissible when `K` lies in the square `|x₀|, |x₁| < R`. -/
+lemma crit_exists_critical {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) :
+    ∃ L, IsCriticalLattice K L := by
+  -- an admissible lattice: `R ℤ²` with `K` inside the square `|x₀|, |x₁| < R`
+  obtain ⟨R₀, hR₀⟩ := hK.2.1.isBounded.subset_closedBall 0
+  set R := |R₀| + 1 with hRdef
+  have hR : 0 < R := by positivity
+  have hdet : (![R, 0] : Fin 2 → ℝ) 0 * (![0, R] : Fin 2 → ℝ) 1 -
+      (![R, 0] : Fin 2 → ℝ) 1 * (![0, R] : Fin 2 → ℝ) 0 ≠ 0 := by
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, mul_zero, sub_zero]
+    positivity
+  obtain ⟨hd₀, hs₀⟩ := PlaneLattice.discreteTopology_span_pair hdet
+  have hint : ∀ m : ℤ, |(m : ℝ) * R| ≤ R₀ → m = 0 := by
+    intro m hm
+    rw [abs_mul, abs_of_pos hR] at hm
+    have h1 : |(m : ℝ)| < 1 := by
+      by_contra h
+      push Not at h
+      have := mul_le_mul_of_nonneg_right h hR.le
+      linarith [le_abs_self R₀]
+    exact Int.abs_lt_one_iff.1 (by exact_mod_cast h1)
+  have hadm₀ : IsAdmissible K (Submodule.span ℤ {![R, 0], ![0, R]}) := by
+    intro x hx hxK
+    obtain ⟨m, n, rfl⟩ := PlaneLattice.mem_span_pair_iff.1 hx
+    have hxb := hR₀ (interior_subset hxK)
+    rw [mem_closedBall_zero_iff] at hxb
+    have h0 := (norm_le_pi_norm _ 0).trans hxb
+    have h1 := (norm_le_pi_norm _ 1).trans hxb
+    simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, Matrix.cons_val_zero,
+      Matrix.cons_val_one, mul_zero, add_zero, zero_add, Real.norm_eq_abs] at h0 h1
+    rw [hint m h0, hint n h1]
     simp
-
-lemma mm_isCompact_stdTri : IsCompact mm_stdTri := by
-  refine (isCompact_Icc (a := (0 : Fin 2 → ℝ)) (b := 1)).of_isClosed_subset ?_ ?_
-  · have h0 : Continuous fun p : Fin 2 → ℝ ↦ p 0 := continuous_apply 0
-    have h1 : Continuous fun p : Fin 2 → ℝ ↦ p 1 := continuous_apply 1
-    exact (isClosed_le continuous_const h0).inter
-      ((isClosed_le continuous_const h1).inter (isClosed_le (h0.add h1) continuous_const))
-  · rintro p ⟨h0, h1, h2⟩
-    refine ⟨fun i ↦ ?_, fun i ↦ ?_⟩ <;> fin_cases i <;> simp <;> linarith
-
-lemma mm_isCompact_tri (u w : Fin 2 → ℝ) : IsCompact (mm_tri u w) :=
-  mm_isCompact_stdTri.image (mm_lin u w).continuous_of_finiteDimensional
-
-/-- The triangle `[0, u, w]` lies in every convex set containing `0, u, w`. -/
-lemma mm_tri_subset {S : Set (Fin 2 → ℝ)} (hS : Convex ℝ S) {u w : Fin 2 → ℝ} (h0 : 0 ∈ S)
-    (hu : u ∈ S) (hw : w ∈ S) : mm_tri u w ⊆ S := by
-  intro x hx
-  obtain ⟨s, t, hs, ht, hst, rfl⟩ := mm_mem_tri.1 hx
-  have := hS.sum_mem (t := Finset.univ) (w := ![1 - s - t, s, t]) (z := ![0, u, w])
-    (fun i _ ↦ by fin_cases i <;> simp <;> linarith) (by simp [Fin.sum_univ_three]; ring)
-    (fun i _ ↦ by fin_cases i <;> simpa)
-  simpa [Fin.sum_univ_three] using this
-
-/-- A line through the origin is a null set. -/
-lemma mm_volume_line {u : Fin 2 → ℝ} (hu : u ≠ 0) : volume {x : Fin 2 → ℝ | det2 u x = 0} = 0 := by
-  let L : (Fin 2 → ℝ) →ₗ[ℝ] ℝ := u 0 • LinearMap.proj 1 - u 1 • LinearMap.proj 0
-  have hL : {x : Fin 2 → ℝ | det2 u x = 0} = (LinearMap.ker L : Set (Fin 2 → ℝ)) := by
-    ext x
-    simp [L, det2, mul_comm]
-  rw [hL]
-  refine Measure.addHaar_submodule _ _ fun h ↦ hu ?_
-  have h' : L ![-u 1, u 0] = 0 := by
-    rw [← LinearMap.mem_ker, h]
-    trivial
-  simp [L] at h'
-  ext i
-  fin_cases i <;> simp <;> nlinarith [sq_nonneg (u 0), sq_nonneg (u 1)]
-
-lemma mm_volume_tri_eq (u w : Fin 2 → ℝ) :
-    volume (mm_tri u w) = ENNReal.ofReal |det2 u w| * volume mm_stdTri := by
-  rw [mm_tri, Measure.addHaar_image_linearMap, mm_det_lin]
-
-/-- The standard triangle has area `1/2`: the unit square is the union of the triangles
-`[0, e₀, e₀ + e₁]` and `[0, e₀ + e₁, e₁]`, both linear images of it with determinant `±1`, which
-meet in the diagonal. -/
-lemma mm_volume_stdTri : volume mm_stdTri = ENNReal.ofReal (1 / 2) := by
-  have hsq : Icc (0 : Fin 2 → ℝ) 1 = mm_tri ![1, 0] ![1, 1] ∪ mm_tri ![1, 1] ![0, 1] := by
-    ext x
-    simp only [mem_Icc, mem_union, mm_mem_tri]
-    constructor
-    · rintro ⟨h0, h1⟩
-      have h00 := h0 0; have h01 := h0 1; have h10 := h1 0; have h11 := h1 1
-      simp only [Pi.zero_apply, Pi.one_apply] at h00 h01 h10 h11
-      rcases le_total (x 1) (x 0) with h | h
-      · left
-        refine ⟨x 0 - x 1, x 1, by linarith, h01, by linarith, ?_⟩
-        ext i; fin_cases i <;> simp
-      · right
-        refine ⟨x 0, x 1 - x 0, h00, by linarith, by linarith, ?_⟩
-        ext i; fin_cases i <;> simp
-    · rintro (⟨s, t, hs, ht, hst, rfl⟩ | ⟨s, t, hs, ht, hst, rfl⟩) <;>
-        refine ⟨fun i ↦ ?_, fun i ↦ ?_⟩ <;> fin_cases i <;> simp <;> linarith
-  have hdisj : AEDisjoint volume (mm_tri ![1, 0] ![1, 1]) (mm_tri ![1, 1] ![0, 1]) := by
-    refine measure_mono_null (fun x ⟨h1, h2⟩ ↦ ?_) (mm_volume_line (u := ![1, 1]) ?_)
-    · obtain ⟨s, t, hs, ht, -, rfl⟩ := mm_mem_tri.1 h1
-      obtain ⟨s', t', hs', ht', -, h⟩ := mm_mem_tri.1 h2
-      have e0 := congrFun h 0
-      have e1 := congrFun h 1
-      simp at e0 e1
-      simp [det2]
-      linarith
-    · intro h
-      simpa using congrFun h 0
-  have hvol := Real.volume_Icc_pi (a := (0 : Fin 2 → ℝ)) (b := 1)
-  rw [hsq, measure_union₀ (mm_isCompact_tri _ _).measurableSet.nullMeasurableSet hdisj,
-    mm_volume_tri_eq, mm_volume_tri_eq] at hvol
-  have d1 : det2 ![1, 0] ![1, 1] = 1 := by simp [det2]
-  have d2 : det2 ![1, 1] ![0, 1] = 1 := by simp [det2]
-  have hprod : ∏ i : Fin 2, ENNReal.ofReal ((1 : Fin 2 → ℝ) i - (0 : Fin 2 → ℝ) i) = 1 := by
-    simp
-  rw [d1, d2, abs_one, ENNReal.ofReal_one, one_mul, hprod] at hvol
-  have hfin : volume mm_stdTri ≠ ⊤ := by
-    intro h; rw [h] at hvol; simp at hvol
-  have := congrArg ENNReal.toReal hvol
-  rw [ENNReal.toReal_add hfin hfin, ENNReal.toReal_one] at this
-  rw [← ENNReal.ofReal_toReal hfin]
-  congr 1
-  linarith
-
-/-- The area of the triangle `[0, u, w]` is `|det(u, w)|/2`. -/
-lemma mm_volume_tri (u w : Fin 2 → ℝ) :
-    volume (mm_tri u w) = ENNReal.ofReal (|det2 u w| / 2) := by
-  rw [mm_volume_tri_eq, mm_volume_stdTri, ← ENNReal.ofReal_mul (abs_nonneg _)]
-  ring_nf
-
-/-- A point of the angle from `u` to `w` (counterclockwise), on the side of `0` of the line
-through `u` and `w`, lies in the triangle `[0, u, w]`. -/
-lemma mm_mem_tri_of {u w x : Fin 2 → ℝ} (hD : 0 < det2 u w) (h1 : 0 ≤ det2 u x)
-    (h2 : det2 w x ≤ 0) (h3 : det2 (u - w) x ≤ det2 u w) : x ∈ mm_tri u w := by
-  rw [mm_mem_tri]
-  refine ⟨-det2 w x / det2 u w, det2 u x / det2 u w, div_nonneg (by linarith) hD.le,
-    div_nonneg h1 hD.le, ?_, ?_⟩
-  · rw [← add_div, div_le_one hD]
-    have : det2 (u - w) x = det2 u x - det2 w x := by simp [det2]; ring
-    linarith
-  · ext i
-    have hD0 : det2 u w ≠ 0 := hD.ne'
-    fin_cases i <;> simp <;> field_simp <;> simp only [det2] <;> ring
-
-/-- A linear functional `det(y, ·)` that has the sign `ε` at `u` and `w` has the sign `ε` on the
-triangle `[0, u, w]`. -/
-lemma mm_cone_sign {u w x y : Fin 2 → ℝ} {ε : ℝ} (hx : x ∈ mm_tri u w)
-    (hu : 0 ≤ ε * det2 y u) (hw : 0 ≤ ε * det2 y w) : 0 ≤ ε * det2 y x := by
-  obtain ⟨s, t, hs, ht, -, rfl⟩ := mm_mem_tri.1 hx
-  have : ε * det2 y (s • u + t • w) = s * (ε * det2 y u) + t * (ε * det2 y w) := by
-    simp [det2]; ring
-  rw [this]
-  positivity
-
-/-! ### Centrally symmetric hexagons -/
-
-/-- The centrally symmetric hexagon with vertices `a, b, c, -a, -b, -c`. -/
-def mm_hex (a b c : Fin 2 → ℝ) : ZMod 6 → Fin 2 → ℝ :=
-  fun k ↦ (![a, b, c, -a, -b, -c] : Fin 6 → Fin 2 → ℝ) k
-
-/-- The six elements of `ℤ/6ℤ`. -/
-lemma mm_cases (k : ZMod 6) : k = 0 ∨ k = 1 ∨ k = 2 ∨ k = 3 ∨ k = 4 ∨ k = 5 := by
-  revert k; decide
-
-section mm_Hex
-
-variable {a b c x : Fin 2 → ℝ}
-
-lemma mm_hex_zero : mm_hex a b c 0 = a := rfl
-lemma mm_hex_one : mm_hex a b c 1 = b := rfl
-lemma mm_hex_two : mm_hex a b c 2 = c := rfl
-lemma mm_hex_three : mm_hex a b c 3 = -a := rfl
-lemma mm_hex_four : mm_hex a b c 4 = -b := rfl
-lemma mm_hex_five : mm_hex a b c 5 = -c := rfl
-
-/-- Additions of numerals in `ℤ/6ℤ`. -/
-lemma mm_zmod_facts :
-    (0 : ZMod 6) + 1 = 1 ∧ (1 : ZMod 6) + 1 = 2 ∧ (2 : ZMod 6) + 1 = 3 ∧ (3 : ZMod 6) + 1 = 4 ∧
-    (4 : ZMod 6) + 1 = 5 ∧ (5 : ZMod 6) + 1 = 0 ∧ (0 : ZMod 6) + 2 = 2 ∧ (1 : ZMod 6) + 2 = 3 ∧
-    (2 : ZMod 6) + 2 = 4 ∧ (3 : ZMod 6) + 2 = 5 ∧ (4 : ZMod 6) + 2 = 0 ∧ (5 : ZMod 6) + 2 = 1 ∧
-    (0 : ZMod 6) + 3 = 3 ∧ (1 : ZMod 6) + 3 = 4 ∧ (2 : ZMod 6) + 3 = 5 ∧ (3 : ZMod 6) + 3 = 0 ∧
-    (4 : ZMod 6) + 3 = 1 ∧ (5 : ZMod 6) + 3 = 2 := by decide
-
-/-- A centrally symmetric hexagon is `mm_hex (v 0) (v 1) (v 2)`. -/
-lemma mm_eq_hex {v : ZMod 6 → Fin 2 → ℝ} (hv : IsCSHexagon v) : v = mm_hex (v 0) (v 1) (v 2) := by
-  obtain ⟨-, -, -, -, -, -, -, -, -, -, -, -, f03, f13, f23, -, -, -⟩ := mm_zmod_facts
-  funext k
-  rcases mm_cases k with rfl | rfl | rfl | rfl | rfl | rfl
-  · rfl
-  · rfl
-  · rfl
-  · have := (hv 0).1; rw [f03] at this; rw [this]; rfl
-  · have := (hv 1).1; rw [f13] at this; rw [this]; rfl
-  · have := (hv 2).1; rw [f23] at this; rw [this]; rfl
-
-/-- The conditions on `a, b, c` that make `mm_hex a b c` a convex hexagon (`IsCSHexagon`). -/
-structure mm_HexCond (a b c : Fin 2 → ℝ) : Prop where
-  hA : 0 < det2 a b
-  hB : 0 < det2 b c
-  hC : 0 < det2 a c
-  h0 : det2 a c < det2 a b + det2 b c
-  h1 : det2 a b < det2 b c + det2 a c
-  h2 : det2 b c < det2 a b + det2 a c
-
-/-- `mm_hex a b c` is a convex hexagon iff `mm_HexCond a b c`. -/
-lemma mm_isCSHexagon_iff : IsCSHexagon (mm_hex a b c) ↔ mm_HexCond a b c := by
-  obtain ⟨f01, f11, f21, f31, f41, f51, f02, f12, f22, f32, f42, f52, f03, f13, f23, f33, f43,
-    f53⟩ := mm_zmod_facts
-  constructor
-  · intro hv
-    have e0 := hv 0
-    have e1 := hv 1
-    have e2 := hv 2
-    simp only [f01, f11, f21, f02, f12, f22, mm_hex_zero, mm_hex_one, mm_hex_two,
-      mm_hex_three, mm_hex_four] at e0 e1 e2
-    obtain ⟨-, hA, t0⟩ := e0
-    obtain ⟨-, hB, t1⟩ := e1
-    obtain ⟨-, hC, t2⟩ := e2
-    simp only [det2, Pi.sub_apply, Pi.neg_apply] at hA hB hC t0 t1 t2
-    refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> simp only [det2] <;> nlinarith
-  · rintro ⟨hA, hB, hC, h0, h1, h2⟩
-    simp only [det2] at hA hB hC h0 h1 h2
-    intro k
-    rcases mm_cases k with rfl | rfl | rfl | rfl | rfl | rfl <;>
-      simp only [f01, f11, f21, f31, f41, f51, f02, f12, f22, f32, f42, f52, f03, f13, f23, f33,
-        f43, f53, mm_hex_zero, mm_hex_one, mm_hex_two, mm_hex_three, mm_hex_four,
-        mm_hex_five, neg_neg, true_and, det2, Pi.sub_apply, Pi.neg_apply] <;>
-      refine ⟨?_, ?_⟩ <;> nlinarith
-
-/-- The hexagon `mm_hex a b c` is the intersection of three strips. -/
-def mm_strips (a b c x : Fin 2 → ℝ) : Prop :=
-  |det2 (a - b) x| ≤ det2 a b ∧ |det2 (b - c) x| ≤ det2 b c ∧ |det2 (c + a) x| ≤ det2 a c
-
-lemma mm_convex_abs_det2_le (u : Fin 2 → ℝ) (k : ℝ) : Convex ℝ {x | |det2 u x| ≤ k} := by
-  intro x hx y hy s t hs ht hst
-  simp only [mem_ofPred_eq] at *
-  have : det2 u (s • x + t • y) = s * det2 u x + t * det2 u y := by simp [det2]; ring
-  rw [this]
-  calc |s * det2 u x + t * det2 u y| ≤ |s * det2 u x| + |t * det2 u y| := abs_add_le _ _
-    _ = s * |det2 u x| + t * |det2 u y| := by
-      rw [abs_mul, abs_mul, abs_of_nonneg hs, abs_of_nonneg ht]
-    _ ≤ s * k + t * k := by gcongr
-    _ = k := by rw [← add_mul, hst, one_mul]
-
-lemma mm_convex_strips : Convex ℝ {x | mm_strips a b c x} :=
-  (mm_convex_abs_det2_le _ _).inter ((mm_convex_abs_det2_le _ _).inter
-    (mm_convex_abs_det2_le _ _))
-
-/-- The hexagon lies in the three strips: they are convex and contain its vertices. -/
-lemma mm_strips_of_mem (h : mm_HexCond a b c) (hx : x ∈ hexagonOf (mm_hex a b c)) :
-    mm_strips a b c x := by
-  refine convexHull_min (range_subset_iff.2 fun k ↦ ?_) mm_convex_strips hx
-  obtain ⟨hA, hB, hC, h0, h1, h2⟩ := h
-  simp only [det2] at hA hB hC h0 h1 h2
-  simp only [mem_ofPred_eq, mm_strips, abs_le]
-  rcases mm_cases k with rfl | rfl | rfl | rfl | rfl | rfl <;>
-    simp only [mm_hex_zero, mm_hex_one, mm_hex_two, mm_hex_three, mm_hex_four,
-      mm_hex_five, det2, Pi.sub_apply, Pi.neg_apply, Pi.add_apply] <;>
-    refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩, ⟨?_, ?_⟩⟩ <;> nlinarith
-
-/-- The vertices `v_j` of the hexagon `mm_hex a b c`, indexed by `Fin 6`. -/
-def mm_us (a b c : Fin 2 → ℝ) : Fin 6 → Fin 2 → ℝ := ![a, b, c, -a, -b, -c]
-/-- The vertices `v_{j+1}` of the hexagon `mm_hex a b c`, indexed by `Fin 6`. -/
-def mm_ws (a b c : Fin 2 → ℝ) : Fin 6 → Fin 2 → ℝ := ![b, c, -a, -b, -c, a]
-/-- The six triangles `[0, v_j, v_{j+1}]` into which the hexagon `mm_hex a b c` is cut. -/
-noncomputable def mm_piece (a b c : Fin 2 → ℝ) (i : Fin 6) : Set (Fin 2 → ℝ) :=
-  mm_tri (mm_us a b c i) (mm_ws a b c i)
-
-/-- Every point of the three strips lies in one of the six triangles: the one whose angle at `0`
-contains it. -/
-lemma mm_exists_piece (h : mm_HexCond a b c) (hx : mm_strips a b c x) :
-    ∃ i, x ∈ mm_piece a b c i := by
-  obtain ⟨hA, hB, hC, h0, h1, h2⟩ := h
-  obtain ⟨s0, s1, s2⟩ := hx
-  rw [abs_le] at s0 s1 s2
-  have e (u w : Fin 2 → ℝ) : det2 (-u) w = -det2 u w := by simp [det2]; ring
-  have e' (u w : Fin 2 → ℝ) : det2 u (-w) = -det2 u w := by simp [det2]; ring
-  have es (u w : Fin 2 → ℝ) : det2 (u - w) x = det2 u x - det2 w x := by simp [det2]; ring
-  have ea (u w : Fin 2 → ℝ) : det2 (u + w) x = det2 u x + det2 w x := by simp [det2]; ring
-  have eca : det2 c (-a) = det2 a c := by simp [det2]; ring
-  have eac : det2 c a = -det2 a c := by simp [det2]; ring
-  rw [es] at s0 s1
-  rw [ea] at s2
-  rcases le_or_gt 0 (det2 a x) with ha | ha
-  · rcases le_or_gt (det2 b x) 0 with hb | hb
-    · exact ⟨0, show x ∈ mm_tri a b from mm_mem_tri_of hA ha hb (by rw [es]; linarith)⟩
-    · rcases le_or_gt (det2 c x) 0 with hc | hc
-      · exact ⟨1, show x ∈ mm_tri b c from mm_mem_tri_of hB hb.le hc (by rw [es]; linarith)⟩
-      · exact ⟨2, show x ∈ mm_tri c (-a) from mm_mem_tri_of (by rwa [eca]) hc.le
-          (by rw [e]; linarith) (by rw [es, e, eca]; linarith)⟩
-  · rcases le_or_gt 0 (det2 b x) with hb | hb
-    · exact ⟨3, show x ∈ mm_tri (-a) (-b) from mm_mem_tri_of (by rwa [e, e', neg_neg])
-        (by rw [e]; linarith) (by rw [e]; linarith) (by rw [es, e, e, e, e', neg_neg]; linarith)⟩
-    · rcases le_or_gt 0 (det2 c x) with hc | hc
-      · exact ⟨4, show x ∈ mm_tri (-b) (-c) from mm_mem_tri_of (by rwa [e, e', neg_neg])
-          (by rw [e]; linarith) (by rw [e]; linarith)
-          (by rw [es, e, e, e, e', neg_neg]; linarith)⟩
-      · refine ⟨5, show x ∈ mm_tri (-c) a from mm_mem_tri_of
-          (by rw [e, eac]; linarith) (by rw [e]; linarith) ha.le
-          (by rw [es, e, e, eac]; linarith)⟩
-
-lemma mm_vertex_mem (k : ZMod 6) : mm_hex a b c k ∈ hexagonOf (mm_hex a b c) :=
-  subset_convexHull ℝ _ (mem_range_self k)
-
-lemma mm_zero_mem_hex : (0 : Fin 2 → ℝ) ∈ hexagonOf (mm_hex a b c) := by
-  have := convex_convexHull ℝ (range (mm_hex a b c)) (mm_vertex_mem 0) (mm_vertex_mem 3)
-    (by norm_num : (0 : ℝ) ≤ 1 / 2) (by norm_num : (0 : ℝ) ≤ 1 / 2) (by norm_num)
-  simp only [mm_hex_zero, mm_hex_three, smul_neg, add_neg_cancel] at this
-  exact this
-
-lemma mm_piece_subset (i : Fin 6) : mm_piece a b c i ⊆ hexagonOf (mm_hex a b c) := by
-  refine mm_tri_subset (convex_convexHull ℝ _) mm_zero_mem_hex ?_ ?_ <;>
-    fin_cases i
-  all_goals first
-    | exact mm_vertex_mem 0 | exact mm_vertex_mem 1 | exact mm_vertex_mem 2
-    | exact mm_vertex_mem 3 | exact mm_vertex_mem 4 | exact mm_vertex_mem 5
-
-/-- The hexagon is the union of its six triangles `[0, v_j, v_{j+1}]`. -/
-lemma mm_hexagonOf_eq (h : mm_HexCond a b c) :
-    hexagonOf (mm_hex a b c) = ⋃ i, mm_piece a b c i := by
-  ext x
-  constructor
-  · intro hx
-    obtain ⟨i, hi⟩ := mm_exists_piece h (mm_strips_of_mem h hx)
-    exact mem_iUnion.2 ⟨i, hi⟩
-  · intro hx
-    obtain ⟨i, hi⟩ := mem_iUnion.1 hx
-    exact mm_piece_subset i hi
-
-/-- The hexagon is the intersection of three strips. -/
-lemma mm_mem_hexagonOf_iff (h : mm_HexCond a b c) :
-    x ∈ hexagonOf (mm_hex a b c) ↔ mm_strips a b c x := by
-  refine ⟨mm_strips_of_mem h, fun hx ↦ ?_⟩
-  obtain ⟨i, hi⟩ := mm_exists_piece h hx
-  exact mm_piece_subset i hi
-
-/-- The signs of `det(a, x), det(b, x), det(c, x)` on the six triangles of the hexagon; they
-differ for any two triangles. -/
-lemma mm_piece_signs (h : mm_HexCond a b c) (i : Fin 6) (hx : x ∈ mm_piece a b c i) :
-    0 ≤ (![1, 1, 1, -1, -1, -1] : Fin 6 → ℝ) i * det2 a x ∧
-      0 ≤ (![-1, 1, 1, 1, -1, -1] : Fin 6 → ℝ) i * det2 b x ∧
-      0 ≤ (![-1, -1, 1, 1, 1, -1] : Fin 6 → ℝ) i * det2 c x := by
-  obtain ⟨hA, hB, hC, -, -, -⟩ := h
-  simp only [det2] at hA hB hC
-  refine ⟨mm_cone_sign hx ?_ ?_, mm_cone_sign hx ?_ ?_, mm_cone_sign hx ?_ ?_⟩ <;>
-    fin_cases i <;> simp [mm_us, mm_ws, det2] <;> nlinarith
-
-lemma mm_ne_zero_left (h : mm_HexCond a b c) : a ≠ 0 := by
-  rintro rfl; have := h.hA; simp [det2] at this
-
-lemma mm_ne_zero_mid (h : mm_HexCond a b c) : b ≠ 0 := by
-  rintro rfl; have := h.hA; simp [det2] at this
-
-lemma mm_ne_zero_right (h : mm_HexCond a b c) : c ≠ 0 := by
-  rintro rfl; have := h.hB; simp [det2] at this
-
-/-- Two triangles of the hexagon meet in a null set (in one of the lines `ℝa, ℝb, ℝc`). -/
-lemma mm_piece_aedisjoint (h : mm_HexCond a b c) :
-    Pairwise (Function.onFun (AEDisjoint volume) (mm_piece a b c)) := by
-  have hN : volume ({x : Fin 2 → ℝ | det2 a x = 0} ∪ {x | det2 b x = 0} ∪
-      {x | det2 c x = 0}) = 0 :=
-    measure_union_null (measure_union_null (mm_volume_line (mm_ne_zero_left h))
-      (mm_volume_line (mm_ne_zero_mid h))) (mm_volume_line (mm_ne_zero_right h))
-  intro i j hij
-  refine measure_mono_null (fun x hx ↦ ?_) hN
-  have si := mm_piece_signs h i hx.1
-  have sj := mm_piece_signs h j hx.2
-  simp only [mem_union, mem_ofPred_eq]
-  fin_cases i <;> fin_cases j <;> simp at hij si sj <;>
-    first | (left; left; linarith) | (left; right; linarith) | (right; linarith)
-
-/-- The area of the hexagon `mm_hex a b c` is `det(a, b) + det(b, c) + det(a, c)`. -/
-lemma mm_volume_hex (h : mm_HexCond a b c) :
-    volume (hexagonOf (mm_hex a b c)) = ENNReal.ofReal (det2 a b + det2 b c + det2 a c) := by
-  rw [mm_hexagonOf_eq h, measure_iUnion₀ (mm_piece_aedisjoint h)
-    (fun i ↦ (mm_isCompact_tri _ _).measurableSet.nullMeasurableSet), tsum_fintype]
-  simp only [mm_piece, mm_volume_tri]
-  rw [← ENNReal.ofReal_sum_of_nonneg (fun i _ ↦ by positivity)]
-  congr 1
-  have e1 : det2 c (-a) = det2 a c := by simp [det2]; ring
-  have e2 : det2 (-a) (-b) = det2 a b := by simp [det2]
-  have e3 : det2 (-b) (-c) = det2 b c := by simp [det2]
-  have e4 : det2 (-c) a = det2 a c := by simp [det2]; ring
-  simp only [Fin.sum_univ_six, mm_us, mm_ws, Matrix.cons_val, e1, e2, e3, e4,
-    abs_of_pos h.hA, abs_of_pos h.hB, abs_of_pos h.hC]
-  ring
-
-/-- The area of the hexagon `mm_hex a b c`, as a real number. -/
-lemma mm_volume_real_hex (h : mm_HexCond a b c) :
-    volume.real (hexagonOf (mm_hex a b c)) = det2 a b + det2 b c + det2 a c := by
-  rw [measureReal_def, mm_volume_hex h, ENNReal.toReal_ofReal]
-  linarith [h.hA, h.hB, h.hC]
-
-end mm_Hex
-
-/-- The area of a centrally symmetric hexagon is `4 det(m₀, m₁)`, where `m₀, m₁` are the midpoints
-of two consecutive edges (§2.2: `det(s_j, s_{j+1})` is a fixed fraction of `area(H_K)`). -/
-lemma mm_volume_hexagonOf {v : ZMod 6 → Fin 2 → ℝ} (hv : IsCSHexagon v) :
-    volume.real (hexagonOf v) = 4 * det2 (hexMidpoint v 0) (hexMidpoint v 1) := by
-  obtain ⟨a, b, c, rfl⟩ : ∃ a b c, v = mm_hex a b c := ⟨_, _, _, mm_eq_hex hv⟩
-  rw [mm_volume_real_hex (mm_isCSHexagon_iff.1 hv)]
-  simp only [hexMidpoint, zero_add, show (1 : ZMod 6) + 1 = 2 from rfl, mm_hex_zero,
-    mm_hex_one, mm_hex_two, midpoint_eq_smul_add]
-  simp only [det2, Pi.smul_apply, Pi.add_apply, smul_eq_mul, invOf_eq_inv]
-  ring
+  -- a lattice of least determinant among the admissible ones
+  obtain ⟨L, hLd, hLs, hLadm, hLmin⟩ := PlaneLattice.exists_admissible_covolume_le isOpen_interior
+    (External.MinkowskiMahler.mm_zero_mem_interior hK) hd₀ hs₀ hadm₀
+  refine ⟨L, ⟨hLd, hLs⟩, hLadm, ?_⟩
+  unfold minDeterminant
+  refine Eq.symm (IsLeast.csInf_eq ⟨⟨L, ⟨hLd, hLs⟩, hLadm, rfl⟩, ?_⟩)
+  rintro d ⟨L', ⟨hL'd, hL's⟩, hL'adm, rfl⟩
+  exact hLmin L' hL'd hL's hL'adm
 
 /-! ### Edge lines of a centrally symmetric hexagon -/
 
@@ -640,11 +264,11 @@ lemma mm_normal_dot_le_iff (hv : IsCSHexagon v) (j : ZMod 6) (x : Fin 2 → ℝ)
 
 /-- The hexagon is the intersection of the half-planes `a_j · x ≤ 1` of its edges. -/
 lemma mm_polarHexagon_normal (hv : IsCSHexagon v) : polarHexagon (mm_normal v) = hexagonOf v := by
-  obtain ⟨a, b, c, rfl⟩ : ∃ a b c, v = mm_hex a b c := ⟨_, _, _, mm_eq_hex hv⟩
-  have h := mm_isCSHexagon_iff.1 hv
-  obtain ⟨f01, f11, f21, f31, f41, f51, -⟩ := mm_zmod_facts
+  obtain ⟨a, b, c, rfl⟩ : ∃ a b c, v = hex_mk a b c := ⟨_, _, _, hex_eq_mk hv⟩
+  have h := hex_isCSHexagon_mk_iff.1 hv
+  obtain ⟨f01, f11, f21, f31, f41, f51, -⟩ := hex_zmod_facts
   ext x
-  rw [mm_mem_hexagonOf_iff h, polarHexagon, mem_ofPred_eq]
+  rw [hex_mem_hexagonOf_iff h, polarHexagon, mem_ofPred_eq]
   simp only [mm_normal_dot_le_iff hv]
   constructor
   · intro hx
@@ -654,17 +278,17 @@ lemma mm_polarHexagon_normal (hv : IsCSHexagon v) : polarHexagon (mm_normal v) =
     have e3 := hx 3
     have e4 := hx 4
     have e5 := hx 5
-    simp only [f01, f11, f21, f31, f41, f51, mm_hex_zero, mm_hex_one, mm_hex_two,
-      mm_hex_three, mm_hex_four, mm_hex_five] at e0 e1 e2 e3 e4 e5
-    simp only [mm_strips, abs_le]
+    simp only [f01, f11, f21, f31, f41, f51, hex_mk_zero, hex_mk_one, hex_mk_two,
+      hex_mk_three, hex_mk_four, hex_mk_five] at e0 e1 e2 e3 e4 e5
+    simp only [hex_strips, abs_le]
     simp only [det2, Pi.sub_apply, Pi.neg_apply, Pi.add_apply] at *
     refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩, ⟨?_, ?_⟩⟩ <;> linarith
   · rintro ⟨s0, s1, s2⟩ j
     rw [abs_le] at s0 s1 s2
     simp only [det2, Pi.sub_apply, Pi.add_apply] at s0 s1 s2
-    rcases mm_cases j with rfl | rfl | rfl | rfl | rfl | rfl <;>
-      simp only [f01, f11, f21, f31, f41, f51, mm_hex_zero, mm_hex_one, mm_hex_two,
-        mm_hex_three, mm_hex_four, mm_hex_five, det2, Pi.sub_apply, Pi.neg_apply] <;>
+    rcases hex_cases j with rfl | rfl | rfl | rfl | rfl | rfl <;>
+      simp only [f01, f11, f21, f31, f41, f51, hex_mk_zero, hex_mk_one, hex_mk_two,
+        hex_mk_three, hex_mk_four, hex_mk_five, det2, Pi.sub_apply, Pi.neg_apply] <;>
       linarith
 
 lemma mm_normal_dot_le (hv : IsCSHexagon v) (j : ZMod 6) {x : Fin 2 → ℝ}
@@ -689,28 +313,6 @@ lemma mm_normal_ne_zero (hv : IsCSHexagon v) (j : ZMod 6) : mm_normal v j ≠ 0 
   have := (mm_normal_dot_self hv j).1
   rw [h, zero_dotProduct] at this
   exact zero_ne_one this
-
-/-- A point `p` with `a · p = 1` is not interior to a set lying in the half-plane `a · x ≤ 1`. -/
-lemma mm_not_mem_interior {S : Set (Fin 2 → ℝ)} {a p : Fin 2 → ℝ} (ha : a ≠ 0)
-    (hS : ∀ x ∈ S, a ⬝ᵥ x ≤ 1) (hp : a ⬝ᵥ p = 1) : p ∉ interior S := by
-  intro hint
-  have hcont : Continuous fun t : ℝ ↦ p + t • a := by fun_prop
-  have hev : ∀ᶠ t in nhds (0 : ℝ), p + t • a ∈ S := by
-    have := hcont.tendsto 0
-    simp only [zero_smul, add_zero] at this
-    exact (this.eventually (isOpen_interior.mem_nhds hint)).mono fun t ht ↦ interior_subset ht
-  have hpos : 0 < a ⬝ᵥ a := by
-    have : a ⬝ᵥ a = a 0 ^ 2 + a 1 ^ 2 := by simp [dotProduct, Fin.sum_univ_two]; ring
-    rw [this]
-    by_contra hle
-    apply ha
-    ext i; fin_cases i <;> simp <;> nlinarith [sq_nonneg (a 0), sq_nonneg (a 1)]
-  obtain ⟨t, ht, htpos⟩ := ((hev.filter_mono nhdsWithin_le_nhds).and
-    (self_mem_nhdsWithin : Ioi (0 : ℝ) ∈ nhdsWithin 0 (Ioi 0))).exists
-  have := hS _ ht
-  rw [dotProduct_add, dotProduct_smul, hp, smul_eq_mul] at this
-  have htpos' : 0 < t := htpos
-  nlinarith
 
 /-- Two lines `{a · x = 1}`, `{b · x = 1}` that coincide have `a = b`. -/
 lemma mm_eq_of_line_subset {a b : Fin 2 → ℝ} (ha : a ≠ 0)
@@ -796,16 +398,6 @@ lemma mm_hexMidpoint_add_three (hv : IsCSHexagon v) (j : ZMod 6) :
   simp only [hexMidpoint, show j + 3 + 1 = j + 1 + 3 by ring, h1, h2, midpoint_eq_smul_add]
   rw [← neg_add, smul_neg]
 
-/-- The edge midpoints of a least-area circumscribed hexagon lie on the boundary of `K`: they lie
-in `K` (Remark 2.2.4, Reinhardt) and on the edges of the hexagon. -/
-lemma mm_hexMidpoint_mem_frontier (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v)
-    (j : ZMod 6) : hexMidpoint v j ∈ frontier K := by
-  obtain ⟨ε, hε, h⟩ := remark2_2_4 hK hv j
-  have hmem : hexMidpoint v j ∈ K := h _ (by simpa using hε) rfl
-  rw [hK.2.1.isClosed.frontier_eq]
-  exact ⟨hmem, mm_not_mem_interior (mm_normal_ne_zero hv.1 j)
-    (fun x hx ↦ mm_normal_dot_le hv.1 j (hv.2.1 hx)) (mm_normal_dot_midpoint hv.1 j)⟩
-
 /-- The line of an edge of a least-area circumscribed hexagon is a support line of `K` at the
 midpoint of the edge. -/
 lemma mm_isSupportLine_normal (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) (j : ZMod 6) :
@@ -815,84 +407,10 @@ lemma mm_isSupportLine_normal (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) (
   · have h1 := mm_normal_dot_le hv.1 j (hv.2.1 hx)
     have h2 := mm_normal_dot_le hv.1 j (hv.2.1 hy)
     nlinarith
-  · exact External.MinkowskiMahler.mm_mem_of_frontier hK (mm_hexMidpoint_mem_frontier hK hv j)
-
-lemma mm_volume_real_pos (hK : IsCCSDisk K) : 0 < volume.real K :=
-  ENNReal.toReal_pos (Measure.measure_pos_of_nonempty_interior _ hK.2.2.1).ne'
-    hK.2.1.measure_lt_top.ne
+  · exact External.MinkowskiMahler.mm_mem_of_frontier hK (hex_hexMidpoint_mem_frontier hK hv j)
 
 lemma mm_isCompact_hexagonOf (v : ZMod 6 → Fin 2 → ℝ) : IsCompact (hexagonOf v) :=
   (Set.finite_range v).isCompact_convexHull (𝕜 := ℝ)
-
-/-- The comparison of Theorem 2.3.9 (`area(H_K) ≤ 4 det(L)` for every admissible lattice `L`),
-from the density formula of Theorem 2.2.2 and Theorem 2.1.3: `L` is `K`-admissible, so `2L` gives
-a lattice packing of `K` (the remark after Definition 2.3.1), of density
-`area(K)/det(2L) ≤ δ_L(K) = δ(K) = area(K)/area(H_K)`. -/
-lemma mm_volume_le (hK : IsCCSDisk K) (hpar : ¬ IsParallelogram K) (hv : IsLeastAreaHexagon K v)
-    {L : Submodule ℤ (Fin 2 → ℝ)} (hL : IsPlaneLattice L) (hadm : IsAdmissible K L) :
-    volume.real (hexagonOf v) ≤ 4 * latticeDet L := by
-  obtain ⟨a, b, hab, hc⟩ := External.MinkowskiMahler.mm_exists_basis hL
-  have hdetL : latticeDet L = |det2 a b| := definition2_3_2 hL hab
-  have e2 : det2 ((2 : ℝ) • a) ((2 : ℝ) • b) = 4 * det2 a b := by
-    simp only [det2, Pi.smul_apply, smul_eq_mul]; ring
-  have hc2 : det2 ((2 : ℝ) • a) ((2 : ℝ) • b) ≠ 0 := by
-    rw [e2]; exact mul_ne_zero (by norm_num) hc
-  set L₂ := latticeSpan ((2 : ℝ) • a) ((2 : ℝ) • b) with hL₂def
-  have hL₂ : IsPlaneLattice L₂ := External.MinkowskiMahler.mm_isLattice_span hc2
-  have hdet₂ : latticeDet L₂ = 4 * latticeDet L := by
-    rw [hdetL, show latticeDet L₂ = |det2 ((2 : ℝ) • a) ((2 : ℝ) • b)| from
-      External.MinkowskiMahler.mm_det_span hc2, e2, abs_mul]
-    norm_num
-  have hpack : IsLatticePacking K L₂ := by
-    intro l hl l' hl' hne
-    have i1 : interior ((fun x ↦ x + l) '' K) = (fun x ↦ x + l) '' interior K :=
-      ((Homeomorph.addRight l).image_interior K).symm
-    have i2 : interior ((fun x ↦ x + l') '' K) = (fun x ↦ x + l') '' interior K :=
-      ((Homeomorph.addRight l').image_interior K).symm
-    rw [i1, i2, Set.disjoint_left]
-    rintro z ⟨p, hp, rfl⟩ ⟨q, hq, hpq⟩
-    apply hne
-    obtain ⟨m, n, hmn⟩ := External.MinkowskiMahler.mm_mem_span_pair.1 (L₂.sub_mem hl' hl)
-    have hhalf : (1 / 2 : ℝ) • (l' - l) ∈ interior K := by
-      have hq' := External.MinkowskiMahler.mm_neg_mem_interior hK hq
-      have := hK.1.interior hp hq' (by norm_num : (0 : ℝ) ≤ 1 / 2)
-        (by norm_num : (0 : ℝ) ≤ 1 / 2) (by norm_num)
-      convert this using 1
-      have : l' - l = p - q := by
-        simp only at hpq
-        ext i
-        have := congrFun hpq i
-        simp only [Pi.add_apply] at this
-        simp only [Pi.sub_apply]
-        linarith
-      rw [this]; module
-    have hmem : (1 / 2 : ℝ) • (l' - l) ∈ L := by
-      rw [← hmn, ← hab.2]
-      exact External.MinkowskiMahler.mm_mem_span_pair.2 ⟨m, n, by module⟩
-    have h0 := hadm _ hmem hhalf
-    have : l' - l = 0 := by
-      have := congrArg ((2 : ℝ) • ·) h0
-      simpa [smul_smul] using this
-    exact (sub_eq_zero.1 this).symm
-  have hKpos := mm_volume_real_pos hK
-  have hHpos : 0 < volume.real (hexagonOf v) :=
-    hKpos.trans_le (measureReal_mono hv.2.1 (mm_isCompact_hexagonOf v).measure_lt_top.ne)
-  have hδ := (theorem2_2_2 hK hpar).2 v hv
-  have hFT := theorem2_1_3 hK
-  have hbdd : BddAbove
-      {d | ∃ L, IsPlaneLattice L ∧ IsLatticePacking K L ∧ latticePackingDensity K L = d} := by
-    by_contra hnb
-    have h0 : greatestLatticePackingDensity K = 0 := by
-      rw [greatestLatticePackingDensity, csSup_of_not_bddAbove hnb, Real.sSup_empty]
-    rw [← hFT, hδ] at h0
-    exact (div_pos hKpos hHpos).ne' h0
-  have hle : latticePackingDensity K L₂ ≤ greatestLatticePackingDensity K :=
-    le_csSup hbdd ⟨L₂, hL₂, hpack, rfl⟩
-  have hLpos : 0 < latticeDet L := by
-    rw [hdetL]; exact abs_pos.2 hc
-  rw [ch2_latticePackingDensity_eq ⟨hK.1, hK.2.1, hK.2.2.1⟩ hL₂ hpack, ← hFT, hδ, hdet₂,
-    div_le_div_iff_of_pos_left hKpos (by positivity) hHpos] at hle
-  exact hle
 
 /-- A vertex `v_j` is the only point of the hexagon on both lines of the edges at `v_j`. -/
 lemma mm_eq_vertex (hv : IsCSHexagon v) (j : ZMod 6) {x : Fin 2 → ℝ}
@@ -981,13 +499,13 @@ lemma mm_not_isParallelogram (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) :
     have dAC : det2 (r • u + (-r) • w) ((1 : ℝ) • u + r • w) = (r ^ 2 + r) * D := by
       rw [mm_det2_comb]; ring
     have hr2 : 0 < r ^ 2 - 1 := by nlinarith
-    have hcond : mm_HexCond (r • u + (-r) • w) (r • u + (1 : ℝ) • w) ((1 : ℝ) • u + r • w) := by
+    have hcond : hex_Cond (r • u + (-r) • w) (r • u + (1 : ℝ) • w) ((1 : ℝ) • u + r • w) := by
       refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> simp only [dAB, dBC, dAC] <;> nlinarith
-    have hsub : K ⊆ hexagonOf (mm_hex (r • u + (-r) • w) (r • u + (1 : ℝ) • w)
+    have hsub : K ⊆ hexagonOf (hex_mk (r • u + (-r) • w) (r • u + (1 : ℝ) • w)
         ((1 : ℝ) • u + r • w)) := by
       intro x hx
       obtain ⟨s, t, hs, ht, rfl⟩ := (hmem x).1 hx
-      rw [mm_mem_hexagonOf_iff hcond]
+      rw [hex_mem_hexagonOf_iff hcond]
       rw [abs_le] at hs ht
       have eAB : r • u + (-r) • w - (r • u + (1 : ℝ) • w) = (0 : ℝ) • u + (-r - 1) • w := by
         module
@@ -1010,25 +528,25 @@ lemma mm_not_isParallelogram (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) :
         constructor
         · nlinarith [mul_nonneg (mul_nonneg hr1 hD.le) (show 0 ≤ t + r by linarith)]
         · nlinarith [mul_nonneg (mul_nonneg hr1 hD.le) (show 0 ≤ r - t by linarith)]
-    have hle := hv.2.2 _ (mm_isCSHexagon_iff.2 hcond) hsub
-    have hfin : volume (hexagonOf (mm_hex (r • u + (-r) • w) (r • u + (1 : ℝ) • w)
+    have hle := hv.2.2 _ (hex_isCSHexagon_mk_iff.2 hcond) hsub
+    have hfin : volume (hexagonOf (hex_mk (r • u + (-r) • w) (r • u + (1 : ℝ) • w)
         ((1 : ℝ) • u + r • w))) ≠ ⊤ := (mm_isCompact_hexagonOf _).measure_lt_top.ne
     have := ENNReal.toReal_mono hfin hle
-    rw [← measureReal_def, ← measureReal_def, mm_volume_real_hex hcond, dAB, dBC, dAC] at this
+    rw [← measureReal_def, ← measureReal_def, hex_volume_real_mk hcond, dAB, dBC, dAC] at this
     linarith
   -- the area of `K`
-  have hKimg : K = mm_lin u w '' Icc (-1) 1 := by
+  have hKimg : K = hex_lin u w '' Icc (-1) 1 := by
     ext x
     rw [hmem]
     constructor
     · rintro ⟨s, t, hs, ht, rfl⟩
       rw [abs_le] at hs ht
-      refine ⟨![s, t], ⟨fun i ↦ ?_, fun i ↦ ?_⟩, by rw [mm_lin_apply]; simp⟩ <;>
+      refine ⟨![s, t], ⟨fun i ↦ ?_, fun i ↦ ?_⟩, by rw [hex_lin_apply]; simp⟩ <;>
         fin_cases i <;> simp <;> linarith
     · rintro ⟨p, hp, rfl⟩
-      exact ⟨p 0, p 1, abs_le.2 ⟨hp.1 0, hp.2 0⟩, abs_le.2 ⟨hp.1 1, hp.2 1⟩, mm_lin_apply _ _ _⟩
+      exact ⟨p 0, p 1, abs_le.2 ⟨hp.1 0, hp.2 0⟩, abs_le.2 ⟨hp.1 1, hp.2 1⟩, hex_lin_apply _ _ _⟩
   have hvolK : volume.real K = 4 * D := by
-    rw [hKimg, measureReal_def, Measure.addHaar_image_linearMap, mm_det_lin, Real.volume_Icc_pi]
+    rw [hKimg, measureReal_def, Measure.addHaar_image_linearMap, hex_det_lin, Real.volume_Icc_pi]
     simp only [Fin.prod_univ_two, Pi.one_apply, Pi.neg_apply]
     rw [← hDdef, abs_of_pos hD, ← ENNReal.ofReal_mul (by norm_num),
       ← ENNReal.ofReal_mul hD.le, ENNReal.toReal_ofReal (by positivity)]
@@ -1162,6 +680,392 @@ lemma mm_not_isParallelogram (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) :
   · exact hA.ne' (mm_det2_eq_zero_of_parallel hq0 h0 h1)
   · exact hA.ne' (mm_det2_eq_zero_of_parallel hq0 h0 h1)
 
+/-- Two vectors with the same values at two independent vectors are equal. -/
+lemma crit_eq_of_dot {x y b c : Fin 2 → ℝ} (h : det2 x y ≠ 0) (hx : b ⬝ᵥ x = c ⬝ᵥ x)
+    (hy : b ⬝ᵥ y = c ⬝ᵥ y) : b = c := by
+  simp only [dotProduct, Fin.sum_univ_two] at hx hy
+  simp only [det2] at h
+  ext i
+  fin_cases i
+  · have : (b 0 - c 0) * (x 0 * y 1 - x 1 * y 0) = 0 := by
+      linear_combination y 1 * hx - x 1 * hy
+    exact sub_eq_zero.1 ((mul_eq_zero.1 this).resolve_right h)
+  · have : (b 1 - c 1) * (x 0 * y 1 - x 1 * y 0) = 0 := by
+      linear_combination x 0 * hy - y 0 * hx
+    exact sub_eq_zero.1 ((mul_eq_zero.1 this).resolve_right h)
+
+/-- The edge lines of a centrally symmetric hexagon are symmetric: `a_{j+3} = -a_j`. -/
+lemma crit_normal_add_three (hv : IsCSHexagon v) (j : ZMod 6) :
+    mm_normal v (j + 3) = -mm_normal v j := by
+  have h1 := mm_normal_dot_self hv (j + 3)
+  have h2 := mm_normal_dot_self hv j
+  have e3 : v (j + 3) = -v j := (hv j).1
+  have e4 : v (j + 3 + 1) = -v (j + 1) := by
+    rw [show j + 3 + 1 = j + 1 + 3 by ring]; exact (hv (j + 1)).1
+  refine crit_eq_of_dot (hv (j + 3)).2.1.ne' ?_ ?_
+  · rw [h1.1, e3, neg_dotProduct, dotProduct_neg, neg_neg, h2.1]
+  · rw [h1.2, e4, neg_dotProduct, dotProduct_neg, neg_neg, h2.2]
+
+/-- The vertex `v_{j+2}` lies strictly inside the half-plane of the edge `j`. -/
+lemma crit_normal_dot_add_two_lt (hv : IsCSHexagon v) (j : ZMod 6) :
+    mm_normal v j ⬝ᵥ v (j + 2) < 1 := by
+  rw [mm_normal_dot, div_lt_one (hv j).2.1]
+  have := (hv j).2.2
+  simp only [det2, Pi.sub_apply] at this ⊢
+  linarith
+
+/-- The vertex `v_{j-1}` lies strictly inside the half-plane of the edge `j`. -/
+lemma crit_normal_dot_sub_one_lt (hv : IsCSHexagon v) (j : ZMod 6) :
+    mm_normal v j ⬝ᵥ v (j - 1) < 1 := by
+  rw [mm_normal_dot, div_lt_one (hv j).2.1]
+  have := (hv (j - 1)).2.2
+  rw [show j - 1 + 1 = j by ring, show j - 1 + 2 = j + 1 by ring] at this
+  simp only [det2, Pi.sub_apply] at this ⊢
+  linarith
+
+/-- No two edges of a centrally symmetric hexagon lie on the same line. -/
+lemma crit_normal_injective (hv : IsCSHexagon v) {i j : ZMod 6} (hij : i ≠ j) :
+    mm_normal v i ≠ mm_normal v j := by
+  intro heq
+  obtain ⟨d, rfl⟩ : ∃ d, j = i + d := ⟨j - i, by ring⟩
+  have self := mm_normal_dot_self hv i
+  have hneg : ∀ k, mm_normal v k ⬝ᵥ v (k + 3) = -1 := fun k ↦ by
+    rw [(hv k).1, dotProduct_neg, (mm_normal_dot_self hv k).1]
+  have hneg' : ∀ k, mm_normal v k ⬝ᵥ v (k + 4) = -1 := fun k ↦ by
+    rw [show k + 4 = k + 1 + 3 by ring, (hv (k + 1)).1, dotProduct_neg,
+      (mm_normal_dot_self hv k).2]
+  rcases hex_cases d with rfl | rfl | rfl | rfl | rfl | rfl
+  · exact hij (by simp)
+  · have := crit_normal_dot_sub_one_lt hv (i + 1)
+    rw [show i + 1 - 1 = i by ring, ← heq, self.1] at this
+    exact lt_irrefl _ this
+  · have := hneg' (i + 2)
+    rw [show i + 2 + 4 = i + (2 + 4) by ring, show (2 + 4 : ZMod 6) = 0 by decide, add_zero,
+      ← heq, self.1] at this
+    norm_num at this
+  · have h := self.1
+    rw [heq, crit_normal_add_three hv i, neg_dotProduct, self.1] at h
+    norm_num at h
+  · have := hneg (i + 4)
+    rw [show i + 4 + 3 = i + 1 + (3 + 3) by ring, show (3 + 3 : ZMod 6) = 0 by decide, add_zero,
+      ← heq, self.2] at this
+    norm_num at this
+  · have := crit_normal_dot_add_two_lt hv (i + 5)
+    rw [show i + 5 + 2 = i + 1 + (3 + 3) by ring, show (3 + 3 : ZMod 6) = 0 by decide, add_zero,
+      ← heq, self.2] at this
+    exact lt_irrefl _ this
+
+/-- `K` lies on the side of each of its support lines `a · x = 1` that contains the origin. -/
+lemma crit_dot_le_one (hK : IsCCSDisk K) {a : Fin 2 → ℝ} (ha : IsSupportLine K {x | a ⬝ᵥ x = 1})
+    {x : Fin 2 → ℝ} (hx : x ∈ K) : a ⬝ᵥ x ≤ 1 := by
+  obtain ⟨⟨b, -, c, hℓ, hsep⟩, -⟩ := ha
+  have h0 : (0 : Fin 2 → ℝ) ∈ K :=
+    interior_subset (External.MinkowskiMahler.mm_zero_mem_interior hK)
+  have hc : c ≠ 0 := by
+    rintro rfl
+    have : (0 : Fin 2 → ℝ) ∈ {x : Fin 2 → ℝ | a ⬝ᵥ x = 1} := by rw [hℓ]; simp
+    simp at this
+  have hba : c⁻¹ • b = a := by
+    refine mm_eq_of_line_eq (Set.ext fun y ↦ ?_)
+    have := Set.ext_iff.1 hℓ y
+    simp only [mem_ofPred_eq] at this ⊢
+    rw [smul_dotProduct, smul_eq_mul, inv_mul_eq_one₀ hc, this, eq_comm]
+  have hbx : b ⬝ᵥ x = c * (a ⬝ᵥ x) := by
+    rw [← hba, smul_dotProduct, smul_eq_mul, ← mul_assoc, mul_inv_cancel₀ hc, one_mul]
+  have key : (b ⬝ᵥ x - c) * (b ⬝ᵥ 0 - c) = -(c ^ 2 * (a ⬝ᵥ x - 1)) := by
+    rw [hbx, dotProduct_zero]; ring
+  have hsx := hsep x hx 0 h0
+  rw [key] at hsx
+  have hc2 : 0 < c ^ 2 := by positivity
+  by_contra h
+  push Not at h
+  have := mul_pos hc2 (sub_pos.2 h)
+  linarith
+
+/-- The six vertices of a hexagon bounded by symmetric lines `a_j · x = 1` (`a_{j+3} = -a_j`)
+through the points `s_j = ±e, ±(e + f), ±f`, in terms of `α_j = a_j · s_{j+1} ∈ (0, 1)`:
+`w₀ = ℓ₅ ∩ ℓ₀`, `w₁ = ℓ₀ ∩ ℓ₁`, `w₂ = ℓ₁ ∩ ℓ₂`. The edges are `w₁ - w₀ = λ₀ t₀`,
+`w₂ - w₁ = λ₁ t₁`, `-w₀ - w₂ = λ₂ t₂` with `λ_j > 0` and `t_j` the directions of the lines, which
+turn counterclockwise, so the six points are the vertices of a convex hexagon. -/
+lemma crit_hexagon_of_dots {e f a₀ a₁ a₂ : Fin 2 → ℝ} {α₀ α₁ α₂ : ℝ} (hD : 0 < det2 e f)
+    (h0 : 0 < α₀) (h0' : α₀ < 1) (h1 : 0 < α₁) (h1' : α₁ < 1) (h2 : 0 < α₂) (h2' : α₂ < 1)
+    (d0e : a₀ ⬝ᵥ e = 1) (d0f : a₀ ⬝ᵥ f = α₀ - 1) (d1e : a₁ ⬝ᵥ e = 1 - α₁) (d1f : a₁ ⬝ᵥ f = α₁)
+    (d2e : a₂ ⬝ᵥ e = -α₂) (d2f : a₂ ⬝ᵥ f = 1) :
+    ∃ w₀ w₁ w₂ : Fin 2 → ℝ, hex_Cond w₀ w₁ w₂ ∧ a₀ ⬝ᵥ w₀ = 1 ∧ a₀ ⬝ᵥ w₁ = 1 ∧
+      a₁ ⬝ᵥ w₁ = 1 ∧ a₁ ⬝ᵥ w₂ = 1 ∧ a₂ ⬝ᵥ w₂ = 1 ∧ a₂ ⬝ᵥ -w₀ = 1 := by
+  -- the vertices `w₀ = ℓ₅ ∩ ℓ₀`, `w₁ = ℓ₀ ∩ ℓ₁`, `w₂ = ℓ₁ ∩ ℓ₂`
+  obtain ⟨D₀, hD₀def⟩ : ∃ x : ℝ, x = 1 - α₀ + α₀ * α₁ := ⟨_, rfl⟩
+  obtain ⟨D₁, hD₁def⟩ : ∃ x : ℝ, x = 1 - α₁ + α₁ * α₂ := ⟨_, rfl⟩
+  obtain ⟨D₂, hD₂def⟩ : ∃ x : ℝ, x = 1 - α₂ + α₂ * α₀ := ⟨_, rfl⟩
+  have hD₀ : 0 < D₀ := by rw [hD₀def]; nlinarith
+  have hD₁ : 0 < D₁ := by rw [hD₁def]; nlinarith
+  have hD₂ : 0 < D₂ := by rw [hD₂def]; nlinarith
+  have hD₀' := hD₀.ne'
+  have hD₁' := hD₁.ne'
+  have hD₂' := hD₂.ne'
+  obtain ⟨w₀, hw₀⟩ : ∃ w : Fin 2 → ℝ, w = (α₀ / D₂) • e + (-(1 - α₂) / D₂) • f := ⟨_, rfl⟩
+  obtain ⟨w₁, hw₁⟩ : ∃ w : Fin 2 → ℝ, w = ((1 - α₀ + α₁) / D₀) • e + (α₁ / D₀) • f := ⟨_, rfl⟩
+  obtain ⟨w₂, hw₂⟩ : ∃ w : Fin 2 → ℝ, w = ((1 - α₁) / D₁) • e + ((1 - α₁ + α₂) / D₁) • f :=
+    ⟨_, rfl⟩
+  -- the edge lengths `λ_j` (relative to the directions `t_j` of the lines)
+  obtain ⟨l₀, hl₀⟩ : ∃ x : ℝ, x = α₁ / D₀ + (1 - α₂) / D₂ := ⟨_, rfl⟩
+  obtain ⟨l₁, hl₁⟩ : ∃ x : ℝ, x = α₂ / D₁ + (1 - α₀) / D₀ := ⟨_, rfl⟩
+  obtain ⟨l₂, hl₂⟩ : ∃ x : ℝ, x = α₀ / D₂ + (1 - α₁) / D₁ := ⟨_, rfl⟩
+  have hl₀p : 0 < l₀ := hl₀ ▸ add_pos (div_pos h1 hD₀) (div_pos (by linarith) hD₂)
+  have hl₁p : 0 < l₁ := hl₁ ▸ add_pos (div_pos h2 hD₁) (div_pos (by linarith) hD₀)
+  have hl₂p : 0 < l₂ := hl₂ ▸ add_pos (div_pos h0 hD₂) (div_pos (by linarith) hD₁)
+  have hcomb : ∀ p q r t : ℝ, det2 (p • e + q • f) (r • e + t • f) = (p * t - q * r) * det2 e f :=
+    fun p q r t ↦ by simp only [det2, Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+  have eA : det2 w₀ w₁ = l₀ * det2 e f := by
+    rw [hw₀, hw₁, hcomb, hl₀]
+    congr 1
+    field_simp
+    rw [hD₀def, hD₂def]
+    ring
+  have eB : det2 w₁ w₂ = l₁ * det2 e f := by
+    rw [hw₁, hw₂, hcomb, hl₁]
+    congr 1
+    field_simp
+    rw [hD₀def, hD₁def]
+    ring
+  have eC : det2 w₀ w₂ = l₂ * det2 e f := by
+    rw [hw₀, hw₂, hcomb, hl₂]
+    congr 1
+    field_simp
+    rw [hD₁def, hD₂def]
+    ring
+  have t01 : l₀ + l₁ - l₂ = l₀ * l₁ * ((1 - α₀) * (1 - α₁) + α₁) := by
+    rw [hl₀, hl₁, hl₂]
+    field_simp
+    rw [hD₀def, hD₁def, hD₂def]
+    ring
+  have t12 : l₁ + l₂ - l₀ = l₁ * l₂ * (α₁ * α₂ + (1 - α₁)) := by
+    rw [hl₀, hl₁, hl₂]
+    field_simp
+    rw [hD₀def, hD₁def, hD₂def]
+    ring
+  have t02 : l₀ + l₂ - l₁ = l₀ * l₂ * (1 - α₂ + α₀ * α₂) := by
+    rw [hl₀, hl₁, hl₂]
+    field_simp
+    rw [hD₀def, hD₁def, hD₂def]
+    ring
+  have c01 : 0 < (1 - α₀) * (1 - α₁) + α₁ := by nlinarith
+  have c12 : 0 < α₁ * α₂ + (1 - α₁) := by nlinarith
+  have c02 : 0 < 1 - α₂ + α₀ * α₂ := by nlinarith
+  refine ⟨w₀, w₁, w₂, ⟨?_, ?_, ?_, ?_, ?_, ?_⟩, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [eA]; exact mul_pos hl₀p hD
+  · rw [eB]; exact mul_pos hl₁p hD
+  · rw [eC]; exact mul_pos hl₂p hD
+  · rw [eA, eB, eC]
+    have key : l₀ * det2 e f + l₁ * det2 e f - l₂ * det2 e f =
+        l₀ * l₁ * ((1 - α₀) * (1 - α₁) + α₁) * det2 e f := by rw [← t01]; ring
+    have := mul_pos (mul_pos (mul_pos hl₀p hl₁p) c01) hD
+    linarith
+  · rw [eA, eB, eC]
+    have key : l₁ * det2 e f + l₂ * det2 e f - l₀ * det2 e f =
+        l₁ * l₂ * (α₁ * α₂ + (1 - α₁)) * det2 e f := by rw [← t12]; ring
+    have := mul_pos (mul_pos (mul_pos hl₁p hl₂p) c12) hD
+    linarith
+  · rw [eA, eB, eC]
+    have key : l₀ * det2 e f + l₂ * det2 e f - l₁ * det2 e f =
+        l₀ * l₂ * (1 - α₂ + α₀ * α₂) * det2 e f := by rw [← t02]; ring
+    have := mul_pos (mul_pos (mul_pos hl₀p hl₂p) c02) hD
+    linarith
+  · rw [hw₀]
+    simp only [dotProduct_add, dotProduct_smul, smul_eq_mul, d0e, d0f]
+    field_simp
+    rw [hD₂def]
+    ring
+  · rw [hw₁]
+    simp only [dotProduct_add, dotProduct_smul, smul_eq_mul, d0e, d0f]
+    field_simp
+    rw [hD₀def]
+    ring
+  · rw [hw₁]
+    simp only [dotProduct_add, dotProduct_smul, smul_eq_mul, d1e, d1f]
+    field_simp
+    rw [hD₀def]
+    ring
+  · rw [hw₂]
+    simp only [dotProduct_add, dotProduct_smul, smul_eq_mul, d1e, d1f]
+    field_simp
+    rw [hD₁def]
+    ring
+  · rw [hw₂]
+    simp only [dotProduct_add, dotProduct_smul, smul_eq_mul, d2e, d2f]
+    field_simp
+    rw [hD₁def]
+    ring
+  · rw [hw₀]
+    simp only [dotProduct_neg, dotProduct_add, dotProduct_smul, smul_eq_mul, d2e, d2f]
+    field_simp
+    rw [hD₂def]
+    ring
+
+/-- **The critical hexagon `H̃_K` is a centrally symmetric hexagon.** Let `s₀, …, s₅` be points of
+`K` with `s₀ - s₁ + s₂ = 0`, `s_{j+3} = -s_j` and `det(s₀, s₁) > 0`, and let `ℓ_j = {a_j · x = 1}`
+be the support lines of Theorem 2.3.7 at the `s_j`. Then the hexagon `H̃_K` bounded by the `ℓ_j`
+is `hexagonOf w` for a centrally symmetric hexagon `w` (`IsCSHexagon`), whose edges lie on the
+`ℓ_j`. The book takes this for granted ("the centrally symmetric hexagon `H_K` bounded by the
+support lines", Theorem 2.3.7). Since `ℓ_j` is the only support line at `s_j` and no two of the
+lines coincide, `s_j` lies on no other `ℓ_k`; in the basis `e = s₀, f = s₂` this says
+`α_j = a_j · s_{j+1} ∈ (0, 1)`, and `crit_hexagon_of_dots` gives the vertices. -/
+lemma crit_exists_isCSHexagon (hK : IsCCSDisk K) {s a : ZMod 6 → Fin 2 → ℝ}
+    (h012 : s 0 - s 1 + s 2 = 0) (hsymm : ∀ j, s (j + 3) = -s j) (hsK : ∀ j, s j ∈ K)
+    (hpos : 0 < det2 (s 0) (s 1)) (ha : IsMahlerSupportSystem K s a) :
+    ∃ w, IsCSHexagon w ∧ hexagonOf w = polarHexagon a := by
+  obtain ⟨hasymm, hsupp, huniq, hdist, -, -, -⟩ := ha
+  -- `a_k · s_j ≤ 1`, with equality only for `k = j`
+  have hle : ∀ k j, a k ⬝ᵥ s j ≤ 1 := fun k j ↦ crit_dot_le_one hK (hsupp k).1 (hsK j)
+  have hlt : ∀ k j, k ≠ j → a k ⬝ᵥ s j < 1 := by
+    intro k j hkj
+    refine (hle k j).lt_of_ne fun heq ↦ hdist k j hkj ?_
+    exact mm_eq_of_line_eq (huniq j _ (hsupp k).1 heq)
+  -- the points in the basis `e = s₀`, `f = s₂`
+  have hs1 : s 1 = s 0 + s 2 := by rw [← sub_eq_zero, ← neg_eq_zero, ← h012]; abel
+  have hs3 : s 3 = -s 0 := hsymm 0
+  have hs5 : s 5 = -s 2 := hsymm 2
+  have hD : 0 < det2 (s 0) (s 2) := by
+    have : det2 (s 0) (s 1) = det2 (s 0) (s 2) := by
+      rw [hs1]; simp only [det2, Pi.add_apply]; ring
+    linarith
+  have d0e : a 0 ⬝ᵥ s 0 = 1 := (hsupp 0).2
+  have d0f : a 0 ⬝ᵥ s 2 = a 0 ⬝ᵥ s 1 - 1 := by rw [hs1, dotProduct_add, d0e]; ring
+  have d1e : a 1 ⬝ᵥ s 0 = 1 - a 1 ⬝ᵥ s 2 := by
+    have h := (hsupp 1).2
+    rw [hs1, dotProduct_add] at h
+    linarith
+  have d2f : a 2 ⬝ᵥ s 2 = 1 := (hsupp 2).2
+  have d2e : a 2 ⬝ᵥ s 0 = -(a 2 ⬝ᵥ s 3) := by rw [hs3, dotProduct_neg, neg_neg]
+  -- `α_j ∈ (0, 1)`
+  have h0' : a 0 ⬝ᵥ s 1 < 1 := hlt 0 1 (by decide)
+  have h0 : 0 < a 0 ⬝ᵥ s 1 := by
+    have := hlt 0 5 (by decide)
+    rw [hs5, dotProduct_neg, d0f] at this
+    linarith
+  have h1' : a 1 ⬝ᵥ s 2 < 1 := hlt 1 2 (by decide)
+  have h1 : 0 < a 1 ⬝ᵥ s 2 := by
+    have := hlt 1 0 (by decide)
+    rw [d1e] at this
+    linarith
+  have h2' : a 2 ⬝ᵥ s 3 < 1 := hlt 2 3 (by decide)
+  have h2 : 0 < a 2 ⬝ᵥ s 3 := by
+    have := hlt 2 1 (by decide)
+    rw [hs1, dotProduct_add, d2e, d2f] at this
+    linarith
+  obtain ⟨w₀, w₁, w₂, hc, l00, l01, l11, l12, l22, l23⟩ :=
+    crit_hexagon_of_dots hD h0 h0' h1 h1' h2 h2' d0e d0f d1e rfl d2e d2f
+  -- the hexagon `w` and its edge lines
+  have hw : IsCSHexagon (hex_mk w₀ w₁ w₂) := hex_isCSHexagon_mk_iff.2 hc
+  set w := hex_mk w₀ w₁ w₂ with hwdef
+  have hline3 : ∀ j, a j ⬝ᵥ w j = 1 ∧ a j ⬝ᵥ w (j + 1) = 1 →
+      a (j + 3) ⬝ᵥ w (j + 3) = 1 ∧ a (j + 3) ⬝ᵥ w (j + 3 + 1) = 1 := by
+    rintro j ⟨e1, e2⟩
+    rw [show j + 3 + 1 = j + 1 + 3 by ring, (hw j).1, (hw (j + 1)).1, hasymm j, neg_dotProduct,
+      neg_dotProduct, dotProduct_neg, dotProduct_neg, neg_neg, neg_neg]
+    exact ⟨e1, e2⟩
+  have hl0 : a 0 ⬝ᵥ w 0 = 1 ∧ a 0 ⬝ᵥ w (0 + 1) = 1 := ⟨l00, l01⟩
+  have hl1 : a 1 ⬝ᵥ w 1 = 1 ∧ a 1 ⬝ᵥ w (1 + 1) = 1 := ⟨l11, l12⟩
+  have hl2 : a 2 ⬝ᵥ w 2 = 1 ∧ a 2 ⬝ᵥ w (2 + 1) = 1 := ⟨l22, l23⟩
+  have hline : ∀ j, a j ⬝ᵥ w j = 1 ∧ a j ⬝ᵥ w (j + 1) = 1 := by
+    intro j
+    rcases hex_cases j with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact hl0
+    · exact hl1
+    · exact hl2
+    · exact hline3 0 hl0
+    · exact hline3 1 hl1
+    · exact hline3 2 hl2
+  have hn : mm_normal w = a := by
+    funext j
+    have := mm_normal_dot_self hw j
+    exact crit_eq_of_dot (hw j).2.1.ne' (this.1.trans (hline j).1.symm)
+      (this.2.trans (hline j).2.symm)
+  exact ⟨w, hw, by rw [← hn, mm_polarHexagon_normal hw]⟩
+
+/-- The six lattice points of Theorem 2.3.6 for a critical lattice `L`: `s₀, s₁, s₂` and their
+reflections, numbered counterclockwise. -/
+lemma crit_six_points (hK : IsCCSDisk K) {L : Submodule ℤ (Fin 2 → ℝ)}
+    (hL : IsCriticalLattice K L) :
+    ∃ s : ZMod 6 → Fin 2 → ℝ, (∀ j, s j ∈ L) ∧ (∀ j, s j ∈ frontier K) ∧ s 0 - s 1 + s 2 = 0 ∧
+      (∀ j, s (j + 3) = -s j) ∧ 0 < det2 (s 0) (s 1) := by
+  obtain ⟨s₀, s₁, s₂, h0L, h1L, h2L, h0K, h1K, h2K, -, h1, hdetL, -⟩ := (theorem2_3_6 hK).1 L hL
+  have hne : det2 s₀ s₁ ≠ 0 := by
+    intro h
+    obtain ⟨hd, hs⟩ := hL.1
+    have : IsZLattice ℝ L := ⟨hs⟩
+    have hpos : 0 < latticeDet L := by unfold latticeDet; exact ZLattice.covolume_pos L
+    rw [hdetL, h, abs_zero] at hpos
+    exact lt_irrefl _ hpos
+  have hneg : ∀ x ∈ frontier K, -x ∈ frontier K :=
+    fun x hx ↦ External.MinkowskiMahler.mm_neg_mem_frontier hK hx
+  obtain ⟨f01, f11, f21, f31, f41, f51, -, -, -, -, -, -, f03, f13, f23, f33, f43, f53⟩ :=
+    hex_zmod_facts
+  have hsym : ∀ a b c : Fin 2 → ℝ, ∀ j, hex_mk a b c (j + 3) = -hex_mk a b c j := by
+    intro a b c j
+    rcases hex_cases j with rfl | rfl | rfl | rfl | rfl | rfl
+    · rw [f03]; rfl
+    · rw [f13]; rfl
+    · rw [f23]; rfl
+    · rw [f33]; exact (neg_neg a).symm
+    · rw [f43]; exact (neg_neg b).symm
+    · rw [f53]; exact (neg_neg c).symm
+  have hall : ∀ (P : (Fin 2 → ℝ) → Prop) (a b c : Fin 2 → ℝ), (∀ x, P x → P (-x)) → P a → P b →
+      P c → ∀ j, P (hex_mk a b c j) := by
+    intro P a b c hP ha hb hc j
+    rcases hex_cases j with rfl | rfl | rfl | rfl | rfl | rfl
+    · exact ha
+    · exact hb
+    · exact hc
+    · exact hP _ ha
+    · exact hP _ hb
+    · exact hP _ hc
+  rcases lt_or_gt_of_ne hne with hlt | hgt
+  · -- clockwise: take `s₀, -s₂, -s₁`
+    refine ⟨hex_mk s₀ (-s₂) (-s₁), hall (· ∈ L) _ _ _ (fun x hx ↦ L.neg_mem hx) h0L
+      (L.neg_mem h2L) (L.neg_mem h1L), hall (· ∈ frontier K) _ _ _ hneg h0K (hneg _ h2K)
+      (hneg _ h1K), ?_, hsym _ _ _, ?_⟩
+    · change s₀ - -s₂ + -s₁ = 0
+      rw [h1]; abel
+    · change 0 < det2 s₀ (-s₂)
+      have : det2 s₀ (-s₂) = -det2 s₀ s₁ := by
+        rw [h1]; simp only [det2, Pi.neg_apply, Pi.add_apply]; ring
+      rw [this]; linarith
+  · refine ⟨hex_mk s₀ s₁ s₂, hall (· ∈ L) _ _ _ (fun x hx ↦ L.neg_mem hx) h0L h1L h2L,
+      hall (· ∈ frontier K) _ _ _ hneg h0K h1K h2K, ?_, hsym _ _ _, hgt⟩
+    change s₀ - s₁ + s₂ = 0
+    rw [h1]; abel
+
+/-- **The area of a least-area hexagon is `4Δ(K)`** (the book's proof of Theorem 2.3.9). Let
+`L̃` be a critical lattice of `K` (`crit_exists_critical`) and `H̃_K` its critical hexagon: the
+hexagon bounded by the support lines of Theorem 2.3.7 at the six points of `L̃` on the boundary
+of `K` given by Theorem 2.3.6. Both `H_K` and `H̃_K` have least area among the centrally
+symmetric hexagons circumscribing `K`: `H̃_K` is such a hexagon (`crit_exists_isCSHexagon`), so
+`area(H_K) ≤ area(H̃_K)`; the edges of `H_K` are symmetric support lines of `K`
+(`mm_isSupportLine_normal`), no two of them equal, so `area(H̃_K) ≤ area(H_K)` by
+Theorem 2.3.7 (4). Hence `area(H_K) = area(H̃_K) = 4Δ(K)` by Theorem 2.3.7 (2). -/
+lemma crit_volume_eq (hK : IsCCSDisk K) (hpar : ¬ IsParallelogram K)
+    (hv : IsLeastAreaHexagon K v) : volume.real (hexagonOf v) = 4 * minDeterminant K := by
+  -- a critical lattice `L̃`, its six boundary points (Theorem 2.3.6) and its critical hexagon
+  -- (Theorem 2.3.7)
+  obtain ⟨L, hL⟩ := crit_exists_critical hK
+  obtain ⟨s, hsL, hsK, h012, hsymm, hpos⟩ := crit_six_points hK hL
+  obtain ⟨a, ha, -⟩ := theorem2_3_7 hK hpar hL hsL hsK h012 hsymm
+  have hsK' : ∀ j, s j ∈ K := fun j ↦ External.MinkowskiMahler.mm_mem_of_frontier hK (hsK j)
+  obtain ⟨w, hw, hwa⟩ := crit_exists_isCSHexagon hK h012 hsymm hsK' hpos ha
+  -- `area(H_K) ≤ area(H̃_K)`: `H̃_K` is a centrally symmetric hexagon circumscribing `K`
+  have hKw : K ⊆ hexagonOf w := by
+    rw [hwa]
+    exact fun x hx j ↦ crit_dot_le_one hK (ha.2.1 j).1 hx
+  have hle := hv.2.2 w hw hKw
+  -- `area(H̃_K) ≤ area(H_K)`: Theorem 2.3.7 (4) for the edge lines of `H_K`
+  have hge := ha.2.2.2.2.2.2 (mm_normal v) (crit_normal_add_three hv.1)
+    (fun i j hij ↦ crit_normal_injective hv.1 hij) (mm_isSupportLine_normal hK hv)
+  rw [mm_polarHexagon_normal hv.1, ← hwa] at hge
+  have heq : volume (hexagonOf v) = volume (hexagonOf w) := le_antisymm hle hge
+  rw [measureReal_def, heq, ← measureReal_def, hwa]
+  exact ha.2.2.2.2.1
+
 /-- **The proof of Theorem 2.3.9.** For a least-area centrally symmetric hexagon `H_K` around
 `K`, with edge midpoints `s_j`: `K` is not a parallelogram, the `s_j` lie on the boundary of `K`
 and satisfy the multi-point conditions, and the lattice `L` generated by `s₀, s₁` is a critical
@@ -1174,37 +1078,33 @@ lemma mm_leastArea_critical (hK : IsCCSDisk K) (hv : IsLeastAreaHexagon K v) :
       hexMidpoint v 0 - hexMidpoint v 1 + hexMidpoint v 2 = 0 ∧
       ∀ j, hexMidpoint v (j + 3) = -hexMidpoint v j := by
   have hpar := mm_not_isParallelogram hK hv
+  -- the edge midpoints `s_j` lie on the boundary of `K` and satisfy the multi-point conditions
   set s := hexMidpoint v with hs
   have hsymm : ∀ j, s (j + 3) = -s j := mm_hexMidpoint_add_three hv.1
-  have hsub : s 1 - s 0 = s 2 := mm_hexMidpoint_sub hv.1
+  have hsub : s 1 - s 0 = s 2 := hex_hexMidpoint_sub hv.1
   have h012 : s 0 - s 1 + s 2 = 0 := by rw [← hsub]; abel
   have h1 : s 1 = s 0 + s 2 := by rw [← hsub]; abel
-  have hfr : ∀ j, s j ∈ frontier K := mm_hexMidpoint_mem_frontier hK hv
-  -- Theorem 2.3.6 (converse part): `Δ(K) ≤ |det(s₀, s₁)|`, with equality iff `L` is critical
-  have h236 := (theorem2_3_6 hK).2 (s 0) (s 1) (s 2) (hfr 0) (hfr 1) (hfr 2) h1
-  -- `L` is admissible (Mahler's Lemma 1)
+  have hfr : ∀ j, s j ∈ frontier K := hex_hexMidpoint_mem_frontier hK hv
+  -- `L = ℤ s₀ + ℤ s₁` is admissible (Mahler's Lemma 1)
   have hadm : IsAdmissible K (latticeSpan (s 0) (s 1)) := by
     have := External.MinkowskiMahler.mm_isAdmissible hK (hfr 0) (hfr 2) (by rw [← h1]; exact hfr 1)
     rwa [← h1] at this
-  have hpos : 0 < det2 (s 0) (s 1) := mm_det2_hexMidpoint_pos hv.1
+  have hpos : 0 < det2 (s 0) (s 1) := hex_det2_hexMidpoint_pos hv.1
   have hlat : IsPlaneLattice (latticeSpan (s 0) (s 1)) :=
     External.MinkowskiMahler.mm_isLattice_span hpos.ne'
-  -- `area(H_K) = 4 |det(s₀, s₁)| = det(2L)`, and `area(H_K) ≤ 4 det(L')` for admissible `L'`
-  have harea : volume.real (hexagonOf v) = 4 * det2 (s 0) (s 1) := mm_volume_hexagonOf hv.1
-  have hle : |det2 (s 0) (s 1)| ≤ minDeterminant K := by
-    unfold minDeterminant
-    refine le_csInf ⟨_, latticeSpan (s 0) (s 1), hlat, hadm, rfl⟩ ?_
-    rintro d ⟨L', hL', hadm', rfl⟩
-    have := mm_volume_le hK hpar hv hL' hadm'
-    rw [abs_of_pos hpos]
+  -- `area(H_K) = 4 det(L)`, and `area(H_K) = 4Δ(K)`: `L` is critical
+  have harea : volume.real (hexagonOf v) = 4 * det2 (s 0) (s 1) := hex_volume_hexagonOf hv.1
+  have hdet : latticeDet (latticeSpan (s 0) (s 1)) = minDeterminant K := by
+    rw [show latticeDet (latticeSpan (s 0) (s 1)) = |det2 (s 0) (s 1)| from
+      External.MinkowskiMahler.mm_det_span hpos.ne', abs_of_pos hpos]
+    have := crit_volume_eq hK hpar hv
     linarith
-  have hcrit := h236.2.1 (le_antisymm hle h236.1)
-  refine ⟨hpar, hcrit, fun j ↦ ⟨?_, hfr j⟩, h012, hsymm⟩
+  refine ⟨hpar, ⟨hlat, hadm, hdet⟩, fun j ↦ ⟨?_, hfr j⟩, h012, hsymm⟩
   have m0 : s 0 ∈ latticeSpan (s 0) (s 1) := Submodule.subset_span (by simp)
   have m1 : s 1 ∈ latticeSpan (s 0) (s 1) := Submodule.subset_span (by simp)
   have m2 : s 2 ∈ latticeSpan (s 0) (s 1) := by
     rw [← hsub]; exact Submodule.sub_mem _ m1 m0
-  rcases mm_cases j with rfl | rfl | rfl | rfl | rfl | rfl
+  rcases hex_cases j with rfl | rfl | rfl | rfl | rfl | rfl
   · exact m0
   · exact m1
   · exact m2
@@ -1219,11 +1119,16 @@ hexagon of least area circumscribing `K`. Then `H_K` is a critical hexagon in th
 Definition 2.3.8.
 
 Proof (the book's, `mm_leastArea_critical`). The edge midpoints `s_j` of `H_K` lie on the boundary
-of `K` (Remark 2.2.4) and satisfy the multi-point conditions; `L = ℤ s₀ + ℤ s₁` is `K`-admissible,
-and `area(H_K) = det(2L) = 4 |det(s₀, s₁)|` (`mm_volume_hexagonOf`). `L` is critical because
-`area(H_K) ≤ 4 det(L')` for every admissible lattice `L'`. Finally Theorem 2.3.7, applied to `L`
-and the `s_j`, gives support lines `ℓ_j` at the `s_j` with the properties listed there; they are
-the unique support lines at the `s_j`, hence the lines of the edges of `H_K`, which bound `H_K`.
+of `K` (`hex_hexMidpoint_mem_frontier`) and satisfy the multi-point conditions;
+`L = ℤ s₀ + ℤ s₁` is `K`-admissible, and `area(H_K) = det(2L) = 4 det(L)`
+(`hex_volume_hexagonOf`). `L` is critical (`crit_volume_eq`): let `L̃` be a critical lattice of
+`K` (`crit_exists_critical`), with six points on the boundary of `K` (Theorem 2.3.6) and critical
+hexagon `H̃_K` (Theorem 2.3.7). Both `H_K` and `H̃_K` have least area among the centrally
+symmetric circumscribing hexagons (for `H̃_K`, Theorem 2.3.7 (4)), so their areas are equal, and
+`area(H̃_K) = 4Δ(K)` (Theorem 2.3.7 (2)); hence `det(L) = Δ(K)`. Finally Theorem 2.3.7, applied to
+`L` and the `s_j`, gives support lines `ℓ_j` at the `s_j` with the properties listed there; they
+are the unique support lines at the `s_j`, hence the lines of the edges of `H_K`, which bound
+`H_K`.
 
 Departures from the paper:
 * `K` is not a parallelogram (Definition 2.3.8 requires it, and the book applies Theorem 2.3.7):
@@ -1231,14 +1136,18 @@ Departures from the paper:
   arbitrarily close to its own, and none of equal area).
 * The admissibility of `L` is Mahler's Lemma 1 (the converse part of Theorem 2.3.6,
   `External.MinkowskiMahler.mm_isAdmissible`) instead of the tiling of the plane by translates
-  of `H_K`, and `area(H_K) = 4 det(s₀, s₁)` is computed (`mm_volume_hexagonOf`) instead of using
-  that `H_K` is a fundamental domain of `2L`.
-* The book proves `area(H_K) ≤ 4Δ(K)` by comparing `H_K` with the critical hexagon `H̃_K` of a
-  critical lattice `L̃` of `K`; neither the existence of a critical lattice nor the fact that
-  `H̃_K` is a centrally symmetric hexagon in the sense of `IsCSHexagon` is established (by the
-  book or here). Instead (`mm_volume_le`): an admissible `L'` gives the lattice packing `K + 2L'`
-  (the remark after Definition 2.3.1), so `area(K)/det(2L') ≤ δ_L(K) = δ(K) = area(K)/area(H_K)`
-  by Theorems 2.1.3 and 2.2.2, that is, `area(H_K) ≤ 4 det(L')`. -/
+  of `H_K`, and `area(H_K) = 4 det(s₀, s₁)` is computed (`hex_volume_hexagonOf`) instead of using
+  that `H_K` is a fundamental domain of `2L`: the formalization has no lattice tiling by `H_K` to
+  appeal to (Lemma 2.2.1 is not proved), while both facts follow directly from the geometry of
+  the six edge midpoints.
+
+Gaps of the book's comparison of `H_K` with `H̃_K`, filled along its lines: a critical lattice
+`L̃` exists (`crit_exists_critical`, by Mahler's compactness theorem, which the book does not
+state); `H̃_K` is a centrally symmetric hexagon in the sense of `IsCSHexagon`
+(`crit_exists_isCSHexagon`, from the uniqueness and distinctness of the support lines in
+Theorem 2.3.7); and the edges of `H_K` lie on six distinct symmetric support lines
+(`crit_normal_injective`, `crit_normal_add_three`, `mm_isSupportLine_normal`), so that
+Theorem 2.3.7 (4) applies to `H_K`. -/
 theorem theorem2_3_9 {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {v : ZMod 6 → Fin 2 → ℝ}
     (hv : IsLeastAreaHexagon K v) : IsCriticalHexagon K (hexagonOf v) := by
   -- the edge midpoints `s_j` and the critical lattice `L = ℤ s₀ + ℤ s₁`

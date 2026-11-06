@@ -8,6 +8,7 @@ public import SmoothedPolygons.Ch2.BalancedCircle
 public import SmoothedPolygons.Ch2.BalancedDensity
 public import SmoothedPolygons.Ch2.Boundary
 public import SmoothedPolygons.Ch2.Density
+public import SmoothedPolygons.Ch2.Hexagon
 public import SmoothedPolygons.Ch2.Mahler
 public import SmoothedPolygons.Ch2.MultiCurve
 public import SmoothedPolygons.Ch2.Reinhardt

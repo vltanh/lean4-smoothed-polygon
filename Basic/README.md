@@ -5,6 +5,7 @@ field as Mathlib files it. Nothing here imports [`External`](../External) or [`S
 
 | File | Content | Possible destination |
 | --- | --- | --- |
+| `Algebra/Module/ZLattice/PlaneCritical.lean` | Mahler's compactness theorem in the plane, as the existence of critical lattices: for an open `U ∋ 0`, if some lattice has no nonzero point in `U`, one of least covolume among such lattices exists; Lagrange–Gauss reduced bases; the lattice `ℤa + ℤb` and its covolume `\|det(a, b)\|` | Mathlib (`Mathlib/Algebra/Module/ZLattice/`) |
 | `Analysis/Calculus/MatrixEntrywise.lean` | entrywise derivatives and Lipschitz conditions for matrix-valued functions of a real variable; their algebra (sums, products, inverse, trace, `det` of `2 × 2`, transpose, chain rule), continuity entry by entry, and the bridge to `HasDerivAt` | Mathlib (`Mathlib/Analysis/Matrix/`, `Mathlib/Analysis/Calculus/Deriv/`) |
 | `Analysis/Calculus/MatrixEntrywiseExp.lean` | the derivative of `t ↦ exp(tA)` for matrices, entry by entry, and identities for `exp(sA) exp(tA)` | Mathlib (`Mathlib/Analysis/Normed/Algebra/MatrixExponential.lean`) |
 | `Analysis/Calculus/MatrixFTC.lean` | fundamental theorem of calculus for matrix-valued curves with derivatives off a countable set; integral equations and back; zero derivative implies constant; Grönwall uniqueness for linear and affine matrix ODEs | Mathlib (`Mathlib/Analysis/ODE/`) |
