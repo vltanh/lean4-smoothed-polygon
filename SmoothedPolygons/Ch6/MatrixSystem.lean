@@ -187,19 +187,139 @@ theorem traceForm_controlMatrix_stateX_neg {q : MatrixState} (hq : q ∈ matrixD
     {u : Fin 3 → ℝ} (hu : u ∈ controlSimplex) : traceForm (controlMatrix u) (stateX q) < 0 :=
   (lemma3_3_4 (stateX q) (trace_slMatrix _)).1 hq.2 u hu
 
+/-- A family `f(·, u)` that is `C¹` jointly in `(q, u)` on an open set containing `Ω × U` is `C¹` in
+the sense of the maximum principle. (The same as the private `iw_isC1On_of_contDiffOn` of
+`SmoothedPolygons/Ch6/LiftedSystem.lean`.) -/
+private lemma mxa_isC1On_of_contDiffOn {E V F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [FiniteDimensional ℝ E] [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
+    [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
+    {f : E → V → F} {Ω : Set E} {U : Set V} {O : Set (E × V)} (hO : IsOpen O)
+    (hΩU : Ω ×ˢ U ⊆ O) (hf : ContDiffOn ℝ 1 (fun q : E × V ↦ f q.1 q.2) O) : IsC1On f Ω U where
+  continuousOn := hf.continuousOn.mono hΩU
+  differentiableAt x hx u hu := by
+    have hd : DifferentiableAt ℝ (fun q : E × V ↦ f q.1 q.2) (x, u) :=
+      (hf.contDiffAt (hO.mem_nhds (hΩU ⟨hx, hu⟩))).differentiableAt one_ne_zero
+    exact DifferentiableAt.comp (𝕜 := ℝ) x hd
+      (by fun_prop : DifferentiableAt ℝ (fun x : E ↦ (x, u)) x)
+  continuousOn_fderiv := by
+    have key : ∀ q ∈ O, fderiv ℝ (f · q.2) q.1 =
+        (fderiv ℝ (fun q : E × V ↦ f q.1 q.2) q).comp (ContinuousLinearMap.inl ℝ E V) := by
+      rintro ⟨x, u⟩ hq
+      have hd := (hf.contDiffAt (hO.mem_nhds hq)).differentiableAt one_ne_zero
+      exact (HasFDerivAt.comp (𝕜 := ℝ) x hd.hasFDerivAt (hasFDerivAt_prodMk_left x u)).fderiv
+    refine ContinuousOn.congr ?_ (fun q hq ↦ key q (hΩU hq))
+    exact ((hf.continuousOn_fderiv_of_isOpen hO le_rfl).clm_comp continuousOn_const).mono hΩU
+
 /-- The dynamics satisfies the regularity hypotheses of the maximum principle on `GL₂⁺(ℝ) × C`:
 it is jointly smooth where `⟨Z_u, X⟩ ≠ 0`, an open set containing `GL₂⁺(ℝ) × C × U_T`
 (`traceForm_controlMatrix_stateX_neg`). -/
 theorem isC1On_matrixField : IsC1On matrixField matrixDomain controlSimplex := by
-  sorry
+  refine mxa_isC1On_of_contDiffOn
+    (O := {p | traceForm (controlMatrix p.2) (stateX p.1) ≠ 0}) ?_ ?_ ?_
+  · refine isOpen_ne_fun ?_ continuous_const
+    simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two,
+      controlMatrix, stateX, slMatrix, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
+    fun_prop
+  · rintro ⟨q, u⟩ ⟨hq, hu⟩
+    exact (traceForm_controlMatrix_stateX_neg hq hu).ne
+  · intro p hp
+    have hD : traceForm (controlMatrix p.2) (stateX p.1) ≠ 0 := hp
+    simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two,
+      controlMatrix, stateX, slMatrix, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one] at hD
+    refine ContDiffAt.contDiffWithinAt (ContDiffAt.prodMk ?_ ?_)
+    · refine contDiffAt_pi.2 fun i ↦ contDiffAt_pi.2 fun j ↦ ?_
+      fin_cases i <;> fin_cases j <;>
+        simp only [stateG, stateX, slMatrix, Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply,
+          Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.empty_val',
+          Matrix.cons_val_fin_one, Fin.zero_eta, Fin.mk_one, Fin.isValue] <;>
+        fun_prop
+    · refine contDiffAt_pi.2 fun k ↦ ?_
+      fin_cases k <;>
+        simp only [slCoords, controlP, traceForm, Matrix.trace_fin_two, Matrix.sub_apply,
+          Matrix.mul_apply, Matrix.smul_apply, smul_eq_mul, Fin.sum_univ_two, controlMatrix,
+          stateX, slMatrix, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
+          Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one, Fin.zero_eta,
+          Fin.mk_one, Fin.isValue, Fin.reduceFinMk, Matrix.cons_val_two, Matrix.tail_cons,
+          Matrix.head_cons] <;>
+        fun_prop (disch := assumption)
 
 /-- The cost integrand is smooth (linear in `X`). -/
 theorem isC1On_matrixCost : IsC1On matrixCost matrixDomain controlSimplex := by
-  sorry
+  refine mxa_isC1On_of_contDiffOn (O := univ) isOpen_univ (subset_univ _) (ContDiff.contDiffOn ?_)
+  simp only [matrixCost, traceForm, J, stateX, slMatrix, Matrix.trace_fin_two, Matrix.mul_apply,
+    Fin.sum_univ_two, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
+    Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
+  fun_prop
 
 /-- The boundary map is smooth (polynomial). -/
 theorem contDiff_matrixBoundary : ContDiff ℝ 1 matrixBoundary := by
-  sorry
+  refine ContDiff.prodMk ?_ (ContDiff.prodMk ?_ (ContDiff.prodMk ?_ ?_))
+  · refine contDiff_pi.2 fun i ↦ contDiff_pi.2 fun j ↦ ?_
+    simp only [stateG, Matrix.sub_apply, Matrix.of_apply]
+    fun_prop
+  · refine contDiff_pi.2 fun k ↦ ?_
+    fin_cases k <;>
+      simp only [stateG, Matrix.of_apply, Fin.isValue, Fin.zero_eta, Fin.mk_one,
+        Fin.reduceFinMk, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val] <;>
+      fun_prop
+  · simp only [stateX, slMatrix, Matrix.det_fin_two_of]
+    fun_prop
+  · refine contDiff_pi.2 fun k ↦ ?_
+    fin_cases k <;>
+      simp only [stateX, slMatrix, Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply,
+        Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.empty_val',
+        Matrix.cons_val_fin_one, Fin.isValue, Fin.zero_eta, Fin.mk_one] <;>
+      fun_prop
+
+/-- A function whose restriction to the line through `w` in the direction `v` is the polynomial
+`t ↦ a + t b + t² c` has derivative `b` at `w` in the direction `v`. -/
+private lemma mxa_fderiv_apply_of_line {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [NormedAddCommGroup F] [NormedSpace ℝ F] {f : E → F} {w v : E}
+    (hf : DifferentiableAt ℝ f w) {a b c : F}
+    (h : ∀ t : ℝ, f (w + t • v) = a + t • b + t ^ 2 • c) : fderiv ℝ f w v = b := by
+  have hl : HasDerivAt (fun t : ℝ ↦ w + t • v) v 0 := by
+    simpa using ((hasDerivAt_id (0 : ℝ)).smul_const v).const_add w
+  have h1 : HasDerivAt (fun t : ℝ ↦ f (w + t • v)) (fderiv ℝ f w v) 0 := by
+    have hf' : HasFDerivAt f (fderiv ℝ f w) (w + (0 : ℝ) • v) := by
+      simpa using hf.hasFDerivAt
+    exact hf'.comp_hasDerivAt (0 : ℝ) hl
+  have h2 : HasDerivAt (fun t : ℝ ↦ f (w + t • v)) b 0 := by
+    simp_rw [h]
+    convert (((hasDerivAt_id (0 : ℝ)).smul_const b).const_add a).add
+      ((hasDerivAt_pow 2 (0 : ℝ)).smul_const c) using 1
+    · rfl
+    · simp
+  exact h1.unique h2
+
+/-- `slMatrix` is linear; it maps `0` to `0`. -/
+private lemma mxa_slMatrix_zero : slMatrix 0 = 0 := by
+  ext i j; fin_cases i <;> fin_cases j <;> simp [slMatrix]
+
+/-- **The derivative of the boundary map**: the identity on `g(0)` and on the three entries of
+`g(t_f)`, the derivative `Y ↦ -⟨X(0), Y⟩` of `det` at `X(0)` on `𝔰𝔩₂(ℝ)`, and
+`(δX(0), δX(t_f)) ↦ δX(t_f) - R⁻¹ δX(0) R` on the two entries of `X(t_f)`. -/
+theorem fderiv_matrixBoundary_apply (w v : MatrixState × MatrixState) :
+    fderiv ℝ matrixBoundary w v =
+      (v.1.1, ![v.2.1 0 0, v.2.1 0 1, v.2.1 1 0], -traceForm (stateX w.1) (slMatrix v.1.2),
+        ![v.2.2 0 - (R⁻¹ * slMatrix v.1.2 * R) 0 0, v.2.2 1 - (R⁻¹ * slMatrix v.1.2 * R) 0 1]) := by
+  -- on the line `w + t v` the boundary map is `G(w) + t G'(w) v + t² (0, 0, det δX(0), 0)`
+  refine mxa_fderiv_apply_of_line (contDiff_matrixBoundary.differentiable one_ne_zero w)
+    (a := matrixBoundary w) (c := (0, 0, (slMatrix v.1.2).det, 0)) fun t ↦ ?_
+  refine Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ ?_))
+  · funext i j
+    simp [matrixBoundary, stateG]
+    ring
+  · funext k
+    fin_cases k <;> simp [matrixBoundary, stateG] <;> ring
+  · simp [matrixBoundary, stateX, slMatrix, traceForm, Matrix.det_fin_two, Matrix.trace_fin_two,
+      Matrix.mul_apply, Fin.sum_univ_two]
+    ring
+  · funext k
+    fin_cases k <;>
+      simp [matrixBoundary, stateX, slMatrix, Matrix.mul_apply, Fin.sum_univ_two] <;>
+      ring
 
 /-- **The boundary map is a submersion** at every `(q(0), q(t_f))` with `q(0) ∈ GL₂⁺(ℝ) × C`:
 its derivative is block triangular, the identity on `g(0)`, three entries of `g(t_f)`, two
@@ -207,7 +327,21 @@ entries of `X(t_f)`, and the derivative `W ↦ -⟨X(0), W⟩` of `det` at `X(0)
 `X(0) ≠ 0`. -/
 theorem surjective_fderiv_matrixBoundary {w : MatrixState × MatrixState}
     (hw : w.1 ∈ matrixDomain) : Function.Surjective (fderiv ℝ matrixBoundary w) := by
-  sorry
+  rintro ⟨A, b, c, d⟩
+  -- `X(0)₀₁ < 0` on the cone `C`, so `-⟨X(0), s E₁₀⟩ = -s X(0)₀₁` takes every value
+  have hβ : stateX w.1 0 1 ≠ 0 := (stateX_zero_one_neg hw).ne
+  set y : Fin 3 → ℝ := ![0, 0, -c / stateX w.1 0 1] with hy
+  refine ⟨((A, y), (![![b 0, b 1], ![b 2, 0]],
+    ![d 0 + (R⁻¹ * slMatrix y * R) 0 0, d 1 + (R⁻¹ * slMatrix y * R) 0 1, 0])), ?_⟩
+  rw [fderiv_matrixBoundary_apply]
+  refine Prod.ext rfl (Prod.ext ?_ (Prod.ext ?_ ?_))
+  · funext k
+    fin_cases k <;> rfl
+  · simp only [hy, traceForm, slMatrix, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two]
+    simp
+    field_simp
+  · funext k
+    fin_cases k <;> simp
 
 /-! ### Directions tangent to the boundary condition
 
@@ -220,14 +354,26 @@ spanned by the following vectors, which the transversality conditions are applie
 theorem fderiv_matrixBoundary_g₁₁ (w : MatrixState × MatrixState) :
     fderiv ℝ matrixBoundary w
       ((0 : MatrixState), ((Pi.single 1 (Pi.single 1 (1 : ℝ)) : Fin 2 → Fin 2 → ℝ), 0)) = 0 := by
-  sorry
+  rw [fderiv_matrixBoundary_apply]
+  refine Prod.ext rfl (Prod.ext ?_ (Prod.ext ?_ ?_))
+  · funext k
+    fin_cases k <;> simp
+  · simp [mxa_slMatrix_zero, traceForm]
+  · funext k
+    fin_cases k <;> simp [mxa_slMatrix_zero]
 
 /-- The direction `E₁₀` of `X(t_f)` (the coordinate `c`) is tangent to the boundary condition
 (the equation `X(t_f)₁₀ = (R⁻¹X(0)R)₁₀` is left out). -/
 theorem fderiv_matrixBoundary_X₁₀ (w : MatrixState × MatrixState) :
     fderiv ℝ matrixBoundary w ((0 : MatrixState), (0, (Pi.single 2 (1 : ℝ) : Fin 3 → ℝ))) =
       0 := by
-  sorry
+  rw [fderiv_matrixBoundary_apply]
+  refine Prod.ext rfl (Prod.ext ?_ (Prod.ext ?_ ?_))
+  · funext k
+    fin_cases k <;> rfl
+  · simp [mxa_slMatrix_zero, traceForm]
+  · funext k
+    fin_cases k <;> simp [mxa_slMatrix_zero]
 
 /-- The variations `δX(0) = Y` with `⟨X(0), Y⟩ = 0` (tangent to `det X = 1`) together with
 `δX(t_f) = R⁻¹YR` are tangent to the boundary condition: "the initial and terminal submanifolds
@@ -236,6 +382,12 @@ theorem fderiv_matrixBoundary_conj (w : MatrixState × MatrixState) {y : Fin 3 �
     (hy : traceForm (stateX w.1) (slMatrix y) = 0) :
     fderiv ℝ matrixBoundary w (((0 : Fin 2 → Fin 2 → ℝ), y),
       ((0 : Fin 2 → Fin 2 → ℝ), slCoords (R⁻¹ * slMatrix y * R))) = 0 := by
-  sorry
+  rw [fderiv_matrixBoundary_apply]
+  refine Prod.ext rfl (Prod.ext ?_ (Prod.ext ?_ ?_))
+  · funext k
+    fin_cases k <;> rfl
+  · simp [hy]
+  · funext k
+    fin_cases k <;> simp [slCoords]
 
 end SmoothedPolygons
