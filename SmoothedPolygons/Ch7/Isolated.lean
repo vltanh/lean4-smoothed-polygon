@@ -14,8 +14,7 @@ public import SmoothedPolygons.Ch7.Isolated.FixedPoints
 isolated extremal. That is, in some neighborhood of the set of initial conditions in the cotangent
 space, the only extremal trajectory satisfying the transversality conditions at the endpoints is
 that of the smoothed octagon." The book gives a proof sketch (E32 of the audit). This file states
-the theorem; the sketch is made into a sequence of lemmas, the elementary ones proved and the
-analytic ones left with `sorry`, in the modules
+the theorem; the sketch is made into a sequence of lemmas, all proved, in the modules
 
 * `SmoothedPolygons.Ch7.Isolated.Defs`: all definitions (the statement's vocabulary and the plan's);
 * `SmoothedPolygons.Ch7.Isolated.VertexFlow`: steps 0–1;
@@ -75,11 +74,17 @@ Write `q = (X, Λ₁, Λ_R) ∈ 𝔰𝔩₂(ℝ)³` and normalize `λ_cost = -1`
    edge `[e₂, e₃]` of `U_T` (it is the Poisson bracket `{H₃, H₂}`), so near the octagon's switching
    points no singular arc and no chattering can occur.
 3. *Same switching structure* (`iso_section_crossing`, `iso_return`). An extremal whose initial
-   condition is near the octagon's and whose terminal time is near `t_f` stays near the octagon's
-   trajectory (Grönwall, together with the strict inequalities of Lemma 7.5.3 away from the
-   switching times and step 2 near them), is bang-bang with controls `e₃, e₁, e₂, e₃` (up to the
-   shift), crosses the section `χ₂₃ = 0` near `t = 0` (or near `t = T`), and, restarted there,
-   returns to its initial point after four applications of the Poincaré map `f` (eqn:fp).
+   condition is near the octagon's and whose terminal time is near `t_f` is bang-bang with
+   controls `e₃, e₁, e₂, e₃` (up to the shift), crosses the section `χ₂₃ = 0` near `t = 0` or near
+   `t = 3t_sw` (near `t = T` it crosses the conjugate surface `χ₃₁ = 0` instead), and, restarted
+   there, returns to its initial point after four applications of the Poincaré map `f` (eqn:fp).
+   The proof (`SmoothedPolygons.Ch7.Isolated.Return`) shows that an extremal uses `e₃` for as long
+   as the closed-form `e₃`-flow from its initial point has `χ₃₁, χ₃₂ > 0` (continuation with the
+   maximum condition and `iso_arc_eq_vertexFlow`); the flow from points near `q_oct` inherits the
+   strict inequalities of Lemma 7.5.3 and the transversal zeros of step 2 by joint continuity and
+   compactness; and on the switching surface a first-order expansion of `χ₃₂` along the integral
+   curve, with `iso_edge_slope`, shows that `χ₃₂` becomes positive at once (no singular arc, no
+   chattering).
 4. *The Poincaré map* (`iso_poincareTime`, `iso_poincareMap`, `iso_poincareMap_qFix`,
    `iso_poincareMapCoords_hasStrictFDerivAt`). `f(q) = Ad(R) q(t_sw(q), q)`, with `t_sw(q)` the
    first positive zero of `χ₃₁` along the `e₃`-flow; by step 2 and the implicit function theorem it
@@ -141,11 +146,14 @@ characteristic polynomial of the section map at `q_fix(y₀)` are
 `2√3 D/(3u) = -iso_chi32Slope y₀`. These were obtained by differentiating the closed-form flow
 symbolically and are exact identities in `(y₀, ℓ)` (`ℓ` treated as an independent symbol).
 
-What is proved here: `theorem7_7_1_octagon` (non-vacuity), `iso_smul`, `iso_chi32Slope_pos`,
-`iso_qFix_isSectionPt`, `iso_poincareTime_qFix` and `iso_poincareMap_qFix` (from
-`iso_vertexFlow_qFix`), `iso_octagon_bounds`, `iso_det_quadratic`,
-`iso_sectionMatrix_octagon_hyperbolic` (from `iso_sectionMatrix_charpoly`),
-`iso_trace_sq_of_pow_four`, `iso_y0_of_closing`.
+What is proved in this file: `theorem7_7_1` (the assembly) and `theorem7_7_1_octagon`
+(non-vacuity). The assembly follows the plan (section *Assembly* below) and fills in two points
+the plan leaves implicit: the group trajectory of the restarted extremal is the spline of `y₀` by
+uniqueness for `g' = gX` (`ifp_g_unique`), and the control of the original extremal is recovered
+almost everywhere from the maximum condition, since away from its switching times the octagon's
+control is the unique maximizer of the Hamiltonian (Lemma 7.5.3, conjugated; `ifp_octagon_max`).
+Undoing the restart uses the twisted periodicity of the octagon's lift (`ifp_unshift`,
+`ifp_unshift_g`).
 -/
 
 @[expose] public section
@@ -153,6 +161,312 @@ What is proved here: `theorem7_7_1_octagon` (non-vacuity), `iso_smul`, `iso_chi3
 namespace SmoothedPolygons
 
 open Matrix Set Filter Topology MeasureTheory
+
+/-! ### Assembly helpers -/
+
+/-- Shifting the argument of a piecewise curve by `n` switching intervals conjugates it. -/
+lemma ifp_pw_add {A B : Mat2} {τ : ℝ} (hτ : 0 < τ) (f0 : ℝ → Mat2) {x : ℝ} (hx : 0 ≤ x)
+    (n : ℕ) : poly_pw A B τ f0 (x + n * τ) = A ^ n * poly_pw A B τ f0 x * B ^ n := by
+  have hfl : ⌊(x + n * τ) / τ⌋₊ = ⌊x / τ⌋₊ + n := by
+    rw [add_div, mul_div_cancel_right₀ _ hτ.ne', Nat.floor_add_natCast (div_nonneg hx hτ.le)]
+  have hsub : x + n * τ - ((⌊x / τ⌋₊ + n : ℕ) : ℝ) * τ = x - ⌊x / τ⌋₊ * τ := by
+    push_cast; ring
+  simp only [poly_pw, hfl, hsub]
+  rw [show A ^ (⌊x / τ⌋₊ + n) = A ^ n * A ^ ⌊x / τ⌋₊ by rw [← pow_add, add_comm], pow_add]
+  simp only [Matrix.mul_assoc]
+
+/-- The octagon's state and costates have period `3τ` (`R³ = -I₂` is central). -/
+lemma ifp_pw_three {τ : ℝ} (hτ : 0 < τ) (f0 : ℝ → Mat2) {x : ℝ} (hx : 0 ≤ x) (k : ℕ) :
+    poly_pw R⁻¹ R τ f0 (x + 3 * τ * k) = poly_pw R⁻¹ R τ f0 x := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    have h := ifp_pw_add (A := R⁻¹) (B := R) hτ f0 (x := x + 3 * τ * k) (by positivity) 3
+    rw [show x + 3 * τ * k + ((3 : ℕ) : ℝ) * τ = x + 3 * τ * ((k + 1 : ℕ) : ℝ) by push_cast; ring,
+      ih, poly_Rinv_pow_three, poly_R_pow_three] at h
+    rw [h]
+    simp
+
+/-- After four switching intervals the octagon's state and costates are conjugated by `R`. -/
+lemma ifp_pw_four {τ : ℝ} (hτ : 0 < τ) (f0 : ℝ → Mat2) {x : ℝ} (hx : 0 ≤ x) :
+    poly_pw R⁻¹ R τ f0 (x + 4 * τ) = R⁻¹ * poly_pw R⁻¹ R τ f0 x * R := by
+  have h := ifp_pw_add (A := R⁻¹) (B := R) hτ f0 hx (3 * 1 + 1)
+  rw [poly_conj_pow_three_mul_add_one] at h
+  rw [← h]
+  norm_num
+
+/-- The time `s_oct = 3τ⌈s/(3τ)⌉ - s ∈ [0, 3τ)` of the octagon that corresponds to time `0` of an
+extremal restarted at `s` (`≡ -s` modulo the period `3τ`). -/
+noncomputable def ifp_sOct (τ s : ℝ) : ℝ := 3 * τ * ⌈s / (3 * τ)⌉₊ - s
+
+lemma ifp_sOct_mem {τ s : ℝ} (hτ : 0 < τ) (hs : 0 ≤ s) : ifp_sOct τ s ∈ Ico 0 (3 * τ) := by
+  have h3 : 0 < 3 * τ := by positivity
+  have h1 := Nat.le_ceil (s / (3 * τ))
+  have h2 := Nat.ceil_lt_add_one (div_nonneg hs h3.le)
+  have e : 3 * τ * (s / (3 * τ)) = s := by field_simp
+  unfold ifp_sOct
+  constructor
+  · nlinarith [mul_le_mul_of_nonneg_left h1 h3.le]
+  · nlinarith [mul_lt_mul_of_pos_left h2 h3]
+
+/-- Undoing a restart, for the state and the costates: if the twisted-periodic continuation of
+`F` (on `[0, T]`, `T = 4τ`, `F(T) = R⁻¹F(0)R`) started at `s` is the octagon's curve
+`O = poly_pw R⁻¹ R τ f₀`, then `F` is `O` started at `s_oct`. -/
+lemma ifp_unshift {τ T s : ℝ} (hτ : 0 < τ) (hT : T = 4 * τ) (hs : s ∈ Ico 0 T)
+    {F f0 : ℝ → Mat2} (hF : F T = R⁻¹ * F 0 * R)
+    (h : ∀ t ∈ Icc 0 T, poly_pw R⁻¹ R T F (s + t) = poly_pw R⁻¹ R τ f0 t) :
+    ∀ t ∈ Icc 0 T, F t = poly_pw R⁻¹ R τ f0 (ifp_sOct τ s + t) := by
+  have hTpos : 0 < T := by rw [hT]; positivity
+  have hE1 : ∀ x ∈ Icc 0 T, poly_pw R⁻¹ R T F x = F x := fun x hx ↦ by
+    have := poly_pw_of_mem_Icc (A := R⁻¹) (B := R) hTpos hF (i := 0) (t := x) (by simpa using hx)
+    simpa using this
+  have hE2 : ∀ x, 0 ≤ x → poly_pw R⁻¹ R T F (x + T) = R⁻¹ * poly_pw R⁻¹ R T F x * R :=
+    fun x hx ↦ by simpa using ifp_pw_add (A := R⁻¹) (B := R) hTpos F hx 1
+  have h2 : ∀ t ∈ Icc 0 (2 * T), poly_pw R⁻¹ R T F (s + t) = poly_pw R⁻¹ R τ f0 t := by
+    intro t ht
+    rcases le_or_gt t T with htT | htT
+    · exact h t ⟨ht.1, htT⟩
+    · have h' := h (t - T) ⟨by linarith, by linarith [ht.2]⟩
+      have hO := ifp_pw_four hτ f0 (x := t - T) (by linarith)
+      rw [show t - T + 4 * τ = t by rw [hT]; ring] at hO
+      rw [show s + t = (s + (t - T)) + T by ring, hE2 _ (by linarith [hs.1]), h', hO]
+  intro t ht
+  obtain ⟨hso0, -⟩ := ifp_sOct_mem hτ hs.1
+  have key : F t = R * poly_pw R⁻¹ R T F (t + T) * R⁻¹ := by
+    rw [hE2 t ht.1, hE1 t ht]
+    simp only [← Matrix.mul_assoc, poly_R_mul_inv, Matrix.one_mul]
+    rw [Matrix.mul_assoc, poly_R_mul_inv, Matrix.mul_one]
+  rw [key, show t + T = s + (t + T - s) by ring,
+    h2 _ ⟨by linarith [hs.2, ht.1], by linarith [hs.1, ht.2]⟩,
+    ← ifp_pw_three hτ f0 (by linarith [hs.2, ht.1] : 0 ≤ t + T - s) ⌈s / (3 * τ)⌉₊,
+    show t + T - s + 3 * τ * ⌈s / (3 * τ)⌉₊ = (ifp_sOct τ s + t) + 4 * τ by
+      unfold ifp_sOct; rw [hT]; ring,
+    ifp_pw_four hτ f0 (by linarith [ht.1])]
+  simp only [← Matrix.mul_assoc, poly_R_mul_inv, Matrix.one_mul]
+  rw [Matrix.mul_assoc, poly_R_mul_inv, Matrix.mul_one]
+
+/-- Undoing a restart, for the group trajectory. `G` is twisted periodic: `G(x + 3τ) = C G(x)`
+with `C` invertible and `G(x + T) = G(x) R`. -/
+lemma ifp_unshift_g {τ T s : ℝ} (hτ : 0 < τ) (hT : T = 4 * τ) (hs : s ∈ Ico 0 T)
+    {g G : ℝ → Mat2} (hg0 : g 0 = 1) (hgT : g T = R) (hgdet : ∀ t ∈ Icc 0 T, (g t).det = 1)
+    (hGdet : ∀ x, 0 ≤ x → (G x).det = 1) {C : Mat2} (hC : IsUnit C.det)
+    (hG3 : ∀ x, 0 ≤ x → G (x + 3 * τ) = C * G x) (hG4 : ∀ x, 0 ≤ x → G (x + T) = G x * R)
+    (h : ∀ t ∈ Icc 0 T, (poly_pw 1 R T g s)⁻¹ * poly_pw 1 R T g (s + t) = G t) :
+    ∀ t ∈ Icc 0 T, g t = (G (ifp_sOct τ s))⁻¹ * G (ifp_sOct τ s + t) := by
+  have hTpos : 0 < T := by rw [hT]; positivity
+  have hglue : g T = 1 * g 0 * R := by rw [hg0, hgT]; simp
+  have hE1 : ∀ x ∈ Icc 0 T, poly_pw 1 R T g x = g x := fun x hx ↦ by
+    have := poly_pw_of_mem_Icc (A := 1) (B := R) hTpos hglue (i := 0) (t := x) (by simpa using hx)
+    simpa using this
+  have hE2 : ∀ x, 0 ≤ x → poly_pw 1 R T g (x + T) = poly_pw 1 R T g x * R :=
+    fun x hx ↦ by simpa using ifp_pw_add (A := 1) (B := R) hTpos g hx 1
+  have hunit : ∀ M : Mat2, M.det = 1 → IsUnit M.det := fun M hM ↦ by rw [hM]; exact isUnit_one
+  have hs' : s ∈ Icc 0 T := Ico_subset_Icc_self hs
+  have ha : IsUnit (g s).det := hunit _ (hgdet s hs')
+  have h1 : ∀ t ∈ Icc 0 T, poly_pw 1 R T g (s + t) = g s * G t := fun t ht ↦ by
+    rw [← h t ht, hE1 s hs', ← Matrix.mul_assoc, Matrix.mul_nonsing_inv _ ha, Matrix.one_mul]
+  have h2 : ∀ t ∈ Icc 0 (2 * T), poly_pw 1 R T g (s + t) = g s * G t := by
+    intro t ht
+    rcases le_or_gt t T with htT | htT
+    · exact h1 t ⟨ht.1, htT⟩
+    · rw [show s + t = (s + (t - T)) + T by ring, hE2 _ (by linarith [hs.1]),
+        h1 _ ⟨by linarith, by linarith [ht.2]⟩, Matrix.mul_assoc, ← hG4 _ (by linarith)]
+      congr 2
+      ring
+  -- `G` modulo the period `3τ`
+  have hGk : ∀ k : ℕ, ∃ Ck : Mat2, IsUnit Ck.det ∧
+      ∀ x, 0 ≤ x → G (x + 3 * τ * k) = Ck * G x := by
+    intro k
+    induction k with
+    | zero => exact ⟨1, by simp, fun x _ ↦ by simp⟩
+    | succ k ih =>
+      obtain ⟨Ck, hCk, hk⟩ := ih
+      refine ⟨C * Ck, by rw [Matrix.det_mul]; exact hC.mul hCk, fun x hx ↦ ?_⟩
+      rw [show x + 3 * τ * ((k + 1 : ℕ) : ℝ) = (x + 3 * τ * k) + 3 * τ by push_cast; ring,
+        hG3 _ (by positivity), hk x hx, Matrix.mul_assoc]
+  obtain ⟨Ck, hCk, hk⟩ := hGk ⌈s / (3 * τ)⌉₊
+  have hquot : ∀ x y, 0 ≤ x → 0 ≤ y →
+      (G (x + 3 * τ * ⌈s / (3 * τ)⌉₊))⁻¹ * G (y + 3 * τ * ⌈s / (3 * τ)⌉₊) = (G x)⁻¹ * G y := by
+    intro x y hx hy
+    rw [hk x hx, hk y hy, Matrix.mul_inv_rev, Matrix.mul_assoc, ← Matrix.mul_assoc Ck⁻¹,
+      Matrix.nonsing_inv_mul _ hCk, Matrix.one_mul]
+  obtain ⟨hso0, -⟩ := ifp_sOct_mem hτ hs.1
+  have hshift : ∀ x, 0 ≤ x → x + 3 * τ * ⌈s / (3 * τ)⌉₊ - s = x - s + 3 * τ * ⌈s / (3 * τ)⌉₊ :=
+    fun x _ ↦ by ring
+  -- `g(t) = g(s) G(t + T - s) R⁻¹`
+  have hgt : ∀ t ∈ Icc 0 T, g t = g s * G (t + T - s) * R⁻¹ := by
+    intro t ht
+    have := h2 (t + T - s) ⟨by linarith [hs.2, ht.1], by linarith [hs.1, ht.2]⟩
+    rw [show s + (t + T - s) = t + T by ring, hE2 t ht.1, hE1 t ht] at this
+    rw [← this, Matrix.mul_assoc, poly_R_mul_inv, Matrix.mul_one]
+  have hT0 : T - s = 0 + T - s := by ring
+  have hG0 := hgt 0 ⟨le_rfl, hTpos.le⟩
+  rw [hg0, ← hT0] at hG0
+  -- so `g(s) = R G(T - s)⁻¹`
+  have hGTs : IsUnit (G (T - s)).det := hunit _ (hGdet _ (by linarith [hs.2]))
+  have hgs : g s = R * (G (T - s))⁻¹ := by
+    have := congrArg (· * (R * (G (T - s))⁻¹)) hG0
+    simp only [Matrix.one_mul] at this
+    rw [this, Matrix.mul_assoc, Matrix.mul_assoc, ← Matrix.mul_assoc R⁻¹, poly_inv_mul_R,
+      Matrix.one_mul, Matrix.mul_nonsing_inv _ hGTs, Matrix.mul_one]
+  intro t ht
+  rw [hgt t ht, hgs]
+  have hq := hquot (T - s) (t + T - s) (by linarith [hs.2]) (by linarith [hs.2, ht.1])
+  have e1 : T - s + 3 * τ * ⌈s / (3 * τ)⌉₊ = ifp_sOct τ s + T := by unfold ifp_sOct; ring
+  have e2 : t + T - s + 3 * τ * ⌈s / (3 * τ)⌉₊ = (ifp_sOct τ s + t) + T := by
+    unfold ifp_sOct; ring
+  rw [e1, e2, hG4 _ hso0, hG4 _ (by linarith [ht.1]), Matrix.mul_inv_rev] at hq
+  rw [Matrix.mul_assoc R, ← hq]
+  simp only [← Matrix.mul_assoc, poly_R_mul_inv, Matrix.one_mul]
+  rw [Matrix.mul_assoc _ R, poly_R_mul_inv, Matrix.mul_one]
+
+/-- The group trajectory is determined by the state trajectory: if `g' = gX` with `g(0) = I₂` and
+`X` is the spline of `y₀` on `[0, Nτ]`, then `g` is the spline's group trajectory there. -/
+lemma ifp_g_unique {y0 : ℝ} (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) {N : ℕ} (hN : 1 ≤ N)
+    {g X : ℝ → Mat2} (hgI : IsIntegralCurve g (fun t ↦ g t * X t) (N * switchTime y0))
+    (hg0 : g 0 = 1) (hX : ∀ t ∈ Icc 0 (N * switchTime y0), X t = polygonX y0 (switchTime y0) t) :
+    ∀ t ∈ Icc 0 (N * switchTime y0), g t = polygonG y0 (switchTime y0) t := by
+  set τ := switchTime y0 with hτdef
+  have hτ : 0 < τ := poly_switchTime_pos hy0 hy1
+  obtain ⟨⟨-, -, -, -, hGI, -⟩, hG0, -⟩ := poly_isStateTrajectory y0 hy0 hy1 N hN
+  have hXc : ContinuousOn (polygonX y0 τ) (Icc 0 (N * τ)) :=
+    poly_pw_continuousOn hτ (poly_segX_glue hy0)
+      (poly_segX_continuous (poly_y0_pos hy0)).continuousOn N
+  have hgc : ContinuousOn g (Icc 0 (N * τ)) := Matrix.continuousOn_of_eq_add_integral hgI
+  have hGc : ContinuousOn (polygonG y0 τ) (Icc 0 (N * τ)) :=
+    Matrix.continuousOn_of_eq_add_integral hGI
+  have hgX : ContinuousOn (fun t ↦ g t * X t) (Icc 0 (N * τ)) :=
+    (hgc.mul hXc).congr fun t ht ↦ by simp only [hX t ht, Pi.mul_apply]
+  refine fun t ht ↦ Matrix.ODE_solution_unique_mul_right hXc hgc (fun s hs ↦ ?_) hGc
+    (fun s hs ↦ ?_) (by rw [hg0, hG0]) ht
+  · have := Matrix.hasDerivWithinAtEntrywise_of_eq_add_integral hgI (Ico_subset_Icc_self hs)
+      (hgX s (Ico_subset_Icc_self hs))
+    rwa [hX s (Ico_subset_Icc_self hs)] at this
+  · exact Matrix.hasDerivWithinAtEntrywise_of_eq_add_integral hGI (Ico_subset_Icc_self hs)
+      ((hGc.mul hXc) s (Ico_subset_Icc_self hs))
+
+/-- The Hamiltonian is homogeneous of degree one in the costate `(Λ₁, Λ_R, λ_cost)`. -/
+lemma ifp_hamiltonian_smul (c lam : ℝ) (Λ₁ ΛR X : Mat2) (v : Fin 3 → ℝ) :
+    hamiltonian (c * lam) (c • Λ₁) (c • ΛR) X v = c * hamiltonian lam Λ₁ ΛR X v := by
+  have hJ : (3 / 2 * (c * lam)) • J = c • ((3 / 2 * lam) • J) := by rw [smul_smul]; ring_nf
+  have htf : ∀ A B : Mat2, traceForm (c • A) B = c * traceForm A B := fun A B ↦ by
+    simp [traceForm, Matrix.trace_smul]
+  simp only [hamiltonian, hJ, ← smul_sub, htf]
+  ring
+
+/-- Away from its switching times, the smoothed octagon's control is the only maximizer of the
+Hamiltonian along its lift (Lemma 7.5.3 gives the strict inequalities, conjugated to the `i`-th
+switching interval). -/
+lemma ifp_octagon_max {x : ℝ} (hx : 0 ≤ x) (hxn : ∀ n : ℕ, x ≠ n * tsw 1)
+    {w : Fin 3 → ℝ} (hw : w ∈ controlSimplex)
+    (hmax : ∀ v ∈ controlSimplex,
+      hamiltonian (-1) (octΛ₁ x) (octΛR x) (polygonX (y₀ 1) (tsw 1) x) v ≤
+        hamiltonian (-1) (octΛ₁ x) (octΛR x) (polygonX (y₀ 1) (tsw 1) x) w) :
+    w = polygonControl 1 x := by
+  obtain ⟨hy0, hy1⟩ := poly_y₀_mem (le_refl 1)
+  set y := y₀ 1
+  set τ := tsw 1 with hτdef
+  have hτ : 0 < τ := poly_switchTime_pos hy0 hy1
+  obtain ⟨hf1, hf2⟩ := poly_floor_mem hτ hx
+  set i := ⌊x / τ⌋₊ with hi
+  have hx' : x - i * τ ∈ Ioo 0 τ := ⟨by
+    have := hxn i; exact sub_pos.2 (lt_of_le_of_ne hf1 (Ne.symm this)), by linarith⟩
+  have hxI : x ∈ Ico ((i : ℝ) * τ) ((i + 1) * τ) := ⟨hf1, hf2⟩
+  have hX : polygonX y τ x = R⁻¹ ^ i * segX y (x - i * τ) * R ^ i := by
+    rw [poly_polygonX_eq, poly_pw_of_mem_Ico hτ hxI]
+  have h1 : octΛ₁ x = R⁻¹ ^ i * strongΛ₁ y (x - i * τ) * R ^ i := by
+    rw [octΛ₁, poly_pw_of_mem_Ico hτ hxI]
+  have hR : octΛR x = R⁻¹ ^ i * strongΛR y (x - i * τ) * R ^ i := by
+    rw [octΛR, poly_pw_of_mem_Ico hτ hxI]
+  have hctrl : polygonControl 1 x = vertex (poly_idx i) := rfl
+  rw [hX, h1, hR] at hmax
+  rw [hctrl]
+  have hs : x - i * τ ∈ Icc 0 (switchTime y) := Ioo_subset_Icc_self hx'
+  refine irt_eq_vertex_of_max (poly_isStarState_conj_pow i (segX_star y hy0 hy1 _ hs))
+    (fun j hj ↦ ?_) hw (hmax _ (poly_vertex_mem _))
+  set m : Fin 3 := ⟨(j.val + 2 * i) % 3, Nat.mod_lt _ (by norm_num)⟩ with hmdef
+  have hm : (⟨(m.val + i) % 3, Nat.mod_lt _ (by norm_num)⟩ : Fin 3) = j := by
+    ext; simp only [hmdef]; omega
+  have hm2 : m ≠ 2 := by
+    intro h; apply hj; rw [← hm, h]; rfl
+  rw [← hm, poly_hamiltonian_conj (poly_Rpow_mul_Rinvpow i) (poly_conj_pow_J i)
+    (poly_conj_pow_vertex i _), poly_hamiltonian_conj (poly_Rpow_mul_Rinvpow i)
+    (poly_conj_pow_J i) (poly_conj_pow_vertex_two i)]
+  have hχ := lemma7_5_3 y hy0 hy1 _ _ (strongLift_isStrongLift y hy0) _ hs
+  have hsub := poly_hamiltonian_sub (-1) (strongΛ₁ y (x - i * τ)) (strongΛR y (x - i * τ))
+    (segX y (x - i * τ)) 2 m
+  have hpos : 0 < switchingFn 2 m (strongΛR y (x - i * τ)) (segX y (x - i * τ)) := by
+    have hlt := m.isLt
+    have hne : m.val ≠ 2 := fun h ↦ hm2 (Fin.ext h)
+    rcases (by omega : m.val = 0 ∨ m.val = 1) with h | h
+    · rw [show m = 0 from Fin.ext h]
+      exact lt_of_le_of_ne hχ.1 fun h ↦ hx'.2.ne (hχ.2.2.1 h.symm)
+    · rw [show m = 1 from Fin.ext h]
+      exact lt_of_le_of_ne hχ.2.1 fun h ↦ hx'.1.ne' (hχ.2.2.2 h.symm)
+  linarith
+
+/-- The normalization `(X₀, Λ₁, Λ_R, λ) ↦ (X₀, Λ₁/(-λ), Λ_R/(-λ))` of an initial condition in the
+cotangent space to `λ_cost = -1`. -/
+noncomputable def ifp_normalize (p : Mat2 × Mat2 × Mat2 × ℝ) : iso_PhasePt :=
+  (p.1, (-p.2.2.2)⁻¹ • p.2.1, (-p.2.2.2)⁻¹ • p.2.2.1)
+
+lemma ifp_normalize_oct : ifp_normalize octInitialCondition = iso_qFix (y₀ 1) := by
+  simp [ifp_normalize, octInitialCondition, iso_qFix]
+
+lemma ifp_normalize_continuousAt : ContinuousAt ifp_normalize octInitialCondition := by
+  unfold ifp_normalize
+  have h : (-octInitialCondition.2.2.2) ≠ 0 := by simp [octInitialCondition]
+  fun_prop (disch := exact h)
+
+lemma ifp_iterate_qFix {y0 : ℝ} (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) (i : ℕ) :
+    iso_poincareMap^[i] (iso_qFix y0) = iso_qFix y0 :=
+  Function.iterate_fixed (iso_poincareMap_qFix y0 hy0 hy1) i
+
+lemma ifp_switchTimes_qFix {y0 : ℝ} (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) (i : ℕ) :
+    iso_poincareSwitchTimes (iso_qFix y0) i = i * switchTime y0 := by
+  simp [iso_poincareSwitchTimes, ifp_iterate_qFix hy0 hy1, iso_poincareTime_qFix y0 hy0 hy1]
+
+/-- The group trajectory of a spline has determinant one. -/
+lemma ifp_det_polygonG {y0 : ℝ} (hy : 0 < y0) (τ x : ℝ) : (polygonG y0 τ x).det = 1 := by
+  simp only [polygonG, Matrix.det_mul, Matrix.det_pow, (seg_solution y0 0 hy).2.2.2.2,
+    poly_det_Rinv, poly_det_R, one_pow, mul_one]
+
+/-- Over three switching intervals the spline's group trajectory is multiplied on the left by
+`-(g_sw R⁻¹)³`. -/
+lemma ifp_polygonG_three {y0 : ℝ} (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) {x : ℝ} (hx : 0 ≤ x) :
+    polygonG y0 (switchTime y0) (x + 3 * switchTime y0) =
+      -(segG y0 (switchTime y0) * R⁻¹) ^ 3 * polygonG y0 (switchTime y0) x := by
+  have h := ifp_pw_add (A := segG y0 (switchTime y0) * R⁻¹) (B := R)
+    (poly_switchTime_pos hy0 hy1) (segG y0) hx 3
+  rw [← poly_polygonG_eq] at h
+  rw [show (3 : ℝ) * switchTime y0 = ((3 : ℕ) : ℝ) * switchTime y0 by norm_num, h,
+    poly_R_pow_three]
+  simp
+
+/-- If the spline closes up after four switching intervals (`g(4t_sw) = R`), its group
+trajectory satisfies `g(x + 4t_sw) = g(x)R`. -/
+lemma ifp_polygonG_four {y0 : ℝ} (hy0 : 1 / √3 < y0) (hy1 : y0 < 1)
+    (hclose : polygonG y0 (switchTime y0) (4 * switchTime y0) = R) {x : ℝ} (hx : 0 ≤ x) :
+    polygonG y0 (switchTime y0) (x + 4 * switchTime y0) = polygonG y0 (switchTime y0) x * R := by
+  have hτ := poly_switchTime_pos hy0 hy1
+  set H := segG y0 (switchTime y0) * R⁻¹
+  have h4 : ∀ z, 0 ≤ z → polygonG y0 (switchTime y0) (z + 4 * switchTime y0) =
+      H ^ 4 * polygonG y0 (switchTime y0) z * R ^ 4 := fun z hz ↦ by
+    have h := ifp_pw_add (A := H) (B := R) hτ (segG y0) hz 4
+    rw [← poly_polygonG_eq] at h
+    rw [← h]; norm_num
+  have hR4 : R ^ 4 = -R := by rw [pow_succ, poly_R_pow_three, neg_one_mul]
+  have h0 : polygonG y0 (switchTime y0) 0 = 1 := by
+    simp [polygonG, (seg_solution y0 0 (poly_y0_pos hy0)).2.2.1]
+  have hH4 : H ^ 4 = -1 := by
+    have := h4 0 le_rfl
+    rw [zero_add, hclose, h0, Matrix.mul_one, hR4] at this
+    have h' := congrArg (· * R⁻¹) this
+    simp only [Matrix.mul_neg, Matrix.neg_mul, Matrix.mul_assoc, poly_R_mul_inv,
+      Matrix.mul_one] at h'
+    rw [h', neg_neg]
+  rw [h4 x hx, hH4, hR4]
+  simp
 
 /-- **Theorem 7.7.1** (`thm:oct-isolated`). The lifted trajectory of the smoothed octagon is an
 isolated extremal: there are a neighborhood `U` of its normalized initial condition in the
@@ -169,7 +483,121 @@ theorem theorem7_7_1 :
         IsPontryaginExtremal T u g X Λ₁ ΛR lam → |T - tf 1| < ε →
         InitialConditionMem U X Λ₁ ΛR lam →
         T = tf 1 ∧ lam < 0 ∧ ∃ s ∈ Ico 0 (3 * tsw 1), IsOctagonLiftFrom s T u g X Λ₁ ΛR lam := by
-  sorry
+  obtain ⟨Vr, hVr, εr, hεr, hret⟩ := iso_return
+  obtain ⟨Vf, hVf, hfix⟩ := iso_fixedPoints
+  obtain ⟨Us, hUs, εs, hεs, hsc⟩ := iso_section_crossing (Vr ∩ Vf) (inter_mem hVr hVf)
+  have hU1 : ifp_normalize ⁻¹' Us ∈ 𝓝 octInitialCondition :=
+    ifp_normalize_continuousAt.preimage_mem_nhds (by rwa [ifp_normalize_oct])
+  have hU2 : {p : Mat2 × Mat2 × Mat2 × ℝ | p.2.2.2 < 0} ∈ 𝓝 octInitialCondition :=
+    (isOpen_lt continuous_snd.snd.snd continuous_const).mem_nhds (by simp [octInitialCondition])
+  refine ⟨ifp_normalize ⁻¹' Us ∩ {p | p.2.2.2 < 0}, inter_mem hU1 hU2, min εr εs,
+    lt_min hεr hεs, ?_⟩
+  intro T u g X Λ₁ ΛR lam hext hT ⟨c, hc, hmemU, hneg⟩
+  -- Step 0: normalize the costate (`λ_cost = -1`)
+  have hlam : lam < 0 := by
+    have h : c * lam < 0 := hneg
+    by_contra h'
+    exact (mul_nonneg hc.le (not_lt.1 h')).not_gt h
+  set κ := (-lam)⁻¹ with hκ
+  have hκpos : 0 < κ := inv_pos.2 (neg_pos.2 hlam)
+  have hκlam : κ * lam = -1 := by rw [hκ, inv_mul_eq_div, div_neg, div_self hlam.ne]
+  have hext1 := iso_smul hext hκpos
+  rw [hκlam] at hext1
+  have hmem1 : (X 0, κ • Λ₁ 0, κ • ΛR 0) ∈ Us := by
+    have e : ∀ M : Mat2, (-(c * lam))⁻¹ • c • M = κ • M := fun M ↦ by
+      rw [smul_smul, hκ]; congr 1; field_simp
+    have h := hmemU
+    simp only [mem_preimage, ifp_normalize, e] at h
+    exact h
+  -- Step 3: restart on the section and return after four turns
+  obtain ⟨s, hs, hsV, hsSec⟩ := hsc T u g X (fun t ↦ κ • Λ₁ t) (fun t ↦ κ • ΛR t) hext1
+    (lt_of_lt_of_le hT (min_le_right _ _)) hmem1
+  have hshift := iso_shift hext1 hs.1
+  set X' : ℝ → Mat2 := fun t ↦ poly_pw R⁻¹ R T X (s + t) with hX'
+  set L1' : ℝ → Mat2 := fun t ↦ poly_pw R⁻¹ R T (fun t ↦ κ • Λ₁ t) (s + t) with hL1'
+  set LR' : ℝ → Mat2 := fun t ↦ poly_pw R⁻¹ R T (fun t ↦ κ • ΛR t) (s + t) with hLR'
+  set g' : ℝ → Mat2 := fun t ↦ (poly_pw 1 R T g s)⁻¹ * poly_pw 1 R T g (s + t) with hg'
+  have hq0 : (X' 0, L1' 0, LR' 0) = (poly_pw R⁻¹ R T X s,
+      poly_pw R⁻¹ R T (fun t ↦ κ • Λ₁ t) s, poly_pw R⁻¹ R T (fun t ↦ κ • ΛR t) s) := by
+    simp only [hX', hL1', hLR', add_zero]
+  rw [← hq0] at hsV hsSec
+  obtain ⟨hf4, hTsum, harc⟩ := hret T _ g' X' L1' LR' hshift
+    (lt_of_lt_of_le hT (min_le_left _ _)) hsV.1 hsSec
+  -- Step 6: the fixed point is some `q_fix(y₀)`
+  obtain ⟨y0, ⟨hy0, hy1⟩, hq⟩ := hfix _ hsV.2 hsSec hf4
+  rw [hq] at hTsum harc
+  set τ := switchTime y0 with hτdef
+  have hτ : 0 < τ := poly_switchTime_pos hy0 hy1
+  have hy : 0 < y0 := poly_y0_pos hy0
+  simp only [ifp_switchTimes_qFix hy0 hy1, ifp_iterate_qFix hy0 hy1,
+    iso_vertexFlow_qFix y0 hy0] at hTsum harc
+  rw [← hτdef] at hTsum harc
+  have hT4 : T = 4 * τ := by rw [hTsum]; norm_num
+  have hT4' : ((4 : ℕ) : ℝ) * switchTime y0 = T := by rw [hT4, hτdef]; norm_num
+  -- Step 1: the restarted extremal is the spline of `y₀` with the strong lift
+  obtain ⟨-, -, -, -, -, -, -, hgR, hg1⟩ := strongLift_isStrongLift y0 hy0
+  have hpiece : ∀ t ∈ Icc 0 T, X' t = polygonX y0 τ t ∧
+      L1' t = poly_pw R⁻¹ R τ (strongΛ₁ y0) t ∧ L1' t = L1' t ∧
+      LR' t = poly_pw R⁻¹ R τ (strongΛR y0) t := by
+    intro t ht
+    rw [← hT4'] at ht
+    obtain ⟨i, hi, hti⟩ := poly_exists_piece hτ (by norm_num) ht
+    have h := harc i hi t (by push_cast; exact hti)
+    simp only [iso_adRinvPow, Prod.mk.injEq] at h
+    obtain ⟨hX, h1, hR⟩ := h
+    refine ⟨?_, ?_, rfl, ?_⟩
+    · rw [hX, poly_Xp_eq hy0 hy1 rfl hti, poly_Xp]
+    · rw [h1, poly_pw_of_mem_Icc hτ hg1 hti]
+    · rw [hR, poly_pw_of_mem_Icc hτ hgR hti]
+  -- the group trajectory, and Step 7: `g(t_f) = R` forces `y₀ = y_oct`
+  obtain ⟨⟨-, -, -, -, hgI, -⟩, hg0', hgT', -⟩ := hshift
+  have hgG : ∀ t ∈ Icc 0 T, g' t = polygonG y0 τ t := by
+    rw [← hT4'] at hgI ⊢
+    exact ifp_g_unique hy0 hy1 (by norm_num) hgI hg0' fun t ht ↦ (hpiece t (hT4' ▸ ht)).1
+  have hTpos : 0 ≤ T := by rw [hT4]; positivity
+  have hclose : polygonG y0 τ (4 * τ) = R := by
+    rw [← hT4, ← hgG T ⟨hTpos, le_rfl⟩]
+    exact hgT'
+  have hyoct := iso_y0_of_closing y0 hy0 hy1 hclose
+  subst hyoct
+  have hτoct : τ = tsw 1 := by rw [hτdef, tsw_eq_switchTime]
+  obtain ⟨hso0, -⟩ := ifp_sOct_mem hτ hs.1
+  have hlift : ∀ t ∈ Icc 0 T, X t = polygonX (y₀ 1) τ (ifp_sOct τ s + t) ∧
+      g t = (polygonG (y₀ 1) τ (ifp_sOct τ s))⁻¹ * polygonG (y₀ 1) τ (ifp_sOct τ s + t) ∧
+      Λ₁ t = (-lam) • octΛ₁ (ifp_sOct τ s + t) ∧ ΛR t = (-lam) • octΛR (ifp_sOct τ s + t) := by
+    intro t ht
+    obtain ⟨hext0, hextg0, hextgT, hextXT, -, -, -, -, -, -, -⟩ := hext
+    obtain ⟨-, -, -, -, h1T, hRT, -, -, -, -, -⟩ := hext1
+    refine ⟨ifp_unshift hτ hT4 hs hextXT (fun t ht ↦ (hpiece t ht).1) t ht, ?_, ?_, ?_⟩
+    · refine ifp_unshift_g hτ hT4 hs hextg0 hextgT (fun t ht ↦ (hext0.2.2.2.1 t ht).1)
+        (fun x _ ↦ ifp_det_polygonG (poly_y0_pos hy0) τ x) ?_
+        (fun x hx ↦ ifp_polygonG_three hy0 hy1 hx) (fun x hx ↦ ?_) hgG t ht
+      · rw [Matrix.det_neg, Matrix.det_pow, Matrix.det_mul, (seg_solution _ 0 hy).2.2.2.2,
+          poly_det_Rinv]
+        norm_num
+      · rw [hT4]; exact ifp_polygonG_four hy0 hy1 hclose hx
+    · have h := ifp_unshift hτ hT4 hs h1T (fun t ht ↦ (hpiece t ht).2.1) t ht
+      rw [octΛ₁, ← hτoct, ← h, smul_smul, hκ, mul_inv_cancel₀ (neg_pos.2 hlam).ne', one_smul]
+    · have h := ifp_unshift hτ hT4 hs hRT (fun t ht ↦ (hpiece t ht).2.2.2) t ht
+      rw [octΛR, ← hτoct, ← h, smul_smul, hκ, mul_inv_cancel₀ (neg_pos.2 hlam).ne', one_smul]
+  refine ⟨by rw [hT4, tf, hτoct]; norm_num, hlam, ifp_sOct τ s, ifp_sOct_mem hτ hs.1,
+    fun t ht ↦ hlift t ht, ?_⟩
+  -- the control, from the maximum condition (Lemma 7.5.3 away from the switching times)
+  obtain ⟨hst, -, -, -, -, -, -, -, -, -, hmax⟩ := hext
+  filter_upwards [hmax, (countable_range fun n : ℕ ↦ n * τ - ifp_sOct τ s).ae_notMem volume]
+    with t hmt hS ht
+  have htI : t ∈ Icc 0 T := Ioo_subset_Icc_self ht
+  obtain ⟨hXt, -, h1t, hRt⟩ := hlift t htI
+  obtain ⟨-, hle⟩ := hmt ht
+  have e : ∀ (A B Y : Mat2) (v : Fin 3 → ℝ), hamiltonian lam ((-lam) • A) ((-lam) • B) Y v =
+      (-lam) * hamiltonian (-1) A B Y v := fun A B Y v ↦ by
+    rw [← ifp_hamiltonian_smul]; congr 1; ring
+  refine ifp_octagon_max (by linarith [ht.1]) (fun n hn ↦ hS ⟨n, by
+    change (n : ℝ) * τ - ifp_sOct τ s = t; rw [← hτoct] at hn; linarith⟩)
+    (hst.2.2.1 t htI) fun v hv ↦ ?_
+  have h := hle v hv
+  rw [hXt, h1t, hRt, e, e] at h
+  exact le_of_mul_le_mul_left h (neg_pos.2 hlam)
 
 /-- The statement of Theorem 7.7.1 is not vacuous: the smoothed octagon's own lift is a Pontryagin
 extremal with terminal time `t_f`, its initial condition lies in every neighborhood `U` of
