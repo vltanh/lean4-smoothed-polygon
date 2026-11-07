@@ -31,6 +31,15 @@ public import SmoothedPolygons.Ch4.AdjointOrbit
 public import SmoothedPolygons.Ch4.IdealVertices
 public import SmoothedPolygons.Ch4.StarDomain
 public import SmoothedPolygons.Ch4.TerminalTime
+public import SmoothedPolygons.Ch5.AreaBound
+public import SmoothedPolygons.Ch5.Compactification
+public import SmoothedPolygons.Ch5.EdgeBound
+public import SmoothedPolygons.Ch5.Hexagon
+public import SmoothedPolygons.Ch5.Monotonicity
+public import SmoothedPolygons.Ch5.Recenter
+public import SmoothedPolygons.Ch5.Theorem502
+public import SmoothedPolygons.Ch6.AdmissibleDisk
+public import SmoothedPolygons.Ch6.Existence
 public import SmoothedPolygons.Ch6.HalfPlane
 public import SmoothedPolygons.Ch6.Hamiltonian
 public import SmoothedPolygons.Ch6.LeftInvariant
@@ -39,6 +48,8 @@ public import SmoothedPolygons.Ch6.MatrixExtremal
 public import SmoothedPolygons.Ch6.MatrixMinimizer
 public import SmoothedPolygons.Ch6.MatrixSystem
 public import SmoothedPolygons.Ch6.PeriodicExtension
+public import SmoothedPolygons.Ch6.Winding
+public import SmoothedPolygons.Ch6.WorstDisk
 public import SmoothedPolygons.Ch7.ConstantControl
 public import SmoothedPolygons.Ch7.DiscreteK
 public import SmoothedPolygons.Ch7.Faces

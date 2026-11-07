@@ -63,6 +63,15 @@ import all SmoothedPolygons.Ch4.AdjointOrbit
 import all SmoothedPolygons.Ch4.IdealVertices
 import all SmoothedPolygons.Ch4.StarDomain
 import all SmoothedPolygons.Ch4.TerminalTime
+import all SmoothedPolygons.Ch5.AreaBound
+import all SmoothedPolygons.Ch5.Compactification
+import all SmoothedPolygons.Ch5.EdgeBound
+import all SmoothedPolygons.Ch5.Hexagon
+import all SmoothedPolygons.Ch5.Monotonicity
+import all SmoothedPolygons.Ch5.Recenter
+import all SmoothedPolygons.Ch5.Theorem502
+import all SmoothedPolygons.Ch6.AdmissibleDisk
+import all SmoothedPolygons.Ch6.Existence
 import all SmoothedPolygons.Ch6.HalfPlane
 import all SmoothedPolygons.Ch6.Hamiltonian
 import all SmoothedPolygons.Ch6.LeftInvariant
@@ -71,6 +80,8 @@ import all SmoothedPolygons.Ch6.MatrixExtremal
 import all SmoothedPolygons.Ch6.MatrixMinimizer
 import all SmoothedPolygons.Ch6.MatrixSystem
 import all SmoothedPolygons.Ch6.PeriodicExtension
+import all SmoothedPolygons.Ch6.Winding
+import all SmoothedPolygons.Ch6.WorstDisk
 import all SmoothedPolygons.Ch7.ConstantControl
 import all SmoothedPolygons.Ch7.DiscreteK
 import all SmoothedPolygons.Ch7.Faces
@@ -191,6 +202,8 @@ meta def paperResults : List (String × Name) :=
    ("Lemma 3.4.1", ``SmoothedPolygons.lemma3_4_1),
    ("Thm 3.4.2", ``SmoothedPolygons.theorem3_4_2),
    ("Prop 3.6.1", ``SmoothedPolygons.proposition3_6_1),
+   ("Problem 3.6.2 converse (E15, winding one)",
+     ``SmoothedPolygons.exists_isBalancedPair_of_isReinhardtAdmissible),
    ("Lemma 4.1.1", ``SmoothedPolygons.lemma4_1_1),
    ("Lemma 4.2.1", ``SmoothedPolygons.lemma4_2_1),
    ("Lemma 4.2.3", ``SmoothedPolygons.lemma4_2_3),
@@ -200,6 +213,19 @@ meta def paperResults : List (String × Name) :=
    ("Lemma 4.5.2", ``SmoothedPolygons.lemma4_5_2),
    ("§4.6 R, S on ideal vertices", ``SmoothedPolygons.dihedral_smul_idealVertices),
    ("§4.6 Dih permutes ideal vertices", ``SmoothedPolygons.dihedral_permutes_idealVertices),
+   ("Def 5.0.1: 𝔥** compact", ``SmoothedPolygons.isCompact_truncatedStarDomain),
+   ("Thm 5.0.2", ``SmoothedPolygons.theorem5_0_2),
+   ("Lemma 5.0.3", ``SmoothedPolygons.lemma5_0_3),
+   ("Lemma 5.0.4", ``SmoothedPolygons.lemma5_0_4),
+   ("Lemma 5.0.5", ``SmoothedPolygons.lemma5_0_5),
+   ("Thm 5.0.6", ``SmoothedPolygons.theorem5_0_6),
+   ("Lemma 5.0.7 (1)", ``SmoothedPolygons.lemma5_0_7_1),
+   ("Lemma 5.0.7 (2)", ``SmoothedPolygons.lemma5_0_7_2),
+   ("Lemma 5.0.7 (3)", ``SmoothedPolygons.lemma5_0_7_3),
+   ("Lemma 5.0.7 (4)", ``SmoothedPolygons.lemma5_0_7_4),
+   ("§6.1 existence of a minimizer", ``SmoothedPolygons.exists_isReinhardtMinimizer),
+   ("§6.1 K_min is a minimizer", ``SmoothedPolygons.exists_isReinhardtMinimizer_of_isWorstDisk),
+   ("§6.1 a minimizer is K_min", ``SmoothedPolygons.isWorstDisk_of_isReinhardtMinimizer),
    ("Lemma 6.1.2", ``SmoothedPolygons.lemma6_1_2),
    ("§6.2 minimizers are extremals",
      ``SmoothedPolygons.exists_isPontryaginExtremal_of_isReinhardtMinimizer),

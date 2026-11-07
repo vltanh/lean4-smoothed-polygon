@@ -76,8 +76,11 @@ measurable selection (Filippov's lemma, `MeasureTheory.exists_measurable_forall_
 trajectories are equi-Lipschitz, pointwise convergence is all the argument needs.
 
 The application in §6.1 (an optimal control exists for the Reinhardt problem, TeX 4553–4600) uses
-the compactification of the state space (Theorem 5.0.2 of Chapter 5, `th:compactification`), which
-is outside the scope of this formalization; it is not stated.
+the compactification of the state space (Theorem 5.0.2 of Chapter 5, `th:compactification`) and,
+in place of the book's cut-off of the vector fields, a closed state constraint, a compact set of
+initial points and coupled endpoints; it applies the form of this theorem with these features
+(`ControlSystem.exists_optimal_constrained` of the OptimalControl package, same proof) in
+`SmoothedPolygons/Ch6/Existence.lean`.
 -/
 
 @[expose] public section

@@ -35,6 +35,10 @@ lem:sl2-star-condition	lemma	1
 lem:sl2-lemmas	lemma	0	
 thm:X-dynamics-sl2	theorem	1	cor:param-equiv,lem:sl2-lemmas
 prop:trivialization	proposition	1	
+# Problem 3.6.2 (line 3205): "The convex disks in K_bal in circle representation arise via the following optimal
+# control problem". Its converse (an admissible trajectory bounds a balanced disk whose area is its cost) is used
+# without proof at line 4579 (E15); it holds for trajectories of winding number one. Label of this formalization.
+pbm:reinhardt-optimal-control:converse	remark	0	
 lem:X-hyperbolic	lemma	1	
 lem:def-phi	lemma	0	
 lem:half-plane-lie-algebra-iso	lemma	1	
@@ -47,11 +51,28 @@ lem:X-dynamics	lemma	1
 # star domain, acting on RP¹ by linear fractional transformations (stated without proof). Label of this
 # formalization.
 sec:dihedral:ideal-vertices	remark	0	
-th:compactification	theorem	1	
+# Running text after Definition 5.0.1 (line 3975): "The set h** ⊂ h* is compact" (asserted without proof). Label of
+# this formalization.
+def:compactification:compact	remark	0	
+# th:compactification: the proof uses "the previous lemma" (lem:compactification-lemma, lines 4487 and 4503) without
+# \ref, and the density bound of the unlabelled Theorem 5.0.6 (thm:compactification-area-bound) through delta(z)
+# (lines 4332-4348).
+th:compactification	theorem	1	lem:compactification-lemma,thm:compactification-area-bound
 lem:pt-to-hexagon	lemma	1	
 lem:triangle-areas	lemma	1	lem:pt-to-hexagon
 lem:geom-thales	lemma	1	
+# Unlabelled Theorem 5.0.6 (line 4203): area(K) >= 3*sqrt(3)/2 + 2 sum_i I_i area_i for a balanced disk with critical
+# hexagon H_K(z). Its proof cites Lemma 5.0.4 (lem:triangle-areas, line 4231) and Lemma 5.0.5 (lem:geom-thales,
+# line 4298). Label of this formalization.
+thm:compactification-area-bound	theorem	1	lem:geom-thales,lem:triangle-areas
 lem:compactification-lemma	lemma	1	
+# Running text of §6.1 (lines 4520-4600): an optimal control of the Reinhardt control problem exists, by Filippov's
+# theorem (Theorem 6.1.1, unlabelled, cited without a source), with Theorem 5.0.2 (line 4579), Lemma 6.1.2 (line 4563)
+# and Lemma 4.3.1 (line 4584). The label is the section label of §6.1.
+sec:existence-opt-control	theorem	1	lem:control-convex,lem:tf-pi3,th:compactification
+# §6.1 (lines 4571-4572), Proposition 8.1.3 (line 6786) and Theorem 16.3.1 (lines 12793-12795): the global minimizer of
+# the control problem is Reinhardt's K_min (stated without proof). Label of this formalization.
+sec:existence-opt-control:kmin	remark	0	
 lem:control-convex	lemma	1	lem:triangle-areas
 # Running text of §6.2 and §6.6 (lines 4662-4835, 5157-5242), summarized in Problem 6.7.1 and used in the proof of
 # Proposition 8.1.3 (line 6791, "We have seen that the global minimizer must be extremal"): every minimizer of the
