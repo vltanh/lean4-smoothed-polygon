@@ -148,7 +148,8 @@ From [REPORT.md](REPORT.md), whose E-numbers are used here.
   no person has reviewed the proofs.
 - Made on 5–7 November 2026 in three rounds (the control-theoretic chapters; then Chapter 2, its
   cited theorems and the octagon's packing density; then the rest of these chapters: Lemma 3.1.8,
-  Filippov's theorem, Proposition 6.4.1, Theorem 7.7.1 and the remarks). [CREDITS.md](CREDITS.md)
+  Filippov's theorem, Mahler's Lemma 3 in full, Proposition 6.4.1, Theorem 7.7.1 and the
+  remarks). [CREDITS.md](CREDITS.md)
   has the procedure and the figures.
 
 ## Related work

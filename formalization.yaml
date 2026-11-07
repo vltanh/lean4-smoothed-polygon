@@ -195,7 +195,7 @@ automation:
       framework: "Claude Code 2.1.318 (VS Code extension, Claude Agent SDK)"
       tool_setup: >-
         The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, local copy
-        dated 2026-10-17) in one Claude Code session, in two rounds, with 43 sub-agents of the same
+        dated 2026-10-17) in one Claude Code session, in three rounds, with 65 sub-agents of the same
         model (at most 9 at once): statement reviews against the TeX source, parallel proofs by
         chapter and by part, proof reviews, verification of the audit and of its literature
         section, and an exploration of follow-up directions. Lean builds, the axiom audit, a route
@@ -203,22 +203,27 @@ automation:
         locally.
       cost:
         wall_time: >-
-          20.5 hours elapsed from the start to the completed audit report of the second round
-          (5-6 November 2026, including a night), of which the first round took 3.2 hours; 24.3
-          hours of sub-agent working time in all
+          43.0 hours elapsed from the start to the completed audit report of the third round
+          (5-7 November 2026, including two nights and about 15 hours stopped by a usage limit);
+          the rounds took 3.2, 15.5 and 21.5 hours; 35.0 hours of sub-agent working time in all
         spend_usd: "not tracked"
         hardware: "local machine (Linux) for Lean builds; models via API"
       prompting_notes: >-
         One request: '/formalize-math-paper https://arxiv.org/abs/2405.04331'. The user chose the
-        scope and approved two decisions (the proof of Jacobi's formula, and the hypothesis of
-        Theorem 3.1.4(3)).
+        scope of each round and decided the questions the work raised: the proof of Jacobi's formula
+        and the hypothesis of Theorem 3.1.4(3) (first round); proving every cited theorem, the
+        routes for Lemmas 2.2.1 and 2.2.5, and the corrected form of Lemma 2.2.1 (second round);
+        the hypothesis of Lemma 3.1.8, the statement of Filippov's theorem, the reading of
+        Theorem 7.7.1, and following Mahler's 1946 paper for his Lemma 3 (third round).
   spend_usd: "not tracked"
   notes: >-
     The-Anh Vu-Le requested the formalization, chose its scope (first the control-theoretic core,
-    then Chapter 2 with every cited theorem proved) and made the decisions it needed (the proof of
-    Jacobi's formula, the hypothesis of Theorem 3.1.4(3), the routes for Lemmas 2.2.1 and 2.2.5
-    and for Mahler's Lemma 3 (along Mahler's 1946 paper), and the corrected form of the false
-    Lemma 2.2.1). Claude Opus 5.5 wrote the statements, the
+    then Chapter 2 with every cited theorem proved, then the rest of the formalized chapters) and
+    made the decisions it needed (the proof of Jacobi's formula, the hypothesis of Theorem
+    3.1.4(3), the routes for Lemmas 2.2.1 and 2.2.5 and for Mahler's Lemma 3 (along Mahler's 1946
+    paper), the corrected form of the false Lemma 2.2.1, the hypothesis of Lemma 3.1.8, the
+    statement of Filippov's theorem and the reading of Theorem 7.7.1). Claude Opus 5.5 wrote the
+    statements, the
     proofs, the audit report and the packaging; independent agents reviewed the statements, the
     proofs and the report. No person has reviewed the proofs. Details and token counts in
     CREDITS.md.
