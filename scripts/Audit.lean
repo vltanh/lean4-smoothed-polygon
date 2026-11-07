@@ -33,6 +33,8 @@ import all External.EulerArnold
 import all External.FejesToth
 import all External.Filippov
 import all External.Gruber
+import all External.Mahler1946.TheoremC
+import all External.Mahler1946.TheoremE
 import all External.Mahler1947
 import all External.MahlerIrreducible
 import all External.MinkowskiMahler
