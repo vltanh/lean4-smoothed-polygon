@@ -9,25 +9,27 @@ public import Mathlib.Analysis.Matrix.MeasurableSpace
 /-!
 # Step B1, part 2: the boundary trajectory of a worst disk
 
-From a balanced pair `(K, σ)` in circle representation (`wd_exists_balancedPair`) to an admissible
-trajectory of Problem 3.6.2, along Chapter 3:
+From a balanced pair `(K, σ)` in circle representation (`IsWorstDisk.exists_isBalancedPair`) to an
+admissible trajectory of Problem 3.6.2, along Chapter 3:
 
-* `wd_exists_normalize`: the linear normalization to circle representation (§2.2, §2.4: a
-  critical hexagon is mapped to the one with edge midpoints `s_j*`);
-* `wd_exists_balancedPair_det_one`: the reparameterization with `det X = 1` (§3.1,
-  Proposition 3.1.9:
-  `t ↦ s(t)` with `s' = det(X(s))^{-1/2}`, the inverse of `τ(s) = ∫₀ˢ √(det X)`); the result is
-  again a balanced pair (Lemmas 2.4.5, 2.4.6 apply to every regular boundary multi-curve, and the
-  derivatives stay Lipschitz by Proposition 3.1.9);
-* `wd_shift`: in this parameterization, `σ_j(t + t_f) = σ_{j+1}(t)` (§3.5, the derivation of the
-  boundary conditions, "the curves `σ_j` close up seamlessly"). The book takes this for granted.
-  Proof: the multi-point through a boundary point of a worst disk is unique (Lemma 2.2.7,
-  `bdy_eq_hexMidpoint`), so `σ_{j+1}(t) = σ_j(h(t))` for a reparameterization `h` (`h` is `C¹` by
-  the inverse function theorem applied to the polar angles); differentiating
-  `g(h(t)) = g(t) R` gives `h'(t)² det X(h(t)) = det X(t)`, so `h' = 1`; and `h(0) = t_f` by
-  counting the turning of the polar angle (`σ_{j+3} = -σ_j`);
-* `wd_isReinhardtAdmissible`: the trajectory `(g, X)`, `X = g⁻¹g'`, with the control of
-  Definition 3.3.2 is admissible: the star inequalities (Corollary 3.1.6), `X` Lipschitz
+* `IsWorstDisk.exists_hexMidpoint_eq_sixthRoot`: the linear normalization to circle representation
+  (§2.2, §2.4: a critical hexagon is mapped to the one with edge midpoints `s_j*`);
+* `IsBalancedPair.exists_reparam_det_one`: the reparameterization with `det X = 1` (§3.1,
+  Proposition 3.1.9: `t ↦ s(t)` with `s' = det(X(s))^{-1/2}`, the inverse of
+  `τ(s) = ∫₀ˢ √(det X)`); the result is again a balanced pair (Lemmas 2.4.5, 2.4.6 apply to every
+  regular boundary multi-curve, and the derivatives stay Lipschitz by Proposition 3.1.9);
+* `IsWorstDisk.shift_of_det_one`: in this parameterization, `σ_j(t + t_f) = σ_{j+1}(t)`. The book
+  derives it in §3.5 (TeX 3143–3156): `g(t + t_f) = g(s(t)) R` for an orientation-preserving
+  reparameterization `s` with `s(0) = 0`, and differentiating with `det X = 1` gives `s' = 1`. It
+  takes the existence of `s` for granted (it refers to the remark after Theorem 3.1.1, which does
+  not contain it). The proof follows that derivation and supplies `s` by the uniqueness of the
+  multi-point through a boundary point of a worst disk (Lemma 2.2.7, `bdy_eq_hexMidpoint`):
+  `σ_{j+1}(t) = σ_j(h(t))` for a reparameterization `h` (`C¹` by the inverse function theorem
+  applied to the polar angles); differentiating `g(h(t)) = g(t) R` gives
+  `h'(t)² det X(h(t)) = det X(t)`, so `h' = 1`; and `h(0) = t_f` by counting the turning of the
+  polar angle (`σ_{j+3} = -σ_j`);
+* `IsBalancedPair.exists_isReinhardtAdmissible`: the trajectory `(g, X)`, `X = g⁻¹g'`, with the
+  control of Definition 3.3.2 is admissible: the star inequalities (Corollary 3.1.6), `X` Lipschitz
   (Proposition 3.1.9), the dynamics `X' = [Z_u, X]/⟨Z_u, X⟩` almost everywhere (Lemma 3.3.1,
   Theorem 3.4.2) and the boundary conditions `g(0) = I`, `g(t_f) = R`, `X(t_f) = R⁻¹X(0)R` (§3.5,
   from the circle representation and the shift).
@@ -42,7 +44,7 @@ open MeasureTheory Set Filter Topology Real Matrix
 /-! ### Helper lemmas: the curve `g` of a multi-curve -/
 
 /-- The entries of a matrix from its values at `s₀* = (1, 0)` and `s₂* = (-1/2, √3/2)`. -/
-lemma wd_entries (A : Mat2) (i : Fin 2) :
+private lemma wd_entries (A : Mat2) (i : Fin 2) :
     A i 0 = (A *ᵥ sixthRoot 0) i ∧
       A i 1 = 2 / √3 * ((A *ᵥ sixthRoot 2) i + (A *ᵥ sixthRoot 0) i / 2) := by
   have h3 : (0 : ℝ) < √3 := by positivity
@@ -54,7 +56,7 @@ lemma wd_entries (A : Mat2) (i : Fin 2) :
   ring
 
 /-- A matrix is determined by its values at `s₀*` and `s₂*`. -/
-lemma wd_eq_of_mulVec {A B : Mat2} (h0 : A *ᵥ sixthRoot 0 = B *ᵥ sixthRoot 0)
+private lemma wd_eq_of_mulVec {A B : Mat2} (h0 : A *ᵥ sixthRoot 0 = B *ᵥ sixthRoot 0)
     (h2 : A *ᵥ sixthRoot 2 = B *ᵥ sixthRoot 2) : A = B := by
   ext i k
   obtain ⟨a0, a1⟩ := wd_entries A i
@@ -65,8 +67,8 @@ lemma wd_eq_of_mulVec {A B : Mat2} (h0 : A *ᵥ sixthRoot 0 = B *ᵥ sixthRoot 0
 
 /-- For a balanced pair with `σ_j = g s_j*`: `det g = 1`, `g` is differentiable, and
 `g' s_j* = σ_j'`. -/
-lemma wd_balanced_g {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {T : ℝ} {g : ℝ → Mat2}
-    (h : IsBalancedPair K σ T) (hg : ∀ j t, σ j t = g t *ᵥ sixthRoot j) (t : ℝ) :
+private lemma wd_balanced_g {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {T : ℝ}
+    {g : ℝ → Mat2} (h : IsBalancedPair K σ T) (hg : ∀ j t, σ j t = g t *ᵥ sixthRoot j) (t : ℝ) :
     (g t).det = 1 ∧ HasDerivAtEntrywise g (derivEntrywise g t) t ∧
       ∀ j, derivEntrywise g t *ᵥ sixthRoot j = deriv (σ j) t := by
   obtain ⟨-, hC, -, hmp, -⟩ := h
@@ -106,19 +108,19 @@ lemma wd_balanced_g {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 →
 /-! ### Helper lemmas: bounded Lipschitz functions -/
 
 /-- `f` is Lipschitz and bounded on `ℝ`. -/
-def wd_LipBdd (f : ℝ → ℝ) : Prop := (∃ K, LipschitzWith K f) ∧ ∃ M, ∀ x, |f x| ≤ M
+private def wd_LipBdd (f : ℝ → ℝ) : Prop := (∃ K, LipschitzWith K f) ∧ ∃ M, ∀ x, |f x| ≤ M
 
-lemma wd_LipBdd_const (c : ℝ) : wd_LipBdd fun _ ↦ c :=
+private lemma wd_LipBdd_const (c : ℝ) : wd_LipBdd fun _ ↦ c :=
   ⟨⟨0, LipschitzWith.const c⟩, |c|, fun _ ↦ le_rfl⟩
 
-lemma wd_LipBdd_add {f g : ℝ → ℝ} (hf : wd_LipBdd f) (hg : wd_LipBdd g) :
+private lemma wd_LipBdd_add {f g : ℝ → ℝ} (hf : wd_LipBdd f) (hg : wd_LipBdd g) :
     wd_LipBdd fun x ↦ f x + g x := by
   obtain ⟨⟨Kf, hKf⟩, Mf, hMf⟩ := hf
   obtain ⟨⟨Kg, hKg⟩, Mg, hMg⟩ := hg
   exact ⟨⟨_, hKf.add hKg⟩, Mf + Mg, fun x ↦ (abs_add_le _ _).trans (add_le_add (hMf x) (hMg x))⟩
 
 /-- The product of two bounded Lipschitz functions is Lipschitz (and bounded). -/
-lemma wd_LipBdd_mul {f g : ℝ → ℝ} (hf : wd_LipBdd f) (hg : wd_LipBdd g) :
+private lemma wd_LipBdd_mul {f g : ℝ → ℝ} (hf : wd_LipBdd f) (hg : wd_LipBdd g) :
     wd_LipBdd fun x ↦ f x * g x := by
   obtain ⟨⟨Kf, hKf⟩, Mf, hMf⟩ := hf
   obtain ⟨⟨Kg, hKg⟩, Mg, hMg⟩ := hg
@@ -141,10 +143,11 @@ lemma wd_LipBdd_mul {f g : ℝ → ℝ} (hf : wd_LipBdd f) (hg : wd_LipBdd g) :
   · rw [abs_mul]
     exact mul_le_mul (hMf x) (hMg x) (abs_nonneg _) hMf0
 
-lemma wd_LipBdd_lipschitzWith {f : ℝ → ℝ} (hf : wd_LipBdd f) : ∃ K, LipschitzWith K f := hf.1
+private lemma wd_LipBdd_lipschitzWith {f : ℝ → ℝ} (hf : wd_LipBdd f) : ∃ K, LipschitzWith K f :=
+  hf.1
 
 /-- A continuous periodic function is bounded. -/
-lemma wd_bdd_of_periodic {f : ℝ → ℝ} (hf : Continuous f) {P : ℝ} (hP : 0 < P)
+private lemma wd_bdd_of_periodic {f : ℝ → ℝ} (hf : Continuous f) {P : ℝ} (hP : 0 < P)
     (hper : Function.Periodic f P) : ∃ M, ∀ x, |f x| ≤ M := by
   obtain ⟨M, hM⟩ := (isCompact_Icc (a := 0) (b := P)).exists_bound_of_continuousOn hf.continuousOn
   refine ⟨M, fun x ↦ ?_⟩
@@ -153,13 +156,13 @@ lemma wd_bdd_of_periodic {f : ℝ → ℝ} (hf : Continuous f) {P : ℝ} (hP : 0
   simpa [Real.norm_eq_abs] using hM y (Ico_subset_Icc_self hy)
 
 /-- The composition of a bounded Lipschitz function with a Lipschitz function. -/
-lemma wd_LipBdd_comp {f S : ℝ → ℝ} {K : NNReal} (hf : wd_LipBdd f) (hS : LipschitzWith K S) :
-    wd_LipBdd fun t ↦ f (S t) := by
+private lemma wd_LipBdd_comp {f S : ℝ → ℝ} {K : NNReal} (hf : wd_LipBdd f)
+    (hS : LipschitzWith K S) : wd_LipBdd fun t ↦ f (S t) := by
   obtain ⟨⟨Kf, hKf⟩, M, hM⟩ := hf
   exact ⟨⟨_, hKf.comp hS⟩, M, fun t ↦ hM (S t)⟩
 
 /-- A periodic function with a continuous periodic derivative is Lipschitz and bounded. -/
-lemma wd_LipBdd_of_hasDerivAt {f f' : ℝ → ℝ} (hf : ∀ t, HasDerivAt f (f' t) t)
+private lemma wd_LipBdd_of_hasDerivAt {f f' : ℝ → ℝ} (hf : ∀ t, HasDerivAt f (f' t) t)
     (hf' : Continuous f') {P : ℝ} (hP : 0 < P) (hper : Function.Periodic f P)
     (hper' : Function.Periodic f' P) : wd_LipBdd f := by
   obtain ⟨M', hM'⟩ := wd_bdd_of_periodic hf' hP hper'
@@ -170,8 +173,8 @@ lemma wd_LipBdd_of_hasDerivAt {f f' : ℝ → ℝ} (hf : ∀ t, HasDerivAt f (f'
   exact (hM' t).trans (Real.le_coe_toNNReal M')
 
 /-- A curve in the plane whose two coordinates are Lipschitz is Lipschitz. -/
-lemma wd_lipschitzWith_pi {f : ℝ → Fin 2 → ℝ} (h : ∀ i, ∃ K, LipschitzWith K fun t ↦ f t i) :
-    ∃ K, LipschitzWith K f := by
+private lemma wd_lipschitzWith_pi {f : ℝ → Fin 2 → ℝ}
+    (h : ∀ i, ∃ K, LipschitzWith K fun t ↦ f t i) : ∃ K, LipschitzWith K f := by
   choose K hK using h
   refine ⟨K 0 + K 1, LipschitzWith.of_dist_le_mul fun x y ↦
     (dist_pi_le_iff (by positivity)).2 fun i ↦ ?_⟩
@@ -182,7 +185,7 @@ lemma wd_lipschitzWith_pi {f : ℝ → Fin 2 → ℝ} (h : ∀ i, ∃ K, Lipschi
   · simp
 
 /-- The curve `g` of a multi-curve: `σ_j(t) = g(t) s_j*` (Theorem 3.1.1). -/
-lemma wd_exists_g {σ : ZMod 6 → ℝ → Fin 2 → ℝ} (hm : ∀ t, IsMultiPoint fun j ↦ σ j t) :
+private lemma wd_exists_g {σ : ZMod 6 → ℝ → Fin 2 → ℝ} (hm : ∀ t, IsMultiPoint fun j ↦ σ j t) :
     ∃ g : ℝ → Mat2, ∀ j t, σ j t = g t *ᵥ sixthRoot j := by
   have h3 : (0 : ℝ) < √3 := by positivity
   have hs3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
@@ -214,7 +217,7 @@ lemma wd_exists_g {σ : ZMod 6 → ℝ → Fin 2 → ℝ} (hm : ∀ t, IsMultiPo
 
 /-- A star curve starting in the direction `θ₀` is `r(t) e(θ₀ + φ(t))`, with `φ` its continuous
 angle (`PlaneCurve.sc_angle`). -/
-lemma wd_polar {γ : ℝ → Fin 2 → ℝ} {P : ℝ} (hγ : PlaneCurve.IsStarCurve γ P) {θ₀ : ℝ}
+private lemma wd_polar {γ : ℝ → Fin 2 → ℝ} {P : ℝ} (hγ : PlaneCurve.IsStarCurve γ P) {θ₀ : ℝ}
     (h0 : γ 0 = rein_dir θ₀) (t : ℝ) :
     ∃ r : ℝ, 0 < r ∧ γ t = r • rein_dir (θ₀ + PlaneCurve.sc_angle γ t) := by
   have e := hγ.sc_toC_eq t
@@ -230,22 +233,23 @@ lemma wd_polar {γ : ℝ → Fin 2 → ℝ} {P : ℝ} (hγ : PlaneCurve.IsStarCu
   apply Complex.ext <;> simp [PlaneCurve.sc_angle]
 
 /-- The boundary point in the opposite direction: `rein_bd K (θ + π) = -rein_bd K θ`. -/
-lemma wd_bd_add_pi {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) (θ : ℝ) :
+private lemma wd_bd_add_pi {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) (θ : ℝ) :
     rein_bd K (θ + π) = -rein_bd K θ := by
   rw [rein_bd, rein_bd, rein_dir_add_pi, gauge_neg (fun x hx ↦ hK.2.2.2 x hx), smul_neg]
 
 /-- **The multi-point through a boundary point of a worst disk is unique** (Lemma 2.2.7,
 `bdy_eq_hexMidpoint`). -/
-lemma wd_multiPoint_eq {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) {s s' : ZMod 6 → Fin 2 → ℝ}
-    (hs : IsMultiPoint s) (hs' : IsMultiPoint s') (hsK : ∀ j, s j ∈ frontier K)
-    (hs'K : ∀ j, s' j ∈ frontier K) (h0 : s 0 = s' 0) : ∀ j, s j = s' j := by
+private lemma wd_multiPoint_eq {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K)
+    {s s' : ZMod 6 → Fin 2 → ℝ} (hs : IsMultiPoint s) (hs' : IsMultiPoint s')
+    (hsK : ∀ j, s j ∈ frontier K) (hs'K : ∀ j, s' j ∈ frontier K) (h0 : s 0 = s' 0) :
+    ∀ j, s j = s' j := by
   obtain ⟨v, hv, hvK, hv0⟩ := bdy_exists_hexagon hK (hsK 0)
   intro j
   rw [bdy_eq_hexMidpoint hK hv hvK hs hsK hv0.symm j,
     bdy_eq_hexMidpoint hK hv hvK hs' hs'K (h0.symm.trans hv0.symm) j]
 
 /-- The shift of a multi-point is a multi-point. -/
-lemma wd_isMultiPoint_shift {s : ZMod 6 → Fin 2 → ℝ} (hs : IsMultiPoint s) :
+private lemma wd_isMultiPoint_shift {s : ZMod 6 → Fin 2 → ℝ} (hs : IsMultiPoint s) :
     IsMultiPoint fun j ↦ s (j + 1) := by
   intro j
   obtain ⟨h1, h2, h3⟩ := hs (j + 1)
@@ -258,7 +262,7 @@ lemma wd_isMultiPoint_shift {s : ZMod 6 → Fin 2 → ℝ} (hs : IsMultiPoint s)
 
 /-- **FTC for Lipschitz curves.** A curve whose entries are Lipschitz on `[0, T]` and which has
 entrywise derivative `V(t)` at almost every `t ∈ (0, T)` is an integral curve of `V`. -/
-lemma wd_isIntegralCurve_of_lipschitz {X V : ℝ → Mat2} {T : ℝ} (hT : 0 ≤ T)
+private lemma wd_isIntegralCurve_of_lipschitz {X V : ℝ → Mat2} {T : ℝ} (hT : 0 ≤ T)
     (hL : LipschitzOnEntrywise X (Icc 0 T))
     (hd : ∀ᵐ t, t ∈ Ioo 0 T → HasDerivAtEntrywise X (V t) t) : IsIntegralCurve X V T := by
   intro i j
@@ -279,7 +283,7 @@ lemma wd_isIntegralCurve_of_lipschitz {X V : ℝ → Mat2} {T : ℝ} (hT : 0 ≤
   ring
 
 /-- A linear combination of Lipschitz functions is Lipschitz. -/
-lemma wd_lipschitzWith_lincomb {f h : ℝ → ℝ} {Kf Kh : NNReal} (hf : LipschitzWith Kf f)
+private lemma wd_lipschitzWith_lincomb {f h : ℝ → ℝ} {Kf Kh : NNReal} (hf : LipschitzWith Kf f)
     (hh : LipschitzWith Kh h) (a b : ℝ) : ∃ K, LipschitzWith K fun x ↦ a * f x + b * h x := by
   refine ⟨Real.toNNReal (|a| * Kf + |b| * Kh), LipschitzWith.of_dist_le' fun x y ↦ ?_⟩
   have h1 := hf.dist_le_mul x y
@@ -294,7 +298,7 @@ lemma wd_lipschitzWith_lincomb {f h : ℝ → ℝ} {Kf Kh : NNReal} (hf : Lipsch
 
 /-- `det(σ', σ'') = κ`: for `σ = g s` with `g' = gX`, `det g = det X = 1`, the curvature
 `det(gXs, g(X² + X')s)` is `det(s, (X + X⁻¹X')s)` (`eqn:state-dep-curvature`). -/
-lemma wd_det2_curv {A Y Y' : Mat2} (hA : A.det = 1) (hY : Y.det = 1) (s : Fin 2 → ℝ) :
+private lemma wd_det2_curv {A Y Y' : Mat2} (hA : A.det = 1) (hY : Y.det = 1) (s : Fin 2 → ℝ) :
     det2 ((A * Y) *ᵥ s) ((A * (Y * Y + Y')) *ᵥ s) = det2 s ((Y + Y⁻¹ * Y') *ᵥ s) := by
   have hYY : Y * Y + Y' = Y * (Y + Y⁻¹ * Y') := by
     rw [Matrix.mul_add, ← Matrix.mul_assoc, Matrix.mul_nonsing_inv _ (by rw [hY]; exact isUnit_one),
@@ -306,7 +310,7 @@ lemma wd_det2_curv {A Y Y' : Mat2} (hA : A.det = 1) (hY : Y.det = 1) (s : Fin 2 
 positive determinant, with a critical hexagon whose edge midpoints are the sixth roots of unity
 `s_j*` (critical hexagons are invariant under orientation-preserving linear maps,
 `bdy_isLeastAreaHexagon_image`). -/
-theorem wd_exists_normalize {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) :
+theorem IsWorstDisk.exists_hexMidpoint_eq_sixthRoot {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) :
     ∃ A : Mat2, 0 < A.det ∧ ∃ v, IsLeastAreaHexagon ((fun x ↦ A *ᵥ x) '' K) v ∧
       ∀ j, hexMidpoint v j = sixthRoot j := by
   -- a critical hexagon (Lemma 2.2.7)
@@ -338,7 +342,7 @@ theorem wd_exists_normalize {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K) :
 /-- **The reparameterization with `det X = 1`** (Proposition 3.1.9). A balanced pair `(K, σ)` in
 circle representation has a reparameterization `σ' = σ ∘ s` that is again a balanced pair in
 circle representation, with `σ'_j = g s_j*` and `det(g⁻¹g') = 1` everywhere. -/
-theorem wd_exists_balancedPair_det_one {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
+theorem IsBalancedPair.exists_reparam_det_one {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
     {tf : ℝ} (h : IsBalancedPair K σ tf) (hc : IsCircleRepresentation σ) :
     ∃ (σ' : ZMod 6 → ℝ → Fin 2 → ℝ) (T : ℝ) (g : ℝ → Mat2), IsBalancedPair K σ' T ∧
       IsCircleRepresentation σ' ∧ (∀ j t, σ' j t = g t *ᵥ sixthRoot j) ∧
@@ -411,7 +415,7 @@ theorem wd_exists_balancedPair_det_one {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 �
     simp only [zero_add, hℓ0, sub_zero] at hc
     linarith
   obtain ⟨hLpos, S, hSc, hSm, hS0, -, hℓS, hSL, hSd⟩ :=
-    wd_exists_inverse hℓ hδpos hℓ0 hP₀pos hℓper
+    exists_inverse_of_hasDerivAt_pos hℓ hδpos hℓ0 hP₀pos hℓper
   set L := ℓ P₀ with hL_def
   have hSL' : S L = P₀ := by have := hSL 0; rwa [zero_add, hS0, zero_add] at this
   set S' : ℝ → ℝ := fun t ↦ (δ (S t))⁻¹ with hS'_def
@@ -530,8 +534,8 @@ theorem wd_exists_balancedPair_det_one {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 �
 /-- **The shift relation** (§3.5). For a balanced pair `(K, σ)` in circle representation with
 `K` a worst disk, parameterized with `det X = 1` (`σ_j = g s_j*`, `X = g⁻¹g'`), the curves follow
 one another: `σ_j(t + t_f) = σ_{j+1}(t)`. -/
-theorem wd_shift {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {T : ℝ} {g : ℝ → Mat2}
-    (hK : IsWorstDisk K) (h : IsBalancedPair K σ T) (hc : IsCircleRepresentation σ)
+theorem IsWorstDisk.shift_of_det_one {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {T : ℝ}
+    {g : ℝ → Mat2} (hK : IsWorstDisk K) (h : IsBalancedPair K σ T) (hc : IsCircleRepresentation σ)
     (hg : ∀ j t, σ j t = g t *ᵥ sixthRoot j) (hdet : ∀ t, ((g t)⁻¹ * derivEntrywise g t).det = 1) :
     ∀ j t, σ j (t + T) = σ (j + 1) t := by
   have hK1 := hK.1
@@ -568,7 +572,7 @@ theorem wd_shift {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → �
   have hAper : ∀ t, A (t + P) = A t + 2 * π := fun t ↦ by
     rw [hA_def, hs0.sc_angle_add_period, hs0.sc_angle_period]
   obtain ⟨-, Ai, -, -, -, hAAi, -, -, hAid⟩ :=
-    wd_exists_inverse hAd hApos PlaneCurve.sc_angle_zero hP hAper
+    exists_inverse_of_hasDerivAt_pos hAd hApos PlaneCurve.sc_angle_zero hP hAper
   -- the reparameterization `hh` with `σ₀(hh t) = σ₁(t)`
   set hh : ℝ → ℝ := fun t ↦ Ai (π / 3 + B t) with hh_def
   have hAhh : ∀ t, A (hh t) = π / 3 + B t := fun t ↦ hAAi _
@@ -700,8 +704,9 @@ Proposition 3.1.9, Lemma 3.3.1, Theorem 3.4.2, §3.5). For a balanced pair `(K, 
 representation with `σ_j = g s_j*`, `det(g⁻¹g') = 1` and `σ_j(t + T) = σ_{j+1}(t)`, the trajectory
 `(g, g⁻¹g')` with the control variables of Definition 3.3.2 (made a fixed point of `U_T` on the
 null set where they are undefined) is admissible for Problem 3.6.2. -/
-theorem wd_isReinhardtAdmissible {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {T : ℝ}
-    {g : ℝ → Mat2} (h : IsBalancedPair K σ T) (hc : IsCircleRepresentation σ)
+theorem IsBalancedPair.exists_isReinhardtAdmissible {K : Set (Fin 2 → ℝ)}
+    {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {T : ℝ} {g : ℝ → Mat2} (h : IsBalancedPair K σ T)
+    (hc : IsCircleRepresentation σ)
     (hg : ∀ j t, σ j t = g t *ᵥ sixthRoot j) (hdet : ∀ t, ((g t)⁻¹ * derivEntrywise g t).det = 1)
     (hshift : ∀ j t, σ j (t + T) = σ (j + 1) t) :
     ∃ u : ℝ → Fin 3 → ℝ, IsReinhardtAdmissible T u g fun t ↦ (g t)⁻¹ * derivEntrywise g t := by

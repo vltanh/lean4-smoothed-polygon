@@ -31,10 +31,13 @@ For a balanced disk `K` in circle representation whose critical hexagon is `H_K(
 4. **Case 2**, `z ∈ h₀ ∩ h₁` (TeX 4302–4312): "the above argument can also be adapted", giving two
    points `r`, `r'` on `∂K` in `T₀` and `T₁`, and the bound with `area₀ + area₁`. Only sketched.
 
-## The proof, and the repair of Case 2
+## The proof: Case 2 repaired, Case 1 restructured
 
-Departure from the paper (Case 2 only, which the book sketches). The claim of Case 1 holds for each
-`i` with `z ∈ h_i` separately: its argument modifies `H_K(z)` only near the corners `p_i`, `p_{i+3}`
+Departure from the paper, in both cases. Case 2, which the book only sketches, is repaired, and
+Case 1 is restructured with it: the case `z ∉ h₀ ∪ h₁ ∪ h₂` (step 1) and the two cases are one
+argument, and the area is bounded by the measure of a union of almost disjoint pieces instead of
+`area(conv{s_j*, ±r})` (the same quantity). The claim of Case 1 holds for each `i` with `z ∈ h_i`
+separately: its argument modifies `H_K(z)` only near the corners `p_i`, `p_{i+3}`
 and over the edges `p_{i+1}p_{i+2}`, `p_{i+4}p_{i+5}`; the modified hexagon is the intersection of
 the strips of the lines through `s_i*`, `s_{i+1}*` and of the cut lines, so it is a centrally
 symmetric hexagon containing `K` whenever `K` misses the cut, whatever happens at the other corners.
@@ -42,8 +45,9 @@ So the claim is stated for every `i` with `z ∈ h_i` (`exists_mem_frontier_segm
 `I = {i | z ∈ h_i}`, the points `±r_i`, `i ∈ I`, with `r_i ∈ T_i`, give `K ⊇ conv{s_j*} ∪ ⋃_{i ∈ I}
 (△s_i r_i s_{i+1} ∪ -△s_i r_i s_{i+1})`, a union of a hexagon and triangles with disjoint interiors
 (each triangle lies beyond its own edge `s_i s_{i+1}`), so `area(K) ≥ 3√3/2 + 2 Σ_{i ∈ I} area_i` by
-Lemma 5.0.5. This repairs Case 2 along the book's lines and makes step 2 unnecessary (it is proved
-as in the book).
+Lemma 5.0.5. For `I = ∅` this is step 1, and for `I = {0}` it is Case 1 with the area of
+`conv{s_j*, ±r}` written as that of the union. This repairs Case 2 along the book's lines and makes
+step 2 unnecessary (it is proved as in the book).
 
 **The claim** (`ab_corner`, in the frame `(e, f) = (s_i*, s_{i+1}*)`, where
 `p_i = A(B + C) e + C(A + B) f`, `p_{i+1} = -A(B + C) e + (1 + AB) f`,
@@ -71,7 +75,8 @@ gives `area(△s_i r_i s_{i+1}) = area_i(z)`; and `area(conv{s_j*}) = 3√3/2`
 Facts used: `K` convex and compact (`IsCCSDisk`), `s_j* ∈ ∂K`; `K ⊆ hexagonOf (hexVertex x y)` and
 minimality (`IsLeastAreaHexagon`); the strip description and the area of a centrally symmetric
 hexagon (`rein_mem_hexagonOf_iff_strips`, `rein_volume_hexagonOf_hex3`); Lemmas 5.0.4 and 5.0.5;
-`hx_mulVec_sixthRoot`, `hx_sigma`, `hx_starFn_pos` of `SmoothedPolygons/Ch5/Hexagon.lean`.
+`mulVec_sixthRoot_eq_starFn`, `starFn_Φ_mul_add_eq_one`, `starFn_Φ_pos` of
+`SmoothedPolygons/Ch5/Hexagon.lean`.
 -/
 
 @[expose] public section
@@ -86,13 +91,13 @@ triangle `△ r p_i r̃` with `r - p_i = λ_i (s_i* - p_i)`, `r̃ - p_i = λ_i (
 noncomputable def cutRatio (x y : ℝ) (i : Fin 3) : ℝ := √(extTriArea x y i / triArea x y i)
 
 /-- The point `r₀ = p_i + λ_i (s_i* - p_i)` on the edge `[s_i*, p_i]` (proof of Theorem 5.0.6,
-TeX 4256–4260). -/
+TeX 4258–4267). -/
 noncomputable def cutPoint (x y : ℝ) (i : Fin 3) : Fin 2 → ℝ :=
   hexVertex x y (i.val : ZMod 6) +
     cutRatio x y i • (sixthRoot (i.val : ZMod 6) - hexVertex x y (i.val : ZMod 6))
 
 /-- The point `r̃₀ = p_i + λ_i (s_{i+1}* - p_i)` on the edge `[s_{i+1}*, p_i]` (proof of
-Theorem 5.0.6, TeX 4256–4260). -/
+Theorem 5.0.6, TeX 4258–4267). -/
 noncomputable def cutPoint' (x y : ℝ) (i : Fin 3) : Fin 2 → ℝ :=
   hexVertex x y (i.val : ZMod 6) +
     cutRatio x y i • (sixthRoot ((i.val : ZMod 6) + 1) - hexVertex x y (i.val : ZMod 6))
@@ -439,7 +444,8 @@ private lemma ab_hexVertex_frame {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : Z
     hexVertex x y (j + 2) =
       ab_F (sixthRoot j) (sixthRoot (j + 1)) (-(1 + B * C)) (C * (A + B)) := by
   have htr : (Φ x y) 1 1 = -(Φ x y) 0 0 := by simp [Φ]; ring
-  have hABC : A * B + B * C + C * A = 1 := by rw [← hA, ← hB, ← hC]; exact hx_sigma hz j
+  have hABC : A * B + B * C + C * A = 1 := by
+    rw [← hA, ← hB, ← hC]; exact starFn_Φ_mul_add_eq_one hz j
   have hs2 : sixthRoot (j + 2) = sixthRoot (j + 1) - sixthRoot j := by
     rw [(rein_sixthRoot_rel j).2.1]; abel
   have hs3 : sixthRoot (j + 3) = -sixthRoot j := (rein_sixthRoot_rel j).1
@@ -449,13 +455,13 @@ private lemma ab_hexVertex_frame {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : Z
   have hB3 : starFn (Φ x y) (j + 4) = B := by
     rw [show j + 4 = j + 1 + 3 by ring, ab_starFn_add_three, hB]
   refine ⟨?_, ?_, ?_⟩
-  · rw [hexVertex, hx_mulVec_sixthRoot htr, hA, hB, hC, hs2,
+  · rw [hexVertex, mulVec_sixthRoot_eq_starFn htr, hA, hB, hC, hs2,
       show A * (B + C) = 1 - B * C by linear_combination hABC]
     simp only [ab_F]; module
-  · rw [hexVertex, hx_mulVec_sixthRoot htr, show j + 1 + 2 = j + 3 by ring,
+  · rw [hexVertex, mulVec_sixthRoot_eq_starFn htr, show j + 1 + 2 = j + 3 by ring,
       show j + 1 + 1 = j + 2 by ring, hA3, hB, hC, hs2, hs3]
     simp only [ab_F]; module
-  · rw [hexVertex, hx_mulVec_sixthRoot htr, show j + 2 + 2 = j + 4 by ring,
+  · rw [hexVertex, mulVec_sixthRoot_eq_starFn htr, show j + 2 + 2 = j + 4 by ring,
       show j + 2 + 1 = j + 3 by ring, hB3, hA3, hC, hs2, hs3, hs4,
       show C * (A + B) = 1 - A * B by linear_combination hABC]
     simp only [ab_F]; module
@@ -507,7 +513,7 @@ theorem inter_hRegion_eq_empty : hRegion 0 ∩ hRegion 1 ∩ hRegion 2 = ∅ := 
     nlinarith [mul_le_mul_of_nonneg_left hcs (by positivity : (0 : ℝ) ≤ √3 / 4)]
   nlinarith [mul_pos h3 (mul_pos p0 p0)]
 
-/-- **The claim in the proof of Theorem 5.0.6** (Case 1, TeX 4262–4276). Let `K` be a balanced
+/-- **The claim in the proof of Theorem 5.0.6** (Case 1, TeX 4271–4281). Let `K` be a balanced
 disk in circle representation with critical hexagon `H_K(z)`, `z ∈ 𝔥*`. If `z ∈ h_i`, the boundary
 of `K` meets the cut segment `[r̃₀, r₀]` of the corner `p_i`. -/
 theorem exists_mem_frontier_segment_cut {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
@@ -521,10 +527,10 @@ theorem exists_mem_frontier_segment_cut {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 �
   set A := starFn (Φ x y) j with hA
   set B := starFn (Φ x y) (j + 1) with hB
   set C := starFn (Φ x y) (j + 2) with hC
-  have hA0 : 0 < A := hx_starFn_pos hz _
-  have hB0 : 0 < B := hx_starFn_pos hz _
-  have hC0 : 0 < C := hx_starFn_pos hz _
-  have hABC : A * B + B * C + C * A = 1 := hx_sigma hz j
+  have hA0 : 0 < A := starFn_Φ_pos hz _
+  have hB0 : 0 < B := starFn_Φ_pos hz _
+  have hC0 : 0 < C := starFn_Φ_pos hz _
+  have hABC : A * B + B * C + C * A = 1 := starFn_Φ_mul_add_eq_one hz j
   obtain ⟨hv0, hv1, hv2⟩ := ab_hexVertex_frame hz j hA.symm hB.symm hC.symm
   have hw : IsLeastAreaHexagon K
       (rein_hex3 (hexVertex x y j) (hexVertex x y (j + 1)) (hexVertex x y (j + 2))) := by
@@ -565,10 +571,10 @@ private lemma ab_det2_left_F (e f : Fin 2 → ℝ) (p q : ℝ) :
 /-- The vertex `p_j` of `H_K(z)` lies in the triangle `s_j* s_{j+1}* (s_j* + s_{j+1}*)`. -/
 private lemma ab_hexVertex_mem_sixthTriangle {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
     hexVertex x y j ∈ sixthTriangle j := by
-  have hA := hx_starFn_pos hz j
-  have hB := hx_starFn_pos hz (j + 1)
-  have hC := hx_starFn_pos hz (j + 2)
-  have hABC := hx_sigma hz j
+  have hA := starFn_Φ_pos hz j
+  have hB := starFn_Φ_pos hz (j + 1)
+  have hC := starFn_Φ_pos hz (j + 2)
+  have hABC := starFn_Φ_mul_add_eq_one hz j
   have hD := rein_det2_sixthRoot_pos j
   rw [(ab_hexVertex_frame hz j rfl rfl rfl).1, sixthTriangle, rein_mem_convexHull_triple hD,
     ab_det2_F_right, ab_det2_left_F]
@@ -588,8 +594,8 @@ private lemma ab_cutRatio {x y : ℝ} (hz : (x, y) ∈ starDomain) {i : Fin 3}
       cutRatio x y i ^ 2 * triArea x y i = extTriArea x y i := by
   obtain ⟨hT, -⟩ := ab_areas hz i
   have hTpos : 0 < triArea x y i := by
-    rw [hT]; have := hx_starFn_pos hz (i.val : ZMod 6)
-    have := hx_starFn_pos hz ((i.val : ZMod 6) + 2); positivity
+    rw [hT]; have := starFn_Φ_pos hz (i.val : ZMod 6)
+    have := starFn_Φ_pos hz ((i.val : ZMod 6) + 2); positivity
   refine ⟨Real.sqrt_nonneg _, Real.sqrt_le_one.2 ((div_le_one hTpos).2 hi.2), hTpos, ?_⟩
   have hTe0 : 0 ≤ extTriArea x y i := measureReal_nonneg
   rw [cutRatio, Real.sq_sqrt (div_nonneg hTe0 hTpos.le)]

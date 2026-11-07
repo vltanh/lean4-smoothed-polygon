@@ -16,7 +16,7 @@ for all `z ∈ 𝔥* ∩ Π₀⁺ ∩ {1 ≤ y ≤ 4.5} ⊆ h₀`.
 
 ## Statements and proofs
 
-* `edgeSlab_subset_hRegion`: `𝔥* ∩ Π₀⁺ ∩ {1 ≤ y ≤ 4.5} ⊆ h₀` (asserted at TeX 4498). By
+* `edgeSlab_subset_hRegion`: `𝔥* ∩ Π₀⁺ ∩ {1 ≤ y ≤ 4.5} ⊆ h₀` (asserted at TeX 4499). By
   Lemma 5.0.4, `z ∈ h₀` iff `4ρ₁² ≤ ρ₀ρ₂`. On `Π₀⁺`, `0 < ρ₁ = (1 - √3x)/(√3y) < 1/15`; with
   `y ≤ 4.5` also `x > 1/√3 - 0.3 > 0`, so `ρ₀ ≥ 1/(√3y)`, and `y ≥ 1` gives `ρ₂ ≥ y/√3`; hence
   `ρ₀ρ₂ ≥ 1/3 > 4/225 > 4ρ₁²`.
@@ -87,7 +87,7 @@ private lemma eb_octagonDensity_lt : octagonDensity < 903 / 1000 := by
   norm_num at hl ⊢
   linarith
 
-/-- `𝔥* ∩ Π₀⁺ ∩ {1 ≤ y ≤ 4.5} ⊆ h₀` (proof of Theorem 5.0.2, TeX 4498). -/
+/-- `𝔥* ∩ Π₀⁺ ∩ {1 ≤ y ≤ 4.5} ⊆ h₀` (proof of Theorem 5.0.2, TeX 4499). -/
 theorem edgeSlab_subset_hRegion :
     starDomain ∩ edgeHalfPlane ∩ {z | 1 ≤ z.2 ∧ z.2 ≤ 9 / 2} ⊆ hRegion 0 := by
   rintro ⟨x, y⟩ ⟨⟨hz, -, hP⟩, hy1, hy2⟩

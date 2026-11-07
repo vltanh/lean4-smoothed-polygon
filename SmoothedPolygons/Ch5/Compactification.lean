@@ -45,11 +45,14 @@ through these maps (`Φ_lftAct`, Remark 4.2.2; `reflS_conj_Φ`).
 
 ## Readings and corrections
 
-* **The fundamental domain (TeX 4479).** The proof of Theorem 5.0.2 writes
-  `{x ≥ 0, (x - 1/√3)² + y² = 4/3}`, a curve; §4.6 (TeX 3807) gives the sector with `≤ 4/3`. The
-  proof needs the sector with `≥ 4/3`, which lies in `{x ≥ 0, y ≥ 1}` (TeX 4480); both sectors are
-  fundamental domains (the six sectors cut out by the three medians through `i` are permuted
-  simply transitively). We use `≥ 4/3`.
+* **The fundamental domain (TeX 3807, 4479).** The three medians through `i` (`x = 0` and the
+  circles `(x ∓ 1/√3)² + y² = 4/3`) cut `𝔥*` into six sectors, which the dihedral group permutes
+  simply transitively, so each sector is a fundamental domain (TeX 3803–3804). The set that §4.6
+  prints as one, `{x ≥ 0, (x - 1/√3)² + y² ≤ 4/3}` (TeX 3807), is not: it is the union of two
+  sectors, split by the median `(x + 1/√3)² + y² = 4/3`, and contains two points of each generic
+  orbit (a single sector is `{x ≥ 0, (x + 1/√3)² + y² ≤ 4/3}`). The proof of Theorem 5.0.2 writes
+  `{x ≥ 0, (x - 1/√3)² + y² = 4/3}` (TeX 4479), a curve, which must read `≥ 4/3`: that sector is a
+  fundamental domain and lies in `{x ≥ 0, y ≥ 1}` (TeX 4480), as the proof needs. We use `≥ 4/3`.
 * **`Π₂⁺` (TeX 4500–4501).** "The regions `Π₁⁺` and `Π₂⁺` do not meet the fundamental domain" is
   false for `Π₂⁺ = {y > 15(x + 1/√3)}`, which meets `{x ≥ 0, y ≥ 1}` where `y > 15/√3 ≈ 8.66`.
   Those points lie in `B(i∞)`, so the proof is unaffected;
@@ -135,7 +138,8 @@ noncomputable def truncatedStarDomain : Set (ℝ × ℝ) :=
 
 /-- The fundamental domain `{z ∈ 𝔥* | x ≥ 0, (x - 1/√3)² + y² ≥ 4/3}` of the action of the
 dihedral group on `𝔥*` used in the proof of Theorem 5.0.2 (TeX 4477–4479, where `= 4/3` is printed
-for `≥ 4/3`; see the module docstring). -/
+and must read `≥ 4/3`; the set `≤ 4/3` that §4.6 prints at TeX 3807 is the union of two sectors,
+not a fundamental domain; see the module docstring). -/
 noncomputable def fundamentalDomain : Set (ℝ × ℝ) :=
   {z | z ∈ starDomain ∧ 0 ≤ z.1 ∧ 4 / 3 ≤ (z.1 - 1 / √3) ^ 2 + z.2 ^ 2}
 

@@ -19,7 +19,8 @@ problem (Problem 3.6.2, TeX 3203), with the same cost:
 * hence an admissible pair with `(q(0), q(t_f)) ∈ matrixEndpoints` is an admissible trajectory of
   Problem 3.6.2 (`isReinhardtAdmissible_of_mem_matrixEndpoints`): `g(t) ∈ SL₂(ℝ)`,
   `X(t)` is a star state, and the two boundary equations left out of `matrixBoundary` hold
-  (`det g(t_f) = 1` with `R₀₀ = 1/2 ≠ 0`; `det X(t_f) = 1` with `X(t_f)₀₁ < 0`);
+  (`det g(t_f) = 1` with `R₀₀ = 1/2 ≠ 0`; `det X(t_f) = 1` with `X(t_f)₀₁ < 0`); conversely an
+  admissible trajectory satisfies `matrixEndpoints` (`IsReinhardtAdmissible.mem_matrixEndpoints`);
 * the costs agree (`cost_matrixCost`), so a global minimizer of Problem 3.6.2 is a strong local
   minimizer of the matrix system (`IsReinhardtMinimizer.isStrongLocalMinimizer_matrix`).
 -/
@@ -423,8 +424,30 @@ theorem isReinhardtAdmissible_of_mem_matrixEndpoints {T : ℝ} (hT : 0 < T) {u :
       rw [h11, e0]
       linarith
 
+/-- **Admissible trajectories satisfy the boundary condition of the matrix system**: for an
+admissible trajectory `(g, X)` of Problem 3.6.2, the pair `t ↦ (g(t), X(t))` satisfies
+`matrixEndpoints` (`g(0) = I`, `g(t_f) = R`, `X(t_f) = R⁻¹X(0)R` and `det X(0) = 1`). -/
+theorem IsReinhardtAdmissible.mem_matrixEndpoints {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
+    (h : IsReinhardtAdmissible T u g X) :
+    (toMatrixState (g 0) (X 0), toMatrixState (g T) (X T)) ∈ matrixEndpoints := by
+  obtain ⟨hst, hg0, hgT, hXT⟩ := h
+  have hT : 0 < T := hst.1
+  have h0m : (0 : ℝ) ∈ Icc 0 T := ⟨le_rfl, hT.le⟩
+  have hTm : T ∈ Icc 0 T := ⟨hT.le, le_rfl⟩
+  have hXq : ∀ t ∈ Icc 0 T, stateX (toMatrixState (g t) (X t)) = X t := fun t ht ↦
+    stateX_toMatrixState _ (hst.2.2.2.1 t ht).2.1
+  change matrixBoundary (toMatrixState (g 0) (X 0), toMatrixState (g T) (X T)) = 0
+  simp only [matrixBoundary, stateG_toMatrixState, hXq 0 h0m, hXq T hTm]
+  rw [hg0, hgT, hXT, (hst.2.2.2.1 0 h0m).2.2.1]
+  refine Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ ?_))
+  · funext i j; simp
+  · funext k; fin_cases k <;> simp
+  · simp
+  · funext k; fin_cases k <;> simp
+
 /-- **A Reinhardt minimizer is a strong local minimizer of the matrix system**: the pair
-`t ↦ (g(t), X(t))` satisfies the boundary condition `matrixEndpoints`, and every competitor
+`t ↦ (g(t), X(t))` satisfies the boundary condition `matrixEndpoints`
+(`IsReinhardtAdmissible.mem_matrixEndpoints`), and every competitor
 projects to an admissible trajectory of Problem 3.6.2 with the same cost
 (`isReinhardtAdmissible_of_mem_matrixEndpoints`, `cost_matrixCost`), so it minimizes the cost
 among all of them. -/
@@ -432,31 +455,22 @@ theorem IsReinhardtMinimizer.isStrongLocalMinimizer_matrix {T : ℝ} {u : ℝ �
     {g X : ℝ → Mat2} (h : IsReinhardtMinimizer T u g X) :
     IsStrongLocalMinimizer matrixField matrixCost matrixDomain controlSimplex matrixEndpoints T u
       (fun t ↦ toMatrixState (g t) (X t)) := by
-  obtain ⟨⟨hst, hg0, hgT, hXT⟩, hmin⟩ := h
+  obtain ⟨hadm, hmin⟩ := h
+  have hst := hadm.1
   have hT : 0 < T := hst.1
-  have h0m : (0 : ℝ) ∈ Icc 0 T := ⟨le_rfl, hT.le⟩
-  have hTm : T ∈ Icc 0 T := ⟨hT.le, le_rfl⟩
   have hXq : ∀ t ∈ Icc 0 T, stateX (toMatrixState (g t) (X t)) = X t := fun t ht ↦
     stateX_toMatrixState _ (hst.2.2.2.1 t ht).2.1
-  refine ⟨hT, hst.isAdmissibleIn_matrix, ?_, 1, one_pos, ?_⟩
-  -- the boundary condition
-  · change matrixBoundary (toMatrixState (g 0) (X 0), toMatrixState (g T) (X T)) = 0
-    simp only [matrixBoundary, stateG_toMatrixState, hXq 0 h0m, hXq T hTm]
-    rw [hg0, hgT, hXT, (hst.2.2.2.1 0 h0m).2.2.1]
-    refine Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ ?_))
-    · funext i j; simp
-    · funext k; fin_cases k <;> simp
-    · simp
-    · funext k; fin_cases k <;> simp
-  -- a competitor projects to an admissible trajectory of Problem 3.6.2 with the same cost
-  · intro T' u' q' hT' hadm' hbd _ _
-    rw [cost_matrixCost, cost_matrixCost]
-    calc reinhardtCost T (fun t ↦ stateX (toMatrixState (g t) (X t))) = reinhardtCost T X := by
-          simp only [reinhardtCost]
-          congr 1
-          refine intervalIntegral.integral_congr fun t ht ↦ ?_
-          rw [uIcc_of_le hT.le] at ht
-          simp only [hXq t ht]
-      _ ≤ _ := hmin T' u' _ _ (isReinhardtAdmissible_of_mem_matrixEndpoints hT' hadm' hbd)
+  -- the boundary condition, and a competitor projects to an admissible trajectory of
+  -- Problem 3.6.2 with the same cost
+  refine ⟨hT, hst.isAdmissibleIn_matrix, hadm.mem_matrixEndpoints, 1, one_pos, ?_⟩
+  intro T' u' q' hT' hadm' hbd _ _
+  rw [cost_matrixCost, cost_matrixCost]
+  calc reinhardtCost T (fun t ↦ stateX (toMatrixState (g t) (X t))) = reinhardtCost T X := by
+        simp only [reinhardtCost]
+        congr 1
+        refine intervalIntegral.integral_congr fun t ht ↦ ?_
+        rw [uIcc_of_le hT.le] at ht
+        simp only [hXq t ht]
+    _ ≤ _ := hmin T' u' _ _ (isReinhardtAdmissible_of_mem_matrixEndpoints hT' hadm' hbd)
 
 end SmoothedPolygons

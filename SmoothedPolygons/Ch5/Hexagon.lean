@@ -20,7 +20,7 @@ indices of `ρ` modulo 3 (`starFn`). Chapter 5 (TeX 4029–4083) names the trian
 * `T_i = △ s_i p_i s_{i+1}` (`innerTriangle`, `triArea`), `i = 0, 1, 2`;
 * `T_i^ext = △ p_{i+1} q_{i+1} p_{i+2}` (`outerTriangle`, `extTriArea`), where
   `q_j = p_j + 2ρ_j(X) X s_j*` is the intersection of the lines of the two edges adjacent to the
-  edge `p_j p_{j+1}` (`hexExtVertex`; TeX 4128: `q₁ = p₁ + 2ρ₁Xs₁ = p₂ - 2ρ₁Xs₃`), so that
+  edge `p_j p_{j+1}` (`hexExtVertex`; TeX 4131: `q₁ = p₁ + 2ρ₁Xs₁ = p₂ - 2ρ₁Xs₃`), so that
   `T₀^ext = △p₁q₁p₂`, `T₁^ext = △p₂q₂p₃`, `T₂^ext = △p₃q₃p₄ = -△p₀q₀p₁`;
 
 areas are Lebesgue measure (`volume.real`). Then (TeX 4185–4199, 4332–4348)
@@ -39,13 +39,14 @@ areas are Lebesgue measure (`volume.real`). Then (TeX 4185–4199, 4332–4348)
   hexagon is reconstructed from `Φ(z)` by Remark 3.1.7. Its second claim, that `H_K(z)` is the
   critical hexagon of `K` at the multi-point `s_j*`, is not argued; it is proved here along the
   lines of Remark 3.1.7 and §2.2. The proof: the identity `X s_j = ρ_j s_{j+1} + ρ_{j+1} s_{j+2}`
-  of `eqn:rho-star-inequalities` (`hx_mulVec_sixthRoot`, for every traceless `X`) and
-  `ρ_jρ_{j+1} + ρ_{j+1}ρ_{j+2} + ρ_{j+2}ρ_j = det X = 1` (`eqn:det-rho`, `hx_sigma`, with
-  `theorem4_4_1` for `det Φ(z) = 1` and the star inequalities `ρ_j > 0`) express every point of the
-  construction in the frame `(s_j*, s_{j+1}*)`, where `det(α s_j* + β s_{j+1}*, γ s_j* + δ s_{j+1}*)
-  = (αδ - βγ)√3/2`. In that frame the two forms of `eqn:hex-vertex` agree (`hx_edge`:
-  `p_j = s_{j+1}* - ρ_j X s_{j+1}*`, `p_{j+1} - p_j = 2ρ_j X s_{j+1}*`), so `s_{j+1}*` is the
-  midpoint of `p_j p_{j+1}`; central symmetry and convexity (`IsCSHexagon`) are
+  of `eqn:rho-star-inequalities` (`mulVec_sixthRoot_eq_starFn`, for every traceless `X`) and
+  `ρ_jρ_{j+1} + ρ_{j+1}ρ_{j+2} + ρ_{j+2}ρ_j = det X = 1` (`eqn:det-rho`,
+  `starFn_Φ_mul_add_eq_one`, with `theorem4_4_1` for `det Φ(z) = 1` and the star inequalities
+  `ρ_j > 0`) express every point of the construction in the frame `(s_j*, s_{j+1}*)`, where
+  `det(α s_j* + β s_{j+1}*, γ s_j* + δ s_{j+1}*) = (αδ - βγ)√3/2`. In that frame `s_{j+1}*` is the
+  midpoint of `p_j p_{j+1}`, so the two forms of `eqn:hex-vertex` agree
+  (`l2c_edge_of_hexMidpoint`: `p_j = s_{j+1}* - ρ_j X s_{j+1}*`,
+  `p_{j+1} - p_j = 2ρ_j X s_{j+1}*`); central symmetry and convexity (`IsCSHexagon`) are
   `det(p_j, p_{j+1}) > 0` and `det(p_{j+1} - p_j, p_{j+2} - p_{j+1}) = 4ρ_jρ_{j+1} · √3/2 > 0`; the
   star condition holds with `α = ρ_{j+1}ρ_{j+2}`, `β = ρ_jρ_{j+2}`. For the critical hexagon:
   `g(0) = I` (the `s_j*` span the plane), `g` is differentiable (its columns are combinations of
@@ -68,7 +69,8 @@ areas are Lebesgue measure (`volume.real`). Then (TeX 4185–4199, 4332–4348)
   (`hx_volume_real_triangle`: the triangle is the image of the standard triangle under an affine
   map), and the determinants are computed in the frame of Lemma 5.0.3 (`hx_triArea`:
   `△ s_j* p_j s_{j+1}* = (√3/4) ρ_jρ_{j+2}`; `hx_extTriArea`: `q_j - p_j = 2ρ_j X s_j*`,
-  `p_{j+1} - p_j = 2ρ_j X s_{j+1}*` and `det(X s_j*, X s_{j+1}*) = det X · √3/2`, so
+  `p_{j+1} - p_j = 2ρ_j X s_{j+1}*` because Lemma 5.0.3 makes `s_{j+1}*` the midpoint of
+  `p_j p_{j+1}` (`l2c_edge_of_hexMidpoint`), and `det(X s_j*, X s_{j+1}*) = det X · √3/2`, so
   `△ p_j q_j p_{j+1} = √3 ρ_j²`).
 * **Lemma 5.0.5** (`lemma5_0_5`, `lem:geom-thales`, TeX 4153–4180). The book's proof: an affine
   map (preserving ratios of areas) reduces to a right angle at `s₁` with `s₀s₁ = s₁p₀ = 1`,
@@ -103,7 +105,7 @@ noncomputable def starFn (X : Mat2) (j : ZMod 6) : ℝ :=
 noncomputable def hexVertex (x y : ℝ) (j : ZMod 6) : Fin 2 → ℝ :=
   sixthRoot j + starFn (Φ x y) (j + 2) • (Φ x y *ᵥ sixthRoot j)
 
-/-- The point `q_j = p_j + 2ρ_j(X) X s_j*` (TeX 4128), the intersection of the lines of the edges
+/-- The point `q_j = p_j + 2ρ_j(X) X s_j*` (TeX 4131), the intersection of the lines of the edges
 `p_{j-1}p_j` (through `s_j*`) and `p_{j+1}p_{j+2}` (through `s_{j+2}*`), the apex of the exterior
 triangle over the edge `p_j p_{j+1}`. -/
 noncomputable def hexExtVertex (x y : ℝ) (j : ZMod 6) : Fin 2 → ℝ :=
@@ -151,14 +153,14 @@ noncomputable def octagonDensity : ℝ := (8 - √32 - Real.log 2) / (√8 - 1)
 ### Star functions and the identity `X s_j* = ρ_j s_{j+1}* + ρ_{j+1} s_{j+2}*` -/
 
 /-- `ρ_{j+3} = ρ_j`. -/
-lemma hx_starFn_add_three (X : Mat2) (j : ZMod 6) : starFn X (j + 3) = starFn X j := by
+private lemma hx_starFn_add_three (X : Mat2) (j : ZMod 6) : starFn X (j + 3) = starFn X j := by
   rcases rein_zmod6_cases j with rfl | rfl | rfl | rfl | rfl | rfl <;> rfl
 
 private lemma hx_sqrt3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
 
 /-- `X s_j* = ρ_j s_{j+1}* + ρ_{j+1} s_{j+2}*` for traceless `X` (`eqn:rho-star-inequalities`; the
 book's `ρ̃_j` equals `ρ_j`). -/
-lemma hx_mulVec_sixthRoot {X : Mat2} (hX : X 1 1 = -X 0 0) (j : ZMod 6) :
+lemma mulVec_sixthRoot_eq_starFn {X : Mat2} (hX : X 1 1 = -X 0 0) (j : ZMod 6) :
     X *ᵥ sixthRoot j = starFn X j • sixthRoot (j + 1) + starFn X (j + 1) • sixthRoot (j + 2) := by
   have h3 := hx_sqrt3
   have h3' : (0 : ℝ) < √3 := by positivity
@@ -176,7 +178,7 @@ lemma hx_mulVec_sixthRoot {X : Mat2} (hX : X 1 1 = -X 0 0) (j : ZMod 6) :
       try first | ring1 | linear_combination (X 0 1) * h3 | linear_combination (-X 0 1) * h3
 
 /-- `det X = ρ_jρ_{j+1} + ρ_{j+1}ρ_{j+2} + ρ_{j+2}ρ_j` for traceless `X` (`eqn:det-rho`). -/
-lemma hx_det_eq {X : Mat2} (hX : X 1 1 = -X 0 0) (j : ZMod 6) :
+private lemma hx_det_eq {X : Mat2} (hX : X 1 1 = -X 0 0) (j : ZMod 6) :
     X.det = starFn X j * starFn X (j + 1) + starFn X (j + 1) * starFn X (j + 2) +
       starFn X (j + 2) * starFn X j := by
   have h3 := hx_sqrt3
@@ -193,7 +195,7 @@ lemma hx_det_eq {X : Mat2} (hX : X 1 1 = -X 0 0) (j : ZMod 6) :
     try ring1
 
 /-- On the star domain, `ρ_j(Φ(z)) > 0` (Theorem 4.4.1). -/
-lemma hx_starFn_pos {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
+lemma starFn_Φ_pos {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
     0 < starFn (Φ x y) j := by
   obtain ⟨-, -, h0, h1, h2⟩ := (theorem4_4_1 x y hz.1).2 hz
   rcases rein_zmod6_cases j with rfl | rfl | rfl | rfl | rfl | rfl
@@ -201,7 +203,7 @@ lemma hx_starFn_pos {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
 
 /-- On the star domain, `ρ_jρ_{j+1} + ρ_{j+1}ρ_{j+2} + ρ_{j+2}ρ_j = det Φ(z) = 1`
 (`eqn:det-rho`, Lemma 4.2.1). -/
-lemma hx_sigma {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
+lemma starFn_Φ_mul_add_eq_one {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
     starFn (Φ x y) j * starFn (Φ x y) (j + 1) + starFn (Φ x y) (j + 1) * starFn (Φ x y) (j + 2) +
       starFn (Φ x y) (j + 2) * starFn (Φ x y) j = 1 := by
   rw [← hx_det_eq (by simp [Φ]; ring) j]
@@ -254,7 +256,7 @@ private lemma hx_sixthRoot_F (j : ZMod 6) :
 
 /-- `X s_j*`, `X s_{j+1}*` and the vertices `p_j, p_{j+1}, p_{j+2}` in the frame at `j`, with
 `A = ρ_j`, `B = ρ_{j+1}`, `C = ρ_{j+2}` (the definition `eqn:hex-vertex` and
-`hx_mulVec_sixthRoot`); `p_{j+3} = -p_j`; and the definition of `q_j`. -/
+`mulVec_sixthRoot_eq_starFn`); `p_{j+3} = -p_j`; and the definition of `q_j`. -/
 private lemma hx_frame (x y : ℝ) (j : ZMod 6) :
     Φ x y *ᵥ sixthRoot j = hx_F j (-starFn (Φ x y) (j + 1))
         (starFn (Φ x y) j + starFn (Φ x y) (j + 1)) ∧
@@ -278,9 +280,9 @@ private lemma hx_frame (x y : ℝ) (j : ZMod 6) :
   have e3 : j + 2 + 1 = j + 3 := by ring
   have e4 : j + 2 + 2 = j + 1 + 3 := by ring
   have e5 : j + 3 + 2 = j + 2 + 3 := by ring
-  have hXj := hx_mulVec_sixthRoot hX j
-  have hXj1 := hx_mulVec_sixthRoot hX (j + 1)
-  have hXj2 := hx_mulVec_sixthRoot hX (j + 2)
+  have hXj := mulVec_sixthRoot_eq_starFn hX j
+  have hXj1 := mulVec_sixthRoot_eq_starFn hX (j + 1)
+  have hXj2 := mulVec_sixthRoot_eq_starFn hX (j + 2)
   rw [e1, e2] at hXj1
   rw [e3, e4] at hXj2
   have t3 := hx_starFn_add_three X j
@@ -301,25 +303,6 @@ private lemma hx_frame (x y : ℝ) (j : ZMod 6) :
   · simp only [hexVertex, ← hXdef, e5, t23, (algA_isMultiPoint_sixthRoot j).2.1, Matrix.mulVec_neg,
       smul_neg]
     abel
-
-/-- On the star domain (`det X = 1`), the two forms of the vertex in `eqn:hex-vertex`:
-`p_j = s_{j+1}* - ρ_j X s_{j+1}*`, so the edge `p_j p_{j+1}` lies on the line through `s_{j+1}*`
-in direction `X s_{j+1}*`, with `p_{j+1} - p_j = 2ρ_j X s_{j+1}*`. -/
-lemma hx_edge {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
-    hexVertex x y j = sixthRoot (j + 1) - starFn (Φ x y) j • (Φ x y *ᵥ sixthRoot (j + 1)) ∧
-      hexVertex x y (j + 1) - hexVertex x y j =
-        (2 * starFn (Φ x y) j) • (Φ x y *ᵥ sixthRoot (j + 1)) := by
-  obtain ⟨-, f1, p0, p1, -⟩ := hx_frame x y j
-  obtain ⟨-, s1, -⟩ := hx_sixthRoot_F j
-  have hσ := hx_sigma hz j
-  rw [p0, p1, f1, s1, hx_F_smul, hx_F_sub, hx_F_sub, hx_F_smul]
-  constructor
-  · congr 1
-    · linear_combination -hσ
-    · linear_combination hσ
-  · congr 1
-    · linear_combination hσ
-    · linear_combination -hσ
 
 /-! ### Areas of triangles -/
 
@@ -361,7 +344,7 @@ private lemma hx_convexHull_triple (a b c : Fin 2 → ℝ) :
 
 /-- The area of the triangle `△abc` is `|det(b - a, c - a)|/2` (the image of the standard
 triangle, of area `1/2`, under an affine map of determinant `det(b - a, c - a)`). -/
-lemma hx_volume_real_triangle (a b c : Fin 2 → ℝ) :
+private lemma hx_volume_real_triangle (a b c : Fin 2 → ℝ) :
     volume.real (convexHull ℝ {a, b, c}) = |det2 (b - a) (c - a)| / 2 := by
   have hstd : volume hx_stdTri = ENNReal.ofReal (1 / 2) := rein_volume_stdTri
   rw [measureReal_def, hx_convexHull_triple, image_add_left, measure_preimage_add,
@@ -371,13 +354,13 @@ lemma hx_volume_real_triangle (a b c : Fin 2 → ℝ) :
 
 /-- The interior triangle `△ s_j* p_j s_{j+1}*` has area `(√3/4) ρ_j ρ_{j+2}`
 (proof of Lemma 5.0.4: `T₀ = ½ det(p₀ - s₀, s₂) = ½ ρ₂ det(X s₀, s₂) = (√3/4) ρ₀ρ₂`). -/
-lemma hx_triArea {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
+private lemma hx_triArea {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
     volume.real (convexHull ℝ {sixthRoot j, hexVertex x y j, sixthRoot (j + 1)}) =
       √3 / 4 * starFn (Φ x y) j * starFn (Φ x y) (j + 2) := by
   obtain ⟨-, -, p0, -⟩ := hx_frame x y j
   obtain ⟨s0, s1, -⟩ := hx_sixthRoot_F j
-  have hA := hx_starFn_pos hz j
-  have hC := hx_starFn_pos hz (j + 2)
+  have hA := starFn_Φ_pos hz j
+  have hC := starFn_Φ_pos hz (j + 2)
   rw [hx_volume_real_triangle, p0, s0, s1, hx_F_sub, hx_F_sub, hx_det2_F]
   rw [show ((1 - starFn (Φ x y) (j + 1) * starFn (Φ x y) (j + 2) - 1) * (1 - 0) -
       (starFn (Φ x y) (j + 2) * (starFn (Φ x y) j + starFn (Φ x y) (j + 1)) - 0) * (0 - 1)) *
@@ -385,33 +368,31 @@ lemma hx_triArea {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
   rw [abs_of_pos (by positivity)]
   ring
 
-/-- The exterior triangle `△ p_j q_j p_{j+1}` has area `√3 ρ_j²` (proof of Lemma 5.0.4:
-`q_j - p_j = 2ρ_j X s_j*`, `p_{j+1} - p_j = 2ρ_j X s_{j+1}*`, and
-`det(X s_j*, X s_{j+1}*) = det X · det(s_j*, s_{j+1}*) = √3/2`). -/
-lemma hx_extTriArea {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
-    volume.real (convexHull ℝ {hexVertex x y j, hexExtVertex x y j, hexVertex x y (j + 1)}) =
-      √3 * starFn (Φ x y) j ^ 2 := by
-  obtain ⟨f0, f1, -, -, -, -, hq⟩ := hx_frame x y j
-  obtain ⟨-, hedge⟩ := hx_edge hz j
-  have hσ := hx_sigma hz j
-  have hA := hx_starFn_pos hz j
-  rw [hx_volume_real_triangle, hedge, hq, add_sub_cancel_left, f0, f1, hx_F_smul, hx_F_smul,
-    hx_det2_F]
-  set A := starFn (Φ x y) j
-  set B := starFn (Φ x y) (j + 1)
-  set C := starFn (Φ x y) (j + 2)
-  rw [show (2 * A * -B * (2 * A * B) - 2 * A * (A + B) * (2 * A * -(B + C))) * (√3 / 2) =
-      2 * A ^ 2 * √3 * (A * B + B * C + C * A) by ring, hσ, mul_one,
-    abs_of_pos (by positivity)]
-  ring
-
+/-- The two forms of the vertex in `eqn:hex-vertex`, from the midpoint of an edge: if the edge
+`p_j p_{j+1}` has midpoint `s_{j+1}*` (as Lemma 5.0.3 shows), then
+`p_j = s_{j+1}* - ρ_j X s_{j+1}*`, so the edge lies on the line through `s_{j+1}*` in direction
+`X s_{j+1}*`, and
+`p_{j+1} - p_j = 2ρ_j X s_{j+1}*`: by definition `p_{j+1} = s_{j+1}* + ρ_{j+3} X s_{j+1}*`, and
+`ρ_{j+3} = ρ_j`. -/
+private lemma l2c_edge_of_hexMidpoint {x y : ℝ} {j : ZMod 6}
+    (h : hexMidpoint (hexVertex x y) j = sixthRoot (j + 1)) :
+    hexVertex x y j = sixthRoot (j + 1) - starFn (Φ x y) j • (Φ x y *ᵥ sixthRoot (j + 1)) ∧
+      hexVertex x y (j + 1) - hexVertex x y j =
+        (2 * starFn (Φ x y) j) • (Φ x y *ᵥ sixthRoot (j + 1)) := by
+  have hp : hexVertex x y (j + 1) =
+      sixthRoot (j + 1) + starFn (Φ x y) j • (Φ x y *ᵥ sixthRoot (j + 1)) := by
+    rw [hexVertex, show j + 1 + 2 = j + 3 by ring, hx_starFn_add_three]
+  rw [hexMidpoint, midpoint_eq_smul_add, invOf_eq_inv] at h
+  constructor
+  · linear_combination (norm := module) (2 : ℝ) • h - hp
+  · linear_combination (norm := module) (2 : ℝ) • hp - (2 : ℝ) • h
 
 /-! ### Support lines of a balanced disk at the multi-point -/
 
 /-- Each curve `σ_j` of a balanced pair is a positively oriented regular `C¹` parameterization of
 `∂K`: its range is `∂K` by periodicity, and `det(σ_j, σ_j') = (α + β) √3/2 > 0` by the star
 condition. -/
-lemma hx_isPositiveBoundaryParam {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
+private lemma hx_isPositiveBoundaryParam {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
     {tf : ℝ} (h : IsBalancedPair K σ tf) (j : ZMod 6) : IsPositiveBoundaryParam K (σ j) := by
   obtain ⟨-, hσ, -, hmulti, -, hstar, htf, hper, -, himage⟩ := h
   refine ⟨(hσ j).1, (hσ j).2, ?_, fun t ↦ ?_⟩
@@ -433,7 +414,7 @@ lemma hx_isPositiveBoundaryParam {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ 
 /-- If `σ_j(t) = g(t) s_j*` with `σ_j(0) = s_j*` (circle representation) and
 `g(0)⁻¹ g'(0) = Φ(z)`, then `σ_j'(0) = Φ(z) s_j*`: `g(0) = I` because `s₀*, s₁*` are a basis, and
 `g` is differentiable because its columns are combinations of `σ₀`, `σ₁`. -/
-lemma hx_deriv_eq {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {tf : ℝ}
+private lemma hx_deriv_eq {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {tf : ℝ}
     {g : ℝ → Mat2} {X : Mat2} (hbal : IsBalancedPair K σ tf) (hcirc : IsCircleRepresentation σ)
     (hσg : ∀ j t, σ j t = g t *ᵥ sixthRoot j) (hX : (g 0)⁻¹ * derivEntrywise g 0 = X)
     (j : ZMod 6) : deriv (σ j) 0 = X *ᵥ sixthRoot j := by
@@ -494,7 +475,7 @@ lemma hx_deriv_eq {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → �
 /-- The support lines of `K` at the multi-point: `K` lies to the left of the line through `s_j*` in
 direction `Φ(z) s_j* = σ_j'(0)`, the tangent of the boundary curve `σ_j` at `s_j*`
 (`bdy_det2_deriv_sub_nonneg`). -/
-lemma hx_support {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {tf : ℝ}
+private lemma hx_support {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {tf : ℝ}
     {g : ℝ → Mat2} {X : Mat2} (hbal : IsBalancedPair K σ tf) (hcirc : IsCircleRepresentation σ)
     (hσg : ∀ j t, σ j t = g t *ᵥ sixthRoot j) (hX : (g 0)⁻¹ * derivEntrywise g 0 = X)
     (j : ZMod 6) {q : Fin 2 → ℝ} (hq : q ∈ K) : 0 ≤ det2 (X *ᵥ sixthRoot j) (q - sixthRoot j) := by
@@ -528,10 +509,10 @@ theorem lemma5_0_3 {x y : ℝ} (hz : (x, y) ∈ starDomain) :
   have hcs : IsCSHexagon (hexVertex x y) := by
     intro j
     obtain ⟨-, -, p0, p1, p2, p3, -⟩ := hx_frame x y j
-    have hA := hx_starFn_pos hz j
-    have hB := hx_starFn_pos hz (j + 1)
-    have hC := hx_starFn_pos hz (j + 2)
-    have hσ := hx_sigma hz j
+    have hA := starFn_Φ_pos hz j
+    have hB := starFn_Φ_pos hz (j + 1)
+    have hC := starFn_Φ_pos hz (j + 2)
+    have hσ := starFn_Φ_mul_add_eq_one hz j
     set A := starFn (Φ x y) j
     set B := starFn (Φ x y) (j + 1)
     set C := starFn (Φ x y) (j + 2)
@@ -553,7 +534,7 @@ theorem lemma5_0_3 {x y : ℝ} (hz : (x, y) ∈ starDomain) :
     intro j
     obtain ⟨-, -, p0, p1, -⟩ := hx_frame x y j
     obtain ⟨-, s1, -⟩ := hx_sixthRoot_F j
-    have hσ := hx_sigma hz j
+    have hσ := starFn_Φ_mul_add_eq_one hz j
     rw [hexMidpoint, p0, p1, hx_midpoint_F, s1]
     congr 1
     · linear_combination (-1 / 2 : ℝ) * hσ
@@ -565,8 +546,8 @@ theorem lemma5_0_3 {x y : ℝ} (hz : (x, y) ∈ starDomain) :
     obtain ⟨s0, s1, -⟩ := hx_sixthRoot_F j
     refine ⟨starFn (Φ x y) (j + 1) * starFn (Φ x y) (j + 2),
       starFn (Φ x y) j * starFn (Φ x y) (j + 2),
-      mul_pos (hx_starFn_pos hz _) (hx_starFn_pos hz _),
-      mul_pos (hx_starFn_pos hz _) (hx_starFn_pos hz _), ?_⟩
+      mul_pos (starFn_Φ_pos hz _) (starFn_Φ_pos hz _),
+      mul_pos (starFn_Φ_pos hz _) (starFn_Φ_pos hz _), ?_⟩
     rw [p0, s0, s1, hx_F_sub, hx_F_sub, hx_F_smul, hx_F_smul, hx_F_add]
     congr 1 <;> ring
   intro K σ tf g hbal hcirc hσg hX
@@ -576,9 +557,9 @@ theorem lemma5_0_3 {x y : ℝ} (hz : (x, y) ∈ starDomain) :
   have hhalf : ∀ j, ∀ q ∈ K,
       0 ≤ det2 (hexVertex x y (j + 1) - hexVertex x y j) (q - hexVertex x y j) := by
     intro j q hq
-    obtain ⟨e1, e2⟩ := hx_edge hz j
+    obtain ⟨e1, e2⟩ := l2c_edge_of_hexMidpoint (hmid j)
     have hs := hx_support hbal hcirc hσg hX (j + 1) hq
-    have hA := hx_starFn_pos hz j
+    have hA := starFn_Φ_pos hz j
     rw [e2, e1]
     have : det2 ((2 * starFn (Φ x y) j) • (Φ x y *ᵥ sixthRoot (j + 1)))
         (q - (sixthRoot (j + 1) - starFn (Φ x y) j • (Φ x y *ᵥ sixthRoot (j + 1)))) =
@@ -632,6 +613,29 @@ theorem lemma5_0_3 {x y : ℝ} (hz : (x, y) ∈ starDomain) :
   -- the critical hexagon of Definition 2.3.8: Theorem 2.3.9
   exact ⟨hleast, theorem2_3_9 hK hleast⟩
 
+/-- The exterior triangle `△ p_j q_j p_{j+1}` has area `√3 ρ_j²` (proof of Lemma 5.0.4:
+`q_j - p_j = 2ρ_j X s_j*`, `p_{j+1} - p_j = 2ρ_j X s_{j+1}*` because the edge `p_j p_{j+1}` has
+midpoint `s_{j+1}*` (Lemma 5.0.3), and `det(X s_j*, X s_{j+1}*) = det X · det(s_j*, s_{j+1}*) =
+√3/2`). -/
+private lemma hx_extTriArea {x y : ℝ} (hz : (x, y) ∈ starDomain) (j : ZMod 6) :
+    volume.real (convexHull ℝ {hexVertex x y j, hexExtVertex x y j, hexVertex x y (j + 1)}) =
+      √3 * starFn (Φ x y) j ^ 2 := by
+  obtain ⟨f0, f1, -, -, -, -, hq⟩ := hx_frame x y j
+  -- `p_{j+1} - p_j = 2ρ_j X s_{j+1}*`: the edge has midpoint `s_{j+1}*` (Lemma 5.0.3)
+  obtain ⟨-, hedge⟩ := l2c_edge_of_hexMidpoint ((lemma5_0_3 hz).2.1 j)
+  have hσ := starFn_Φ_mul_add_eq_one hz j
+  have hA := starFn_Φ_pos hz j
+  rw [hx_volume_real_triangle, hedge, hq, add_sub_cancel_left, f0, f1, hx_F_smul, hx_F_smul,
+    hx_det2_F]
+  set A := starFn (Φ x y) j
+  set B := starFn (Φ x y) (j + 1)
+  set C := starFn (Φ x y) (j + 2)
+  rw [show (2 * A * -B * (2 * A * B) - 2 * A * (A + B) * (2 * A * -(B + C))) * (√3 / 2) =
+      2 * A ^ 2 * √3 * (A * B + B * C + C * A) by ring, hσ, mul_one,
+    abs_of_pos (by positivity)]
+  ring
+
+
 /-- **Lemma 5.0.4** (`lem:triangle-areas`). For `z = x + iy ∈ 𝔥*` and `ρ_j = ρ_j(Φ(z))`:
 `area(T₀) = (√3/4)ρ₀ρ₂`, `area(T₁) = (√3/4)ρ₀ρ₁`, `area(T₂) = (√3/4)ρ₁ρ₂`,
 `area(T₀^ext) = √3ρ₁²`, `area(T₁^ext) = √3ρ₂²`, `area(T₂^ext) = √3ρ₀²`, and
@@ -664,7 +668,7 @@ theorem lemma5_0_4 {x y : ℝ} (hz : (x, y) ∈ starDomain) :
   have r22 : starFn X (((2 : Fin 3).val : ZMod 6) + 2) = ρ₁ X := rfl
   have r21 : starFn X (((2 : Fin 3).val : ZMod 6) + 1) = ρ₀ X := rfl
   -- `ρ₀ρ₁ + ρ₁ρ₂ + ρ₂ρ₀ = det X = 1` (`eqn:det-rho`)
-  have hσ : ρ₀ X * ρ₁ X + ρ₁ X * ρ₂ X + ρ₂ X * ρ₀ X = 1 := hx_sigma hz 0
+  have hσ : ρ₀ X * ρ₁ X + ρ₁ X * ρ₂ X + ρ₂ X * ρ₀ X = 1 := starFn_Φ_mul_add_eq_one hz 0
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · rw [hT, r0, r02]
   · rw [hT, r1, r12]; ring

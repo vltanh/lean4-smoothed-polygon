@@ -1,16 +1,18 @@
 module
 
 public import SmoothedPolygons.Ch2.BalancedDensity
+public import Basic.Analysis.Calculus.DerivInverse
 
 /-!
 # Step B1, part 1: the multi-curve of a worst disk
 
 The results of §2.4 (Lemmas 2.4.2, 2.4.3, 2.4.5, 2.4.6) take the multi-curve `σ` of a worst disk
 as a hypothesis, with `σ₀` a regular `C¹` parameterization of the boundary by arclength (the
-standing assumption of §2.4: "Let `K_min` ... with boundary parameterized by arclength").
+standing assumption of §2.4, TeX 2157–2158: from there on the book assumes that `σ₀` is
+parameterized by arclength).
 This file produces it: for a worst disk `K` in circle representation (a critical hexagon with
 edge midpoints `s_j*`), a balanced pair `(K, σ)` in circle representation
-(`wd_exists_balancedPair`).
+(`IsWorstDisk.exists_isBalancedPair`).
 
 ## The book's argument, and how it is filled in
 
@@ -30,7 +32,8 @@ each boundary point; `rein_Good`). We prove:
    a positive multiple of the tangent (`wd_hasDerivAt_of_det2_const`,
    `wd_isPositiveBoundaryParam_bd`).
 3. *Arclength.* The arclength reparameterization of a regular periodic `C¹` curve is a regular
-   `C¹` curve of unit speed (`wd_exists_arclength_reparam`).
+   `C¹` curve of unit speed (`wd_exists_arclength_reparam`, with the inverse of the arclength from
+   `exists_inverse_of_hasDerivAt_pos`).
 4. *The multi-curve.* `σ_j(t) = rein_bd K (φ_j(Θ(t)))` with the continuous angles `φ_j` of the edge
    midpoints of the critical hexagons (Lemma 2.2.7, `lemma2_2_7`): a continuous multi-curve on the
    boundary (the midpoints of a critical hexagon of a disk in circle representation form a
@@ -48,11 +51,11 @@ open MeasureTheory Set Filter Topology Real
 
 /-- `w` is a unit tangent of `K` at `x`: `‖w‖ = 1` (sup norm) and `K` lies to the left of the line
 through `x` in the direction `w`. -/
-def wd_IsTangent (K : Set (Fin 2 → ℝ)) (x w : Fin 2 → ℝ) : Prop :=
+private def wd_IsTangent (K : Set (Fin 2 → ℝ)) (x w : Fin 2 → ℝ) : Prop :=
   ‖w‖ = 1 ∧ ∀ z ∈ K, 0 ≤ det2 w (z - x)
 
 /-- A unit tangent exists at every boundary point (a support functional, Hahn–Banach). -/
-lemma wd_exists_isTangent {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {x : Fin 2 → ℝ}
+private lemma wd_exists_isTangent {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {x : Fin 2 → ℝ}
     (hx : x ∈ frontier K) : ∃ w, wd_IsTangent K x w := by
   obtain ⟨f, hfi, hfK⟩ := bdy_exists_support hK hx
   set n : Fin 2 → ℝ := ![-f (Pi.single 1 1), f (Pi.single 0 1)] with hn_def
@@ -74,7 +77,7 @@ lemma wd_exists_isTangent {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {x : Fin 
 
 /-- The unit tangent at a boundary point turns counterclockwise about the origin:
 `det(x, w) > 0` (the origin is an interior point, to the left of the line). -/
-lemma wd_det2_pos_of_isTangent {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {x w : Fin 2 → ℝ}
+private lemma wd_det2_pos_of_isTangent {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {x w : Fin 2 → ℝ}
     (hw : wd_IsTangent K x w) : 0 < det2 x w := by
   obtain ⟨hw1, hwK⟩ := hw
   have hw0 : w ≠ 0 := by rintro rfl; simp at hw1
@@ -93,7 +96,7 @@ lemma wd_det2_pos_of_isTangent {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {x w
 
 /-- The unit tangent at a boundary point is unique when the support line there is unique
 (Lemma 2.2.5). -/
-lemma wd_isTangent_unique {K : Set (Fin 2 → ℝ)} (hG : rein_Good K) {x w w' : Fin 2 → ℝ}
+private lemma wd_isTangent_unique {K : Set (Fin 2 → ℝ)} (hG : rein_Good K) {x w w' : Fin 2 → ℝ}
     (hx : x ∈ frontier K) (hw : wd_IsTangent K x w) (hw' : wd_IsTangent K x w') : w = w' := by
   have hK := hG.1
   have hxK := rein_frontier_subset hK hx
@@ -126,10 +129,10 @@ lemma wd_isTangent_unique {K : Set (Fin 2 → ℝ)} (hG : rein_Good K) {x w w' :
 
 open Classical in
 /-- The unit tangent of the boundary of `K` at `x`. -/
-noncomputable def wd_tangent (K : Set (Fin 2 → ℝ)) (x : Fin 2 → ℝ) : Fin 2 → ℝ :=
+private noncomputable def wd_tangent (K : Set (Fin 2 → ℝ)) (x : Fin 2 → ℝ) : Fin 2 → ℝ :=
   if h : ∃ w, wd_IsTangent K x w then h.choose else 0
 
-lemma wd_tangent_spec {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {x : Fin 2 → ℝ}
+private lemma wd_tangent_spec {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {x : Fin 2 → ℝ}
     (hx : x ∈ frontier K) : wd_IsTangent K x (wd_tangent K x) := by
   have h := wd_exists_isTangent hK hx
   rw [wd_tangent, dite_eq_left h]
@@ -137,7 +140,7 @@ lemma wd_tangent_spec {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) {x : Fin 2 �
 
 /-- **The tangent field is continuous** along continuous curves on the boundary: a limit of
 support lines is a support line, and the support line is unique at each boundary point. -/
-lemma wd_continuous_tangent {K : Set (Fin 2 → ℝ)} (hG : rein_Good K) {τ : ℝ → Fin 2 → ℝ}
+private lemma wd_continuous_tangent {K : Set (Fin 2 → ℝ)} (hG : rein_Good K) {τ : ℝ → Fin 2 → ℝ}
     (hτ : Continuous τ) (hτK : ∀ t, τ t ∈ frontier K) :
     Continuous fun t ↦ wd_tangent K (τ t) := by
   have hK := hG.1
@@ -171,7 +174,7 @@ differentiable curve `γ` and an arbitrary continuous field `U` of unit tangents
 continuous curve on the boundary of `K ∈ 𝔎_ccs` and `U(s)` a unit tangent at `τ(s)`, continuous at
 `t`, with `det(γ(s), τ(s)) = c` for all `s`, where `γ` is differentiable at `t`. If
 `det(γ(t), U(t)) ≠ 0`, then `τ'(t) = (-det(γ'(t), τ(t))/det(γ(t), U(t))) U(t)`. -/
-lemma wd_hasDerivAt_of_det2_const {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K)
+private lemma wd_hasDerivAt_of_det2_const {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K)
     {γ τ U : ℝ → Fin 2 → ℝ} {γ' : Fin 2 → ℝ} {t c : ℝ} (hγ : HasDerivAt γ γ' t)
     (hτ : Continuous τ) (hτK : ∀ s, τ s ∈ frontier K) (hU : ∀ s, wd_IsTangent K (τ s) (U s))
     (hUc : ContinuousAt U t) (hc : ∀ s, det2 (γ s) (τ s) = c) (hb : det2 (γ t) (U t) ≠ 0) :
@@ -271,7 +274,7 @@ lemma wd_hasDerivAt_of_det2_const {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K)
 /-- **The polar parameterization of the boundary of a disk with unique support lines is a
 positively oriented regular `C¹` parameterization**, with `2π`-periodic derivative a positive
 multiple of the unit tangent. -/
-lemma wd_isPositiveBoundaryParam_bd {K : Set (Fin 2 → ℝ)} (hG : rein_Good K) :
+private lemma wd_isPositiveBoundaryParam_bd {K : Set (Fin 2 → ℝ)} (hG : rein_Good K) :
     IsPositiveBoundaryParam K (rein_bd K) := by
   have hK := hG.1
   set U : ℝ → Fin 2 → ℝ := fun s ↦ wd_tangent K (rein_bd K s) with hU_def
@@ -328,63 +331,11 @@ lemma wd_isPositiveBoundaryParam_bd {K : Set (Fin 2 → ℝ)} (hG : rein_Good K)
 
 /-! ### Reparameterization by arclength -/
 
-/-- **The inverse of a `C¹` increasing function.** If `ℓ` has a continuous positive derivative `n`,
-`ℓ(0) = 0` and `ℓ(θ + p) = ℓ(θ) + L`, then `ℓ` is a bijection of `ℝ`; its inverse `Θ` is continuous,
-increasing, has derivative `1/n(Θ(t))`, and `Θ(t + L) = Θ(t) + p`. -/
-lemma wd_exists_inverse {ℓ n : ℝ → ℝ} (hℓ : ∀ θ, HasDerivAt ℓ (n θ) θ) (hpos : ∀ θ, 0 < n θ)
-    (h0 : ℓ 0 = 0) {p L : ℝ} (hp : 0 < p) (hL : ∀ θ, ℓ (θ + p) = ℓ θ + L) :
-    0 < L ∧ ∃ Θ : ℝ → ℝ, Continuous Θ ∧ StrictMono Θ ∧ Θ 0 = 0 ∧ (∀ t, ℓ (Θ t) = t) ∧
-      (∀ θ, Θ (ℓ θ) = θ) ∧ (∀ t, Θ (t + L) = Θ t + p) ∧ ∀ t, HasDerivAt Θ (n (Θ t))⁻¹ t := by
-  have hmono : StrictMono ℓ := strictMono_of_deriv_pos fun θ ↦ by
-    rw [(hℓ θ).deriv]; exact hpos θ
-  have hcont : Continuous ℓ := continuous_iff_continuousAt.2 fun θ ↦ (hℓ θ).continuousAt
-  have hLpos : 0 < L := by
-    have h1 := hL 0
-    rw [zero_add, h0] at h1
-    have h2 := hmono hp
-    rw [h0] at h2
-    linarith
-  have hk : ∀ (k : ℕ) θ, ℓ (θ + k * p) = ℓ θ + k * L := by
-    intro k
-    induction k with
-    | zero => intro θ; simp
-    | succ k ih =>
-      intro θ
-      push_cast
-      rw [show θ + (k + 1) * p = (θ + k * p) + p by ring, hL, ih]
-      ring
-  have hsurj : Function.Surjective ℓ := by
-    refine hcont.surjective (tendsto_atTop_atTop_of_monotone hmono.monotone fun b ↦ ?_)
-      (tendsto_atBot_atBot_of_monotone hmono.monotone fun b ↦ ?_)
-    · obtain ⟨k, hk'⟩ := exists_nat_ge (b / L)
-      refine ⟨0 + k * p, ?_⟩
-      rw [hk, h0]
-      have := (div_le_iff₀ hLpos).1 hk'
-      linarith
-    · obtain ⟨k, hk'⟩ := exists_nat_ge (-b / L)
-      refine ⟨-(k * p), ?_⟩
-      have h1 := hk k (-(k * p))
-      rw [neg_add_cancel, h0] at h1
-      have := (div_le_iff₀ hLpos).1 hk'
-      linarith
-  set e := StrictMono.orderIsoOfSurjective ℓ hmono hsurj
-  have he1 : ∀ t, ℓ (e.symm t) = t := fun t ↦
-    StrictMono.orderIsoOfSurjective_self_symm_apply ℓ hmono hsurj t
-  have he2 : ∀ θ, e.symm (ℓ θ) = θ := fun θ ↦
-    StrictMono.orderIsoOfSurjective_symm_apply_self ℓ hmono hsurj θ
-  refine ⟨hLpos, e.symm, e.symm.continuous, e.symm.strictMono, by have := he2 0; rwa [h0] at this,
-    he1, he2,
-    fun t ↦ ?_, fun t ↦ ?_⟩
-  · conv_lhs => rw [← he1 t]
-    rw [← hL, he2]
-  · exact HasDerivAt.of_local_left_inverse e.symm.continuous.continuousAt (hℓ _) (hpos _).ne'
-      (Eventually.of_forall he1)
-
 /-- **Arclength.** A regular `C¹` curve `β` with period `p > 0` has a reparameterization
 `β ∘ Θ` of unit (Euclidean) speed, with `Θ` a continuous increasing bijection,
 `Θ(t + L) = Θ(t) + p` (`L` the length of a period) and `(β ∘ Θ)'(t)` a positive multiple of
 `β'(Θ(t))`: `Θ` is the inverse of the arclength `ℓ(θ) = ∫₀^θ |β'|`. -/
-lemma wd_exists_arclength_reparam {β : ℝ → Fin 2 → ℝ} (hβ : ContDiff ℝ 1 β)
+private lemma wd_exists_arclength_reparam {β : ℝ → Fin 2 → ℝ} (hβ : ContDiff ℝ 1 β)
     (hreg : ∀ θ, deriv β θ ≠ 0) {p : ℝ} (hp : 0 < p) (hper : ∀ θ, β (θ + p) = β θ) :
     ∃ Θ : ℝ → ℝ, Continuous Θ ∧ StrictMono Θ ∧ Function.Surjective Θ ∧ Θ 0 = 0 ∧
       (∃ L : ℝ, 0 < L ∧ ∀ t, Θ (t + L) = Θ t + p) ∧ ContDiff ℝ 1 (fun t ↦ β (Θ t)) ∧
@@ -418,7 +369,8 @@ lemma wd_exists_arclength_reparam {β : ℝ → Fin 2 → ℝ} (hβ : ContDiff �
       (fun s ↦ (hd s).deriv) θ 0
     simp only [zero_add, hℓ0, sub_zero] at hc
     linarith
-  obtain ⟨hLpos, Θ, hΘc, hΘm, hΘ0, -, hΘℓ, hΘL, hΘd⟩ := wd_exists_inverse hℓ hnpos hℓ0 hp hL
+  obtain ⟨hLpos, Θ, hΘc, hΘm, hΘ0, -, hΘℓ, hΘL, hΘd⟩ :=
+    exists_inverse_of_hasDerivAt_pos hℓ hnpos hℓ0 hp hL
   -- `(β ∘ Θ)' = β'(Θ)/n(Θ)`
   have hd : ∀ t, HasDerivAt (fun t ↦ β (Θ t)) ((n (Θ t))⁻¹ • deriv β (Θ t)) t := fun t ↦
     (hβd (Θ t)).scomp t (hΘd t)
@@ -443,7 +395,7 @@ lemma wd_exists_arclength_reparam {β : ℝ → Fin 2 → ℝ} (hβ : ContDiff �
 /-- The edge midpoints of every critical hexagon of a disk in circle representation (a critical
 hexagon with edge midpoints `s_j*`) form a multi-point: all critical hexagons have the area
 `2√3 = 4 det(m₀, m₁)` (`hex_volume_hexagonOf`). -/
-lemma wd_isMultiPoint_hexMidpoint {K : Set (Fin 2 → ℝ)} {v w : ZMod 6 → Fin 2 → ℝ}
+private lemma wd_isMultiPoint_hexMidpoint {K : Set (Fin 2 → ℝ)} {v w : ZMod 6 → Fin 2 → ℝ}
     (hv : IsLeastAreaHexagon K v) (hvm : ∀ j, hexMidpoint v j = sixthRoot j)
     (hw : IsLeastAreaHexagon K w) : IsMultiPoint (hexMidpoint w) := by
   -- all critical hexagons have the same area, `4 det(m₀, m₁)`
@@ -482,7 +434,7 @@ whose edge midpoints are `s_j*`, there is a multi-curve `σ` with `(K, σ)` a ba
 circle representation: `σ₀` the arclength parameterization of the boundary from `s₀*`
 (`wd_isPositiveBoundaryParam_bd`, `wd_exists_arclength_reparam`), `σ_j` the edge midpoints of the
 critical hexagons (Lemma 2.2.7), and Lemmas 2.4.2, 2.4.3, 2.4.5, 2.4.6. -/
-theorem wd_exists_balancedPair {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K)
+theorem IsWorstDisk.exists_isBalancedPair {K : Set (Fin 2 → ℝ)} (hK : IsWorstDisk K)
     {v : ZMod 6 → Fin 2 → ℝ} (hv : IsLeastAreaHexagon K v)
     (hvm : ∀ j, hexMidpoint v j = sixthRoot j) :
     ∃ (σ : ZMod 6 → ℝ → Fin 2 → ℝ) (tf : ℝ), IsBalancedPair K σ tf ∧ IsCircleRepresentation σ := by

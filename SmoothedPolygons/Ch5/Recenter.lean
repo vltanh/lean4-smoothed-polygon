@@ -9,13 +9,12 @@ The proof of Theorem 5.0.2 applies Theorem 5.0.6, a statement about the multi-po
 `0` of a balanced disk in circle representation, at every time `t₀` of the boundary trajectory
 (TeX 4486–4489: "If any point of the trajectory `(g, X)` passes through a point `X = Φ(z)` …").
 That step needs the re-centered disk, which the book does not state: for a balanced pair `(K, σ)`
-with `σ_j(t) = g(t) s_j*` and `σ_j(t + t_f) = σ_{j+1}(t)`, the pair
+with `σ_j(t) = g(t) s_j*`, the pair
 
   `K' = g(t₀)⁻¹ K`, `σ'_j(t) = g(t₀)⁻¹ σ_j(t + t₀) = g'(t) s_j*`, `g'(t) = g(t₀)⁻¹ g(t + t₀)`,
 
-is again a balanced pair, in circle representation, with the same shift relation, the same area
-(`det g(t₀) = 1`), and `g'⁻¹ g'' = X(· + t₀)`: its `X` at time `0` is `X(t₀)`
-(`IsBalancedPair.recenter`).
+is again a balanced pair, in circle representation, with the same area (`det g(t₀) = 1`), and
+`g'⁻¹ g'' = X(· + t₀)`: its `X` at time `0` is `X(t₀)` (`IsBalancedPair.recenter`).
 
 ## Proof
 

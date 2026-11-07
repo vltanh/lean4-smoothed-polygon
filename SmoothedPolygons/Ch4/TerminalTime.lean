@@ -9,7 +9,9 @@ public import SmoothedPolygons.Ch7.SmoothedPolygon
 The cost in half-plane coordinates is `(3/2) ∫ (x² + y² + 1)/y dt` (`eqn:cost-upper-half-plane`).
 Lemma 4.3.1 bounds the terminal time of a global minimizer. Its proof uses that the minimizer has
 area less than `π`, which the book does not justify at that point; it follows from the smoothed
-octagon (Example before Theorem 7.5.6), which is why this file comes after Chapter 7.
+octagon (Example before Theorem 7.5.6), which is why this file comes after Chapter 7. Its other
+step, that the cost density is at least `3` on star states, needs no minimality: it is stated for
+every state trajectory (`three_mul_le_reinhardtCost`), as §6.1 uses it for every competitor.
 -/
 
 @[expose] public section
@@ -45,6 +47,40 @@ lemma poly_traceForm_J_neg {X : Mat2} (hX : IsStarState X) : traceForm J X < 0 :
   rw [hJX]
   linarith
 
+/-- The cost density `-(3/2)⟨J, X⟩ = (3/2)(x² + y² + 1)/y ≥ y + 1/y ≥ 2 · (3/2) = 3` on star
+states, with `X = Φ(x + iy)` by Lemmas 4.1.1 and 4.2.1 (a star state has `det X = 1` and
+`⟨J, X⟩ < 0`). -/
+private lemma l2c_three_le_costDensity {X : Mat2} (hX : IsStarState X) :
+    3 ≤ -(3 / 2) * traceForm J X := by
+  have hmem : X ∈ adjointOrbit J := by
+    rw [← lemma4_1_1]
+    exact ⟨hX.1, hX.2.1, poly_traceForm_J_neg hX⟩
+  obtain ⟨z, -, hz⟩ := lemma4_2_1.surjOn hmem
+  have hy := z.im_pos
+  rw [← hz, ΦH, cost_density_halfPlane _ _ hy]
+  have h2 : 2 ≤ (z.re ^ 2 + z.im ^ 2 + 1) / z.im := by
+    rw [le_div_iff₀ hy]
+    nlinarith [sq_nonneg z.re, sq_nonneg (z.im - 1)]
+  linarith
+
+/-- **The cost is at least three times the terminal time**: the cost density
+`-(3/2)⟨J, X⟩ = (3/2)(x² + y² + 1)/y` (`eqn:cost-upper-half-plane`) is at least `3` on star states,
+so the cost of every state trajectory on `[0, T]` is at least `3T`. This is the argument of the
+proof of Lemma 4.3.1, which needs no minimality; §6.1 uses it to bound the terminal time of every
+competitor cheaper than the smoothed octagon (`SmoothedPolygons/Ch6/Existence.lean`). -/
+theorem three_mul_le_reinhardtCost {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
+    (h : IsStateTrajectory T u g X) : 3 * T ≤ reinhardtCost T X := by
+  obtain ⟨hT, -, -, hstar, -, hXI⟩ := h
+  have hXc : ContinuousOn X (Set.Icc 0 T) := Matrix.continuousOn_of_eq_add_integral hXI
+  have hJc : ContinuousOn (fun t ↦ traceForm J (X t)) (Set.Icc 0 T) :=
+    (continuous_const.matrix_mul continuous_id).matrix_trace.comp_continuousOn hXc
+  have hbound : ∀ t ∈ Set.Icc 0 T, 3 ≤ -(3 / 2) * traceForm J (X t) := fun t ht ↦
+    l2c_three_le_costDensity (hstar t ht).2
+  have := intervalIntegral.integral_mono_on (μ := MeasureTheory.volume) hT.le
+    intervalIntegrable_const ((hJc.intervalIntegrable_of_Icc hT.le).const_mul (-(3 / 2))) hbound
+  rw [intervalIntegral.integral_const, intervalIntegral.integral_const_mul] at this
+  simpa [reinhardtCost, smul_eq_mul, mul_comm] using this
+
 /-- **Lemma 4.3.1** (`lem:tf-pi3`). The global minimizer of the Reinhardt control problem has
 terminal time `t_f < π/3`.
 
@@ -68,30 +104,8 @@ theorem lemma4_3_1 (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2) (h
     ⟨hst', hg0', hP.2.2.1, hP.2.2.2.1⟩
   have hoct := (example7_5_smoothedOctagon.2.2.2.2 g' X' hst' hg0' hX0').2.2.1
   have hlt : reinhardtCost T X < Real.pi := (hmin _ _ _ _ hadm).trans_lt hoct
-  -- `-(3/2)⟨J, X⟩ = (3/2)(x² + y² + 1)/y ≥ 3`
-  obtain ⟨hT, -, -, hstar, -, hXI⟩ := hst
-  have hXc : ContinuousOn X (Set.Icc 0 T) := Matrix.continuousOn_of_eq_add_integral hXI
-  have hJc : ContinuousOn (fun t ↦ traceForm J (X t)) (Set.Icc 0 T) :=
-    (continuous_const.matrix_mul continuous_id).matrix_trace.comp_continuousOn hXc
-  have hbound : ∀ t ∈ Set.Icc 0 T, 3 ≤ -(3 / 2) * traceForm J (X t) := by
-    intro t ht
-    have hX := (hstar t ht).2
-    have hmem : X t ∈ adjointOrbit J := by
-      rw [← lemma4_1_1]
-      exact ⟨hX.1, hX.2.1, poly_traceForm_J_neg hX⟩
-    obtain ⟨z, -, hz⟩ := lemma4_2_1.surjOn hmem
-    have hy := z.im_pos
-    rw [← hz, ΦH, cost_density_halfPlane _ _ hy]
-    have h2 : 2 ≤ (z.re ^ 2 + z.im ^ 2 + 1) / z.im := by
-      rw [le_div_iff₀ hy]
-      nlinarith [sq_nonneg z.re, sq_nonneg (z.im - 1)]
-    linarith
-  have hge : 3 * T ≤ reinhardtCost T X := by
-    have := intervalIntegral.integral_mono_on (μ := MeasureTheory.volume) hT.le
-      intervalIntegrable_const
-      ((hJc.intervalIntegrable_of_Icc hT.le).const_mul (-(3 / 2))) hbound
-    rw [intervalIntegral.integral_const, intervalIntegral.integral_const_mul] at this
-    simpa [reinhardtCost, smul_eq_mul, mul_comm] using this
+  -- `-(3/2)⟨J, X⟩ = (3/2)(x² + y² + 1)/y ≥ 3`, so the cost is at least `3 t_f`
+  have hge := three_mul_le_reinhardtCost hst
   linarith [Real.pi_pos]
 
 end SmoothedPolygons

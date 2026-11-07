@@ -11,8 +11,8 @@ the density bound `δ(x, y)` of `SmoothedPolygons.Ch5.Hexagon` on the star domai
 coordinates `z = x + iy`. By Lemma 5.0.4 and Theorem 4.4.1, with
 `ρ₀ = (1 + √3x)/(√3y)`, `ρ₁ = (1 - √3x)/(√3y)`, `ρ₂ = (3(x² + y²) - 1)/(2√3y)` (`ρⱼ(Φ(x, y))`):
 
-  `area₀ = (√3/4)(ρ₀ρ₂ - 2√(ρ₀ρ₁²ρ₂))`  (`areaFn_zero_eq`, TeX 4379),
-  `area₂(x, y) = area₀(-x, y)`, since `ρ₀(-x, y) = ρ₁(x, y)` (`areaFn_two_eq`, TeX 4442).
+  `area₀ = (√3/4)(ρ₀ρ₂ - 2√(ρ₀ρ₁²ρ₂))`  (`areaFn_zero_eq`, TeX 4386–4391),
+  `area₂(x, y) = area₀(-x, y)`, since `ρ₀(-x, y) = ρ₁(x, y)` (`areaFn_two_eq`, TeX 4443).
 
 ## Statements and the book's proofs
 
@@ -30,6 +30,8 @@ The book uses `ρ₀,ₓ > 0`, `ρ₁,ₓ < 0` and `ρ₂,ₓ = √3x/y` through
   (`continuousOn_sum_indicator_areaFn`: `area_i = 0` on the boundary of `h_i`, where `I_i`
   jumps); it is increasing in `x ∈ (0, 1/√3)` on `h₀ \ h₂` (by (1)) and on `h₀ ∩ h₂` (by (2)),
   hence on `h₀ ∩ {x > 0, y ≥ √3}`; it is even in `x` (`areaFn_two_eq`), so it is least at `x = 0`.
+  (TeX 4447's "monotonic decreasing in `x` on `h₀ ∩ {x < 0, y ≥ √3}`" should read
+  `h₂ ∩ {x < 0, y ≥ √3}`: the mirror image of `h₀ ∩ {x > 0}` under `x ↦ -x` is in `h₂`.)
   **Gap (inventory, Part I §6):** the book treats only `h₀ ∩ {x > 0, y ≥ √3}` and does not show
   that the points with `x > 0` lie in `h₀`, nor how `I₁area₁` enters. Repair along its lines: for
   `y ≥ √3`, `x ≥ 0`, `T₀ - T₀^ext` has the sign of
@@ -37,8 +39,11 @@ The book uses `ρ₀,ₓ > 0`, `ρ₁,ₓ < 0` and `ρ₂,ₓ = √3x/y` through
   discriminant), so `{x ≥ 0, y ≥ √3} ⊆ h₀`, and symmetrically `{x ≤ 0, y ≥ √3} ⊆ h₂`; the statement
   of (3) involves only `I₀area₀ + I₂area₂`, so `h₁` does not enter.
 * (4) `lemma5_0_7_4` (TeX 4450–4465): `area₀(0, y) = area₂(0, y) = (√3/4)√(ρ₀ρ₂)(√(ρ₀ρ₂) - 2ρ₁)`
-  is increasing in `y` (`ρ₀ρ₂ = (y² - 1/3)/(2y²)` and `√(ρ₀ρ₂) - 2ρ₁` increase), so by (3) and
-  `I₁area₁ ≥ 0`, `δ(x, y) ≥ δ(0, y) ≥ δ(0, 4.5) = 0.9059… > δ_oct = 0.9024…`.
+  is increasing in `y` (`ρ₀ρ₂ = (y² - 1/3)/(2y²)` and `√(ρ₀ρ₂) - 2ρ₁` increase), and
+  `δ(x, y) ≥ δ(0, y) ≥ δ(0, 4.5) = 0.9059… > δ_oct = 0.9024…`. **Gap:** the first inequality does
+  not follow from (3) alone, which does not control `I₁area₁`; it also needs
+  `I₁area₁(x, y) ≥ 0 = I₁area₁(0, y)`, that is, `(0, y) ∉ h₁` (on the imaginary axis
+  `T₁ < T₁^ext`, as `(3y² - 1)² > 1`), which the book does not state.
 
 ## How the proofs are written
 
@@ -64,9 +69,10 @@ sign of a derivative by the mean value theorem (`antitoneOn_of_hasDerivWithinAt_
   which is `area₀ + area₂` on `h₀ ∩ h₂` and `area₀` on `h₀ ∖ h₂`; it increases as the maximum of the
   increasing functions of (2) and (1). This is the book's "increasing on each piece, and
   continuous" in one step.
-* (4): the bound uses `I₁area₁(x, y) ≥ 0` and (3) directly,
-  `δ(x, y) ≥ 3/4 + 2area₀(0, y)/√3 ≥ 3/4 + 2area₀(0, 4.5)/√3`, bypassing the book's `δ(0, y)`
-  (which contains `I₁area₁(0, y)`; it vanishes, as `T₁ < T₁^ext` there, but this is not needed).
+* (4): the book's chain. `δ(x, y) ≥ δ(0, y)` by (3), `I₁area₁(x, y) ≥ 0` and
+  `(0, y) ∉ h₁` (`l2c_not_mem_hRegion_one_axis`); `δ(0, y) = 3/4 + 2area₀(0, y)/√3`
+  (`l2c_densityBound_axis`: `(0, y) ∈ h₀ ∩ h₂`) increases with `y ≥ √3`
+  (`mo_areaFn_zero_axis_mono`: `√u` increases, `v` decreases, and `√u - 2v ≥ 0` for `y ≥ √3`).
   Numerics with exact rational bounds: `√32 > 5.656854`, `√8 > 2.828427` and
   `ln 2 > 0.6931471803` (`Real.log_two_gt_d9`) give `δ_oct < 0.9025`; at `y = 4.5`,
   `u = ρ₀ρ₂ = 239/486`, `v = ρ₁`, `2area₀/√3 = u/2 - v√u` and `(v√u)² = 956/118098 < 0.0905²`, so
@@ -93,7 +99,7 @@ private lemma mo_ρ (x y : ℝ) (hy : 0 < y) :
   · simp [ρ₁, Φ]; field_simp
   · simp [ρ₂, Φ]; field_simp; rw [h3sq]; ring
 
-/-- `ρ₀(-x, y) = ρ₁(x, y)`, `ρ₁(-x, y) = ρ₀(x, y)`, `ρ₂(-x, y) = ρ₂(x, y)` (TeX 4442). -/
+/-- `ρ₀(-x, y) = ρ₁(x, y)`, `ρ₁(-x, y) = ρ₀(x, y)`, `ρ₂(-x, y) = ρ₂(x, y)` (TeX 4443). -/
 private lemma mo_ρ_neg (x y : ℝ) :
     ρ₀ (Φ (-x) y) = ρ₁ (Φ x y) ∧ ρ₁ (Φ (-x) y) = ρ₀ (Φ x y) ∧ ρ₂ (Φ (-x) y) = ρ₂ (Φ x y) := by
   refine ⟨?_, ?_, ?_⟩ <;> simp [ρ₀, ρ₁, ρ₂, Φ] <;> ring
@@ -115,7 +121,7 @@ private lemma mo_sqrt_ext_mul (a b c : ℝ) :
   have : √3 * a ^ 2 * (√3 / 4 * b * c) = (√3 / 2) ^ 2 * (b * a ^ 2 * c) := by ring
   rw [this, Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq (by positivity)]
 
-/-- `area₀` in terms of the star functions (TeX 4379): on `𝔥*`,
+/-- `area₀` in terms of the star functions (TeX 4386–4391): on `𝔥*`,
 `area₀(x, y) = (√3/4)(ρ₀ρ₂ - 2√(ρ₀ρ₁²ρ₂))` with `ρⱼ = ρⱼ(Φ(x, y))`. -/
 theorem areaFn_zero_eq {x y : ℝ} (hz : (x, y) ∈ starDomain) :
     areaFn 0 (x, y) = √3 / 4 * (ρ₀ (Φ x y) * ρ₂ (Φ x y) -
@@ -124,7 +130,7 @@ theorem areaFn_zero_eq {x y : ℝ} (hz : (x, y) ∈ starDomain) :
   simp only [areaFn, h0, he0, mo_sqrt_ext_mul]
   ring
 
-/-- The reflection symmetry of the areas (TeX 4442): `area₂(x, y) = area₀(-x, y)` and
+/-- The reflection symmetry of the areas (TeX 4443): `area₂(x, y) = area₀(-x, y)` and
 `(x, y) ∈ h₂ ↔ (-x, y) ∈ h₀`, since `ρ₀(-x, y) = ρ₁(x, y)` and `ρ₂(-x, y) = ρ₂(x, y)`. -/
 theorem areaFn_two_eq {x y : ℝ} (hz : (x, y) ∈ starDomain) :
     areaFn 2 (x, y) = areaFn 0 (-x, y) ∧ ((x, y) ∈ hRegion 2 ↔ (-x, y) ∈ hRegion 0) := by
@@ -558,7 +564,7 @@ theorem lemma5_0_7_3 {y : ℝ} (hy : √3 ≤ y) {x : ℝ} (hx : x ∈ Ioo (-(1 
 
 /-! ### Lemma 5.0.7 (4) -/
 
-/-- On the imaginary axis (TeX 4453–4458): `area₀(0, y) = (√3/4)(u - 2v√u)
+/-- On the imaginary axis (TeX 4450–4457): `area₀(0, y) = (√3/4)(u - 2v√u)
 = (√3/4)√u(√u - 2v)` with `u = ρ₀ρ₂ = (3y² - 1)/(6y²)` and `v = ρ₁ = 1/(√3y)`. -/
 private lemma mo_areaFn_zero_axis {y : ℝ} (hy : 1 ≤ y) :
     areaFn 0 (0, y) = √3 / 4 * ((3 * y ^ 2 - 1) / (6 * y ^ 2) -
@@ -579,7 +585,7 @@ private lemma mo_areaFn_zero_axis {y : ℝ} (hy : 1 ≤ y) :
     rw [← hu]; ring
   rw [hu, hF, Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq (by positivity)]
 
-/-- `area₀(0, y)` is increasing in `y ≥ √3` (TeX 4459–4461): `u = ρ₀ρ₂` increases, `v = ρ₁`
+/-- `area₀(0, y)` is increasing in `y ≥ √3` (TeX 4458–4460): `u = ρ₀ρ₂` increases, `v = ρ₁`
 decreases, and `√u - 2v ≥ 0` for `y ≥ √3`. -/
 private lemma mo_areaFn_zero_axis_mono {y₁ y₂ : ℝ} (h1 : √3 ≤ y₁) (h12 : y₁ ≤ y₂) :
     areaFn 0 (0, y₁) ≤ areaFn 0 (0, y₂) := by
@@ -639,43 +645,75 @@ private lemma mo_axis_value : 0.9025 < 3 / 4 + 2 * areaFn 0 (0, 9 / 2) / √3 :=
   have : 2 * (√3 / 4 * (239 / 486 - 2 * w)) / √3 = 239 / 972 - w := by field_simp; ring
   rw [this]; norm_num; linarith
 
+/-- `(0, y) ∉ h₁` for `y ≥ 1`, so `I₁ area₁(0, y) = 0`: on the imaginary axis
+`T₁ = (√3/4)ρ₀ρ₁ = √3/(4k²)` and `T₁^ext = √3ρ₂² = √3c²/(4k²)` with `k = √3y`, `c = 3y² - 1 ≥ 2`,
+so `T₁ < T₁^ext`. (The book's step `δ(x, y) ≥ δ(0, y)` of (4) uses this without stating it.) -/
+private lemma l2c_not_mem_hRegion_one_axis {y : ℝ} (hy : 1 ≤ y) : ((0 : ℝ), y) ∉ hRegion 1 := by
+  have hz0 : ((0 : ℝ), y) ∈ starDomain :=
+    mo_mem_starDomain hy ⟨neg_lt_zero.mpr (by positivity), by positivity⟩
+  obtain ⟨-, h1, -, -, he1, -, -⟩ := lemma5_0_4 hz0
+  obtain ⟨r0, r1, r2⟩ := mo_ρ 0 y (by linarith)
+  rintro ⟨-, hle⟩
+  change extTriArea 0 y 1 ≤ triArea 0 y 1 at hle
+  rw [h1, he1, r0, r1, r2] at hle
+  have hc : 2 ≤ 3 * y ^ 2 - 1 := by nlinarith
+  have hk : 0 < √3 * y := by positivity
+  have h3 : 0 < √3 := by positivity
+  simp only [mul_zero, add_zero, sub_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+    zero_pow, zero_add] at hle
+  generalize √3 * y = k at hk hle
+  generalize 3 * y ^ 2 - 1 = c at hc hle
+  have e : √3 * (c / (2 * k)) ^ 2 - √3 / 4 * (1 / k) * (1 / k) =
+      √3 / (4 * k ^ 2) * (c ^ 2 - 1) := by
+    field_simp; ring
+  nlinarith [mul_pos (by positivity : 0 < √3 / (4 * k ^ 2)) (by nlinarith : (0 : ℝ) < c ^ 2 - 1)]
+
+/-- The density bound on the imaginary axis: for `y ≥ √3`, `(0, y) ∈ h₀ ∩ h₂ \ h₁` and
+`area₂(0, y) = area₀(0, y)`, so `δ(0, y) = 3/4 + 2 area₀(0, y)/√3`. -/
+private lemma l2c_densityBound_axis {y : ℝ} (hy : √3 ≤ y) :
+    densityBound (0, y) = 3 / 4 + 2 * areaFn 0 (0, y) / √3 := by
+  have hy1 : 1 ≤ y := mo_one_le_sqrt_three.trans hy
+  have hz0 : ((0 : ℝ), y) ∈ starDomain :=
+    mo_mem_starDomain hy1 ⟨neg_lt_zero.mpr (by positivity), by positivity⟩
+  have hm0 : ((0 : ℝ), y) ∈ hRegion 0 := mo_mem_hRegion_zero hz0 hy le_rfl
+  obtain ⟨e2, m2⟩ := areaFn_two_eq hz0
+  rw [neg_zero] at e2 m2
+  rw [densityBound_eq, Fin.sum_univ_three, indicator_of_mem hm0,
+    indicator_of_notMem (l2c_not_mem_hRegion_one_axis hy1), indicator_of_mem (m2.mpr hm0), e2]
+  ring
+
 /-- **Lemma 5.0.7 (4)** (`lem:compactification-lemma`). For all `x ∈ (-1/√3, 1/√3)` and all
-`y ≥ 4.5`, `δ(x, y) > δ_oct`. -/
+`y ≥ 4.5`, `δ(x, y) > δ_oct`.
+
+The book's proof (TeX 4450–4465): `δ(x, y) ≥ δ(0, y) ≥ δ(0, 4.5) = 0.9059… > δ_oct`. The first
+inequality is (3) for `I₀area₀ + I₂area₂`, together with `I₁area₁(x, y) ≥ 0 = I₁area₁(0, y)`: (3)
+does not control `I₁area₁`, and the fact that `(0, y) ∉ h₁` (`T₁ < T₁^ext` on the imaginary axis,
+`l2c_not_mem_hRegion_one_axis`) is unstated in the book. The second is the monotonicity of
+`δ(0, y) = 3/4 + 2area₀(0, y)/√3` in `y ≥ √3` (`area₀(0, y)` is increasing). -/
 theorem lemma5_0_7_4 {x y : ℝ} (hx : x ∈ Ioo (-(1 / √3)) (1 / √3)) (hy : 9 / 2 ≤ y) :
     octagonDensity < densityBound (x, y) := by
-  have h3p : 0 < √3 := by positivity
   have h3lt : √3 < 9 / 2 := by rw [Real.sqrt_lt' (by norm_num)]; norm_num
   have hy3 : √3 ≤ y := by linarith
   have hy1 : 1 ≤ y := mo_one_le_sqrt_three.trans hy3
   have hz := mo_mem_starDomain hy1 hx
-  -- `δ = 3/4 + Σ I_i area_i/√3`, as `√12 = 2√3`
-  have h12 : √12 = 2 * √3 := by
-    rw [show (12 : ℝ) = 2 ^ 2 * 3 by norm_num, Real.sqrt_mul (by norm_num),
-      Real.sqrt_sq (by norm_num)]
-  -- `I₁ area₁ ≥ 0`
-  have hI1 : 0 ≤ (hRegion 1).indicator (areaFn 1) (x, y) := by
-    rw [mo_indicator_eq_max hz]; exact le_max_right _ _
-  -- (3): `I₀area₀ + I₂area₂ ≥ (I₀area₀ + I₂area₂)(0, y) = 2 area₀(0, y)`
-  have hS := lemma5_0_7_3 hy3 hx
-  have hz0 : ((0 : ℝ), y) ∈ starDomain :=
-    mo_mem_starDomain hy1 ⟨neg_lt_zero.mpr (by positivity), by positivity⟩
-  have hm0 : ((0 : ℝ), y) ∈ hRegion 0 := mo_mem_hRegion_zero hz0 hy3 le_rfl
-  obtain ⟨e2, m2⟩ := areaFn_two_eq hz0
-  rw [neg_zero] at e2 m2
-  rw [indicator_of_mem hm0, indicator_of_mem (m2.mpr hm0), e2] at hS
-  -- `area₀(0, y) ≥ area₀(0, 4.5)`
-  have hmono := mo_areaFn_zero_axis_mono (y₁ := 9 / 2) (by linarith) hy
-  have hval := mo_axis_value
-  have hoct := mo_octagonDensity_lt
-  have e1 : octagonDensity * (2 * √3) < 0.9025 * (2 * √3) :=
-    mul_lt_mul_of_pos_right hoct (by positivity)
-  have e2 : 0.9025 * (2 * √3) < (3 / 4 + 2 * areaFn 0 (0, 9 / 2) / √3) * (2 * √3) :=
-    mul_lt_mul_of_pos_right hval (by positivity)
-  have e3 : (3 / 4 + 2 * areaFn 0 (0, 9 / 2) / √3) * (2 * √3) =
-      3 * √3 / 2 + 4 * areaFn 0 (0, 9 / 2) := by
-    field_simp; ring
-  unfold densityBound
-  rw [Fin.sum_univ_three, h12, lt_div_iff₀ (by positivity)]
-  linarith
+  -- `δ(x, y) ≥ δ(0, y)`: (3), and `I₁area₁(x, y) ≥ 0 = I₁area₁(0, y)` as `(0, y) ∉ h₁`
+  have hδ0 : densityBound (0, y) ≤ densityBound (x, y) := by
+    have hS := lemma5_0_7_3 hy3 hx
+    have hI1 : 0 ≤ (hRegion 1).indicator (areaFn 1) (x, y) := by
+      rw [mo_indicator_eq_max hz]; exact le_max_right _ _
+    rw [densityBound_eq, densityBound_eq, Fin.sum_univ_three, Fin.sum_univ_three,
+      indicator_of_notMem (l2c_not_mem_hRegion_one_axis hy1)]
+    gcongr 3 / 4 + ?_ / _
+    linarith
+  -- `δ(0, y) = 3/4 + 2area₀(0, y)/√3` is increasing in `y ≥ √3`: `δ(0, y) ≥ δ(0, 4.5)`
+  have hδy : densityBound (0, 9 / 2) ≤ densityBound (0, y) := by
+    rw [l2c_densityBound_axis h3lt.le, l2c_densityBound_axis hy3]
+    have := mo_areaFn_zero_axis_mono (y₁ := 9 / 2) h3lt.le hy
+    gcongr
+  -- `δ(0, 4.5) = 0.9059… > 0.9025 > δ_oct`
+  have hval : octagonDensity < densityBound (0, 9 / 2) := by
+    rw [l2c_densityBound_axis h3lt.le]
+    exact mo_octagonDensity_lt.trans mo_axis_value
+  exact hval.trans_le (hδy.trans hδ0)
 
 end SmoothedPolygons

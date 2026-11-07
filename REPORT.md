@@ -444,7 +444,7 @@ trajectory, with `λ_cost = 0` and `Λ₂ = cX` (from the first integral `det X`
 the nontriviality of `(λ_cost, Λ₁, Λ_R)` cannot be derived. Because `det g` and `det X` are
 constant, the equations `g(t_f)₁₁ = R₁₁` and `X(t_f)₁₀ = (R⁻¹X(0)R)₁₀` follow from the others
 (with `det g(0) = det X(0) = 1`, `R₀₀ ≠ 0` and `X₀₁ < 0` on `C`), so leaving them out changes no
-admissible trajectory ([`isReinhardtAdmissible_of_mem_matrixEndpoints`](SmoothedPolygons/Ch6/MatrixMinimizer.lean#L360)). The formalization applies the
+admissible trajectory ([`isReinhardtAdmissible_of_mem_matrixEndpoints`](SmoothedPolygons/Ch6/MatrixMinimizer.lean#L361)). The formalization applies the
 maximum principle with the boundary condition without them ([`matrixBoundary`](SmoothedPolygons/Ch6/MatrixSystem.lean#L136)); transversality in the
 two directions this frees gives `p(t_f)₁₁ = 0` and `Λ₂(t_f)₀₁ = 0`, which exclude these covectors
 ([`eq_zero_of_covectorΛ_eq_zero`](SmoothedPolygons/Ch6/MatrixCostate.lean#L526)), and the nontriviality of the reduced costate follows: if

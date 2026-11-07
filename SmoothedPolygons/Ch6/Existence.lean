@@ -46,8 +46,9 @@ Proposition 8.1.3 ("We have seen that the global minimizer must be extremal", Te
    `X(t_f) = R⁻¹X(0)R`), while Theorem 6.1.1 fixes the initial point. Repair: the same theorem with
    a compact set of initial points and a closed endpoint relation.
 4. *Time bound.* Lemma 4.3.1 assumes a minimizer. Repair: the cost density `-(3/2)⟨J, X⟩` is at
-   least `3` on star states (`three_mul_le_reinhardtCost`), so every competitor cheaper than the
-   smoothed octagon (`< π`) has `t_f < π/3`.
+   least `3` on star states (`three_mul_le_reinhardtCost`, the argument of Lemma 4.3.1 stated for
+   every state trajectory), so every competitor cheaper than the smoothed octagon (`< π`) has
+   `t_f < π/3`.
 5. *Reinhardt's existence theorem* (TeX 4569–4572) concerns `K_min`, not the control problem; the
    argument does not use it (see `SmoothedPolygons/Ch6/WorstDisk.lean` for the identification).
 
@@ -88,41 +89,6 @@ Lemma 6.1.2 carried over by `Φ`.
 namespace SmoothedPolygons
 
 open MeasureTheory Set Matrix
-
-/-! ### The time bound -/
-
-/-- The cost density `-(3/2)⟨J, X⟩ = (3/2)(x² + y² + 1)/y ≥ y + 1/y ≥ 2 · (3/2) = 3` on star
-states: the bound `hbound` in the proof of Lemma 4.3.1 (`lemma4_3_1`), with `X = Φ(x + iy)` by
-Lemmas 4.1.1 and 4.2.1. -/
-private lemma ex_three_le_costDensity {X : Mat2} (hX : IsStarState X) :
-    3 ≤ -(3 / 2) * traceForm J X := by
-  have hmem : X ∈ adjointOrbit J := by
-    rw [← lemma4_1_1]
-    exact ⟨hX.1, hX.2.1, poly_traceForm_J_neg hX⟩
-  obtain ⟨z, -, hz⟩ := lemma4_2_1.surjOn hmem
-  have hy := z.im_pos
-  rw [← hz, ΦH, cost_density_halfPlane _ _ hy]
-  have h2 : 2 ≤ (z.re ^ 2 + z.im ^ 2 + 1) / z.im := by
-    rw [le_div_iff₀ hy]
-    nlinarith [sq_nonneg z.re, sq_nonneg (z.im - 1)]
-  linarith
-
-/-- **The time bound** (repair of the use of Lemma 4.3.1 in §6.1, TeX 4583): the cost density
-`-(3/2)⟨J, X⟩ = (3/2)(x² + y² + 1)/y` is at least `3` on star states, so the cost of every state
-trajectory on `[0, T]` is at least `3T`. (The argument `hbound`, `hge` of the proof of
-Lemma 4.3.1, which needs no minimality.) -/
-theorem three_mul_le_reinhardtCost {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
-    (h : IsStateTrajectory T u g X) : 3 * T ≤ reinhardtCost T X := by
-  obtain ⟨hT, -, -, hstar, -, hXI⟩ := h
-  have hXc : ContinuousOn X (Icc 0 T) := Matrix.continuousOn_of_eq_add_integral hXI
-  have hJc : ContinuousOn (fun t ↦ traceForm J (X t)) (Icc 0 T) :=
-    (continuous_const.matrix_mul continuous_id).matrix_trace.comp_continuousOn hXc
-  have hbound : ∀ t ∈ Icc 0 T, 3 ≤ -(3 / 2) * traceForm J (X t) := fun t ht ↦
-    ex_three_le_costDensity (hstar t ht).2
-  have := intervalIntegral.integral_mono_on (μ := volume) hT.le intervalIntegrable_const
-    ((hJc.intervalIntegrable_of_Icc hT.le).const_mul (-(3 / 2))) hbound
-  rw [intervalIntegral.integral_const, intervalIntegral.integral_const_mul] at this
-  simpa [reinhardtCost, smul_eq_mul, mul_comm] using this
 
 /-! ### `Φ(𝔥**)` -/
 
@@ -363,7 +329,7 @@ theorem IsReinhardtAdmissible.forall_mem_truncatedStarDomain {T : ℝ} {u : ℝ 
   -- winding number one, since the cost is less than `π < 7π/2`
   have hw : IsWindingOne T g := isWindingOne_of_reinhardtCost_lt h (by linarith [Real.pi_pos])
   -- the balanced disk bounded by the trajectory (the converse of Problem 3.6.2)
-  obtain ⟨K, σ, G, -, hGX, hstar, hσ, hshift, hKσ, hcirc, -⟩ :=
+  obtain ⟨K, σ, G, -, hGX, hstar, hσ, hshift, hKσ, -, -⟩ :=
     exists_isBalancedPair_of_isReinhardtAdmissible h hw
   set X' : ℝ → Mat2 := fun t ↦ (G t)⁻¹ * derivEntrywise G t with hX'
   choose z hz using fun t ↦ ex_exists_starDomain (hstar t)
@@ -378,7 +344,7 @@ theorem IsReinhardtAdmissible.forall_mem_truncatedStarDomain {T : ℝ} {u : ℝ 
   have hzout : z t ∉ truncatedStarDomain := fun hm ↦
     hout ⟨z t, hm, by rw [← hGX t ht]; exact (hz t).2⟩
   -- Theorem 5.0.2: the cost would exceed the area of the smoothed octagon
-  have := (theorem5_0_2 hKσ hcirc hσ hshift (fun _ ↦ rfl) hz hzout).1
+  have := (theorem5_0_2 hKσ hσ hshift (fun _ ↦ rfl) hz hzout).1
   rw [hcost] at this
   linarith
 
@@ -425,26 +391,6 @@ private lemma ex_isCompact_S (C : ℝ) : IsCompact (ex_S C) := by
 private lemma ex_isClosed_matrixEndpoints : IsClosed matrixEndpoints :=
   isClosed_eq contDiff_matrixBoundary.continuous continuous_const
 
-/-- An admissible trajectory of Problem 3.6.2 satisfies the boundary condition `matrixEndpoints`
-(as in `IsReinhardtMinimizer.isStrongLocalMinimizer_matrix`). -/
-private lemma ex_mem_matrixEndpoints {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
-    (h : IsReinhardtAdmissible T u g X) :
-    (toMatrixState (g 0) (X 0), toMatrixState (g T) (X T)) ∈ matrixEndpoints := by
-  obtain ⟨hst, hg0, hgT, hXT⟩ := h
-  have hT : 0 < T := hst.1
-  have h0m : (0 : ℝ) ∈ Icc 0 T := ⟨le_rfl, hT.le⟩
-  have hTm : T ∈ Icc 0 T := ⟨hT.le, le_rfl⟩
-  have hXq : ∀ t ∈ Icc 0 T, stateX (toMatrixState (g t) (X t)) = X t := fun t ht ↦
-    stateX_toMatrixState _ (hst.2.2.2.1 t ht).2.1
-  change matrixBoundary (toMatrixState (g 0) (X 0), toMatrixState (g T) (X T)) = 0
-  simp only [matrixBoundary, stateG_toMatrixState, hXq 0 h0m, hXq T hTm]
-  rw [hg0, hgT, hXT, (hst.2.2.2.1 0 h0m).2.2.1]
-  refine Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ ?_))
-  · funext i j; simp
-  · funext k; fin_cases k <;> simp
-  · simp
-  · funext k; fin_cases k <;> simp
-
 /-- The cost of the matrix pair of a state trajectory is its Reinhardt cost. -/
 private lemma ex_integral_matrixCost {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
     (h : IsStateTrajectory T u g X) :
@@ -483,7 +429,7 @@ private lemma ex_mem_class {C : ℝ}
       change slCoords (Φ z.1 z.2) = slCoords (X t)
       rw [hXz]⟩
   exact ⟨⟨hst.1.le, hTlt.le⟩, hst.isAdmissibleIn_matrix.1, hmem 0 ⟨le_rfl, hst.1.le⟩, hmem,
-    ex_mem_matrixEndpoints h⟩
+    h.mem_matrixEndpoints⟩
 
 /-- **Existence of an optimal control** (§6.1, `sec:existence-opt-control`, TeX 4520–4600): the
 Reinhardt control problem (Problem 3.6.2) has a global minimizer. -/

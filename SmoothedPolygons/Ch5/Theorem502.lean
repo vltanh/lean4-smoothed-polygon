@@ -51,8 +51,8 @@ smoothed octagon; hence `K` is not a global minimizer.
   (`reflS_conj_Φ`), and `R`, `S` permute the star functions (`ρ_R_conj`, `ρ_reflS_conj`).
 * `octagonDensity_lt_densityBound`: steps 1–3 above.
 * `sqrt12_mul_densityBound_le_volume`: `IsBalancedPair.recenter`, `lemma5_0_3`, `theorem5_0_6`.
-  (The hypothesis `IsCircleRepresentation σ` is not used: the re-centered disk is in circle
-  representation whatever `σ(0)` is.)
+  No circle representation of `K` is needed: the re-centered disk is in circle representation
+  whatever `σ(0)` is.
 * `theorem5_0_2`: `eqn_cost` (the curve `g` is differentiable because its columns are `σ₀` and
   `(2σ₁ - σ₀)/√3`, and `g' = gX` since `det g = 1`), `smoothedOctagon_volume`,
   `greatestPackingDensity_of_isBalancedPair`, and the admissibility of the smoothed octagon's
@@ -182,15 +182,15 @@ theorem octagonDensity_lt_densityBound {z : ℝ × ℝ} (hz : z ∈ starDomain)
   · exact octagonDensity_lt_densityBound_of_mem_edgeHalfPlane hwS hP hy1 hy
 
 /-- **The density bound along the trajectory** (Theorem 5.0.6 at every time, TeX 4486–4489 and
-4332–4348): for a balanced disk `K` in circle representation with boundary trajectory `(g, X)`,
-`σ_j(t) = g(t) s_j*`, `X = g⁻¹g' = Φ ∘ z`, and every time `t₀`, `area(K) ≥ √12 δ(z(t₀))`.
+4332–4348): for a balanced disk `K` with boundary trajectory `(g, X)`, `σ_j(t) = g(t) s_j*`,
+`X = g⁻¹g' = Φ ∘ z`, and every time `t₀`, `area(K) ≥ √12 δ(z(t₀))`.
 
 Proof: re-center `K` at `t₀` (`IsBalancedPair.recenter`: `g(t₀)⁻¹K` is a balanced disk in circle
 representation, of the same area, whose `X` at time `0` is `X(t₀) = Φ(z(t₀))`); by Lemma 5.0.3
 its critical hexagon is `H_K(z(t₀))`, and Theorem 5.0.6 bounds its area by
 `3√3/2 + 2 Σ I_i area_i = √12 δ(z(t₀))`. -/
 theorem sqrt12_mul_densityBound_le_volume {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
-    {tf : ℝ} (hKσ : IsBalancedPair K σ tf) (hcirc : IsCircleRepresentation σ) {g X : ℝ → Mat2}
+    {tf : ℝ} (hKσ : IsBalancedPair K σ tf) {g X : ℝ → Mat2}
     (hg : ∀ j t, σ j t = g t *ᵥ sixthRoot j)
     (hX : ∀ t, X t = (g t)⁻¹ * derivEntrywise g t) {z : ℝ → ℝ × ℝ}
     (hz : ∀ t, z t ∈ starDomain ∧ X t = Φ (z t).1 (z t).2) (t₀ : ℝ) :
@@ -239,15 +239,19 @@ private lemma eb_hasDerivAtEntrywise {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → 
       exact (((hd 1 i).const_mul 2).sub (hd 0 i)).div_const _
   simpa [derivEntrywise] using hdiff.hasDerivAt
 
-/-- **Theorem 5.0.2** (`th:compactification`). Let `K` be a balanced disk in circle representation
-with boundary trajectory `(g, X)` (`σ_j(t) = g(t) s_j*`, `σ_j(t + t_f) = σ_{j+1}(t)`,
-`X = g⁻¹g'`), and let `z` be the trajectory in `𝔥*` with `Φ ∘ z = X`. If some point `z(t₀)` is not
-in `𝔥**`, then the cost of the trajectory, which is `area(K)`, is strictly greater than the area of
-the smoothed octagon. Hence `K` is not a global minimizer: the smoothed octagon has a smaller
-greatest packing density, and `(g, X)` is not a global minimizer of the Reinhardt control problem
-(Problem 3.6.2). -/
+/-- **Theorem 5.0.2** (`th:compactification`). Let `K` be a balanced disk with boundary
+trajectory `(g, X)` (`σ_j(t) = g(t) s_j*`, `σ_j(t + t_f) = σ_{j+1}(t)`, `X = g⁻¹g'`), and let `z`
+be the trajectory in `𝔥*` with `Φ ∘ z = X`. If some point `z(t₀)` is not in `𝔥**`, then the cost
+of the trajectory, which is `area(K)`, is strictly greater than the area of the smoothed octagon.
+Hence `K` is not a global minimizer: the smoothed octagon has a smaller greatest packing density,
+and `(g, X)` is not a global minimizer of the Reinhardt control problem (Problem 3.6.2).
+
+The book takes `K` in circle representation, with `g(0) = I₂` (the boundary trajectory of
+Problem 3.6.2, and the paragraph after the statement, TeX 3991–3994). That hypothesis is redundant
+and is omitted here: the proof re-centers `K` at the time `t₀` (`IsBalancedPair.recenter`), and the
+re-centered disk `g(t₀)⁻¹K` is in circle representation whatever `g(0)` is. -/
 theorem theorem5_0_2 {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {tf : ℝ}
-    (hKσ : IsBalancedPair K σ tf) (hcirc : IsCircleRepresentation σ) {g X : ℝ → Mat2}
+    (hKσ : IsBalancedPair K σ tf) {g X : ℝ → Mat2}
     (hg : ∀ j t, σ j t = g t *ᵥ sixthRoot j) (hshift : ∀ j t, σ j (t + tf) = σ (j + 1) t)
     (hX : ∀ t, X t = (g t)⁻¹ * derivEntrywise g t) {z : ℝ → ℝ × ℝ}
     (hz : ∀ t, z t ∈ starDomain ∧ X t = Φ (z t).1 (z t).2) {t₀ : ℝ}
@@ -259,7 +263,7 @@ theorem theorem5_0_2 {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 �
   have h12 : (0 : ℝ) < √12 := by positivity
   -- `area(K) ≥ √12 δ(z(t₀)) > √12 δ_oct` (Theorem 5.0.6 and the density bound off `𝔥**`)
   have hδ := octagonDensity_lt_densityBound (hz t₀).1 hout
-  have hle := sqrt12_mul_densityBound_le_volume hKσ hcirc hg hX hz t₀
+  have hle := sqrt12_mul_densityBound_le_volume hKσ hg hX hz t₀
   -- the smoothed octagon: a balanced disk of area `√12 δ_oct`, with an admissible trajectory
   obtain ⟨hst, hg0, hX0, -, -, hbal8, -, hvol8⟩ := smoothedPolygonDisk_spec 1 le_rfl
   obtain ⟨-, Λ₁, ΛR, lam, hPE⟩ := (theorem7_5_6 1 le_rfl).2 _ _ hst hg0 hX0

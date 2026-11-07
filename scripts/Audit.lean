@@ -7,6 +7,7 @@ public meta import Lean.DocString
 --   find SmoothedPolygons External Basic -name '*.lean' | sort |
 --     sed 's/\.lean$//; s#/#.#g; s/^/import all /'
 import all Basic.Algebra.Module.ZLattice.PlaneCritical
+import all Basic.Analysis.Calculus.DerivInverse
 import all Basic.Analysis.Calculus.MatrixEntrywise
 import all Basic.Analysis.Calculus.MatrixEntrywiseExp
 import all Basic.Analysis.Calculus.MatrixFTC
