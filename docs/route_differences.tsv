@@ -56,3 +56,5 @@ thm:min-critical	+thm:minkowski-inscribe	the critical hexagon of the critical la
 lem:sigma2:c1	-lem:star-conditions	the book's proof only says "(Compare the proof of Lemma 2.4.5)"; it does not use the lemma
 lem:sigma2:c1	+lem:multi-cont	cited in the paragraph between the statement and the proof (TeX 2031: "By Lemma 2.2.7, the curves sigma_j(t) are continuous")
 lem:tangents-lipschitz	+lem:multi-cont	the book's "by continuity over the compact boundary" (the curvature bound of the hyperbolas) needs the continuity of the critical midpoints, Lemma 2.2.7
+thm:oct-isolated	+lem:discrete-k	the book's last step uses the final transversality condition eqn:theta-k, which Lemma 7.5.5 states (cited by equation number, not by the lemma); the formal proof uses the lemma, and the eigenvalue comparison of its proof for the converse direction (E30, E32)
+thm:oct-isolated	+prop:star-domain	the states of nearby extremals stay in the star domain of Theorem 4.4.1 (the state space of the control problem), where the denominators ⟨Z_u, X⟩ of the switching functions are nonzero; the book uses this implicitly
