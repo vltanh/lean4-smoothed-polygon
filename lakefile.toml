@@ -19,7 +19,8 @@ rev = "v4.36.0-rc2"
 # (git = "https://github.com/vltanh/lean4-optimal-control", rev = "<full commit hash>").
 [[require]]
 name = "OptimalControl"
-path = "../lean4-optimal-control"
+git = "https://github.com/vltanh/lean4-optimal-control"
+rev = "6fb380c64e56f7bd1de9da68ec2a479425477462"
 
 [[lean_lib]]
 name = "Basic"
