@@ -276,7 +276,7 @@ theorem ipc_poincareTime_ift (y : ℝ) (hy0 : 1 / √3 < y) (hy1 : y < 1) :
     have e : (fun t ↦ ipc_G (v0, t)) = fun t ↦ switchingFn 2 0 (strongΛR y t) (segX y t) :=
       funext (ipc_G_v0 y hy0 hy1)
     rw [e]
-    exact iso_chi31_hasDerivAt y hy0 hy1
+    exact iso_chi31_hasDerivAt y hy0
   have hG01ne : G' (0, 1) ≠ 0 := by
     rw [hG01]; exact neg_ne_zero.2 (iso_chi32Slope_pos y hy0 hy1).ne'
   have hinv : (G' ∘L ContinuousLinearMap.inr ℝ (Fin 9 → ℝ) ℝ).IsInvertible := by
@@ -401,7 +401,7 @@ lemma ipc_G'01 (y : ℝ) (hy0 : 1 / √3 < y) (hy1 : y < 1) :
   have e : (fun t ↦ ipc_G (ipc_v0 y, t)) = fun t ↦ switchingFn 2 0 (strongΛR y t) (segX y t) :=
     funext (ipc_G_v0 y hy0 hy1)
   rw [e]
-  exact iso_chi31_hasDerivAt y hy0 hy1
+  exact iso_chi31_hasDerivAt y hy0
 
 /-- The time derivative of `Ad(R) q(t, q)` in coordinates. -/
 lemma ipc_hasDerivAt_phaseCoords_adR_flow (q : iso_PhasePt) (t : ℝ) :

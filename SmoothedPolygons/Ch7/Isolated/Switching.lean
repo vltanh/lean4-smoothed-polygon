@@ -150,7 +150,7 @@ lemma isw_chi31_eq_chi32 (y0 : ℝ) (hy0 : 0 < y0) (t : ℝ) (hW : Real.exp (√
 /-- By the symmetry `χ₃₁(t_sw - t) = χ₃₂(t)` (proof of Lemma 7.5.3), `χ₃₁` vanishes at `t_sw`
 with slope `-iso_chi32Slope y₀`: the end of the first arc is a transversal switching time, the
 hypothesis of the implicit function theorem for the Poincaré time. -/
-theorem iso_chi31_hasDerivAt (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
+theorem iso_chi31_hasDerivAt (y0 : ℝ) (hy0 : 1 / √3 < y0) :
     HasDerivAt (fun t ↦ switchingFn 2 0 (strongΛR y0 t) (segX y0 t)) (-iso_chi32Slope y0)
       (switchTime y0) := by
   have hy : 0 < y0 := poly_y0_pos hy0
@@ -278,8 +278,8 @@ field is the same for every control `u` on the edge `[e₂, e₃]` of `U_T` (it 
 bracket `{H₃, H₂}`: the Hamiltonian vector field of `H_u` is a convex combination of those of
 `H₂` and `H₃` where `H₂ = H₃`). With `iso_chi32_hasDerivAt` this excludes singular arcs and
 chattering near the octagon's switching points. -/
-theorem iso_edge_slope (q : iso_PhasePt)     (hstar : IsStarState q.1) (hχ : switchingFn 1 2 q.2.2 q.1 = 0) (u : Fin 3 → ℝ)
-    (hu : u ∈ controlSimplex) (hu0 : u 0 = 0) :
+theorem iso_edge_slope (q : iso_PhasePt) (hstar : IsStarState q.1)
+    (hχ : switchingFn 1 2 q.2.2 q.1 = 0) (u : Fin 3 → ℝ) (hu : u ∈ controlSimplex) (hu0 : u 0 = 0) :
     HasDerivAt (fun s : ℝ ↦ switchingFn 2 1 (q.2.2 + s • (iso_extremalField u q).2.2)
         (q.1 + s • (iso_extremalField u q).1))
       (deriv (fun s : ℝ ↦ switchingFn 2 1 (q.2.2 + s • (iso_extremalField (vertex 2) q).2.2)

@@ -640,8 +640,8 @@ lemma irt_tube_u {K : Set (Fin 3 → ℝ)} (hK : IsCompact K) {f : iso_PhasePt �
 
 /-- On the switching surface the derivative of `χ₃₂` along the field of a control on the edge
 `[e₂, e₃]` is that along the `e₃`-field (`iso_edge_slope`). -/
-lemma irt_edge_dsw {p : iso_PhasePt} (hX : p.1.trace = 0) (hR : p.2.2.trace = 0)
-    (hstar : IsStarState p.1) (hχ : switchingFn 1 2 p.2.2 p.1 = 0) {u : Fin 3 → ℝ}
+lemma irt_edge_dsw {p : iso_PhasePt} (hstar : IsStarState p.1)
+    (hχ : switchingFn 1 2 p.2.2 p.1 = 0) {u : Fin 3 → ℝ}
     (hu : u ∈ controlSimplex) (hu0 : u 0 = 0) :
     irt_dsw 2 1 p.2.2 p.1 (iso_extremalField u p).2.2 (iso_extremalField u p).1 =
       irt_G 2 1 p := by
@@ -983,7 +983,7 @@ lemma irt_oct_facts :
   · have h1 := irt_chi_flow_hasDerivAt 2 0 (iso_qFix (y₀ 1)) (tsw 1)
       (hDen _ ⟨hτ.le, le_rfl⟩)
     rw [hfun] at h1
-    exact h1.unique (iso_chi31_hasDerivAt _ hy0 hy1)
+    exact h1.unique (iso_chi31_hasDerivAt _ hy0)
   · have h1 := irt_chi_flow_hasDerivAt 2 1 (iso_qFix (y₀ 1)) 0 (hDen _ ⟨le_rfl, hτ.le⟩)
     rw [hfun] at h1
     exact h1.unique (iso_chi32_hasDerivAt _ hy0)
@@ -1319,7 +1319,7 @@ theorem irt_start_surface : ∃ W ∈ 𝓝 (iso_qFix (y₀ 1)),
   have hEl := irt_tube_u hedge (f := fun q w ↦ -ℓ (F q w)) (p := p)
     (fun w hw ↦ hℓc.continuousAt.neg.comp (hFc w hw.1)) (r := -(κ / 2)) fun w hw ↦ by
       simp only [hℓ, hF]
-      rw [irt_edge_dsw hstar0.1 htrR hstar0 h23p hw.1 hw.2]
+      rw [irt_edge_dsw hstar0 h23p hw.1 hw.2]
       linarith
   -- `χ₃₁ > 0`, `χ₂₁ > 0` near `p`
   have hEc : ∀ᶠ q in 𝓝 p, irt_Den q ∧ 0 < irt_chi 2 0 q ∧ 0 < irt_chi 1 0 q := by
