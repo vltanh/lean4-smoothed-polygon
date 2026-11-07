@@ -5,6 +5,11 @@ public import Basic.Analysis.Convex.LatticePacking
 public import External.MahlerIrreducible
 public import External.MahlerIrreducible.Lemma3
 public import External.Filippov
+public import External.Pontryagin.Defs
+public import External.Pontryagin.FreeTime
+public import External.Pontryagin.Geometric
+public import External.Pontryagin.MaximumPrinciple
+public import External.Pontryagin.OptimalControl
 public import SmoothedPolygons.AppA.FunctionalDerivative
 public import SmoothedPolygons.AppA.MatrixIdentities
 public import SmoothedPolygons.AppA.Riemannian
@@ -32,7 +37,11 @@ public import SmoothedPolygons.Ch4.StarDomain
 public import SmoothedPolygons.Ch4.TerminalTime
 public import SmoothedPolygons.Ch6.HalfPlane
 public import SmoothedPolygons.Ch6.Hamiltonian
+public import SmoothedPolygons.Ch6.IwasawaChart
 public import SmoothedPolygons.Ch6.LeftInvariant
+public import SmoothedPolygons.Ch6.LiftedSystem
+public import SmoothedPolygons.Ch6.MaximumPrinciple
+public import SmoothedPolygons.Ch6.PeriodicExtension
 public import SmoothedPolygons.Ch7.ConstantControl
 public import SmoothedPolygons.Ch7.DiscreteK
 public import SmoothedPolygons.Ch7.Faces
