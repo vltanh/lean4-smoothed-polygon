@@ -641,40 +641,6 @@ lemma ivf_abs_le_sum (D : Mat2) (k l : Fin 2) : |D k l| ≤ ∑ i, ∑ j, |D i j
       (fun _ _ ↦ Finset.sum_nonneg fun _ _ ↦ abs_nonneg _) (Finset.mem_univ k)
   linarith
 
-/-- Entrywise bound for the linear part `D ↦ [M, D] - ⟨D, M⟩B` of the costate equation (as
-`str_lin_bound`). -/
-lemma ivf_lin_bound (M B D : Mat2) {m C : ℝ} (hm : ∀ k l, |M k l| ≤ m)
-    (hC : ∀ k l, |B k l| ≤ C) (i j : Fin 2) :
-    |((M * D - D * M) - traceForm D M • B) i j| ≤
-      (4 * m + 4 * m * C) * ∑ k, ∑ l, |D k l| := by
-  set S := ∑ k, ∑ l, |D k l|
-  have hD := ivf_abs_le_sum D
-  have hm0 : 0 ≤ m := le_trans (abs_nonneg _) (hm 0 0)
-  have hS0 : 0 ≤ S := le_trans (abs_nonneg _) (hD 0 0)
-  have hp : ∀ a b c d : Fin 2, |M a b * D c d| ≤ m * S := fun a b c d ↦ by
-    rw [abs_mul]; exact mul_le_mul (hm _ _) (hD _ _) (abs_nonneg _) hm0
-  have hq : ∀ a b c d : Fin 2, |D a b * M c d| ≤ m * S := fun a b c d ↦ by
-    rw [abs_mul, mul_comm]; exact mul_le_mul (hm _ _) (hD _ _) (abs_nonneg _) hm0
-  have htr : |traceForm D M| ≤ 4 * (m * S) := by
-    simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two]
-    have := hq 0 0 0 0; have := hq 0 1 1 0; have := hq 1 0 0 1; have := hq 1 1 1 1
-    rw [abs_le] at *
-    constructor <;> linarith
-  have hB : |traceForm D M * B i j| ≤ 4 * (m * S) * C := by
-    rw [abs_mul]; exact mul_le_mul htr (hC i j) (abs_nonneg _) (by positivity)
-  simp only [Matrix.sub_apply, Matrix.smul_apply, smul_eq_mul, Matrix.mul_apply, Fin.sum_univ_two]
-  have := hp i 0 0 j; have := hp i 1 1 j; have := hq i 0 0 j; have := hq i 1 1 j
-  rw [abs_le] at *
-  constructor <;> nlinarith
-
-/-- The difference of two values of the right-hand side of `eqn:lamR` is linear in `Λ_R`. -/
-lemma ivf_costateRHS_sub (lam : ℝ) (Λ₁ P Q X : Mat2) (u : Fin 3 → ℝ) :
-    costateRHS lam Λ₁ P X u - costateRHS lam Λ₁ Q X u =
-      (controlP u X * (P - Q) - (P - Q) * controlP u X) -
-        traceForm (P - Q) (controlP u X) • (controlP u X * X - X * controlP u X) := by
-  simp only [costateRHS, traceForm, Matrix.mul_sub, Matrix.sub_mul, Matrix.trace_sub, sub_smul]
-  abel
-
 /-- The costate equation `eqn:lamR` is uniformly Lipschitz in `Λ_R` along a curve `X`, continuous
 on a compact set, on which `P = Z_u/⟨Z_u, X⟩` is a constant `P₀`. -/
 lemma ivf_costateRHS_lipschitz {X : ℝ → Mat2} {S : Set ℝ} (hS : IsCompact S)
@@ -690,8 +656,8 @@ lemma ivf_costateRHS_lipschitz {X : ℝ → Mat2} {S : Set ℝ} (hS : IsCompact 
   obtain ⟨C, hC⟩ := hS.exists_bound_of_continuousOn hBc
   refine ⟨4 * (∑ k, ∑ l, |P₀ k l|) + 4 * (∑ k, ∑ l, |P₀ k l|) * max C 0,
     fun s hs lam Λ₁ u hu P Q i j ↦ ?_⟩
-  rw [← Matrix.sub_apply, ivf_costateRHS_sub, hu]
-  exact ivf_lin_bound P₀ _ (P - Q) (ivf_abs_le_sum P₀)
+  rw [← Matrix.sub_apply, str_costateRHS_sub, hu]
+  exact str_lin_bound P₀ _ (P - Q) (ivf_abs_le_sum P₀)
     (fun k l ↦ (ivf_abs_le_sum _ k l).trans ((le_abs_self _).trans
       ((Real.norm_eq_abs _ ▸ hC s hs).trans (le_max_left _ _)))) i j
 
