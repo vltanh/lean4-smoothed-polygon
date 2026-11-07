@@ -4,6 +4,7 @@ public import SmoothedPolygons.Ch2.Reinhardt
 public import SmoothedPolygons.Ch2.Hexagon
 public import Basic.Algebra.Module.ZLattice.PlaneCritical
 public import External.Mahler1947
+public import External.MahlerIrreducible.Lemma3
 public import External.MinkowskiMahler
 public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 

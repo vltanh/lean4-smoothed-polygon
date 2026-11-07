@@ -3,6 +3,7 @@ module
 public import Basic.Analysis.Calculus.MatrixEntrywise
 public import Basic.Analysis.Convex.LatticePacking
 public import External.MahlerIrreducible
+public import External.MahlerIrreducible.Lemma3
 public import External.Filippov
 public import SmoothedPolygons.AppA.FunctionalDerivative
 public import SmoothedPolygons.AppA.MatrixIdentities

@@ -1,12 +1,12 @@
 module
 
-public import External.Mahler1947
+public import External.MinkowskiMahler
 public import Basic.Algebra.Module.ZLattice.PlaneCritical
 public import Basic.Analysis.Convex.BoundaryArc
 public import Mathlib.Analysis.Convex.Extreme
 
 /-!
-# Irreducible convex domains (Mahler)
+# Irreducible convex domains (Mahler, paper A)
 
 Cited in the remark after Definition 2.3.5 of Hales–Vajjha, *Packings of Smoothed Polygons*, from
 K. Mahler, *On the minimum determinant and the circumscribed hexagons of a convex domain*,
@@ -15,108 +15,81 @@ reads "See Lemmas 8 and 12 of paper A", paper A being Mahler, *On irreducible co
 Proc. Kon. Ned. Akad. Wet. 50 (1947), 98–107): *the convex domain `K` is irreducible if and only if
 every boundary point of `K` belongs to a critical lattice of `K`.*
 
+This file has the definition of irreducibility and the lemmas of paper A that the proof of
+Lemma 3 uses. Paper A quotes its Lemmas 8, 10, 11 and 12 from K. Mahler, *Lattice points in
+n-dimensional star bodies II. Reducibility theorems I*, Proc. Kon. Ned. Akad. Wet. 49 (1946),
+331–343, Theorems B–E; these are in `External.Mahler1946.TheoremC` and
+`External.Mahler1946.TheoremE`, which import this file. Lemma 3 itself (`mahler_irreducible_iff`,
+and the weak form `mahler_irreducible` that Lemma 2.2.5 uses) is assembled in
+`External.MahlerIrreducible.Lemma3`, whose docstring says which part of the proof follows which
+source and collects the errors and gaps of the three sources.
+
 Definitions, in the terms of the source; symmetric convex domains, lattices, `Δ(K)` and critical
-lattices are those of `External.MinkowskiMahler`, tac-lines those of `External.Mahler1947`. A
-symmetric convex domain `K` is irreducible (`IsIrreducible`) if every symmetric convex domain
-`K' ⊆ K` other than `K` has a smaller minimal determinant, `Δ(K') < Δ(K)`.
+lattices are those of `External.MinkowskiMahler`. A symmetric convex domain `K` is irreducible
+(`IsIrreducible`) if every symmetric convex domain `K' ⊆ K` other than `K` has a smaller minimal
+determinant, `Δ(K') < Δ(K)`.
 
 ## What is proved
 
-`mahler_irreducible_iff`: Lemma 3 in full. On the way, the lemmas of paper A that its proof uses:
-Lemma 1 (`MahlerIrreducible.ml5_lemma1`, parallelograms are irreducible; `Δ` of a parallelogram,
-`ml5_par_minDet`), Lemma 2 (`ml3_width_eq`), Lemma 5 and its Corollary (`ml5_lemma5`,
+Paper A's own lemmas, by Mahler's arguments: Lemma 1 (`MahlerIrreducible.ml5_lemma1`,
+parallelograms are irreducible; `Δ` of a parallelogram, `ml5_par_minDet`; Mahler's example in §3,
+`Π = C` for a parallelogram, `ml5_par_pi`), Lemma 2 (`ml3_width_eq`), Lemmas 3 and 4 in the form
+used (critical configurations `ml5_IsConf`, `ml5_conf_of_pi`, `ml5_pi_of_conf`; Lemma 3 is
+Minkowski's theorem, `External.minkowski_mahler`), Lemma 5 and its Corollary (`ml5_lemma5`,
 `ml5_lemma5_partner`, `ml5_lemma5_unique`, `ml5_lemma5_cor_six`, `ml5_lemma5_cor_arcs`), Lemma 6
-(`ml5_lemma6`), Lemma 7 (`ml5_lemma7`), Lemma 11 for convex domains (`ml3_isClosed`) and the
-class-A case of Lemma 13 (`ml5_classA`); further `mahler_irreducible` (if `K` is irreducible,
-every tac-line `ℓ` of `K` passes through a point of a critical lattice `Λ` of `K`, one of the six
-points `±P₀, ±P₁, ±P₂` of a configuration of Mahler's Lemma 2 (Minkowski: `P₀, P₁` a basis of `Λ`,
-`P₁ = P₀ + P₂`, the three points on the boundary of `K`)), `mahler_irreducible_exposed` (exposed
-points), `ml3_extreme` (extreme points), `ml3_onlyIf` (all boundary points) and
-`ml3_irreducible_of_forall` (the converse). The facts about the boundary curve that Mahler uses
-"by the convexity of `C`" (arcs, the radial parametrization and the intermediate value theorem on
-arcs, chords, arcs without extreme points) are in `Basic.Analysis.Convex.BoundaryArc`.
+(`ml5_lemma6`), Lemma 7 (`ml5_lemma7`) and the class-A case of Lemma 13 (`ml5_classA`, with
+Mahler's quadratic `ml3_quadratic`). On the way, facts that the 1946 files use too: the existence
+of critical lattices (`irr_exists_critical`, Mahler's compactness theorem in the plane), the cut
+of `K` by a strip `|a · x| ≤ c` (`irr_cut`), `Δ(K') ≤ Δ(K)` for `K' ⊆ K` (`ml3_minDet_mono`), a
+boundary point of `K` outside a proper subdomain (`ml3_exists_frontier_notMem`), and the lattice
+points of `K` beyond Minkowski's hexagon (`ml3_eight`). The facts about the boundary curve that
+Mahler uses "by the convexity of `C`" (arcs, the radial parametrization and the intermediate
+value theorem on arcs, chords, arcs without extreme points) are in
+`Basic.Analysis.Convex.BoundaryArc`.
 
 ## Sources, and departures from them
 
 Mahler 1947 states Lemma 3 without proof. Paper A was not among the sources supplied with the
-book; for this proof we read a scan of it (Mahler's collected works, CARMA archive, item 094).
-In paper A a domain is *irreducible* if every *star domain* `H ⊊ K` has `Δ(H) < Δ(K)`;
-`IsIrreducible` asks this only of symmetric convex subdomains (paper A's Lemma 13 shows that for a
-convex `K` the two notions agree, so Lemma 3 holds for either). Paper A quotes its Lemma 8
-(irreducible star domain: every boundary point on a critical lattice), Lemmas 10, 11 and Lemma 12
-(convex `K` with every boundary point on a critical lattice is irreducible) from Mahler, *Lattice
-points in n-dimensional star bodies II. Reducibility theorems I*, Proc. Kon. Ned. Akad. Wet. 49
-(1946), 331–343, Theorems B–E; it proves Lemmas 1, 2, 5–7 and 13 itself. Our proofs:
+book; we read a scan of it (Mahler's collected works, CARMA archive, item 094), and of the 1946
+paper (item 088; the book's bibliography entry `mahler1946lattice` is this paper). Reading: in
+paper A and in the 1946 paper a domain is *irreducible* if every *star domain* `H ⊊ K` has
+`Δ(H) < Δ(K)`; `IsIrreducible` asks this only of symmetric convex subdomains. Paper A's Lemma 13
+(a reducible convex domain has a convex proper subdomain with the same `Δ`) is the bridge: for a
+convex `K` the two notions agree, and the "only if" half of Lemma 3 for `IsIrreducible` is the
+proof of Lemma 13 (`MahlerIrreducible.ml3_onlyIf`). The lemmas of this file follow paper A:
 
-* **Following paper A.** The "only if" half follows the proof of Lemma 13, which splits the
-  boundary points off critical lattices into class B (extreme points) and class A (inner points
-  of boundary segments), with paper A's own lemmas proved by Mahler's arguments:
-  - Lemma 1 (`ml5_lemma1`), in the coordinates of the parallelogram instead of after an affine
-    map to the square. `Δ(K₀) = 1`, which Mahler takes from Minkowski's theorem on linear forms
-    (not available), is obtained from Mahler's own example in §2 (`A(P₁) = 1` for every boundary
-    point of the square) with Lemmas 2 and 3 (`ml5_par_minDet`). Gaps in paper A, filled: the
-    reduction to `P₀ = (ξ, 1)`, `0 < ξ < 1`, is left to the reader; and `±θP₀` are not the only
-    points of `Λ₀` inside the square when `θ < 1/2` (all of them are multiples of `θP₀`, which
-    are not inner points of `H`; `ml5_lemma1_core`).
-  - Lemma 2 (`ml3_width_eq`): Mahler's strip argument (this replaces an earlier proof by support
-    functionals).
-  - Lemma 5 (`ml5_lemma5`, `ml5_lemma5_partner`, `ml5_lemma5_unique`), Mahler's proof; slip in
-    paper A: "an inner point of `P₂P₃` lies on `L**`" should read "lies on `C`". Its Corollary
-    (`ml5_lemma5_cor_six`, `ml5_lemma5_cor_arcs`) has no proof in paper A; we supply one
-    (`ml3_eight` and the uniqueness of the configuration at a point).
-  - Lemma 6 (`ml5_lemma6`), Mahler's proof: the triangle `P₁, P₁ + P₂, P₂` (`ml5_triangle`), the
-    line `{P₁*, X} = Δ` meeting the arcs `A₂, A₃` (intermediate value theorem on arcs), Lemma 5.
-    Stated for one step (a point inside `A₁` has its next points inside `A₂, A₃`), from which
-    Mahler's "just one point on each arc" follows by rotating the configuration.
-  - Lemma 7 (`ml5_lemma7_step`, `ml5_lemma7`), Mahler's argument via Lemma 6.
-  - Class A (`ml5_classA`, used in `ml3_onlyIf`), as written: the largest segment `Γ₁` around the
-    point with ends on critical lattices and inner points off them; `P'₁` inside `A₁` (Mahler's
-    "without loss of generality" is our naming of the ends by orientation); `P'₂, P'₃` inside
-    `A₂, A₃` (Lemma 6); the inner points of `Γ₂, Γ₃` off critical lattices (Lemma 7, used with
-    the indices shifted cyclically and the roles of the lattices exchanged, `ml5_lemma7_back`),
-    hence not extreme, hence `Γ₂, Γ₃` are segments; `{Q₁, Q₃} > 0` from the positions of
-    `P'₁, P'₃` in the triangles; Mahler's quadratic (`ml3_quadratic`). Gaps in paper A, filled:
-    the sign of `{P₁*, P₃*}` (Lemma 3 bounds its absolute value; the sign follows by continuity),
-    and the step "the inner points of `Γ_l` are of class A, so `Γ_l` is a segment"
-    (`BoundaryArc.midpoint_mem_frontier_of_forall_not_mem_extremePoints`). Mahler excludes
-    parallelograms by Lemma 1 (a reducible domain is not a parallelogram); since we argue by
-    contradiction from an irreducible `K` with a boundary point off `Π`, we exclude them by
-    Mahler's example in §3 instead (for a parallelogram `Π = C`, `ml5_par_pi`).
-* **Departures that remain** (the 1946 paper's proofs were not at hand when these were written;
-  the paper has since been located in the same archive, item 088, and following it is left for a
-  later round):
-  - Class B (`ml3_extreme`). Mahler uses Lemma 10 (from the proof of Theorem C of the 1946 paper,
-    for star domains) and a cut by a line. We use the shaving argument of `mahler_irreducible` on
-    support lines tilted towards the extreme point, and the closedness of the set `Π` of boundary
-    points on critical lattices (Lemma 11, a special case of Theorem B of the 1946 paper;
-    `ml3_isClosed`, by compactness of the critical lattices).
-  - "If" (Lemma 12 = Theorems D and E of the 1946 paper, for convex subdomains;
-    `ml3_irreducible_of_forall`). Our argument: if `K' ⊊ K` had `Δ(K') = Δ(K)`, a critical
-    lattice `Λ` of `K` through a boundary point `p ∉ K'` would be `K'`-critical, so (Lemma 2 for
-    `K'`) it has points `Q₀, Q₂, Q₀ + Q₂` on the boundary of `K'`, hence of `K`. Admissibility
-    then forces `p = ±(2Q₀ + Q₂), ±(Q₀ + 2Q₂), ±(Q₀ - Q₂)` (`ml3_eight`), i.e. `p = A + B` with
-    `A, B, A ± B` on the boundary; then `K` lies in the parallelogram `|f| ≤ 1, |g| ≤ 1` (`f, g`
-    support functionals at `A, B`) of vertex `p`, and `p` is an extreme point of `K`
-    (`ml3_square_extreme`). The nearby boundary points `A + (1 - ε)B`, also outside `K'`, are not
-    extreme.
+* Lemma 1 (`ml5_lemma1`), Mahler's proof. *Departure from paper A:* `Δ(K₀) = 1`, which Mahler
+  takes from Minkowski's theorem on linear forms, is obtained from Mahler's own example in §2
+  (`A(P₁) = 1` for every boundary point of the square) with Lemmas 2 and 3 (`ml5_par_minDet`);
+  and the proof is written in the coordinates of the parallelogram instead of after an affine map
+  to the square. *Gap in paper A*, filled: the reduction to `P₀ = (ξ, 1)`, `0 < ξ < 1`, is left to
+  the reader. *Error in paper A*, harmless: `±θP₀` are not the only points of `Λ₀` inside the
+  square when `θ < 1/2`; all of them are multiples of `θP₀`, which are not inner points of `H`
+  (`ml5_lemma1_core`).
+* Lemma 2 (`ml3_width_eq`): Mahler's strip argument.
+* Lemma 5 (`ml5_lemma5`, `ml5_lemma5_partner`, `ml5_lemma5_unique`), Mahler's proof. *Slip in
+  paper A:* "an inner point of `P₂P₃` lies on `L**`" should read "lies on `C`". *Gap in paper A*,
+  filled: its Corollary (`ml5_lemma5_cor_six`, `ml5_lemma5_cor_arcs`) has no proof; we supply one
+  (`ml3_eight` and the uniqueness of the configuration at a point).
+* Lemma 6 (`ml5_lemma6`), Mahler's proof: the triangle `P₁, P₁ + P₂, P₂` (`ml5_triangle`), the
+  line `{P₁*, X} = Δ` meeting the arcs `A₂, A₃` (intermediate value theorem on arcs), Lemma 5.
+  Stated for one step (a point inside `A₁` has its next points inside `A₂, A₃`), from which
+  Mahler's "just one point on each arc" follows by rotating the configuration.
+* Lemma 7 (`ml5_lemma7_step`, `ml5_lemma7`), Mahler's argument via Lemma 6.
+* Class A of Lemma 13 (`ml5_classA`), as written: the largest segment `Γ₁` around the point with
+  ends on critical lattices and inner points off them; `P'₁` inside `A₁`; `P'₂, P'₃` inside
+  `A₂, A₃` (Lemma 6); the inner points of `Γ₂, Γ₃` off critical lattices (Lemma 7, used with the
+  indices shifted cyclically and the roles of the lattices exchanged, `ml5_lemma7_back`), hence
+  not extreme, hence `Γ₂, Γ₃` are segments; `{Q₁, Q₃} > 0` from the positions of `P'₁, P'₃` in
+  the triangles; Mahler's quadratic (`ml3_quadratic`). *Gaps in paper A*, filled: Mahler's
+  "without loss of generality, `P'₁` lies on `A₁`" (our naming of the ends by orientation); the
+  sign of `{P₁*, P₃*}` (Lemma 3 bounds its absolute value; the sign follows by continuity); and
+  the step "the inner points of `Γ_l` are of class A, so `Γ_l` is a segment"
+  (`BoundaryArc.midpoint_mem_frontier_of_forall_not_mem_extremePoints`).
 
-## Proof of `mahler_irreducible`
-
-Let `ℓ = {x | a · x = M}` with `a · x ≤ M` on `K`; then `M > 0` and `|a · x| ≤ M` on `K`, with
-`|a · x| < M` on the interior. Shave `K` symmetrically along `±ℓ`: the domains
-`K_n = K ∩ {|a · x| ≤ c_n}`, `c_n ↑ M`, are symmetric convex domains properly contained in `K`
-(`irr_cut`), so `Δ(K_n) < Δ(K)` by irreducibility. Let `Λ_n` be a critical lattice of `K_n`
-(`irr_exists_critical`, Mahler's compactness theorem) with points `P₀ⁿ, P₁ⁿ = P₀ⁿ + P₂ⁿ, P₂ⁿ` on
-the boundary of `K_n` (Lemma 2, `External.minkowski_mahler`). Not all three lie on the boundary of
-`K`: otherwise `Λ_n` would be `K`-admissible (Lemma 1), with `d(Λ_n) = Δ(K_n) < Δ(K)`. A point of
-the boundary of `K_n` inside `K` lies on the cut, so one of the three has `|a · Pⁿ| ≥ c_n`. All
-these points lie in `K`, so a subsequence of `(P₀ⁿ, P₂ⁿ)` converges to some `(P₀, P₂)`. The lattice
-`Λ` with basis `P₀, P₁ = P₀ + P₂` is `K`-admissible: a nonzero point `m P₀ + k P₁` inside `K` would
-be the limit of the points `m P₀ⁿ + k P₁ⁿ` of `Λ_n`, which for large `n` lie inside `K` with
-`|a · x| < c_n`, hence inside `K_n`. So `P₀, P₁, P₂` are boundary points of `K` (they are not `0`:
-the points `Pⁿ` stay outside a fixed neighbourhood of `0`), `det(P₀, P₂) ≠ 0`, and
-`d(Λ) = |det(P₀, P₁)| = lim Δ(K_n) ≤ Δ(K)`: `Λ` is critical. Finally `|a · P| ≥ M` for one of the
-`P = P₀, P₁, P₂`, so `P` or `-P` lies on `ℓ`.
+Class B of Lemma 13 (with Lemma 10), the closedness of `Π` (Lemma 11) and Lemma 12 are in the
+1946 files, by Mahler's proofs of Theorems B–E; the assembly, and the weak form
+`mahler_irreducible` derived from Lemma 3, are in `External.MahlerIrreducible.Lemma3`.
 -/
 
 @[expose] public section
@@ -241,237 +214,7 @@ lemma irr_cut (hK : IsSymmetricConvexDomain K) (a : Fin 2 → ℝ) {c : ℝ} (hc
 
 end Proof
 
-end MahlerIrreducible
-
-open Set Filter Topology MahlerIrreducible Mahler1947 MinkowskiMahler
-
-/-- **Mahler (1947), Lemma 3, weak form of the "only if" half** (a critical-lattice point on each
-support line). Let `K` be an irreducible symmetric convex domain and `ℓ` a tac-line of `K`. Then a
-critical lattice `Λ` of `K` has a point on `ℓ`: there are points `P₀, P₁, P₂` of `Λ` on the
-boundary of `K` with `P₁ = P₀ + P₂` such that `P₀, P₁` is a basis of `Λ` (Mahler's Lemma 2), and
-one of the six points `±P₀, ±P₁, ±P₂` lies on `ℓ`.
-
-This is the basic step of our proof of the "only if" half of Lemma 3 (`mahler_irreducible_iff`),
-proved by shaving `K` along `±ℓ` (see the module docstring); Mahler states Lemma 3 without proof,
-referring to Lemmas 8 and 12 of his paper A. For a boundary point that is the only point of `K` on
-a tac-line it is the corresponding case of Lemma 3 (`mahler_irreducible_exposed`). -/
-theorem mahler_irreducible {K : Set (Fin 2 → ℝ)} (hK : MahlerIrreducible.IsIrreducible K)
-    {ℓ : Set (Fin 2 → ℝ)} (hℓ : IsTacLine K ℓ) :
-    ∃ (Λ : Submodule ℤ (Fin 2 → ℝ)) (P₀ P₁ P₂ : Fin 2 → ℝ), MinkowskiMahler.IsCritical K Λ ∧
-      P₀ ∈ Λ ∧ P₁ ∈ Λ ∧ P₂ ∈ Λ ∧ P₀ ∈ frontier K ∧ P₁ ∈ frontier K ∧ P₂ ∈ frontier K ∧
-      MinkowskiMahler.IsBasis Λ P₀ P₁ ∧ P₁ = P₀ + P₂ ∧
-      (P₀ ∈ ℓ ∨ -P₀ ∈ ℓ ∨ P₁ ∈ ℓ ∨ -P₁ ∈ ℓ ∨ P₂ ∈ ℓ ∨ -P₂ ∈ ℓ) := by
-  obtain ⟨hKd, hirr⟩ := hK
-  obtain ⟨⟨a, ha, M, rfl, haK⟩, ⟨u, hu, huK⟩⟩ := hℓ
-  simp only [mem_ofPred_eq] at hu
-  -- `|a · x| ≤ M` on `K` and `|a · x| < M` on its interior
-  have habs : ∀ x ∈ K, |a ⬝ᵥ x| ≤ M := by
-    intro x hx
-    have := haK (-x) (hKd.2.2.2 x hx)
-    rw [dotProduct_neg] at this
-    exact abs_le.2 ⟨by linarith, haK x hx⟩
-  have hlt : ∀ x ∈ interior K, |a ⬝ᵥ x| < M := by
-    intro x hx
-    have h1 := irr_dot_lt ha haK hx
-    have h2 := irr_dot_lt ha haK (mm_neg_mem_interior hKd hx)
-    rw [dotProduct_neg] at h2
-    exact abs_lt.2 ⟨by linarith, h1⟩
-  have hM : 0 < M := by simpa using hlt 0 (mm_zero_mem_interior hKd)
-  -- the cuts `c_n ↑ M`
-  set c : ℕ → ℝ := fun n ↦ M - M / 2 * (1 / ((n : ℝ) + 1)) with hcdef
-  have hinv : ∀ n : ℕ, 0 < 1 / ((n : ℝ) + 1) ∧ 1 / ((n : ℝ) + 1) ≤ 1 := fun n ↦
-    ⟨by positivity,
-      (div_le_one (by positivity)).2 (by linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)])⟩
-  have hc0 : ∀ n, M / 2 ≤ c n := fun n ↦ by
-    have := hinv n
-    simp only [hcdef]; nlinarith
-  have hcM : ∀ n, c n < M := fun n ↦ by
-    have := hinv n
-    simp only [hcdef]; nlinarith
-  have hcpos : ∀ n, 0 < c n := fun n ↦ lt_of_lt_of_le (half_pos hM) (hc0 n)
-  have hctend : Tendsto c atTop (𝓝 M) := by
-    have h := (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).const_mul (M / 2)
-    have h2 := h.const_sub M
-    rw [mul_zero, sub_zero] at h2
-    exact h2
-  -- the shaved domains `K_n`
-  set Kn : ℕ → Set (Fin 2 → ℝ) := fun n ↦ K ∩ {x | |a ⬝ᵥ x| ≤ c n} with hKndef
-  have hKn : ∀ n, IsSymmetricConvexDomain (Kn n) := fun n ↦ irr_cut hKd a (hcpos n)
-  have hKnK : ∀ n, Kn n ⊆ K := fun n ↦ inter_subset_left
-  have hKnne : ∀ n, Kn n ≠ K := by
-    intro n h
-    have h2 : u ∈ Kn n := h ▸ huK
-    have h3 : |a ⬝ᵥ u| ≤ c n := h2.2
-    rw [hu, abs_of_pos hM] at h3
-    linarith [hcM n]
-  have hΔ : ∀ n, minimalDeterminant (Kn n) < minimalDeterminant K :=
-    fun n ↦ hirr _ (hKn n) (hKnK n) (hKnne n)
-  have hint : ∀ n x, x ∈ interior K → |a ⬝ᵥ x| < c n → x ∈ interior (Kn n) := by
-    intro n x hx hxc
-    rw [interior_inter]
-    exact ⟨hx, interior_maximal (t := {x | |a ⬝ᵥ x| < c n})
-      (fun y (hy : |a ⬝ᵥ y| < c n) ↦ show |a ⬝ᵥ y| ≤ c n from hy.le)
-      (isOpen_lt (irr_continuous_abs_dot a) continuous_const) hxc⟩
-  -- critical lattices of the `K_n` and their configurations of Lemma 2
-  choose Λ hΛ using fun n ↦ irr_exists_critical (hKn n)
-  have hconf := fun n ↦ (minkowski_mahler (hKn n)).1 (Λ n) (hΛ n)
-  choose P₀ P₁ P₂ h0Λ h1Λ h2Λ h0F h1F h2F hB h012 hdetΛ hdetΔ using hconf
-  -- one of the three points lies in the cut-off part
-  have hcap : ∀ n, c n ≤ |a ⬝ᵥ P₀ n| ∨ c n ≤ |a ⬝ᵥ P₁ n| ∨ c n ≤ |a ⬝ᵥ P₂ n| := by
-    intro n
-    by_contra hcon
-    push Not at hcon
-    obtain ⟨g0, g1, g2⟩ := hcon
-    have hfr : ∀ x, x ∈ frontier (Kn n) → |a ⬝ᵥ x| < c n → x ∈ frontier K := fun x hx hxc ↦
-      mm_mem_frontier hKd (hKnK n (mm_mem_of_frontier (hKn n) hx))
-        (fun hxi ↦ hx.2 (hint n x hxi hxc))
-    have hadm := mm_isAdmissible hKd (hfr _ (h0F n) g0) (hfr _ (h2F n) g2)
-      (by rw [← h012 n]; exact hfr _ (h1F n) g1)
-    rw [← h012 n, (hB n).2] at hadm
-    have h1 := mm_minimalDeterminant_le (hΛ n).1 hadm
-    rw [(hΛ n).2.2] at h1
-    linarith [hΔ n]
-  -- the points stay outside a fixed neighbourhood `W` of `0`
-  set W : Set (Fin 2 → ℝ) := interior K ∩ {x | |a ⬝ᵥ x| < M / 2} with hW
-  have hWo : IsOpen W := isOpen_interior.inter (isOpen_lt (irr_continuous_abs_dot a)
-    continuous_const)
-  have hW0 : (0 : Fin 2 → ℝ) ∈ W := ⟨mm_zero_mem_interior hKd, by simpa using half_pos hM⟩
-  have hWn : ∀ n x, x ∈ frontier (Kn n) → x ∉ W := fun n x hx hxW ↦
-    hx.2 (hint n x hxW.1 (lt_of_lt_of_le hxW.2 (hc0 n)))
-  -- a convergent subsequence
-  have hmemK : ∀ n, (P₀ n, P₂ n) ∈ K ×ˢ K := fun n ↦
-    ⟨hKnK n (mm_mem_of_frontier (hKn n) (h0F n)), hKnK n (mm_mem_of_frontier (hKn n) (h2F n))⟩
-  obtain ⟨⟨Q₀, Q₂⟩, ⟨hQ₀K, hQ₂K⟩, φ, hφ, hlim⟩ := (hKd.2.1.prod hKd.2.1).tendsto_subseq hmemK
-  have t0 : Tendsto (fun n ↦ P₀ (φ n)) atTop (𝓝 Q₀) := hlim.fst_nhds
-  have t2 : Tendsto (fun n ↦ P₂ (φ n)) atTop (𝓝 Q₂) := hlim.snd_nhds
-  have t1 : Tendsto (fun n ↦ P₁ (φ n)) atTop (𝓝 (Q₀ + Q₂)) := by
-    simp only [h012]; exact t0.add t2
-  have tc : Tendsto (fun n ↦ c (φ n)) atTop (𝓝 M) := hctend.comp hφ.tendsto_atTop
-  -- the limit lattice is `K`-admissible
-  have hadm : ∀ m k : ℤ, (m : ℝ) • Q₀ + (k : ℝ) • (Q₀ + Q₂) ∈ interior K →
-      (m : ℝ) • Q₀ + (k : ℝ) • (Q₀ + Q₂) = 0 := by
-    intro m k hy
-    have ty : Tendsto (fun n ↦ (m : ℝ) • P₀ (φ n) + (k : ℝ) • P₁ (φ n)) atTop
-        (𝓝 ((m : ℝ) • Q₀ + (k : ℝ) • (Q₀ + Q₂))) :=
-      (t0.const_smul _).add (t1.const_smul _)
-    have e1 : ∀ᶠ n in atTop, (m : ℝ) • P₀ (φ n) + (k : ℝ) • P₁ (φ n) ∈ interior K :=
-      ty (isOpen_interior.mem_nhds hy)
-    have tdot : Tendsto (fun n ↦ |a ⬝ᵥ ((m : ℝ) • P₀ (φ n) + (k : ℝ) • P₁ (φ n))|) atTop
-        (𝓝 |a ⬝ᵥ ((m : ℝ) • Q₀ + (k : ℝ) • (Q₀ + Q₂))|) :=
-      ((irr_continuous_abs_dot a).tendsto _).comp ty
-    have e2 := tdot.eventually_lt tc (hlt _ hy)
-    have e3 : ∀ᶠ n in atTop, (m : ℝ) • P₀ (φ n) + (k : ℝ) • P₁ (φ n) = 0 := by
-      filter_upwards [e1, e2] with n h1 h2
-      have hmem : (m : ℝ) • P₀ (φ n) + (k : ℝ) • P₁ (φ n) ∈ Λ (φ n) := by
-        rw [← (hB (φ n)).2]; exact mm_mem_span_pair.2 ⟨m, k, rfl⟩
-      exact (hΛ (φ n)).2.1 _ hmem (hint _ _ h1 h2)
-    exact tendsto_nhds_unique ty
-      ((tendsto_const_nhds (x := (0 : Fin 2 → ℝ))).congr' (e3.mono fun n h ↦ h.symm))
-  -- the limit points are nonzero boundary points of `K`
-  have hnW : ∀ {f : ℕ → Fin 2 → ℝ} {q : Fin 2 → ℝ}, Tendsto f atTop (𝓝 q) → (∀ n, f n ∉ W) →
-      q ≠ 0 := by
-    intro f q hf hfW hq
-    obtain ⟨n, hn⟩ := (hf.eventually_mem (hWo.mem_nhds (hq ▸ hW0))).exists
-    exact hfW n hn
-  have hQ0 := hnW t0 (fun n ↦ hWn _ _ (h0F (φ n)))
-  have hQ1 := hnW t1 (fun n ↦ hWn _ _ (h1F (φ n)))
-  have hQ2 := hnW t2 (fun n ↦ hWn _ _ (h2F (φ n)))
-  have hQ₁K : Q₀ + Q₂ ∈ K := hKd.2.1.isClosed.mem_of_tendsto t1
-    (Eventually.of_forall fun n ↦ hKnK _ (mm_mem_of_frontier (hKn _) (h1F (φ n))))
-  have hF0 : Q₀ ∈ frontier K := mm_mem_frontier hKd hQ₀K fun hi ↦ hQ0 (by
-    have := hadm 1 0 (by simpa using hi)
-    simpa using this)
-  have hF1 : Q₀ + Q₂ ∈ frontier K := mm_mem_frontier hKd hQ₁K fun hi ↦ hQ1 (by
-    have := hadm 0 1 (by simpa using hi)
-    simpa using this)
-  have e2 : ((-1 : ℤ) : ℝ) • Q₀ + ((1 : ℤ) : ℝ) • (Q₀ + Q₂) = Q₂ := by
-    push_cast; module
-  have hF2 : Q₂ ∈ frontier K := mm_mem_frontier hKd hQ₂K fun hi ↦ hQ2 (by
-    have := hadm (-1) 1 (by rw [e2]; exact hi)
-    rwa [e2] at this)
-  -- the limit lattice is critical
-  have hcr : cross Q₀ (Q₀ + Q₂) ≠ 0 := by
-    have : cross Q₀ (Q₀ + Q₂) = cross Q₀ Q₂ := by simp only [cross, Pi.add_apply]; ring
-    rw [this]; exact mm_cross_ne_zero hKd hF0 hF2 hF1
-  have hlat := mm_isLattice_span hcr
-  have hadm' : IsAdmissible K (Submodule.span ℤ {Q₀, Q₀ + Q₂}) := by
-    intro x hx hxK
-    obtain ⟨m, k, rfl⟩ := mm_mem_span_pair.1 hx
-    exact hadm m k hxK
-  have hcrit : IsCritical K (Submodule.span ℤ {Q₀, Q₀ + Q₂}) := by
-    refine ⟨hlat, hadm', le_antisymm ?_ (mm_minimalDeterminant_le hlat hadm')⟩
-    rw [mm_det_span hcr]
-    have hcc : Continuous fun p : (Fin 2 → ℝ) × (Fin 2 → ℝ) ↦ |cross p.1 p.2| := by
-      simp only [cross]; fun_prop
-    have tcr : Tendsto (fun n ↦ |cross (P₀ (φ n)) (P₁ (φ n))|) atTop
-        (𝓝 |cross Q₀ (Q₀ + Q₂)|) := (hcc.tendsto _).comp (t0.prodMk_nhds t1)
-    refine le_of_tendsto tcr (Eventually.of_forall fun n ↦ ?_)
-    rw [hdetΔ (φ n)]
-    exact (hΔ (φ n)).le
-  -- one of the limit points lies on `±ℓ`
-  have hon : M ≤ |a ⬝ᵥ Q₀| ∨ M ≤ |a ⬝ᵥ (Q₀ + Q₂)| ∨ M ≤ |a ⬝ᵥ Q₂| := by
-    by_contra hcon
-    push Not at hcon
-    obtain ⟨g0, g1, g2⟩ := hcon
-    have f0 := (((irr_continuous_abs_dot a).tendsto _).comp t0).eventually_lt tc g0
-    have f1 := (((irr_continuous_abs_dot a).tendsto _).comp t1).eventually_lt tc g1
-    have f2 := (((irr_continuous_abs_dot a).tendsto _).comp t2).eventually_lt tc g2
-    obtain ⟨n, i0, i1, i2⟩ := (f0.and (f1.and f2)).exists
-    simp only [Function.comp_apply] at i0 i1 i2
-    rcases hcap (φ n) with h | h | h <;> linarith
-  have hside : ∀ q ∈ K, M ≤ |a ⬝ᵥ q| → q ∈ {x | a ⬝ᵥ x = M} ∨ -q ∈ {x | a ⬝ᵥ x = M} := by
-    intro q hq hMq
-    have := le_antisymm (habs q hq) hMq
-    rcases (abs_eq hM.le).1 this with h | h
-    · exact Or.inl h
-    · right; change a ⬝ᵥ -q = M; rw [dotProduct_neg, h, neg_neg]
-  have m0 : Q₀ ∈ Submodule.span ℤ {Q₀, Q₀ + Q₂} := Submodule.subset_span (by simp)
-  have m1 : Q₀ + Q₂ ∈ Submodule.span ℤ {Q₀, Q₀ + Q₂} := Submodule.subset_span (by simp)
-  have m2 : Q₂ ∈ Submodule.span ℤ {Q₀, Q₀ + Q₂} := by
-    have := Submodule.sub_mem _ m1 m0
-    rwa [add_sub_cancel_left] at this
-  refine ⟨_, Q₀, Q₀ + Q₂, Q₂, hcrit, m0, m1, m2, hF0, hF1, hF2, mm_isBasis_span hcr, rfl, ?_⟩
-  rcases hon with h | h | h
-  · rcases hside _ hQ₀K h with h' | h'
-    · exact Or.inl h'
-    · exact Or.inr (Or.inl h')
-  · rcases hside _ hQ₁K h with h' | h'
-    · exact Or.inr (Or.inr (Or.inl h'))
-    · exact Or.inr (Or.inr (Or.inr (Or.inl h')))
-  · rcases hside _ hQ₂K h with h' | h'
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl h'))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr h'))))
-
-/-- **Mahler (1947), Lemma 3, at exposed points.** If `K` is irreducible, every boundary point
-`u` that is the only point of `K` on some tac-line belongs to a critical lattice of `K`. -/
-theorem mahler_irreducible_exposed {K : Set (Fin 2 → ℝ)}
-    (hK : MahlerIrreducible.IsIrreducible K)
-    {ℓ : Set (Fin 2 → ℝ)} (hℓ : IsTacLine K ℓ) {u : Fin 2 → ℝ} (hu : ℓ ∩ K = {u}) :
-    ∃ Λ, MinkowskiMahler.IsCritical K Λ ∧ u ∈ Λ := by
-  obtain ⟨Λ, P₀, P₁, P₂, hΛ, h0, h1, h2, f0, f1, f2, -, -, hon⟩ := mahler_irreducible hK hℓ
-  have hKd := hK.1
-  have key : ∀ P ∈ Λ, P ∈ frontier K → P ∈ ℓ ∨ -P ∈ ℓ → u ∈ Λ := by
-    intro P hP hPF hPℓ
-    have hPK := mm_mem_of_frontier hKd hPF
-    rcases hPℓ with h | h
-    · have : P ∈ ℓ ∩ K := ⟨h, hPK⟩
-      rw [hu] at this
-      rw [← this]; exact hP
-    · have : -P ∈ ℓ ∩ K := ⟨h, hKd.2.2.2 P hPK⟩
-      rw [hu] at this
-      rw [← this]; exact Λ.neg_mem hP
-  refine ⟨Λ, hΛ, ?_⟩
-  rcases hon with h | h | h | h | h | h
-  · exact key _ h0 f0 (Or.inl h)
-  · exact key _ h0 f0 (Or.inr h)
-  · exact key _ h1 f1 (Or.inl h)
-  · exact key _ h1 f1 (Or.inr h)
-  · exact key _ h2 f2 (Or.inl h)
-  · exact key _ h2 f2 (Or.inr h)
-
-namespace MahlerIrreducible
-
-open Set Filter Topology MinkowskiMahler Mahler1947 BoundaryArc
+open Set Filter Topology MinkowskiMahler BoundaryArc
 
 section Lemma3
 
@@ -719,103 +462,7 @@ lemma ml3_width_abs (hK : IsSymmetricConvexDomain K) {X U V : Fin 2 → ℝ} (hX
   rw [hU'eq, hV'eq]
   exact ml3_width_eq hK hX hU'F hU'X hV'F hV'X hU'0 hV'0
 
-/-! ### The set of boundary points on critical lattices is closed -/
-
-/-- **Mahler, paper A, Lemma 11** (in the plane, for convex domains): the set `Π` of boundary
-points of `K` that lie on a critical lattice of `K` is closed. A limit of such points lies on the
-limit of a convergent subsequence of the critical lattices (Lemma 2 bases on the boundary). -/
-lemma ml3_isClosed (hK : IsSymmetricConvexDomain K) :
-    IsClosed {x | x ∈ frontier K ∧ ∃ Λ, IsCritical K Λ ∧ x ∈ Λ} := by
-  refine IsSeqClosed.isClosed fun {xs x} hxs hlim ↦ ?_
-  choose hF Λ hΛ hxΛ using hxs
-  have hconf := fun n ↦ (minkowski_mahler hK).1 (Λ n) (hΛ n)
-  choose P₀ P₁ P₂ h0Λ h1Λ h2Λ h0F h1F h2F hB h012 hdetΛ hdetΔ using hconf
-  have hmemK : ∀ n, (P₀ n, P₁ n) ∈ K ×ˢ K :=
-    fun n ↦ ⟨mm_mem_of_frontier hK (h0F n), mm_mem_of_frontier hK (h1F n)⟩
-  obtain ⟨⟨Q₀, Q₁⟩, -, φ, hφ, hlim'⟩ := (hK.2.1.prod hK.2.1).tendsto_subseq hmemK
-  have t0 : Tendsto (fun n ↦ P₀ (φ n)) atTop (𝓝 Q₀) := hlim'.fst_nhds
-  have t1 : Tendsto (fun n ↦ P₁ (φ n)) atTop (𝓝 Q₁) := hlim'.snd_nhds
-  have tx : Tendsto (fun n ↦ xs (φ n)) atTop (𝓝 x) := hlim.comp hφ.tendsto_atTop
-  have hΔ := irr_minimalDeterminant_pos hK
-  have hcc : Continuous fun p : (Fin 2 → ℝ) × (Fin 2 → ℝ) ↦ cross p.1 p.2 := by
-    simp only [cross]; fun_prop
-  have tcr : Tendsto (fun n ↦ cross (P₀ (φ n)) (P₁ (φ n))) atTop (𝓝 (cross Q₀ Q₁)) :=
-    (hcc.tendsto _).comp (t0.prodMk_nhds t1)
-  have habs : |cross Q₀ Q₁| = minimalDeterminant K :=
-    tendsto_nhds_unique tcr.abs (tendsto_const_nhds.congr fun n ↦ (hdetΔ (φ n)).symm)
-  have hcr : cross Q₀ Q₁ ≠ 0 := by intro h; rw [h, abs_zero] at habs; linarith
-  have hcrn : ∀ n, cross (P₀ n) (P₁ n) ≠ 0 := fun n h ↦ by
-    have := hdetΔ n; rw [h, abs_zero] at this; linarith
-  -- the limit lattice is `K`-admissible
-  have hadm : IsAdmissible K (Submodule.span ℤ {Q₀, Q₁}) := by
-    intro y hy hyK
-    obtain ⟨m, k, rfl⟩ := mm_mem_span_pair.1 hy
-    have ty : Tendsto (fun n ↦ (m : ℝ) • P₀ (φ n) + (k : ℝ) • P₁ (φ n)) atTop
-        (𝓝 ((m : ℝ) • Q₀ + (k : ℝ) • Q₁)) := (t0.const_smul _).add (t1.const_smul _)
-    have e1 : ∀ᶠ n in atTop, (m : ℝ) • P₀ (φ n) + (k : ℝ) • P₁ (φ n) ∈ interior K :=
-      ty (isOpen_interior.mem_nhds hyK)
-    have e3 : ∀ᶠ n in atTop, (m : ℝ) • P₀ (φ n) + (k : ℝ) • P₁ (φ n) = 0 := by
-      filter_upwards [e1] with n h1
-      have hmem : (m : ℝ) • P₀ (φ n) + (k : ℝ) • P₁ (φ n) ∈ Λ (φ n) := by
-        rw [← (hB (φ n)).2]; exact mm_mem_span_pair.2 ⟨m, k, rfl⟩
-      exact (hΛ (φ n)).2.1 _ hmem h1
-    exact tendsto_nhds_unique ty
-      ((tendsto_const_nhds (x := (0 : Fin 2 → ℝ))).congr' (e3.mono fun n h ↦ h.symm))
-  have hcrit : IsCritical K (Submodule.span ℤ {Q₀, Q₁}) :=
-    ⟨mm_isLattice_span hcr, hadm, by rw [mm_det_span hcr, habs]⟩
-  -- integer coordinates of `x`
-  have hcoef : ∀ n, ∃ m k : ℤ, cross (xs n) (P₁ n) / cross (P₀ n) (P₁ n) = m ∧
-      cross (P₀ n) (xs n) / cross (P₀ n) (P₁ n) = k := by
-    intro n
-    have hx := hxΛ n
-    rw [← (hB n).2] at hx
-    obtain ⟨m, k, hmk⟩ := mm_mem_span_pair.1 hx
-    refine ⟨m, k, ?_, ?_⟩
-    · rw [← hmk, mm_cross_smul_add, mm_cross_self]; field_simp [hcrn n]; ring
-    · rw [← hmk, mm_cross_add_smul, mm_cross_self]; field_simp [hcrn n]; ring
-  choose m k hm hk using hcoef
-  have ta : Tendsto (fun n ↦ cross (xs (φ n)) (P₁ (φ n)) / cross (P₀ (φ n)) (P₁ (φ n))) atTop
-      (𝓝 (cross x Q₁ / cross Q₀ Q₁)) :=
-    (((hcc.tendsto _).comp (tx.prodMk_nhds t1))).div tcr hcr
-  have tb : Tendsto (fun n ↦ cross (P₀ (φ n)) (xs (φ n)) / cross (P₀ (φ n)) (P₁ (φ n))) atTop
-      (𝓝 (cross Q₀ x / cross Q₀ Q₁)) :=
-    (((hcc.tendsto _).comp (t0.prodMk_nhds tx))).div tcr hcr
-  have ha : cross x Q₁ / cross Q₀ Q₁ ∈ range ((↑) : ℤ → ℝ) :=
-    Real.isClosed_range_intCast.mem_of_tendsto ta
-      (Eventually.of_forall fun n ↦ ⟨m (φ n), (hm (φ n)).symm⟩)
-  have hb : cross Q₀ x / cross Q₀ Q₁ ∈ range ((↑) : ℤ → ℝ) :=
-    Real.isClosed_range_intCast.mem_of_tendsto tb
-      (Eventually.of_forall fun n ↦ ⟨k (φ n), (hk (φ n)).symm⟩)
-  obtain ⟨a, ha⟩ := ha
-  obtain ⟨b, hb⟩ := hb
-  refine ⟨isClosed_frontier.mem_of_tendsto tx (Eventually.of_forall fun n ↦ hF _), _, hcrit, ?_⟩
-  rw [mm_eq_comb hcr x, ← ha, ← hb]
-  exact mm_mem_span_pair.2 ⟨a, b, rfl⟩
-
-/-- A point of a critical lattice on a tac-line (`mahler_irreducible`, in the form used below). -/
-lemma ml3_tac_point (hK : IsIrreducible K) {ℓ : Set (Fin 2 → ℝ)} (hℓ : IsTacLine K ℓ) :
-    ∃ Z ∈ ℓ, Z ∈ frontier K ∧ ∃ Λ, IsCritical K Λ ∧ Z ∈ Λ := by
-  obtain ⟨Λ, P₀, P₁, P₂, hΛ, h0, h1, h2, f0, f1, f2, -, -, hon⟩ := mahler_irreducible hK hℓ
-  have key : ∀ P ∈ Λ, P ∈ frontier K → P ∈ ℓ ∨ -P ∈ ℓ →
-      ∃ Z ∈ ℓ, Z ∈ frontier K ∧ ∃ Λ, IsCritical K Λ ∧ Z ∈ Λ := by
-    intro P hP hPF hPℓ
-    rcases hPℓ with h | h
-    · exact ⟨P, h, hPF, Λ, hΛ, hP⟩
-    · exact ⟨-P, h, mm_neg_mem_frontier hK.1 hPF, Λ, hΛ, Λ.neg_mem hP⟩
-  rcases hon with h | h | h | h | h | h
-  · exact key _ h0 f0 (Or.inl h)
-  · exact key _ h0 f0 (Or.inr h)
-  · exact key _ h1 f1 (Or.inl h)
-  · exact key _ h1 f1 (Or.inr h)
-  · exact key _ h2 f2 (Or.inl h)
-  · exact key _ h2 f2 (Or.inr h)
-
-/-- The tac-line `{x | a · x = M}` where `M` is the maximum of `a · x` on `K`. -/
-lemma ml3_tacLine_max (hK : IsSymmetricConvexDomain K) {a : Fin 2 → ℝ} (ha : a ≠ 0) :
-    ∃ M, (∀ x ∈ K, a ⬝ᵥ x ≤ M) ∧ IsTacLine K {x | a ⬝ᵥ x = M} := by
-  obtain ⟨z, hz, hmax⟩ := hK.2.1.exists_isMaxOn ⟨0, interior_subset (mm_zero_mem_interior hK)⟩
-    (irr_continuous_dot a).continuousOn
-  exact ⟨a ⬝ᵥ z, fun x hx ↦ hmax hx, ⟨a, ha, _, rfl, fun x hx ↦ hmax hx⟩, ⟨z, rfl, hz⟩⟩
+/-! ### Extreme points and subdomains -/
 
 /-- An extreme point of `K` lies on its boundary. -/
 lemma ml3_extreme_frontier (hK : IsSymmetricConvexDomain K) {e : Fin 2 → ℝ}
@@ -838,112 +485,6 @@ lemma ml3_extreme_frontier (hK : IsSymmetricConvexDomain K) {e : Fin 2 → ℝ}
   have h3 : t • v = 0 := by
     have := congrArg (· - e) this; simpa using this
   exact (smul_eq_zero.1 h3).resolve_left ht0
-
-/-- **Every extreme point of an irreducible domain lies on a critical lattice.** At an exposed
-point this is `mahler_irreducible_exposed`. Otherwise the support line at `e` meets `K` in a
-segment `[e, b]`; tilting it, the tac-lines `{x | (a - s(b - e)) · x = M_s}` carry points of
-critical lattices (`mahler_irreducible`) which tend to `e` as `s → 0⁺`, and `Π` is closed
-(`ml3_isClosed`). -/
-lemma ml3_extreme (hK : IsIrreducible K) {e : Fin 2 → ℝ} (he : e ∈ K.extremePoints ℝ) :
-    ∃ Λ, IsCritical K Λ ∧ e ∈ Λ := by
-  have hKd := hK.1
-  have heF := ml3_extreme_frontier hKd he
-  obtain ⟨f, hf1, hf2, hf3⟩ := mm_support hKd heF
-  obtain ⟨a, ha⟩ := ml3_dual_vec f
-  have ha0 : a ≠ 0 := by rintro rfl; have := ha e; simp [hf1] at this
-  by_cases hface : ∃ b ∈ K, f b = 1 ∧ b ≠ e
-  · obtain ⟨b, hbK, hfb, hbe⟩ := hface
-    set w := b - e with hw
-    have hw0 : w ≠ 0 := sub_ne_zero.2 hbe
-    have hww : 0 < w ⬝ᵥ w := irr_dot_self_pos hw0
-    have haw : a ⬝ᵥ w = 0 := by rw [hw, dotProduct_sub, ha, ha, hfb, hf1, sub_self]
-    set s : ℕ → ℝ := fun n ↦ 1 / ((n : ℝ) + 1) with hs
-    have hs0 : ∀ n, 0 < s n := fun n ↦ by positivity
-    have hstend : Tendsto s atTop (𝓝 0) := tendsto_one_div_add_atTop_nhds_zero_nat
-    have hg0 : ∀ n, a - s n • w ≠ 0 := by
-      intro n h
-      have : a ⬝ᵥ w = s n * (w ⬝ᵥ w) := by
-        rw [sub_eq_zero.1 h, smul_dotProduct, smul_eq_mul]
-      rw [haw] at this
-      have := mul_pos (hs0 n) hww
-      linarith
-    have hpt : ∀ n, ∃ Z, (∀ x ∈ K, (a - s n • w) ⬝ᵥ x ≤ (a - s n • w) ⬝ᵥ Z) ∧
-        Z ∈ frontier K ∧ ∃ Λ, IsCritical K Λ ∧ Z ∈ Λ := by
-      intro n
-      obtain ⟨M, hM, hℓ⟩ := ml3_tacLine_max hKd (hg0 n)
-      obtain ⟨Z, hZℓ, hZF, hZΛ⟩ := ml3_tac_point hK hℓ
-      exact ⟨Z, fun x hx ↦ (hM x hx).trans_eq hZℓ.symm, hZF, hZΛ⟩
-    choose Z hZmax hZF hZΛ using hpt
-    have hZK : ∀ n, Z n ∈ K := fun n ↦ mm_mem_of_frontier hKd (hZF n)
-    obtain ⟨z, hzK, φ, hφ, tz⟩ := hKd.2.1.tendsto_subseq hZK
-    -- `w · Z_n ≤ w · e` and `f(Z_n) ≥ 1 + s_n (w · Z_n - w · e)`
-    have hineq : ∀ n, w ⬝ᵥ Z n ≤ w ⬝ᵥ e ∧ 1 + s n * (w ⬝ᵥ Z n - w ⬝ᵥ e) ≤ a ⬝ᵥ Z n := by
-      intro n
-      have h1 := hZmax n e (mm_mem_of_frontier hKd heF)
-      have h2 := hf2 _ (hZK n)
-      rw [← ha] at h2
-      simp only [sub_dotProduct, smul_dotProduct, smul_eq_mul, ha e, hf1] at h1
-      constructor
-      · by_contra hc; push Not at hc
-        nlinarith [mul_pos (hs0 n) (sub_pos.2 hc)]
-      · linarith
-    obtain ⟨m₀, hm₀⟩ : ∃ m₀, ∀ x ∈ K, m₀ ≤ w ⬝ᵥ x := by
-      obtain ⟨y, -, hy⟩ := hKd.2.1.exists_isMinOn ⟨e, mm_mem_of_frontier hKd heF⟩
-        (irr_continuous_dot w).continuousOn
-      exact ⟨w ⬝ᵥ y, fun x hx ↦ hy hx⟩
-    have tdot : ∀ c : Fin 2 → ℝ, Tendsto (fun n ↦ c ⬝ᵥ Z (φ n)) atTop (𝓝 (c ⬝ᵥ z)) :=
-      fun c ↦ ((irr_continuous_dot c).tendsto _).comp tz
-    -- `f(z) = 1`
-    have hfz : a ⬝ᵥ z = 1 := by
-      refine le_antisymm ((ha z).trans_le (hf2 z hzK)) ?_
-      have tl : Tendsto (fun n ↦ 1 + s (φ n) * (m₀ - w ⬝ᵥ e)) atTop (𝓝 1) := by
-        have := ((hstend.comp hφ.tendsto_atTop).mul_const (m₀ - w ⬝ᵥ e)).const_add 1
-        simpa using this
-      refine le_of_tendsto_of_tendsto tl (tdot a) (Eventually.of_forall fun n ↦ ?_)
-      have := (hineq (φ n)).2
-      have h3 := hm₀ _ (hZK (φ n))
-      have := hs0 (φ n)
-      nlinarith
-    have hwz : w ⬝ᵥ z ≤ w ⬝ᵥ e :=
-      le_of_tendsto_of_tendsto (tdot w) tendsto_const_nhds
-        (Eventually.of_forall fun n ↦ (hineq (φ n)).1)
-    -- `z = e`
-    have hcr : cross w (z - e) = 0 :=
-      ml3_cross_eq_zero_of_dot ha0 haw (by rw [dotProduct_sub, hfz, ha, hf1, sub_self])
-    obtain ⟨τ, hτ⟩ := ml3_parallel hcr hw0
-    have hτ0 : τ ≤ 0 := by
-      have : w ⬝ᵥ z = w ⬝ᵥ e + τ * (w ⬝ᵥ w) := by
-        rw [show z = e + τ • w by rw [← hτ]; abel, dotProduct_add, dotProduct_smul,
-          smul_eq_mul]
-      nlinarith
-    have hze : z = e := by
-      rcases hτ0.lt_or_eq with hlt | heq
-      · have h1τ : 1 - τ ≠ 0 := by linarith
-        have hseg : e ∈ openSegment ℝ z b := by
-          refine ⟨1 / (1 - τ), -τ / (1 - τ), by apply div_pos <;> linarith,
-            by apply div_pos <;> linarith, by rw [← add_div, div_eq_one_iff_eq h1τ]; ring,
-            ?_⟩
-          rw [show z = e + τ • w by rw [← hτ]; abel, hw]
-          ext i
-          simp only [Pi.add_apply, Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
-          field_simp
-          ring
-        exact he.2 hzK hbK hseg
-      · rw [show z = e + τ • w by rw [← hτ]; abel, heq, zero_smul, add_zero]
-    rw [hze] at tz
-    obtain ⟨-, hΛ⟩ := (ml3_isClosed hKd).mem_of_tendsto tz
-      (Eventually.of_forall fun n ↦ ⟨hZF (φ n), hZΛ (φ n)⟩)
-    exact hΛ
-  · push Not at hface
-    refine mahler_irreducible_exposed hK (ℓ := {x | a ⬝ᵥ x = 1})
-      ⟨⟨a, ha0, 1, rfl, fun x hx ↦ (ha x).trans_le (hf2 x hx)⟩, ⟨e, by simp [ha, hf1], he.1⟩⟩ ?_
-    ext x
-    simp only [mem_inter_iff, mem_ofPred_eq, mem_singleton_iff, ha]
-    constructor
-    · rintro ⟨h1, h2⟩; exact hface x h2 h1
-    · rintro rfl; exact ⟨hf1, he.1⟩
-
-/-! ### The "if" half (Mahler, paper A, Lemma 12, for convex subdomains) -/
 
 /-- `Δ(K') ≤ Δ(K)` for `K' ⊆ K`: a critical lattice of `K` is `K'`-admissible. -/
 lemma ml3_minDet_mono (hK : IsSymmetricConvexDomain K) {K' : Set (Fin 2 → ℝ)} (hsub : K' ⊆ K) :
@@ -974,48 +515,7 @@ lemma ml3_exists_frontier_notMem (hK : IsSymmetricConvexDomain K) {K' : Set (Fin
     rw [ha, ha] at h2
     linarith
 
-/-- In a square configuration (`A + B, A - B ∈ K`) a support functional at `A` vanishes at `B`. -/
-lemma ml3_square_supp {A B : Fin 2 → ℝ} (hAB : A + B ∈ K) (hAB' : A - B ∈ K)
-    (f : StrongDual ℝ (Fin 2 → ℝ)) (hf1 : f A = 1) (hf2 : ∀ y ∈ K, f y ≤ 1) : f B = 0 := by
-  have h1 := hf2 _ hAB
-  have h2 := hf2 _ hAB'
-  rw [map_add, hf1] at h1
-  rw [map_sub, hf1] at h2
-  linarith
-
-/-- **`A + B` is an extreme point of `K` in a square configuration**: if `A, B, A + B, A - B` are
-boundary points, `K` lies in the parallelogram `|f| ≤ 1, |g| ≤ 1` (`f, g` support functionals at
-`A, B`), of which `A + B` is a vertex. -/
-lemma ml3_square_extreme (hK : IsSymmetricConvexDomain K) {A B : Fin 2 → ℝ}
-    (hA : A ∈ frontier K) (hB : B ∈ frontier K) (hAB : A + B ∈ frontier K)
-    (hAB' : A - B ∈ frontier K) {x y : Fin 2 → ℝ} (hx : x ∈ K) (hy : y ∈ K)
-    (hxy : x + y = (2 : ℝ) • (A + B)) : x = A + B := by
-  obtain ⟨f, hf1, hf2, -⟩ := mm_support hK hA
-  obtain ⟨g, hg1, hg2, -⟩ := mm_support hK hB
-  have hfB := ml3_square_supp (mm_mem_of_frontier hK hAB) (mm_mem_of_frontier hK hAB') f hf1 hf2
-  have hgA : g A = 0 := ml3_square_supp (A := B) (B := A)
-    (by rw [add_comm]; exact mm_mem_of_frontier hK hAB)
-    (by have := hK.2.2.2 _ (mm_mem_of_frontier hK hAB'); rwa [neg_sub] at this) g hg1 hg2
-  have hcr := mm_cross_ne_zero hK hA hB hAB
-  have hfx := hf2 x hx
-  have hfy := hf2 y hy
-  have hgx := hg2 x hx
-  have hgy := hg2 y hy
-  have hf' : f x + f y = 2 := by
-    have := congrArg f hxy
-    simp only [map_add, map_smul, smul_eq_mul, hf1, hfB] at this; linarith
-  have hg' : g x + g y = 2 := by
-    have := congrArg g hxy
-    simp only [map_add, map_smul, smul_eq_mul, hg1, hgA] at this; linarith
-  have hd := mm_eq_comb hcr x
-  have hfx' : f x = cross x B / cross A B := by
-    conv_lhs => rw [hd]
-    simp [hf1, hfB]
-  have hgx' : g x = cross A x / cross A B := by
-    conv_lhs => rw [hd]
-    simp [hg1, hgA]
-  rw [hd, show cross x B / cross A B = 1 by linarith, show cross A x / cross A B = 1 by linarith,
-    one_smul, one_smul]
+/-! ### Lattice points beyond Minkowski's hexagon -/
 
 /-- The integer case analysis of `ml3_eight`. -/
 lemma ml3_int_cases (a b : ℤ) (hpos : 0 < a ∨ (a = 0 ∧ 0 < b)) (h10 : ¬ (a = 1 ∧ b = 0))
@@ -1191,77 +691,6 @@ lemma ml3_eight (hK : IsSymmetricConvexDomain K) {Q₀ Q₂ u : Fin 2 → ℝ} (
   · have hu2 : u = -Q₀ + Q₂ := by rw [hval (-1) 1 h₁ h₂]; push_cast; module
     refine ⟨-Q₀, Q₂, hF0, h2, hu2 ▸ huF, by convert hF1 using 1; module, hu2, ?_⟩
     rw [show cross (-Q₀) Q₂ = -cross Q₀ Q₂ by simp only [cross, Pi.neg_apply]; ring, abs_neg]
-
-/-- **Mahler, paper A, Lemma 12, for convex subdomains** (the "if" half of Lemma 3): if every
-boundary point of `K` lies on a critical lattice of `K`, then `K` is irreducible. Let `K' ⊊ K`
-have `Δ(K') = Δ(K)`. A critical lattice `Λ` of `K` through a boundary point `p ∉ K'` is
-`K'`-critical, so (Lemma 2 for `K'`) it has points `Q₀, Q₂, Q₀ + Q₂` on the boundary of `K'`,
-hence of `K`; then `p` is a vertex `A + B` of a square configuration (`ml3_eight`), an extreme
-point of `K` (`ml3_square_extreme`). But the boundary points `A + (1 - ε)B` near `A + B` are also
-outside `K'` and are not extreme. -/
-lemma ml3_irreducible_of_forall (hK : IsSymmetricConvexDomain K)
-    (hall : ∀ u ∈ frontier K, ∃ Λ, IsCritical K Λ ∧ u ∈ Λ) : IsIrreducible K := by
-  refine ⟨hK, fun K' hK' hsub hne ↦ lt_of_le_of_ne (ml3_minDet_mono hK hsub) fun hEq ↦ ?_⟩
-  have key : ∀ p ∈ frontier K, p ∉ K' → ∃ A B, A ∈ frontier K ∧ B ∈ frontier K ∧
-      A + B ∈ frontier K ∧ A - B ∈ frontier K ∧ p = A + B := by
-    intro p hp hpK'
-    obtain ⟨Λ, hΛ, hpΛ⟩ := hall p hp
-    have hΛ' : IsCritical K' Λ :=
-      ⟨hΛ.1, fun x hx hxi ↦ hΛ.2.1 x hx (interior_mono hsub hxi), hΛ.2.2.trans hEq.symm⟩
-    obtain ⟨Q₀, Q₁, Q₂, h0Λ, h1Λ, h2Λ, h0F, h1F, h2F, hB, h012, -, -⟩ :=
-      (minkowski_mahler hK').1 Λ hΛ'
-    have toF : ∀ Q ∈ Λ, Q ∈ frontier K' → Q ∈ frontier K := fun Q hQ hQF ↦
-      mm_mem_frontier hK (hsub (mm_mem_of_frontier hK' hQF))
-        fun hi ↦ mm_ne_zero_of_frontier hK' hQF (hΛ.2.1 Q hQ hi)
-    have hK'0 := interior_subset (mm_zero_mem_interior hK')
-    have mem : ∀ Q, Q ∈ frontier K' → Q ∈ K' ∧ -Q ∈ K' := fun Q hQ ↦
-      ⟨mm_mem_of_frontier hK' hQ, hK'.2.2.2 _ (mm_mem_of_frontier hK' hQ)⟩
-    subst h012
-    have hne : p ≠ 0 ∧ p ≠ Q₀ ∧ p ≠ -Q₀ ∧ p ≠ Q₂ ∧ p ≠ -Q₂ ∧ p ≠ Q₀ + Q₂ ∧
-        p ≠ -(Q₀ + Q₂) := by
-      refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> rintro rfl
-      · exact hpK' hK'0
-      · exact hpK' (mem _ h0F).1
-      · exact hpK' (mem _ h0F).2
-      · exact hpK' (mem _ h2F).1
-      · exact hpK' (mem _ h2F).2
-      · exact hpK' (mem _ h1F).1
-      · exact hpK' (mem _ h1F).2
-    obtain ⟨A, B, h₁, h₂, h₃, h₄, h₅, -⟩ := ml3_eight hK (toF _ h0Λ h0F) (toF _ h2Λ h2F)
-      (toF _ h1Λ h1F) (mm_mem_of_frontier hK hp) (by rw [hB.2]; exact hpΛ) hne
-    exact ⟨A, B, h₁, h₂, h₃, h₄, h₅⟩
-  obtain ⟨u, huF, huK'⟩ := ml3_exists_frontier_notMem hK hK' hsub hne
-  obtain ⟨A, B, hA, hB, hAB, hAB', rfl⟩ := key u huF huK'
-  have hc : Continuous fun ε : ℝ ↦ A + (1 - ε) • B := by fun_prop
-  have hev₀ : (fun ε : ℝ ↦ A + (1 - ε) • B) ⁻¹' K'ᶜ ∈ 𝓝 (0 : ℝ) :=
-    hc.continuousAt.preimage_mem_nhds (by
-      rw [sub_zero, one_smul]; exact hK'.2.1.isClosed.isOpen_compl.mem_nhds huK')
-  have hev : ∀ᶠ ε in 𝓝 (0 : ℝ), A + (1 - ε) • B ∉ K' := hev₀
-  obtain ⟨ε, ⟨hεK', hε1⟩, hε0⟩ := (((hev.and (Iio_mem_nhds one_pos)).filter_mono
-    nhdsWithin_le_nhds).and (self_mem_nhdsWithin : Ioi (0 : ℝ) ∈ 𝓝[>] 0)).exists
-  have hε0' : (0 : ℝ) < ε := hε0
-  have hε1' : ε < 1 := hε1
-  have hABK := mm_mem_of_frontier hK hAB
-  have hABK' := mm_mem_of_frontier hK hAB'
-  obtain ⟨f, hf1, hf2, hf3⟩ := mm_support hK hA
-  have hfB := ml3_square_supp hABK hABK' f hf1 hf2
-  have hpK : A + (1 - ε) • B ∈ K := by
-    have := hK.1 hABK hABK' (show (0 : ℝ) ≤ 1 - ε / 2 by linarith)
-      (show (0 : ℝ) ≤ ε / 2 by linarith) (by ring)
-    convert this using 1; module
-  have hpF : A + (1 - ε) • B ∈ frontier K := mm_mem_frontier hK hpK fun hi ↦ by
-    have := hf3 _ hi
-    simp only [map_add, map_smul, hf1, hfB, smul_eq_mul, mul_zero, add_zero] at this
-    exact lt_irrefl _ this
-  obtain ⟨A', B', hA', hB', hAB₁, hAB₁', hp⟩ := key _ hpF hεK'
-  have hyK : A + (1 - 2 * ε) • B ∈ K := by
-    have := hK.1 hABK hABK' (show (0 : ℝ) ≤ 1 - ε by linarith) hε0'.le (by ring)
-    convert this using 1; module
-  have hx := ml3_square_extreme hK hA' hB' hAB₁ hAB₁' hABK hyK (by rw [← hp]; module)
-  rw [← hp] at hx
-  have : ε • B = 0 := by
-    rw [show ε • B = (A + B) - (A + (1 - ε) • B) by module, hx, sub_self]
-  exact mm_ne_zero_of_frontier hK hB ((smul_eq_zero.1 this).resolve_left hε0'.ne')
 
 /-! ### Functionals and partners -/
 
@@ -2368,7 +1797,7 @@ lemma ml5_lemma7_back (hK : IsSymmetricConvexDomain K) (hpar : ¬IsParallelogram
 
 end Lemma67
 
-/-! ### Mahler's quadratic and the "only if" half -/
+/-! ### Segments of the boundary -/
 
 /-- If the midpoint of two points of `K` is a boundary point, so is the whole segment. -/
 lemma ml3_seg_frontier (hK : IsSymmetricConvexDomain K) {P Q : Fin 2 → ℝ} (hP : P ∈ K)
@@ -2561,216 +1990,8 @@ theorem ml5_classA (hK : IsSymmetricConvexDomain K) (hpar : ¬IsParallelogram K)
       mul_nonpos_of_nonneg_of_nonpos hΔ.le hc]
   exact ml3_quadratic hK h h' hseg seg2 seg3 hcQ
 
-/-- **Mahler, paper A, Lemma 8 and Lemma 13, for convex subdomains** (the "only if" half of
-Lemma 3): every boundary point of an irreducible domain lies on a critical lattice. A
-parallelogram has `Π = C` (`ml5_par_pi`, Mahler's example in §3). Otherwise we follow the proof of
-Lemma 13: extreme points (class B) lie on critical lattices (`ml3_extreme`); a point `u` of class A
-lies inside a boundary segment `{f = 1} ∩ K` whose ends are extreme, hence on critical lattices,
-the critical-lattice points of the segment form a closed set (Lemma 11, `ml3_isClosed`), and `u`
-lies in a largest sub-segment `Γ₁ = [A, B]` whose ends are on critical lattices and whose inner
-points are not; this contradicts `ml5_classA` (Lemmas 5–7 and Mahler's quadratic). -/
-lemma ml3_onlyIf (hirr : IsIrreducible K) {u : Fin 2 → ℝ} (hu : u ∈ frontier K) :
-    ∃ Λ, IsCritical K Λ ∧ u ∈ Λ := by
-  have hK := hirr.1
-  by_cases hnpar : IsParallelogram K
-  · exact ml5_par_pi hnpar hu
-  by_contra hnot
-  have huK := mm_mem_of_frontier hK hu
-  have hnext : u ∉ K.extremePoints ℝ := fun he ↦ hnot (ml3_extreme hirr he)
-  obtain ⟨x₁, hx₁, x₂, hx₂, hseg, hne⟩ :
-      ∃ x₁ ∈ K, ∃ x₂ ∈ K, u ∈ openSegment ℝ x₁ x₂ ∧ x₁ ≠ u := by
-    by_contra h; push Not at h
-    exact hnext ⟨huK, fun x₁ hx₁ x₂ hx₂ hs ↦ h x₁ hx₁ x₂ hx₂ hs⟩
-  obtain ⟨a₁, a₂, ha₁, ha₂, ha12, hu12⟩ := hseg
-  set d := x₂ - x₁ with hd
-  have hd0 : d ≠ 0 := by
-    intro h; apply hne
-    have h2 : x₂ = x₁ := sub_eq_zero.1 h
-    rw [← hu12, h2, ← add_smul, ha12, one_smul]
-  obtain ⟨f, hf1, hf2, hf3⟩ := mm_support hK hu
-  have hfx : f x₁ = 1 ∧ f x₂ = 1 := by
-    have h1 := hf2 _ hx₁
-    have h2 := hf2 _ hx₂
-    have := congrArg f hu12
-    rw [map_add, map_smul, map_smul, hf1, smul_eq_mul, smul_eq_mul] at this
-    constructor <;> nlinarith
-  have hfd : f d = 0 := by rw [hd, map_sub, hfx.1, hfx.2, sub_self]
-  -- the face `p t = u + t d`
-  set p : ℝ → Fin 2 → ℝ := fun t ↦ u + t • d with hp
-  have hpc : Continuous p := by fun_prop
-  have hfp : ∀ t, f (p t) = 1 := fun t ↦ by simp [hp, hf1, hfd]
-  have hpF : ∀ t, p t ∈ K → p t ∈ frontier K := fun t ht ↦
-    mm_mem_frontier hK ht fun hi ↦ by have := hf3 _ hi; rw [hfp] at this; exact lt_irrefl _ this
-  set T := {t : ℝ | p t ∈ K} with hT
-  have hTc : IsClosed T := hK.2.1.isClosed.preimage hpc
-  have hx₁T : -a₂ ∈ T := by
-    change u + (-a₂) • d ∈ K
-    convert hx₁ using 1; rw [← hu12, hd]; rw [show a₁ = 1 - a₂ by linarith]; module
-  have hx₂T : a₁ ∈ T := by
-    change u + a₁ • d ∈ K
-    convert hx₂ using 1; rw [← hu12, hd]; rw [show a₂ = 1 - a₁ by linarith]; module
-  obtain ⟨R, hR⟩ := hK.2.1.isBounded.subset_closedBall 0
-  have hdn : 0 < ‖d‖ := norm_pos_iff.2 hd0
-  have hTbd : ∀ t ∈ T, |t| ≤ (R + ‖u‖) / ‖d‖ := by
-    intro t ht
-    have h1 := hR ht
-    rw [mem_closedBall_zero_iff] at h1
-    rw [le_div_iff₀ hdn]
-    have h2 : ‖t • d‖ ≤ ‖u + t • d‖ + ‖u‖ := by
-      have := norm_sub_le (u + t • d) u
-      rwa [add_sub_cancel_left] at this
-    rw [norm_smul, Real.norm_eq_abs] at h2
-    linarith
-  have hTa : BddAbove T := ⟨_, fun t ht ↦ (le_abs_self t).trans (hTbd t ht)⟩
-  have hTbb : BddBelow T := ⟨-((R + ‖u‖) / ‖d‖), fun t ht ↦ by
-    have := neg_abs_le t; linarith [hTbd t ht]⟩
-  set tlo := sInf T with htlo
-  set thi := sSup T with hthi
-  have htloT : tlo ∈ T := hTc.csInf_mem ⟨_, hx₁T⟩ hTbb
-  have hthiT : thi ∈ T := hTc.csSup_mem ⟨_, hx₁T⟩ hTa
-  have htlo0 : tlo < 0 := lt_of_le_of_lt (csInf_le hTbb hx₁T) (by linarith)
-  have hthi0 : 0 < thi := lt_of_lt_of_le ha₁ (le_csSup hTa hx₂T)
-  have hpK : ∀ r ∈ Icc tlo thi, p r ∈ K := by
-    rintro r ⟨hr1, hr2⟩
-    have hlen : 0 < thi - tlo := by linarith
-    have := hK.1 htloT hthiT
-      (show 0 ≤ (thi - r) / (thi - tlo) from div_nonneg (by linarith) hlen.le)
-      (show 0 ≤ (r - tlo) / (thi - tlo) from div_nonneg (by linarith) hlen.le)
-      (by field_simp; ring)
-    convert this using 1
-    simp only [hp]
-    ext i
-    simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
-    field_simp
-    ring
-  -- the ends of the face are extreme points
-  have hpar : ∀ y, f y = 1 → ∃ τ, y = p τ := by
-    intro y hy
-    obtain ⟨a, ha⟩ := ml3_dual_vec f
-    have ha0 : a ≠ 0 := by rintro rfl; have := ha u; simp [hf1] at this
-    have hcr := ml3_cross_eq_zero_of_dot ha0 (show a ⬝ᵥ d = 0 by rw [ha, hfd])
-      (show a ⬝ᵥ (y - u) = 0 by rw [ha, map_sub, hy, hf1, sub_self])
-    obtain ⟨τ, hτ⟩ := ml3_parallel hcr hd0
-    exact ⟨τ, by simp only [hp]; rw [← hτ]; abel⟩
-  have hext : ∀ t₀ ∈ T, ((∀ t ∈ T, t₀ ≤ t) ∨ (∀ t ∈ T, t ≤ t₀)) →
-      p t₀ ∈ K.extremePoints ℝ := by
-    intro t₀ ht₀ hmin
-    refine ⟨ht₀, fun y₁ hy₁ y₂ hy₂ hs ↦ ?_⟩
-    obtain ⟨b₁, b₂, hb₁, hb₂, hb12, hy12⟩ := hs
-    have h1 := hf2 _ hy₁
-    have h2 := hf2 _ hy₂
-    have := congrArg f hy12
-    rw [map_add, map_smul, map_smul, hfp, smul_eq_mul, smul_eq_mul] at this
-    obtain ⟨τ₁, rfl⟩ := hpar y₁ (by nlinarith)
-    obtain ⟨τ₂, rfl⟩ := hpar y₂ (by nlinarith)
-    have hτ : t₀ = b₁ * τ₁ + b₂ * τ₂ := by
-      have hv : (t₀ - (b₁ * τ₁ + b₂ * τ₂)) • d = p t₀ - (b₁ • p τ₁ + b₂ • p τ₂) := by
-        simp only [hp]; rw [show b₂ = 1 - b₁ by linarith]; module
-      rw [hy12, sub_self] at hv
-      exact sub_eq_zero.1 ((smul_eq_zero.1 hv).resolve_right hd0)
-    have hid : b₁ * (τ₁ - t₀) + b₂ * (τ₂ - t₀) = 0 := by
-      rw [hτ]; linear_combination (-(b₁ * τ₁ + b₂ * τ₂)) * hb12
-    rcases hmin with h | h
-    · have e1 := h τ₁ hy₁
-      have e2 := h τ₂ hy₂
-      have : b₁ * (τ₁ - t₀) = 0 := by
-        linarith [mul_nonneg hb₁.le (sub_nonneg.2 e1), mul_nonneg hb₂.le (sub_nonneg.2 e2)]
-      rw [show τ₁ = t₀ by
-        have := (mul_eq_zero.1 this).resolve_left hb₁.ne'; linarith]
-    · have e1 := h τ₁ hy₁
-      have e2 := h τ₂ hy₂
-      have : b₁ * (t₀ - τ₁) = 0 := by
-        linarith [mul_nonneg hb₁.le (sub_nonneg.2 e1), mul_nonneg hb₂.le (sub_nonneg.2 e2)]
-      rw [show τ₁ = t₀ by
-        have := (mul_eq_zero.1 this).resolve_left hb₁.ne'; linarith]
-  set Pk := {x | x ∈ frontier K ∧ ∃ Λ, IsCritical K Λ ∧ x ∈ Λ} with hPi
-  have hPic : IsClosed Pk := ml3_isClosed hK
-  have hpPi : ∀ t, p t ∈ Pk ↔ p t ∈ frontier K ∧ ∃ Λ, IsCritical K Λ ∧ p t ∈ Λ := fun t ↦ Iff.rfl
-  have hplo : p tlo ∈ Pk := ⟨hpF _ htloT, ml3_extreme hirr (hext _ htloT (Or.inl fun t ht ↦
-    csInf_le hTbb ht))⟩
-  have hphi : p thi ∈ Pk := ⟨hpF _ hthiT, ml3_extreme hirr (hext _ hthiT (Or.inr fun t ht ↦
-    le_csSup hTa ht))⟩
-  have hp0 : p 0 ∉ Pk := fun h ↦ hnot (by simpa [hp] using h.2)
-  -- the gap `(t_A, t_B)` around `0`
-  set S₁ := {t : ℝ | t ∈ Icc tlo 0 ∧ p t ∈ Pk} with hS₁
-  set S₂ := {t : ℝ | t ∈ Icc 0 thi ∧ p t ∈ Pk} with hS₂
-  have hS₁c : IsClosed S₁ := isClosed_Icc.inter (hPic.preimage hpc)
-  have hS₂c : IsClosed S₂ := isClosed_Icc.inter (hPic.preimage hpc)
-  have hS₁a : BddAbove S₁ := ⟨0, fun t ht ↦ ht.1.2⟩
-  have hS₂b : BddBelow S₂ := ⟨0, fun t ht ↦ ht.1.1⟩
-  have hS₁n : tlo ∈ S₁ := ⟨⟨le_rfl, htlo0.le⟩, hplo⟩
-  have hS₂n : thi ∈ S₂ := ⟨⟨hthi0.le, le_rfl⟩, hphi⟩
-  set tA := sSup S₁ with htA
-  set tB := sInf S₂ with htB
-  have htAS : tA ∈ S₁ := hS₁c.csSup_mem ⟨_, hS₁n⟩ hS₁a
-  have htBS : tB ∈ S₂ := hS₂c.csInf_mem ⟨_, hS₂n⟩ hS₂b
-  have htA0 : tA < 0 := lt_of_le_of_ne htAS.1.2 fun h ↦ hp0 (h ▸ htAS.2)
-  have htB0 : 0 < tB := lt_of_le_of_ne htBS.1.1 fun h ↦ hp0 (h.symm ▸ htBS.2)
-  have hgap0 : ∀ r, tA < r → r < tB → p r ∉ Pk := by
-    intro r hr1 hr2 hr
-    rcases le_total r 0 with h | h
-    · have := le_csSup hS₁a ⟨⟨by linarith [htAS.1.1], h⟩, hr⟩; linarith
-    · have := csInf_le hS₂b ⟨⟨h, by linarith [htBS.1.2]⟩, hr⟩; linarith
-  set A := p tA with hA
-  set B := p tB with hB
-  have hAF : A ∈ frontier K := htAS.2.1
-  have hBF : B ∈ frontier K := htBS.2.1
-  have hBA : B - A = (tB - tA) • d := by simp only [hA, hB, hp]; module
-  have hgap : ∀ t : ℝ, 0 < t → t < 1 → ¬ ∃ Λ, IsCritical K Λ ∧ A + t • (B - A) ∈ Λ := by
-    intro t ht0 ht1 hΛ
-    have heq : A + t • (B - A) = p (tA + t * (tB - tA)) := by
-      rw [hBA]; simp only [hA, hp]; module
-    have hr1 : tA < tA + t * (tB - tA) := by nlinarith
-    have hr2 : tA + t * (tB - tA) < tB := by nlinarith
-    refine hgap0 _ hr1 hr2 ⟨hpF _ (hpK _ ⟨by linarith [htAS.1.1], by linarith [htBS.1.2]⟩), ?_⟩
-    rw [← heq]; exact hΛ
-  -- the segment `Γ₁ = [A, B]`: ends on critical lattices, inner points off them
-  have hfA : f A = 1 := hfp tA
-  have hfB : f B = 1 := hfp tB
-  have hcAB : cross A B ≠ 0 := by
-    intro h
-    obtain ⟨τ, hτ⟩ := ml3_parallel h (mm_ne_zero_of_frontier hK hAF)
-    have h1 := congrArg f hτ
-    rw [map_smul, hfA, hfB, smul_eq_mul, mul_one] at h1
-    rw [← h1, one_smul] at hτ
-    have : (tB - tA) • d = 0 := by rw [← hBA, hτ, sub_self]
-    exact smul_ne_zero (sub_pos.2 (htA0.trans htB0)).ne' hd0 this
-  have hmid : (1 / 2 : ℝ) • (A + B) ∈ frontier K := by
-    have e : (1 / 2 : ℝ) • (A + B) = p ((tA + tB) / 2) := by simp only [hA, hB, hp]; module
-    rw [e]
-    exact hpF _ (hpK _ ⟨by linarith [htAS.1.1], by linarith [htBS.1.2]⟩)
-  have hgapArc : ∀ X ∈ openArc K A B, ¬∃ Λ, IsCritical K Λ ∧ X ∈ Λ := by
-    intro X hX hΛ
-    obtain ⟨t, ht, rfl⟩ := ml5_openArc_seg hK hAF hBF hmid hX
-    exact hgap t ht.1 ht.2 hΛ
-  have hext : ∀ e ∈ K.extremePoints ℝ, ∃ Λ, IsCritical K Λ ∧ e ∈ Λ :=
-    fun e he ↦ ml3_extreme hirr he
-  -- Lemma 13, class A, with the ends named so that `det(P₁, P₁') > 0`
-  rcases lt_or_gt_of_ne hcAB with hneg | hpos
-  · refine ml5_classA hK hnpar hext hBF hAF htBS.2.2 htAS.2.2 (by rw [mm_cross_swap]; linarith)
-      (by rw [add_comm]; exact hmid) fun X hX ↦ hgapArc X ?_
-    obtain ⟨hXF, a, b, ha, hb, rfl⟩ := hX
-    exact ⟨hXF, b, a, hb, ha, add_comm _ _⟩
-  · exact ml5_classA hK hnpar hext hAF hBF htAS.2.2 htBS.2.2 hpos hmid hgapArc
-
 end Lemma3
 
 end MahlerIrreducible
-
-/-- **Mahler (1947), Lemma 3.** The (symmetric) convex domain `K` is irreducible if and only if
-every boundary point of `K` belongs to a critical lattice of `K`.
-
-Mahler states the lemma without proof (footnote 3: "See Lemmas 8 and 12 of paper A", Mahler, *On
-irreducible convex domains*, Proc. Kon. Ned. Akad. Wet. 50 (1947), 98–107). All domains of the
-paper are symmetric in the origin; irreducibility is `MahlerIrreducible.IsIrreducible` (no proper
-symmetric convex subdomain has the same minimal determinant).
-
-Proof. "If" (paper A, Lemma 12, for convex subdomains): `ml3_irreducible_of_forall`. "Only if"
-(paper A, Lemma 8 together with Lemma 13, which passes from convex to star subdomains):
-`ml3_onlyIf`; see the module docstring for the arguments and the departures from paper A. -/
-theorem mahler_irreducible_iff {K : Set (Fin 2 → ℝ)} (hK : IsSymmetricConvexDomain K) :
-    MahlerIrreducible.IsIrreducible K ↔
-      ∀ u ∈ frontier K, ∃ Λ, MinkowskiMahler.IsCritical K Λ ∧ u ∈ Λ :=
-  ⟨fun h _ hu ↦ ml3_onlyIf h hu, ml3_irreducible_of_forall hK⟩
 
 end External

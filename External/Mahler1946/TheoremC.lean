@@ -10,9 +10,9 @@ Ned. Akad. Wet. 49 (1946), 331–343 (scan: Mahler's collected works, CARMA arch
 Theorems B (p. 334, proof pp. 335–336) and C (pp. 336–338), and their use in K. Mahler, *On
 irreducible convex domains*, Proc. Kon. Ned. Akad. Wet. 50 (1947), 98–107 ("paper A"): Lemma 10
 ("proof of Theorem C"), Lemma 11 ("special case of Theorem B"), both p. 104, and the first case
-("class B") of the proof of Lemma 13, pp. 104–105. These replace two arguments of
-`External.MahlerIrreducible` that were not Mahler's: `ml3_isClosed` (by `lemma11`, same statement)
-and `ml3_extreme` (by `m46c_classB`, same statement).
+("class B") of the proof of Lemma 13, pp. 104–105. The proof of Mahler 1947, Lemma 3
+(`External.MahlerIrreducible.Lemma3`, `MahlerIrreducible.ml3_onlyIf`) uses `lemma11` and
+`m46c_classB`.
 
 ## Mahler's setting, and how it is specialized
 
@@ -262,8 +262,7 @@ theorem theoremB (hK : IsSymmetricConvexDomain K) {Λ : ℕ → Submodule ℤ (F
 /-- **Mahler, paper A, Lemma 11** (p. 104; "special case of Theorem B" of the 1946 paper), for a
 symmetric convex domain `K`: *let `Π` be the set of all points on `C` which belong to at least one
 critical lattice of `K`. Then `Π` is a closed set.* A limit of points of `Π` on critical lattices
-`Λ_r` is, by Theorem B (`d(Λ_r) = Δ(K)` for all `r`), on a critical lattice. Same statement as
-`MahlerIrreducible.ml3_isClosed`. -/
+`Λ_r` is, by Theorem B (`d(Λ_r) = Δ(K)` for all `r`), on a critical lattice. -/
 theorem lemma11 (hK : IsSymmetricConvexDomain K) :
     IsClosed {x | x ∈ frontier K ∧ ∃ Λ, IsCritical K Λ ∧ x ∈ Λ} := by
   refine IsSeqClosed.isClosed fun {xs x} hxs hlim ↦ ?_
@@ -810,7 +809,7 @@ lemma m46c_line (hK : IsSymmetricConvexDomain K) {e : Fin 2 → ℝ} (he : e ∈
 /-- **Mahler, paper A, Lemma 13, class B** (first case of the proof, pp. 104–105), for convex
 subdomains: *every extreme point `e` of an irreducible convex domain `K` lies on a critical lattice
 of `K`.* (Paper A's class B: the points of `C` that are not inner points of a segment in `C`, i.e.
-the extreme points of `K`.) Same statement as `MahlerIrreducible.ml3_extreme`, which it replaces.
+the extreme points of `K`.)
 
 Mahler's proof: otherwise, *by Lemma 10, there exists a star domain `H'` contained in `K`, but not
 containing the two points `±P`, such that `Δ(H') = Δ(K)`. Draw a line `L'` through `P` which has no

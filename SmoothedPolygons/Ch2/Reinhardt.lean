@@ -3739,9 +3739,9 @@ does not have. We follow Mahler's lattice route instead:
    `δ_L(K) = area(K)/(4Δ(K))` (`irr_glpd_eq`; `K + L` is a packing iff `½L` is `K`-admissible), a
    proper symmetric convex subdomain with the same `Δ` would have a smaller density. `K_min` is
    not a parallelogram (`irr_not_isParallelogram_of_worst`: the Euclidean disk has `δ_L < 1`).
-2. Mahler's Lemma 3 (`External.mahler_irreducible`, by shaving along `±ℓ`): every support line `ℓ`
-   passes through a point `x` of a critical lattice, one of the six points `s_j` of Mahler's
-   Lemma 2.
+2. Mahler's Lemma 3 (`External.mahler_irreducible`, from `External.mahler_irreducible_iff`):
+   every support line `ℓ` passes through a point `x` of a critical lattice, one of the six points
+   `s_j` of Mahler's Lemma 2.
 3. Mahler's Theorem 2 (`External.mahler_1947`): `ℓ` is the only support line at `x`, and it is the
    line of an edge of the hexagon bounded by the support lines at the `s_j`, which contains `K`
    and has area at most `4Δ(K)` (`irr_main`). Every centrally symmetric hexagon around `K` has

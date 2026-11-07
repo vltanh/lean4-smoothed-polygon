@@ -1,7 +1,7 @@
 module
 
 public import SmoothedPolygons.Ch2.Density
-public import External.MahlerIrreducible
+public import External.MahlerIrreducible.Lemma3
 public import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
 public import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
 public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar

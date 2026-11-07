@@ -37,6 +37,7 @@ import all External.Mahler1946.TheoremC
 import all External.Mahler1946.TheoremE
 import all External.Mahler1947
 import all External.MahlerIrreducible
+import all External.MahlerIrreducible.Lemma3
 import all External.MinkowskiMahler
 import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.MatrixIdentities
