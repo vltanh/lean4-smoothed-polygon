@@ -6,9 +6,10 @@ public import SmoothedPolygons.Ch7.HMax
 /-!
 # Theorem 7.7.1, step 2: transversality of the switching times
 
-Step 2: the slopes of `χ₃₂` at `0` and of `χ₃₁` at `t_sw` along the strong lift (the remark after
-Lemma 7.5.3), their sign, and the independence of the slope of `χ₃₂` on the switching surface from
-the control on the edge `[e₂, e₃]`.
+Step 2: the slopes of `χ₃₂` at `0` and of `χ₃₁` at `t_sw` along the strong lift, their sign (the
+remark after Lemma 7.5.3 asserts that the derivative of `χ₃₂` at `0` is positive; its value is
+computed here), and the independence of the slope of `χ₃₂` on the switching surface from the
+control on the edge `[e₂, e₃]`.
 
 * `iso_chi32_hasDerivAt` follows the remark after Lemma 7.5.3. In the variables of the proof of
   Lemma 7.5.3, `χ₃₂(t) = 2 f(y, yW)/(3y²W y₀³(2 - W))`, `y = 1 + 3y₀²`, `W = exp(√3 y₀ t)`
@@ -87,8 +88,8 @@ lemma isw_W_ne_two (y0 : ℝ) : ∀ᶠ t in 𝓝 (0 : ℝ), Real.exp (√3 * y0 
   have hc : ContinuousAt (fun t : ℝ ↦ Real.exp (√3 * y0 * t)) 0 := by fun_prop
   exact hc.eventually_ne (by norm_num)
 
-/-- The remark after Lemma 7.5.3: `χ₃₂` vanishes at `t = 0` with slope `iso_chi32Slope y₀`
-(`∂f/∂r = -∂f/∂y = y((4 - y) - y ln(4/y))` on the diagonal, eqn:f'). -/
+/-- The remark after Lemma 7.5.3, with the value of the derivative: `χ₃₂` vanishes at `t = 0` with
+slope `iso_chi32Slope y₀` (`∂f/∂r = -∂f/∂y = y((4 - y) - y ln(4/y))` on the diagonal, eqn:f'). -/
 theorem iso_chi32_hasDerivAt (y0 : ℝ) (hy0 : 1 / √3 < y0) :
     HasDerivAt (fun t ↦ switchingFn 2 1 (strongΛR y0 t) (segX y0 t)) (iso_chi32Slope y0) 0 := by
   have hy : 0 < y0 := poly_y0_pos hy0
@@ -304,7 +305,7 @@ theorem iso_edge_slope (q : iso_PhasePt) (hstar : IsStarState q.1)
   rw [hcu, hc, hPu]
   exact isw_core _ _ _ _ _ _ _
 
-/-- The slope of the remark after Lemma 7.5.3 is positive: `4 - Y - Y ln(4/Y) > 0` for
+/-- The remark after Lemma 7.5.3: the slope of `χ₃₂` at `0` is positive: `4 - Y - Y ln(4/Y) > 0` for
 `Y = 1 + 3y₀² ∈ (2, 4)`, by `ln x < x - 1` (`x = 4/Y ≠ 1`). -/
 theorem iso_chi32Slope_pos (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) : 0 < iso_chi32Slope y0 := by
   obtain ⟨hY2, hY4⟩ := hmax_y_mem hy0 hy1

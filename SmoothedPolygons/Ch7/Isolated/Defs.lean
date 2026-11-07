@@ -186,7 +186,9 @@ and its image lies in the section). With `u = y₀²`, `ℓ = ln(4/(3u + 1))`, `
 derivative has, in the basis `iso_sectionBasis y₀ ℓ`, the matrix `iso_sectionMatrix u ℓ`,
 computed in closed form by differentiating the closed-form flow (scratch computation, exact in
 `(y₀, ℓ)`; it reproduces the multipliers of the smoothed `(6k+2)`-gons for `k = 1, 2, 3, 5`
-found by an independent numerical computation). -/
+found by an independent numerical computation). In Lean the tangent space is defined, and the
+matrix proved to be that of the derivative (`iso_fderiv_basis`), at `q_oct` (`y₀ = y_oct`) only;
+the invariance of the tangent space follows there from `iso_fderiv_basis`. -/
 
 /-- The constraint map `(det X - 1, ⟨X, Λ_R⟩, H(e₃), χ₂₃, det Λ₁)` in coordinates. -/
 noncomputable def iso_sectionConstraints (v : Fin 9 → ℝ) : Fin 5 → ℝ :=
@@ -212,8 +214,9 @@ noncomputable def iso_sectionBasis (y L : ℝ) : Fin 4 → Fin 9 → ℝ :=
       -√3*(y - 1)*(y + 1)*(3*y^2 + 1)/(12*y^3), -√3*(y - 1)*(y + 1)*(3*y^2 + 1)/(12*y^5)]]
 
 /-- The matrix of the derivative of the Poincaré map on `T N_d` at `q_fix(y₀)` in the basis
-`iso_sectionBasis`, with `u = y₀²` and `L = ln(4/(3u + 1))`; the common factor of the
-denominators is `3Lu + L + 3u - 3 = YL + Y - 4 < 0`, `Y = 1 + 3u`. -/
+`iso_sectionBasis`, with `u = y₀²` and `L = ln(4/(3u + 1))` (by the scratch computation; proved at
+`y₀ = y_oct`, `iso_fderiv_basis`); the common factor of the denominators is
+`3Lu + L + 3u - 3 = YL + Y - 4 < 0`, `Y = 1 + 3u`. -/
 noncomputable def iso_sectionMatrix (u L : ℝ) : Matrix (Fin 4) (Fin 4) ℝ :=
   !![(81*L*u^4 + 162*L*u^3 - 12*L*u^2 - 10*L*u + 3*L + 216*u^4 - 243*u^3 - 3*u^2 + 39*u - 9) /
       (2*u*(3*u + 1)^2*(3*L*u + L + 3*u - 3)),

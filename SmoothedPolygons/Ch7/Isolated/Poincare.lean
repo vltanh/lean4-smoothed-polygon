@@ -22,11 +22,12 @@ Near `q_fix(y₀)` the vertex flow equals its integral-free closed form `ipc_cf`
 exponential is analytic). So `G(v, t) = χ₃₁(q(t, q(v)))` and `F(v, t) = Ad(R) q(t, q(v))` are
 strictly differentiable at `(v₀, t_sw)`, with `∂_t G = -iso_chi32Slope y₀ ≠ 0`
 (`iso_chi31_hasDerivAt`, `iso_chi32Slope_pos`). The implicit function theorem
-(`HasStrictFDerivAt.implicitFunctionOfProdDomain`) gives a strictly differentiable zero `ψ` of
-`G` near `v₀`; it is the *first* positive zero (`iso_poincareTime`) near `v₀`, because `χ₃₁ > 0`
-on `[0, t_sw - ε/2]` along the octagon's arc (Lemma 7.5.3), hence near `v₀` uniformly by
-compactness (`IsCompact.eventually_forall_of_forall_eventually`), and the zeros near `t_sw` are
-exactly `ψ v` (`ipc_poincareTime_ift`). Then `f(v) = F(v, ψ v)` near `v₀`.
+(`HasStrictFDerivAt.implicitFunctionOfProdDomain`) gives a zero `ψ` of `G` near `v₀`, strictly
+differentiable at `v₀`; it is the *first* positive zero (`iso_poincareTime`) near `v₀`, because
+`χ₃₁ > 0` on `[0, t_sw - ε/2]` along the octagon's arc (Lemma 7.5.3), hence near `v₀` uniformly
+by compactness (`IsCompact.eventually_forall_of_forall_eventually`), and the zeros near `t_sw`
+are exactly `ψ v` (`ipc_poincareTime_ift`). Then `f(v) = F(v, ψ v)` near `v₀`, so `f` is strictly
+differentiable at `v₀` (this is all that is proved: not that `f` is `C¹` near `v₀`).
 
 ## The direct calculation (`iso_fderiv_basis`)
 
@@ -248,9 +249,9 @@ lemma ipc_contDiffAt_Gcf_v0 (y : ℝ) (hy0 : 1 / √3 < y) (hy1 : y < 1) {t : �
   · rw [(str_traceForm_segX y t hy).2.2]
     simp [hy.ne']
 
-/-- **Step 4.** The implicit function theorem for the Poincaré time near `q_fix(y₀)`: the
-Poincaré time is a strictly differentiable function `ψ` near `q_fix(y₀)`, and the Poincaré map
-is `v ↦ ipc_F (v, ψ v)` there. -/
+/-- **Step 4.** The implicit function theorem for the Poincaré time near `q_fix(y₀)`: near
+`q_fix(y₀)` the Poincaré time is a function `ψ` strictly differentiable at `q_fix(y₀)`, and the
+Poincaré map is `v ↦ ipc_F (v, ψ v)` there. -/
 theorem ipc_poincareTime_ift (y : ℝ) (hy0 : 1 / √3 < y) (hy1 : y < 1) :
     ∃ ψ : (Fin 9 → ℝ) → ℝ, ∃ ψ' : (Fin 9 → ℝ) →L[ℝ] ℝ,
       HasStrictFDerivAt ψ ψ' (ipc_v0 y) ∧ ψ (ipc_v0 y) = switchTime y ∧
@@ -689,9 +690,10 @@ lemma ipc_fderiv_Vq :
     (hasDerivWithinAt_const _ _ _).congr_of_eventuallyEq hev (hev.self_of_nhdsWithin le_rfl)
   exact (uniqueDiffWithinAt_Ici 0).eq_deriv _ h1 h2
 
-/-- The Poincaré map is strictly differentiable at `q_oct` (in coordinates): the vertex flow is
-smooth in `(q, t)`, and by `iso_chi31_hasDerivAt` and the implicit function theorem the Poincaré
-time is a strictly differentiable function of `q` near `q_oct` (`ipc_fderiv_structure`). -/
+/-- The Poincaré map is strictly differentiable at `q_oct` (in coordinates): the closed form of
+the vertex flow is `C¹` in `(q, t)` near the octagon's arc, and by `iso_chi31_hasDerivAt` and the
+implicit function theorem, near `q_oct` the Poincaré time is a function of `q` strictly
+differentiable at `q_oct` (`ipc_fderiv_structure`). -/
 theorem iso_poincareMapCoords_hasStrictFDerivAt :
     HasStrictFDerivAt iso_poincareMapCoords
       (fderiv ℝ iso_poincareMapCoords (iso_phaseCoords (iso_qFix (y₀ 1))))

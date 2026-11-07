@@ -4,14 +4,20 @@ public import SmoothedPolygons.Ch7.Isolated.Defs
 public import SmoothedPolygons.Ch7.SmoothedPolygon
 public import SmoothedPolygons.Ch7.Isolated.Hyperbolic
 public import SmoothedPolygons.Ch7.Isolated.Return
-public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Deriv
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
+public import SmoothedPolygons.Ch7.Remarks
+public import Mathlib.LinearAlgebra.Eigenspace.Triangularizable
 
 /-!
-# Theorem 7.7.1, steps 6–7: the implicit function theorem and the final transversality
+# Theorem 7.7.1, steps 6–7: the fixed points of `f⁴` and the final transversality
 
-Step 6: near the octagon's point, the fixed points of the fourth iterate of the Poincaré map on the
-section are the points `q_fix(y₀)`. Step 7: the condition `g(t_f) = R` picks `y₀ = y_oct` in this
-family (the converse direction of Lemma 7.5.5 for `k = 1`).
+Step 6 (`iso_fixedPoints`): near the octagon's point, the fixed points of the fourth iterate of the
+Poincaré map on the section are the points `q_fix(y₀)`. The book argues "By the implicit function
+theorem" (TeX 6616) for each `d` separately; here the inverse function theorem is applied once, at
+`q_oct`, and the parameter `y₀(d)` comes from Remark 7.5.2 as in the book (departure from the
+paper explained in the section header of step 6). Step 7 (`iso_trace_sq_of_pow_four`,
+`iso_y0_of_closing`): the condition `g(t_f) = R` picks `y₀ = y_oct` in this family (the converse
+direction of Lemma 7.5.5 for `k = 1`, by the comparison of eigenvalues of its proof).
 -/
 
 @[expose] public section
@@ -20,7 +26,23 @@ namespace SmoothedPolygons
 
 open Matrix Set Filter Topology MeasureTheory
 
-/-! ### Step 6: the implicit function theorem
+/-! ### Step 6: the fixed points of `f⁴` near `q_oct`
+
+The book (TeX 6581–6582, 6612–6621): fix `d`; `y₀(d)` is "the real number constructed in
+Section 7.5", the inverse of `y₀ ↦ d(y₀) = det Λ₁(q_fix(y₀))`, which is strictly increasing with
+range `(0, 9/4)` (Remark 7.5.2), and `q_fix(d) = q_fix(y₀(d))`. "Direct calculation shows that the
+fixed point `q_oct` is hyperbolic ... Then the fixed point `q_fix(d)` is also hyperbolic for the
+map `f_d⁴` for sufficiently nearby parameters `d`. By the implicit function theorem, for each `d`
+near `d_oct`, the function `f_d⁴ - I` can be inverted in an open neighborhood of the fixed point
+`q_fix(d)`, forcing the fixed point to be isolated ... Thus, the only fixed points near `q_oct`
+are the fixed points `q_fix(d)`."
+
+Departure from the paper: the book applies the implicit function theorem to `f_d⁴ − I` for each
+`d` separately, after asserting that `q_fix(d)` stays hyperbolic for nearby `d` (TeX 6615); the
+uniqueness "thus the only fixed points near `q_oct` are the `q_fix(d)`" needs neighbourhoods
+uniform in `d`, which this does not give. The formal proof applies the inverse function theorem
+once, at `q_oct`, to `(section constraints, f⁴ − id)`, whose constraints include `d`; this gives
+the uniformity, and the hyperbolicity of `q_fix(d)` for `d ≠ d_oct` is not needed.
 
 Coordinates and notation: `p₀ = iso_phaseCoords q_oct ∈ ℝ⁹`, `F = iso_poincareMapCoords`,
 `L = DF(p₀)`, `c = iso_sectionConstraints : ℝ⁹ → ℝ⁵` (`det X - 1`, `⟨X, Λ_R⟩`, `H(e₃)`, `χ₂₃`,
@@ -28,14 +50,12 @@ Coordinates and notation: `p₀ = iso_phaseCoords q_oct ∈ ℝ⁹`, `F = iso_po
 `Ψ(v) = (c(v), F⁴(v) - v) : ℝ⁹ → ℝ⁵ × ℝ⁹` has at `p₀` the derivative `w ↦ (Dc w, (L⁴ - 1)w)`,
 which is injective: `Dc w = 0` means `w ∈ T`, and `L⁴ - 1 = (L - 1)(L + 1)(L² + 1)` is injective
 on the `L`-invariant space `T` by hyperbolicity (`iso_hyperbolic` with `θ = 0, π, π/2`). So `Ψ` is
-injective near `p₀` (inverse function theorem, in the form of `ApproximatesLinearOn`). On the
-section, a fixed point `q` of `f⁴` has `Ψ(q) = (0, 0, 0, 0, det Λ₁(q); 0)`, and so does
-`q_fix(y₀)` with `det Λ₁ = d(y₀)`. The function `d(y₀) = det Λ₁(q_fix(y₀))` has nonzero derivative
-at `y_oct`: its derivative is the last component of `DΨ(p₀)γ'`, `γ = q_fix` in coordinates (the
-other components vanish since `γ` lies in the section and is fixed by `f⁴`), and `γ' ≠ 0`. So
-`d` takes every value near `d(y_oct)` near `y_oct`, and `q = q_fix(y₀)` by injectivity. The
-coordinate `d` plays the role of the book's parameter `d` (uniformity in `d` is automatic), and
-the monotonicity of `d(y₀)` (Remark 7.5.2) is not needed. -/
+injective on a neighbourhood `W` of `p₀` (the local injectivity part of the inverse function
+theorem, `ifp_injOn_of_hasStrictFDerivAt`, from `ApproximatesLinearOn`). On the section, a fixed
+point `q` of `f⁴` has `Ψ(q) = (0, 0, 0, 0, d; 0)` with `d = det Λ₁(q)`, and so does `q_fix(y₀)`
+with `d = d(y₀)`. By Remark 7.5.2 (`remark7_5_2`), for `d` near `d_oct` the parameter `y₀(d)`
+exists and is near `y_oct` (a strictly increasing function with an interval as range has a
+continuous inverse), so `q_fix(y₀(d)) ∈ W` and `q = q_fix(y₀(d))` by injectivity. -/
 
 /-- The iterates of the Poincaré map in coordinates are the coordinates of its iterates. -/
 lemma ifp_coords_iterate (n : ℕ) {q : iso_PhasePt} (h1 : q.1.trace = 0) (h2 : q.2.1.trace = 0)
@@ -92,30 +112,12 @@ lemma ifp_injOn_of_hasStrictFDerivAt {E F : Type*} [NormedAddCommGroup E] [Norme
   have : ‖x - y‖ = 0 := le_antisymm (by linarith [norm_nonneg (x - y)]) (norm_nonneg _)
   exact sub_eq_zero.1 (norm_eq_zero.1 this)
 
-/-- The tangent space `T` of the section at `q_oct` is spanned by `iso_sectionBasis` (a vector of
-`T` is determined by its free coordinates `δX₀₀, δX₀₁, δΛ₁₀₀, δΛ₁₀₁`). -/
+/-- The tangent space `T` of the section at `q_oct` is spanned by `iso_sectionBasis`
+(`ihy_tangentSection_eq_sum`). -/
 lemma ifp_tangentSection_le_span (v : Fin 9 → ℝ) (hv : v ∈ iso_tangentSection) :
     v ∈ Submodule.span ℝ (range (iso_sectionBasis (y₀ 1) (ellSw (y₀ 1)))) := by
-  have hy : 0 < y₀ 1 := poly_y0_pos (poly_y₀_mem le_rfl).1
-  set b := iso_sectionBasis (y₀ 1) (ellSw (y₀ 1)) with hb
-  set w := v - (v 0 • b 0 + (√3 * v 1) • b 1 + (y₀ 1 * v 3) • b 2 + (√3 * y₀ 1 * v 4) • b 3)
-    with hw
-  have hmem : ∀ j, b j ∈ iso_tangentSection := iso_sectionBasis_mem
-  have hwT : w ∈ iso_tangentSection := by
-    refine iso_tangentSection.sub_mem hv ?_
-    refine iso_tangentSection.add_mem (iso_tangentSection.add_mem (iso_tangentSection.add_mem
-      ?_ ?_) ?_) ?_ <;> exact iso_tangentSection.smul_mem _ (hmem _)
-  have hw0 : w = 0 := by
-    refine ihy_tangentSection_eq_zero w hwT ?_ ?_ ?_ ?_ <;>
-      simp only [hw, hb, Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul,
-        iso_sectionBasis, Matrix.cons_val, Matrix.cons_val_zero, Matrix.cons_val_one] <;>
-      field_simp <;> ring_nf <;> simp only [Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 3)] <;> ring
-  have hspan : ∀ j, b j ∈ Submodule.span ℝ (range b) := fun j ↦ Submodule.subset_span ⟨j, rfl⟩
-  have hv' : v = v 0 • b 0 + (√3 * v 1) • b 1 + (y₀ 1 * v 3) • b 2 + (√3 * y₀ 1 * v 4) • b 3 :=
-    sub_eq_zero.1 hw0
-  rw [hv']
-  refine Submodule.add_mem _ (Submodule.add_mem _ (Submodule.add_mem _ ?_ ?_) ?_) ?_ <;>
-    exact Submodule.smul_mem _ _ (hspan _)
+  rw [ihy_tangentSection_eq_sum v hv]
+  exact Submodule.sum_mem _ fun i _ ↦ Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
 
 /-- The derivative of the Poincaré map leaves the tangent space of the section invariant. -/
 lemma ifp_fderiv_mem_tangentSection (v : Fin 9 → ℝ) (hv : v ∈ iso_tangentSection) :
@@ -162,53 +164,33 @@ lemma ifp_pow_four_injective (v : Fin 9 → ℝ) (hv : v ∈ iso_tangentSection)
   exact iso_hyperbolic (Real.pi / 2) v hv (by
     rw [Real.cos_pi_div_two, mul_zero, zero_smul, sub_zero]; exact h2)
 
-/-- `q_fix(y₀)` in coordinates, as an explicit function of `y₀` (`ihy_phaseCoords_qFix`). -/
-noncomputable def ifp_gamma (y : ℝ) : Fin 9 → ℝ :=
-  ![0, -y, 1 / y, 0, strongL₁ y * ((2 * y ^ 2 * (1 + 3 * y ^ 2))⁻¹ * (4 * √3 * y ^ 4)),
-    strongL₁ y * ((2 * y ^ 2 * (1 + 3 * y ^ 2))⁻¹ * -(√3 * (1 + y ^ 2) * (3 * y ^ 2 - 1))),
-    0, strongLR y * y ^ 2, strongLR y]
+/-! ### Step 6: the theorem -/
 
-lemma ifp_gamma_contDiffAt {y : ℝ} (hy : 0 < y) : ContDiffAt ℝ 1 ifp_gamma y := by
-  have h1 : y ≠ 0 := hy.ne'
-  have h2 : 4 / (3 * y ^ 2 + 1) ≠ 0 := by positivity
-  have h3 : 2 * y ^ 2 * (1 + 3 * y ^ 2) ≠ 0 := by positivity
-  have h4 : 12 * √3 * y ^ 4 ≠ 0 := by positivity
-  have h5 : 24 * y ^ 6 ≠ 0 := by positivity
-  have h6 : 3 * y ^ 2 + 1 ≠ 0 := by positivity
-  unfold ifp_gamma strongL₁ strongLR ellSw
-  rw [contDiffAt_pi]
-  intro i
-  fin_cases i <;> dsimp <;> fun_prop (disch := assumption)
+/-- Near `q_oct`, the fixed points of `f⁴` on the section are the `q_fix(y₀)`: the book's "Thus,
+the only fixed points near `q_oct` are the fixed points `q_fix(d)`" (TeX 6619–6620).
 
-/-! ### Step 6: the implicit function theorem -/
-
-/-- Near `q_oct`, the fixed points of `f⁴` on the section are the `q_fix(y₀)`. In coordinates
-`(d, ξ)` on `N = ⋃_d N_d` (or with `X₁₀ = 1/y₀` as the parameter), `f⁴ - id` has an invertible
-partial derivative `A⁴ - I` in `ξ` (by `iso_hyperbolic` with `θ ∈ {0, π/2, π}`), so its zero set
-is a graph over the parameter (`HasStrictFDerivAt.implicitFunctionOfProdDomain`), which the
-family `q_fix(y₀)` (`iso_poincareMap_qFix`) fills. -/
+`Ψ = (c, F⁴ - id)` is injective on a neighbourhood `W` of `p₀` (the inverse function theorem at
+`q_oct`, instead of the book's implicit function theorem for each `d`: see the section header).
+By Remark 7.5.2 (`remark7_5_2`), `d(y₀) = det Λ₁(q_fix(y₀))` is strictly increasing on
+`(1/√3, 1)` with range `(0, 9/4)`, so `y₀(d)` exists for `d` in an interval `(d(a), d(b))` around
+`d_oct` and lies in `(a, b)`, chosen so that `q_fix(y₀) ∈ W` for `y₀ ∈ (a, b)`. A fixed point `q`
+of `f⁴` on the section, in `W` and with `d = det Λ₁(q) ∈ (d(a), d(b))`, has
+`Ψ(q) = (0, 0, 0, 0, d; 0) = Ψ(q_fix(y₀(d)))`, so `q = q_fix(y₀(d))`. -/
 theorem iso_fixedPoints :
     ∃ V ∈ 𝓝 (iso_qFix (y₀ 1)), ∀ q ∈ V, iso_IsSectionPt q → iso_poincareMap^[4] q = q →
       ∃ y0 ∈ Ioo (1 / √3) 1, q = iso_qFix y0 := by
   obtain ⟨hy0, hy1⟩ := poly_y₀_mem (le_refl 1)
   have hy : 0 < y₀ 1 := poly_y0_pos hy0
-  set y := y₀ 1 with hydef
+  set y := y₀ 1
   set p₀ := iso_phaseCoords (iso_qFix y) with hp₀
-  set F := iso_poincareMapCoords with hFdef
-  set L := fderiv ℝ F p₀ with hL
+  set F := iso_poincareMapCoords
+  set L := fderiv ℝ F p₀
   set c := iso_sectionConstraints with hcdef
-  set Dc := fderiv ℝ c p₀ with hDc
-  have hγ : ∀ y', 0 < y' → iso_phaseCoords (iso_qFix y') = ifp_gamma y' :=
-    fun y' h ↦ ihy_phaseCoords_qFix y' h
-  have hp₀γ : p₀ = ifp_gamma y := hγ y hy
-  have htr : ∀ y', 1 / √3 < y' → y' < 1 → (iso_qFix y').1.trace = 0 ∧
-      (iso_qFix y').2.1.trace = 0 ∧ (iso_qFix y').2.2.trace = 0 := fun y' h0 h1 ↦
-    ⟨(iso_qFix_isSectionPt y' h0 h1).1, (iso_qFix_isSectionPt y' h0 h1).2.1,
-      (iso_qFix_isSectionPt y' h0 h1).2.2.1⟩
+  set Dc := fderiv ℝ c p₀
   have hFγ : ∀ y', 1 / √3 < y' → y' < 1 → ∀ n : ℕ,
       F^[n] (iso_phaseCoords (iso_qFix y')) = iso_phaseCoords (iso_qFix y') := by
     intro y' h0 h1 n
-    obtain ⟨k1, k2, k3⟩ := htr y' h0 h1
+    obtain ⟨k1, k2, k3, -⟩ := iso_qFix_isSectionPt y' h0 h1
     rw [ifp_coords_iterate n k1 k2 k3, Function.iterate_fixed (iso_poincareMap_qFix y' h0 h1)]
   -- the derivatives at `p₀`
   have hFp : F p₀ = p₀ := hFγ y hy0 hy1 1
@@ -217,7 +199,7 @@ theorem iso_fixedPoints :
   obtain ⟨hA, hB⟩ := ihy_qFix_den
   have hcC : ContDiffAt ℝ 1 c p₀ := ifp_constraints_contDiffAt hA hB
   have hc : HasStrictFDerivAt c Dc p₀ := hcC.hasStrictFDerivAt one_ne_zero
-  -- `Ψ(v) = (c(v), F⁴(v) - v)` has an injective derivative at `p₀`
+  -- `Ψ(v) = (c(v), F⁴(v) - v)` has an injective derivative at `p₀`, so is injective near `p₀`
   set Ψ : (Fin 9 → ℝ) → (Fin 5 → ℝ) × (Fin 9 → ℝ) := fun v ↦ (c v, F^[4] v - v) with hΨdef
   set DΨ : (Fin 9 → ℝ) →L[ℝ] (Fin 5 → ℝ) × (Fin 9 → ℝ) :=
     Dc.prod (L ^ 4 - ContinuousLinearMap.id ℝ _) with hDΨ
@@ -234,120 +216,119 @@ theorem iso_fixedPoints :
     exact h2
   have hinj : Function.Injective DΨ := (injective_iff_map_eq_zero DΨ).2 hDΨ0
   obtain ⟨W, hW, hWinj⟩ := ifp_injOn_of_hasStrictFDerivAt hΨ hinj
-  -- the curve `γ = q_fix` in coordinates and `d(y₀) = det Λ₁(q_fix(y₀))`
-  have hγC : ContDiffAt ℝ 1 ifp_gamma y := ifp_gamma_contDiffAt hy
-  set γ' := deriv ifp_gamma y with hγ'
-  have hγd : HasDerivAt ifp_gamma γ' y := (hγC.differentiableAt one_ne_zero).hasDerivAt
-  have hγ'2 : γ' 2 = -(y ^ 2)⁻¹ := by
-    have h1 := (hasDerivAt_pi.1 hγd) 2
-    have h2 : HasDerivAt (fun y ↦ ifp_gamma y 2) (-(y ^ 2)⁻¹) y := by
-      have e : (fun y ↦ ifp_gamma y 2) = fun y ↦ y⁻¹ := by funext y; simp [ifp_gamma]
-      rw [e]; exact hasDerivAt_inv hy.ne'
-    exact h1.unique h2
-  have hIoo : Ioo (1 / √3) 1 ∈ 𝓝 y := Ioo_mem_nhds hy0 hy1
-  have hcγ : ∀ᶠ y' in 𝓝 y, c (ifp_gamma y') = ![0, 0, 0, 0, (iso_qFix y').2.1.det] := by
-    filter_upwards [hIoo] with y' hy'
-    rw [← hγ y' (poly_y0_pos hy'.1)]
-    exact ifp_constraints_of_section (iso_qFix_isSectionPt y' hy'.1 hy'.2)
-  have hFγ' : ∀ᶠ y' in 𝓝 y, F^[4] (ifp_gamma y') = ifp_gamma y' := by
-    filter_upwards [hIoo] with y' hy'
-    rw [← hγ y' (poly_y0_pos hy'.1)]
-    exact hFγ y' hy'.1 hy'.2 4
-  have hc' : HasFDerivAt c Dc (ifp_gamma y) := hp₀γ ▸ hc.hasFDerivAt
-  have hF4' : HasFDerivAt (F^[4]) (L ^ 4) (ifp_gamma y) := hp₀γ ▸ hF4.hasFDerivAt
-  have hcγd : HasDerivAt (fun y' ↦ c (ifp_gamma y')) (Dc γ') y := hc'.comp_hasDerivAt y hγd
-  have hFγd : HasDerivAt (fun y' ↦ F^[4] (ifp_gamma y')) ((L ^ 4) γ') y :=
-    hF4'.comp_hasDerivAt y hγd
-  have hDcγ : ∀ i : Fin 5, i ≠ 4 → Dc γ' i = 0 := by
-    intro i hi
-    refine ((hasDerivAt_pi.1 hcγd) i).unique ((hasDerivAt_const y (0 : ℝ)).congr_of_eventuallyEq ?_)
-    filter_upwards [hcγ] with y' hy'
-    rw [hy']
-    fin_cases i
-    · rfl
-    · rfl
-    · rfl
-    · rfl
-    · exact absurd rfl hi
-  have hLγ : (L ^ 4) γ' = γ' := hFγd.unique (hγd.congr_of_eventuallyEq hFγ')
-  have hd0 : Dc γ' 4 ≠ 0 := by
-    intro h4
-    have hz : DΨ γ' = 0 := by
-      simp only [hDΨ, ContinuousLinearMap.prod_apply, sub_apply,
-        ContinuousLinearMap.id_apply, hLγ, sub_self, Prod.mk_eq_zero, and_true]
-      funext i
-      by_cases hi : i = 4
-      · rw [hi, h4]; rfl
-      · exact hDcγ i hi
-    have h2 := congrFun (hDΨ0 γ' hz) 2
-    rw [hγ'2, Pi.zero_apply, neg_eq_zero, inv_eq_zero] at h2
-    exact (pow_pos hy 2).ne' h2
-  set d : ℝ → ℝ := fun y' ↦ c (ifp_gamma y') 4 with hd
-  have hdC : ContDiffAt ℝ 1 d y :=
-    contDiffAt_pi.1 ((hp₀γ ▸ hcC : ContDiffAt ℝ 1 c (ifp_gamma y)).comp y hγC) 4
-  have hdS : HasStrictDerivAt d (Dc γ' 4) y := by
-    have h := hdC.hasStrictDerivAt one_ne_zero
-    rwa [((hasDerivAt_pi.1 hcγd) 4).deriv] at h
-  have hmap : Filter.map d (𝓝 y) = 𝓝 (d y) := HasStrictDerivAt.map_nhds_eq hdS hd0
-  -- the neighbourhood
-  set Y := Ioo (1 / √3) 1 ∩ ifp_gamma ⁻¹' W with hYdef
-  have hY : Y ∈ 𝓝 y :=
-    inter_mem hIoo (hγC.continuousAt.preimage_mem_nhds (by rw [← hp₀γ]; exact hW))
-  have hdY : d '' Y ∈ 𝓝 (d y) := hmap ▸ image_mem_map hY
+  -- `y₀(d)` (Remark 7.5.2): `d(y₀) = det Λ₁(q_fix(y₀))` is strictly increasing with range
+  -- `(0, 9/4)`
+  obtain ⟨hdet, hmono, hrange, -⟩ := remark7_5_2
+  set D := detConstOfMotion
+  have hd : ∀ y' ∈ Ioo (1 / √3) 1, (iso_qFix y').2.1.det = D y' := fun y' hy' ↦
+    (hdet y' hy'.1 hy'.2 _ _ (strongLift_isStrongLift y' hy'.1) 0
+      ⟨le_rfl, (poly_switchTime_pos hy'.1 hy'.2).le⟩).2
+  -- an interval `(l, u)` around `y_oct` on which `q_fix(y₀) ∈ W`, and `a < y_oct < b` inside it
+  have hY : Ioo (1 / √3) 1 ∩ (fun y' ↦ iso_phaseCoords (iso_qFix y')) ⁻¹' W ∈ 𝓝 y :=
+    inter_mem (Ioo_mem_nhds hy0 hy1)
+      ((ipc_hasDerivAt_qFix y hy).continuousAt.preimage_mem_nhds hW)
+  obtain ⟨l, u, ⟨hly, hyu⟩, hluY⟩ := mem_nhds_iff_exists_Ioo_subset.1 hY
+  have ha : (l + y) / 2 ∈ Ioo (1 / √3) 1 := (hluY ⟨by linarith, by linarith⟩).1
+  have hb : (y + u) / 2 ∈ Ioo (1 / √3) 1 := (hluY ⟨by linarith, by linarith⟩).1
+  have hDa : D ((l + y) / 2) ∈ Ioo 0 (9 / 4) := hrange ▸ mem_image_of_mem D ha
+  have hDb : D ((y + u) / 2) ∈ Ioo 0 (9 / 4) := hrange ▸ mem_image_of_mem D hb
+  -- the inverse of `d`: for `d ∈ (d(a), d(b))`, `y₀(d)` exists and lies in `(a, b) ⊆ (l, u)`
+  have hinv : ∀ d ∈ Ioo (D ((l + y) / 2)) (D ((y + u) / 2)), ∃ y' ∈ Ioo l u, D y' = d := by
+    intro d hd'
+    obtain ⟨y', hy'I, rfl⟩ : d ∈ D '' Ioo (1 / √3) 1 :=
+      hrange ▸ ⟨hDa.1.trans hd'.1, hd'.2.trans hDb.2⟩
+    refine ⟨y', ⟨?_, ?_⟩, rfl⟩
+    · linarith [(hmono.lt_iff_lt ha hy'I).1 hd'.1]
+    · linarith [(hmono.lt_iff_lt hy'I hb).1 hd'.2]
+  have hab : Ioo (D ((l + y) / 2)) (D ((y + u) / 2)) ∈ 𝓝 (c p₀ 4) := by
+    have h : c p₀ 4 = D y := by
+      rw [hp₀, hcdef, ifp_constraints_of_section (iso_qFix_isSectionPt y hy0 hy1)]
+      exact hd y ⟨hy0, hy1⟩
+    rw [h]
+    exact Ioo_mem_nhds (hmono ha ⟨hy0, hy1⟩ (by linarith)) (hmono ⟨hy0, hy1⟩ hb (by linarith))
+  -- the neighbourhood of `q_oct`
   have hc4 : ContinuousAt (fun v ↦ c v 4) p₀ :=
     (continuous_apply 4).continuousAt.comp hcC.continuousAt
-  set V' := W ∩ (fun v ↦ c v 4) ⁻¹' (d '' Y) with hV'
-  have hV'mem : V' ∈ 𝓝 p₀ :=
-    inter_mem hW (hc4.preimage_mem_nhds (by simp only [hd, ← hp₀γ] at hdY; exact hdY))
+  set V' := W ∩ (fun v ↦ c v 4) ⁻¹' Ioo (D ((l + y) / 2)) (D ((y + u) / 2))
+  have hV'mem : V' ∈ 𝓝 p₀ := inter_mem hW (hc4.preimage_mem_nhds hab)
   refine ⟨iso_phaseCoords ⁻¹' V',
     irt_continuous_phaseCoords.continuousAt.preimage_mem_nhds hV'mem, fun q hqV hsec hfix ↦ ?_⟩
-  obtain ⟨hqW, y', ⟨hy'I, hy'W⟩, hdy'⟩ := hqV
+  obtain ⟨hqW, hqd⟩ := hqV
+  obtain ⟨y', hy'lu, hdy'⟩ := hinv _ hqd
+  obtain ⟨hy'I, hy'W⟩ := hluY hy'lu
   obtain ⟨k1, k2, k3, -⟩ := id hsec
-  have hy'0 : 0 < y' := poly_y0_pos hy'I.1
-  have hΨq : Ψ (iso_phaseCoords q) = Ψ (ifp_gamma y') := by
-    have h4 : d y' = c (iso_phaseCoords q) 4 := hdy'
-    simp only [hd, ← hγ y' hy'0, hcdef, ifp_constraints_of_section hsec,
-      ifp_constraints_of_section (iso_qFix_isSectionPt y' hy'I.1 hy'I.2)] at h4
+  have hsec' := iso_qFix_isSectionPt y' hy'I.1 hy'I.2
+  -- `Ψ(q) = (0, 0, 0, 0, d; 0) = Ψ(q_fix(y₀(d)))`
+  have hΨq : Ψ (iso_phaseCoords q) = Ψ (iso_phaseCoords (iso_qFix y')) := by
+    have h4 : q.2.1.det = (iso_qFix y').2.1.det := by
+      rw [hd y' hy'I, hdy']
+      change _ = iso_sectionConstraints (iso_phaseCoords q) 4
+      rw [ifp_constraints_of_section hsec]
+      rfl
     simp only [hΨdef, hcdef]
-    rw [ifp_coords_iterate 4 k1 k2 k3, hfix, sub_self, ← hγ y' hy'0, hFγ y' hy'I.1 hy'I.2 4,
-      sub_self, ifp_constraints_of_section hsec,
-      ifp_constraints_of_section (iso_qFix_isSectionPt y' hy'I.1 hy'I.2)]
-    simp only [Matrix.cons_val] at h4
-    rw [h4]
+    rw [ifp_coords_iterate 4 k1 k2 k3, hfix, sub_self, hFγ y' hy'I.1 hy'I.2 4, sub_self,
+      ifp_constraints_of_section hsec, ifp_constraints_of_section hsec', h4]
   have heq := hWinj hqW hy'W hΨq
   refine ⟨y', hy'I, ?_⟩
-  obtain ⟨t1, t2, t3⟩ := htr y' hy'I.1 hy'I.2
-  rw [← irt_ofCoords_coords k1 k2 k3, heq, ← hγ y' hy'0, irt_ofCoords_coords t1 t2 t3]
+  obtain ⟨t1, t2, t3, -⟩ := hsec'
+  rw [← irt_ofCoords_coords k1 k2 k3, heq, irt_ofCoords_coords t1 t2 t3]
 
 /-! ### Step 7: the final transversality condition -/
 
-/-- If `A ∈ SL₂(ℝ)` and `A⁴ = -I` then `(tr A)² = 2`: by Cayley–Hamilton `A⁴ + I =
-(t² - 2)(tA - I)`, `t = tr A`; if `t² ≠ 2` then `tA = I` and `t² = t(a + d) = 2` anyway. -/
+/-- If `A ∈ SL₂(ℝ)` and `A⁴ = -I` then `(tr A)² = 2`, by the book's comparison of eigenvalues
+(proof of Lemma 7.5.5, TeX 6316–6328, for `k = 1`): let `λ ∈ ℂ` be an eigenvalue of `A`, so
+`λ² - (tr A)λ + det A = 0` and the eigenvalues are `λ, λ⁻¹`; comparing eigenvalues on the two
+sides of `A⁴ = -I` gives `λ⁴ = -1`. Then `tr A = λ + λ⁻¹` and `(tr A)² = λ² + λ⁻² + 2 = 2`, since
+`λ⁻² = -λ²`. (The book writes `λ = exp(πi/4 + πiℓ/2)`, `ℓ ∈ ℤ`, so `tr A = 2cos(π/4 + πℓ/2)`;
+`(tr A)² = 2` is the same statement without the polar form.) -/
 theorem iso_trace_sq_of_pow_four (A : Mat2) (hdet : A.det = 1) (h4 : A ^ 4 = -1) :
     A.trace ^ 2 = 2 := by
-  have hd : A 0 0 * A 1 1 - A 0 1 * A 1 0 = 1 := by rw [← Matrix.det_fin_two]; exact hdet
-  have h00 : (A ^ 4) 0 0 = -1 := by rw [h4]; simp
-  have h11 : (A ^ 4) 1 1 = -1 := by rw [h4]; simp
-  simp only [pow_succ, pow_zero, one_mul, Matrix.mul_apply, Fin.sum_univ_two] at h00 h11
-  rw [Matrix.trace_fin_two]
-  set a := A 0 0
-  set b := A 0 1
-  set c := A 1 0
-  set d := A 1 1
-  have e00 : ((a + d) ^ 2 - 2) * ((a + d) * a - 1) = 0 := by
-    linear_combination h00 - (-3 * a ^ 2 - 3 * a * d - b * c - d ^ 2 + 1) * hd
-  have e11 : ((a + d) ^ 2 - 2) * ((a + d) * d - 1) = 0 := by
-    linear_combination h11 - (-a ^ 2 - 3 * a * d - b * c - 3 * d ^ 2 + 1) * hd
-  by_contra hne
-  have h2 : (a + d) ^ 2 - 2 ≠ 0 := sub_ne_zero.mpr hne
-  have ha : (a + d) * a - 1 = 0 := (mul_eq_zero.mp e00).resolve_left h2
-  have hd' : (a + d) * d - 1 = 0 := (mul_eq_zero.mp e11).resolve_left h2
-  exact hne (by linear_combination ha + hd')
+  -- an eigenvalue `μ ∈ ℂ` of `A` (the book's `λ`), with an eigenvector `v`
+  set B : Matrix (Fin 2) (Fin 2) ℂ := Complex.ofRealHom.mapMatrix A with hB
+  obtain ⟨μ, hμ⟩ := Module.End.exists_eigenvalue (Matrix.toLin' B)
+  obtain ⟨v, hv⟩ := hμ.exists_hasEigenvector
+  have hv0 : v ≠ 0 := hv.2
+  -- `μ` is a root of `μ² - (tr A)μ + det A`
+  have hchar : μ ^ 2 - (A.trace : ℂ) * μ + 1 = 0 := by
+    have hBv : B *ᵥ v = μ • v := by rw [← Matrix.toLin'_apply]; exact hv.apply_eq_smul
+    have h : (μ • (1 : Matrix (Fin 2) (Fin 2) ℂ) - B).det = 0 :=
+      Matrix.exists_mulVec_eq_zero_iff.1 ⟨v, hv0, by
+        rw [Matrix.sub_mulVec, Matrix.smul_mulVec, Matrix.one_mulVec, hBv, sub_self]⟩
+    have hdet' : (A 0 0 : ℂ) * A 1 1 - A 0 1 * A 1 0 = 1 := by
+      rw [Matrix.det_fin_two] at hdet; exact_mod_cast hdet
+    rw [Matrix.det_fin_two] at h
+    simp only [hB, RingHom.mapMatrix_apply, Matrix.sub_apply, Matrix.smul_apply, Matrix.map_apply,
+      Matrix.one_apply_eq, Matrix.one_apply_ne (by decide : (0 : Fin 2) ≠ 1),
+      Matrix.one_apply_ne (by decide : (1 : Fin 2) ≠ 0), smul_eq_mul, mul_one, mul_zero,
+      Complex.ofRealHom_eq_coe] at h
+    rw [Matrix.trace_fin_two]
+    push_cast
+    linear_combination h - hdet'
+  -- comparing eigenvalues on the two sides of `A⁴ = -I`: `μ⁴ = -1`
+  have hμ4 : μ ^ 4 = -1 := by
+    have h := hv.pow_apply 4
+    rw [← Matrix.toLin'_pow, hB, ← map_pow, h4, map_neg, map_one, map_neg, Matrix.toLin'_one,
+      LinearMap.neg_apply, LinearMap.id_apply] at h
+    have h' : (μ ^ 4 + 1) • v = 0 := by rw [add_smul, ← h, one_smul, neg_add_cancel]
+    exact eq_neg_of_add_eq_zero_left ((smul_eq_zero.1 h').resolve_right hv0)
+  -- `tr A = μ + μ⁻¹` and `μ⁻² = -μ²`
+  have hμ0 : μ ≠ 0 := by rintro rfl; norm_num at hμ4
+  have ht : (A.trace : ℂ) = μ + μ⁻¹ := by
+    field_simp
+    linear_combination -hchar
+  have h2 : ((A.trace ^ 2 : ℝ) : ℂ) = 2 := by
+    push_cast
+    rw [ht]
+    field_simp
+    linear_combination hμ4
+  exact_mod_cast h2
 
 /-- The final transversality condition picks the octagon in the family: if the trajectory from
 `q_fix(y₀)` with four switching intervals ends at `g(4 t_sw) = R`, then `y₀ = y_oct`
-(`g(4t_sw) = h⁴R⁴` with `h = g_sw R⁻¹`, so `h⁴ = R⁻³ = -I`, `(tr h)² = 2`, `tr h = 4/(1 + 3y₀²)`;
-the converse direction of Lemma 7.5.5 for `k = 1`). -/
+(`g(4t_sw) = h⁴R⁴` with `h = g_sw R⁻¹`, so `h⁴ = R⁻³ = -I`, `(tr h)² = 2` by comparing eigenvalues
+(`iso_trace_sq_of_pow_four`), and `tr h = 4/(1 + 3y₀²)`; the converse direction of Lemma 7.5.5
+for `k = 1`). The book picks the eigenvalues with `ℓ = 0, -k` by a winding-number consideration
+(TeX 6322–6326); here the other sign `tr h = -√2` is excluded because `4/(1 + 3y₀²) > 0`. -/
 theorem iso_y0_of_closing (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1)
     (h : polygonG y0 (switchTime y0) (4 * switchTime y0) = R) : y0 = y₀ 1 := by
   have hy : 0 < y0 := poly_y0_pos hy0

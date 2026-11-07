@@ -337,8 +337,9 @@ theorem iso_sectionBasis_linearIndependent :
 
 open Polynomial in
 /-- The characteristic polynomial of `iso_sectionMatrix` is reciprocal,
-`z⁴ - e₁ z³ + e₂ z² - e₁ z + 1` (the Poincaré map is symplectic); an identity of rational
-functions in `(u, L)` (checked exactly with sympy). -/
+`z⁴ - e₁ z³ + e₂ z² - e₁ z + 1`: what one expects for a symplectic map, checked here directly (the
+symplecticity of the Poincaré map is not proved); an identity of rational functions in `(u, L)`
+(checked exactly with sympy). -/
 theorem iso_sectionMatrix_charpoly (u L : ℝ) (hu : 0 < u) (hL : 3 * L * u + L + 3 * u - 3 ≠ 0) :
     (iso_sectionMatrix u L).charpoly =
       X ^ 4 - C (iso_sectionE1 u L) * X ^ 3 + C (iso_sectionE2 u L) * X ^ 2 -

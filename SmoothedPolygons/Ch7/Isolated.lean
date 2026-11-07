@@ -67,12 +67,14 @@ Write `q = (X, Λ₁, Λ_R) ∈ 𝔰𝔩₂(ℝ)³` and normalize `λ_cost = -1`
    everywhere the extremal is this flow (Grönwall). From `q_fix(y₀) = (Φ(iy₀), Λ₁(0), Λ_R(0))` it
    is the explicit lift of Theorem 7.5.1.
 2. *Transversality of switching times* (`iso_chi32_hasDerivAt`, `iso_chi32Slope_pos`,
-   `iso_chi31_hasDerivAt`, `iso_edge_slope`). The remark after Lemma 7.5.3: `χ₃₂` vanishes at `0`
-   with slope `2√3(4 - Y - Y ln(4/Y))/(3y₀²) > 0`, `Y = 1 + 3y₀²`; by the symmetry of Lemma 7.5.3,
-   `χ₃₁` vanishes at `t_sw` with the opposite slope. On the switching surface `χ₂₃ = 0` the
-   derivative of `χ₃₂` along the state–costate vector field is the same for every control on the
-   edge `[e₂, e₃]` of `U_T` (it is the Poisson bracket `{H₃, H₂}`), so near the octagon's switching
-   points no singular arc and no chattering can occur.
+   `iso_chi31_hasDerivAt`, `iso_edge_slope`). The remark after Lemma 7.5.3 states that `χ₃₂`
+   vanishes at `0` with positive derivative; the derivative is computed here from eqn:f',
+   `2√3(4 - Y - Y ln(4/Y))/(3y₀²) > 0`, `Y = 1 + 3y₀²`. By the symmetry
+   `χ₃₁(t_sw - t) = χ₃₂(t)` of the proof of Lemma 7.5.3 (TeX 6220), `χ₃₁` vanishes at `t_sw` with
+   the opposite slope. On the switching surface `χ₂₃ = 0` the derivative of `χ₃₂` along the
+   state–costate vector field is the same for every control on the edge `[e₂, e₃]` of `U_T` (it
+   is the Poisson bracket `{H₃, H₂}`), so near the octagon's switching points no singular arc and
+   no chattering can occur.
 3. *Same switching structure* (`iso_section_crossing`, `iso_return`). An extremal whose initial
    condition is near the octagon's and whose terminal time is near `t_f` is bang-bang with
    controls `e₃, e₁, e₂, e₃` (up to the shift), crosses the section `χ₂₃ = 0` near `t = 0` or near
@@ -87,29 +89,41 @@ Write `q = (X, Λ₁, Λ_R) ∈ 𝔰𝔩₂(ℝ)³` and normalize `λ_cost = -1`
    chattering).
 4. *The Poincaré map* (`iso_poincareTime`, `iso_poincareMap`, `iso_poincareMap_qFix`,
    `iso_poincareMapCoords_hasStrictFDerivAt`). `f(q) = Ad(R) q(t_sw(q), q)`, with `t_sw(q)` the
-   first positive zero of `χ₃₁` along the `e₃`-flow; by step 2 and the implicit function theorem it
-   is `C¹` near `q_oct`. Every `q_fix(y₀)`, `y₀ ∈ (1/√3, 1)`, is a fixed point (Theorem 7.5.1,
-   Lemma 7.5.3).
+   first positive zero of `χ₃₁` along the `e₃`-flow; by step 2 and the implicit function theorem,
+   near each `q_fix(y₀)` the time `t_sw(q)` is a function of `q` strictly differentiable at
+   `q_fix(y₀)`, and so is `f` (`ipc_fderiv_structure`; at `q_oct`:
+   `iso_poincareMapCoords_hasStrictFDerivAt`). Every `q_fix(y₀)`, `y₀ ∈ (1/√3, 1)`, is a fixed
+   point (Theorem 7.5.1, Lemma 7.5.3).
 5. *The direct calculation* (`iso_sectionMatrix`, `iso_sectionBasis`, `iso_fderiv_basis`,
    `iso_sectionMatrix_charpoly`, `iso_octagon_bounds`, `iso_sectionMatrix_octagon_hyperbolic`,
-   `iso_hyperbolic`). On the tangent space of the four-dimensional section `N_d` at
-   `q_fix(y₀)` the derivative of `f` has, in the basis `iso_sectionBasis`, the explicit matrix
-   `iso_sectionMatrix (y₀²) ℓ`, `ℓ = ln(4/(3y₀² + 1))`, whose characteristic polynomial is the
-   reciprocal polynomial `z⁴ - e₁z³ + e₂z² - e₁z + 1` (`f` is symplectic). For the octagon
+   `iso_hyperbolic`). On the tangent space of the four-dimensional section `N_{d_oct}` at
+   `q_oct` the derivative of `f` has, in the basis `iso_sectionBasis`, the explicit matrix
+   `iso_sectionMatrix (y₀²) ℓ`, `ℓ = ln(4/(3y₀² + 1))`, `y₀ = y_oct` (`iso_fderiv_basis`, proved
+   at `y_oct` only; the closed form in `(y₀, ℓ)` comes from a symbolic computation for all `y₀`).
+   Its characteristic polynomial is the reciprocal polynomial `z⁴ - e₁z³ + e₂z² - e₁z + 1`
+   (`iso_sectionMatrix_charpoly`, an identity in `(u, ℓ)`): what one expects for a symplectic
+   map, checked here directly (symplecticity of `f` is not proved). For the octagon
    (`Y = 2√2`, `ℓ = ln 2/2`) the multipliers are `-7.74641, -2.11221, -0.47344, -0.12909`; with
    `w = z + 1/z` the polynomial becomes `z² p(w)`, `p(w) = w² - e₁w + e₂ - 2`, and `p > 0` on
    `[-2, 2]` because `-e₁ > 4` and `p(-2) = 2 + 2e₁ + e₂ > 0`; these two inequalities reduce to
    `(4√2 + 1) ln 2 + 50 - 38√2 > 0` and `10 ln 2 + 52 - 42√2 < 0` (`iso_octagon_bounds`, proved).
    So no multiplier has modulus `1`: the fixed point is hyperbolic.
-6. *Implicit function theorem* (`iso_fixedPoints`). On the five-dimensional manifold
-   `N = ⋃_d N_d`, `f⁴ - id` has at `q_oct` a derivative of rank four (it is `A⁴ - I` on
-   `T N_{d_oct}`, invertible by step 5); its kernel is spanned by the tangent of the family
-   `y₀ ↦ q_fix(y₀)`. So near `q_oct` the fixed points of `f⁴` on the section are exactly the
-   `q_fix(y₀)` (Mathlib: `HasStrictFDerivAt.implicitFunctionOfProdDomain` in coordinates
-   `(d, ξ)`, or the inverse function theorem).
+6. *The fixed points of `f⁴` near `q_oct`* (`iso_fixedPoints`). The book: "By the implicit
+   function theorem, for each `d` near `d_oct`, the function `f_d⁴ - I` can be inverted in an open
+   neighborhood of the fixed point `q_fix(d)`" (TeX 6616–6618), with `q_fix(d) = q_fix(y₀(d))` and
+   `y₀(d)` the inverse of `y₀ ↦ d(y₀) = det Λ₁(q_fix(y₀))` (TeX 6581, Remark 7.5.2). Here the
+   inverse function theorem is applied once, at `q_oct`, to
+   `Ψ = (section constraints, f⁴ - id) : ℝ⁹ → ℝ⁵ × ℝ⁹`, whose constraints include `d = det Λ₁`:
+   its derivative `w ↦ (Dc w, (A⁴ - I)w)` is injective, since `A⁴ - I` is invertible on
+   `T N_{d_oct}` by step 5, so `Ψ` is injective near `q_oct`. By Remark 7.5.2 (`remark7_5_2`: `d`
+   is strictly increasing with range `(0, 9/4)`), `y₀(d)` exists for `d` near `d_oct` and is near
+   `y_oct`; a fixed point `q` of `f⁴` on the section near `q_oct` with `det Λ₁(q) = d` has the same
+   image under `Ψ` as `q_fix(y₀(d))`, so `q = q_fix(y₀(d))` (departure from the paper: see the
+   gaps below).
 7. *Final transversality* (`iso_trace_sq_of_pow_four`, `iso_y0_of_closing`). For the extremal
    from `q_fix(y₀)` with four switching intervals, `g(t_f) = (g_sw R⁻¹)⁴ R⁴`, so `g(t_f) = R` means
-   `(g_sw R⁻¹)⁴ = -I`, hence `(tr(g_sw R⁻¹))² = 2`, `4/(1 + 3y₀²) = √2` and `y₀ = y_oct` (proved).
+   `(g_sw R⁻¹)⁴ = -I`, hence `(tr(g_sw R⁻¹))² = 2` by comparing eigenvalues as in the proof of
+   Lemma 7.5.5 (an eigenvalue `λ` has `λ⁴ = -1`), `4/(1 + 3y₀²) = √2` and `y₀ = y_oct` (proved).
    This is eqn:theta-k for `k = 1`, used in the converse direction of Lemma 7.5.5.
 
 ## Gaps of the book's sketch
@@ -124,27 +138,41 @@ Write `q = (X, Λ₁, Λ_R) ∈ 𝔰𝔩₂(ℝ)³` and normalize `λ_cost = -1`
   chattering at the switching points (step 2: the slope of `χ₃₂` on the switching surface does
   not depend on the control on the edge), and a continuous-dependence argument for the
   discontinuous extremal dynamics (step 3).
-* The remark after Lemma 7.5.3 gives the slope only for `χ₃₂` at `0`; the Poincaré time needs
-  the slope of `χ₃₁` at `t_sw`, which follows by the symmetry `χ₃₁(t_sw - t) = χ₃₂(t)`.
+* The remark after Lemma 7.5.3 asserts only that the derivative of `χ₃₂` at `0` is positive (its
+  value is computed in step 2 from eqn:f'); the Poincaré time needs the transversal zero of `χ₃₁`
+  at `t_sw`, which follows by the symmetry `χ₃₁(t_sw - t) = χ₃₂(t)` of the proof of Lemma 7.5.3
+  (TeX 6220).
+* The proof defines the switching functions by `χ_ij = ⟨Λ_R, P_i - P_j⟩` (TeX 6573), the opposite
+  sign of eqn:switch (TeX 6072–6078: `χ_ij = ⟨Λ_R, P_{i,j} - P_{i,i}⟩`, i.e. `⟨Λ_R, P_j - P_i⟩`),
+  which the formalization uses (`switchingFn`). This is harmless: the proof only uses the zero
+  set `χ_ij = 0` (the section `χ₂₃ = 0`, the switching times).
 * "Direct calculation shows that the fixed point `q_oct` is hyperbolic" is not given; step 5
   supplies it, with the Jacobian in closed form.
-* The book applies the inverse function theorem to `f_d⁴ - I` for each `d` separately; the
-  neighborhoods must be uniform in `d`, which the implicit function theorem with parameter `d`
-  (step 6) provides. The book's `y₀(d)` uses the monotonicity of `d(y₀)` (Remark 7.5.2, not proved
-  in the book); step 6 does not need it (hyperbolicity forces `d'(y_oct) ≠ 0`).
+* Departure from the paper (step 6): the book applies the implicit function theorem to
+  `f_d⁴ − I` for each `d` separately, after asserting that `q_fix(d)` stays hyperbolic for nearby
+  `d` (TeX 6615); the uniqueness "thus the only fixed points near `q_oct` are the `q_fix(d)`"
+  needs neighbourhoods uniform in `d`, which this does not give. The formal proof applies the
+  inverse function theorem once, at `q_oct`, to `(section constraints, f⁴ − id)`, whose
+  constraints include `d`; this gives the uniformity, and the hyperbolicity of `q_fix(d)` for
+  `d ≠ d_oct` is not needed. The parameter `y₀(d)` is obtained, as in the book, from Remark 7.5.2
+  (monotonicity and range of `d(y₀)`, `remark7_5_2`).
 * "The only fixed point `q_fix(d)` satisfying (eqn:theta-k) is `q_oct`" uses Lemma 7.5.5 in the
-  converse direction (`g(t_f) = R` implies the trace condition), which step 7 proves.
+  converse direction (`g(t_f) = R` implies the trace condition); its proof (TeX 6303–6332)
+  compares eigenvalues, which step 7 follows for `k = 1`.
 
 ## The direct calculation in closed form
 
 With `u = y₀²`, `Y = 1 + 3u`, `ℓ = ln(4/Y)` and `D = Yℓ + Y - 4 < 0`, the coefficients of the
-characteristic polynomial of the section map at `q_fix(y₀)` are
+characteristic polynomial of `iso_sectionMatrix u ℓ` (the matrix of the section map at
+`q_fix(y₀)` by the symbolic computation; proved to be that matrix at `y_oct` only) are
 `e₁ = 8(ℓY(2Y - 3) + (Y - 4)(Y² - 3Y + 1))/(Y²D)` and
 `e₂ = -2(ℓ(Y⁴ + 16Y³ - 72Y² + 64) + 9Y⁴ - 60Y³ + 40Y² + 304Y - 320)/(Y³D)`, with
 `χ(-1) = 32(ℓ(3Y² - 4) + 4Y² - 21Y + 20)/(Y³D)`; for the octagon `e₁ ≈ -10.46115`,
 `e₂ ≈ 22.36330`, `χ(-1) ≈ 3.44100`, `χ(1) ≈ 45.28561`. The slope of `χ₃₁` at `t_sw` is
 `2√3 D/(3u) = -iso_chi32Slope y₀`. These were obtained by differentiating the closed-form flow
-symbolically and are exact identities in `(y₀, ℓ)` (`ℓ` treated as an independent symbol).
+symbolically and are exact identities in `(y₀, ℓ)` (`ℓ` treated as an independent symbol); in
+Lean, `e₁`, `e₂` are proved for `iso_sectionMatrix` for all `(u, ℓ)`
+(`iso_sectionMatrix_charpoly`) and the slope of `χ₃₁` for all `y₀` (`iso_chi31_hasDerivAt`).
 
 What is proved in this file: `theorem7_7_1` (the assembly) and `theorem7_7_1_octagon`
 (non-vacuity). The assembly follows the plan (section *Assembly* below) and fills in two points
