@@ -80,6 +80,8 @@ import all SmoothedPolygons.Ch6.MatrixExtremal
 import all SmoothedPolygons.Ch6.MatrixMinimizer
 import all SmoothedPolygons.Ch6.MatrixSystem
 import all SmoothedPolygons.Ch6.PeriodicExtension
+import all SmoothedPolygons.Ch6.WdBoundaryParam
+import all SmoothedPolygons.Ch6.WdTrajectory
 import all SmoothedPolygons.Ch6.Winding
 import all SmoothedPolygons.Ch6.WorstDisk
 import all SmoothedPolygons.Ch7.ConstantControl

@@ -48,6 +48,8 @@ public import SmoothedPolygons.Ch6.MatrixExtremal
 public import SmoothedPolygons.Ch6.MatrixMinimizer
 public import SmoothedPolygons.Ch6.MatrixSystem
 public import SmoothedPolygons.Ch6.PeriodicExtension
+public import SmoothedPolygons.Ch6.WdBoundaryParam
+public import SmoothedPolygons.Ch6.WdTrajectory
 public import SmoothedPolygons.Ch6.Winding
 public import SmoothedPolygons.Ch6.WorstDisk
 public import SmoothedPolygons.Ch7.ConstantControl
