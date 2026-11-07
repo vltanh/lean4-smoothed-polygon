@@ -15,6 +15,12 @@ name = "mathlib"
 scope = "leanprover-community"
 rev = "v4.36.0-rc2"
 
+# Development only: the coordinator switches to the published repository at a pinned commit
+# (git = "https://github.com/vltanh/lean4-optimal-control", rev = "<full commit hash>").
+[[require]]
+name = "OptimalControl"
+path = "../lean4-optimal-control"
+
 [[lean_lib]]
 name = "Basic"
 globs = ["Basic.+"]

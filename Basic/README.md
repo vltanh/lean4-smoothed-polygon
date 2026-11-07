@@ -19,5 +19,13 @@ field as Mathlib files it. Nothing here imports [`External`](../External) or [`S
 | `Analysis/Convex/TietzeNakajima.lean` | a closed connected locally convex subset of the plane is convex | Mathlib (`Mathlib/Analysis/Convex/`) |
 | `Analysis/Convex/BoundaryArc.lean` | the boundary curve of a convex body with `0` inside: the radial projection `x ↦ x / g_K(x)` (gauge) onto the boundary, arcs between boundary points (boundary points in the cone of their ends) and the intermediate value theorem on arcs; chords (the part of `K` beyond a chord lies in the cone of its ends); a segment through a boundary point lies on the boundary, a line meets the boundary twice unless it contains a boundary segment; in the plane, an arc without extreme inner points is a segment (Krein–Milman) | Mathlib (`Mathlib/Analysis/Convex/`) |
 | `Analysis/Convex/LatticePacking.lean` | a centrally symmetric convex body free of half-lattice points lies in a maximal one, which is cut out by at most three strips (a parallelogram or a hexagon); a packed convex body has area at most the covolume (Blichfeldt) | Mathlib (`Mathlib/Algebra/Module/ZLattice/`) |
-| `Analysis/ODE/ControlSystem.lean` | control systems `x' = F(x, u)`, `u ∈ U` compact, with Carathéodory trajectories: Filippov's theorem (convex velocity sets: the attainable sets at time `T` and up to time `T` are compact), existence of optimal controls for integral costs (fixed and free terminal time) via the extended system; FTC for Lipschitz curves (`∫ f' = f b - f a`) | Mathlib (`Mathlib/Analysis/ODE/`) |
-| `MeasureTheory/MeasurableSelection.lean` | measurable selection of zeros of Carathéodory functions on a compact set (Kuratowski–Ryll-Nardzewski construction; Filippov's lemma); measurability of `{t \| ∃ w ∈ C, g t w = 0}` for compact `C` | Mathlib (`Mathlib/MeasureTheory/`) |
+
+The general theory of control systems moved to the OptimalControl package
+(`../lean4-optimal-control`, to be published as `https://github.com/vltanh/lean4-optimal-control`),
+which the project requires: control systems with Carathéodory trajectories, Filippov's
+compactness theorem and the existence of optimal controls (formerly
+`Analysis/ODE/ControlSystem.lean`), measurable selection (formerly
+`MeasureTheory/MeasurableSelection.lean`), Lebesgue points, Carathéodory theory, flows and needle
+variations (formerly `Analysis/ODE/Control/`), and supporting cones and Agrachev–Sachkov's Lemma
+12.1 (formerly `Analysis/Convex/Cone/`), together with the maximum principle (formerly
+`External/Pontryagin/`).

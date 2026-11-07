@@ -158,8 +158,8 @@ Filippov's theorem is proved by the standard argument: the trajectories are equi
 limit is extracted by Tychonoff's theorem (pointwise convergence suffices, so Arzelà–Ascoli is not
 needed), its velocities lie in the closed convex velocity sets (by closed thickenings of them), a
 control realizing them is chosen measurably (a Kuratowski–Ryll-Nardzewski selection, proved in
-[`Basic/MeasureTheory/MeasurableSelection.lean`](Basic/MeasureTheory/MeasurableSelection.lean); Mathlib has none), and optimal controls come from the
-system extended by the cost ([`Basic/Analysis/ODE/ControlSystem.lean`](Basic/Analysis/ODE/ControlSystem.lean)). Agrachev and Sachkov's text
+`OptimalControl.MeasureTheory.MeasurableSelection`, in the OptimalControl package; Mathlib has none), and optimal controls come from the
+system extended by the cost (`OptimalControl.ODE.ControlSystem`). Agrachev and Sachkov's text
 was not available to us, so the proof was not compared with theirs; the statement is the book's,
 with the source's standing smoothness assumptions on `f` (Section 5) and the correction of E35.
 
@@ -1080,7 +1080,7 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
 - **Filippov's theorem** needs no smoothness of `f` in `q`: continuity, bounded velocities and the
   convexity hypotheses suffice, so the standing assumptions `hfq`, `hfq'` that the statement keeps
   from the source (Section 5) could be dropped, and the theorem holds for any finite-dimensional
-  state space ([`Basic/Analysis/ODE/ControlSystem.lean`](Basic/Analysis/ODE/ControlSystem.lean) is stated so).
+  state space (`OptimalControl.ODE.ControlSystem`, in the OptimalControl package, is stated so).
 - **Toward the main theorem.** Chapters 8–16 need the Pontryagin maximum principle (or at least the
   existence of an extremal lift of a minimizer), Filippov's theorem on the compactified state space
   of Chapter 5 (it is proved here on `ℝⁿ`), the stable manifold theorem,

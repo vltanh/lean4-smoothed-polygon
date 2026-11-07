@@ -3,7 +3,7 @@ module
 public import SmoothedPolygons.Ch6.IwasawaChart
 public import SmoothedPolygons.Ch3.ControlProblem
 public import SmoothedPolygons.Ch4.StarDomain
-public import External.Pontryagin.Defs
+public import OptimalControl.Pontryagin.Defs
 
 /-!
 # The Reinhardt problem in the global chart `ℝ³ × 𝔥*`
@@ -43,7 +43,7 @@ which is the condition of `IsPontryaginExtremal`.
 
 namespace SmoothedPolygons
 
-open Set MeasureTheory Filter Topology External.Pontryagin ControlSystem
+open Set MeasureTheory Filter Topology Pontryagin ControlSystem
 
 /-- The state space `ℝ³ × ℝ²` of the lifted problem: Iwasawa coordinates `p = (s, r, θ)` of `g`
 and the point `z = (x, y)` of the upper half-plane with `X = Φ(x + iy)`. -/

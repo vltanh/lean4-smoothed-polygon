@@ -195,7 +195,7 @@ Lean `v4.36.0-rc2`, Mathlib `v4.36.0-rc2`.
 
 | Path | Content |
 | --- | --- |
-| [`Basic/`](Basic) | general mathematics, for Mathlib: matrix calculus and ODEs, generalized circles under `SL₂(ℝ)`, areas and convexity of star-shaped regions, Dowker's theorem, hexagon lattice tilings, polygon angles, Fejes Tóth's cell lemma, the Tietze–Nakajima theorem, critical lattices, lattice-packed bodies, control systems and Filippov's compactness theorem, measurable selection ([Basic/README.md](Basic/README.md)) |
+| [`Basic/`](Basic) | general mathematics, for Mathlib: matrix calculus and ODEs, generalized circles under `SL₂(ℝ)`, areas and convexity of star-shaped regions, Dowker's theorem, hexagon lattice tilings, polygon angles, Fejes Tóth's cell lemma, the Tietze–Nakajima theorem, critical lattices, lattice-packed bodies ([Basic/README.md](Basic/README.md)); control systems, Filippov's compactness theorem, measurable selection and the maximum principle moved to the OptimalControl package (`../lean4-optimal-control`) |
 | [`External/`](External) | cited results, proved: Fejes Tóth, Gruber, Minkowski–Mahler, Mahler 1947 (Theorem 2; Lemma 3, with the lemmas of Mahler's *On irreducible convex domains* and Theorems B–E of Mahler 1946 that prove it), Euler–Arnold, Filippov ([External/README.md](External/README.md)) |
 | [`SmoothedPolygons/Defs.lean`](SmoothedPolygons/Defs.lean) | the definitions that the Challenge uses |
 | [`SmoothedPolygons/Ch2/`](SmoothedPolygons/Ch2) | Chapter 2: packing densities and Fejes Tóth's theorem (§2.1), Reinhardt's lemmas and the minimizer (§2.2), critical lattices and hexagons (§2.3), the boundary of the minimizer and balanced disks (§2.4), the density of balanced disks, the refutation of the printed Lemma 2.2.1 |

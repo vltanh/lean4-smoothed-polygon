@@ -1,6 +1,6 @@
 module
 
-public import Basic.Analysis.ODE.ControlSystem
+public import OptimalControl.ODE.ControlSystem
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import Mathlib.Analysis.Convex.Basic
 public import Mathlib.Analysis.Calculus.ContDiff.Defs
@@ -62,8 +62,8 @@ control, which is a measurable function).
 
 ## Proof
 
-The general theory is in `Basic/Analysis/ODE/ControlSystem.lean` (for a control system on a
-finite-dimensional space): Filippov's compactness theorem
+The general theory is in `OptimalControl.ODE.ControlSystem` of the OptimalControl package (for a
+control system on a finite-dimensional space): Filippov's compactness theorem
 (`ControlSystem.isCompact_reachableSet`, `ControlSystem.isCompact_reachableSetLE`) and the existence
 of optimal controls through the system extended by the cost coordinate
 (`ControlSystem.exists_optimal_fixedTime`, `ControlSystem.exists_optimal_freeTime`). The compact
@@ -71,7 +71,7 @@ support of `f` bounds the velocities. The proof is the standard one: a sequence 
 trajectories with endpoints converging has a limit trajectory, which is Lipschitz, has its velocity
 in the convex set `f(q, U)` almost everywhere, and is driven by a measurable control obtained by a
 measurable selection (Filippov's lemma, `MeasureTheory.exists_measurable_forall_mem_ae_eq_zero` in
-`Basic/MeasureTheory/MeasurableSelection.lean`). The limit is extracted by Tychonoff's theorem
+`OptimalControl.MeasureTheory.MeasurableSelection`). The limit is extracted by Tychonoff's theorem
 (pointwise convergence along a filter finer than `atTop`) rather than Arzelà–Ascoli; since the
 trajectories are equi-Lipschitz, pointwise convergence is all the argument needs.
 

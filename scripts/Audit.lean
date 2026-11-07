@@ -21,23 +21,12 @@ import all Basic.Analysis.Convex.CellDecomposition.PolygonOfFrontier
 import all Basic.Analysis.Convex.CellDecomposition.PolygonSides
 import all Basic.Analysis.Convex.CellDecomposition.SideCount
 import all Basic.Analysis.Convex.CircumscribedPolygon
-import all Basic.Analysis.Convex.Cone.Openness
-import all Basic.Analysis.Convex.Cone.Support
 import all Basic.Analysis.Convex.HexagonLattice
 import all Basic.Analysis.Convex.LatticePacking
 import all Basic.Analysis.Convex.PolygonAngle
 import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.StarCurveConvex
 import all Basic.Analysis.Convex.TietzeNakajima
-import all Basic.Analysis.ODE.Control.Caratheodory
-import all Basic.Analysis.ODE.Control.FlowDerivative
-import all Basic.Analysis.ODE.Control.LinearCaratheodory
-import all Basic.Analysis.ODE.Control.NeedleVariation
-import all Basic.Analysis.ODE.Control.TimeChange
-import all Basic.Analysis.ODE.Control.VariationsFormula
-import all Basic.Analysis.ODE.ControlSystem
-import all Basic.MeasureTheory.LebesguePoints
-import all Basic.MeasureTheory.MeasurableSelection
 import all External.EulerArnold
 import all External.FejesToth
 import all External.Filippov
@@ -48,11 +37,7 @@ import all External.Mahler1947
 import all External.MahlerIrreducible
 import all External.MahlerIrreducible.Lemma3
 import all External.MinkowskiMahler
-import all External.Pontryagin.Defs
-import all External.Pontryagin.FreeTime
-import all External.Pontryagin.Geometric
-import all External.Pontryagin.MaximumPrinciple
-import all External.Pontryagin.OptimalControl
+import all External.Pontryagin
 import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.MatrixIdentities
 import all SmoothedPolygons.AppA.Riemannian
@@ -108,6 +93,8 @@ import all SmoothedPolygons.Ch7.SmoothedPolygonDisk
 import all SmoothedPolygons.Ch7.StrongTransversality
 import all SmoothedPolygons.Defs
 import all Solution
+-- The OptimalControl package needs no `import all`: the traversal stays inside the libraries,
+-- and `collectAxioms` sees the axioms of the package's proofs (its `sorry`s too) without it.
 
 /-!
 # Axiom and dependency audit

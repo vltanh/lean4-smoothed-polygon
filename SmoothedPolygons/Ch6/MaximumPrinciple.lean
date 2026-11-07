@@ -2,7 +2,7 @@ module
 
 public import SmoothedPolygons.Ch6.LiftedSystem
 public import SmoothedPolygons.Ch6.HalfPlane
-public import External.Pontryagin.MaximumPrinciple
+public import External.Pontryagin
 
 /-!
 # The maximum principle for the Reinhardt problem (§6.2, §6.6)
@@ -45,7 +45,7 @@ are read through the chart and the compact `U_T`.
 
 namespace SmoothedPolygons
 
-open Set MeasureTheory Filter Topology External.Pontryagin ControlSystem
+open Set MeasureTheory Filter Topology Pontryagin ControlSystem
 
 /-- **Translation of the costate.** Let `(u, g, X)` be admissible for the Reinhardt problem, `q`
 its lift to `ℝ³ × 𝔥*` (`π(q(t).1) = g(t)`, `Φ(q(t).2) = X(t)`, `q(0).1 = 0`), and `(ν, p)` a

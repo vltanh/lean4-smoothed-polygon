@@ -5,11 +5,7 @@ public import Basic.Analysis.Convex.LatticePacking
 public import External.MahlerIrreducible
 public import External.MahlerIrreducible.Lemma3
 public import External.Filippov
-public import External.Pontryagin.Defs
-public import External.Pontryagin.FreeTime
-public import External.Pontryagin.Geometric
-public import External.Pontryagin.MaximumPrinciple
-public import External.Pontryagin.OptimalControl
+public import External.Pontryagin
 public import SmoothedPolygons.AppA.FunctionalDerivative
 public import SmoothedPolygons.AppA.MatrixIdentities
 public import SmoothedPolygons.AppA.Riemannian
