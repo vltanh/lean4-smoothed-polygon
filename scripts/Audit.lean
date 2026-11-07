@@ -11,6 +11,7 @@ import all Basic.Analysis.Calculus.MatrixEntrywise
 import all Basic.Analysis.Calculus.MatrixEntrywiseExp
 import all Basic.Analysis.Calculus.MatrixFTC
 import all Basic.Analysis.Complex.UpperHalfPlane.GeneralizedCircle
+import all Basic.Analysis.Convex.BoundaryArc
 import all Basic.Analysis.Convex.CellDecomposition
 import all Basic.Analysis.Convex.CellDecomposition.Defs
 import all Basic.Analysis.Convex.CellDecomposition.HoleStructure
