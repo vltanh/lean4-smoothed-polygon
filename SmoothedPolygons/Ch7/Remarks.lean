@@ -199,9 +199,14 @@ Reading: "monotonic increasing" is strict monotonicity (`StrictMonoOn`), which i
 sentence (`d` determines `y₀`, `Set.InjOn`) needs; the remark is about the lift normalized by
 `λ_cost = -1` (for the lift `c (Λ₁, Λ_R, -1)` the determinant is `c² d(y₀)`).
 
-Proof of monotonicity and range (the book: "the derivative factors in a nice way"):
-`d'(y) = E(y) F(y)/(36 y⁹)` with `E = 3 + 6y² - (1 + 3y²) ℓ` and
-`F = 2ℓ(3y⁴ - 1) + 9y⁶ - 9y⁴ - 6y² + 6` (`sm_hasDerivAt_detConstOfMotion`). On `(1/√3, 1)`,
+Proof of monotonicity and range. The printed book gives no proof of the remark. The hint "the
+derivative factors in a nice way" is not printed text: it is a comment of the TeX source
+(TeX 6199–6201, a `DONE` note: "The derivative factors in a nice way. Check it is indeed monotonic,
+remove the word appears."). The proof follows that hint; the positivity of the factors, which the
+comment does not address, is proved by the logarithm bounds `ln x ≤ x - 1` and
+`ln x ≥ 2(x - 1)/(x + 1)` (`x ≥ 1`). In detail: `d'(y) = E(y) F(y)/(36 y⁹)` with
+`E = 3 + 6y² - (1 + 3y²) ℓ` and `F = 2ℓ(3y⁴ - 1) + 9y⁶ - 9y⁴ - 6y² + 6`
+(`sm_hasDerivAt_detConstOfMotion`). On `(1/√3, 1)`,
 `E > 0` (by `ℓ ≤ x - 1`) and `F > 0` (`F` has a double zero at `y = 1`; with `s = y²` it is
 bounded below using `ℓ ≥ 2(x - 1)/(x + 1)` when `3s² ≥ 1` and `ℓ ≤ x - 1` when `3s² < 1`,
 `x = 4/(3s + 1)`), so `d` is strictly increasing on `[1/√3, 1]`; `d(1/√3) = 0`, `d(1) = 9/4`, and
@@ -1693,7 +1698,10 @@ The claims: (1) its cost, the area of §3.2, tends to `√12`; (2) its six arcs
 rectangle (image of `[-a, a] × [-b, b]` under a Euclidean motion) of area `4ab = √12`. (The
 rectangle is `[-1, 1] × [-√3/2, √3/2]`, by the figure; the statement only asserts a rectangle, as
 the remark does. Hausdorff convergence does not depend on the metric of `ℝ²`, Mathlib's being the
-sup metric.) The trajectories are quantified universally; they exist and are unique.
+sup metric.) The trajectories are quantified universally. They exist, so the statement is not
+vacuous: `remark7_6_4_exists` shows that for every `k > 1` the closing condition has the solution
+`y₀(k) > 1` and the explicit `(6k - 2)`-spline satisfies the hypotheses `hgX`. They are unique on
+`[0, t_f(k)]` for `k ∈ (1, 4/3)` (`sm_minus_unique`), which is all the limit uses.
 
 Proof (the book gives none; the remark reports a numerical figure). For `k ∈ (1, 4/3)` the
 terminal time `(3k - 1) t_sw` lies in `(2t_sw, 3t_sw)`, and the trajectory is the spline: the
@@ -1723,5 +1731,182 @@ theorem remark7_6_4 (g X : ℝ → ℝ → Mat2)
     one_pos, by positivity, by rw [poly_sqrt12]; ring, ?_⟩
   rw [sm_frontier_rect]
   exact sm_hausdorff_tendsto g X hgX
+
+/-! ### Existence of the trajectories of Remark 7.6.4
+
+For every real `k > 1` the hypotheses of `remark7_6_4` are met by the explicit spline of
+Remark 7.6.2: `X = Rⁱ X(z₀, t - i t_sw) R⁻ⁱ` and `g = (g_sw R)ⁱ g₀(z₀, t - i t_sw) R⁻ⁱ` on the
+`i`-th switching interval, assembled from the closed-form `e₂`-arc (`sm_mX_eq`, `sm_mG_eq`) by
+`poly_pw`, as `poly_isStateTrajectory` does for the `(6k + 2)`-gons with `R⁻¹` in place of `R`. -/
+
+/-- `R Z_{e_m} R⁻¹ = Z_{e_{m+2}}` (indices mod 3). -/
+private lemma smx_R_conj_vertex (m : Fin 3) :
+    R * controlMatrix (vertex m) * R⁻¹ = controlMatrix (vertex (m + 2)) := by
+  have h := poly_Rinv_conj_vertex (m + 2)
+  rw [show m + 2 + 1 = m by fin_cases m <;> rfl] at h
+  rw [← h, show R * (R⁻¹ * controlMatrix (vertex (m + 2)) * R) * R⁻¹ =
+    (R * R⁻¹) * controlMatrix (vertex (m + 2)) * (R * R⁻¹) by simp only [Matrix.mul_assoc],
+    poly_R_mul_inv, Matrix.one_mul, Matrix.mul_one]
+
+/-- `Rⁱ Z_{e₂} R⁻ⁱ = Z_{e_{(1 + 2i) mod 3}}`, the control of `minusPolygonControlAt` on the `i`-th
+switching interval. -/
+private lemma smx_conj_pow_vertex (i : ℕ) :
+    R ^ i * controlMatrix (vertex 1) * R⁻¹ ^ i =
+      controlMatrix (vertex ⟨(1 + 2 * i) % 3, Nat.mod_lt _ (by norm_num)⟩) := by
+  induction i with
+  | zero => simp
+  | succ i ih =>
+    rw [pow_succ', pow_succ, show R * R ^ i * controlMatrix (vertex 1) * (R⁻¹ ^ i * R⁻¹) =
+      R * (R ^ i * controlMatrix (vertex 1) * R⁻¹ ^ i) * R⁻¹ by simp only [Matrix.mul_assoc],
+      ih, smx_R_conj_vertex]
+    congr 2
+    ext
+    simp only [Fin.val_add]
+    simp
+    omega
+
+/-- The bracket `[P, X]` of the state equation is equivariant under conjugation by `Rⁱ`. -/
+private lemma smx_conj_pow_rhs (i : ℕ) (S : Mat2) :
+    R ^ i * (controlP (vertex 1) S * S - S * controlP (vertex 1) S) * R⁻¹ ^ i =
+      controlP (vertex ⟨(1 + 2 * i) % 3, Nat.mod_lt _ (by norm_num)⟩) (R ^ i * S * R⁻¹ ^ i) *
+          (R ^ i * S * R⁻¹ ^ i) -
+        (R ^ i * S * R⁻¹ ^ i) *
+          controlP (vertex ⟨(1 + 2 * i) % 3, Nat.mod_lt _ (by norm_num)⟩)
+            (R ^ i * S * R⁻¹ ^ i) := by
+  rw [poly_conj_bracket (poly_Rinvpow_mul_Rpow i),
+    poly_controlP_conj (poly_Rinvpow_mul_Rpow i) (smx_conj_pow_vertex i)]
+
+/-- The star states are invariant under conjugation by `R` (`ρ_R_conj` permutes the `ρᵢ`). -/
+private lemma smx_isStarState_R_conj {S : Mat2} (hS : IsStarState S) :
+    IsStarState (R * S * R⁻¹) := by
+  obtain ⟨htr, hdet, h0, h1, h2⟩ := hS
+  have hρ := ρ_R_conj S htr
+  exact ⟨by rw [poly_trace_conj poly_inv_mul_R, htr], by rw [poly_det_conj poly_inv_mul_R, hdet],
+    hρ.1 ▸ h2, hρ.2.1 ▸ h0, hρ.2.2 ▸ h1⟩
+
+private lemma smx_isStarState_conj_pow (i : ℕ) {S : Mat2} (hS : IsStarState S) :
+    IsStarState (R ^ i * S * R⁻¹ ^ i) := by
+  induction i with
+  | zero => simpa using hS
+  | succ i ih =>
+    rw [pow_succ', pow_succ, show R * R ^ i * S * (R⁻¹ ^ i * R⁻¹) =
+      R * (R ^ i * S * R⁻¹ ^ i) * R⁻¹ by simp only [Matrix.mul_assoc]]
+    exact smx_isStarState_R_conj ih
+
+/-- On `[0, t_sw]` the `e₂`-arc stays in the star domain: with `W ∈ [q, 1]`, `q = 4/(3y₀² + 1)`,
+`x = (1 - W)/√3 ∈ (-1/√3, 1/√3)` and `x² + y² - 1/3 = W((1/3 + y₀²)W - 2/3) > 0`. -/
+private lemma smx_mX_star {y0 : ℝ} (hy : 1 < y0) {t : ℝ}
+    (ht : t ∈ Set.Icc 0 (minusSwitchTime y0)) : IsStarState (sm_mX y0 t) := by
+  have h3 : (0 : ℝ) < √3 := by positivity
+  have hy0 : 0 < y0 := by linarith
+  obtain ⟨hWq, hW1⟩ := sm_W_mem hy ht
+  rw [sm_mX_eq y0 t hy0, theorem4_4_1 _ _ (by positivity)]
+  generalize Real.exp (-(√3 * y0 * t)) = W at hWq hW1
+  have hq : 0 < 4 / (3 * y0 ^ 2 + 1) := by positivity
+  have hW0 : 0 < W := hq.trans_le hWq
+  have hWy : 4 ≤ (3 * y0 ^ 2 + 1) * W := by rwa [div_le_iff₀' (by positivity)] at hWq
+  refine ⟨by positivity, ?_, ?_, ?_⟩ <;> dsimp only
+  · rw [show -(1 / √3) = (-1) / √3 by ring, div_lt_div_iff_of_pos_right h3]; linarith
+  · rw [div_lt_div_iff_of_pos_right h3]; linarith
+  · rw [div_pow, str_sqrt3_sq]
+    nlinarith [mul_le_mul_of_nonneg_left hWy hW0.le]
+
+/-- `det g₀(z₀, t) = 1`. -/
+private lemma smx_mG_det {y0 : ℝ} (hy0 : 0 < y0) (t : ℝ) : (sm_mG y0 t).det = 1 := by
+  have h3 : (0 : ℝ) < √3 := by positivity
+  have hW := Real.exp_pos (-(√3 * y0 * t))
+  rw [sm_mG_eq y0 t hy0, Matrix.det_fin_two_of]
+  generalize Real.exp (-(√3 * y0 * t)) = W at hW ⊢
+  field_simp
+  ring_nf
+  simp only [str_sqrt3_sq]
+  ring
+
+private lemma smx_measurable (τ : ℝ) : Measurable (minusPolygonControlAt τ) := by
+  change Measurable ((fun n : ℕ ↦
+      (Pi.single (⟨(1 + 2 * n) % 3, Nat.mod_lt _ (by norm_num)⟩ : Fin 3) 1 : Fin 3 → ℝ)) ∘
+    fun t : ℝ ↦ ⌊t / τ⌋₊)
+  exact measurable_from_nat.comp (Nat.measurable_floor.comp (measurable_id.div_const τ))
+
+/-- An integral curve on `[0, T']` is one on `[0, T]` for `0 ≤ T ≤ T'`. -/
+private lemma smx_isIntegralCurve_mono {f v : ℝ → Mat2} {T T' : ℝ} (h : IsIntegralCurve f v T')
+    (hT : 0 ≤ T) (hTT' : T ≤ T') : IsIntegralCurve f v T := fun i j ↦
+  ⟨(h i j).1.mono_set (by
+      rw [Set.uIcc_of_le hT, Set.uIcc_of_le (hT.trans hTT')]
+      exact Set.Icc_subset_Icc_right hTT'),
+    fun t ht ↦ (h i j).2 t ⟨ht.1, ht.2.trans hTT'⟩⟩
+
+private lemma smx_Rinvpow_cancel (i : ℕ) (Y : Mat2) : R⁻¹ ^ i * (R ^ i * Y) = Y := by
+  rw [← Matrix.mul_assoc, poly_Rinvpow_mul_Rpow, Matrix.one_mul]
+
+/-- `X` of the `(6k - 2)`-spline: `Rⁱ X(z₀, t - i t_sw) R⁻ⁱ` on the `i`-th switching interval. -/
+private noncomputable def smx_X (y0 : ℝ) : ℝ → Mat2 :=
+  poly_pw R R⁻¹ (minusSwitchTime y0) (sm_mX y0)
+
+/-- `g` of the `(6k - 2)`-spline: `(g_sw R)ⁱ g₀(z₀, t - i t_sw) R⁻ⁱ` on the `i`-th switching
+interval. -/
+private noncomputable def smx_G (y0 : ℝ) : ℝ → Mat2 :=
+  poly_pw (sm_mG y0 (minusSwitchTime y0) * R) R⁻¹ (minusSwitchTime y0) (sm_mG y0)
+
+/-- The `(6k - 2)`-spline (any `y₀ > 1`, switching time `t_sw(y₀)`, any terminal time `T > 0`) is a
+state trajectory with the control of `eqn:3k+2`, `g(0) = I₂` and `X(0) = Φ(i y₀)`. -/
+private theorem smx_isStateTrajectory {y0 T : ℝ} (hy : 1 < y0) (hT : 0 < T) :
+    IsStateTrajectory T (minusPolygonControlAt (minusSwitchTime y0)) (smx_G y0) (smx_X y0) ∧
+      smx_G y0 0 = 1 ∧ smx_X y0 0 = Φ 0 y0 := by
+  set τ := minusSwitchTime y0 with hτdef
+  have hτ : 0 < τ := sm_minusSwitchTime_pos hy
+  have hy0 : 0 < y0 := by linarith
+  have hsol := sm_m_solution y0
+  have hTN : T ≤ (⌈T / τ⌉₊ : ℕ) * τ := (div_le_iff₀ hτ).1 (Nat.le_ceil _)
+  have hstar : ∀ s ∈ Set.Icc 0 τ, IsStarState (sm_mX y0 s) := fun s hs ↦ smx_mX_star hy hs
+  have hXc := (sm_mX_continuous y0).continuousOn (s := Set.Icc 0 τ)
+  refine ⟨⟨hT, smx_measurable τ, fun t _ ↦ poly_vertex_mem _, fun t ht ↦ ?_, ?_, ?_⟩, ?_, ?_⟩
+  · obtain ⟨h1, h2⟩ := poly_floor_mem hτ ht.1
+    have hs : t - ⌊t / τ⌋₊ * τ ∈ Set.Icc 0 τ := ⟨by linarith, by linarith⟩
+    constructor
+    · simp only [smx_G, poly_pw, Matrix.det_mul, Matrix.det_pow, smx_mG_det hy0, poly_det_Rinv,
+        poly_det_R]
+      simp
+    · rw [smx_X, poly_pw]
+      exact smx_isStarState_conj_pow _ (hstar _ hs)
+  · refine smx_isIntegralCurve_mono ?_ hT.le hTN
+    refine poly_pw_isIntegralCurve hτ (v0 := fun s ↦ sm_mG y0 s * sm_mX y0 s) ?_
+      (sm_mG_continuous y0).continuousOn
+      ((sm_mG_continuous y0).mul (sm_mX_continuous y0)).continuousOn
+      (fun s _ ↦ (hsol s).1) _ fun i _ t ht ↦ ?_
+    · rw [(hsol 0).2.2.1, Matrix.mul_one, Matrix.mul_assoc, poly_R_mul_inv, Matrix.mul_one]
+    · simp only [smx_G, smx_X, ← hτdef, poly_pw_of_mem_Ico hτ ht, Matrix.mul_assoc,
+        smx_Rinvpow_cancel]
+  · refine smx_isIntegralCurve_mono ?_ hT.le hTN
+    have hP := poly_controlP_continuousOn hXc (poly_vertex_mem 1) hstar
+    refine poly_pw_isIntegralCurve hτ ?_ hXc ((hP.mul hXc).sub (hXc.mul hP))
+      (fun s _ ↦ (hsol s).2.1) _ fun i _ t ht ↦ ?_
+    · rw [(hsol 0).2.2.2, hτdef, sm_mX_switchTime hy0]
+    · simp only [sm_minus_control hτ ht.1 ht.2, smx_X, ← hτdef, poly_pw_of_mem_Ico hτ ht]
+      exact (smx_conj_pow_rhs i _).symm
+  · simp [smx_G, poly_pw, (hsol 0).2.2.1]
+  · simp [smx_X, poly_pw, (hsol 0).2.2.2]
+
+/-- **Existence of the trajectories of Remark 7.6.4** (non-vacuity of `remark7_6_4`). For every
+real `k > 1`, the closing condition `4/(3y₀² + 1) = 2 cos(πk/(3k - 1))` has the solution
+`y₀ = y₀(k) > 1` (`minusY₀`), and the explicit `(6k - 2)`-spline satisfies every hypothesis of
+`remark7_6_4`: it is a state trajectory on `[0, t_f(k)]` with the control of `eqn:3k+2` and
+switching time `t_sw(y₀(k))` (in particular `X(t)` is a star state: on the `e₂`-arc
+`X = Φ((1 - W)/√3 + i y₀ W)`, `W = e^{-√3 y₀ t} ∈ [q, 1]`, `q = 4/(3y₀² + 1)`, and
+`x² + y² - 1/3 = W((1/3 + y₀²)W - 2/3) > 0`), with `g(0) = I₂` and `X(0) = Φ(i y₀(k))`. The spline
+is `X = Rⁱ X(z₀, t - i t_sw) R⁻ⁱ` and `g = (g_sw R)ⁱ g₀(z₀, t - i t_sw) R⁻ⁱ` on the `i`-th switching
+interval, glued by `X(z₀, t_sw) = R X₀ R⁻¹`, as for the `(6k + 2)`-gons
+(`poly_isStateTrajectory`). -/
+theorem remark7_6_4_exists :
+    (∀ k : ℝ, 1 < k →
+      1 < minusY₀ k ∧ 4 / (3 * minusY₀ k ^ 2 + 1) = 2 * Real.cos (minusθ k)) ∧
+    ∃ g X : ℝ → ℝ → Mat2, ∀ k : ℝ, 1 < k →
+      IsStateTrajectory (minusTf k) (minusPolygonControlAt (minusSwitchTime (minusY₀ k)))
+        (g k) (X k) ∧ g k 0 = 1 ∧ X k 0 = Φ 0 (minusY₀ k) := by
+  refine ⟨fun k hk ↦ ⟨sm_one_lt_minusY₀ hk, sm_four_div hk⟩,
+    fun k ↦ smx_G (minusY₀ k), fun k ↦ smx_X (minusY₀ k), fun k hk ↦ ?_⟩
+  have hy := sm_one_lt_minusY₀ hk
+  exact smx_isStateTrajectory hy
+    (by rw [minusTf]; exact mul_pos (by linarith) (sm_minusSwitchTime_pos hy))
 
 end SmoothedPolygons
