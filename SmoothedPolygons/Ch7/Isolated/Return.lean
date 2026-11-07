@@ -647,7 +647,7 @@ lemma irt_edge_dsw {p : iso_PhasePt} (hX : p.1.trace = 0) (hR : p.2.2.trace = 0)
       irt_G 2 1 p := by
   have ha := (poly_traceForm_neg (poly_vertex_mem 1) hstar).ne
   have hb := (poly_traceForm_neg (poly_vertex_mem 2) hstar).ne
-  have h1 := iso_edge_slope p hX hR hstar hχ u hu hu0
+  have h1 := iso_edge_slope p hstar hχ u hu hu0
   have h2 := isw_hasDerivAt_chi32_line p.2.2 p.1 (iso_extremalField u p).2.2
     (iso_extremalField u p).1 ha hb
   have h3 := isw_hasDerivAt_chi32_line p.2.2 p.1 (iso_extremalField (vertex 2) p).2.2
@@ -986,7 +986,7 @@ lemma irt_oct_facts :
     exact h1.unique (iso_chi31_hasDerivAt _ hy0 hy1)
   · have h1 := irt_chi_flow_hasDerivAt 2 1 (iso_qFix (y₀ 1)) 0 (hDen _ ⟨le_rfl, hτ.le⟩)
     rw [hfun] at h1
-    exact h1.unique (iso_chi32_hasDerivAt _ hy0 hy1)
+    exact h1.unique (iso_chi32_hasDerivAt _ hy0)
 
 /-- **The flow from near `q_oct`.** For `p` near `q_oct` with `χ₃₂(p) ≥ 0`, the Poincaré time is
 near `t_sw`, `χ₃₁ > 0` before it and vanishes there, and `χ₃₂ > 0` after `0`. -/

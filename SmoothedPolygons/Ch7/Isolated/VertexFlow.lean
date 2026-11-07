@@ -715,7 +715,7 @@ lemma ivf_lax_lipschitz {X : ℝ → Mat2} {S : Set ℝ} (hS : IsCompact S) (hX 
 /-- `iso_vertexFlow` solves the state–costate equations with control `e_m` and `λ_cost = -1`, from
 `q` at time `0`. -/
 theorem iso_vertexFlow_solution (m : Fin 3) (q : iso_PhasePt)
-    (hZ : traceForm (controlMatrix (vertex m)) q.1 ≠ 0) (t : ℝ) :
+    (t : ℝ) :
     HasDerivAtEntrywise (fun s ↦ (iso_vertexFlow m q s).1)
         (controlP (vertex m) (iso_vertexFlow m q t).1 * (iso_vertexFlow m q t).1 -
           (iso_vertexFlow m q t).1 * controlP (vertex m) (iso_vertexFlow m q t).1) t ∧
@@ -726,8 +726,6 @@ theorem iso_vertexFlow_solution (m : Fin 3) (q : iso_PhasePt)
         (costateRHS (-1) (iso_vertexFlow m q t).2.1 (iso_vertexFlow m q t).2.2
           (iso_vertexFlow m q t).1 (vertex m)) t ∧
       iso_vertexFlow m q 0 = q := by
-  -- the hypothesis `⟨Z_{e_m}, X₀⟩ ≠ 0` is not needed: for `⟨Z_{e_m}, X₀⟩ = 0`, `P = 0`
-  have _hZ := hZ
   exact ⟨ivf_vfX_hasDerivAt m q t, ivf_vfΛ₁_hasDerivAt m q t, ivf_vfΛR_hasDerivAt m q t,
     ivf_vertexFlow_zero m q⟩
 

@@ -87,10 +87,9 @@ lemma isw_W_ne_two (y0 : ℝ) : ∀ᶠ t in 𝓝 (0 : ℝ), Real.exp (√3 * y0 
   have hc : ContinuousAt (fun t : ℝ ↦ Real.exp (√3 * y0 * t)) 0 := by fun_prop
   exact hc.eventually_ne (by norm_num)
 
-set_option linter.unusedVariables false in
 /-- The remark after Lemma 7.5.3: `χ₃₂` vanishes at `t = 0` with slope `iso_chi32Slope y₀`
-(`∂f/∂r = -∂f/∂y = y((4 - y) - y ln(4/y))` on the diagonal, eqn:f'). (`y₀ < 1` is not used.) -/
-theorem iso_chi32_hasDerivAt (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
+(`∂f/∂r = -∂f/∂y = y((4 - y) - y ln(4/y))` on the diagonal, eqn:f'). -/
+theorem iso_chi32_hasDerivAt (y0 : ℝ) (hy0 : 1 / √3 < y0) :
     HasDerivAt (fun t ↦ switchingFn 2 1 (strongΛR y0 t) (segX y0 t)) (iso_chi32Slope y0) 0 := by
   have hy : 0 < y0 := poly_y0_pos hy0
   have h3 : (0 : ℝ) < √3 := by positivity
@@ -157,7 +156,7 @@ theorem iso_chi31_hasDerivAt (y0 : ℝ) (hy0 : 1 / √3 < y0) (hy1 : y0 < 1) :
   have hy : 0 < y0 := poly_y0_pos hy0
   have hs : HasDerivAt (fun t : ℝ ↦ switchTime y0 - t) (-1) (switchTime y0) := by
     simpa using (hasDerivAt_id' (switchTime y0)).const_sub (switchTime y0)
-  have h := HasDerivAt.comp_of_eq (switchTime y0) (iso_chi32_hasDerivAt y0 hy0 hy1) hs
+  have h := HasDerivAt.comp_of_eq (switchTime y0) (iso_chi32_hasDerivAt y0 hy0) hs
     (sub_self _).symm
   rw [mul_neg_one] at h
   refine h.congr_of_eventuallyEq ?_
@@ -274,14 +273,12 @@ lemma isw_controlP_edge {u : Fin 3 → ℝ} (hu : u ∈ controlSimplex) (hu0 : u
   · field_simp
     linear_combination (-1 : ℝ) * hdeq
 
-set_option linter.unusedVariables false in
 /-- On the switching surface `χ₂₃ = 0`, the derivative of `χ₃₂` along the state–costate vector
 field is the same for every control `u` on the edge `[e₂, e₃]` of `U_T` (it is the Poisson
 bracket `{H₃, H₂}`: the Hamiltonian vector field of `H_u` is a convex combination of those of
 `H₂` and `H₃` where `H₂ = H₃`). With `iso_chi32_hasDerivAt` this excludes singular arcs and
-chattering near the octagon's switching points. (`tr X = 0` and `tr Λ_R = 0` are not used.) -/
-theorem iso_edge_slope (q : iso_PhasePt) (hX : q.1.trace = 0) (hR : q.2.2.trace = 0)
-    (hstar : IsStarState q.1) (hχ : switchingFn 1 2 q.2.2 q.1 = 0) (u : Fin 3 → ℝ)
+chattering near the octagon's switching points. -/
+theorem iso_edge_slope (q : iso_PhasePt)     (hstar : IsStarState q.1) (hχ : switchingFn 1 2 q.2.2 q.1 = 0) (u : Fin 3 → ℝ)
     (hu : u ∈ controlSimplex) (hu0 : u 0 = 0) :
     HasDerivAt (fun s : ℝ ↦ switchingFn 2 1 (q.2.2 + s • (iso_extremalField u q).2.2)
         (q.1 + s • (iso_extremalField u q).1))
