@@ -6,6 +6,9 @@ thm:frac-hexagon	theorem	1
 lem:no-corner	lemma	1	
 lem:tri-interior	lemma	1	lem:no-corner
 lem:multi-cont	lemma	1	lem:no-corner
+# Unlabelled remark after Definition 2.3.5 (line 1779): Definition 2.3.5 is equivalent to Mahler's original
+# definition of irreducibility, by Mahler 1947, Lemma 3 (cited, no proof). Label of this formalization.
+rem:irreducible-original	remark	0	
 thm:minkowski-inscribe	theorem	0	
 thm:mahler-circumscribe	theorem	0	
 thm:min-critical	theorem	1	thm:mahler-circumscribe
@@ -40,6 +43,10 @@ lem:tangent-maps	lemma	1	lem:half-plane-lie-algebra-iso
 lem:tf-pi3	lemma	1	
 prop:star-domain	theorem	1	cor:X-props
 lem:X-dynamics	lemma	1	
+# Running text of §4.6 (lines 3779-3790): the dihedral group permutes the ideal vertices ±1/√3 and +∞ of the
+# star domain, acting on RP¹ by linear fractional transformations (stated without proof). Label of this
+# formalization.
+sec:dihedral:ideal-vertices	remark	0	
 th:compactification	theorem	1	
 lem:pt-to-hexagon	lemma	1	
 lem:triangle-areas	lemma	1	lem:pt-to-hexagon
@@ -60,12 +67,18 @@ lem:const-control-trajectories	lemma	1
 lem:control-face-lemma	lemma	1	
 # thm:strong-transversality: the proof also cites cor:lam1-gen-sol through \eqref (line 6123), which the extractor does not read.
 thm:strong-transversality	theorem	1	cor:lam1-gen-sol,lem:H-max-6k+2
+# Unlabelled Remark 7.5.2 (line 6185): d(y0) = det Λ1 = λ1² det Λ10 is a constant of motion, increasing on
+# (1/√3, 1) with range (0, 9/4) (stated without proof). Label of this formalization.
+rem:det-lambda1	remark	0	
 lem:H-max-6k+2	lemma	1	
 lem:discrete-k	lemma	1	thm:strong-transversality
 # thm:6k+2: the proof cites no label, but the text before Theorem 7.5.1 (lines 6059-6065) says that the proof of
 # extremality is broken into Theorem 7.5.1, Lemma 7.5.3 and Lemma 7.5.5, and the proof uses the strong
 # transversality conditions (7.5.1) and the boundary condition z(z0,tsw)=R^-1 z0 (eqn:poly-z).
 thm:6k+2	theorem	1	lem:H-max-6k+2,lem:discrete-k,thm:strong-transversality
+# Unlabelled Remark 7.6.4 (line 6427): the smoothed (6k-2)-gons tend to a rectangle of area √12 as k → 1
+# (a numerical observation, no proof). Label of this formalization.
+rem:6k-2-rectangle	remark	0	
 thm:oct-isolated	theorem	1	lem:H-max-6k+2
 prop:edge-extremal	proposition	1	
 thm:edge	theorem	1	

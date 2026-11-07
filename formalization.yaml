@@ -14,15 +14,19 @@ project:
     The formalization covers Chapters 2, 3, 4, 6 and 7 of the book with Appendices A.6 and A.11:
     packing and lattice packing densities, critical lattices and circumscribed hexagons, the
     boundary of the minimizer and balanced disks, the state dynamics, the cost and its area
-    formula, the upper half-plane model, the Hamiltonian and the costate equations, constant and
-    bang-bang controls. Its main results are Theorem 7.5.6, that for every k >= 1 the smoothed
-    (6k+2)-gon is a Pontryagin extremal of the Reinhardt control problem with bang-bang control,
-    and that the smoothed octagon is a balanced disk of area sqrt(12)(8 - sqrt(32) - ln 2)/(sqrt(8)
-    - 1) whose greatest packing density is (8 - sqrt(32) - ln 2)/(sqrt(8) - 1). The cited results
-    the proofs use are proved, among them Fejes Toth's theorem that lattice packings are densest
-    for centrally symmetric disks and Mahler's theorems on critical lattices. One lemma of the book
-    (Lemma 2.2.1) is false as printed; it is refuted in Lean and proved in corrected form. The
-    book's main theorem (Mahler's First conjecture) is not formalized.
+    formula, the upper half-plane model, Filippov's existence theorem, left-invariant control
+    systems, the Hamiltonian and the costate equations, constant and bang-bang controls. Its main
+    results are Theorem 7.5.6, that for every k >= 1 the smoothed (6k+2)-gon is a Pontryagin
+    extremal of the Reinhardt control problem with bang-bang control; that the smoothed octagon is
+    a balanced disk of area sqrt(12)(8 - sqrt(32) - ln 2)/(sqrt(8) - 1) whose greatest packing
+    density is (8 - sqrt(32) - ln 2)/(sqrt(8) - 1); and Theorem 7.7.1, that the smoothed octagon is
+    an isolated extremal, whose proof the book only sketches. The cited results the proofs use are
+    proved, among them Fejes Toth's theorem that lattice packings are densest for centrally
+    symmetric disks and Mahler's theorems on critical lattices, and so is Filippov's theorem. Four
+    results of the book are false as printed and are proved in corrected form: Lemma 2.2.1
+    (refuted in Lean), Lemma 3.1.8 and Filippov's theorem (each missing a hypothesis), and Theorem
+    7.7.1 (true up to time translation, for terminal times near t_f). The book's main theorem
+    (Mahler's First conjecture) is not formalized.
   authors:
     - "The-Anh Vu-Le"
   license: "Apache-2.0"
@@ -74,6 +78,19 @@ sources:
     note: >-
       Source of the Euler-Arnold equation cited in the proof of Proposition 6.5.1, proved in the
       formalization for left-invariant Hamiltonians on matrix groups (External.euler_arnold).
+  - title: "Control Theory from the Geometric Viewpoint"
+    authors:
+      - "Andrei A. Agrachev"
+      - "Yuri L. Sachkov"
+    type: "book"
+    location: "Encyclopaedia of Mathematical Sciences 87, Springer, 2004, Theorem 10.1"
+    relationship: "background"
+    note: >-
+      The book's reference for the maximum principle (bibliography entry zelikin2004control, which
+      names M. I. Zelikin as first author). Filippov's theorem, stated in the book as Theorem 6.1.1
+      without a source and cited from this book (Theorem 10.1) by Hales's 2017 preprint, is proved
+      on R^n (External.filippov) by the standard argument; Agrachev and Sachkov's text was not
+      available to compare with.
 
   - title: "Some packing and covering theorems"
     authors:
@@ -106,8 +123,35 @@ sources:
     relationship: "background"
     note: >-
       Cited as Theorems 2.3.6 and 2.3.7 and after Definition 2.3.5; Lemma 2 (with Minkowski),
-      Theorems 1 and 2 and the half of Lemma 3 that is used are proved (External.minkowski_mahler,
-      External.mahler_1947, External.mahler_irreducible).
+      Theorems 1 and 2 and Lemma 3 are proved (External.minkowski_mahler, External.mahler_1947,
+      External.mahler_irreducible_iff, and External.mahler_irreducible, the form Lemma 2.2.5 uses).
+      Lemma 3 is stated there without proof; it is proved along the next two sources.
+  - title: "On irreducible convex domains"
+    authors:
+      - "Kurt Mahler"
+    type: "article"
+    location: "Proc. KNAW 50 (1947) 98-107"
+    relationship: "background"
+    note: >-
+      Not cited by the book; the paper ("paper A") to which Mahler 1947 refers for the proof of
+      Lemma 3, read from a scan of Mahler's collected works (CARMA archive, item 094). Its Lemmas 1,
+      2, 5-7 and 13 are proved by its arguments (External/MahlerIrreducible.lean,
+      External.MahlerIrreducible.ml3_onlyIf), and the Corollary to Lemma 5, which it states without
+      proof, is proved; its errors and gaps are repaired (REPORT.md, Section 7).
+  - title: "Lattice points in n-dimensional star bodies II. Reducibility theorems I"
+    authors:
+      - "Kurt Mahler"
+    type: "article"
+    location: "Proc. KNAW 49 (1946) 331-343"
+    relationship: "background"
+    note: >-
+      The book's entry mahler1946lattice, cited with Minkowski for Theorem 2.3.6, of which it only
+      quotes the six-point statement (REPORT.md, E33). Paper A quotes its Lemmas 8, 10, 11 and 12
+      from Theorems B-E of this paper, which are proved in the plane by Mahler's arguments
+      (External/Mahler1946/TheoremC.lean, External/Mahler1946/TheoremE.lean; scan of Mahler's
+      collected works, CARMA archive, item 088), with its errors and gaps repaired: the function G
+      in the proof of Theorem C is not even, so it does not define a star body (proved in Lean),
+      and two steps of Section 4 are asserted without argument.
 
 related_formalizations:
   - id: "https://github.com/sunfishho/reinhardt-density-bound"
@@ -120,16 +164,26 @@ related_formalizations:
 status:
   scope: >-
     Formalized: every numbered result of Chapters 2, 3, 4, 6 and 7 of the book and of Appendices
-    A.6 and A.11, except Lemma 3.1.8, Theorem 6.1.1 (Filippov, cited), Definition 6.3.1 and
-    Proposition 6.4.1 (general left-invariant systems, unused), and Theorem 7.7.1 (whose proof the
-    book only sketches). Lemma 2.2.1 is false as printed (refuted in Lean) and is proved in
-    corrected form (REPORT.md, E1, approved by the user). Not formalized: Chapters 1, 5 and 8-16,
-    including the main theorem (Mahler's First conjecture, Theorem 16.3.1). Pontryagin extremals
-    are defined by the conditions of the maximum principle, which is not proved and not needed.
-    No cited theorem is assumed: Fejes Toth's theorem, Gruber's density formula, the theorems of
-    Minkowski and Mahler on critical lattices (the half of Mahler's Lemma 3 that is used), and the
-    Euler-Arnold equation are proved. Statements and definitions corrected (REPORT.md, Section 3):
-    E1 (false lemma), E6, E13 (a hypothesis approved by the user), E16, E17, E20, E21, E26.
+    A.6 and A.11, including Theorem 6.1.1 (Filippov, cited without a source), Definition 6.3.1 and
+    Proposition 6.4.1 (left-invariant systems on Lie groups) and Theorem 7.7.1 (the smoothed
+    octagon is an isolated extremal; the book gives a proof sketch), and Remarks 2.2.4, 7.5.2 and
+    7.6.4, the remark after Definition 2.3.5 and the action of the dihedral group on the ideal
+    vertices of Section 4.6. Lemma 2.2.1 is false as printed (refuted in Lean) and is proved in
+    corrected form (REPORT.md, E1); Theorem 7.7.1 is false read literally and is proved up to time
+    translation, for terminal times near t_f (E32); Lemma 3.1.8 and the existence claim of Theorem
+    6.1.1 are proved with a missing hypothesis added (E34, E35); the user approved the four
+    corrected statements. Not formalized: Chapters 1, 5 and 8-16, including the main theorem
+    (Mahler's First conjecture, Theorem 16.3.1); Appendices A.1-A.5, A.7-A.10 and B; within the
+    formalized chapters, the conjectural Remarks 7.6.1 and 7.6.3 and the application of Filippov's
+    theorem in Section 6.1, which rests on Chapter 5. Pontryagin extremals are defined by the
+    conditions of the maximum principle, which is not proved and not needed. No cited theorem is
+    assumed: Fejes Toth's theorem, Gruber's density formula, the theorems of Minkowski and Mahler
+    on critical lattices and circumscribed hexagons, Mahler's Lemma 3 on irreducible domains (in
+    full, along the two earlier papers of Mahler on which it rests), and the Euler-Arnold equation
+    are proved, and so is Filippov's theorem. Statements and definitions corrected
+    (REPORT.md, Section 3): E1 (false lemma), E6, E13 (a hypothesis approved by the user), E16,
+    E17, E20, E21, E26, E32 (Theorem 7.7.1's reading), E34 and E35 (hypotheses approved by the
+    user).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -141,7 +195,7 @@ automation:
       framework: "Claude Code 2.1.318 (VS Code extension, Claude Agent SDK)"
       tool_setup: >-
         The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, local copy
-        dated 2026-10-17) in one Claude Code session, in two rounds, with 43 sub-agents of the same
+        dated 2026-10-17) in one Claude Code session, in three rounds, with 65 sub-agents of the same
         model (at most 9 at once): statement reviews against the TeX source, parallel proofs by
         chapter and by part, proof reviews, verification of the audit and of its literature
         section, and an exploration of follow-up directions. Lean builds, the axiom audit, a route
@@ -149,21 +203,27 @@ automation:
         locally.
       cost:
         wall_time: >-
-          20.5 hours elapsed from the start to the completed audit report of the second round
-          (5-6 November 2026, including a night), of which the first round took 3.2 hours; 24.3
-          hours of sub-agent working time in all
+          43.0 hours elapsed from the start to the completed audit report of the third round
+          (5-7 November 2026, including two nights and about 15 hours stopped by a usage limit);
+          the rounds took 3.2, 15.5 and 21.5 hours; 35.0 hours of sub-agent working time in all
         spend_usd: "not tracked"
         hardware: "local machine (Linux) for Lean builds; models via API"
       prompting_notes: >-
         One request: '/formalize-math-paper https://arxiv.org/abs/2405.04331'. The user chose the
-        scope and approved two decisions (the proof of Jacobi's formula, and the hypothesis of
-        Theorem 3.1.4(3)).
+        scope of each round and decided the questions the work raised: the proof of Jacobi's formula
+        and the hypothesis of Theorem 3.1.4(3) (first round); proving every cited theorem, the
+        routes for Lemmas 2.2.1 and 2.2.5, and the corrected form of Lemma 2.2.1 (second round);
+        the hypothesis of Lemma 3.1.8, the statement of Filippov's theorem, the reading of
+        Theorem 7.7.1, and following Mahler's 1946 paper for his Lemma 3 (third round).
   spend_usd: "not tracked"
   notes: >-
     The-Anh Vu-Le requested the formalization, chose its scope (first the control-theoretic core,
-    then Chapter 2 with every cited theorem proved) and made the decisions it needed (the proof of
-    Jacobi's formula, the hypothesis of Theorem 3.1.4(3), the routes for Lemmas 2.2.1 and 2.2.5,
-    and the corrected form of the false Lemma 2.2.1). Claude Opus 5.5 wrote the statements, the
+    then Chapter 2 with every cited theorem proved, then the rest of the formalized chapters) and
+    made the decisions it needed (the proof of Jacobi's formula, the hypothesis of Theorem
+    3.1.4(3), the routes for Lemmas 2.2.1 and 2.2.5 and for Mahler's Lemma 3 (along Mahler's 1946
+    paper), the corrected form of the false Lemma 2.2.1, the hypothesis of Lemma 3.1.8, the
+    statement of Filippov's theorem and the reading of Theorem 7.7.1). Claude Opus 5.5 wrote the
+    statements, the
     proofs, the audit report and the packaging; independent agents reviewed the statements, the
     proofs and the report. No person has reviewed the proofs. Details and token counts in
     CREDITS.md.
@@ -181,14 +241,26 @@ fidelity:
     E20, the sign of a(u) in Problem 4.5.1; E21, the nontriviality condition of a Pontryagin
     extremal is imposed on the reduced costate (lambda_cost, Lambda_1, Lambda_R), since on the full
     costate (Lambda_1, Lambda_2) of Section 6.2 every admissible trajectory would lift; E26, Lemma
-    7.3.1 needs <X, Z_u> != 0 on the control set. Slips in proofs corrected where they occur: E8,
-    E14, E24.
+    7.3.1 needs <X, Z_u> != 0 on the control set; E32, Theorem 7.7.1 (the smoothed octagon is an
+    isolated extremal) is false read literally (the octagon's lift started at another time, or run
+    for several laps, is another extremal with all the transversality conditions and a nearby or
+    the same initial condition) and is proved up to time translation, for terminal times near t_f,
+    in a conic neighbourhood of the normalized initial condition (approved by the user); E34,
+    Lemma 3.1.8 is false unless the curves of the multi-curve are regular (a square, with one curve
+    at rest and two sliding along parallel edges), as the book's Section 2.4 assumes, and is proved
+    with that hypothesis (approved by the user); E35, Filippov's theorem (Theorem 6.1.1, stated
+    without a source) asserts that an optimal control exists when the velocity sets f(q, U) are
+    convex, which fails for costs depending on the control, and is proved when the velocity sets
+    extended by the cost are convex, the book's hypothesis for the Reinhardt cost (approved by the
+    user). Slips in proofs corrected where they occur: E8, E14, E24.
 
 
     Redundant hypotheses omitted from the Lean statements (REPORT.md, Section 5): Theorem 3.1.4
     (1)-(2), Proposition 3.1.9, Corollary 3.1.10, Lemma 3.3.1, Corollary 6.5.4, Theorem 6.8.2,
     Lemma 7.1.2, Lemma 7.3.1, and the packing hypothesis of Gruber's Cor. 30.1. The Challenge keeps
-    the book's hypotheses.
+    the book's hypotheses. Kept although the proofs do not use them, because the book or the source
+    states them: the covering hypothesis of Lemma 3.1.8, the properties of the bilinear form in
+    Proposition 6.4.1, and the smoothness of f in q in Filippov's theorem.
 
 
     Readings (REPORT.md, Section 6): the book's disks B_r are Euclidean disks, congruent copies
@@ -204,7 +276,16 @@ fidelity:
     canonical coordinates (g, p) of the cotangent bundle of GL2, with Lambda_1 = p g, as hypotheses;
     a bang-bang control takes values in the vertices of the control simplex; Lemma 6.8.1 is stated
     for nonzero traceless X; Theorem 6.8.3 is proved in the direction of its statement; Proposition
-    3.6.1 is stated without smoothness of the trivialization.
+    3.6.1 is stated without smoothness of the trivialization; Lemma 3.1.8 reads "the boundary is
+    parametrized by a C1 multi-curve" as in Section 2.4 (regular curves whose arcs cover the
+    boundary) and measures areas by the signed shoelace area; Filippov's theorem is stated on R^n
+    instead of a manifold, with Caratheodory trajectories, for fixed and free terminal time;
+    Definition 6.3.1 and Proposition 6.4.1 are stated on Mathlib's real Lie groups, with the left
+    trivialization of the cotangent bundle part of the statement; the ideal vertices of Section 4.6
+    are points of Mathlib's OnePoint R, acted on by GL2(R); Remark 7.5.2's "monotonic increasing"
+    is strict; Remark 7.6.4's "when k = 1" is the limit k -> 1+ of the (6k-2)-gons interpolated to
+    real k (cost tending to sqrt(12), arcs tending in the Hausdorff distance to the boundary of a
+    rectangle of area sqrt(12)); Theorem 7.7.1 is read as in E32.
 
 
     Departures from the book's proofs (REPORT.md, Section 7), each forced by an error or gap of the
@@ -215,12 +296,30 @@ fidelity:
     integral curve is not shown to stay on the boundary) and Lemma 2.4.6 (Shifrin's Proposition 3.8 is about smooth curves; a direct argument); the area
     formula of Section 3.2 (Green's theorem replaced by its polar-coordinates form for star-shaped
     regions); Lemma 3.1.12 (Jacobi's formula by the Leibniz expansion, approved by the user); Lemma
-    4.3.1 (comparison with the smoothed octagon). Every other proof follows the book's argument;
-    the remaining gaps are filled along the book's lines, and the index slip of Lemma 2.4.5 is
-    corrected. Proofs of the cited results follow their sources, except where a source quotes
-    another paper without proof (Mahler's Lemmas 3 and 5) and in Fejes Toth's theorem (Dowker's theorem by an alternating merge; the cell lemma by
+    4.3.1 (comparison with the smoothed octagon); one step of Theorem 7.7.1 (the fixed points of the
+    fourth iterate of the Poincare map near the octagon's: the book applies the implicit function
+    theorem for each value of the parameter d = det Lambda_1 separately, which does not give the
+    neighbourhoods uniform in d that its conclusion needs; the formal proof applies the inverse
+    function theorem once, at the octagon's fixed point, to the map (section constraints, f^4 - id),
+    whose constraints include d). Every other proof follows the book's argument; the remaining gaps
+    are filled along the book's lines (among them those of Lemma 3.1.8 and of the sketch of Theorem
+    7.7.1, whose "direct calculation" of hyperbolicity is supplied in closed form), and the index
+    slip of Lemma 2.4.5 is corrected. Remarks 7.5.2 and 7.6.4 have no proof in the book. Proofs of the cited results follow their sources, except where a source quotes
+    another paper without proof (Mahler 1947's Lemma 5 and footnote 8, used in its Theorem 2) and in Fejes Toth's theorem (Dowker's theorem by an alternating merge; the cell lemma by
     Boroczky's maximal cells, with a counting argument and angle sums in place of boundary cycles
-    and Euler's formula).
+    and Euler's formula). Lemma 3 of Mahler 1947, stated there without proof, follows Mahler's
+    paper A and Mahler 1946 throughout, with their errors and gaps repaired (among them a function
+    in Mahler 1946's proof of Theorem C that is not even and so defines no star body, and Lemma 12
+    of paper A, which does not follow from the two theorems it is quoted from without paper A's
+    own Corollary to Lemma 5 and Lemma 1); the departures that remain are small: the minimal
+    determinant of a parallelogram is taken from Mahler's own example instead of Minkowski's
+    theorem on linear forms, and the two results of Mahler's Part I that the 1946 paper quotes
+    (selection, existence of critical lattices) are proved in the plane by standard arguments.
+    The domains are symmetric convex domains in the plane, with their gauge as distance function,
+    and irreducibility is tested against symmetric convex subdomains (paper A's Lemma 13 is the
+    bridge to Mahler's star domains). Filippov's theorem is proved by the standard argument (equi-Lipschitz
+    trajectories, a limit by Tychonoff's theorem, measurable selection); its source's text was not
+    available to compare with.
 
 review:
   status: "agent-reviewed"

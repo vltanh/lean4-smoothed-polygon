@@ -4,10 +4,11 @@ How this formalization was made, from the run log and the session transcript.
 
 ## Who
 
-- **Author and maintainer:** The-Anh Vu-Le, who asked for the formalization, chose its scope (the
-  smoothed-polygon core of the book) and made the two decisions it needed: proving Jacobi's
+- **Author and maintainer:** The-Anh Vu-Le, who asked for the formalization, chose the scope of
+  each round and made the decisions it needed. In the first round these were proving Jacobi's
   formula by the Leibniz expansion instead of the book's argument, and proving Theorem 3.1.4(3)
-  with the hypothesis that the tangents are Lipschitz (E13).
+  with the hypothesis that the tangents are Lipschitz (E13). The later rounds' decisions are listed
+  under each round below.
 - **Formalization:** Claude Opus 5.5 (`claude-opus-5-5`) in Claude Code 2.1.318 (VS Code
   extension, Claude Agent SDK), in one session, with sub-agents of the same model. There was no
   earlier draft; the project was written from scratch.
@@ -17,8 +18,8 @@ How this formalization was made, from the run log and the session transcript.
   results the book's proof cites, cleanup, an audit report checked by independent agents, and
   packaging for Palomar.
 - **Review:** no person has reviewed the proofs. Independent agents checked the statements against
-  the TeX source (before the proofs were written), compared the proofs with the book's (two
-  agents), verified every finding of the report against the TeX source, and checked the report's
+  the TeX source (before the proofs were written), compared the proofs with the book's (in
+  every round), verified every finding of the report against the TeX source, and checked the report's
   account of the literature and its suggestions against the cited works.
 
 ## First round (5 November 2026)
@@ -106,3 +107,58 @@ round's REPORT.md (6 November, 10:34 CST), from the session transcript:
 
 For the whole project (both rounds, to the same commit): 20.5 hours elapsed, 43 sub-agents (at most
 9 at once), 24.3 hours of sub-agent work.
+
+## Third round (6–7 November 2026)
+
+The user asked to finish what the report still listed as not formalized within the formalized
+chapters: the small results of the book (Lemma 3.1.8, Remarks 7.5.2 and 7.6.4, the dihedral action
+of §4.6, the remark after Definition 2.3.5), the cited results (Filippov's theorem, Jurdjevic's
+Definition 6.3.1 and Proposition 6.4.1, Mahler's Lemma 3 in full) and Theorem 7.7.1, whose proof the
+book only sketches; the conjectural Remarks 7.6.1 and 7.6.3 were left out. The user decided four
+questions: to add the regularity hypothesis without which Lemma 3.1.8 is false (E34); to state
+Filippov's theorem with convex extended velocity sets, since the book's form is false for costs that
+depend on the control (E35); to read Theorem 7.7.1 up to time translation, with terminal time near
+`t_f` and costates up to a positive factor, since the literal statement is false (E32); and, once
+the papers behind Mahler's Lemma 3 had been found, to follow Mahler's 1946 paper as well as his paper
+A.
+
+How it was made:
+
+- **Statements** (two agents): the new statements, and a plan of Theorem 7.7.1's proof as a sequence
+  of lemmas, with the Jacobian of the Poincaré map in closed form (computed with sympy). An
+  independent agent reviewed them against the TeX source and the cited sources; it confirmed the
+  three counterexamples and corrected Filippov's statement.
+- **Proofs** (fifteen agents, at most eight at once, coordinated by the main session): Theorem 7.7.1
+  split into modules proved in parallel (the vertex flow; the switching slopes; the Poincaré map and
+  the book's "direct calculation"; the algebra of hyperbolicity; the switching structure of nearby
+  extremals, the fixed points and the assembly); Lemma 3.1.8 and the remarks; Filippov's theorem,
+  with a measurable selection theorem that Mathlib lacks; Mahler's Lemma 3, whose sources an agent
+  found in Mahler's collected works, proved along them (paper A's lemmas with a theory of boundary
+  arcs; the 1946 Theorems B–C and D–E, which turned up an error and gaps that were repaired; the
+  integration).
+- **Verification and cleanup** (main session): unused hypotheses of the plan's lemmas, duplicated
+  helpers, the axiom audit, the route check and Comparator.
+- **Audit:** an independent agent compared the round's proofs with the book's. It found that the
+  proof of Lemma 3.1.8 departed from the book without need and that a departure in Theorem 7.7.1
+  was not recorded; three agents rewrote Lemma 3.1.8 along the book, made Theorem 7.7.1 use
+  Remark 7.5.2 and the eigenvalue comparison of Lemma 7.5.5 as the book does (recording the
+  remaining departure), and proved that the hypotheses of Remark 7.6.4 can be met. Two agents
+  updated REPORT.md, README.md and formalization.yaml.
+
+A weekly usage limit stopped the two agents then running in the afternoon of 6 November; they
+resumed the next morning.
+
+Figures, from the start of the round (6 November 2026, 11:38 CST) to the commit that completes the
+round's REPORT.md (7 November, 09:07 CST), from the session transcript:
+
+- elapsed time: 21.5 hours, including about 15 hours during which the usage limit stopped the work;
+- sub-agents: 22 (one of them started by another agent), at most 8 running at once, 5 resumptions;
+  their total working time 10.7 hours;
+- tool calls: 2,002 by the sub-agents, 146 by the main session;
+- tokens: sub-agents 3.91M output, 9.93M input (uncached input and cache writes), 474M cache reads;
+  main session 0.16M output, 0.55M input, 45M cache reads;
+- model calls: `claude-opus-5-5` only, 1,840 by the sub-agents and 154 by the main session.
+
+For the whole project (three rounds, to the same commit): 43.0 hours elapsed, 65 sub-agents (at
+most 9 at once), 35.0 hours of sub-agent work, 5,721 tool calls by sub-agents and 766 by the main
+session.

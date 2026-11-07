@@ -700,7 +700,7 @@ private lemma str_abs_le_sum (D : Mat2) (k l : Fin 2) : |D k l| ≤ ∑ i, ∑ j
   linarith
 
 /-- Entrywise bound for the linear part `D ↦ [M, D] - ⟨D, M⟩B` of the costate equation. -/
-private lemma str_lin_bound (M B D : Mat2) {m C : ℝ} (hm : ∀ k l, |M k l| ≤ m)
+lemma str_lin_bound (M B D : Mat2) {m C : ℝ} (hm : ∀ k l, |M k l| ≤ m)
     (hC : ∀ k l, |B k l| ≤ C) (i j : Fin 2) :
     |((M * D - D * M) - traceForm D M • B) i j| ≤
       (4 * m + 4 * m * C) * ∑ k, ∑ l, |D k l| := by
@@ -725,7 +725,7 @@ private lemma str_lin_bound (M B D : Mat2) {m C : ℝ} (hm : ∀ k l, |M k l| �
   constructor <;> nlinarith
 
 /-- The difference of two values of the right-hand side of `eqn:lamR` is linear in `Λ_R`. -/
-private lemma str_costateRHS_sub (lam : ℝ) (Λ₁ P Q X : Mat2) (u : Fin 3 → ℝ) :
+lemma str_costateRHS_sub (lam : ℝ) (Λ₁ P Q X : Mat2) (u : Fin 3 → ℝ) :
     costateRHS lam Λ₁ P X u - costateRHS lam Λ₁ Q X u =
       (controlP u X * (P - Q) - (P - Q) * controlP u X) -
         traceForm (P - Q) (controlP u X) • (controlP u X * X - X * controlP u X) := by

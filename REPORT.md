@@ -14,44 +14,56 @@ Status of the formalization:
   bang-bang solutions and the smoothed `(6k+2)`-gons (Chapter 7), and Appendix A.6 and A.11. The
   book's main theorem, Mahler's First conjecture (Theorem 16.3.1), and Chapters 1, 5, 8–16 are not
   formalized (Section 9).
-- **Proved.** Every numbered result of Chapters 2, 3, 4, 6 and 7 is proved, except Lemma 3.1.8,
-  Theorem 6.1.1 (Filippov, cited), Definition 6.3.1 and Proposition 6.4.1 (general left-invariant
-  systems, unused by the rest) and Theorem 7.7.1 (whose proof the book only sketches); Section 9.
-  Lemma 2.2.1 is false as printed and is proved in corrected form (E1). The main results are
-  Theorem 7.5.6 (each smoothed `(6k+2)`-gon is a Pontryagin extremal of the Reinhardt control
-  problem with bang-bang control) and the smoothed octagon's packing density: the octagon's
-  trajectory bounds a balanced disk `K` whose area is the cost `√12(8 - √32 - ln 2)/(√8 - 1)` and
-  whose greatest packing density is `δ(K) = (8 - √32 - ln 2)/(√8 - 1)`.
+- **Proved.** Every numbered result of Chapters 2, 3, 4, 6 and 7 is formalized and proved, among
+  them Filippov's theorem (Theorem 6.1.1, cited without a source), Proposition 6.4.1 with
+  Definition 6.3.1 (general left-invariant systems, on Mathlib's Lie groups) and Theorem 7.7.1 (the
+  smoothed octagon is an isolated extremal), whose proof the book only sketches. So are the remark
+  after Definition 2.3.5 (the book's irreducibility is Mahler's), the action of the dihedral group
+  on the ideal vertices of `𝔥*` (§4.6) and Remarks 2.2.4, 7.5.2 and 7.6.4, which the book states
+  without proof. Lemma 2.2.1 is false as printed and Theorem 7.7.1 is false read literally (E1,
+  E32); Lemma 3.1.8 and the existence claim of Theorem 6.1.1 lack a hypothesis (E34, E35); all
+  four are proved in corrected forms approved by the user. What is left within these chapters is
+  conjectural or rests on Chapter 5 (Section 9). The main results are Theorem 7.5.6 (each smoothed
+  `(6k+2)`-gon is a Pontryagin extremal of the Reinhardt control problem with bang-bang control),
+  the smoothed octagon's packing density (the octagon's trajectory bounds a balanced disk `K` whose
+  area is the cost `√12(8 - √32 - ln 2)/(√8 - 1)` and whose greatest packing density is
+  `δ(K) = (8 - √32 - ln 2)/(√8 - 1)`) and Theorem 7.7.1.
 - **Nothing is assumed.** Every cited result that a proof uses is proved in [`External/`](External): Fejes
   Tóth's theorem (`δ = δ_L`), Gruber's lattice density formula, the theorems of Minkowski and
-  Mahler on critical lattices and circumscribed hexagons, a weak form of one half of Mahler's
-  Lemma 3 (all that is used), and the Euler–Arnold equation (Section 2). A Pontryagin extremal is defined by the
-  conditions of the maximum principle (Section 6). Theorem 3.1.4(3) keeps one hypothesis for a
+  Mahler on critical lattices and circumscribed hexagons, Mahler's Lemma 3 on irreducible domains
+  (in full, along the two papers of Mahler on which its proof rests, with their errors and gaps
+  repaired), and the Euler–Arnold equation (Section 2). Filippov's theorem, which
+  no proof uses, is proved there too. A Pontryagin extremal is defined by the conditions of the
+  maximum principle (Section 6). Theorem 3.1.4(3) keeps one hypothesis for a
   general convex disk (E13, approved by the user); for balanced disks it holds.
 - **Build.** `lake build` succeeds; the only `sorry`s are the two statements of [`Challenge.lean`](Challenge.lean),
   by design. There is no `axiom`, `admit` or `native_decide`. [`scripts/Audit.lean`](scripts/Audit.lean) checks that every
   declaration of the library and the two Challenge theorems depend only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext),
   [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound). Palomar's Comparator accepts [`Solution.lean`](Solution.lean) against
   [`Challenge.lean`](Challenge.lean) under Lean's kernel and NanoDa.
-- **Statements.** One result of the book is false and is formalized in corrected form, with a
-  machine-checked counterexample to the printed statement (Lemma 2.2.1, E1, approved by the user).
-  Six statements and definitions are corrected for slips: a definition missing a hypothesis
-  (Definition 2.3.4, E6), two misprints in definitions (E16, E20), the nontriviality condition of a
-  Pontryagin extremal (E21), and missing hypotheses in Theorem 3.1.4(3) (E13, approved by the user),
-  Lemma 4.2.3 (E17) and Lemma 7.3.1 (E26). Slips in proofs (E8, E14, E24) are corrected where they
-  occur. Otherwise the Lean statements differ from the book's only by the omitted hypotheses of
-  Section 5 and the readings of Section 6.
+- **Statements.** Two results of the book are false as stated and are formalized in corrected
+  form, approved by the user: Lemma 2.2.1, with a machine-checked counterexample to the printed
+  statement (E1), and Theorem 7.7.1, which holds only up to time translation and for terminal times
+  near `t_f` (E32). Nine further statements and definitions are corrected: a definition missing a
+  hypothesis (Definition 2.3.4, E6), two misprints in definitions (E16, E20), the nontriviality
+  condition of a Pontryagin extremal (E21), and missing hypotheses in Theorem 3.1.4(3) (E13),
+  Lemma 3.1.8 (E34) and Theorem 6.1.1 (E35), each approved by the user, and in Lemma 4.2.3 (E17)
+  and Lemma 7.3.1 (E26). Slips in proofs (E8, E14, E24) are corrected where they occur. Otherwise
+  the Lean statements differ from the book's only by the omitted hypotheses of Section 5 and the
+  readings of Section 6.
 - **Proofs.** Every proof follows the book's argument, except the departures listed in Section 7,
   each forced by an error or gap of the book or by mathematics Mathlib lacks: Lemma 2.2.1 (its
   printed form is false), Lemma 2.2.5 (a gap the book's lines cannot close, closed by Mahler's
   lattice route, chosen by the user), one step each of Lemmas 2.4.2 and 2.4.6, the area formula of
-  §3.2 (Green's theorem), Jacobi's formula (Lemma 3.1.12, approved by the user) and Lemma 4.3.1.
-  The other gaps are filled along the book's lines. The route check
-  ([`scripts/route_check.py`](scripts/route_check.py) against [`docs/paper_routes.tsv`](docs/paper_routes.tsv)) passes; its recorded differences are
+  §3.2 (Green's theorem), Jacobi's formula (Lemma 3.1.12, approved by the user), Lemma 4.3.1 and
+  one step of Theorem 7.7.1 (the fixed points of the Poincaré map near the octagon's, which the
+  book's argument does not give uniformly). The other gaps are filled along the book's lines.
+  The route check ([`scripts/route_check.py`](scripts/route_check.py) against [`docs/paper_routes.tsv`](docs/paper_routes.tsv)) passes; its recorded differences are
   listed with their reasons in [`docs/route_differences.tsv`](docs/route_differences.tsv) (Section 8).
 - **Redundant hypotheses.** Eight results of the book and one cited result hold without some of
   their hypotheses; the Lean statements omit them (Section 5). The Challenge keeps the book's
-  hypotheses.
+  hypotheses. Lemma 3.1.8, Proposition 6.4.1 and Filippov's theorem keep hypotheses of the book or
+  of the source that their proofs do not use (Section 5).
 
 ## 1. Summary
 
@@ -63,11 +75,15 @@ Status of the formalization:
   half-plane control problem (E20). The nontriviality condition of a Pontryagin extremal, imposed on
   the full costate `(Λ₁, Λ₂)`, makes every admissible trajectory an extremal (E21); it must be
   imposed on the reduced costate `(Λ₁, Λ_R)`, as the formalization does, for Theorem 7.5.6 to say
-  anything. Slips that do not affect any result: the definition of a critical lattice omits
-  admissibility (E6), an equation written too early in the proof of Theorem 2.3.9 (E7), a sign in
-  the proof of Lemma 2.4.2 (E8), an index in the proof of Lemma 2.4.5 (E10), an index in the proof
-  of Theorem 3.4.2 (E14), a sign convention in the proof of Proposition 6.5.1 (E22), and the
-  eigenvectors of §7.1 (E24).
+  anything. Theorem 7.7.1 (the smoothed octagon is an isolated extremal) is false read literally:
+  the octagon's lift started at another time, or run for several laps, is another extremal
+  satisfying the transversality conditions with a nearby or the same initial condition; it holds up
+  to time translation and for terminal times near `t_f` (E32). Slips that do not affect any result:
+  the definition of a critical lattice omits admissibility (E6), an equation written too early in
+  the proof of Theorem 2.3.9 (E7), a sign in the proof of Lemma 2.4.2 (E8), an index in the proof
+  of Lemma 2.4.5 (E10), an index in the proof of Theorem 3.4.2 (E14), a sign convention in the
+  proof of Proposition 6.5.1 (E22), the eigenvectors of §7.1 (E24), and the sign of the switching
+  functions in the proof of Theorem 7.7.1 (E32).
 - **Gaps.** The proof of Lemma 2.2.5 (the minimizer has no corners) has a gap that its shaving
   argument cannot close; the formalization closes it by Mahler's lattice route (E4). The smoothed
   octagon's density value rests on a fact the book never proves, that a balanced disk has least
@@ -75,11 +91,20 @@ Status of the formalization:
   maximum principle for the smoothed polygons rests is left "as a tedious but elementary exercise"
   (Lemma 7.5.3, E29): it is true, tight at one corner, and proved here. Lemma 4.3.1 does not justify
   that the minimizer has area less than `π` (E19). Lemma 2.4.6 applies a theorem about smooth
-  curves to curves that are only `C¹,¹` (E11). Further gaps, all filled: E2, E3, E5, E7, E8, E9,
-  E15, E18, E23, E30, E31. Theorem 7.7.1 has only a proof sketch (E32).
+  curves to curves that are only `C¹,¹` (E11). The proof of Theorem 7.7.1 is a sketch: it does not
+  argue that nearby extremals switch as the octagon does, does not give the "direct calculation" of
+  hyperbolicity, and applies the implicit function theorem in a way that does not give the
+  uniformity its conclusion needs; the formalization supplies all three, the last by a different
+  argument (E32). Remarks 7.5.2 and 7.6.4 are stated without proof (the second is read off a
+  figure), and the smoothed `(6k−2)`-gons of Remark 7.6.2 without the condition that closes them;
+  both remarks are true and proved here (E36, E37). Further gaps, all filled: E2, E3, E5, E7, E8,
+  E9, E15, E18, E23, E30, E31, E34.
 - **Missing hypotheses.** Theorem 3.1.4(3) is false for a general convex disk; it holds under the
-  standing assumptions of §2.4 (E13). Lemma 4.2.3 needs `X ≠ 0` (E17). Lemma 7.3.1 needs
-  `⟨X, Z_u⟩ ≠ 0` on the control set, which its proof uses (E26).
+  standing assumptions of §2.4 (E13). Lemma 3.1.8 is false unless the curves are regular, as §2.4
+  assumes (E34). Filippov's theorem (Theorem 6.1.1) claims that an optimal control exists when
+  the velocity sets are convex; this fails for costs that depend on the control, and holds when the
+  velocity sets extended by the cost are convex (E35). Lemma 4.2.3 needs `X ≠ 0` (E17). Lemma
+  7.3.1 needs `⟨X, Z_u⟩ ≠ 0` on the control set, which its proof uses (E26).
 - **Redundant hypotheses.** Several hypotheses are not needed; the Lean statements drop them
   (Section 5). The most notable: Lemma 7.3.1 holds for every compact convex control set on which
   `⟨X, Z_u⟩ ≠ 0`, not only one in the plane `u₀ + u₁ + u₂ = 1`.
@@ -87,11 +112,15 @@ Status of the formalization:
   lattice density formula, Minkowski's and Mahler's theorems on critical lattices and circumscribed
   hexagons, and Shifrin's characterization of convex curves; the control-theoretic chapters cite
   the Euler–Arnold equations (Cushman–Bates, with a sign slip, E22), the Iwasawa decomposition and
-  Rademacher's theorem. All are proved here, in [`External/`](External) or from Mathlib, except Shifrin's, which
+  Rademacher's theorem, and state Filippov's theorem without a source (Theorem 6.1.1, E35). All are
+  proved here, in [`External/`](External) or from Mathlib, except Shifrin's, which
   is applied outside its hypotheses and replaced by a direct argument (E11) (Section 2).
-- **Literature.** Theorem 7.5.6 was announced in Hales's 2017 preprint (Section 10). The book is
-  still an unrefereed preprint, with no newer version or erratum. One date in its bibliography is
-  wrong, and two citations are to later editions (E33).
+- **Literature.** Theorem 7.5.6 was announced in Hales's 2017 preprint, which also sketches another
+  proof of Theorem 7.7.1 (Section 10). The book is still an unrefereed preprint, with no newer
+  version or erratum. One date in its bibliography is wrong, two citations are to later editions,
+  the entry cited for the maximum principle, Agrachev and Sachkov's book, names M. I. Zelikin as
+  its first author, and the paper of Mahler cited with Minkowski for Theorem 2.3.6 states only
+  part of it, quoted from Minkowski without proof (E33).
 
 ## 2. Results from prior work and how the paper uses them
 
@@ -102,9 +131,37 @@ Status of the formalization:
 | Euler–Arnold equation for left-invariant Hamiltonians on matrix groups, `μ' = [μ, δh/δμ]` for `μ = pg` | Cushman–Bates, cited in the proof of Proposition 6.5.1 | [`External.euler_arnold`](External/EulerArnold.lean#L72) | [`proposition6_5_1`](SmoothedPolygons/Ch6/Hamiltonian.lean#L319) |
 | Fejes Tóth's theorem: for a centrally symmetric convex disk, no packing of congruent copies is denser (even in upper density) than the best lattice packing | L. Fejes Tóth 1950; cited as Theorem 2.1.3 | [`External.fejes_toth`](External/FejesToth.lean#L882) | [`theorem2_1_3`](SmoothedPolygons/Ch2/Density.lean#L252) |
 | The upper and lower densities of a lattice arrangement of a convex body are `V(C)/d(L)` | Gruber, *Convex and Discrete Geometry*, Cor. 30.1; cited in Definition 2.1.2 | [`External.gruber_corollary_30_1`](External/Gruber.lean#L320) | [`definition2_1_2`](SmoothedPolygons/Ch2/Density.lean#L86) |
-| A critical lattice has a basis and a third point on the boundary forming a parallelogram of area `Δ(K)`, and conversely | Minkowski 1907, Mahler 1946/1947 (Lemma 2); cited as Theorem 2.3.6 | [`External.minkowski_mahler`](External/MinkowskiMahler.lean#L964) | [`theorem2_3_6`](SmoothedPolygons/Ch2/Mahler.lean#L100) |
-| The circumscribed hexagon of a critical lattice: unique tac-lines, area `4Δ(K)`, sides bisected, least area | Mahler 1947, Theorems 1 and 2; cited as Theorem 2.3.7 | [`External.mahler_1947`](External/Mahler1947.lean#L1700) | [`theorem2_3_7`](SmoothedPolygons/Ch2/Mahler.lean#L169) |
-| In an irreducible domain every tac-line contains a point of a critical lattice (a weak form of the "only if" half of Mahler's Lemma 3; all that is used) | Mahler 1947, Lemma 3; cited after Definition 2.3.5 | [`External.mahler_irreducible`](External/MahlerIrreducible.lean#L196) | [`lemma2_2_5`](SmoothedPolygons/Ch2/Reinhardt.lean#L3754) |
+| A critical lattice has a basis and a third point on the boundary forming a parallelogram of area `Δ(K)`, and conversely | Minkowski 1907, Mahler 1947 (Lemma 2); cited as Theorem 2.3.6, from Minkowski and Mahler 1946 (E33) | [`External.minkowski_mahler`](External/MinkowskiMahler.lean#L964) | [`theorem2_3_6`](SmoothedPolygons/Ch2/Mahler.lean#L113) |
+| The circumscribed hexagon of a critical lattice: unique tac-lines, area `4Δ(K)`, sides bisected, least area | Mahler 1947, Theorems 1 and 2; cited as Theorem 2.3.7 | [`External.mahler_1947`](External/Mahler1947.lean#L1700) | [`theorem2_3_7`](SmoothedPolygons/Ch2/Mahler.lean#L182) |
+| A symmetric convex domain is irreducible (no symmetric convex proper subdomain has the same `Δ`) if and only if every boundary point lies on a critical lattice; hence, in an irreducible domain, every tac-line contains a point of a critical lattice, one of the six boundary points of a configuration of Mahler's Lemma 2 | Mahler 1947, Lemma 3, stated there without proof; cited after Definition 2.3.5. Proved along Mahler's paper A and Mahler 1946 (below) | [`External.mahler_irreducible_iff`](External/MahlerIrreducible/Lemma3.lean#L367); [`External.mahler_irreducible`](External/MahlerIrreducible/Lemma3.lean#L383), derived from it | [`isIrreducible_iff_mahlerIrreducible`](SmoothedPolygons/Ch2/Mahler.lean#L99) (the remark after Definition 2.3.5); [`lemma2_2_5`](SmoothedPolygons/Ch2/Reinhardt.lean#L3754) |
+| Filippov's theorem: for a control system on `ℝⁿ` with compact control set, convex velocity sets and `f` of compact support, the attainable sets (at time `T` and up to time `T`) are compact, and an optimal control exists for an integral cost when the velocity sets extended by the cost are convex, with fixed or free terminal time | Agrachev–Sachkov, *Control Theory from the Geometric Viewpoint*, Thm 10.1; cited as Theorem 6.1.1 without a source (E35) | [`External.filippov`](External/Filippov.lean#L150) | none: it is Theorem 6.1.1 (its application in §6.1 needs Chapter 5) |
+
+Mahler 1947 states Lemma 3 without proof and refers to Lemmas 8 and 12 of "paper A", Mahler's *On
+irreducible convex domains* (Proc. KNAW 50 (1947) 98–107; the book does not cite it). Paper A
+proves its Lemmas 1, 2, 5–7 and 13 and quotes Lemmas 8, 10, 11 and 12 from Theorems B–E of
+Mahler's *Lattice points in n-dimensional star bodies II. Reducibility theorems I* (Proc. KNAW 49
+(1946) 331–343, the book's entry `mahler1946lattice`). We read both from scans of Mahler's
+collected works (CARMA archive, items 094 and 088), and the proof follows them, down to the 1946
+paper, as the user chose: paper A's lemmas
+are in [`External/MahlerIrreducible.lean`](External/MahlerIrreducible.lean); Theorems B and C, with paper A's Lemmas 10 and 11 and the
+class-B case of its Lemma 13, in [`External/Mahler1946/TheoremC.lean`](External/Mahler1946/TheoremC.lean); Theorems D and E, with paper
+A's Lemma 12, in [`External/Mahler1946/TheoremE.lean`](External/Mahler1946/TheoremE.lean); and Lemma 3 in
+[`External/MahlerIrreducible/Lemma3.lean`](External/MahlerIrreducible/Lemma3.lean). "Only if" is the proof of paper A's Lemma 13: extreme
+points of `K` through the proof of Theorem C (paper A's Lemma 10) and a cut by a line, inner points
+of boundary segments through paper A's Lemmas 5–7, using that the boundary points on critical
+lattices form a closed set (Theorem B, paper A's Lemma 11); "if" is Theorems D and E with paper A's
+Corollary to Lemma 5 and Lemma 1. The form that Lemma 2.2.5 uses (each tac-line contains
+a point of a critical lattice) follows with paper A's Lemmas 3 and 4. The errors and gaps of the
+sources, all repaired, and the two small departures from them are in Section 7.
+
+Filippov's theorem is proved by the standard argument: the trajectories are equi-Lipschitz, a
+limit is extracted by Tychonoff's theorem (pointwise convergence suffices, so Arzelà–Ascoli is not
+needed), its velocities lie in the closed convex velocity sets (by closed thickenings of them), a
+control realizing them is chosen measurably (a Kuratowski–Ryll-Nardzewski selection, proved in
+[`Basic/MeasureTheory/MeasurableSelection.lean`](Basic/MeasureTheory/MeasurableSelection.lean); Mathlib has none), and optimal controls come from the
+system extended by the cost ([`Basic/Analysis/ODE/ControlSystem.lean`](Basic/Analysis/ODE/ControlSystem.lean)). Agrachev and Sachkov's text
+was not available to us, so the proof was not compared with theirs; the statement is the book's,
+with the source's standing smoothness assumptions on `f` (Section 5) and the correction of E35.
 
 ### Assumed
 
@@ -125,6 +182,7 @@ None.
 | Existence of a critical lattice (Mahler's compactness theorem) | proof of Theorem 2.3.9 (E7) | proved in the plane: [`PlaneLattice.exists_admissible_covolume_le`](Basic/Algebra/Module/ZLattice/PlaneCritical.lean#L288) in [`Basic/`](Basic) |
 | Separating hyperplane theorem | proof of Lemma 2.2.1 | Mathlib (`geometric_hahn_banach_*`) |
 | Uniqueness of solutions of linear ODEs | §7.1 general solutions, Theorem 7.5.1 | [`Matrix.ODE_solution_unique_of_bound`](Basic/Analysis/Calculus/MatrixFTC.lean#L281) and relatives in [`Basic/`](Basic) (Grönwall) |
+| Implicit and inverse function theorems | proof of Theorem 7.7.1 (TeX 6588–6591, 6616) | Mathlib (`HasStrictFDerivAt.implicitFunctionOfProdDomain`; local injectivity from `ApproximatesLinearOn`) |
 
 ### Does the paper use each cited result correctly?
 
@@ -132,9 +190,9 @@ None.
 | --- | --- | --- |
 | Fejes Tóth's theorem | Theorem 2.1.3; proof of Theorem 2.2.2 | Correct. |
 | Gruber, Cor. 30.1 | Definition 2.1.2 | Correct; the packing hypothesis is not needed (Section 5). |
-| Minkowski, Mahler (critical lattices) | Theorem 2.3.6 | Correct, with the sources' definition of a critical lattice (E6). |
+| Minkowski, Mahler (critical lattices) | Theorem 2.3.6 | Correct, with the sources' definition of a critical lattice (E6); the cited paper of Mahler (1946) states only part of it, quoted from Minkowski (E33). |
 | Mahler 1947, Theorems 1 and 2 | Theorem 2.3.7, proof of Theorem 2.3.9 | Correct. |
-| Mahler 1947, Lemma 3 | remark after Definition 2.3.5 | Correct; the formalization proves the weak form of one half that Lemma 2.2.5 needs. |
+| Mahler 1947, Lemma 3 | remark after Definition 2.3.5 | Correct. Mahler states it without proof; the papers on which its proof rests (paper A and Mahler 1946) have errors and gaps, none fatal, repaired in the formalization, which proves the lemma in full (Section 7). |
 | Blaschke selection theorem | proof of Lemma 2.2.5 | Correct, but not sufficient alone for the existence of `K_min` (E4). |
 | Hales 2011, Lemmas 11, 17, 18 | proofs of Lemmas 2.4.2, 2.4.3 (recalled) | The recalled arguments have gaps (E8, E9), filled here. |
 | Shifrin, Proposition 3.8 | proof of Lemma 2.4.6 | Applied outside its hypotheses (smooth curves); replaced by a direct argument (E11). |
@@ -142,15 +200,18 @@ None.
 | Euler–Arnold equations for left-invariant Hamiltonians (Cushman–Bates) | proof of Proposition 6.5.1 (TeX 5030–5040) | Correct conclusion `Λ₁' = [Λ₁, X]`; the identification of `ad*` with `-ad` is inconsistent with the book's own definition of `ad*` (E22). Proved here in the form the book uses ([`External.euler_arnold`](External/EulerArnold.lean#L72)). |
 | Iwasawa decomposition | proof of Lemma 4.1.1 | Correct. |
 | Rademacher's theorem | Corollary 3.1.10 | Correct. |
-| Jurdjevic (attribution) | Proposition 6.4.1, Corollary 6.5.3 | Corollary 6.5.3 is proved in the book by differentiation; correct. |
-| Pontryagin maximum principle (Zelikin–Borisov) | §6.2 | Used as the definition of a Pontryagin extremal; no theorem about it is needed in the formalized chapters. |
-| Filippov's theorem (Zelikin–Borisov) | Theorem 6.1.1 | Not formalized (outside the formalized results' proofs). |
+| Jurdjevic (attribution) | Definition 6.3.1, Proposition 6.4.1, Corollary 6.5.3 | The book proves Proposition 6.4.1 (in one line) and Corollary 6.5.3 (by differentiation); correct. |
+| Pontryagin maximum principle (Agrachev–Sachkov; the bibliography names Zelikin first, E33) | §6.2 | Used as the definition of a Pontryagin extremal; no theorem about it is needed in the formalized chapters. |
+| Filippov's theorem (no source given; Agrachev–Sachkov, Thm 10.1) | Theorem 6.1.1, its application in §6.1 | The existence of an optimal control needs the convexity of the velocity sets extended by the cost, which holds for the Reinhardt problem, whose cost depends only on the state (E35); the application also needs Chapter 5's compactification (not formalized). |
 
 The other citations of the formalized chapters (Reinhardt 1934, Minkowski's other works, Hales 2017, Jurdjevic 2016,
 Perelomov, Babelon et al., Colombo–de Diego, Gay-Balmaz et al., Vajjha's thesis) give context and
 are not used in proofs; Vajjha's thesis is cited for the omitted proof of Theorem 6.8.3.
 
 ## 3. Errors and gaps in the paper
+
+E1–E32 follow the order of the book and E33 concerns its bibliography. E34–E37, found when the
+remaining results of the formalized chapters were formalized, follow, again in the book's order.
 
 **E1. Lemma 2.2.1, §2.2 (TeX 1317–1351): false.** The lemma says that every lattice packing
 `K + L` of a centrally symmetric convex disk is realized by a parallelogram or centrally symmetric
@@ -392,30 +453,138 @@ follows from the rotational symmetry and Lemma 7.5.3, and the reduction of the m
 `U_T` to its vertices from the form of the Hamiltonian (Lemma 7.3.1); the book leaves all of this
 implicit. The formalization proves it ([`poly_isPontryaginExtremal`](SmoothedPolygons/Ch7/SmoothedPolygon.lean#L255)).
 
-**E32. Theorem 7.7.1, §7.7 (TeX 6535–6630): proof sketch.** The proof that the smoothed octagon is
-an isolated extremal is a sketch: it rests on "Direct calculation shows that the fixed point is
-hyperbolic" for a Poincaré map defined through switching times, which the book does not give.
-Not formalized.
+**E32. Theorem 7.7.1, §7.7 (TeX 6543–6623): false read literally; the proof is a sketch.**
+(a) The theorem says that "in some neighborhood of the set of initial conditions in the cotangent
+space, the only extremal trajectory satisfying the transversality conditions at the endpoints is
+that of the smoothed octagon". Read literally, this fails in two ways. The octagon's lift started
+at a time `s` (with `g(t) = g_oct(s)⁻¹g_oct(s + t)`) is another extremal satisfying all the
+transversality conditions, and its initial condition tends to the octagon's as `s → 0`. The
+octagon's lift on `[0, 28t_sw]` (seven turns) satisfies them too, with the same initial condition
+as on `[0, t_f] = [0, 4t_sw]`. The costate is moreover determined only up to a positive factor.
+With the user's approval, the formalization reads the theorem up to time translation, for terminal
+times near `t_f`, and in a conic neighbourhood of the octagon's initial condition normalized by
+`λ_cost = -1` ([`theorem7_7_1`](SmoothedPolygons/Ch7/Isolated.lean#L508)): an extremal with `|T - t_f| < ε` whose initial condition lies in
+the cone over the neighbourhood is the octagon's lift started at some `s ∈ [0, 3t_sw)`, with
+costate `-λ_cost` times the octagon's; in particular `T = t_f` and `λ_cost < 0`. The octagon's own
+lift meets the hypotheses ([`theorem7_7_1_octagon`](SmoothedPolygons/Ch7/Isolated.lean#L633)), so the statement is not vacuous. The book's
+proof also works up to time translation, on a Poincaré section, and only with four switching
+intervals (eqn:fp).
+(b) The proof is a "proof sketch". It considers the Poincaré map `f(q₀) = Ad(R)q(t_sw(q₀), q₀)`
+on a section `χ_ij = 0` of the manifold `M_d` where `det Λ₁ = d` (the formalization takes
+`χ₂₃ = 0`), rests on "Direct calculation shows that the fixed point `q_oct` is hyperbolic" (TeX
+6612), which the book does not give, and leaves these gaps, all filled in the formalization (the
+module docstring of [`SmoothedPolygons.Ch7.Isolated`](SmoothedPolygons/Ch7/Isolated.lean) lists them with the steps that fill them):
+an extremal near the octagon need not start on the section, so it must be restarted where it
+crosses it; that nearby
+extremals are bang-bang with the octagon's switching sequence is not argued (it needs the strict
+inequality of Lemma 7.5.3 at the third vertex, the exclusion of singular arcs and chattering at
+the switching points, and continuous dependence for the discontinuous extremal dynamics);
+Remark 7.5.4 asserts only that the slope of `χ₃₂` at `0` is positive, whereas the Poincaré time
+needs the transversal zero of `χ₃₁` at `t_sw`, which follows from the symmetry
+`χ₃₁(t_sw - t) = χ₃₂(t)` of the proof of Lemma 7.5.3 (TeX 6220); the parameter `y₀(d)` comes from
+Remark 7.5.2, which the book does not prove (E36); and the last step, "the only fixed point
+`q_fix(d)` satisfying (eqn:theta-k) is `q_oct`", uses Lemma 7.5.5 in the converse direction, which
+follows from the eigenvalue comparison of its proof (E30), as in the formalization. The direct
+calculation is supplied: on the four-dimensional tangent space of the section the derivative of
+`f` has an explicit matrix whose characteristic polynomial is reciprocal, with multipliers
+`≈ -7.7464, -2.1122, -0.4734, -0.1291`, and two certified inequalities show that none has modulus
+`1`. The step "by the implicit function theorem, for each `d` near `d_oct`, the function `f_d⁴ - I`
+can be inverted in an open neighborhood of the fixed point `q_fix(d)` ... Thus, the only fixed
+points near `q_oct` are the fixed points `q_fix(d)`" (TeX 6615–6620) needs neighbourhoods uniform
+in `d`, which a separate application for each `d` does not give; the formalization applies the
+inverse function theorem once, at `q_oct` (Section 7). The proof writes the switching functions as
+`χ_ij = ⟨Λ_R, P_i - P_j⟩` (TeX 6573), the opposite sign of eqn:switch (TeX 6072–6078); this is
+harmless, as only their zeros are used.
 
-**E33. Bibliography and history (Chapter 1).** Tammela's bound is from 1970 (*Izv. Vyssh. Uchebn.
+**E33. Bibliography and history.** Tammela's bound is from 1970 (*Izv. Vyssh. Uchebn.
 Zaved. Mat.* 1970, no. 12(103), 103–107); the bibliography prints 1969 and gives the running issue
 number 103 as the volume. The text's "Ennola in 1961 and Tammela in 1969 showed
-`inf δ ≥ 0.8926…`" credits Tammela's bound to both: Ennola proved about `0.88`. The book cites the
-1988 English translation of Nazarov's 1986 paper (*Zap. Nauchn. Sem. LOMI* 151) and a 2017
-reissue of Kupka's 1990 paper. These do not affect the mathematics.
+`inf δ ≥ 0.8926…`" (Chapter 1) credits Tammela's bound to both: Ennola proved about `0.88`. The
+book cites the 1988 English translation of Nazarov's 1986 paper (*Zap. Nauchn. Sem. LOMI* 151)
+and a 2017 reissue of Kupka's 1990 paper. The entry `zelikin2004control`, which the book cites for
+the Pontryagin maximum principle (TeX 737, 4674), is A. A. Agrachev and Yu. L. Sachkov, *Control
+Theory from the Geometric Viewpoint* (Springer, 2004); the bibliography lists M. I. Zelikin as its
+first author and Sachkov twice. Theorem 2.3.6 is attributed to "Minkowski
+[`minkowski1907diophantische`], Mahler [`mahler1946lattice`]" (TeX 1789). The cited communication
+of Mahler (*Lattice points in n-dimensional star bodies II. Reducibility theorems I*, Proc. KNAW 49
+(1946) 331–343) only quotes, without proof and crediting Minkowski, the six-point statement (A)
+(p. 340): every critical lattice of a convex domain in the plane has at least six points on its
+boundary, and in suitable coordinates exactly six are `(1, 0)`, `(0, 1)`, `(−1, 1)` and their
+negatives. It states neither the theorem's form, with a basis and the area of the parallelogram,
+nor its converse; the converse is asserted ("as is easily seen") in the second communication of
+the series (p. 444). The book's wording matches Lemma 3 of Mahler's paper A (p. 101; Section 2).
+The formalization follows Minkowski and Mahler 1947, Lemma 2
+([`External.minkowski_mahler`](External/MinkowskiMahler.lean#L964)). These do not affect the
+mathematics.
+
+**E34. Lemma 3.1.8, §3.1 (TeX 2554–2579): missing hypothesis; two gaps.** The lemma assumes that
+the boundary of `K` "is parameterized by a `C¹` multi-curve `σ`". Without regularity it is false:
+for the square `[-λ, λ]²` with `λ² = √3/2`, there is a `C¹` multi-curve on the boundary in which
+`σ₂ = (-λ, 0)` is constant while `σ₁` and `σ₃ = -σ₀` slide along the parallel edge lines `y = λ`
+and `y = -λ` (continued around the square, one pair `±σ_j` at rest at a time, it parametrizes the
+whole boundary), and no hyperbola has parallel asymptotes. §2.4 parameterizes the boundary "by a
+regular `C¹` curve" (TeX 1945–1946); with the user's approval, the formalization assumes that
+every `σ_j` is regular, `σ_j' ≠ 0` ([`lemma3_1_8`](SmoothedPolygons/Ch3/HyperbolicArc.lean#L772), Section 4). The proof then follows the book's
+(the tangent lines at the multi-point cut out a hexagon `H_K(t)` with edge midpoints `σ_j(t)` and
+area `√12`, the parallelogram `P_K` has constant area, and Reinhardt's observation on the pencil of
+lines cutting a constant area), with two gaps filled: the book takes the lines traced by
+`±σ_{i-1}` and `±σ_{i+1}` to bound a parallelogram, that is, the lines of `σ_{i-1}` and `σ_{i+1}`
+not to be parallel, and does not show that the hyperbola is nondegenerate (its constant is not
+`0`). Both follow from regularity: each line supports `K`, and in either degenerate case one of
+the curves would be constant.
+
+**E35. Theorem 6.1.1 (Filippov), §6.1 (TeX 4538–4546): missing hypothesis; no source.** For
+`q' = f(q, u)` on a manifold, with compact control set `U`, convex velocity sets `f(q, U)` and `f`
+of compact support, the theorem asserts that "the attainable sets are compact and an optimal
+control exists" for the cost `∫φ(q, u) dt`. The second claim fails when `φ` depends on `u`: on
+`ℝ`, with `q' = uψ(q)`, `U = [-1, 1]` and a bump `ψ` equal to `1` on `[-1, 1]`, the cost
+`∫₀¹ (q² + 1 - u²) dt` from `q(0) = 0` to `q(1) = 0` has infimum `0` (chattering controls
+`u = ±1`) and no minimizer (cost `0` forces `q = 0`, hence `u = 0` almost everywhere, of cost
+`1`). It holds when the extended velocity sets `{(f(q, u), φ(q, u)) | u ∈ U}` are convex, which is
+the book's hypothesis when `φ` depends only on the state, as the Reinhardt cost `-(3/2)⟨J, X⟩`
+does; with the user's approval the formalization states it so, on `ℝⁿ`, for fixed and free
+terminal time ([`External.filippov`](External/Filippov.lean#L150); Sections 4 and 6). §6.1 cites no source for the theorem; Hales's
+2017 preprint cites it as Theorem 10.1 of Agrachev and Sachkov's book, the entry
+`zelikin2004control` of the bibliography (E33).
+
+**E36. Remark 7.5.2, §7.5 (TeX 6185–6203): stated without proof.** The remark says that
+`d(y₀) = det Λ₁` is a constant of motion, given by an explicit formula, and that `d` is increasing
+on `(1/√3, 1)` with range `(0, 9/4)`, so that it determines `y₀`; the proof of Theorem 7.7.1 uses
+this to define `y₀(d)` (TeX 6581). The book gives no proof; a comment in the TeX source (TeX
+6199–6201) says that "the derivative factors in a nice way". The formalization follows that hint:
+`d' = E·F/(36y⁹)` with `E = 3 + 6y² - (1 + 3y²)ℓ`, `F = 2ℓ(3y⁴ - 1) + 9y⁶ - 9y⁴ - 6y² + 6` and
+`ℓ = ln(4/(3y² + 1))`, and `E, F > 0` on the interval by the bounds `ln x ≤ x - 1` and
+`ln x ≥ 2(x - 1)/(x + 1)` for `x ≥ 1` ([`remark7_5_2`](SmoothedPolygons/Ch7/Remarks.lean#L214)). The remark is true.
+
+**E37. Remarks 7.6.2 and 7.6.4, §7.6 (TeX 6402–6438): a condition not stated, and a claim read
+off a figure.** Remark 7.6.2 defines the smoothed `(6k−2)`-gons by their control mode sequence
+(eqn:3k+2), switching time, initial point `z₀ = iy₀` with `y₀ > 1` and initial control `e₂` ("The
+changes are minor"), but does not state the condition that fixes `y₀`, the analogue of
+eqn:theta-k. The argument of Lemma 7.5.5 gives `4/(3y₀² + 1) = 2cos(πk/(3k − 1))`; that this
+closes the curve, `g(t_f) = R`, was checked numerically for `k = 2, 3`, not in Lean. Remark 7.6.4
+says that at `k = 1` the smoothed `(6k−2)`-gon "degenerates to a rectangle with corners and area
+`√12`", which the book reads off a figure ("the shape appears to be tending to a rectangle of area
+`√12` as `k ↦ 1`", TeX 6435–6438) and does not prove. At `k = 1` the closing condition has no solution
+(`y₀ = ∞`), so the formalization reads the remark as the limit `k → 1⁺` of the `(6k−2)`-gons
+interpolated to real `k` and proves it: the cost tends to `√12`, and the six arcs tend in the
+Hausdorff distance to the boundary of a rectangle of area `√12` ([`remark7_6_4`](SmoothedPolygons/Ch7/Remarks.lean#L1719)); the
+trajectories exist for every real `k > 1` ([`remark7_6_4_exists`](SmoothedPolygons/Ch7/Remarks.lean#L1900)), so the statement is not
+vacuous. The remark is true in this reading.
 
 ## 4. Missing hypotheses
 
 | Where | Missing hypothesis | Counterexample without it | In the formalization |
 | --- | --- | --- | --- |
 | Theorem 3.1.4(3) | `σ_j'` Lipschitz (the standing assumption of §2.4, through Lemma 2.4.3) | unit disk, `σ_j(t) = Rot(t + t^{3/2}) s_j*`, `X = (1 + (3/2)√t)J` | hypothesis of [`theorem3_1_4_lipschitz`](SmoothedPolygons/Ch3/StateDynamics.lean#L283) (approved by the user) |
+| Lemma 3.1.8 | the curves `σ_j` are regular, `σ_j' ≠ 0` (§2.4, TeX 1945–1946: "a regular `C¹` curve") | the square `[-λ, λ]²`, `λ² = √3/2`: `σ₂ = (-λ, 0)` constant while `σ₁`, `σ₃` slide along the parallel lines `y = ±λ` (E34) | hypothesis `hreg` of [`lemma3_1_8`](SmoothedPolygons/Ch3/HyperbolicArc.lean#L772) (approved by the user) |
 | Lemma 4.2.3 | `X ≠ 0` | `X = 0`: `T_0 O_0 = 0` but `𝔰𝔩₂/ℝ·0` has dimension 3 | hypothesis of [`lemma4_2_3`](SmoothedPolygons/Ch4/AdjointOrbit.lean#L432) |
+| Theorem 6.1.1 (Filippov), "an optimal control exists" | the velocity sets extended by the cost, `{(f(q, u), φ(q, u)) \| u ∈ U}`, are convex (the book's hypothesis when `φ` does not depend on `u`) | on `ℝ`, `q' = uψ(q)`, `U = [-1, 1]`, a bump `ψ` with `ψ = 1` on `[-1, 1]`: `∫₀¹ (q² + 1 - u²) dt` from `q(0) = 0` to `q(1) = 0` has infimum `0` and no minimizer (E35) | hypothesis of the second part of [`External.filippov`](External/Filippov.lean#L150) (approved by the user) |
 | Lemma 7.3.1 | `⟨X, Z_u⟩ ≠ 0` on `U` (used by the proof, TeX 5792) | a segment `U` of the plane `u₀ + u₁ + u₂ = 1` crossing the line where `⟨X, Z_u⟩ = 0`: the Hamiltonian is undefined there | hypothesis `hden` of [`lemma7_3_1`](SmoothedPolygons/Ch7/Faces.lean#L49) |
 
 ## 5. Redundant hypotheses
 
-Each hypothesis below is omitted from the Lean statement, which is therefore more general than the
-book's. The Challenge statements keep the book's hypotheses.
+Each hypothesis in the table is omitted from the Lean statement, which is therefore more general
+than the book's. The Challenge statements keep the book's hypotheses.
 
 | Result | Hypothesis that is not needed | Why |
 | --- | --- | --- |
@@ -429,6 +598,19 @@ book's. The Challenge statements keep the book's hypotheses.
 | Lemma 7.3.1 ([`lemma7_3_1`](SmoothedPolygons/Ch7/Faces.lean#L49)) | the control set lies in the plane `u₀ + u₁ + u₂ = 1` | `Z_u` is linear in `u`, so `H` is a linear-fractional function of `u` on any compact convex set on which `⟨X, Z_u⟩ ≠ 0` (hypothesis `hden`, E26) |
 | Gruber, Cor. 30.1 ([`External.gruber_corollary_30_1`](External/Gruber.lean#L320), cited in Definition 2.1.2) | the translates form a packing | the lattice-point count bounds the sums of the areas of the translates meeting a disk, overlaps counted with multiplicity |
 
+Three Lean statements keep hypotheses that their proofs do not use, because the book or the source
+states them:
+- Lemma 3.1.8 ([`lemma3_1_8`](SmoothedPolygons/Ch3/HyperbolicArc.lean#L772)) keeps `hcover`, that the arcs of `σ` cover `∂K` (part of "the
+  boundary is parameterized by `σ`"); of that hypothesis the proof uses only `hbd`, that the curves
+  lie on `∂K`.
+- Proposition 6.4.1 ([`proposition6_4_1`](SmoothedPolygons/Ch6/LeftInvariant.lean#L91)) keeps the nondegeneracy, symmetry and invariance of the bilinear
+  form: nondegeneracy is what makes `p ↦ ⟨p, ·⟩` the identification `𝔤 ≅ 𝔤*`, and the identity
+  `H = ⟨p, f(e, u)⟩` holds for every bilinear form.
+- Filippov's theorem ([`External.filippov`](External/Filippov.lean#L150)) keeps the source's standing assumptions that `f` is smooth
+  in `q` with `∂f/∂q` jointly continuous (`hfq`, `hfq'`), which give existence and uniqueness of
+  trajectories; the proof uses only the continuity of `f`, the compactness of `U`, the compact
+  support of `f` and the convexity hypotheses.
+
 ## 6. How the formalization reads the paper
 
 - **Packings and densities (§2.1).** The book's disks `B_r` are Euclidean disks ([`euclidDisk`](Challenge.lean#L280);
@@ -437,14 +619,19 @@ book's. The Challenge statements keep the book's hypotheses.
   The density ratios are taken in `[0, ∞]`; a density exists when the upper and lower densities are
   finite and equal; `δ(K)` and `δ_L(K)` are suprema of real numbers, over nonempty sets bounded by
   `1`. A lattice is a discrete `ℤ`-submodule of `ℝ²` spanning it, and its determinant is Mathlib's
-  covolume, shown equal to `|det|` of any basis ([`definition2_3_2`](SmoothedPolygons/Ch2/Mahler.lean#L57)).
+  covolume, shown equal to `|det|` of any basis ([`definition2_3_2`](SmoothedPolygons/Ch2/Mahler.lean#L58)).
 - **Critical lattices and hexagons (§2.3).** A critical lattice is admissible with determinant
   `Δ(K)` (E6). The critical hexagons of §2.2 are the least-area circumscribed centrally symmetric
   hexagons ([`IsLeastAreaHexagon`](SmoothedPolygons/Ch2/Reinhardt.lean#L66), compared among strictly convex hexagons centred at the origin,
   which gives the same minimum); those of Definition 2.3.8 come from Mahler's construction, and
   Theorem 2.3.9 identifies them. Two notions of irreducibility appear: Definition 2.3.5's (every
   boundary point on a critical lattice) and Mahler's original one (no proper subdomain with the same
-  `Δ`), used in the proof of Lemma 2.2.5.
+  `Δ`), used in the proof of Lemma 2.2.5. In Mahler's notion the subdomains are read as centrally
+  symmetric convex disks ([`External.MahlerIrreducible.IsIrreducible`](External/MahlerIrreducible.lean#L105)); Mahler admits all star domains, and
+  paper A's Lemma 13 shows that for a convex `K` the two readings agree (Section 2). The remark after
+  Definition 2.3.5, that the two notions agree, is proved for every `K ∈ 𝔎_ccs`
+  ([`isIrreducible_iff_mahlerIrreducible`](SmoothedPolygons/Ch2/Mahler.lean#L99), from Mahler's Lemma 3,
+  [`External.mahler_irreducible_iff`](External/MahlerIrreducible/Lemma3.lean#L367)).
 - **Statements about `K_min` (§2.2–2.4).** Lemma 2.2.7's "the midpoints advance monotonically and
   continuously" is formalized with polar-angle lifts; Lemma 2.4.2 is read literally (any `C⁰`
   multi-curve on the boundary); Lemmas 2.4.5 and 2.4.6 assume the positive orientation of §2.4,
@@ -511,61 +698,162 @@ book's. The Challenge statements keep the book's hypotheses.
   whose omitted proof calls the two "equivalent", is formalized in the direction of the statement:
   along a solution of the costate equation for `Λ_R`, `ν = T*Φ(-Λ_R)` satisfies `ν' = -dH`. (The
   book says that §6.8 is not used elsewhere.)
+- **Lemma 3.1.8.** "The boundary is parametrized by a `C¹` multi-curve" is read as in §2.4: `σ`
+  is a `C¹` multi-curve on `[0, t_f]` (Definition 2.4.1) whose points lie on `∂K` and whose arcs
+  cover `∂K`, and its six curves are regular (E34). The lines along which `σ_{i±1}` move are given
+  by a point and a direction; the conclusion is that they are not parallel and that `σ_i([a, b])`
+  lies on one hyperbola `det(d₁, x - p₁)·det(d₂, x - p₂) = c` with `c ≠ 0`, the form of Remark
+  2.2.4's hyperbolas. The proof measures areas by the signed (shoelace) area, for which the book's
+  area bookkeeping holds without showing that the hexagon `H_K(t)` cut out by the tangent lines is
+  convex; that `H_K(t)` is a critical hexagon, as the book calls it, is not needed, only that its
+  edge midpoints are the `σ_j(t)` and its area is `√12`.
+- **The ideal vertices (§4.6).** `ℝℙ¹` is Mathlib's `OnePoint ℝ`, on which `GL₂(ℝ)` acts by linear
+  fractional transformations, and the dihedral group is the subgroup of `GL₂(ℝ)` generated by `R`
+  and `S` ([`dihedralGroup`](SmoothedPolygons/Ch4/IdealVertices.lean#L48)). The formal statements give the action of the generators on
+  `±1/√3` and `+∞` ([`dihedral_smul_idealVertices`](SmoothedPolygons/Ch4/IdealVertices.lean#L59)) and show that every element permutes these three
+  points ([`dihedral_permutes_idealVertices`](SmoothedPolygons/Ch4/IdealVertices.lean#L89)).
+- **Filippov's theorem (Theorem 6.1.1).** The state space is `ℝⁿ` instead of a manifold (for `f`
+  smooth with compact support, the manifold case follows by an embedding in some `ℝᴺ`); a
+  trajectory is a Carathéodory solution driven by a measurable control; "the support of `f` is a
+  compact subset of `M × U`" is read as `f(q, u) = 0` for `q` outside a compact set; the attainable
+  sets are those at time `T` and up to time `T`; and "an optimal control exists" is stated for fixed
+  and for free terminal time (the book applies it with free terminal time `t_f ≤ π/3`, TeX 3207,
+  4583), under the convexity of the extended velocity sets (E35).
+- **Definition 6.3.1 and Proposition 6.4.1.** They are stated on Mathlib's real Lie groups
+  (`LieGroup I ∞ G`): `f(g, u)` is a tangent vector at `g`, `TL_h` is the tangent map `mfderiv`,
+  the Lie algebra `𝔤` is `GroupLieAlgebra I G`, a cotangent vector at `g` is a linear form on
+  `T_g G`, and "invariant" means invariant under the adjoint action. The left trivialization
+  `p̃ = T*L_{g⁻¹}(p)` is part of the statement ([`leftTrivCovector`](SmoothedPolygons/Ch6/LeftInvariant.lean#L72)): the Hamiltonian
+  `⟨p̃, f(g, u)⟩_*` at `p̃`, for `p ∈ 𝔤` identified with `⟨p, ·⟩`, is `⟨p, f(e, u)⟩`. That these
+  coordinates cover `T*G` (Proposition 3.6.1) is not needed for the identity.
+- **Remark 7.5.2.** "Monotonic increasing" is read as strictly increasing, which "the determinant
+  uniquely determines the parameter `y₀`" needs. The remark is about the lift of Theorem 7.5.1
+  normalized by `λ_cost = -1` (for `c(Λ₁, Λ_R, -1)` the determinant is `c²d(y₀)`), on `[0, t_sw]`.
+- **Remark 7.6.4.** "When `k = 1`" is read as the limit `k → 1⁺` of the smoothed `(6k−2)`-gons with
+  `k` real, since the closing condition has no solution at `k = 1` (E37). The claims are that the
+  cost tends to `√12` and that the six arcs `σ_j([0, t_f(k)])` tend in the Hausdorff distance to the
+  boundary of a rectangle of area `√12`, the image of `[-a, a] × [-b, b]` under a Euclidean motion
+  (the proof takes `[-1, 1] × [-√3/2, √3/2]`; Hausdorff convergence does not depend on the norm of
+  `ℝ²`, Mathlib's being the sup norm). The trajectories are quantified universally, and
+  [`remark7_6_4_exists`](SmoothedPolygons/Ch7/Remarks.lean#L1900) shows that they exist.
+- **Theorem 7.7.1.** "In some neighborhood of the set of initial conditions in the cotangent space"
+  is read as a conic neighbourhood: some positive multiple of the costate `(Λ₁(0), Λ_R(0), λ_cost)`,
+  with `X(0)`, lies in a neighbourhood of the octagon's initial condition normalized by
+  `λ_cost = -1` (`g(0) = I₂` is a transversality condition). "The only extremal ... is that of the
+  smoothed octagon" is read up to time translation and for terminal times near `t_f`; without these
+  the statement is false (E32).
 - **Balanced pairs exist.** The unit disk, with `σ_j(t) = Rot(t) s_j*` and `t_f = π/3`, is a
   balanced pair ([`circle_isBalancedPair`](SmoothedPolygons/Ch2/BalancedCircle.lean#L241)), so the hypotheses of the results of Chapter 3 about
   balanced pairs can be met.
-- **Corrections of statements.** E13 (hypothesis, user-approved), E16 (misprint), E17 (`X ≠ 0`), E20
-  (misprint), E21 (nontriviality on the reduced costate), E26 (`⟨X, Z_u⟩ ≠ 0`), and in proofs E14 and
-  E24.
+- **Corrections of statements.** E1 (Lemma 2.2.1 in its packing form, user-approved), E13
+  (hypothesis, user-approved), E16 (misprint), E17 (`X ≠ 0`), E20 (misprint), E21 (nontriviality on
+  the reduced costate), E26 (`⟨X, Z_u⟩ ≠ 0`), E32 (Theorem 7.7.1 up to time translation, with
+  terminal time near `t_f`, user-approved), E34 (regularity, user-approved), E35 (the extended
+  velocity sets, user-approved), and in proofs E14 and E24.
 
 ## 7. Departures from the paper's proofs
 
 | Result | The paper's argument | The formalization's | Why it is necessary | E-item |
 | --- | --- | --- | --- | --- |
 | Lemma 2.2.1 (in its corrected form) | expand `K`, separate touching translates by lines, crop, repeat until the plane is tiled; at most six edges by Euler characteristic | a maximal centrally symmetric convex body `C ⊇ K` free of half-lattice points (Zorn; bounded by Blichfeldt) is cut out by at most three strips, whose unique support points pairwise form lattice bases ([`PlaneLattice.exists_halfLatticeFree_eq_strips`](Basic/Analysis/Convex/LatticePacking.lean#L998)) | the book's argument is aimed at the printed statement, which is false (E1): its termination ("the plane is tiled") and its edge count (Euler characteristic of a tiling) fail; the corrected statement needs another argument (approved by the user) | E1 |
-| Lemma 2.2.5, no corners and critical edges | shave `K` near a boundary point lying on no edge of a critical hexagon; at endpoints of flat segments, "shave as above" | a worst disk is irreducible in Mahler's sense; every support line then contains a point of a critical lattice (a weak form of the "only if" half of Mahler 1947, Lemma 3: a critical-lattice point on each support line, not at each boundary point), where Mahler's Theorem 2 gives a unique support line and the edge of a least-area hexagon | the shaving argument cannot close the case of a segment endpoint on a critical edge off its midpoint (E4); the user chose Mahler's route | E4 |
+| Lemma 2.2.5, no corners and critical edges | shave `K` near a boundary point lying on no edge of a critical hexagon; at endpoints of flat segments, "shave as above" | a worst disk is irreducible in Mahler's sense (no symmetric convex proper subdomain has the same `Δ`); by Mahler 1947, Lemma 3, which the book cites after Definition 2.3.5, its boundary points lie on critical lattices, so every support line contains a point of a critical lattice, one of the six boundary points of a configuration of Mahler's Lemma 2 ([`External.mahler_irreducible`](External/MahlerIrreducible/Lemma3.lean#L383)); there Mahler's Theorem 2 gives a unique support line and the edge of a least-area hexagon | the shaving argument cannot close the case of a segment endpoint on a critical edge off its midpoint (E4); the user chose Mahler's route, which rests on results the book itself cites (Mahler's Lemma 3, Theorems 2.3.6 and 2.3.7) | E4 |
 | Lemma 2.4.2, one step | `σ₂` equals the integral curve `σ̃₂` with the same tangent direction and area relation | `σ₂` is differentiable because its chords lie between the tangent lines at their ends, so their directions converge, and the area relation fixes their lengths | the book does not show that `σ̃₂` stays on the boundary, which its identification needs (E8) | E8 |
 | Lemma 2.4.6 | Shifrin's Proposition 3.8 (a simple closed regular curve is convex iff its curvature has one sign) | each tangent line supports `K`, so `f(t) = det(σ'(t₀), σ(t) − σ(t₀)) ≥ 0` with `f(t₀) = f'(t₀) = 0`, and the second-derivative test gives `det(σ', σ'') ≥ 0` | the cited proposition is about smooth curves; the curves here are only `C¹` with Lipschitz derivative (E11) | E11 |
 | The area formula `eqn:cost` (§3.2) | Green's theorem, `area(K) = ½∮ x dy − y dx` | the polar-coordinates form of Green's formula for regions star-shaped about the origin, `area = ½∫ det(γ, γ')` ([`PlaneCurve.IsStarCurve.volume_radialHull`](Basic/Analysis/Convex/StarCurve.lean#L480), by the change of variables `(r, t) ↦ r γ(t)`) | Mathlib has no Green's theorem for regions bounded by `C¹` curves; only that step changes | – |
 | Lemma 3.1.12 (Jacobi's formula) | verify the polynomial identity on the dense set of matrices with distinct nonzero eigenvalues, through a differentiable diagonalization `A = L⁻¹DL` | differentiate the Leibniz expansion of `det` and identify `Σᵢ det(A with column i replaced by A'ᵢ) = tr(adj(A) A')` through Cramer's rule | the step needs mathematics that Mathlib lacks (a differentiable eigen-decomposition and the density argument); the user approved the replacement | – |
 | Lemma 4.3.1 | `area(K_min) < area(unit disk) = π` | `cost(K_min) ≤ cost(smoothed octagon) < π`, the octagon being admissible by Theorem 7.5.6 and its cost computed in the example of §7.5 | the paper's step has a gap that its own comparison cannot close: the unit disk is admissible, so it gives only `≤` (E19) | E19 |
+| Theorem 7.7.1, step 6 (the fixed points of `f⁴` near `q_oct`) | for each `d` near `d_oct`, `q_fix(d)` stays hyperbolic and the implicit function theorem inverts `f_d⁴ - I` near `q_fix(d)`; "thus, the only fixed points near `q_oct` are the fixed points `q_fix(d)`" (TeX 6612–6620) | the inverse function theorem applied once, at `q_oct`, to `Ψ = (section constraints, f⁴ - id)`, whose constraints include `d = det Λ₁`: its derivative is injective because `A⁴ - I` is invertible on the tangent space of the section (step 5), so `Ψ` is injective near `q_oct`, and a fixed point with `det Λ₁ = d` has the same image as `q_fix(y₀(d))`, with `y₀(d)` from Remark 7.5.2 as in the book ([`iso_fixedPoints`](SmoothedPolygons/Ch7/Isolated/FixedPoints.lean#L179)) | a separate application for each `d` gives a neighbourhood of each `q_fix(d)`, not one uniform in `d`, which the conclusion needs; the single application gives the uniformity, and the hyperbolicity of `q_fix(d)` for `d ≠ d_oct` is not needed | E32 |
 
 Every other proof follows the book's argument. The gaps of Theorem 2.2.2 (E2), Theorem 2.3.9 (E7),
-Lemmas 2.2.6, 2.2.7, 2.4.3 (E5, E9), Lemma 7.5.5 (E30) and Theorem 7.5.6 (E31) are filled along the
-book's lines, and the index slip of Lemma 2.4.5 (E10) is corrected. In Lemma 2.4.3 the formal proof
-bounds the turning of the tangent by the hyperbolic arc of Remark 2.2.4 itself rather than by the
-osculating circle the book derives from it, and treats the curves `j ≠ 0` through `σ₁` rather than
-the arclength reparametrization of `σ₂`, a symmetric choice.
+Lemmas 2.2.6, 2.2.7, 2.4.3 (E5, E9), Lemma 3.1.8 (E34), Lemma 7.5.5 (E30), Theorem 7.5.6 (E31) and
+Theorem 7.7.1 apart from its step 6 (E32) are filled along the book's lines, and the index slip of
+Lemma 2.4.5 (E10) is corrected. In Lemma 2.4.3 the formal proof bounds the turning of the tangent
+by the hyperbolic arc of Remark 2.2.4 itself rather than by the osculating circle the book derives
+from it, and treats the curves `j ≠ 0` through `σ₁` rather than the arclength reparametrization of
+`σ₂`, a symmetric choice. Proposition 6.4.1 applies
+left-invariance once, with `h = g⁻¹`, where the book writes `f(g, u) = TL_g f(e, u)` and cancels
+`TL_{g⁻¹}TL_g`: the same identity in one step. The "direct calculation" of Theorem 7.7.1, which the
+book does not give, splits each basis vector of the section's tangent space into the direction of
+the flow (where the derivative of `f` is `0`), the tangent of the curve of fixed points `q_fix(y₀)`
+(where it is the identity) and costate directions (where the flow is affine); since the book gives
+no calculation to follow, this is not a departure. Remarks 7.5.2 and 7.6.4 have no proof in the book
+(E36, E37); the proof of Remark 7.5.2 follows the hint of a TeX comment.
 
 The cited results that [`External/`](External) proves are proved by their sources' arguments, except:
 
 | Cited result | The source's argument | The formalization's | Why |
 | --- | --- | --- | --- |
 | Mahler 1947, Theorem 2 (Theorem 2.3.7) | uses its own Lemma 5 (a convex hexagon `H` has `Δ(H) = V(H)/4` and a unique critical lattice, the midpoint lattice, justified by reference to the unique tiling by translates of `H` in another paper) and, in footnote 8, Lemma 5 of another paper (no arc between consecutive lattice points is a segment) | an exact formula for the area of the hexagon of tac-lines, `V(H) = (4 − p²/(D₀D₁D₂))Δ(K)`, gives the area and the bisection; the footnote is derived from Mahler's Theorem 1 | the uniqueness of the critical lattice of a hexagon rests on a uniqueness theory of lattice tilings that Lean lacks and that the source does not give; the exact formula avoids it |
-| Mahler 1947, Lemma 3 | quoted from Lemmas 8 and 12 of another paper, which we did not have | a weak form of the "only if" half, proved by shaving along a support line: in an irreducible domain each support line contains a point of a critical lattice | the source gives no proof; only this form is used (Lemma 2.2.5) |
+| Mahler 1947, Lemma 3 | stated without proof, with a reference to Lemmas 8 and 12 of paper A, whose proof quotes Theorems B–E of Mahler 1946 (Section 2); paper A's Lemma 1 takes `Δ` of the square from Minkowski's theorem on linear forms, and Mahler 1946 quotes Theorems 2 (selection) and 8 (existence of critical lattices) of its Part I | Mahler's proofs throughout, with the repairs listed below, except that `Δ` of a parallelogram comes from Mahler's own example in §2 of paper A with its Lemmas 2 and 3 (and Lemma 1 is proved in the parallelogram's coordinates, not after an affine map to the square), and that Part I's Theorems 2 and 8 are proved in the plane, by reduced bases and Mahler's compactness theorem | these three results are quoted from works outside the three papers; in the plane Mahler's example and standard arguments give them directly |
 | Fejes Tóth's theorem (Theorem 2.1.3) | Fejes Tóth: Dowker's theorem and the cell decomposition of a finite packing, counted with Euler's formula | Dowker's theorem by an alternating merge of normal angles; the cell lemma by maximal cells (Böröczky 2003, Lemma 5), the convexity of their holes by a counting argument on sides instead of Böröczky's walk around boundary cycles, and the side count by angle sums instead of Euler's formula | Mathlib has neither Euler's formula for planar maps nor the Jordan curve theorem, on which the cycle and Euler arguments rest; Dowker's area formula for polygons is likewise missing, and the merge argument needs only measure additivity |
+
+Mahler's Lemma 3 is otherwise proved by the arguments of paper A and Mahler 1946 (Section 2). They
+have errors and gaps, all repaired; [`External/MahlerIrreducible/Lemma3.lean`](External/MahlerIrreducible/Lemma3.lean) lists them with the
+Lean names:
+
+- **Mahler 1946, proof of Theorem C (p. 337), error.** The function
+  `G(X) = F(X){1 + (δ/σ) max(0, σ − ||X|⁻¹X − |P|⁻¹P|)}` is not even (`G(P) = (1 + δ)F(P)` but
+  `G(−P) = F(P)`), so `H : G ≤ 1` is not a star body and contains `−P`, whereas paper A's Lemma 10
+  asserts that `H` omits `±P` (proved in Lean,
+  [`External.Mahler1946.m46c_mahlerG_not_distanceFunction`](External/Mahler1946/TheoremC.lean#L392)). Repaired by measuring the distance from
+  `|X|⁻¹X` to the nearer of the two directions `±|P|⁻¹P`; the rest of the proof stands, except that
+  in its last step one of the two points `±λQ_s`, not necessarily `λQ_s`, lies in the cone.
+- **Mahler 1946, proof of Theorem E, gap.** "There exists a neighbouring lattice `Λ*` which is
+  `K*`-admissible and of determinant `d(Λ*) < d(Λ)`" is asserted without argument; filled by the
+  deformation that proves Minkowski's (A) ([`External.Mahler1946.m46e_turn`](External/Mahler1946/TheoremE.lean#L369)).
+- **Mahler 1946, §4, gap.** That the points `P_k*` are the only points of `Λ*` on or near `C` for
+  small `ε` is stated without proof; it is proved ([`External.Mahler1946.m46e_near`](External/Mahler1946/TheoremE.lean#L92)).
+- **Paper A, proof of Lemma 1, error.** "`±θP₀` are its only points which are inner points of
+  `K₀`" fails for `θ < 1/2`; the argument survives, since all such points are multiples of `θP₀`,
+  none of them an inner point of `H`.
+- **Paper A, proof of Lemma 5, slip.** "lies on `L**`" should read "lies on `C`".
+- **Paper A, gaps.** The Corollary to Lemma 5 has no proof (supplied,
+  [`External.MahlerIrreducible.ml5_lemma5_cor_six`](External/MahlerIrreducible.lean#L1474)); in class B of Lemma 13, the line `L′` through `P`
+  missing `H′` is not justified (filled by a support line at the extreme point `P`, tilted
+  slightly); and
+  Lemma 12 does not follow from Theorems D and E alone, which need a dense set of boundary points
+  on critical lattices with just six boundary points: paper A's Corollary to Lemma 5 supplies
+  them when `K` is not a parallelogram, and its Lemma 1 settles parallelograms
+  ([`External.Mahler1946.m46e_lemma12`](External/Mahler1946/TheoremE.lean#L759)). Smaller steps left to the reader (the reduction in Lemma 1,
+  three steps of class A of Lemma 13, two details of Theorems D and E) are written out.
+
+The readings: everything is in the plane; the domains are symmetric convex domains, whose gauge is
+Mahler's distance function; the sup norm of `Fin 2 → ℝ` replaces the Euclidean length in the
+direction `|X|⁻¹X` and in the neighbourhoods `|X − Q| ≤ ε` (only their continuity and homogeneity
+are used); and irreducibility is tested against symmetric convex subdomains, where Mahler admits
+all star domains (paper A's Lemma 13 bridges the two; Section 6).
+
+Filippov's theorem is proved by the standard argument; Agrachev and Sachkov's text was not available
+to us to compare it with (Section 2).
 
 ## 8. What each result depends on
 
 The results from prior work that the proofs use are all proved in [`External/`](External) (Section 2):
 Fejes Tóth's theorem (through Theorem 2.1.3, in Theorem 2.2.2 and the results after it), Gruber's
 formula (Definition 2.1.2), the theorems of Minkowski and Mahler (Theorems 2.3.6, 2.3.7 and
-everything that uses them, and Lemma 2.2.5), and the Euler–Arnold equation (Proposition 6.5.1).
-Every
-declaration depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound)
-(`lake env lean scripts/Audit.lean`).
+everything that uses them), Mahler's Lemma 3 with the results of paper A and Mahler 1946 that
+prove it (Lemma 2.2.5 and the remark after Definition 2.3.5), and the Euler–Arnold equation
+(Proposition 6.5.1). Filippov's theorem is proved as Theorem 6.1.1 and used by no other result.
+Every declaration depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound)
+(`lake env lean scripts/Audit.lean`, which checks the 5042 declarations of the library).
 
 The route check (`python3 scripts/route_check.py check docs/paper_routes.tsv --accept
-docs/route_differences.tsv`) compares, for each of the 58 formalized results that the book proves,
-the numbered results that the Lean proof uses with those that the book's proof cites. It passes:
-every difference is recorded in [`docs/route_differences.tsv`](docs/route_differences.tsv) with its reason. The 50 differences
-are of these kinds:
+docs/route_differences.tsv`) compares, for each of the 65 results of the book found in the Lean
+code, the numbered results that the Lean proof uses with those that the book's proof cites. It
+passes: every difference is recorded in [`docs/route_differences.tsv`](docs/route_differences.tsv) with its reason. The 57
+differences are of these kinds:
+
 - results the book uses without `\ref` ("by the previous lemma", "immediate from the previous
-  proposition", an equation cited by number), and three basic facts used throughout (Lemma 7.1.1,
-  Lemma A.6.4, Lemma 3.3.4);
+  proposition", an equation cited by number such as the transversality condition `eqn:theta-k` of
+  Lemma 7.5.5 in Theorem 7.7.1, "the real number constructed in Section 7.5" for Remark 7.5.2's
+  `y₀(d)`) or implicitly (for instance the star domain of Theorem 4.4.1 as the state space, in
+  Lemma 4.5.2 and Theorems 7.5.6 and 7.7.1), and three basic facts used throughout (Lemma 7.1.1,
+  Lemma A.6.4, Lemma 3.3.4); conversely, Lemma 2.4.2 cites Lemma 2.4.5 only by "Compare the proof
+  of Lemma 2.4.5" and does not use it;
 - citations whose content the formal statements take as hypotheses or definitions: Lemma 2.4.3
   (about `K_min` only; Theorem 3.1.4(3) is false without its conclusion, E13), Lemma 2.4.5 (item 5
-  of a balanced pair) and Lemma 5.0.4 (Chapter 5, out of scope);
+  of a balanced pair), Lemma 5.0.4 (Chapter 5, out of scope) and Proposition 3.6.1 (the left
+  trivialization is part of the statement of Proposition 6.4.1);
 - Theorem 2.1.3 converting statements about the worst packing density into the lattice arguments
   that prove them, as the book says it does (TeX 1226);
 - statements that assume what the book derives from a cited result (the star inequalities in
@@ -587,16 +875,20 @@ are of these kinds:
   the main theorem (Mahler's First conjecture, Theorem 16.3.1); Appendix A.1–A.5 and A.7–A.10;
   Appendix B.
 - **Within the formalized chapters:**
-  - Lemma 3.1.8 (hyperbolic arcs).
-  - The "if" half of Mahler's Lemma 3 (cited after Definition 2.3.5), which no proof uses.
-  - Theorem 6.1.1 (Filippov), cited, and its application in §6.1.
-  - Definition 6.3.1 and Proposition 6.4.1 (Jurdjevic: Hamiltonians of left-invariant systems on a
-    general Lie group), which the rest of the formalized chapters do not use.
-  - Theorem 7.7.1 (the smoothed octagon is an isolated extremal), whose proof is a sketch (E32).
-  - The remarks, among them Remark 7.5.2 (the determinant `d(y₀)` of `Λ₁` is monotone) and
-    Remarks 7.6.1–7.6.4 on the smoothed `(6k - 2)`-gons.
-  - The action of the dihedral group on the ideal vertices of `𝔥*` (§4.6): the formalization states
-    the action on controls, star functions and `Φ`, but not on `ℝℙ¹`.
+  - The application of Filippov's theorem in §6.1 (an optimal control exists for the Reinhardt
+    problem, TeX 4553–4600), which rests on the compactification theorem of Chapter 5
+    (Theorem 5.0.2). Theorem 6.1.1 itself is proved (E35).
+  - Remarks 7.6.1 and 7.6.3, which report numerical observations as conjectures: the area of the
+    smoothed `(6k+2)`-gon "appears" to increase with `k` to `π`, and the smoothed `(6k−2)`-gons
+    "seem" to satisfy every condition of an extremal except the sign of `λ_cost` (Section 11).
+  - The other remarks are not stated as results, except Remarks 2.2.4, 7.5.2 and 7.6.4 and the
+    remark after Definition 2.3.5. Some of their content is proved where it is used: the hexagon of
+    Remark 3.1.7, at a multi-point, in the proof of Lemma 3.1.8; the equivariance of `Φ` (Remark
+    4.2.2); the positive slope of `χ₃₂` at `0` (Remark 7.5.4) in the proof of Theorem 7.7.1; the
+    smoothed `(6k−2)`-gons of Remark 7.6.2 in Remark 7.6.4. Remark 4.3.2 (the cost in the disk and
+    hyperboloid models) and Remark 6.6.1 (transversal trajectories extend to periodic ones) are not
+    formalized; Remarks 3.1.2, 3.4.3, 4.1.2, 6.5.2 and 7.7.2 are commentary and pointers to the
+    literature or to the appendices.
 
 ## 10. The paper in the literature
 
@@ -667,8 +959,9 @@ August 2026) include a chapter of open problems.
 
 ### Formalizations
 
-- This is, to our knowledge, the first formalization of Theorem 7.5.6 and of the Hamiltonian part
-  of the book (Chapters 6–7: costates, switching functions, Pontryagin extremals). The state
+- This is, to our knowledge, the first formalization of Theorems 7.5.6 and 7.7.1 and of the
+  Hamiltonian part of the book (Chapters 6–7: costates, switching functions, Pontryagin
+  extremals). The state
   dynamics and the cost of Chapter 3 were formalized independently, three days earlier, in
   M. Ho's repository below.
 - M. Ho, [github.com/sunfishho/reinhardt-density-bound](https://github.com/sunfishho/reinhardt-density-bound)
@@ -703,19 +996,24 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   the balanced Reinhardt problem in circle representation (Problem 2.4.8) is in place, and the
   control problem of Chapter 3 is its reformulation. What separates this from Mahler's First
   conjecture (Theorem 16.3.1) is Chapters 5 and 8–16: the Pontryagin maximum principle (or at least
-  the existence of an extremal lift of a minimizer), Filippov's existence theorem, the analysis of
-  the singular locus and of chattering, and the numerical containments of the global basin theorem.
-- **Theorem 7.7.1.** The isolation of the smoothed octagon among extremals needs a rigorous
-  computation of the Jacobian of the Poincaré map at the octagon's fixed point (TeX 6612). Hales's
-  2017 preprint (§4.5) claims the same isolation by another route, an interval-arithmetic expansion
-  of the cost along the one-parameter family of deformations satisfying the endpoint conditions
-  (Remark 7.7.2); neither computation is published in checkable form. The formalization gives the
-  fixed point in closed form ([`costateΛR`](SmoothedPolygons/Ch7/StrongTransversality.lean#L111), [`strongL₁`](SmoothedPolygons/Ch7/StrongTransversality.lean#L64), [`strongLR`](SmoothedPolygons/Ch7/StrongTransversality.lean#L68)); the Jacobian also needs the
-  general constant-control flow of §7.1 in every direction of the section, the implicit derivative
-  of the switching time, and certified eigenvalue bounds.
+  the existence of an extremal lift of a minimizer), the compactification of Chapter 5 on which the
+  existence of an optimal control by Filippov's theorem (proved here) rests, the analysis of the
+  singular locus and of chattering, and the numerical containments of the global basin theorem.
+- **Local optimality of the octagon.** Theorem 7.7.1 is proved (E32): the octagon is isolated among
+  extremals. Hales's 2017 preprint (§4.5) sketches another proof of the isolation, by an
+  interval-arithmetic expansion of the cost along the one-parameter family of deformations
+  satisfying the endpoint conditions (the "different proof" of Remark 7.7.2), and derives from the
+  same expansion that the octagon is a strict local minimum in a micro-local sense. That
+  computation is not published in checkable form; formalizing it would add local optimality to
+  Theorem 7.7.1.
 - **The other smoothed `(6k+2)`-gons.** Hales's 2017 preprint (Remark 49) asks whether the
   smoothed `(6k+2)`-gons with `k ≥ 2` are local minima in the sense in which it shows the octagon to
-  be one; neither the preprint nor the book answers it.
+  be one; neither the preprint nor the book answers it. Their isolation among extremals, the
+  analogue of Theorem 7.7.1, is not claimed either. The characteristic polynomial of the matrix of
+  the Poincaré map on the section is computed in closed form for every `y₀`
+  ([`iso_sectionMatrix_charpoly`](SmoothedPolygons/Ch7/Isolated/Hyperbolic.lean#L343)), but that matrix is identified with the derivative of the
+  Poincaré map only at the octagon's `y₀` ([`iso_fderiv_basis`](SmoothedPolygons/Ch7/Isolated/Poincare.lean#L710)); extending the identification would
+  reduce the hyperbolicity of the fixed points `q_fix(y₀(k))` to inequalities in `y₀`.
 - **The smoothed `(6k−2)`-gons.** Remark 7.6.3 says they seem to satisfy every condition of an
   extremal except the sign of `λ_cost`, and the 2023–24 posters of Song and Sluis-Cremer
   (Section 10) state, without a published proof, that they are extremals of the area-maximization
@@ -724,7 +1022,9 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   eqn:3k+2, and the closing condition `4/(3y₀² + 1) = 2cos(πk/(3k − 1))`, which the book does not
   state (the 2017 preprint's `θ_k = πk/(3k − 2)` does not close). The new ingredient is the sign of
   the switching functions, in place of Lemma 7.5.3. Numerically, for `k = 2, 3`, the lift exists
-  and has `λ_cost > 0`.
+  and has `λ_cost > 0`. The state trajectories are already constructed in Lean for every real
+  `k > 1` ([`remark7_6_4_exists`](SmoothedPolygons/Ch7/Remarks.lean#L1900)); what is missing is the closing condition `g(t_f) = R` for integral
+  `k` and the costate lift.
 
 ### Simpler proofs
 
@@ -744,11 +1044,19 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   bounded and `σ_j'` Lipschitz, so the argument of Theorem 3.1.4(3) gives `X` Lipschitz on `ℝ`
   directly; this saves the formal proof's restriction to `[0, 2P]` and periodic extension. The
   reparameterization step is unchanged.
-- **Lemma 3.1.8** (not formalized). The multi-point relations give `σ₀ = σ₁ + σ₋₁` and
-  `det(σ₋₁, σ₁) = √3/2`. If `σ₁ = O + αv` and `σ₋₁ = O + βw` move on non-parallel lines and
-  `O = pv + qw`, then `σ₀ - O = (α + p)v + (β + q)w` with `(α + p)(β + q) = √3/(2det(w, v)) + pq`
-  constant: a hyperbola with center `O` and the two lines as asymptotes, without the envelope
-  argument or the critical hexagons.
+- **Lemma 3.1.8.** The formal proof follows the book (the hexagon `H_K(t)`, its area, the area of
+  `P_K` and Reinhardt's observation). One identity does the same work: since
+  `σ_i = σ_{i-1} + σ_{i+1}` and `det(σ_{i-1}, σ_{i+1}) = √3/2`, if `σ_{i-1}` and `σ_{i+1}` move on
+  the lines `det(d₁, x - p₁) = 0` and `det(d₂, x - p₂) = 0`, then
+  `det(d₁, σ_i - p₁)·det(d₂, σ_i - p₂) = det(d₁, p₁)det(d₂, p₂) - (√3/2)det(d₁, d₂)`, a constant
+  (the left side is `det(d₁, σ_{i+1})det(d₂, σ_{i-1})`, and the plane identity
+  `det(a, b)det(c, e) - det(a, e)det(c, b) = det(a, c)det(b, e)` evaluates it). The two gaps that
+  need regularity (the lines are not parallel, the constant is not `0`, E34) remain.
+- **Theorem 7.7.1, step 6.** The injectivity of `A⁴ - I` on the tangent space `T` of the section
+  does not need the linear independence of the basis [`iso_sectionBasis`](SmoothedPolygons/Ch7/Isolated/Defs.lean#L206)
+  ([`iso_sectionBasis_linearIndependent`](SmoothedPolygons/Ch7/Isolated/Hyperbolic.lean#L319)): the four vectors span `T` and `A` acts on their
+  coefficients by [`iso_sectionMatrix`](SmoothedPolygons/Ch7/Isolated/Defs.lean#L220), whose `M⁴ - I` is invertible, so `A⁴ - I` maps `T` onto `T`
+  and is injective because `T` is finite-dimensional.
 - **Theorem 7.5.1.** Centralizing `h` only uses `h ≠ ±I` (immediate from `tr h ∈ (1, 2)`);
   ellipticity is not needed, and the 2017 preprint already argues so.
 
@@ -761,11 +1069,20 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   when the tangent turns one way; Dowker's theorem on least-area circumscribed polygons; the lattice
   tiling by a centrally symmetric hexagon; the angles and angle sum of convex polygons; Fejes Tóth's
   cell lemma for finite packings; the planar Tietze–Nakajima theorem; the existence of critical
-  lattices; and the structure of lattice-packed centrally symmetric convex bodies.
+  lattices; the structure of lattice-packed centrally symmetric convex bodies; control systems with
+  Carathéodory trajectories, the compactness of their attainable sets and the existence of optimal
+  controls (Filippov); and the measurable selection of zeros of Carathéodory functions on a compact
+  set.
 - **Mathlib** lacks `det exp(A) = exp(tr A)` for matrices (a TODO in
   `Mathlib/Analysis/Normed/Algebra/MatrixExponential.lean`), Jacobi's formula, Green's theorem for
-  Jordan domains, and the theory of regular elements of `𝔰𝔩₂`; each was a detour here.
+  Jordan domains, the theory of regular elements of `𝔰𝔩₂`, and any measurable selection theorem;
+  each was a detour here.
+- **Filippov's theorem** needs no smoothness of `f` in `q`: continuity, bounded velocities and the
+  convexity hypotheses suffice, so the standing assumptions `hfq`, `hfq'` that the statement keeps
+  from the source (Section 5) could be dropped, and the theorem holds for any finite-dimensional
+  state space ([`Basic/Analysis/ODE/ControlSystem.lean`](Basic/Analysis/ODE/ControlSystem.lean) is stated so).
 - **Toward the main theorem.** Chapters 8–16 need the Pontryagin maximum principle (or at least the
-  existence of an extremal lift of a minimizer), Filippov's theorem, the stable manifold theorem,
+  existence of an extremal lift of a minimizer), Filippov's theorem on the compactified state space
+  of Chapter 5 (it is proved here on `ℝⁿ`), the stable manifold theorem,
   Weierstrass preparation, and a rigorous version of the numerical containments of the global basin
   theorem (Theorem 16.1.1), which the book checks from Mathematica plots.
