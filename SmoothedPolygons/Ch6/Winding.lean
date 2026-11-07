@@ -21,8 +21,10 @@ have the wrong winding number around the origin".
 * `exists_isReinhardtAdmissible_not_isWindingOne` (**the answer to the winding-number question**):
   admissible trajectories of higher winding exist. The unit circle traversed seven times
   (`X ≡ J`, `u ≡ (1/3, 1/3, 1/3)`, `g(t) = exp(tJ)`, `t_f = 7π/3`) is admissible, has winding
-  number `7` and cost `7π`, and bounds no balanced disk with `σ_j = g s_j*`
-  (`σ₀(0) = σ₀(2π)`, so `σ₀` is not injective on `[0, 6t_f)`). Hence the converse of
+  number `7` and cost `7π`, and is not the boundary trajectory of a balanced pair with period
+  parameter `t_f = 7π/3` and `σ_j = g s_j*` (`σ₀(0) = σ₀(2π)`, so `σ₀` is not injective on
+  `[0, 6t_f)`); the unit disk is a balanced pair for `t_f = π/3`, but its area `π` is not the
+  cost `7π`. Hence the converse of
   Problem 3.6.2 (E15) is false for all admissible trajectories, and holds only for those of
   winding number one (`exists_isBalancedPair_of_isReinhardtAdmissible`,
   `SmoothedPolygons/Ch6/AdmissibleDisk.lean`).
@@ -102,8 +104,9 @@ theorem isWindingOne_of_reinhardtCost_lt {T : ℝ} {u : ℝ → Fin 3 → ℝ} {
 /-- **Admissible trajectories of higher winding exist** (the winding-number question of the
 inventory, Part I §3.5, item 6). The unit circle traversed seven times, `X ≡ J`,
 `u ≡ (1/3, 1/3, 1/3)`, `g(t) = exp(tJ)` on `[0, 7π/3]`, is admissible for Problem 3.6.2, does not
-have winding number one, costs `7π`, and bounds no balanced disk with `σ_j = g s_j*` on
-`[0, t_f]`: so the converse of Problem 3.6.2 (E15) fails for it. -/
+have winding number one, costs `7π`, and is not the boundary trajectory of any balanced pair with
+period parameter `t_f = 7π/3` and `σ_j = g s_j*` on `[0, t_f]`: so the converse of Problem 3.6.2
+(E15) fails for it. -/
 theorem exists_isReinhardtAdmissible_not_isWindingOne :
     ∃ (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2), IsReinhardtAdmissible T u g X ∧
       ¬ IsWindingOne T g ∧ reinhardtCost T X = 7 * Real.pi ∧

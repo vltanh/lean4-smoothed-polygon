@@ -226,6 +226,8 @@ meta def paperResults : List (String × Name) :=
    ("§6.1 existence of a minimizer", ``SmoothedPolygons.exists_isReinhardtMinimizer),
    ("§6.1 K_min is a minimizer", ``SmoothedPolygons.exists_isReinhardtMinimizer_of_isWorstDisk),
    ("§6.1 a minimizer is K_min", ``SmoothedPolygons.isWorstDisk_of_isReinhardtMinimizer),
+   ("§6.1-6.2 a minimizer exists, is an extremal and a K_min",
+     ``SmoothedPolygons.exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk),
    ("Lemma 6.1.2", ``SmoothedPolygons.lemma6_1_2),
    ("§6.2 minimizers are extremals",
      ``SmoothedPolygons.exists_isPontryaginExtremal_of_isReinhardtMinimizer),

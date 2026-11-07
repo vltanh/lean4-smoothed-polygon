@@ -101,4 +101,22 @@ theorem isWorstDisk_of_isReinhardtMinimizer {T : ℝ} {u : ℝ → Fin 3 → ℝ
     IsWorstDisk K ∧ minimaxDensity = reinhardtCost T X / √12 := by
   sorry
 
+/-- **The layer's result** (§6.1 with §6.2, and the identification with `K_min` that Proposition
+8.1.3 and Theorem 16.3.1 use): the Reinhardt control problem (Problem 3.6.2) has a global
+minimizer; it lifts to a Pontryagin extremal, and it is the boundary trajectory of a balanced disk
+`K` in circle representation that is a `K_min`, with `δ_min = cost/√12`. Assembled from
+`exists_isReinhardtMinimizer_isPontryaginExtremal`,
+`IsReinhardtMinimizer.forall_mem_truncatedStarDomain` (the cost is at most the octagon's, below
+`7π/2`), `isWindingOne_of_reinhardtCost_lt`, `exists_isBalancedPair_of_isReinhardtAdmissible`
+and `isWorstDisk_of_isReinhardtMinimizer`. -/
+theorem exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk :
+    ∃ (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X Λ₁ ΛR : ℝ → Mat2) (lam : ℝ)
+      (K : Set (Fin 2 → ℝ)) (σ : ZMod 6 → ℝ → Fin 2 → ℝ),
+      IsReinhardtMinimizer T u g X ∧ IsPontryaginExtremal T u g X Λ₁ ΛR lam ∧
+      IsBalancedPair K σ T ∧ IsCircleRepresentation σ ∧
+      (∀ j, ∀ t ∈ Icc 0 T, σ j t = g t *ᵥ sixthRoot j) ∧
+      (∀ j t, σ j (t + T) = σ (j + 1) t) ∧
+      IsWorstDisk K ∧ minimaxDensity = reinhardtCost T X / √12 := by
+  sorry
+
 end SmoothedPolygons

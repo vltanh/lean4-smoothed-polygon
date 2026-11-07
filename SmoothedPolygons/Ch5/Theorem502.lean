@@ -67,11 +67,10 @@ theorem octagonDensity_lt_densityBound {z : ℝ × ℝ} (hz : z ∈ starDomain)
 
 /-- **The density bound along the trajectory** (Theorem 5.0.6 at every time, TeX 4486–4489 and
 4332–4348): for a balanced disk `K` in circle representation with boundary trajectory `(g, X)`,
-`σ_j(t) = g(t) s_j*`, `σ_j(t + t_f) = σ_{j+1}(t)`, `X = g⁻¹g' = Φ ∘ z`, and every time `t₀`,
-`area(K) ≥ √12 δ(z(t₀))`. -/
+`σ_j(t) = g(t) s_j*`, `X = g⁻¹g' = Φ ∘ z`, and every time `t₀`, `area(K) ≥ √12 δ(z(t₀))`. -/
 theorem sqrt12_mul_densityBound_le_volume {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ}
     {tf : ℝ} (hKσ : IsBalancedPair K σ tf) (hcirc : IsCircleRepresentation σ) {g X : ℝ → Mat2}
-    (hg : ∀ j t, σ j t = g t *ᵥ sixthRoot j) (hshift : ∀ j t, σ j (t + tf) = σ (j + 1) t)
+    (hg : ∀ j t, σ j t = g t *ᵥ sixthRoot j)
     (hX : ∀ t, X t = (g t)⁻¹ * derivEntrywise g t) {z : ℝ → ℝ × ℝ}
     (hz : ∀ t, z t ∈ starDomain ∧ X t = Φ (z t).1 (z t).2) (t₀ : ℝ) :
     √12 * densityBound (z t₀) ≤ volume.real K := by

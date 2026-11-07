@@ -38,18 +38,16 @@ namespace SmoothedPolygons
 open MeasureTheory Set Matrix
 
 /-- **Re-centering a balanced disk** (used without statement in the proof of Theorem 5.0.2,
-TeX 4486–4489). Let `(K, σ)` be a balanced pair with `σ_j(t) = g(t) s_j*` and
-`σ_j(t + t_f) = σ_{j+1}(t)`, and `t₀ ∈ ℝ`. Then `K' = g(t₀)⁻¹ K` with
-`σ'_j(t) = g(t₀)⁻¹ σ_j(t + t₀)` is a balanced pair in circle representation, with
-`σ'_j(t) = g'(t) s_j*` for `g'(t) = g(t₀)⁻¹ g(t + t₀)`, the same shift relation,
+TeX 4486–4489). Let `(K, σ)` be a balanced pair with `σ_j(t) = g(t) s_j*`, and `t₀ ∈ ℝ`. Then
+`K' = g(t₀)⁻¹ K` with `σ'_j(t) = g(t₀)⁻¹ σ_j(t + t₀)` is a balanced pair in circle
+representation, with `σ'_j(t) = g'(t) s_j*` for `g'(t) = g(t₀)⁻¹ g(t + t₀)`,
 `g'(t)⁻¹ g''(t) = g(t + t₀)⁻¹ g'(t + t₀)`, and `area(K') = area(K)`. -/
 theorem IsBalancedPair.recenter {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} {tf : ℝ}
     (hKσ : IsBalancedPair K σ tf) {g : ℝ → Mat2} (hg : ∀ j t, σ j t = g t *ᵥ sixthRoot j)
-    (hshift : ∀ j t, σ j (t + tf) = σ (j + 1) t) (t₀ : ℝ) :
+    (t₀ : ℝ) :
     IsBalancedPair ((fun v ↦ (g t₀)⁻¹ *ᵥ v) '' K) (fun j t ↦ (g t₀)⁻¹ *ᵥ σ j (t + t₀)) tf ∧
       IsCircleRepresentation (fun j t ↦ (g t₀)⁻¹ *ᵥ σ j (t + t₀)) ∧
       (∀ j t, (g t₀)⁻¹ *ᵥ σ j (t + t₀) = ((g t₀)⁻¹ * g (t + t₀)) *ᵥ sixthRoot j) ∧
-      (∀ j t, (g t₀)⁻¹ *ᵥ σ j (t + tf + t₀) = (g t₀)⁻¹ *ᵥ σ (j + 1) (t + t₀)) ∧
       (∀ t, ((g t₀)⁻¹ * g (t + t₀))⁻¹ * derivEntrywise (fun s ↦ (g t₀)⁻¹ * g (s + t₀)) t =
         (g (t + t₀))⁻¹ * derivEntrywise g (t + t₀)) ∧
       volume ((fun v ↦ (g t₀)⁻¹ *ᵥ v) '' K) = volume K := by

@@ -69,13 +69,12 @@ through these maps (`Φ_lftAct`, Remark 4.2.2; `reflS_conj_Φ`).
   side preserved since it is multiplied by `|cz + d|² > 0`), and the bijectivity of `lftAct A` on
   the upper half-plane for `det A = 1`.
 * `truncatedStarDomain_eq`: from the four image lemmas.
-* `isCompact_truncatedStarDomain`: closed and bounded. Bounded: `y ≤ 4.5`, `|x| < 1/√3`. Closed:
-  the explicit inequalities are closed, and they force the strict inequalities of `𝔥*`: the
-  conditions of `Π₁⁺` give `x² + y² ≥ 1/3 + 2y/(15√3)`, and those of `Π₀⁺`, `Π₂⁺` give
-  `|x| ≤ 1/√3 - y/15`; near the cusps `(±1/√3, 0)` these two are incompatible with `y > 0`
-  small (expand `x = 1/√3 - δ`, `δ ≥ y/15`: `-2δ/√3 + δ² + y² ≥ 2y/(15√3)` fails for small
-  `δ, y > 0`), and `y = 0` is excluded since then `|x| < 1/√3` contradicts `x² ≥ 1/3`. So the
-  explicit set equals the closed set obtained by replacing `𝔥*` by its closure.
+* `isCompact_truncatedStarDomain`: closed and bounded. Bounded: `y ≤ 4.5`, `|x| < 1/√3`. A lower
+  bound on `y`: the conditions of `Π₁⁺` give `x² + y² ≥ 1/3 + 2y/(15√3)`, and those of `Π₀⁺`,
+  `Π₂⁺` (with `y ≤ 4.5 < 15/√3`) give `|x| ≤ 1/√3 - y/15`; together they give
+  `y ≥ (4/(15√3))·(225/226) > 0.15` on `𝔥**`. So `𝔥**` is the set of the closed versions of the
+  explicit inequalities intersected with `{y ≥ 0.15}`, which is closed. (The closed inequalities
+  alone do not suffice: the cusps `(±1/√3, 0)` satisfy all of them, as isolated points.)
 * Dihedral invariance: `R` permutes the three horoballs (`R³ = -I` acts trivially) and the three
   half-planes; `S` fixes `B(i∞)` and `Π₁⁺` and exchanges `B(1/√3) ↔ B(-1/√3)`, `Π₀⁺ ↔ Π₂⁺`
   (explicit forms). The invariance of `𝔥*` is §4.6 (`ρ_R_conj`, `ρ_reflS_conj` with
