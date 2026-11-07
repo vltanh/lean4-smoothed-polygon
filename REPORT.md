@@ -30,8 +30,9 @@ Status of the formalization:
   `δ(K) = (8 - √32 - ln 2)/(√8 - 1)`) and Theorem 7.7.1.
 - **Nothing is assumed.** Every cited result that a proof uses is proved in [`External/`](External): Fejes
   Tóth's theorem (`δ = δ_L`), Gruber's lattice density formula, the theorems of Minkowski and
-  Mahler on critical lattices and circumscribed hexagons, a weak form of one half of Mahler's
-  Lemma 3 (all that is used), and the Euler–Arnold equation (Section 2). Filippov's theorem, which
+  Mahler on critical lattices and circumscribed hexagons, Mahler's Lemma 3 on irreducible domains
+  (in full, along the two papers of Mahler on which its proof rests, with their errors and gaps
+  repaired), and the Euler–Arnold equation (Section 2). Filippov's theorem, which
   no proof uses, is proved there too. A Pontryagin extremal is defined by the conditions of the
   maximum principle (Section 6). Theorem 3.1.4(3) keeps one hypothesis for a
   general convex disk (E13, approved by the user); for balanced disks it holds.
@@ -117,8 +118,9 @@ Status of the formalization:
 - **Literature.** Theorem 7.5.6 was announced in Hales's 2017 preprint, which also sketches another
   proof of Theorem 7.7.1 (Section 10). The book is still an unrefereed preprint, with no newer
   version or erratum. One date in its bibliography is wrong, two citations are to later editions,
-  and the entry cited for the maximum principle, Agrachev and Sachkov's book, names M. I. Zelikin
-  as its first author (E33).
+  the entry cited for the maximum principle, Agrachev and Sachkov's book, names M. I. Zelikin as
+  its first author, and the paper of Mahler cited with Minkowski for Theorem 2.3.6 states only
+  part of it, quoted from Minkowski without proof (E33).
 
 ## 2. Results from prior work and how the paper uses them
 
@@ -129,10 +131,28 @@ Status of the formalization:
 | Euler–Arnold equation for left-invariant Hamiltonians on matrix groups, `μ' = [μ, δh/δμ]` for `μ = pg` | Cushman–Bates, cited in the proof of Proposition 6.5.1 | [`External.euler_arnold`](External/EulerArnold.lean#L72) | [`proposition6_5_1`](SmoothedPolygons/Ch6/Hamiltonian.lean#L319) |
 | Fejes Tóth's theorem: for a centrally symmetric convex disk, no packing of congruent copies is denser (even in upper density) than the best lattice packing | L. Fejes Tóth 1950; cited as Theorem 2.1.3 | [`External.fejes_toth`](External/FejesToth.lean#L882) | [`theorem2_1_3`](SmoothedPolygons/Ch2/Density.lean#L252) |
 | The upper and lower densities of a lattice arrangement of a convex body are `V(C)/d(L)` | Gruber, *Convex and Discrete Geometry*, Cor. 30.1; cited in Definition 2.1.2 | [`External.gruber_corollary_30_1`](External/Gruber.lean#L320) | [`definition2_1_2`](SmoothedPolygons/Ch2/Density.lean#L86) |
-| A critical lattice has a basis and a third point on the boundary forming a parallelogram of area `Δ(K)`, and conversely | Minkowski 1907, Mahler 1946/1947 (Lemma 2); cited as Theorem 2.3.6 | [`External.minkowski_mahler`](External/MinkowskiMahler.lean#L964) | [`theorem2_3_6`](SmoothedPolygons/Ch2/Mahler.lean#L112) |
-| The circumscribed hexagon of a critical lattice: unique tac-lines, area `4Δ(K)`, sides bisected, least area | Mahler 1947, Theorems 1 and 2; cited as Theorem 2.3.7 | [`External.mahler_1947`](External/Mahler1947.lean#L1700) | [`theorem2_3_7`](SmoothedPolygons/Ch2/Mahler.lean#L181) |
-| In an irreducible domain every tac-line contains a point of a critical lattice (a weak form of the "only if" half of Mahler's Lemma 3; all that is used) | Mahler 1947, Lemma 3; cited after Definition 2.3.5 | [`External.mahler_irreducible`](External/MahlerIrreducible.lean#L258) | [`lemma2_2_5`](SmoothedPolygons/Ch2/Reinhardt.lean#L3754) |
+| A critical lattice has a basis and a third point on the boundary forming a parallelogram of area `Δ(K)`, and conversely | Minkowski 1907, Mahler 1947 (Lemma 2); cited as Theorem 2.3.6, from Minkowski and Mahler 1946 (E33) | [`External.minkowski_mahler`](External/MinkowskiMahler.lean#L964) | [`theorem2_3_6`](SmoothedPolygons/Ch2/Mahler.lean#L113) |
+| The circumscribed hexagon of a critical lattice: unique tac-lines, area `4Δ(K)`, sides bisected, least area | Mahler 1947, Theorems 1 and 2; cited as Theorem 2.3.7 | [`External.mahler_1947`](External/Mahler1947.lean#L1700) | [`theorem2_3_7`](SmoothedPolygons/Ch2/Mahler.lean#L182) |
+| A symmetric convex domain is irreducible (no symmetric convex proper subdomain has the same `Δ`) if and only if every boundary point lies on a critical lattice; hence, in an irreducible domain, every tac-line contains a point of a critical lattice, one of the six boundary points of a configuration of Mahler's Lemma 2 | Mahler 1947, Lemma 3, stated there without proof; cited after Definition 2.3.5. Proved along Mahler's paper A and Mahler 1946 (below) | [`External.mahler_irreducible_iff`](External/MahlerIrreducible/Lemma3.lean#L367); [`External.mahler_irreducible`](External/MahlerIrreducible/Lemma3.lean#L383), derived from it | [`isIrreducible_iff_mahlerIrreducible`](SmoothedPolygons/Ch2/Mahler.lean#L99) (the remark after Definition 2.3.5); [`lemma2_2_5`](SmoothedPolygons/Ch2/Reinhardt.lean#L3754) |
 | Filippov's theorem: for a control system on `ℝⁿ` with compact control set, convex velocity sets and `f` of compact support, the attainable sets (at time `T` and up to time `T`) are compact, and an optimal control exists for an integral cost when the velocity sets extended by the cost are convex, with fixed or free terminal time | Agrachev–Sachkov, *Control Theory from the Geometric Viewpoint*, Thm 10.1; cited as Theorem 6.1.1 without a source (E35) | [`External.filippov`](External/Filippov.lean#L150) | none: it is Theorem 6.1.1 (its application in §6.1 needs Chapter 5) |
+
+Mahler 1947 states Lemma 3 without proof and refers to Lemmas 8 and 12 of "paper A", Mahler's *On
+irreducible convex domains* (Proc. KNAW 50 (1947) 98–107; the book does not cite it). Paper A
+proves its Lemmas 1, 2, 5–7 and 13 and quotes Lemmas 8, 10, 11 and 12 from Theorems B–E of
+Mahler's *Lattice points in n-dimensional star bodies II. Reducibility theorems I* (Proc. KNAW 49
+(1946) 331–343, the book's entry `mahler1946lattice`). We read both from scans of Mahler's
+collected works (CARMA archive, items 094 and 088), and the proof follows them, down to the 1946
+paper, as the user chose: paper A's lemmas
+are in [`External/MahlerIrreducible.lean`](External/MahlerIrreducible.lean); Theorems B and C, with paper A's Lemmas 10 and 11 and the
+class-B case of its Lemma 13, in [`External/Mahler1946/TheoremC.lean`](External/Mahler1946/TheoremC.lean); Theorems D and E, with paper
+A's Lemma 12, in [`External/Mahler1946/TheoremE.lean`](External/Mahler1946/TheoremE.lean); and Lemma 3 in
+[`External/MahlerIrreducible/Lemma3.lean`](External/MahlerIrreducible/Lemma3.lean). "Only if" is the proof of paper A's Lemma 13: extreme
+points of `K` through the proof of Theorem C (paper A's Lemma 10) and a cut by a line, inner points
+of boundary segments through paper A's Lemmas 5–7, using that the boundary points on critical
+lattices form a closed set (Theorem B, paper A's Lemma 11); "if" is Theorems D and E with paper A's
+Corollary to Lemma 5 and Lemma 1. The form that Lemma 2.2.5 uses (each tac-line contains
+a point of a critical lattice) follows with paper A's Lemmas 3 and 4. The errors and gaps of the
+sources, all repaired, and the two small departures from them are in Section 7.
 
 Filippov's theorem is proved by the standard argument: the trajectories are equi-Lipschitz, a
 limit is extracted by Tychonoff's theorem (pointwise convergence suffices, so Arzelà–Ascoli is not
@@ -170,9 +190,9 @@ None.
 | --- | --- | --- |
 | Fejes Tóth's theorem | Theorem 2.1.3; proof of Theorem 2.2.2 | Correct. |
 | Gruber, Cor. 30.1 | Definition 2.1.2 | Correct; the packing hypothesis is not needed (Section 5). |
-| Minkowski, Mahler (critical lattices) | Theorem 2.3.6 | Correct, with the sources' definition of a critical lattice (E6). |
+| Minkowski, Mahler (critical lattices) | Theorem 2.3.6 | Correct, with the sources' definition of a critical lattice (E6); the cited paper of Mahler (1946) states only part of it, quoted from Minkowski (E33). |
 | Mahler 1947, Theorems 1 and 2 | Theorem 2.3.7, proof of Theorem 2.3.9 | Correct. |
-| Mahler 1947, Lemma 3 | remark after Definition 2.3.5 | Correct; the formalization proves the weak form of one half that Lemma 2.2.5 needs. |
+| Mahler 1947, Lemma 3 | remark after Definition 2.3.5 | Correct. Mahler states it without proof; the papers on which its proof rests (paper A and Mahler 1946) have errors and gaps, none fatal, repaired in the formalization, which proves the lemma in full (Section 7). |
 | Blaschke selection theorem | proof of Lemma 2.2.5 | Correct, but not sufficient alone for the existence of `K_min` (E4). |
 | Hales 2011, Lemmas 11, 17, 18 | proofs of Lemmas 2.4.2, 2.4.3 (recalled) | The recalled arguments have gaps (E8, E9), filled here. |
 | Shifrin, Proposition 3.8 | proof of Lemma 2.4.6 | Applied outside its hypotheses (smooth curves); replaced by a direct argument (E11). |
@@ -484,7 +504,18 @@ book cites the 1988 English translation of Nazarov's 1986 paper (*Zap. Nauchn. S
 and a 2017 reissue of Kupka's 1990 paper. The entry `zelikin2004control`, which the book cites for
 the Pontryagin maximum principle (TeX 737, 4674), is A. A. Agrachev and Yu. L. Sachkov, *Control
 Theory from the Geometric Viewpoint* (Springer, 2004); the bibliography lists M. I. Zelikin as its
-first author and Sachkov twice. These do not affect the mathematics.
+first author and Sachkov twice. Theorem 2.3.6 is attributed to "Minkowski
+[`minkowski1907diophantische`], Mahler [`mahler1946lattice`]" (TeX 1789). The cited communication
+of Mahler (*Lattice points in n-dimensional star bodies II. Reducibility theorems I*, Proc. KNAW 49
+(1946) 331–343) only quotes, without proof and crediting Minkowski, the six-point statement (A)
+(p. 340): every critical lattice of a convex domain in the plane has at least six points on its
+boundary, and in suitable coordinates exactly six are `(1, 0)`, `(0, 1)`, `(−1, 1)` and their
+negatives. It states neither the theorem's form, with a basis and the area of the parallelogram,
+nor its converse; the converse is asserted ("as is easily seen") in the second communication of
+the series (p. 444). The book's wording matches Lemma 3 of Mahler's paper A (p. 101; Section 2).
+The formalization follows Minkowski and Mahler 1947, Lemma 2
+([`External.minkowski_mahler`](External/MinkowskiMahler.lean#L964)). These do not affect the
+mathematics.
 
 **E34. Lemma 3.1.8, §3.1 (TeX 2554–2579): missing hypothesis; two gaps.** The lemma assumes that
 the boundary of `K` "is parameterized by a `C¹` multi-curve `σ`". Without regularity it is false:
@@ -588,16 +619,19 @@ states them:
   The density ratios are taken in `[0, ∞]`; a density exists when the upper and lower densities are
   finite and equal; `δ(K)` and `δ_L(K)` are suprema of real numbers, over nonempty sets bounded by
   `1`. A lattice is a discrete `ℤ`-submodule of `ℝ²` spanning it, and its determinant is Mathlib's
-  covolume, shown equal to `|det|` of any basis ([`definition2_3_2`](SmoothedPolygons/Ch2/Mahler.lean#L57)).
+  covolume, shown equal to `|det|` of any basis ([`definition2_3_2`](SmoothedPolygons/Ch2/Mahler.lean#L58)).
 - **Critical lattices and hexagons (§2.3).** A critical lattice is admissible with determinant
   `Δ(K)` (E6). The critical hexagons of §2.2 are the least-area circumscribed centrally symmetric
   hexagons ([`IsLeastAreaHexagon`](SmoothedPolygons/Ch2/Reinhardt.lean#L66), compared among strictly convex hexagons centred at the origin,
   which gives the same minimum); those of Definition 2.3.8 come from Mahler's construction, and
   Theorem 2.3.9 identifies them. Two notions of irreducibility appear: Definition 2.3.5's (every
   boundary point on a critical lattice) and Mahler's original one (no proper subdomain with the same
-  `Δ`), used in the proof of Lemma 2.2.5. The remark after Definition 2.3.5, that they agree, is
-  proved for every `K ∈ 𝔎_ccs` ([`isIrreducible_iff_mahlerIrreducible`](SmoothedPolygons/Ch2/Mahler.lean#L98), from Mahler's Lemma 3,
-  [`External.mahler_irreducible_iff`](External/MahlerIrreducible.lean#L2771)).
+  `Δ`), used in the proof of Lemma 2.2.5. In Mahler's notion the subdomains are read as centrally
+  symmetric convex disks ([`External.MahlerIrreducible.IsIrreducible`](External/MahlerIrreducible.lean#L105)); Mahler admits all star domains, and
+  paper A's Lemma 13 shows that for a convex `K` the two readings agree (Section 2). The remark after
+  Definition 2.3.5, that the two notions agree, is proved for every `K ∈ 𝔎_ccs`
+  ([`isIrreducible_iff_mahlerIrreducible`](SmoothedPolygons/Ch2/Mahler.lean#L99), from Mahler's Lemma 3,
+  [`External.mahler_irreducible_iff`](External/MahlerIrreducible/Lemma3.lean#L367)).
 - **Statements about `K_min` (§2.2–2.4).** Lemma 2.2.7's "the midpoints advance monotonically and
   continuously" is formalized with polar-angle lifts; Lemma 2.4.2 is read literally (any `C⁰`
   multi-curve on the boundary); Lemmas 2.4.5 and 2.4.6 assume the positive orientation of §2.4,
@@ -722,7 +756,7 @@ states them:
 | Result | The paper's argument | The formalization's | Why it is necessary | E-item |
 | --- | --- | --- | --- | --- |
 | Lemma 2.2.1 (in its corrected form) | expand `K`, separate touching translates by lines, crop, repeat until the plane is tiled; at most six edges by Euler characteristic | a maximal centrally symmetric convex body `C ⊇ K` free of half-lattice points (Zorn; bounded by Blichfeldt) is cut out by at most three strips, whose unique support points pairwise form lattice bases ([`PlaneLattice.exists_halfLatticeFree_eq_strips`](Basic/Analysis/Convex/LatticePacking.lean#L998)) | the book's argument is aimed at the printed statement, which is false (E1): its termination ("the plane is tiled") and its edge count (Euler characteristic of a tiling) fail; the corrected statement needs another argument (approved by the user) | E1 |
-| Lemma 2.2.5, no corners and critical edges | shave `K` near a boundary point lying on no edge of a critical hexagon; at endpoints of flat segments, "shave as above" | a worst disk is irreducible in Mahler's sense; every support line then contains a point of a critical lattice (a weak form of the "only if" half of Mahler 1947, Lemma 3: a critical-lattice point on each support line, not at each boundary point), where Mahler's Theorem 2 gives a unique support line and the edge of a least-area hexagon | the shaving argument cannot close the case of a segment endpoint on a critical edge off its midpoint (E4); the user chose Mahler's route | E4 |
+| Lemma 2.2.5, no corners and critical edges | shave `K` near a boundary point lying on no edge of a critical hexagon; at endpoints of flat segments, "shave as above" | a worst disk is irreducible in Mahler's sense (no symmetric convex proper subdomain has the same `Δ`); by Mahler 1947, Lemma 3, which the book cites after Definition 2.3.5, its boundary points lie on critical lattices, so every support line contains a point of a critical lattice, one of the six boundary points of a configuration of Mahler's Lemma 2 ([`External.mahler_irreducible`](External/MahlerIrreducible/Lemma3.lean#L383)); there Mahler's Theorem 2 gives a unique support line and the edge of a least-area hexagon | the shaving argument cannot close the case of a segment endpoint on a critical edge off its midpoint (E4); the user chose Mahler's route, which rests on results the book itself cites (Mahler's Lemma 3, Theorems 2.3.6 and 2.3.7) | E4 |
 | Lemma 2.4.2, one step | `σ₂` equals the integral curve `σ̃₂` with the same tangent direction and area relation | `σ₂` is differentiable because its chords lie between the tangent lines at their ends, so their directions converge, and the area relation fixes their lengths | the book does not show that `σ̃₂` stays on the boundary, which its identification needs (E8) | E8 |
 | Lemma 2.4.6 | Shifrin's Proposition 3.8 (a simple closed regular curve is convex iff its curvature has one sign) | each tangent line supports `K`, so `f(t) = det(σ'(t₀), σ(t) − σ(t₀)) ≥ 0` with `f(t₀) = f'(t₀) = 0`, and the second-derivative test gives `det(σ', σ'') ≥ 0` | the cited proposition is about smooth curves; the curves here are only `C¹` with Lipschitz derivative (E11) | E11 |
 | The area formula `eqn:cost` (§3.2) | Green's theorem, `area(K) = ½∮ x dy − y dx` | the polar-coordinates form of Green's formula for regions star-shaped about the origin, `area = ½∫ det(γ, γ')` ([`PlaneCurve.IsStarCurve.volume_radialHull`](Basic/Analysis/Convex/StarCurve.lean#L480), by the change of variables `(r, t) ↦ r γ(t)`) | Mathlib has no Green's theorem for regions bounded by `C¹` curves; only that step changes | – |
@@ -750,8 +784,44 @@ The cited results that [`External/`](External) proves are proved by their source
 | Cited result | The source's argument | The formalization's | Why |
 | --- | --- | --- | --- |
 | Mahler 1947, Theorem 2 (Theorem 2.3.7) | uses its own Lemma 5 (a convex hexagon `H` has `Δ(H) = V(H)/4` and a unique critical lattice, the midpoint lattice, justified by reference to the unique tiling by translates of `H` in another paper) and, in footnote 8, Lemma 5 of another paper (no arc between consecutive lattice points is a segment) | an exact formula for the area of the hexagon of tac-lines, `V(H) = (4 − p²/(D₀D₁D₂))Δ(K)`, gives the area and the bisection; the footnote is derived from Mahler's Theorem 1 | the uniqueness of the critical lattice of a hexagon rests on a uniqueness theory of lattice tilings that Lean lacks and that the source does not give; the exact formula avoids it |
-| Mahler 1947, Lemma 3 | quoted from Lemmas 8 and 12 of another paper, which we did not have | a weak form of the "only if" half, proved by shaving along a support line: in an irreducible domain each support line contains a point of a critical lattice | the source gives no proof; only this form is used (Lemma 2.2.5) |
+| Mahler 1947, Lemma 3 | stated without proof, with a reference to Lemmas 8 and 12 of paper A, whose proof quotes Theorems B–E of Mahler 1946 (Section 2); paper A's Lemma 1 takes `Δ` of the square from Minkowski's theorem on linear forms, and Mahler 1946 quotes Theorems 2 (selection) and 8 (existence of critical lattices) of its Part I | Mahler's proofs throughout, with the repairs listed below, except that `Δ` of a parallelogram comes from Mahler's own example in §2 of paper A with its Lemmas 2 and 3 (and Lemma 1 is proved in the parallelogram's coordinates, not after an affine map to the square), and that Part I's Theorems 2 and 8 are proved in the plane, by reduced bases and Mahler's compactness theorem | these three results are quoted from works outside the three papers; in the plane Mahler's example and standard arguments give them directly |
 | Fejes Tóth's theorem (Theorem 2.1.3) | Fejes Tóth: Dowker's theorem and the cell decomposition of a finite packing, counted with Euler's formula | Dowker's theorem by an alternating merge of normal angles; the cell lemma by maximal cells (Böröczky 2003, Lemma 5), the convexity of their holes by a counting argument on sides instead of Böröczky's walk around boundary cycles, and the side count by angle sums instead of Euler's formula | Mathlib has neither Euler's formula for planar maps nor the Jordan curve theorem, on which the cycle and Euler arguments rest; Dowker's area formula for polygons is likewise missing, and the merge argument needs only measure additivity |
+
+Mahler's Lemma 3 is otherwise proved by the arguments of paper A and Mahler 1946 (Section 2). They
+have errors and gaps, all repaired; [`External/MahlerIrreducible/Lemma3.lean`](External/MahlerIrreducible/Lemma3.lean) lists them with the
+Lean names:
+
+- **Mahler 1946, proof of Theorem C (p. 337), error.** The function
+  `G(X) = F(X){1 + (δ/σ) max(0, σ − ||X|⁻¹X − |P|⁻¹P|)}` is not even (`G(P) = (1 + δ)F(P)` but
+  `G(−P) = F(P)`), so `H : G ≤ 1` is not a star body and contains `−P`, whereas paper A's Lemma 10
+  asserts that `H` omits `±P` (proved in Lean,
+  [`External.Mahler1946.m46c_mahlerG_not_distanceFunction`](External/Mahler1946/TheoremC.lean#L392)). Repaired by measuring the distance from
+  `|X|⁻¹X` to the nearer of the two directions `±|P|⁻¹P`; the rest of the proof stands, except that
+  in its last step one of the two points `±λQ_s`, not necessarily `λQ_s`, lies in the cone.
+- **Mahler 1946, proof of Theorem E, gap.** "There exists a neighbouring lattice `Λ*` which is
+  `K*`-admissible and of determinant `d(Λ*) < d(Λ)`" is asserted without argument; filled by the
+  deformation that proves Minkowski's (A) ([`External.Mahler1946.m46e_turn`](External/Mahler1946/TheoremE.lean#L369)).
+- **Mahler 1946, §4, gap.** That the points `P_k*` are the only points of `Λ*` on or near `C` for
+  small `ε` is stated without proof; it is proved ([`External.Mahler1946.m46e_near`](External/Mahler1946/TheoremE.lean#L92)).
+- **Paper A, proof of Lemma 1, error.** "`±θP₀` are its only points which are inner points of
+  `K₀`" fails for `θ < 1/2`; the argument survives, since all such points are multiples of `θP₀`,
+  none of them an inner point of `H`.
+- **Paper A, proof of Lemma 5, slip.** "lies on `L**`" should read "lies on `C`".
+- **Paper A, gaps.** The Corollary to Lemma 5 has no proof (supplied,
+  [`External.MahlerIrreducible.ml5_lemma5_cor_six`](External/MahlerIrreducible.lean#L1474)); in class B of Lemma 13, the line `L′` through `P`
+  missing `H′` is not justified (filled by a support line at the extreme point `P`, tilted
+  slightly); and
+  Lemma 12 does not follow from Theorems D and E alone, which need a dense set of boundary points
+  on critical lattices with just six boundary points: paper A's Corollary to Lemma 5 supplies
+  them when `K` is not a parallelogram, and its Lemma 1 settles parallelograms
+  ([`External.Mahler1946.m46e_lemma12`](External/Mahler1946/TheoremE.lean#L759)). Smaller steps left to the reader (the reduction in Lemma 1,
+  three steps of class A of Lemma 13, two details of Theorems D and E) are written out.
+
+The readings: everything is in the plane; the domains are symmetric convex domains, whose gauge is
+Mahler's distance function; the sup norm of `Fin 2 → ℝ` replaces the Euclidean length in the
+direction `|X|⁻¹X` and in the neighbourhoods `|X − Q| ≤ ε` (only their continuity and homogeneity
+are used); and irreducibility is tested against symmetric convex subdomains, where Mahler admits
+all star domains (paper A's Lemma 13 bridges the two; Section 6).
 
 Filippov's theorem is proved by the standard argument; Agrachev and Sachkov's text was not available
 to us to compare it with (Section 2).
@@ -761,20 +831,25 @@ to us to compare it with (Section 2).
 The results from prior work that the proofs use are all proved in [`External/`](External) (Section 2):
 Fejes Tóth's theorem (through Theorem 2.1.3, in Theorem 2.2.2 and the results after it), Gruber's
 formula (Definition 2.1.2), the theorems of Minkowski and Mahler (Theorems 2.3.6, 2.3.7 and
-everything that uses them, Lemma 2.2.5 and the remark after Definition 2.3.5), and the Euler–Arnold
-equation (Proposition 6.5.1). Filippov's theorem is proved as Theorem 6.1.1 and used by no other
-result. Every
-declaration depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound)
-(`lake env lean scripts/Audit.lean`).
+everything that uses them), Mahler's Lemma 3 with the results of paper A and Mahler 1946 that
+prove it (Lemma 2.2.5 and the remark after Definition 2.3.5), and the Euler–Arnold equation
+(Proposition 6.5.1). Filippov's theorem is proved as Theorem 6.1.1 and used by no other result.
+Every declaration depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound)
+(`lake env lean scripts/Audit.lean`, which checks the 5042 declarations of the library).
 
 The route check (`python3 scripts/route_check.py check docs/paper_routes.tsv --accept
-docs/route_differences.tsv`) compares, for each of the 58 formalized results that the book proves,
-the numbered results that the Lean proof uses with those that the book's proof cites. It passes:
-every difference is recorded in [`docs/route_differences.tsv`](docs/route_differences.tsv) with its reason. The 50 differences
-are of these kinds:
+docs/route_differences.tsv`) compares, for each of the 65 results of the book found in the Lean
+code, the numbered results that the Lean proof uses with those that the book's proof cites. It
+passes: every difference is recorded in [`docs/route_differences.tsv`](docs/route_differences.tsv) with its reason. The 57
+differences are of these kinds:
+
 - results the book uses without `\ref` ("by the previous lemma", "immediate from the previous
-  proposition", an equation cited by number), and three basic facts used throughout (Lemma 7.1.1,
-  Lemma A.6.4, Lemma 3.3.4);
+  proposition", an equation cited by number such as the transversality condition `eqn:theta-k` of
+  Lemma 7.5.5 in Theorem 7.7.1, "the real number constructed in Section 7.5" for Remark 7.5.2's
+  `y₀(d)`) or implicitly (for instance the star domain of Theorem 4.4.1 as the state space, in
+  Lemma 4.5.2 and Theorems 7.5.6 and 7.7.1), and three basic facts used throughout (Lemma 7.1.1,
+  Lemma A.6.4, Lemma 3.3.4); conversely, Lemma 2.4.2 cites Lemma 2.4.5 only by "Compare the proof
+  of Lemma 2.4.5" and does not use it;
 - citations whose content the formal statements take as hypotheses or definitions: Lemma 2.4.3
   (about `K_min` only; Theorem 3.1.4(3) is false without its conclusion, E13), Lemma 2.4.5 (item 5
   of a balanced pair), Lemma 5.0.4 (Chapter 5, out of scope) and Proposition 3.6.1 (the left

@@ -123,8 +123,35 @@ sources:
     relationship: "background"
     note: >-
       Cited as Theorems 2.3.6 and 2.3.7 and after Definition 2.3.5; Lemma 2 (with Minkowski),
-      Theorems 1 and 2 and the half of Lemma 3 that is used are proved (External.minkowski_mahler,
-      External.mahler_1947, External.mahler_irreducible).
+      Theorems 1 and 2 and Lemma 3 are proved (External.minkowski_mahler, External.mahler_1947,
+      External.mahler_irreducible_iff, and External.mahler_irreducible, the form Lemma 2.2.5 uses).
+      Lemma 3 is stated there without proof; it is proved along the next two sources.
+  - title: "On irreducible convex domains"
+    authors:
+      - "Kurt Mahler"
+    type: "article"
+    location: "Proc. KNAW 50 (1947) 98-107"
+    relationship: "background"
+    note: >-
+      Not cited by the book; the paper ("paper A") to which Mahler 1947 refers for the proof of
+      Lemma 3, read from a scan of Mahler's collected works (CARMA archive, item 094). Its Lemmas 1,
+      2, 5-7 and 13 are proved by its arguments (External/MahlerIrreducible.lean,
+      External.MahlerIrreducible.ml3_onlyIf), and the Corollary to Lemma 5, which it states without
+      proof, is proved; its errors and gaps are repaired (REPORT.md, Section 7).
+  - title: "Lattice points in n-dimensional star bodies II. Reducibility theorems I"
+    authors:
+      - "Kurt Mahler"
+    type: "article"
+    location: "Proc. KNAW 49 (1946) 331-343"
+    relationship: "background"
+    note: >-
+      The book's entry mahler1946lattice, cited with Minkowski for Theorem 2.3.6, of which it only
+      quotes the six-point statement (REPORT.md, E33). Paper A quotes its Lemmas 8, 10, 11 and 12
+      from Theorems B-E of this paper, which are proved in the plane by Mahler's arguments
+      (External/Mahler1946/TheoremC.lean, External/Mahler1946/TheoremE.lean; scan of Mahler's
+      collected works, CARMA archive, item 088), with its errors and gaps repaired: the function G
+      in the proof of Theorem C is not even, so it does not define a star body (proved in Lean),
+      and two steps of Section 4 are asserted without argument.
 
 related_formalizations:
   - id: "https://github.com/sunfishho/reinhardt-density-bound"
@@ -151,8 +178,9 @@ status:
     theorem in Section 6.1, which rests on Chapter 5. Pontryagin extremals are defined by the
     conditions of the maximum principle, which is not proved and not needed. No cited theorem is
     assumed: Fejes Toth's theorem, Gruber's density formula, the theorems of Minkowski and Mahler
-    on critical lattices (the half of Mahler's Lemma 3 that is used), and the Euler-Arnold
-    equation are proved, and so is Filippov's theorem. Statements and definitions corrected
+    on critical lattices and circumscribed hexagons, Mahler's Lemma 3 on irreducible domains (in
+    full, along the two earlier papers of Mahler on which it rests), and the Euler-Arnold equation
+    are proved, and so is Filippov's theorem. Statements and definitions corrected
     (REPORT.md, Section 3): E1 (false lemma), E6, E13 (a hypothesis approved by the user), E16,
     E17, E20, E21, E26, E32 (Theorem 7.7.1's reading), E34 and E35 (hypotheses approved by the
     user).
@@ -188,8 +216,9 @@ automation:
   notes: >-
     The-Anh Vu-Le requested the formalization, chose its scope (first the control-theoretic core,
     then Chapter 2 with every cited theorem proved) and made the decisions it needed (the proof of
-    Jacobi's formula, the hypothesis of Theorem 3.1.4(3), the routes for Lemmas 2.2.1 and 2.2.5,
-    and the corrected form of the false Lemma 2.2.1). Claude Opus 5.5 wrote the statements, the
+    Jacobi's formula, the hypothesis of Theorem 3.1.4(3), the routes for Lemmas 2.2.1 and 2.2.5
+    and for Mahler's Lemma 3 (along Mahler's 1946 paper), and the corrected form of the false
+    Lemma 2.2.1). Claude Opus 5.5 wrote the statements, the
     proofs, the audit report and the packaging; independent agents reviewed the statements, the
     proofs and the report. No person has reviewed the proofs. Details and token counts in
     CREDITS.md.
@@ -271,9 +300,19 @@ fidelity:
     are filled along the book's lines (among them those of Lemma 3.1.8 and of the sketch of Theorem
     7.7.1, whose "direct calculation" of hyperbolicity is supplied in closed form), and the index
     slip of Lemma 2.4.5 is corrected. Remarks 7.5.2 and 7.6.4 have no proof in the book. Proofs of the cited results follow their sources, except where a source quotes
-    another paper without proof (Mahler's Lemmas 3 and 5) and in Fejes Toth's theorem (Dowker's theorem by an alternating merge; the cell lemma by
+    another paper without proof (Mahler 1947's Lemma 5 and footnote 8, used in its Theorem 2) and in Fejes Toth's theorem (Dowker's theorem by an alternating merge; the cell lemma by
     Boroczky's maximal cells, with a counting argument and angle sums in place of boundary cycles
-    and Euler's formula). Filippov's theorem is proved by the standard argument (equi-Lipschitz
+    and Euler's formula). Lemma 3 of Mahler 1947, stated there without proof, follows Mahler's
+    paper A and Mahler 1946 throughout, with their errors and gaps repaired (among them a function
+    in Mahler 1946's proof of Theorem C that is not even and so defines no star body, and Lemma 12
+    of paper A, which does not follow from the two theorems it is quoted from without paper A's
+    own Corollary to Lemma 5 and Lemma 1); the departures that remain are small: the minimal
+    determinant of a parallelogram is taken from Mahler's own example instead of Minkowski's
+    theorem on linear forms, and the two results of Mahler's Part I that the 1946 paper quotes
+    (selection, existence of critical lattices) are proved in the plane by standard arguments.
+    The domains are symmetric convex domains in the plane, with their gauge as distance function,
+    and irreducibility is tested against symmetric convex subdomains (paper A's Lemma 13 is the
+    bridge to Mahler's star domains). Filippov's theorem is proved by the standard argument (equi-Lipschitz
     trajectories, a limit by Tychonoff's theorem, measurable selection); its source's text was not
     available to compare with.
 

@@ -31,7 +31,9 @@ formalized.
 - The formalization is unconditional: no cited theorem is assumed. The cited results that the
   proofs use are proved in [`External/`](External): Fejes Tóth's theorem that lattice packings are densest for
   centrally symmetric disks, Gruber's lattice density formula, the theorems of Minkowski and Mahler
-  on critical lattices and circumscribed hexagons, and the Euler–Arnold equation; Filippov's
+  on critical lattices and circumscribed hexagons, Mahler's characterization of irreducible domains
+  (his Lemma 3, stated without proof, proved along the two earlier papers of Mahler on which it
+  rests), and the Euler–Arnold equation; Filippov's
   theorem is proved there too ([External/README.md](External/README.md)). A *Pontryagin extremal* is defined by the conditions
   of the maximum principle ([`IsPontryaginExtremal`](Challenge.lean#L171)), so the maximum principle itself is not needed.
 - `lake build` succeeds; the only `sorry`s are the statements of [`Challenge.lean`](Challenge.lean). There is no
@@ -133,8 +135,9 @@ From [REPORT.md](REPORT.md), whose E-numbers are used here.
   the octagon's fixed point, which gives the uniformity the book's per-`d` argument lacks). The
   cited results are proved by their sources' arguments, with the exceptions listed there (notably
   Fejes Tóth's theorem, through Böröczky's cell lemma, with angle sums in place of Euler's
-  formula); Filippov's theorem is proved by the standard argument, without comparison with its
-  source, which was not available to us.
+  formula); Mahler's Lemma 3 follows his two earlier papers on which it rests, whose errors and
+  gaps are repaired; Filippov's theorem is proved by the standard argument, without comparison
+  with its source, which was not available to us.
 
 ## Credits
 
@@ -192,7 +195,7 @@ Lean `v4.36.0-rc2`, Mathlib `v4.36.0-rc2`.
 | Path | Content |
 | --- | --- |
 | [`Basic/`](Basic) | general mathematics, for Mathlib: matrix calculus and ODEs, generalized circles under `SL₂(ℝ)`, areas and convexity of star-shaped regions, Dowker's theorem, hexagon lattice tilings, polygon angles, Fejes Tóth's cell lemma, the Tietze–Nakajima theorem, critical lattices, lattice-packed bodies, control systems and Filippov's compactness theorem, measurable selection ([Basic/README.md](Basic/README.md)) |
-| [`External/`](External) | cited results, proved: Fejes Tóth, Gruber, Minkowski–Mahler, Mahler 1947 (Theorem 2, half of Lemma 3), Euler–Arnold, Filippov ([External/README.md](External/README.md)) |
+| [`External/`](External) | cited results, proved: Fejes Tóth, Gruber, Minkowski–Mahler, Mahler 1947 (Theorem 2; Lemma 3, with the lemmas of Mahler's *On irreducible convex domains* and Theorems B–E of Mahler 1946 that prove it), Euler–Arnold, Filippov ([External/README.md](External/README.md)) |
 | [`SmoothedPolygons/Defs.lean`](SmoothedPolygons/Defs.lean) | the definitions that the Challenge uses |
 | [`SmoothedPolygons/Ch2/`](SmoothedPolygons/Ch2) | Chapter 2: packing densities and Fejes Tóth's theorem (§2.1), Reinhardt's lemmas and the minimizer (§2.2), critical lattices and hexagons (§2.3), the boundary of the minimizer and balanced disks (§2.4), the density of balanced disks, the refutation of the printed Lemma 2.2.1 |
 | [`SmoothedPolygons/Ch3/`](SmoothedPolygons/Ch3) | the control problem: state dynamics, hyperbolic arcs (Lemma 3.1.8), Jacobi's formula, cost and the area formula of §3.2, controls, Lie algebra dynamics, Proposition 3.6.1, Problem 3.6.2 |
