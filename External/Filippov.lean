@@ -10,10 +10,11 @@ public import Mathlib.Topology.Compactness.Compact
 # Filippov's theorem (compactness of attainable sets, existence of optimal controls)
 
 Cited as Theorem 6.1.1 of Hales–Vajjha, *Packings of Smoothed Polygons* (§6.1, TeX 4538–4546),
-without a reference in the theorem; the surrounding text refers to the book's bibliography entry
-`zelikin2004control`, which is A. A. Agrachev and Yu. L. Sachkov, *Control Theory from the
-Geometric Viewpoint*, Encyclopaedia of Mathematical Sciences 87, Springer, 2004 (the entry also
-lists M. I. Zelikin); Hales's earlier paper (arXiv:1703.01352, §"Filippov's lemma") cites the same
+without a reference (§6.1 cites nothing). The book's control-theory reference, cited for the
+maximum principle (TeX 737, 4674), is the bibliography entry `zelikin2004control`, which is
+A. A. Agrachev and Yu. L. Sachkov, *Control Theory from the Geometric Viewpoint*, Encyclopaedia of
+Mathematical Sciences 87, Springer, 2004 (the entry also lists M. I. Zelikin, and Sachkov twice);
+Hales's earlier paper (arXiv:1703.01352, §"Filippov's lemma") cites the same
 result as Theorem 10.1 of that book. The book states:
 
 *On a smooth manifold `M`, let `q' = f(q, u)` be an optimal control system with an associated cost

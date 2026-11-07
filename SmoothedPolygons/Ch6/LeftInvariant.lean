@@ -85,8 +85,9 @@ trivialization is `⟨p, f(e, u)⟩`, for every `g ∈ G` and `u ∈ U`. ("Invar
 the adjoint action, `⟨[x, y], z⟩ = -⟨y, [x, z]⟩`, Mathlib's `LinearMap.BilinForm.lieInvariant`.)
 The nondegeneracy, symmetry and invariance of the form are the book's hypotheses; nondegeneracy is
 what makes `p ↦ ⟨p, ·⟩` the identification `𝔤 ≅ 𝔤*`, and the identity itself holds for every
-bilinear form. The proof is the book's: `TL_{g⁻¹} f(g, u) = f(g⁻¹g, u) = f(e, u)` by
-left-invariance. -/
+bilinear form. The book writes `f(g, u) = TL_g f(e, u)` and uses `TL_{g⁻¹} TL_g = id`; the formal
+proof applies left-invariance with `h = g⁻¹` directly, `TL_{g⁻¹} f(g, u) = f(g⁻¹g, u) = f(e, u)`,
+the same identity read in one step. -/
 theorem proposition6_4_1 {m : ℕ} {U : Set (Fin m → ℝ)}
     {f : (g : G) → (Fin m → ℝ) → TangentSpace I g} (hf : IsLeftInvariantControlSystem I U f)
     (B : LinearMap.BilinForm ℝ (GroupLieAlgebra I G)) (_hB : B.Nondegenerate) (_hBs : B.IsSymm)
