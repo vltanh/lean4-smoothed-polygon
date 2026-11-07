@@ -17,23 +17,33 @@ centrally symmetric convex disk whose greatest packing density is
 proves that **every minimizer of the Reinhardt control problem lifts to a Pontryagin extremal**
 (§6.2), through the Pontryagin maximum principle, which the separate package
 [OptimalControl](https://github.com/vltanh/lean4-optimal-control) proves by Agrachev and
-Sachkov's argument. The book's main theorem, Mahler's First conjecture (Theorem 16.3.1), is not
-formalized.
+Sachkov's argument. A fifth round, the second layer, formalizes Chapter 5 (the compactification
+of the star domain) and proves that **the Reinhardt control problem has a global minimizer, which
+lifts to a Pontryagin extremal and bounds a centrally symmetric convex disk of least greatest
+packing density** (§6.1, with the identification of the minimizers with Reinhardt's `K_min`,
+which the book uses without proof). The book's main theorem, Mahler's First conjecture
+(Theorem 16.3.1), is not formalized.
 
 ## What is proved
 
-- Every numbered result of the formalized chapters, by the book's own arguments where they hold:
-  among them Filippov's theorem (Theorem 6.1.1, cited), Proposition 6.4.1 on left-invariant
-  systems, and Theorem 7.7.1, whose proof the book only sketches; Remarks 2.2.4, 6.6.1, 7.5.2 and
-  7.6.4, which the book states without proof; and the claim of §6.2 that every minimizer of the
-  Reinhardt problem is a Pontryagin extremal, which the book uses in Chapter 8. What is left in
-  these chapters (two conjectural remarks, and the application of Filippov's theorem, which needs
-  Chapter 5 and gives the existence of a minimizer) is listed in
-  [REPORT.md, Section 9](REPORT.md#9-not-formalized).
+- Every numbered result of the formalized chapters (2–7, with Appendix A.6 and A.11), by the
+  book's own arguments where they hold: among them Filippov's theorem (Theorem 6.1.1, cited),
+  Proposition 6.4.1 on left-invariant systems, Theorem 5.0.2 (a balanced disk whose trajectory
+  leaves the compact set `𝔥**` is worse than the smoothed octagon), Theorem 5.0.6, whose second
+  case the book only sketches, and Theorem 7.7.1, whose proof the book only sketches; Remarks
+  2.2.4, 6.6.1, 7.5.2 and 7.6.4, which the book states without proof; and three claims that the
+  book uses in its later chapters: every minimizer of the Reinhardt problem is a Pontryagin
+  extremal (§6.2), a global minimizer exists (§6.1), and the global minimizers are Reinhardt's
+  `K_min` (stated without proof). What is left in these chapters (two conjectural remarks) is
+  listed in [REPORT.md, Section 9](REPORT.md#9-not-formalized).
 - Lemma 2.2.1 is false as printed; it is refuted in Lean and proved in corrected form (E1).
   Theorem 7.7.1 is false read literally and holds up to time translation, for terminal times near
   `t_f` (E32); Lemma 3.1.8 and the existence of optimal controls in Filippov's theorem each lack
-  a hypothesis (E34, E35). The user approved the four corrected statements.
+  a hypothesis (E34, E35). The user approved the four corrected statements. The converse of the
+  control problem that §6.1 uses, that an admissible trajectory bounds a balanced disk whose area
+  is its cost, is false (the unit circle traversed seven times is admissible) and is proved for
+  trajectories that wind once around the origin, as every trajectory cheaper than `7π/2` does
+  (E15).
 - The formalization is unconditional: no cited theorem is assumed. The cited results that the
   proofs use are proved in [`External/`](External): Fejes Tóth's theorem that lattice packings are densest for
   centrally symmetric disks, Gruber's lattice density formula, the theorems of Minkowski and Mahler
@@ -42,7 +52,9 @@ formalized.
   rests), the Euler–Arnold equation and the Pontryagin maximum principle; Filippov's
   theorem is proved there too ([External/README.md](External/README.md)). The maximum principle and Filippov's theorem are
   proved in the OptimalControl package, required at a pinned commit, which takes Brouwer's
-  fixed-point theorem from the [FixedPoint](https://github.com/vltanh/lean4-fixed-point) package.
+  fixed-point theorem from the [FixedPoint](https://github.com/vltanh/lean4-fixed-point) package;
+  the existence of a minimizer applies the package's form of Filippov's theorem with a closed
+  state constraint, a compact set of initial points and a closed endpoint relation.
   A *Pontryagin extremal* is defined by the conditions of the maximum principle
   ([`IsPontryaginExtremal`](Challenge.lean#L171)); Theorem 7.5.6 shows that the smoothed polygons satisfy them, and the maximum
   principle shows that every minimizer does.
@@ -83,9 +95,24 @@ the cone of the star inequalities; the costate equations through Proposition 6.5
 Euler–Arnold equation) and Corollary 6.5.3; the transversality conditions of §6.6. One departure:
 the boundary conditions are written without two equations that the first integrals `det g` and
 `det X` make redundant, for with them the principle is satisfied by every trajectory with a
-covector whose reduced costate vanishes (E21). That a minimizer exists rests on Chapter 5 and is
-the next layer. Remark 6.6.1 is proved too ([`remark6_6_1`](SmoothedPolygons/Ch6/PeriodicExtension.lean#L352)): every extremal extends to a periodic
+covector whose reduced costate vanishes (E21). Remark 6.6.1 is proved too ([`remark6_6_1`](SmoothedPolygons/Ch6/PeriodicExtension.lean#L352)): every extremal extends to a periodic
 solution with discrete rotational symmetry, `X(3t_f) = X(0)` and `g(6t_f) = I₂` (E38).
+
+The second layer proves that the Reinhardt control problem has a global minimizer, that it lifts
+to a Pontryagin extremal, and that the balanced disk it bounds is a `K_min`, a centrally symmetric
+convex disk of least greatest packing density `δ_min = cost/√12`
+([`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250)); conversely, every `K_min`, after a
+linear map, is the disk of a global minimizer ([`exists_isReinhardtMinimizer_of_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L183)). The existence follows
+§6.1 ([`exists_isReinhardtMinimizer`](SmoothedPolygons/Ch6/Existence.lean#L436)): Theorem 5.0.2 ([`theorem5_0_2`](SmoothedPolygons/Ch5/Theorem502.lean#L253)) confines the competitors that matter to the
+compact set `𝔥**`, and Filippov's theorem gives a minimizer. The book's argument has gaps,
+repaired along its lines (E46): Theorem 5.0.2 is about balanced disks, and the converse of the
+control problem that applying it to trajectories needs holds only for trajectories that wind once
+(E15; higher winding costs at least `7π/2`, by a bound not in the book); the book's cut-off of the
+vector fields changes the problem, and Filippov's theorem as stated fixes the initial point, so the
+formalization uses its form with a closed state constraint, a compact set of initial points and a
+closed endpoint relation, from the OptimalControl package; and the terminal time is bounded by
+`cost ≥ 3t_f` rather than by Lemma 4.3.1, which assumes a minimizer. The identification with
+`K_min`, which the book uses without proof in Chapters 8 and 16, is E47.
 
 The Reinhardt conjecture itself (that the smoothed octagon is the least dense) remains open, and
 is not claimed here.
@@ -119,9 +146,13 @@ From [REPORT.md](REPORT.md), whose E-numbers are used here.
   gives it for a minimizer only when the boundary conditions are written without the equations
   that first integrals make redundant (E21). Theorem 7.7.1 (the
   smoothed octagon is an isolated extremal) is false read literally: the octagon's lift started at
-  another time, or run for several laps, is another such extremal (E32). Slips that do not affect
-  any result: E6 (the definition of a critical lattice omits admissibility), E7, E8, E10, E14, E22,
-  E24.
+  another time, or run for several laps, is another such extremal (E32). The converse of the
+  control problem that §6.1 uses (an admissible trajectory bounds a balanced disk whose area is its
+  cost) is false: the unit circle traversed seven times is admissible (E15). The set that §4.6
+  gives as a fundamental domain of the dihedral group is the union of two sectors, and the proof of
+  Theorem 5.0.2 prints a curve in its place (E40, E45). Slips that do not affect any result: E6
+  (the definition of a critical lattice omits admissibility), E7, E8, E10, E14, E22, E24, E44,
+  E45.
 - **Gaps:** the proof that the minimizer has no corners (Lemma 2.2.5) has a gap its argument cannot
   close; it is closed here by Mahler's lattice route (E4). The octagon's density value rests on a
   fact the book never proves, that balanced disks have least circumscribed hexagon of area `√12`;
@@ -133,8 +164,17 @@ From [REPORT.md](REPORT.md), whose E-numbers are used here.
   calculation" of hyperbolicity is not given, and the uniformity in the parameter `d` that its
   conclusion needs is missing; all are supplied here (E32). Remarks 7.5.2 and 7.6.4 are stated
   without proof, the second read off a figure; both are proved (E36, E37), and so is Remark 6.6.1,
-  the periodic extension of an extremal, also stated without proof (E38). Further gaps, all
-  filled: E2, E3, E5, E8, E9, E15, E18, E23, E30, E31, E34.
+  the periodic extension of an extremal, also stated without proof (E38). Chapter 5 asserts that
+  `𝔥**` is compact (E41), does not argue the second claim of Lemma 5.0.3 (E42) or the claim of
+  Theorem 5.0.6's first case, and only sketches its second case (E43); steps of Lemma 5.0.7 and of
+  the proof of Theorem 5.0.2 are missing, among them a one-variable bound read off a graph (E44,
+  E45). The argument of §6.1 for the existence of a minimizer applies Theorem 5.0.2 to trajectories
+  that need not bound balanced disks, cuts off the vector fields (which changes the minimizers),
+  uses Filippov's theorem with a fixed initial point while the endpoints are coupled, and bounds the
+  terminal time by a lemma that assumes a minimizer (E46). The book identifies the minimizers of
+  the control problem with Reinhardt's `K_min` without proof (E47), and takes for granted a
+  reparameterization in §3.5 (E39). All are filled here, as are the further gaps E2, E3, E5, E8,
+  E9, E18, E23, E30, E31 and E34.
 - **Missing hypotheses:** Theorem 3.1.4(3) is false for a general convex disk and holds under the
   standing assumptions of §2.4 (E13, formalized with the hypothesis `σ_j'` Lipschitz, approved by
   the user); Lemma 3.1.8 (hyperbolic arcs) is false unless the curves are regular, as §2.4 assumes
@@ -142,16 +182,21 @@ From [REPORT.md](REPORT.md), whose E-numbers are used here.
   that an optimal control exists when the velocity sets are convex, which fails for costs that
   depend on the control and holds when the velocity sets extended by the cost are convex (E35,
   approved by the user); Lemma 4.2.3 needs `X ≠ 0` (E17); Lemma 7.3.1 needs `⟨X, Z_u⟩ ≠ 0` on the
-  control set (E26).
-- **Redundant hypotheses:** eight results of the book and one cited result hold without some of
+  control set (E26); the converse of the control problem that §6.1 uses needs winding number one
+  (E15).
+- **Redundant hypotheses:** nine results of the book and one cited result hold without some of
   their hypotheses, which the Lean statements omit
   ([Section 5](REPORT.md#5-redundant-hypotheses)); for instance Lemma 7.3.1 holds for every compact
-  convex control set on which `⟨X, Z_u⟩ ≠ 0`. The Challenge keeps the book's hypotheses.
+  convex control set on which `⟨X, Z_u⟩ ≠ 0`, and Theorem 5.0.2 for balanced disks not in circle
+  representation. The Challenge keeps the book's hypotheses.
 - **Use of cited results:** all correct, except Shifrin's characterization of convex curves, which
   Lemma 2.4.6 applies outside its hypotheses (E11); Filippov's theorem is stated without a source
   and with an existence claim that is false in general, though not for the Reinhardt problem,
-  whose cost depends only on the state (E35); the book's summary of the maximum principle omits
-  one regularity hypothesis of its source, which the Reinhardt problem satisfies
+  whose cost depends only on the state (E35), and §6.1 applies it to a problem it does not cover,
+  which its form with a closed state constraint does (E46); §6.1 recalls Reinhardt's existence
+  theorem, which concerns `K_min`, not the control problem (E47); the book's summary of the
+  maximum principle omits one regularity hypothesis of its source, which the Reinhardt problem
+  satisfies
   ([Section 2](REPORT.md#2-results-from-prior-work-and-how-the-paper-uses-them)). The source of the
   maximum principle, Agrachev and Sachkov's book, has three gaps in its proof, all repaired: the
   proof of its Lemma 12.1 on a convex cone uses interior points, which a cone may lack; a needle
@@ -163,8 +208,11 @@ From [REPORT.md](REPORT.md), whose E-numbers are used here.
   book or by mathematics Mathlib lacks: Lemma 2.2.1 (its printed form is false), Lemma 2.2.5 (by
   Mahler's lattice route, chosen by the user), one step each of Lemmas 2.4.2 and 2.4.6, the area
   formula of §3.2 (polar coordinates for Green's theorem), Jacobi's formula (approved by the
-  user), Lemma 4.3.1, the boundary conditions to which §6.2 applies the maximum principle (E21),
-  and one step of Theorem 7.7.1 (the inverse function theorem applied once at
+  user), Lemma 4.3.1, Theorem 5.0.6 (its first case's claim, by a support line, and its second
+  case, corner by corner), Lemma 5.0.7 (3), the existence of a minimizer in §6.1 (Filippov's
+  theorem under a closed state constraint instead of the book's cut-off, and a time bound that
+  does not assume a minimizer), the boundary conditions to which §6.2 applies the maximum principle
+  (E21), and one step of Theorem 7.7.1 (the inverse function theorem applied once at
   the octagon's fixed point, which gives the uniformity the book's per-`d` argument lacks). The
   cited results are proved by their sources' arguments, with the exceptions listed there (notably
   Fejes Tóth's theorem, through Böröczky's cell lemma, with angle sums in place of Euler's
@@ -180,13 +228,15 @@ From [REPORT.md](REPORT.md), whose E-numbers are used here.
   [formalize-math-paper](https://github.com/vltanh/formalize-math-paper) skill.
 - The statements and the proofs were checked against the book's TeX source by independent agents;
   no person has reviewed the proofs.
-- Made on 5–7 November 2026 in four rounds (the control-theoretic chapters; then Chapter 2, its
+- Made on 5–7 November 2026 in five rounds (the control-theoretic chapters; then Chapter 2, its
   cited theorems and the octagon's packing density; then the rest of these chapters: Lemma 3.1.8,
   Filippov's theorem, Mahler's Lemma 3 in full, Proposition 6.4.1, Theorem 7.7.1 and the
   remarks; then the first layer of a plan for Chapters 5 and 8–16: the maximum principle, with
   Brouwer's fixed-point theorem, in two separate packages, the lift of every minimizer to a
-  Pontryagin extremal, and Remark 6.6.1). [CREDITS.md](CREDITS.md)
-  has the procedure and the figures.
+  Pontryagin extremal, and Remark 6.6.1; then the second layer: Chapter 5, the existence of a
+  minimizer (§6.1) with Filippov's theorem under a state constraint, the converse of Problem 3.6.2
+  for winding number one, and the identification of the minimizers with `K_min`).
+  [CREDITS.md](CREDITS.md) has the procedure and the figures.
 
 ## Related work
 
@@ -213,13 +263,14 @@ From [REPORT.md](REPORT.md), whose E-numbers are used here.
 
 ## What's next
 
-The main theorem, Mahler's First conjecture, needs Chapters 5 and 8–16, which a plan divides into
-layers. The first, the maximum principle and the extremal lift of every minimizer, is done. The
-next is the existence of a minimizer by the book's route: the compactification of Chapter 5, to
-which §6.1 applies Filippov's theorem (proved here on `ℝⁿ`). Then come Chapter 8, with the main
-theorem conditional on one named hypothesis about chattering into the singular locus, and the
-chapters that discharge it (the Fuller system, the analytic extension, the numerical global basin
-and no-return theorems).
+The main theorem, Mahler's First conjecture, needs Chapters 8–16, which a plan divides into
+layers. The first two are done: the maximum principle and the extremal lift of every minimizer;
+then Chapter 5, the existence of a minimizer by the book's route, and its identification with
+`K_min`. The next, Layer 3, is Chapter 8, with the main theorem conditional on one named
+hypothesis, to be called `NoChatteringIntoSingularLocus`: the switching times of a Pontryagin
+extremal do not accumulate at a time where its lift meets the singular locus. The later layers
+discharge it (the Fuller system, the analytic extension, the numerical global basin and no-return
+theorems).
 Beyond Theorem 7.7.1, Hales's 2017 preprint claims that the smoothed octagon is a strict local
 minimum in a micro-local sense, by an interval-arithmetic computation not published in checkable
 form; the smoothed `(6k−2)`-gons, claimed to be extremals of the maximization problem in 2023–24
@@ -238,21 +289,22 @@ python3 scripts/linkify_docs.py                                             # li
 
 Lean `v4.36.0-rc2`, Mathlib `v4.36.0-rc2`. Besides Mathlib, the project requires
 [OptimalControl](https://github.com/vltanh/lean4-optimal-control) (control systems, Filippov's
-theorem, measurable selection, the maximum principle) at the commit pinned in [`lakefile.toml`](lakefile.toml),
-which requires [FixedPoint](https://github.com/vltanh/lean4-fixed-point) (Brouwer's fixed-point
-theorem); `lake` fetches both.
+theorem, also under a state constraint, measurable selection, the maximum principle) at the commit
+pinned in [`lakefile.toml`](lakefile.toml), which requires [FixedPoint](https://github.com/vltanh/lean4-fixed-point) (Brouwer's
+fixed-point theorem); `lake` fetches both.
 
 ## Layout
 
 | Path | Content |
 | --- | --- |
-| [`Basic/`](Basic) | general mathematics, for Mathlib: matrix calculus and ODEs, generalized circles under `SL₂(ℝ)`, areas and convexity of star-shaped regions, Dowker's theorem, hexagon lattice tilings, polygon angles, Fejes Tóth's cell lemma, the Tietze–Nakajima theorem, critical lattices, lattice-packed bodies ([Basic/README.md](Basic/README.md)); control systems, Filippov's compactness theorem, measurable selection and the maximum principle are in the [OptimalControl](https://github.com/vltanh/lean4-optimal-control) package |
+| [`Basic/`](Basic) | general mathematics, for Mathlib: matrix calculus and ODEs, generalized circles under `SL₂(ℝ)`, areas and convexity of star-shaped regions, Dowker's theorem, hexagon lattice tilings, polygon angles, Fejes Tóth's cell lemma, the Tietze–Nakajima theorem, critical lattices, lattice-packed bodies, the inverse of an arclength function ([Basic/README.md](Basic/README.md)); control systems, Filippov's compactness theorem (also under a state constraint), measurable selection and the maximum principle are in the [OptimalControl](https://github.com/vltanh/lean4-optimal-control) package |
 | [`External/`](External) | cited results, proved: Fejes Tóth, Gruber, Minkowski–Mahler, Mahler 1947 (Theorem 2; Lemma 3, with the lemmas of Mahler's *On irreducible convex domains* and Theorems B–E of Mahler 1946 that prove it), Euler–Arnold, Filippov and the Pontryagin maximum principle (the last two from the OptimalControl package) ([External/README.md](External/README.md)) |
 | [`SmoothedPolygons/Defs.lean`](SmoothedPolygons/Defs.lean) | the definitions that the Challenge uses |
 | [`SmoothedPolygons/Ch2/`](SmoothedPolygons/Ch2) | Chapter 2: packing densities and Fejes Tóth's theorem (§2.1), Reinhardt's lemmas and the minimizer (§2.2), critical lattices and hexagons (§2.3), the boundary of the minimizer and balanced disks (§2.4), the density of balanced disks, the refutation of the printed Lemma 2.2.1 |
 | [`SmoothedPolygons/Ch3/`](SmoothedPolygons/Ch3) | the control problem: state dynamics, hyperbolic arcs (Lemma 3.1.8), Jacobi's formula, cost and the area formula of §3.2, controls, Lie algebra dynamics, Proposition 3.6.1, Problem 3.6.2 |
-| [`SmoothedPolygons/Ch4/`](SmoothedPolygons/Ch4) | the adjoint orbit and the upper half-plane, the star domain, the half-plane control problem, Lemma 4.3.1, the dihedral group on the ideal vertices (§4.6) |
-| [`SmoothedPolygons/Ch6/`](SmoothedPolygons/Ch6) | left-invariant control systems on Lie groups (Definition 6.3.1, Proposition 6.4.1), the Hamiltonian, the costate equations, the half-plane Hamiltonian; the Reinhardt problem as a control system on `GL₂⁺(ℝ) × C` (MatrixSystem, MatrixMinimizer, MatrixCostate, MatrixExtremal: the system, its minimizers, the costates of the maximum principle, and the theorem that every minimizer is a Pontryagin extremal); the periodic extension of an extremal (Remark 6.6.1, PeriodicExtension) |
+| [`SmoothedPolygons/Ch4/`](SmoothedPolygons/Ch4) | the adjoint orbit and the upper half-plane, the star domain, the half-plane control problem, Lemma 4.3.1 and the bound `cost ≥ 3t_f` for every trajectory, the dihedral group on the ideal vertices (§4.6) |
+| [`SmoothedPolygons/Ch5/`](SmoothedPolygons/Ch5) | Chapter 5: the compactification `𝔥**`, its compactness and dihedral invariance, and the fundamental domain (Definition 5.0.1, Compactification); the hexagon of a point of `𝔥*` and Lemmas 5.0.3–5.0.5 (Hexagon); Theorem 5.0.6 (AreaBound); Lemma 5.0.7 (Monotonicity); the bound near the edge (EdgeBound); the re-centered disk (Recenter); Theorem 5.0.2 (Theorem502) |
+| [`SmoothedPolygons/Ch6/`](SmoothedPolygons/Ch6) | left-invariant control systems on Lie groups (Definition 6.3.1, Proposition 6.4.1), the Hamiltonian, the costate equations, the half-plane Hamiltonian; the Reinhardt problem as a control system on `GL₂⁺(ℝ) × C` (MatrixSystem, MatrixMinimizer, MatrixCostate, MatrixExtremal: the system, its minimizers, the costates of the maximum principle, and the theorem that every minimizer is a Pontryagin extremal); the periodic extension of an extremal (Remark 6.6.1, PeriodicExtension); the winding number of an admissible trajectory and the bound on the cost of higher winding (Winding); the converse of Problem 3.6.2 for winding number one (AdmissibleDisk); the existence of a global minimizer (§6.1, Existence); `K_min` and the minimizers of the control problem (WorstDisk, with WdBoundaryParam and WdTrajectory: the boundary multi-curve and trajectory of a `K_min`) |
 | [`SmoothedPolygons/Ch7/`](SmoothedPolygons/Ch7) | constant control, faces, the spline, Theorem 7.5.1, Lemma 7.5.3 and its inequality, Lemma 7.5.5, Theorem 7.5.6, the smoothed polygons as balanced disks, Remarks 7.5.2 and 7.6.4, Theorem 7.7.1 (`Isolated.lean` and `Isolated/`) |
 | [`SmoothedPolygons/AppA/`](SmoothedPolygons/AppA) | the functional derivative, matrix identities, the Riemannian metric |
 | [`Challenge.lean`](Challenge.lean), [`Solution.lean`](Solution.lean), [`comparator.json`](comparator.json), [`formalization.yaml`](formalization.yaml) | Palomar |

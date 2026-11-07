@@ -14,34 +14,48 @@ Status of the formalization:
   bang-bang solutions and the smoothed `(6k+2)`-gons (Chapter 7), and Appendix A.6 and A.11. A
   fourth round, the first layer of a plan for the book's remaining chapters (5 and 8–16), added
   the Pontryagin maximum principle, which the book cites in §6.2, and the claim of §6.2 that
-  every minimizer of the Reinhardt problem lifts to a Pontryagin extremal. The book's main theorem,
-  Mahler's First conjecture (Theorem 16.3.1), and Chapters 1, 5, 8–16 are not formalized
-  (Section 9).
-- **Proved.** Every numbered result of Chapters 2, 3, 4, 6 and 7 is formalized and proved, among
-  them Filippov's theorem (Theorem 6.1.1, cited without a source), Proposition 6.4.1 with
-  Definition 6.3.1 (general left-invariant systems, on Mathlib's Lie groups) and Theorem 7.7.1 (the
-  smoothed octagon is an isolated extremal), whose proof the book only sketches. So are the remark
-  after Definition 2.3.5 (the book's irreducibility is Mahler's), the action of the dihedral group
-  on the ideal vertices of `𝔥*` (§4.6), Remarks 2.2.4, 6.6.1, 7.5.2 and 7.6.4, which the book states
-  without proof, and the claim of §6.2 and §6.6, used in the proof of Proposition 8.1.3 ("We have
-  seen that the global minimizer must be extremal", TeX 6791), that every minimizer of the
-  Reinhardt control problem lifts to a Pontryagin extremal; that a minimizer exists rests on
-  Chapter 5 and is not yet proved. Lemma 2.2.1 is false as printed and Theorem 7.7.1 is false
-  read literally (E1, E32); Lemma 3.1.8 and the existence claim of Theorem 6.1.1 lack a hypothesis (E34, E35); all
-  four are proved in corrected forms approved by the user. What is left within these chapters is
-  conjectural or rests on Chapter 5 (Section 9). The main results are Theorem 7.5.6 (each smoothed
-  `(6k+2)`-gon is a Pontryagin extremal of the Reinhardt control problem with bang-bang control),
-  the smoothed octagon's packing density (the octagon's trajectory bounds a balanced disk `K` whose
-  area is the cost `√12(8 - √32 - ln 2)/(√8 - 1)` and whose greatest packing density is
-  `δ(K) = (8 - √32 - ln 2)/(√8 - 1)`), Theorem 7.7.1, and the lift of every minimizer to an
-  extremal ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L587)).
+  every minimizer of the Reinhardt problem lifts to a Pontryagin extremal. A fifth round, the
+  second layer, added Chapter 5 (the compactification of the star domain) and §6.1 (the existence
+  of a minimizer), with the converse of Problem 3.6.2 that §6.1 uses and the identification of the
+  minimizers of the control problem with Reinhardt's `K_min`, which the later chapters use. The
+  book's main theorem, Mahler's First conjecture (Theorem 16.3.1), and Chapters 1 and 8–16 are not
+  formalized (Section 9).
+- **Proved.** Every numbered result of Chapters 2, 3, 4, 5, 6 and 7 is formalized and proved,
+  among them Filippov's theorem (Theorem 6.1.1, cited without a source), Proposition 6.4.1 with
+  Definition 6.3.1 (general left-invariant systems, on Mathlib's Lie groups), Theorem 5.0.6, whose
+  second case the book only sketches, and Theorem 7.7.1 (the smoothed octagon is an isolated
+  extremal), whose proof the book only sketches. So are the remark after Definition 2.3.5 (the
+  book's irreducibility is Mahler's), the action of the dihedral group on the ideal vertices of
+  `𝔥*` (§4.6), the compactness and dihedral invariance of `𝔥**` (Definition 5.0.1), Remarks 2.2.4,
+  6.6.1, 7.5.2 and 7.6.4, which the book states without proof, and three claims of the running
+  text that the book's later chapters use: that every minimizer of the Reinhardt control problem
+  lifts to a Pontryagin extremal (§6.2 and §6.6; "We have seen that the global minimizer must be
+  extremal", TeX 6791), that a global minimizer exists (§6.1, E46), and that the global minimizers
+  are Reinhardt's `K_min` (E47). Lemma 2.2.1 is false as printed and Theorem 7.7.1 is false read
+  literally (E1, E32); Lemma 3.1.8 and the existence claim of Theorem 6.1.1 lack a hypothesis
+  (E34, E35); all four are proved in corrected forms approved by the user. The converse of
+  Problem 3.6.2, which §6.1 uses without proof, is false for trajectories that wind more than once
+  around the origin and is proved for winding number one, which every trajectory cheaper than
+  `7π/2` has (E15). What is left within these chapters is conjectural (Section 9). The main
+  results are Theorem 7.5.6 (each smoothed `(6k+2)`-gon is a Pontryagin extremal of the Reinhardt
+  control problem with bang-bang control), the smoothed octagon's packing density (the octagon's
+  trajectory bounds a balanced disk `K` whose area is the cost `√12(8 - √32 - ln 2)/(√8 - 1)` and
+  whose greatest packing density is `δ(K) = (8 - √32 - ln 2)/(√8 - 1)`), Theorem 7.7.1, the lift of
+  every minimizer to an extremal
+  ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L587)), Theorem 5.0.2 (a balanced
+  disk whose trajectory leaves `𝔥**` is worse than the smoothed octagon), and the layer's result:
+  the Reinhardt control problem has a global minimizer, which lifts to a Pontryagin extremal and
+  bounds a `K_min`
+  ([`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250)).
 - **Nothing is assumed.** Every cited result that a proof uses is proved: Fejes
   Tóth's theorem (`δ = δ_L`), Gruber's lattice density formula, the theorems of Minkowski and
   Mahler on critical lattices and circumscribed hexagons, Mahler's Lemma 3 on irreducible domains
   (in full, along the two papers of Mahler on which its proof rests, with their errors and gaps
   repaired), the Euler–Arnold equation and the Pontryagin maximum principle (Section 2).
-  Filippov's theorem, which no proof uses, is proved too. All are stated in [`External/`](External). The
-  maximum principle and Filippov's theorem are proved in the OptimalControl package
+  Filippov's theorem is proved too, and §6.1 applies its form with a closed state constraint, a
+  compact set of initial points and a closed endpoint relation (E46). All are stated in [`External/`](External),
+  except that form, which is applied directly from the package. The
+  maximum principle and Filippov's theorem (in both forms) are proved in the OptimalControl package
   ([github.com/vltanh/lean4-optimal-control](https://github.com/vltanh/lean4-optimal-control),
   required at a pinned commit), the maximum principle by Agrachev and Sachkov's own argument, with
   Brouwer's fixed-point theorem from the FixedPoint package
@@ -62,22 +76,30 @@ Status of the formalization:
   condition of a Pontryagin extremal, which the maximum principle yields only for boundary
   conditions written without two redundant equations (E21), and missing hypotheses in Theorem
   3.1.4(3) (E13), Lemma 3.1.8 (E34) and Theorem 6.1.1 (E35), each approved by the user, and in Lemma 4.2.3 (E17)
-  and Lemma 7.3.1 (E26). Slips in proofs (E8, E14, E24) are corrected where they occur. Otherwise
+  and Lemma 7.3.1 (E26). The converse of Problem 3.6.2, which §6.1 uses without stating it, is
+  false in general and is stated and proved for winding number one (E15); the fundamental domain of
+  the dihedral group is the sector that the proof of Theorem 5.0.2 needs, not the set that §4.6
+  prints (E40, E45). Slips in proofs (E8, E14, E24, E44) are corrected where they occur. Otherwise
   the Lean statements differ from the book's only by the omitted hypotheses of Section 5 and the
   readings of Section 6.
 - **Proofs.** Every proof follows the book's argument, except the departures listed in Section 7,
   each forced by an error or gap of the book or by mathematics Mathlib lacks: Lemma 2.2.1 (its
   printed form is false), Lemma 2.2.5 (a gap the book's lines cannot close, closed by Mahler's
   lattice route, chosen by the user), one step each of Lemmas 2.4.2 and 2.4.6, the area formula of
-  §3.2 (Green's theorem), Jacobi's formula (Lemma 3.1.12, approved by the user), Lemma 4.3.1, the
-  boundary conditions to which §6.2 applies the maximum principle (E21), and one step of Theorem
-  7.7.1 (the fixed points of the Poincaré map near the octagon's, which the book's argument does
-  not give uniformly). The other gaps are filled along the book's lines. The maximum principle is
+  §3.2 (Green's theorem), Jacobi's formula (Lemma 3.1.12, approved by the user), Lemma 4.3.1,
+  Theorem 5.0.6 (the claim of its first case, which the book does not argue, and its second case,
+  which the book only sketches, argued corner by corner), Lemma 5.0.7 (3) (a step the book does not
+  argue), the existence of a minimizer in §6.1 (Filippov's theorem with a closed state constraint
+  in place of the book's cut-off, which changes the problem, and a time bound that does not
+  presuppose a minimizer), the boundary conditions to which §6.2 applies the maximum principle
+  (E21), and one step of Theorem 7.7.1 (the fixed points of the Poincaré map near the octagon's,
+  which the book's argument does not give uniformly). The other gaps are filled along the book's
+  lines. The maximum principle is
   proved by Agrachev and Sachkov's argument, with the departures and the three gaps of the source
   listed in Section 7.
   The route check ([`scripts/route_check.py`](scripts/route_check.py) against [`docs/paper_routes.tsv`](docs/paper_routes.tsv)) passes; its recorded differences are
   listed with their reasons in [`docs/route_differences.tsv`](docs/route_differences.tsv) (Section 8).
-- **Redundant hypotheses.** Eight results of the book and one cited result hold without some of
+- **Redundant hypotheses.** Nine results of the book and one cited result hold without some of
   their hypotheses; the Lean statements omit them (Section 5). The Challenge keeps the book's
   hypotheses. Lemma 3.1.8, Proposition 6.4.1 and Filippov's theorem keep hypotheses of the book or
   of the source that their proofs do not use (Section 5).
@@ -99,12 +121,22 @@ Status of the formalization:
   would be another way). Theorem 7.7.1 (the smoothed octagon is an isolated extremal) is false read literally:
   the octagon's lift started at another time, or run for several laps, is another extremal
   satisfying the transversality conditions with a nearby or the same initial condition; it holds up
-  to time translation and for terminal times near `t_f` (E32). Slips that do not affect any result:
+  to time translation and for terminal times near `t_f` (E32). The converse of Problem 3.6.2, that
+  an admissible trajectory bounds a balanced disk whose area is its cost, which §6.1 needs to apply
+  Theorem 5.0.2 to the control problem, is false: the unit circle traversed seven times is an
+  admissible trajectory of cost `7π` and bounds no such disk (E15). It holds for trajectories of
+  winding number one, and every trajectory cheaper than `7π/2` has winding number one, by a bound
+  that is not in the book (the cost is at least `3/2` times the angle that `σ₀` sweeps). The set
+  that §4.6 gives as a fundamental domain of the dihedral group on `𝔥*` is the union of two of the
+  six sectors, and the proof of Theorem 5.0.2, citing it, prints a curve; the proof needs a third
+  set, a sector, which the formalization uses (E40, E45). Slips that do not affect any result:
   the definition of a critical lattice omits admissibility (E6), an equation written too early in
   the proof of Theorem 2.3.9 (E7), a sign in the proof of Lemma 2.4.2 (E8), an index in the proof
-  of Lemma 2.4.5 (E10), an index in the proof of Theorem 3.4.2 (E14), a sign convention in the
-  proof of Proposition 6.5.1 (E22), the eigenvectors of §7.1 (E24), and the sign of the switching
-  functions in the proof of Theorem 7.7.1 (E32).
+  of Lemma 2.4.5 (E10), an index in the proof of Theorem 3.4.2 (E14), the centres of two geodesics
+  in §4.6 (E40), a region in the proof of Lemma 5.0.7 (3) (E44), the claim in the proof of Theorem
+  5.0.2 that `Π₂⁺` misses the fundamental domain, which it meets inside `B(i∞)` (E45), a sign
+  convention in the proof of Proposition 6.5.1 (E22), the eigenvectors of §7.1 (E24), and the sign
+  of the switching functions in the proof of Theorem 7.7.1 (E32).
 - **Gaps.** The proof of Lemma 2.2.5 (the minimizer has no corners) has a gap that its shaving
   argument cannot close; the formalization closes it by Mahler's lattice route (E4). The smoothed
   octagon's density value rests on a fact the book never proves, that a balanced disk has least
@@ -119,14 +151,26 @@ Status of the formalization:
   argument (E32). Remarks 7.5.2 and 7.6.4 are stated without proof (the second is read off a
   figure), and the smoothed `(6k−2)`-gons of Remark 7.6.2 without the condition that closes them;
   both remarks are true and proved here (E36, E37). So is Remark 6.6.1, that every extremal
-  extends to a periodic one, which the book also states without proof (E38). Further gaps, all
-  filled: E2, E3, E5, E7, E8, E9, E15, E18, E23, E30, E31, E34.
+  extends to a periodic one, which the book also states without proof (E38). Chapter 5 asserts
+  the compactness of `𝔥**` (E41) and gives no argument for the second claim of Lemma 5.0.3 (E42),
+  the claim of the first case of Theorem 5.0.6 and its whole second case (E43), steps of Lemma
+  5.0.7 (3) and (4) (E44), and, in the proof of Theorem 5.0.2, the application of Theorem 5.0.6 at
+  an arbitrary time and a one-variable bound read off a graph (E45); all are true and proved. The
+  argument of §6.1 for the existence of a minimizer does not hold as written: it applies Theorem
+  5.0.2 to all admissible trajectories (which needs E15), changes the problem by a cut-off, applies
+  Filippov's theorem with a fixed initial point while `X(0)` is free and the endpoints are coupled,
+  and bounds the terminal time by Lemma 4.3.1, which assumes a minimizer; the formalization
+  repairs it along its lines, with Filippov's theorem under a closed state constraint (E46). The
+  book identifies the minimizers of the control problem with Reinhardt's `K_min` without proof;
+  both directions are proved (E47), with the reparameterization of §3.5 that the book takes for
+  granted (E39). Further gaps, all filled: E2, E3, E5, E7, E8, E9, E18, E23, E30, E31, E34.
 - **Missing hypotheses.** Theorem 3.1.4(3) is false for a general convex disk; it holds under the
   standing assumptions of §2.4 (E13). Lemma 3.1.8 is false unless the curves are regular, as §2.4
   assumes (E34). Filippov's theorem (Theorem 6.1.1) claims that an optimal control exists when
   the velocity sets are convex; this fails for costs that depend on the control, and holds when the
   velocity sets extended by the cost are convex (E35). Lemma 4.2.3 needs `X ≠ 0` (E17). Lemma
-  7.3.1 needs `⟨X, Z_u⟩ ≠ 0` on the control set, which its proof uses (E26).
+  7.3.1 needs `⟨X, Z_u⟩ ≠ 0` on the control set, which its proof uses (E26). The converse of
+  Problem 3.6.2 that §6.1 uses needs the trajectory to wind once around the origin (E15).
 - **Redundant hypotheses.** Several hypotheses are not needed; the Lean statements drop them
   (Section 5). The most notable: Lemma 7.3.1 holds for every compact convex control set on which
   `⟨X, Z_u⟩ ≠ 0`, not only one in the plane `u₀ + u₁ + u₂ = 1`.
@@ -134,10 +178,15 @@ Status of the formalization:
   lattice density formula, Minkowski's and Mahler's theorems on critical lattices and circumscribed
   hexagons, and Shifrin's characterization of convex curves; the control-theoretic chapters cite
   the Pontryagin maximum principle (Agrachev–Sachkov), the Euler–Arnold equations (Cushman–Bates,
-  with a sign slip, E22), the Iwasawa decomposition and Rademacher's theorem, and state Filippov's
-  theorem without a source (Theorem 6.1.1, E35). All are proved here, in [`External/`](External) (with the
+  with a sign slip, E22), the Iwasawa decomposition, Rademacher's theorem and Gronwall's
+  inequality, and state Filippov's theorem without a source (Theorem 6.1.1, E35). All are proved
+  here (Gronwall's inequality in the case §6.1 uses), in [`External/`](External) (with the
   OptimalControl package) or from Mathlib, except Shifrin's, which is applied outside its
-  hypotheses and replaced by a direct argument (E11) (Section 2). The book's summary of the
+  hypotheses and replaced by a direct argument (E11) (Section 2). §6.1 applies Filippov's theorem
+  to a problem it does not cover (a free initial point, coupled endpoints, and a cut-off that
+  changes the minimizers); its form with a closed state constraint, proved in the OptimalControl
+  package by the same argument, does (E46). §6.1 also recalls Reinhardt's existence theorem, which
+  concerns `K_min` and not the control problem (E47). The book's summary of the
   maximum principle omits one of its source's regularity hypotheses, which the Reinhardt problem
   satisfies. Agrachev and Sachkov's proof of the maximum principle has three gaps, all repaired
   (Section 7).
@@ -161,7 +210,7 @@ Status of the formalization:
 | A critical lattice has a basis and a third point on the boundary forming a parallelogram of area `Δ(K)`, and conversely | Minkowski 1907, Mahler 1947 (Lemma 2); cited as Theorem 2.3.6, from Minkowski and Mahler 1946 (E33) | [`External.minkowski_mahler`](External/MinkowskiMahler.lean#L964) | [`theorem2_3_6`](SmoothedPolygons/Ch2/Mahler.lean#L113) |
 | The circumscribed hexagon of a critical lattice: unique tac-lines, area `4Δ(K)`, sides bisected, least area | Mahler 1947, Theorems 1 and 2; cited as Theorem 2.3.7 | [`External.mahler_1947`](External/Mahler1947.lean#L1700) | [`theorem2_3_7`](SmoothedPolygons/Ch2/Mahler.lean#L182) |
 | A symmetric convex domain is irreducible (no symmetric convex proper subdomain has the same `Δ`) if and only if every boundary point lies on a critical lattice; hence, in an irreducible domain, every tac-line contains a point of a critical lattice, one of the six boundary points of a configuration of Mahler's Lemma 2 | Mahler 1947, Lemma 3, stated there without proof; cited after Definition 2.3.5. Proved along Mahler's paper A and Mahler 1946 (below) | [`External.mahler_irreducible_iff`](External/MahlerIrreducible/Lemma3.lean#L367); [`External.mahler_irreducible`](External/MahlerIrreducible/Lemma3.lean#L383), derived from it | [`isIrreducible_iff_mahlerIrreducible`](SmoothedPolygons/Ch2/Mahler.lean#L99) (the remark after Definition 2.3.5); [`lemma2_2_5`](SmoothedPolygons/Ch2/Reinhardt.lean#L3754) |
-| Filippov's theorem: for a control system on `ℝⁿ` with compact control set, convex velocity sets and `f` of compact support, the attainable sets (at time `T` and up to time `T`) are compact, and an optimal control exists for an integral cost when the velocity sets extended by the cost are convex, with fixed or free terminal time | Agrachev–Sachkov, *Control Theory from the Geometric Viewpoint*, Thm 10.1; cited as Theorem 6.1.1 without a source (E35) | [`External.filippov`](External/Filippov.lean#L150) | none: it is Theorem 6.1.1 (its application in §6.1 needs Chapter 5) |
+| Filippov's theorem: for a control system on `ℝⁿ` with compact control set, convex velocity sets and `f` of compact support, the attainable sets (at time `T` and up to time `T`) are compact, and an optimal control exists for an integral cost when the velocity sets extended by the cost are convex, with fixed or free terminal time | Agrachev–Sachkov, *Control Theory from the Geometric Viewpoint*, Thm 10.1; cited as Theorem 6.1.1 without a source (E35) | [`External.filippov`](External/Filippov.lean#L153); for §6.1, its form with a closed state constraint, a compact set of initial points, a closed endpoint relation and a window of terminal times, `ControlSystem.exists_optimal_constrained` of the OptimalControl package (same proof) | Theorem 6.1.1; the form with a state constraint, in §6.1: [`exists_isReinhardtMinimizer`](SmoothedPolygons/Ch6/Existence.lean#L436) (E46) |
 | The Pontryagin maximum principle with free terminal time, an integral cost and mixed boundary conditions `(q(0), q(t_f)) ∈ N` (`N` cut out near the end points by a `C¹` submersion), for strong local minimizers on an open subset of a finite-dimensional space with a compact control set: `ν ≤ 0` and a Lipschitz covector curve `p` with `(ν, p(t)) ≠ 0` for every `t`, the adjoint equation, the maximum condition and `H = 0` almost everywhere, and the transversality condition `(-p(0), p(t_f)) ⊥ T N` | Agrachev–Sachkov, *Control Theory from the Geometric Viewpoint*, Ch. 12, Theorem 12.5 with the remark after it (free time), read in the authors' draft; cited in §6.2 from the entry `zelikin2004control` (E33) | [`External.pontryagin_maximum_principle`](External/Pontryagin.lean#L80), proved in the OptimalControl package (`Pontryagin.maximum_principle`) | [`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L587) (§6.2 and §6.6: every minimizer is an extremal) |
 
 Mahler 1947 states Lemma 3 without proof and refers to Lemmas 8 and 12 of "paper A", Mahler's *On
@@ -190,6 +239,11 @@ control realizing them is chosen measurably (a Kuratowski–Ryll-Nardzewski sele
 system extended by the cost (`OptimalControl.ODE.ControlSystem`). The proof was written before we
 had Agrachev and Sachkov's text and was not compared with theirs; the statement is the book's,
 with the source's standing smoothness assumptions on `f` (Section 5) and the correction of E35.
+The form that §6.1 needs, for trajectories confined to a closed set `S`, starting in a compact set
+and with endpoints in a closed relation (`OptimalControl.ODE.StateConstraint`, in the package), is
+proved by the same argument: a limit of trajectories that stay in `S` stays in `S`, so the
+dynamics need to be continuous, with bounded velocities and convex velocity sets, only on `S × U`,
+and need not have compact support.
 
 The maximum principle is proved in the OptimalControl package by Agrachev and Sachkov's own
 argument (Chapter 12 of their book, read in the authors' draft, with preface dated September
@@ -240,6 +294,7 @@ None.
 | Separating hyperplane theorem | proof of Lemma 2.2.1 | Mathlib (`geometric_hahn_banach_*`) |
 | Uniqueness of solutions of linear ODEs | §7.1 general solutions, Theorem 7.5.1 | [`Matrix.ODE_solution_unique_of_bound`](Basic/Analysis/Calculus/MatrixFTC.lean#L281) and relatives in [`Basic/`](Basic) (Grönwall) |
 | Implicit and inverse function theorems | proof of Theorem 7.7.1 (TeX 6588–6591, 6616) | Mathlib (`HasStrictFDerivAt.implicitFunctionOfProdDomain`; local injectivity from `ApproximatesLinearOn`) |
+| Parameterization by arclength of the boundary of a convex disk with a unique support line at each boundary point, as a regular `C¹` curve | §2.4, the standing assumption for `K_min` (TeX 2157–2158) | proved for worst disks in [`IsWorstDisk.exists_isBalancedPair`](SmoothedPolygons/Ch6/WdBoundaryParam.lean#L437), with the inverse of the arclength from [`exists_inverse_of_hasDerivAt_pos`](Basic/Analysis/Calculus/DerivInverse.lean#L29) in [`Basic/`](Basic) (E47) |
 
 ### Does the paper use each cited result correctly?
 
@@ -259,9 +314,11 @@ None.
 | Rademacher's theorem | Corollary 3.1.10 | Correct. |
 | Jurdjevic (attribution) | Definition 6.3.1, Proposition 6.4.1, Corollary 6.5.3 | The book proves Proposition 6.4.1 (in one line) and Corollary 6.5.3 (by differentiation); correct. |
 | Pontryagin maximum principle (Agrachev–Sachkov; the bibliography names Zelikin first, E33) | §6.2, §6.6, Problem 6.7.1; the proof of Proposition 8.1.3 (TeX 6791) | Correct for the Reinhardt problem, with the readings of Section 6. The book's summary states it for a smooth manifold and a closed control set; its source needs `∂f/∂q` jointly continuous in `(q, u)` (Agrachev–Sachkov's (10.4), which the summary omits) and, tacitly, locally bounded velocities `f(q, u(t))`, which a compact control set gives. Both hold for the Reinhardt problem (smooth dynamics on `GL₂⁺(ℝ) × C`, compact `U_T`). Applied with the full boundary conditions, its conclusions hold for every admissible trajectory with a covector whose reduced costate vanishes (E21); applied with the boundary conditions written without the two equations that first integrals make redundant, it gives the extremal lift of a minimizer, with nontrivial reduced costate ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L587)). The source's proof has three gaps, repaired in the formalization (Section 7). |
-| Filippov's theorem (no source given; Agrachev–Sachkov, Thm 10.1) | Theorem 6.1.1, its application in §6.1 | The existence of an optimal control needs the convexity of the velocity sets extended by the cost, which holds for the Reinhardt problem, whose cost depends only on the state (E35); the application also needs Chapter 5's compactification (not formalized). |
+| Filippov's theorem (no source given; Agrachev–Sachkov, Thm 10.1) | Theorem 6.1.1, its application in §6.1 | The existence of an optimal control needs the convexity of the velocity sets extended by the cost, which holds for the Reinhardt problem, whose cost depends only on the state (E35). The application in §6.1 is outside the theorem as stated: the initial point `X(0)` is free and the endpoints are coupled, and the cut-off that gives the fields compact support changes the minimizers. The form with a closed state constraint, a compact set of initial points and a closed endpoint relation, proved by the same argument, applies (E46). |
+| Gronwall's inequality (Appendix A.1, from Amann) | §6.1, the bound on `g` (TeX 4584–4586) | Correct. The formal proof uses its case with constant coefficients, proved in the OptimalControl package (`ControlSystem.le_mul_exp_of_le_add_integral`). |
+| Reinhardt 1934, existence of a minimizer | §6.1 (TeX 4569–4572) | Not what §6.1 needs: Reinhardt's theorem gives `K_min`, a disk, not a minimizer of the control problem, and the book does not prove that the two correspond (E47). The formal existence proof does not use it; the identification with `K_min` does, as proved with Lemma 2.2.5 (E4). |
 
-The other citations of the formalized chapters (Reinhardt 1934, Minkowski's other works, Hales 2017, Jurdjevic 2016,
+The other citations of the formalized chapters (Reinhardt 1934 apart from §6.1, Minkowski's other works, Hales 2017, Jurdjevic 2016,
 Perelomov, Babelon et al., Colombo–de Diego, Gay-Balmaz et al., Vajjha's thesis) give context and
 are not used in proofs; Vajjha's thesis is cited for the omitted proof of Theorem 6.8.3.
 
@@ -269,7 +326,8 @@ are not used in proofs; Vajjha's thesis is cited for the omitted proof of Theore
 
 E1–E32 follow the order of the book and E33 concerns its bibliography. E34–E37, found when the
 remaining results of the formalized chapters were formalized, follow, again in the book's order,
-and then E38, found in the fourth round.
+then E38, found in the fourth round, and E39–E47, found in the fifth round (Chapter 5 and §6.1),
+in the book's order. E15 was revised in the fifth round.
 
 **E1. Lemma 2.2.1, §2.2 (TeX 1317–1351): false.** The lemma says that every lattice packing
 `K + L` of a centrally symmetric convex disk is realized by a parallelogram or centrally symmetric
@@ -361,7 +419,8 @@ with `K` is a critical hexagon `H_K` with midpoints at the points `{s_j*}`"; Lem
 `√12`, so that `δ(K) = area(K)/√12`, is never shown. It is true: the formalization proves it for
 every balanced pair ([`greatestPackingDensity_of_isBalancedPair`](SmoothedPolygons/Ch2/BalancedDensity.lean#L235); the chords of `K` parallel to a
 boundary point `u` have a concave even length function of the height, so the parallelograms
-inscribed on `u` all have the same area).
+inscribed on `u` all have the same area). Chapter 5 and the identification with `K_min` use it
+too (E42, E47).
 
 **E13. Theorem 3.1.4(3), §3.1 (TeX 2414–2442): missing hypothesis.** The theorem states that for
 a convex disk whose boundary is parameterized by a regular `C¹` multi-curve `σ`, the curve
@@ -380,11 +439,32 @@ reading.
 **E14. Proof of Theorem 3.4.2, §3.4 (TeX 3055): index slip.** "Let `κ = κ₁ + κ₂ + κ₃`" should be
 `κ₀ + κ₁ + κ₂` (Definition 3.3.2). The proof is otherwise correct.
 
-**E15. Problem 3.6.2, §3.6 (TeX ~3205): a converse used but not proved.** "The convex disks in
-`𝔎_bal` in circle representation arise via the following optimal control problem": the book does
-not show that a solution of the control problem, such as the smoothed octagon's trajectory, bounds a
-balanced disk; in particular that its curve is simple. For the smoothed `(6k+2)`-gons the
-formalization proves it ([`smoothedPolygonDisk_spec`](SmoothedPolygons/Ch7/SmoothedPolygonDisk.lean#L1392); simplicity by a winding-number argument).
+**E15. Problem 3.6.2, §3.6 (TeX ~3205), and §6.1 (TeX 4579): a converse used but not proved, and
+false in general.** "The convex disks in `𝔎_bal` in circle representation arise via the following
+optimal control problem": the book derives the problem from balanced disks and does not show the
+converse, that an admissible trajectory bounds a balanced disk whose area is its cost; in
+particular that its curve is simple. §6.1 needs the converse to apply Theorem 5.0.2, a statement
+about balanced disks, to the trajectories of the control problem (E46). It is false: the boundary
+conditions, chosen so that "the curves `σ_j` close up seamlessly to form a simple closed curve"
+(TeX 3135–3139), do not force simplicity, and an admissible trajectory may wind `1 + 6m` times
+around the origin. The unit circle traversed seven times (`X ≡ J`, `u ≡ (1/3, 1/3, 1/3)`,
+`t_f = 7π/3`) is admissible, has cost `7π`, and is not the boundary trajectory of any balanced pair
+([`exists_isReinhardtAdmissible_not_isWindingOne`](SmoothedPolygons/Ch6/Winding.lean#L564)). The book meets the phenomenon in the proof of
+Lemma 7.5.5, where other eigenvalues "will produce the right boundary conditions, but the
+corresponding multi-curves `σ_i` will have the wrong winding number around the origin" (TeX
+6323–6326). The converse holds for trajectories of winding number one ([`IsWindingOne`](SmoothedPolygons/Ch6/Winding.lean#L82);
+[`exists_isBalancedPair_of_isReinhardtAdmissible`](SmoothedPolygons/Ch6/AdmissibleDisk.lean#L937)), by the argument that proves it for the smoothed
+`(6k+2)`-gons ([`smoothedPolygonDisk_spec`](SmoothedPolygons/Ch7/SmoothedPolygonDisk.lean#L1392); simplicity by a winding-number argument), generalized to any
+measurable control. Higher winding costs more: the cost is at least `3/2` times the angle swept
+by `σ₀ = g s₀*`, so a trajectory of winding number `1 + 6m` costs at least `π/2 + 3πm`
+([`three_halves_mul_angle_le_reinhardtCost`](SmoothedPolygons/Ch6/Winding.lean#L447)). This bound is not in the book; its proof is a pointwise
+inequality: with `ψ` the polar angle of the bottom row `(g₁₁, g₁₀)` of `g`, which ends where the
+angle of `σ₀` ends, `κ = -tr(JX)` (the cost is `(3/2)∫κ`) satisfies `κ ≥ ψ'` because
+`c(κ - ψ')(p² + q²) = (cp - aq)² + q² det X` for `X = [[a, b], [c, -a]]`, `(p, q) = (g₁₀, g₁₁)`,
+and `c > 0` on star states. So
+every admissible trajectory cheaper than `7π/2` has winding number one
+([`isWindingOne_of_reinhardtCost_lt`](SmoothedPolygons/Ch6/Winding.lean#L497)), in particular every one at most as costly as the smoothed
+octagon, which is all §6.1 needs.
 
 **E16. Problem 3.6.2, §3.6 (TeX 3235): misprint in a definition.** The terminal condition is
 printed `X(t_f) = R X₀ R⁻¹`. The derivation just before (TeX 3152–3156), the half-plane form
@@ -413,7 +493,10 @@ and `X^⊥ = {[Y, X]}` by a dimension count ([`orb_adImage_eq_perp`](SmoothedPol
 (`X ≡ J`, constant control `(1/3, 1/3, 1/3)`, `t_f = π/3`, cost `π`), so minimality gives only
 `area ≤ π`, and the bound `t_f < π/3` needs the strict inequality. It follows from the smoothed
 octagon, whose area `≈ 3.126 < π` the book computes in §7.5; the formalization uses that comparison
-(Section 7). The lemma is true.
+(Section 7). The lemma is true. §6.1 uses it to bound the terminal time of every competitor before
+a minimizer is known to exist; the formalization uses instead the lemma's other step, that the
+cost density is at least `3` on star states, stated for every state trajectory
+([`three_mul_le_reinhardtCost`](SmoothedPolygons/Ch4/TerminalTime.lean#L71); E46).
 
 **E20. Problem 4.5.1, §4.5 (TeX 3631): sign misprint.** The coefficients of the half-plane control
 problem are defined as "`a = a(u) = (u₂ - u₁)/√3`, `b = …`, `c = …`, the following affine functions
@@ -618,9 +701,10 @@ control exists" for the cost `∫φ(q, u) dt`. The second claim fails when `φ` 
 `1`). It holds when the extended velocity sets `{(f(q, u), φ(q, u)) | u ∈ U}` are convex, which is
 the book's hypothesis when `φ` depends only on the state, as the Reinhardt cost `-(3/2)⟨J, X⟩`
 does; with the user's approval the formalization states it so, on `ℝⁿ`, for fixed and free
-terminal time ([`External.filippov`](External/Filippov.lean#L150); Sections 4 and 6). §6.1 cites no source for the theorem; Hales's
+terminal time ([`External.filippov`](External/Filippov.lean#L153); Sections 4 and 6). §6.1 cites no source for the theorem; Hales's
 2017 preprint cites it as Theorem 10.1 of Agrachev and Sachkov's book, the entry
-`zelikin2004control` of the bibliography (E33).
+`zelikin2004control` of the bibliography (E33). The problem to which §6.1 applies the theorem is
+not covered by it, even corrected; a form with a closed state constraint is (E46).
 
 **E36. Remark 7.5.2, §7.5 (TeX 6185–6203): stated without proof.** The remark says that
 `d(y₀) = det Λ₁` is a constant of motion, given by an explicit formula, and that `d` is increasing
@@ -662,14 +746,164 @@ are only measurable they are glued as Carathéodory solutions. The second item, 
 transversality condition for `Λ₁` follows from the one for `g`, refers to Corollary 6.5.3 for the
 proof and is proved so ([`remark6_6_1_lambda1`](SmoothedPolygons/Ch6/PeriodicExtension.lean#L86)); the proof that minimizers are extremals uses it.
 
+**E39. §3.5 (TeX 3140–3156): a reparameterization taken for granted.** To derive the terminal
+condition `X(t_f) = R⁻¹X₀R`, the book writes `g(t + t_f) = g(s(t))R` "for some
+orientation-preserving reparameterization `s(t)` such that `s(0) = 0`", obtained "by the remark
+following Theorem 3.1.1"; that remark (TeX 2378–2390) does not contain it. Differentiating and
+using `det X = 1` then gives `s' = 1`. For a `K_min` parameterized as in §2.4 the
+reparameterization exists: the multi-point through a boundary point is unique (Lemma 2.2.7), so
+`σ_{j+1}(t) = σ_j(h(t))` for a function `h`, which is `C¹` by the inverse function theorem applied
+to the polar angles; differentiating `g(h(t)) = g(t)R` gives `h'(t)² det X(h(t)) = det X(t)`, so
+`h' = 1` in the parameterization with `det X = 1`, and counting the turning of the polar angle
+(`σ_{j+3} = -σ_j`) gives `h(0) = t_f`. The formalization proves `σ_j(t + t_f) = σ_{j+1}(t)` in this
+way ([`IsWorstDisk.shift_of_det_one`](SmoothedPolygons/Ch6/WdTrajectory.lean#L537)) and follows the book's derivation from there; the
+identification with `K_min` needs it (E47).
+
+**E40. §4.6 (TeX 3797–3808): the fundamental domain is not one.** The three geodesics through `i`
+that the dihedral group permutes (the medians: the imaginary axis and the circles
+`(x ∓ 1/√3)² + y² = 4/3`) cut `𝔥*` into six sectors, which the group permutes simply transitively,
+so each sector is a fundamental domain, as the book says. The set it then gives as one,
+`{x ≥ 0, (x - 1/√3)² + y² ≤ 4/3}` (TeX 3807), is the union of two sectors, split by the median
+`(x + 1/√3)² + y² = 4/3`, and contains two points of each generic orbit. A single sector is
+`{x ≥ 0, (x + 1/√3)² + y² ≤ 4/3}`, or `{x ≥ 0, (x - 1/√3)² + y² ≥ 4/3}`, the one that the proof of
+Theorem 5.0.2 needs (E45). The text also puts the centres of the two circles at "the two cusps
+`(0, ±1/√3)` on the real axis" (TeX 3802), for `(±1/√3, 0)`. The formalization proves that every
+orbit meets the last sector ([`exists_dihedralAct_mem_fundamentalDomain`](SmoothedPolygons/Ch5/Compactification.lean#L773)), which is what the proof
+uses.
+
+**E41. Definition 5.0.1 (TeX 3900–3978): three facts asserted.** "The set `𝔥** ⊂ 𝔥*` is
+compact" (TeX 3975) is not immediate: `𝔥*` is open, and the closed versions of the inequalities
+that define `𝔥**` also admit the cusps `(±1/√3, 0)`, as isolated points. The formalization proves
+it ([`isCompact_truncatedStarDomain`](SmoothedPolygons/Ch5/Compactification.lean#L556)): the conditions of `Π₀⁺`, `Π₁⁺`, `Π₂⁺` give
+`y ≥ (4/(15√3))(225/226) > 0.15` on `𝔥**`, so `𝔥**` is the set of the closed inequalities and
+`y ≥ 0.15`. The image of a horoball under a linear fractional transformation (TeX 3903–3915) and
+the invariance of `𝔥**` under the dihedral group (TeX 3977–3978) are also stated without proof;
+both are proved ([`lftAct_image_horoball`](SmoothedPolygons/Ch5/Compactification.lean#L422), [`image_lftAct_R_truncatedStarDomain`](SmoothedPolygons/Ch5/Compactification.lean#L740),
+[`image_reflAct_truncatedStarDomain`](SmoothedPolygons/Ch5/Compactification.lean#L746)).
+
+**E42. Lemma 5.0.3 (TeX 4000–4015): the second claim is not argued.** The lemma says that the
+hexagon `H_K(z)` built from `z ∈ 𝔥*` by Remark 3.1.7 is "the critical hexagon at the multi-point
+`{s_j*}` of `K`" when `z` comes from a balanced disk `K` in circle representation; the proof only
+reconstructs the hexagon. The same identification, at every time, is asserted after Lemma 3.1.8
+(TeX 2583–2587). It is true, and the formalization proves it ([`lemma5_0_3`](SmoothedPolygons/Ch5/Hexagon.lean#L498)): the edge lines of
+`H_K(z)` are the tangents of the boundary curves at the `s_j*`, hence support lines, so
+`K ⊆ H_K(z)`; `area(H_K(z)) = 4 det(s₁*, s₂*) = √12`; and every centrally symmetric hexagon
+containing `K` has area at least `√12`, since one of least area exists and has area
+`area(K)/δ(K)` by Theorem 2.2.2, which is `√12` by E12. Theorem 2.3.9 identifies it with the
+critical hexagon of Definition 2.3.8.
+
+**E43. Theorem 5.0.6 (TeX 4203–4317): a claim not argued, and a case only sketched.** In Case 1
+(`z ∈ h₀`, `z ∉ h₁ ∪ h₂`) the proof cuts the corner `p₀` of the critical hexagon by a segment
+`[r₀, r̃₀] ∥ s₀s₁` with `area(△r₀p₀r̃₀) = T₀^ext` and claims that it meets `∂K`: "Otherwise ... the
+convex disk `K` would be contained in the centrally symmetric hexagon with vertices `r₀, r̃₀, q₁`,
+and their reflections", which has the area of `H_K(z)`, and an inward shift of the cut would give a
+smaller one (TeX 4271–4281). It does not say why `K` would lie in that hexagon, nor that these six
+points bound a convex hexagon. Case 2 (`z ∈ h₀ ∩ h₁`) says only that "the above argument
+can also be adapted" (TeX 4301–4312). Both are true. The formalization shifts the cut line at once
+to the support line of `K` parallel to `s₀s₁`: if that line lies strictly inside the cut, the
+hexagon cut at it contains `K`, is centrally symmetric and convex, and has area
+`area(H_K(z)) + 2T₀^ext - 2μ²T₀ < area(H_K(z))` (`μ > √(T₀^ext/T₀)` the ratio of the line),
+contradicting minimality; otherwise the extreme point of `K` on the cut line lies on `[r̃₀, r₀]`
+([`exists_mem_frontier_segment_cut`](SmoothedPolygons/Ch5/AreaBound.lean#L519)). The construction changes `H_K(z)` only near the corners `p_i`,
+`p_{i+3}` and the edges beyond them, so the claim holds at each corner `i` with `z ∈ h_i`
+separately; the triangles `±△s_i r_i s_{i+1}` then lie beyond distinct edges of `conv{s_j*}`,
+with pairwise disjoint interiors, which gives the bound in all cases at once ([`theorem5_0_6`](SmoothedPolygons/Ch5/AreaBound.lean#L777);
+Section 7). The step `h₀ ∩ h₁ ∩ h₂ = ∅` of the book's proof ([`inter_hRegion_eq_empty`](SmoothedPolygons/Ch5/AreaBound.lean#L492)) is then
+not needed.
+
+**E44. Lemma 5.0.7 (TeX 4432–4465): gaps in (3) and (4), and a slip.** (3) says that
+`I₀area₀ + I₂area₂` is least at `x = 0` on each line `y = const ≥ √3`. The proof shows that the
+sum (5.0.1) over all `i` is continuous, that it increases in `x` on `h₀ ∖ h₂` and on `h₀ ∩ h₂`, and
+concludes that it increases on `h₀ ∩ {x > 0, y ≥ √3}`; it never shows that the points with
+`x > 0`, `y ≥ √3` lie in `h₀`, and its mirror statement, decrease "on `h₀ ∩ {x < 0, y ≥ √3}`" (TeX
+4447), should read `h₂ ∩ {x < 0, y ≥ √3}`. The inclusion holds: with `s = √3x ≥ 0` and `y ≥ √3`,
+`T₀ ≥ T₀^ext` reads `(1 + s)(s² + 3y² - 1) ≥ 8(1 - s)²`, and the difference is at least
+`s(s² - 7s + 24) ≥ 0`. Then, since `I_i area_i = max(area_i, 0)` on `𝔥*`,
+`I₀area₀ + I₂area₂ = max(area₀ + area₂, area₀)` for `x ≥ 0`, the maximum of two functions that (2)
+and (1) show increasing, which makes the book's "increasing on each piece, and continuous" precise
+([`lemma5_0_7_3`](SmoothedPolygons/Ch5/Monotonicity.lean#L541)). (4) says that `δ(x, y) ≥ δ(0, y) ≥ δ(0, 4.5) > δ_oct` for `y ≥ 4.5`. The first
+inequality does not follow from (3), since `δ` also contains `I₁area₁`; it holds because
+`I₁area₁ ≥ 0` and `(0, y) ∉ h₁` (on the imaginary axis `T₁ < T₁^ext`, as `(3y² - 1)² > 1`). The
+second takes `area₀(0, y) = (√3/4)√(ρ₀ρ₂)(√(ρ₀ρ₂) - 2ρ₁)` increasing because both factors increase;
+that also needs `√(ρ₀ρ₂) - 2ρ₁ ≥ 0`, true for `y ≥ √3`. Both are filled ([`lemma5_0_7_4`](SmoothedPolygons/Ch5/Monotonicity.lean#L693)).
+
+**E45. Proof of Theorem 5.0.2 (TeX 4469–4513): a misprinted domain, a false remark, a tacit step and
+two assertions.** (a) The fundamental domain is printed `{x ≥ 0, (x - 1/√3)² + y² = 4/3}` (TeX
+4479), a curve, and attributed to §4.6, which prints another set that is not a fundamental domain
+(E40). The proof needs the sector `{x ≥ 0, (x - 1/√3)² + y² ≥ 4/3}`, which lies in
+`{x ≥ 0, y ≥ 1}` as the proof says (TeX 4481–4482); with §4.6's `≤ 4/3`, the half-plane `Π₁⁺`
+would meet the domain (at `(0.1, 0.58)`, for instance). The formalization uses `≥ 4/3`. (b) "The
+only half-plane meeting this set is `Π₀⁺`" and "the regions `Π₁⁺` and `Π₂⁺` do not meet the
+fundamental domain" (TeX 4483–4484, 4501) are false for `Π₂⁺ = {y > 15(x + 1/√3)}`, which meets
+`{x ≥ 0, y ≥ 1}` where `y > 15/√3 ≈ 8.66`. Those points lie in `B(i∞)`, so the proof is unaffected
+([`mem_horoball_or_edgeHalfPlane_of_mem_fundamentalDomain`](SmoothedPolygons/Ch5/Compactification.lean#L848) states what it uses). (c) Theorem 5.0.6 is
+about the multi-point at time `0` of a disk in circle representation, but the proof applies it at
+any time where the trajectory leaves `𝔥**` ("If any point of the trajectory `(g, X)` passes through
+a point `X = Φ(z)`", TeX 4486). That needs the re-centered pair `g(t₀)⁻¹K`, `g(t₀)⁻¹σ_j(· + t₀)`,
+which is balanced, in circle representation, of the same area, with `X(0) = X(t₀)`
+([`IsBalancedPair.recenter`](SmoothedPolygons/Ch5/Recenter.lean#L147)). (d) The inclusion `𝔥* ∩ Π₀⁺ ∩ {1 ≤ y ≤ 4.5} ⊆ h₀` (TeX 4499) is
+asserted; it holds because there `ρ₁ < 1/15` and `ρ₀ρ₂ ≥ 1/3` ([`edgeSlab_subset_hRegion`](SmoothedPolygons/Ch5/EdgeBound.lean#L91)). The
+bound `δ₀ > δ_oct` on the line `y = 15(1/√3 - x)`, `1 ≤ y ≤ 4.5`, is left to "a single variable
+calculation" and "the graph" (TeX 4507–4512). `δ₀` is not monotone along the line (it increases
+for `y ∈ [1, 1.152]`), but there `ρ₁ = 1/15` exactly and `6yρ₀ρ₂` is a concave quadratic in `y`, so
+the bound reduces to the endpoints; the margin is `0.0018` (the minimum is `0.904209`, at
+`y = 4.5`, against `δ_oct = 0.902414`) ([`octagonDensity_lt_edgeLine`](SmoothedPolygons/Ch5/EdgeBound.lean#L129)).
+
+**E46. §6.1 (TeX 4520–4602): the existence of a minimizer.** The book argues that the Reinhardt
+control problem has an optimal control by Filippov's theorem (Theorem 6.1.1): the control set
+`U_T` is compact; the velocity sets are convex (Lemma 6.1.2); by Theorem 5.0.2 "we may assume that
+`z` lies in the compact set `𝔥**`" (TeX 4579), `t_f ≤ π/3` by Lemma 4.3.1, and Gronwall's
+inequality bounds `g`; and the vector fields, multiplied by a smooth cut-off `ψ` with `ψ = 1` on
+`𝔥**`, have compact support. Four steps fail as written. (a) Theorem 5.0.2 is about balanced
+disks; applying it to the trajectories of the control problem needs the converse of Problem
+3.6.2, which is false for trajectories of higher winding number and true for those of winding
+number one, among them every trajectory cheaper than `7π/2` (E15). (b) The cut-off changes the
+dynamics outside `𝔥**`, so a minimizer of the cut-off problem need not be a trajectory of the
+Reinhardt problem. (c) Theorem 6.1.1 concerns the attainable sets from a fixed initial point,
+while `X(0)` is free and the endpoints are coupled (`X(t_f) = R⁻¹X(0)R`). (d) Lemma 4.3.1 bounds
+the terminal time of a minimizer, whose existence is what is being proved. The formalization
+repairs all four along the book's lines ([`exists_isReinhardtMinimizer`](SmoothedPolygons/Ch6/Existence.lean#L436)): it imposes `z ∈ 𝔥**` as a
+closed state constraint, as the book's "we may assume" says, with a compact set of initial
+points and the closed endpoint relation of the problem, and applies Filippov's theorem in that
+form (`ControlSystem.exists_optimal_constrained`, proved in the OptimalControl package by the
+argument of Theorem 6.1.1, and needing no compact support) to the matrix system of §6.2; the
+terminal time is bounded by the argument of Lemma 4.3.1 for every state trajectory, the cost
+being at least `3t_f` ([`three_mul_le_reinhardtCost`](SmoothedPolygons/Ch4/TerminalTime.lean#L71)), so a competitor cheaper than the smoothed octagon
+(cost `< π`) has `t_f < π/3`. The smoothed octagon belongs to the constrained class, so
+costlier competitors do not matter, and cheaper ones stay in `𝔥**` by (a) and Theorem 5.0.2
+([`IsReinhardtAdmissible.forall_mem_truncatedStarDomain`](SmoothedPolygons/Ch6/Existence.lean#L322)). With §6.2 the minimizer lifts to a Pontryagin
+extremal ([`exists_isReinhardtMinimizer_isPontryaginExtremal`](SmoothedPolygons/Ch6/Existence.lean#L511)), the premise of Proposition 8.1.3 (TeX
+6791).
+
+**E47. §6.1 (TeX 4571–4572), Proposition 8.1.3 (TeX 6786) and Theorem 16.3.1 (TeX 12789–12795):
+the minimizer of the control problem is identified with `K_min` without proof.** "Recall that
+Reinhardt has proved the existence of a optimal solution to the Reinhardt problem" (TeX 4571)
+concerns Reinhardt's `K_min`, a centrally symmetric convex disk of least greatest packing density;
+Proposition 8.1.3 speaks of "the global solution of the Reinhardt problem", and Theorem 16.3.1
+passes from "the global minimizer of the Reinhardt optimal control problem" to "the minimizer
+`K_min` of the Reinhardt problem". The book derives the control problem from `K_min` (Chapters
+2–3) but does not show that the two minimizers correspond. They do, in both directions. Every
+`K_min`, after a linear map of positive determinant, is a balanced disk in circle representation
+whose boundary trajectory is admissible with cost its area (Chapters 2–3, with the arclength
+parameterization of `∂K_min`, which §2.4 assumes, constructed from Lemma 2.2.5, and the
+reparameterization of E39), and that trajectory is a global minimizer: a competitor cheaper than
+`7π/2` bounds a balanced disk of area its cost (E15), whose density is at least `δ_min`, and a
+costlier one costs more than the area `π` of the unit disk, hence more than `√12 δ_min`
+([`exists_isReinhardtMinimizer_of_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L183)).
+Conversely, the disk bounded by a global minimizer is a `K_min`, with `δ_min = cost/√12` (E12;
+[`isWorstDisk_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/WorstDisk.lean#L217)). With E46 and §6.2: the Reinhardt control problem has a global
+minimizer, which lifts to a Pontryagin extremal and bounds a `K_min`
+([`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250)).
+
 ## 4. Missing hypotheses
 
 | Where | Missing hypothesis | Counterexample without it | In the formalization |
 | --- | --- | --- | --- |
 | Theorem 3.1.4(3) | `σ_j'` Lipschitz (the standing assumption of §2.4, through Lemma 2.4.3) | unit disk, `σ_j(t) = Rot(t + t^{3/2}) s_j*`, `X = (1 + (3/2)√t)J` | hypothesis of [`theorem3_1_4_lipschitz`](SmoothedPolygons/Ch3/StateDynamics.lean#L283) (approved by the user) |
 | Lemma 3.1.8 | the curves `σ_j` are regular, `σ_j' ≠ 0` (§2.4, TeX 1945–1946: "a regular `C¹` curve") | the square `[-λ, λ]²`, `λ² = √3/2`: `σ₂ = (-λ, 0)` constant while `σ₁`, `σ₃` slide along the parallel lines `y = ±λ` (E34) | hypothesis `hreg` of [`lemma3_1_8`](SmoothedPolygons/Ch3/HyperbolicArc.lean#L772) (approved by the user) |
+| The converse of Problem 3.6.2 (an admissible trajectory bounds a balanced disk whose area is its cost), used in §6.1 (TeX 4579) | the curve `g s₀*` winds once around the origin ([`IsWindingOne`](SmoothedPolygons/Ch6/Winding.lean#L82)), as it does when the cost is below `7π/2` | the unit circle traversed seven times: `X ≡ J`, `u ≡ (1/3, 1/3, 1/3)`, `t_f = 7π/3`, cost `7π` (E15) | hypothesis `hw` of [`exists_isBalancedPair_of_isReinhardtAdmissible`](SmoothedPolygons/Ch6/AdmissibleDisk.lean#L937) |
 | Lemma 4.2.3 | `X ≠ 0` | `X = 0`: `T_0 O_0 = 0` but `𝔰𝔩₂/ℝ·0` has dimension 3 | hypothesis of [`lemma4_2_3`](SmoothedPolygons/Ch4/AdjointOrbit.lean#L432) |
-| Theorem 6.1.1 (Filippov), "an optimal control exists" | the velocity sets extended by the cost, `{(f(q, u), φ(q, u)) \| u ∈ U}`, are convex (the book's hypothesis when `φ` does not depend on `u`) | on `ℝ`, `q' = uψ(q)`, `U = [-1, 1]`, a bump `ψ` with `ψ = 1` on `[-1, 1]`: `∫₀¹ (q² + 1 - u²) dt` from `q(0) = 0` to `q(1) = 0` has infimum `0` and no minimizer (E35) | hypothesis of the second part of [`External.filippov`](External/Filippov.lean#L150) (approved by the user) |
+| Theorem 6.1.1 (Filippov), "an optimal control exists" | the velocity sets extended by the cost, `{(f(q, u), φ(q, u)) \| u ∈ U}`, are convex (the book's hypothesis when `φ` does not depend on `u`) | on `ℝ`, `q' = uψ(q)`, `U = [-1, 1]`, a bump `ψ` with `ψ = 1` on `[-1, 1]`: `∫₀¹ (q² + 1 - u²) dt` from `q(0) = 0` to `q(1) = 0` has infimum `0` and no minimizer (E35) | hypothesis of the second part of [`External.filippov`](External/Filippov.lean#L153) (approved by the user) |
 | Lemma 7.3.1 | `⟨X, Z_u⟩ ≠ 0` on `U` (used by the proof, TeX 5792) | a segment `U` of the plane `u₀ + u₁ + u₂ = 1` crossing the line where `⟨X, Z_u⟩ = 0`: the Hamiltonian is undefined there | hypothesis `hden` of [`lemma7_3_1`](SmoothedPolygons/Ch7/Faces.lean#L49) |
 
 ## 5. Redundant hypotheses
@@ -683,6 +917,7 @@ than the book's. The Challenge statements keep the book's hypotheses.
 | Proposition 3.1.9 ([`proposition3_1_9`](SmoothedPolygons/Ch3/StateDynamics.lean#L570)) | `σ₀` parameterized by arclength | the proof uses that the tangents are Lipschitz (Definition 2.4.7, item 2), not the normalization |
 | Corollary 3.1.10 ([`corollary3_1_10`](SmoothedPolygons/Ch3/StateDynamics.lean#L679)) | the same (the standing assumption of TeX 2157, not printed in the statement) | it applies Proposition 3.1.9 |
 | Lemma 3.3.1 ([`lemma3_3_1`](SmoothedPolygons/Ch3/ControlSets.lean#L208)) | `g'` Lipschitz | the hypothesis `κ_j ≥ 0` almost everywhere already presupposes that `X'` exists almost everywhere; the first proof (if `κ₀ = κ₁ = 0` then `κ₂ = √3 det X/ρ₀(X) > 0`) uses only `tr X' = 0` where `X'` exists. (The formal `κ_j` is defined everywhere, through [`derivEntrywise`](Basic/Analysis/Calculus/MatrixEntrywise.lean#L113).) |
+| Theorem 5.0.2 ([`theorem5_0_2`](SmoothedPolygons/Ch5/Theorem502.lean#L253)) | `K` in circle representation, `g(0) = I₂` (the boundary trajectory of Problem 3.6.2, and the paragraph after the statement, TeX 3991–3994) | the proof re-centers `K` at the time `t₀` where the trajectory leaves `𝔥**` ([`IsBalancedPair.recenter`](SmoothedPolygons/Ch5/Recenter.lean#L147), E45), and the re-centered disk `g(t₀)⁻¹K` is in circle representation whatever `g(0)` is |
 | Corollary 6.5.4 ([`corollary6_5_4`](SmoothedPolygons/Ch6/Hamiltonian.lean#L477)) | `Z = Z_u` is a control matrix | the Lean statement takes any matrix `Z` with `⟨X, Z⟩ ≠ 0`: the quotient rule does not use the form of `Z_u` |
 | Theorem 6.8.2 ([`theorem6_8_2`](SmoothedPolygons/Ch6/HalfPlane.lean#L164)) | `Λ_R` traceless | `Λ_R` enters only through its trace form with traceless matrices |
 | Lemma 7.1.2 ([`lemma7_1_2`](SmoothedPolygons/Ch7/ConstantControl.lean#L82)) | `u ∈ U_T` | the proof uses only that `P` is constant along the trajectory (Lemma 7.1.1), which holds for every constant `u` |
@@ -697,7 +932,7 @@ states them:
 - Proposition 6.4.1 ([`proposition6_4_1`](SmoothedPolygons/Ch6/LeftInvariant.lean#L91)) keeps the nondegeneracy, symmetry and invariance of the bilinear
   form: nondegeneracy is what makes `p ↦ ⟨p, ·⟩` the identification `𝔤 ≅ 𝔤*`, and the identity
   `H = ⟨p, f(e, u)⟩` holds for every bilinear form.
-- Filippov's theorem ([`External.filippov`](External/Filippov.lean#L150)) keeps the source's standing assumptions that `f` is smooth
+- Filippov's theorem ([`External.filippov`](External/Filippov.lean#L153)) keeps the source's standing assumptions that `f` is smooth
   in `q` with `∂f/∂q` jointly continuous (`hfq`, `hfq'`), which give existence and uniqueness of
   trajectories; the proof uses only the continuity of `f`, the compactness of `U`, the compact
   support of `f` and the convexity hypotheses.
@@ -845,6 +1080,36 @@ states them:
   and `S` ([`dihedralGroup`](SmoothedPolygons/Ch4/IdealVertices.lean#L48)). The formal statements give the action of the generators on
   `±1/√3` and `+∞` ([`dihedral_smul_idealVertices`](SmoothedPolygons/Ch4/IdealVertices.lean#L59)) and show that every element permutes these three
   points ([`dihedral_permutes_idealVertices`](SmoothedPolygons/Ch4/IdealVertices.lean#L89)).
+- **The compactification (Chapter 5).** Points of the upper half-plane are pairs `(x, y)` with
+  `y > 0`, as in the star domain ([`starDomain`](SmoothedPolygons/Ch4/StarDomain.lean#L22)); a real `2 × 2` matrix acts by its linear fractional
+  transformation written in coordinates ([`lftAct`](SmoothedPolygons/Ch5/Compactification.lean#L110)), and the reflection `S` of §4.6 by
+  `(x, y) ↦ (-x, y)` ([`reflAct`](SmoothedPolygons/Ch5/Compactification.lean#L117)). The horoballs and the "half-planes" (regions bounded by a line or
+  a circle) of Definition 5.0.1 are open sets of such pairs ([`horoballAtInfty`](SmoothedPolygons/Ch5/Compactification.lean#L125),
+  [`edgeHalfPlane`](SmoothedPolygons/Ch5/Compactification.lean#L129) and their images under `R` and `R²`), `𝔥**` is [`truncatedStarDomain`](SmoothedPolygons/Ch5/Compactification.lean#L135), and
+  [`truncatedStarDomain_eq`](SmoothedPolygons/Ch5/Compactification.lean#L536) writes it by explicit inequalities. The fundamental domain of the proof of
+  Theorem 5.0.2 is read as the sector `{x ≥ 0, (x - 1/√3)² + y² ≥ 4/3}` ([`fundamentalDomain`](SmoothedPolygons/Ch5/Compactification.lean#L143);
+  E40, E45).
+- **Lemmas 5.0.3–5.0.5 and Theorem 5.0.6.** The hexagon `H_K(z)` is given by its vertices `p_j`
+  (eqn:hex-vertex with `det X = 1`, [`hexVertex`](SmoothedPolygons/Ch5/Hexagon.lean#L105)) and the points `q_j` of TeX 4131 ([`hexExtVertex`](SmoothedPolygons/Ch5/Hexagon.lean#L111));
+  areas are Lebesgue measure. The exterior triangle `T₂^ext = △p₀q₀p₁` is represented by its
+  reflection `△p₃q₃p₄`, which has the same area ([`outerTriangle`](SmoothedPolygons/Ch5/Hexagon.lean#L122)). "The critical hexagon" of `K`
+  in Lemma 5.0.3 and Theorem 5.0.6 is read as a centrally symmetric hexagon of least area
+  containing `K` ([`IsLeastAreaHexagon`](SmoothedPolygons/Ch2/Reinhardt.lean#L66), the critical hexagons of §2.2), which Theorem 2.3.9 identifies
+  with the critical hexagon of Definition 2.3.8 (E42). "`z` constructed from the boundary
+  parameterization of `K` at the multi-point `{s_j*}`" is read as `σ_j = g s_j*` with
+  `g(0)⁻¹g'(0) = Φ(z)`.
+- **Lemma 5.0.7 and Theorem 5.0.2.** `area_i` and `δ` are functions of pairs `(x, y)`
+  ([`areaFn`](SmoothedPolygons/Ch5/Hexagon.lean#L138), [`densityBound`](SmoothedPolygons/Ch5/Hexagon.lean#L144)), and `I_i area_i` is `area_i` times the indicator of `h_i` ([`hRegion`](SmoothedPolygons/Ch5/Hexagon.lean#L133));
+  parts (1) and (2) are stated on the book's open interval `0 < x < 1/√3` and proved on
+  `[0, 1/√3)`. Theorem 5.0.2 takes a balanced pair with its boundary trajectory (`σ_j = g s_j*`,
+  `σ_j(t + t_f) = σ_{j+1}(t)`, `X = g⁻¹g'`) and a curve `z` in `𝔥*` with `X = Φ ∘ z`. "The cost of
+  the trajectory is strictly greater than the area of the smoothed octagon" is stated with the
+  cost equal to `area(K)`, and "Hence `K` is not a global minimizer" as two conclusions: the
+  smoothed octagon has a smaller greatest packing density (so `K` is not a `K_min`), and `(g, X)`
+  is not a global minimizer of Problem 3.6.2 for any control. The dihedral reduction of the proof
+  ("everything ... has been equivariant") is read as the invariance of the density bound `δ` under
+  the dihedral group acting on `𝔥*` ([`densityBound_dihedralAct`](SmoothedPolygons/Ch5/Theorem502.lean#L149)); no action on disks or trajectories
+  is needed.
 - **Filippov's theorem (Theorem 6.1.1).** The state space is `ℝⁿ` instead of a manifold (for `f`
   smooth with compact support, the manifold case follows by an embedding in some `ℝᴺ`); a
   trajectory is a Carathéodory solution driven by a measurable control; "the support of `f` is a
@@ -852,6 +1117,21 @@ states them:
   sets are those at time `T` and up to time `T`; and "an optimal control exists" is stated for fixed
   and for free terminal time (the book applies it with free terminal time `t_f ≤ π/3`, TeX 3207,
   4583), under the convexity of the extended velocity sets (E35).
+- **Winding number (§3.5, §6.1).** An admissible trajectory has winding number one
+  ([`IsWindingOne`](SmoothedPolygons/Ch6/Winding.lean#L82)) when the continuous angle `θ` of `σ₀(t) = g(t)s₀*` with `θ(0) = 0` ends at
+  `θ(t_f) = π/3`, rather than `π/3 + 2πm` with `m ≥ 1`; the closed curve `σ₀` on `[0, 6t_f]`
+  (extended by `g(t + t_f) = g(t)R`) then winds once around the origin. The converse of Problem
+  3.6.2 (E15) is stated with that extension `G` of `g` to `ℝ`: `σ_j = G s_j*` is the multi-curve of
+  a balanced pair `(K, σ)` in circle representation, and `area(K)` is the cost.
+- **The existence of a minimizer and `K_min` (§6.1).** "An optimal control exists" is read as the
+  existence of a global minimizer of Problem 3.6.2 ([`IsReinhardtMinimizer`](SmoothedPolygons/Ch3/ControlProblem.lean#L101): an admissible
+  trajectory whose cost is at most that of every admissible trajectory, of any terminal time).
+  `K_min` is a centrally symmetric convex disk of least greatest packing density `δ_min`
+  ([`IsWorstDisk`](SmoothedPolygons/Ch2/Density.lean#L326), [`minimaxDensity`](SmoothedPolygons/Ch2/Density.lean#L321)). The identification of the global minimizers with `K_min` (E47)
+  is read as two statements: every `K_min` has an image under a linear map of positive determinant
+  that is a balanced disk in circle representation whose boundary trajectory is a global
+  minimizer; and every balanced disk whose boundary trajectory is a global minimizer is a `K_min`,
+  with `δ_min = cost/√12`.
 - **Definition 6.3.1 and Proposition 6.4.1.** They are stated on Mathlib's real Lie groups
   (`LieGroup I ∞ G`): `f(g, u)` is a tangent vector at `g`, `TL_h` is the tangent map `mfderiv`,
   the Lie algebra `𝔤` is `GroupLieAlgebra I G`, a cotangent vector at `g` is a linear form on
@@ -883,7 +1163,8 @@ states them:
   the reduced costate, derived from the maximum principle with non-redundant boundary conditions),
   E26 (`⟨X, Z_u⟩ ≠ 0`), E32 (Theorem 7.7.1 up to time translation, with
   terminal time near `t_f`, user-approved), E34 (regularity, user-approved), E35 (the extended
-  velocity sets, user-approved), and in proofs E14 and E24.
+  velocity sets, user-approved), E15 (the converse of Problem 3.6.2 for winding number one), E40
+  and E45 (the fundamental domain), and in proofs E14, E24 and E44.
 
 ## 7. Departures from the paper's proofs
 
@@ -896,13 +1177,24 @@ states them:
 | The area formula `eqn:cost` (§3.2) | Green's theorem, `area(K) = ½∮ x dy − y dx` | the polar-coordinates form of Green's formula for regions star-shaped about the origin, `area = ½∫ det(γ, γ')` ([`PlaneCurve.IsStarCurve.volume_radialHull`](Basic/Analysis/Convex/StarCurve.lean#L480), by the change of variables `(r, t) ↦ r γ(t)`) | Mathlib has no Green's theorem for regions bounded by `C¹` curves; only that step changes | – |
 | Lemma 3.1.12 (Jacobi's formula) | verify the polynomial identity on the dense set of matrices with distinct nonzero eigenvalues, through a differentiable diagonalization `A = L⁻¹DL` | differentiate the Leibniz expansion of `det` and identify `Σᵢ det(A with column i replaced by A'ᵢ) = tr(adj(A) A')` through Cramer's rule | the step needs mathematics that Mathlib lacks (a differentiable eigen-decomposition and the density argument); the user approved the replacement | – |
 | Lemma 4.3.1 | `area(K_min) < area(unit disk) = π` | `cost(K_min) ≤ cost(smoothed octagon) < π`, the octagon being admissible by Theorem 7.5.6 and its cost computed in the example of §7.5 | the paper's step has a gap that its own comparison cannot close: the unit disk is admissible, so it gives only `≤` (E19) | E19 |
+| Theorem 5.0.6, the claim of Case 1 | if no point of `[r₀, r̃₀]` lies on `∂K`, then `K` lies in the centrally symmetric hexagon `r₀, r̃₀, q₁, …`, of the area of `H_K(z)`; shifting its cut edges inward until they meet `K` gives a smaller one | the line parallel to `s₀s₁` is shifted at once to the support line of `K`: if it lies strictly inside the cut, the hexagon cut at that line contains `K`, is centrally symmetric and convex, and has area `area(H_K(z)) + 2T₀^ext - 2μ²T₀ < area(H_K(z))`; otherwise the extreme point of `K` on the cut line lies on `[r̃₀, r₀]` ([`exists_mem_frontier_segment_cut`](SmoothedPolygons/Ch5/AreaBound.lean#L519)) | the book does not argue that `K` lies in its hexagon, nor that the hexagon is convex (E43) | E43 |
+| Theorem 5.0.6, Case 2 and the area bound | Case 1 for `z ∈ h₀ ∖ (h₁ ∪ h₂)`, with `area(K) ≥ area(conv{s_j*, ±r})`; Case 2, `z ∈ h₀ ∩ h₁`, "adapted"; `h₀ ∩ h₁ ∩ h₂ = ∅` leaves no other case | the claim at each corner `i` with `z ∈ h_i` separately (the construction changes `H_K(z)` only near `p_i` and `p_{i+3}`); `area(K)` bounded below by the measure of the union of `conv{s_j*}` and the triangles `±△s_i r_i s_{i+1}`, `z ∈ h_i`, which have pairwise disjoint interiors ([`theorem5_0_6`](SmoothedPolygons/Ch5/AreaBound.lean#L777)) | Case 2 is only sketched (E43); the corner-by-corner argument covers it, Case 1 and `z ∉ h₀ ∪ h₁ ∪ h₂` at once, and in Case 1 the union has the area of the book's convex hull; `h₀ ∩ h₁ ∩ h₂ = ∅` is then not used | E43 |
+| Lemma 5.0.7 (3) | the sum (5.0.1) is continuous and increases in `x` on `h₀ ∖ h₂` and on `h₀ ∩ h₂`, hence on `h₀ ∩ {x > 0, y ≥ √3}`; it is even, so least at `x = 0` | `{x ≥ 0, y ≥ √3} ⊆ h₀`, and there `I₀area₀ + I₂area₂ = max(area₀ + area₂, area₀)`, the maximum of the functions that (2) and (1) show increasing; even in `x` ([`lemma5_0_7_3`](SmoothedPolygons/Ch5/Monotonicity.lean#L541)) | the book does not show that the points with `x > 0`, `y ≥ √3` lie in `h₀`; the maximum makes its "increasing on each piece, and continuous" precise (E44) | E44 |
+| §6.1, the existence of a minimizer | Filippov's theorem (Theorem 6.1.1) applied to the half-plane system (Problem 4.5.1), with the vector fields multiplied by a cut-off `ψ`, `ψ = 1` on `𝔥**`; `t_f ≤ π/3` by Lemma 4.3.1 | Filippov's theorem with the closed state constraint `z ∈ 𝔥**`, a compact set of initial points, the closed endpoint relation of Problem 3.6.2 and the window `[0, π/3]` (`ControlSystem.exists_optimal_constrained`, OptimalControl package), applied to the matrix system of §6.2 (Lemma 6.1.2 carried over by Lemma 4.5.2); `t_f < π/3` for competitors cheaper than the smoothed octagon from `cost ≥ 3t_f` ([`three_mul_le_reinhardtCost`](SmoothedPolygons/Ch4/TerminalTime.lean#L71)); the octagon is in the class ([`exists_isReinhardtMinimizer`](SmoothedPolygons/Ch6/Existence.lean#L436)) | the cut-off changes the dynamics outside `𝔥**`, so a minimizer of the cut-off problem need not be a Reinhardt trajectory; Theorem 6.1.1 fixes the initial point, while `X(0)` is free and the endpoints are coupled; Lemma 4.3.1 assumes the minimizer whose existence is proved (E46). The matrix system is the one whose admissible pairs §6.2 already identifies with the trajectories of Problem 3.6.2 | E46 |
 | §6.2 and §6.6, every minimizer is a Pontryagin extremal | the maximum principle on `SL₂(ℝ) × 𝔰𝔩₂(ℝ)` with the boundary conditions `g(0) = I₂`, `g(t_f) = R`, `X(t_f) = R⁻¹X(0)R`; the Hamiltonian by Proposition 6.4.1, the costate equations by Proposition 6.5.1, the transversality conditions of §6.6 (for `Λ₁` by Corollary 6.5.3) | the same steps, with two changes. (1) The maximum principle is applied on the open set `GL₂⁺(ℝ) × C` of `Mat₂(ℝ) × 𝔰𝔩₂(ℝ)` ([`matrixDomain`](SmoothedPolygons/Ch6/MatrixSystem.lean#L118)), with `g(0) = I₂` and `det X(0) = 1` among the boundary conditions; this adds three steps: `det g` and `det X` are first integrals, so the competitors are Reinhardt trajectories; the adjoint equation meets the hypotheses of Proposition 6.5.1 through the momentum `p - (tr(pg)/2)g⁻¹`; and the covector `pg = kI₂` of (2). (2) The boundary condition is applied less the equations `g(t_f)₁₁ = R₁₁` and `X(t_f)₁₀ = (R⁻¹X(0)R)₁₀`, which the first integrals `det g` and `det X` make redundant ([`matrixBoundary`](SmoothedPolygons/Ch6/MatrixSystem.lean#L136)); transversality in the two directions this frees excludes the covectors whose reduced costate vanishes, and the nontriviality of `(λ_cost, Λ₁, Λ_R)`, which the book does not derive, is proved by Corollary 6.5.3, uniqueness for the linear `Λ_R` equation and transversality at `t_f` ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L587)) | (1) the maximum principle available in Lean is stated on open subsets of a finite-dimensional space, and `SL₂(ℝ)` is not open in `Mat₂(ℝ)`; (2) with the full boundary conditions the conclusions of the maximum principle hold for every admissible trajectory with a covector whose reduced costate vanishes, so the nontriviality of `(λ_cost, Λ₁, Λ_R)` does not follow (E21) | E21 |
 | Theorem 7.7.1, step 6 (the fixed points of `f⁴` near `q_oct`) | for each `d` near `d_oct`, `q_fix(d)` stays hyperbolic and the implicit function theorem inverts `f_d⁴ - I` near `q_fix(d)`; "thus, the only fixed points near `q_oct` are the fixed points `q_fix(d)`" (TeX 6612–6620) | the inverse function theorem applied once, at `q_oct`, to `Ψ = (section constraints, f⁴ - id)`, whose constraints include `d = det Λ₁`: its derivative is injective because `A⁴ - I` is invertible on the tangent space of the section (step 5), so `Ψ` is injective near `q_oct`, and a fixed point with `det Λ₁ = d` has the same image as `q_fix(y₀(d))`, with `y₀(d)` from Remark 7.5.2 as in the book ([`iso_fixedPoints`](SmoothedPolygons/Ch7/Isolated/FixedPoints.lean#L179)) | a separate application for each `d` gives a neighbourhood of each `q_fix(d)`, not one uniform in `d`, which the conclusion needs; the single application gives the uniformity, and the hyperbolicity of `q_fix(d)` for `d ≠ d_oct` is not needed | E32 |
 
 Every other proof follows the book's argument. The gaps of Theorem 2.2.2 (E2), Theorem 2.3.9 (E7),
-Lemmas 2.2.6, 2.2.7, 2.4.3 (E5, E9), Lemma 3.1.8 (E34), Lemma 7.5.5 (E30), Theorem 7.5.6 (E31) and
-Theorem 7.7.1 apart from its step 6 (E32) are filled along the book's lines, and the index slip of
-Lemma 2.4.5 (E10) is corrected. In Lemma 2.4.3 the formal proof bounds the turning of the tangent
+Lemmas 2.2.6, 2.2.7, 2.4.3 (E5, E9), Lemma 3.1.8 (E34), the shift of §3.5 (E39), Definition 5.0.1
+(E41), Lemma 5.0.3 (E42, through Theorem 2.2.2, E12 and Theorem 2.3.9), Lemma 5.0.7 (4) (E44),
+Theorem 5.0.2 (E45), Lemma 7.5.5 (E30), Theorem 7.5.6 (E31) and Theorem 7.7.1 apart from its step
+6 (E32) are filled along the book's lines, and the index slips of Lemma 2.4.5 (E10) and Lemma
+5.0.7 (3) (E44) are corrected. The converse of Problem 3.6.2 for winding number one (E15) and the
+identification of the minimizers with `K_min` (E47) have no proof in the book: the first
+generalizes the formalization's argument for the smoothed polygons, and the second assembles the
+results of Chapters 2–3 that derive the control problem from `K_min`. The bound on the cost of
+trajectories of higher winding number (E15) is a new argument, a pointwise inequality between the
+cost density and the turning of the bottom row of `g`. In Lemma 2.4.3 the formal proof bounds the turning of the tangent
 by the hyperbolic arc of Remark 2.2.4 itself rather than by the osculating circle the book derives
 from it, and treats the curves `j ≠ 0` through `σ₁` rather than the arclength reparametrization of
 `σ₂`, a symmetric choice. Proposition 6.4.1 applies
@@ -996,39 +1288,53 @@ nontriviality as `(λ_t, ν) ≢ (0, 0)`, which, by the uniqueness for the adjoi
 statement strengthens to every `t`.
 
 Filippov's theorem is proved by the standard argument; it was written before we had Agrachev and
-Sachkov's text and was not compared with their proof (Section 2).
+Sachkov's text and was not compared with their proof (Section 2). Its form with a state
+constraint, which §6.1 uses, is proved by the same argument.
 
 ## 8. What each result depends on
 
 The results from prior work that the proofs use are all proved (Section 2), stated in
-[`External/`](External): Fejes Tóth's theorem (through Theorem 2.1.3, in Theorem 2.2.2 and the results after it), Gruber's
-formula (Definition 2.1.2), the theorems of Minkowski and Mahler (Theorems 2.3.6, 2.3.7 and
-everything that uses them), Mahler's Lemma 3 with the results of paper A and Mahler 1946 that
-prove it (Lemma 2.2.5 and the remark after Definition 2.3.5), the Euler–Arnold equation
-(Proposition 6.5.1 and the proof that minimizers are extremals), and the Pontryagin maximum
-principle (that proof), which is proved in the OptimalControl package with Brouwer's theorem
-from the FixedPoint package. Filippov's theorem is proved as Theorem 6.1.1 and used by no other
-result. Every declaration depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound)
-(`lake env lean scripts/Audit.lean`, which checks the 5163 declarations of the library and the
+[`External/`](External): Fejes Tóth's theorem (through Theorem 2.1.3, in Theorem 2.2.2 and the results after it,
+among them those of Chapter 5 and §6.1), Gruber's formula (Definition 2.1.2), the theorems of
+Minkowski and Mahler (Theorems 2.3.6, 2.3.7 and everything that uses them, Chapter 5 through
+Theorem 2.3.9), Mahler's Lemma 3 with the results of paper A and Mahler 1946 that prove it
+(Lemma 2.2.5, the remark after Definition 2.3.5, and the identification of the minimizers with
+`K_min`), the Euler–Arnold equation (Proposition 6.5.1 and the proof that minimizers are
+extremals), and the Pontryagin maximum principle (that proof), which is proved in the
+OptimalControl package with Brouwer's theorem from the FixedPoint package. Filippov's theorem is
+proved as Theorem 6.1.1, which no other result uses; the existence of a minimizer (§6.1) uses its
+form with a state constraint and Gronwall's inequality, both from the OptimalControl package.
+Every declaration depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound)
+(`lake env lean scripts/Audit.lean`, which checks the 5760 declarations of the library and the
 axioms of each numbered result, through the packages it uses).
 
 The route check (`python3 scripts/route_check.py check docs/paper_routes.tsv --accept
-docs/route_differences.tsv`) compares, for each of the 68 results of the book found in the Lean
+docs/route_differences.tsv`) compares, for each of the 78 results of the book found in the Lean
 code, the numbered results that the Lean proof uses with those that the book's proof cites. It
-passes: every difference is recorded in [`docs/route_differences.tsv`](docs/route_differences.tsv) with its reason. The 61
-differences are of these kinds:
+passes: every difference is recorded in [`docs/route_differences.tsv`](docs/route_differences.tsv) with its reason. The 86
+differences are of these kinds (four more, which the other route explains, are shown by `--all`:
+a result that the Lean proof uses directly where the book reaches it through a cited result, or
+conversely):
 
 - results the book uses without `\ref` ("by the previous lemma", "immediate from the previous
   proposition", an equation cited by number such as the transversality condition `eqn:theta-k` of
   Lemma 7.5.5 in Theorem 7.7.1, "the real number constructed in Section 7.5" for Remark 7.5.2's
-  `y₀(d)`) or implicitly (for instance the star domain of Theorem 4.4.1 as the state space, in
-  Lemma 4.5.2 and Theorems 7.5.6 and 7.7.1), and three basic facts used throughout (Lemma 7.1.1,
-  Lemma A.6.4, Lemma 3.3.4); conversely, Lemma 2.4.2 cites Lemma 2.4.5 only by "Compare the proof
-  of Lemma 2.4.5" and does not use it;
+  `y₀(d)`, Lemma 5.0.4 in Lemma 5.0.7, the compactness of `𝔥**` in §6.1) or implicitly (for
+  instance the star domain of Theorem 4.4.1 as the state space, in Lemma 4.5.2, Chapter 5, §6.1 and
+  Theorems 7.5.6 and 7.7.1, and the half-plane coordinates of Lemmas 4.1.1 and 4.2.1 in §6.1), and
+  three basic facts used throughout (Lemma 7.1.1, Lemma A.6.4, Lemma 3.3.4); conversely, Lemma
+  2.4.2 cites Lemma 2.4.5 only by "Compare the proof of Lemma 2.4.5" and does not use it;
+- in Theorem 5.0.2, the cost of a trajectory as the area of its disk (the area formula of §3.2),
+  and the smoothed octagon as a competitor ("Hence `K` is not a global minimizer"): its trajectory
+  is admissible (Theorem 7.5.6, Lemma 7.5.5) and its area over `√12` is `δ_oct`, all of which the
+  book takes for granted (§6.1 uses the octagon too, in the repair of its time bound, below);
 - citations whose content the formal statements take as hypotheses or definitions: Lemma 2.4.3
   (about `K_min` only; Theorem 3.1.4(3) is false without its conclusion, E13), Lemma 2.4.5 (item 5
-  of a balanced pair), Lemma 5.0.4 (Chapter 5, out of scope) and Proposition 3.6.1 (the left
-  trivialization is part of the statement of Proposition 6.4.1);
+  of a balanced pair) and Proposition 3.6.1 (the left trivialization is part of the statement of
+  Proposition 6.4.1);
+- Lemma 6.1.2, which cites Lemma 5.0.4 for the positivity of the functions `ρ_j(z)`: the text
+  before that lemma sets it up (`𝔥*` is defined by the star inequalities), and the formal proof
+  reads it off the star domain;
 - in the proof that minimizers are extremals (`sec:PMP`, the label of §6.2), Propositions 3.6.1
   and 6.4.1, checked in matrix coordinates rather than applied in their Lean form, which is about
   Mathlib's Lie groups (Section 6), and Lemma 4.2.1, which §6.2 cites for the upper half-plane form
@@ -1042,7 +1348,9 @@ differences are of these kinds:
 - identities that the book takes from a result stated more generally or along trajectories, and
   that the formal proof checks at the point where they are needed (Lemma 4.2.4, Theorem 6.8.2);
 - the repairs of gaps: Lemma 2.2.5 (E4), Theorem 2.3.9 (E7), Lemma 2.4.3 (E9), Lemma 4.3.1 (E19),
-  and the added uniqueness step in Lemma 7.5.5 (E30);
+  Lemma 5.0.3 (E42: Theorems 2.2.2 and 2.3.9), the existence of a minimizer in §6.1 (E46: the
+  converse of Problem 3.6.2 for winding number one, E15, and the time bound by comparison with the
+  smoothed octagon in place of Lemma 4.3.1), and the added uniqueness step in Lemma 7.5.5 (E30);
 - Theorem 7.5.6 uses the explicit lift constructed for Theorem 7.5.1 rather than the statement of
   Theorem 7.5.1, Lemma 7.5.3 identifies its switching functions with that lift, and Lemma 7.5.5
   uses the trace computed in the proof of Theorem 7.5.1;
@@ -1051,21 +1359,18 @@ differences are of these kinds:
 
 ## 9. Not formalized
 
-- **Outside the chosen scope:** Chapter 1; Chapter 5 (compactification), the next layer of the
-  plan for the remaining chapters (Section 11); Chapters 8–16, including the main theorem (Mahler's
-  First conjecture, Theorem 16.3.1); Appendix A.1–A.5 and A.7–A.10; Appendix B.
+- **Outside the chosen scope:** Chapter 1; Chapters 8–16, including the main theorem (Mahler's
+  First conjecture, Theorem 16.3.1), the next layers of the plan for the remaining chapters
+  (Section 11); Appendix A.1–A.5 and A.7–A.10 (the case of Gronwall's inequality of A.1 that §6.1
+  uses is proved in the OptimalControl package); Appendix B.
 - **Within the formalized chapters:**
-  - The application of Filippov's theorem in §6.1 (an optimal control exists for the Reinhardt
-    problem, TeX 4553–4600), which rests on the compactification theorem of Chapter 5
-    (Theorem 5.0.2) and belongs to the next layer with it. Theorem 6.1.1 itself is proved (E35).
-    The maximum principle and the claim of §6.2 that every minimizer is an extremal are proved
-    (Section 2); the existence of a minimizer is what this application adds.
   - Remarks 7.6.1 and 7.6.3, which report numerical observations as conjectures: the area of the
     smoothed `(6k+2)`-gon "appears" to increase with `k` to `π`, and the smoothed `(6k−2)`-gons
     "seem" to satisfy every condition of an extremal except the sign of `λ_cost` (Section 11).
   - The other remarks are not stated as results, except Remarks 2.2.4, 6.6.1, 7.5.2 and 7.6.4 and
     the remark after Definition 2.3.5. Some of their content is proved where it is used: the hexagon of
-    Remark 3.1.7, at a multi-point, in the proof of Lemma 3.1.8; the equivariance of `Φ` (Remark
+    Remark 3.1.7, at a multi-point, in the proof of Lemma 3.1.8, and from a point of `𝔥*` in
+    Lemma 5.0.3; the equivariance of `Φ` (Remark
     4.2.2); the positive slope of `χ₃₂` at `0` (Remark 7.5.4) in the proof of Theorem 7.7.1; the
     smoothed `(6k−2)`-gons of Remark 7.6.2 in Remark 7.6.4. Remark 4.3.2 (the cost in the disk and
     hyperboloid models) is not formalized; Remarks 3.1.2, 3.4.3, 4.1.2, 6.5.2 and 7.7.2 are
@@ -1184,16 +1489,20 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
 - **Toward the main theorem.** With Chapter 2 formalized, the reduction of the Reinhardt problem to
   the balanced Reinhardt problem in circle representation (Problem 2.4.8) is in place, and the
   control problem of Chapter 3 is its reformulation. What separates this from Mahler's First
-  conjecture (Theorem 16.3.1) is Chapters 5 and 8–16, which a plan divides into layers, each ending
-  in a releasable state whose remaining assumptions are explicit hypotheses. Layer 1, the
-  maximum principle and the extremal lift of every minimizer, is done (Section 2). Layer 2, next,
-  is the existence of a minimizer by the book's route: the compactification of Chapter 5
-  (Theorem 5.0.2) and its application in §6.1 of Filippov's theorem (proved here on `ℝⁿ`, and to
-  be extended to an initial set, coupled end points and the closed state constraint). Layer 3 is
-  Chapter 8, with Proposition 8.1.3 (edge extremals, through the maximum principle for the edge
-  problem), and the main theorem conditional on one named hypothesis: that the switching times of
-  an extremal do not accumulate at a time where its lift meets the singular locus. The later
-  layers discharge it: the triangular Fuller system of Chapter 13 and its global basin (Chapter 15,
+  conjecture (Theorem 16.3.1) is Chapters 8–16, which a plan divides into layers, each ending in a
+  releasable state whose remaining assumptions are explicit hypotheses. Layer 1, the maximum
+  principle and the extremal lift of every minimizer, and Layer 2, Chapter 5 and the existence of
+  a minimizer by the book's route (§6.1, with Filippov's theorem under a closed state constraint,
+  E46) with the identification of the minimizers with `K_min` (E47), are done: the Reinhardt
+  control problem has a global minimizer, which is a Pontryagin extremal and bounds a `K_min`
+  ([`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250)). Layer 3, next, is Chapter 8, with
+  Proposition 8.1.3 (the global minimizer is edge extremal, through the maximum principle for the
+  edge problem), and Mahler's First conjecture conditional on one named hypothesis, to be called
+  `NoChatteringIntoSingularLocus`: that the switching times of a Pontryagin extremal do not
+  accumulate at a time where its lift meets the singular locus. Layer 3 also derives the second
+  sentence of Theorem 16.3.1, that `K_min` is a smoothed polygon, from the first, through the
+  identification of E47 and the shape of a trajectory with finitely many switches (Lemmas 7.2.1
+  and 3.1.8). The later layers discharge the hypothesis: the triangular Fuller system of Chapter 13 and its global basin (Chapter 15,
   Theorem 16.1.1), the analytic extension of Chapter 14 with Theorem 16.4.1, and Theorem 14.4.1
   (no return), whose proof rests on a numerical computation of an unstable curve.
 - **Local optimality of the octagon.** Theorem 7.7.1 is proved (E32): the octagon is isolated among
@@ -1256,6 +1565,24 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   and is injective because `T` is finite-dimensional.
 - **Theorem 7.5.1.** Centralizing `h` only uses `h ≠ ±I` (immediate from `tr h ∈ (1, 2)`);
   ellipticity is not needed, and the 2017 preprint already argues so.
+- **The reflection invariance of `𝔥*` (§4.6, Definition 5.0.1).** It can be read off the
+  inequalities `|x| < 1/√3`, `x² + y² > 1/3` of the star domain, which are even in `x`. The formal
+  proof, like §4.6, goes through the star functions (`S` permutes them) and Theorem 4.4.1, as it
+  must for `R`.
+- **Theorem 5.0.6.** Once the claim is applied corner by corner (Section 7), the step
+  `h₀ ∩ h₁ ∩ h₂ = ∅` of the book's proof is not used; the formalization proves it
+  ([`inter_hRegion_eq_empty`](SmoothedPolygons/Ch5/AreaBound.lean#L492)) but could drop it.
+- **Lemma 5.0.7 (2).** No derivatives are needed. With `s = √3x`, `c = 3y² - 1`,
+  `f(s) = (1 + s)(1 - s)²(s² + c)` and `w = √(1 - s²)`,
+  `(√(2f(s)) + √(2f(-s)))² = 4w²(1 + c - w²)(1 + w)`, which increases with `w` for `c ≥ 1`, so
+  `√(ρ₀ρ₁²ρ₂) + √(ρ₀²ρ₁ρ₂)` decreases in `x ≥ 0` while `(ρ₀ + ρ₁)ρ₂` increases. This proves (2) for
+  `y² ≥ 2/3`, not only `y ≥ √3`. The formal proof follows the book's sign analysis of the
+  derivatives, with its split at `x = 1/4`.
+- **Lemma 6.1.2 in §6.1.** The convexity of the velocity sets, extended by the cost, can be seen
+  directly: `[Z_u, X]/⟨Z_u, X⟩` is a linear-fractional function of `u` whose denominator is
+  negative on `U_T` (Lemma 3.3.4), so it maps the convex `U_T` onto a convex set, and neither `gX`
+  nor the cost depends on `u`. The formal proof follows the book (Lemma 6.1.2, carried to the
+  matrix system by Lemma 4.5.2).
 
 ### The formalization
 
@@ -1266,13 +1593,15 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   when the tangent turns one way; Dowker's theorem on least-area circumscribed polygons; the lattice
   tiling by a centrally symmetric hexagon; the angles and angle sum of convex polygons; Fejes Tóth's
   cell lemma for finite packings; the planar Tietze–Nakajima theorem; the existence of critical
-  lattices; and the structure of lattice-packed centrally symmetric convex bodies.
+  lattices; the structure of lattice-packed centrally symmetric convex bodies; and the inverse of a
+  function with positive derivative and periodic increments (the arclength of a closed curve).
 - **Two packages of their own** hold the general theory that this formalization needed and that
   others may import: OptimalControl
   ([github.com/vltanh/lean4-optimal-control](https://github.com/vltanh/lean4-optimal-control)),
   with control systems with Carathéodory trajectories (existence, uniqueness and differentiable
-  dependence for measurable controls), Filippov's theorem and the existence of optimal controls,
-  measurable selection, needle variations and the maximum principle; and FixedPoint
+  dependence for measurable controls), Filippov's theorem and the existence of optimal controls
+  (also under a closed state constraint, with a compact set of initial points and a closed endpoint
+  relation), measurable selection, needle variations and the maximum principle; and FixedPoint
   ([github.com/vltanh/lean4-fixed-point](https://github.com/vltanh/lean4-fixed-point)), with
   Brouwer's fixed-point theorem. The project requires OptimalControl at a pinned commit, and
   OptimalControl requires FixedPoint.
@@ -1287,8 +1616,9 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   convexity hypotheses suffice, so the standing assumptions `hfq`, `hfq'` that the statement keeps
   from the source (Section 5) could be dropped, and the theorem holds for any finite-dimensional
   state space (`OptimalControl.ODE.ControlSystem`, in the OptimalControl package, is stated so).
-- **Toward the main theorem.** With the maximum principle proved, Chapters 5 and 8–16 still need
-  Filippov's theorem on the compactified state space of Chapter 5 (it is proved here on `ℝⁿ`), the
-  stable manifold theorem, Weierstrass preparation, and a rigorous version of the numerical
-  containments of the global basin theorem (Theorem 16.1.1), which the book checks from
-  Mathematica plots.
+  Its form with a state constraint, used in §6.1, needs no compact support either: continuity,
+  bounded velocities and convexity on the constraint set suffice.
+- **Toward the main theorem.** With the maximum principle and the existence of a minimizer proved,
+  Chapters 8–16 still need the stable manifold theorem, Weierstrass preparation, and a rigorous
+  version of the numerical containments of the global basin theorem (Theorem 16.1.1), which the
+  book checks from Mathematica plots.
