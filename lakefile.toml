@@ -19,7 +19,8 @@ rev = "v4.36.0-rc2"
 # commit (it brings Brouwer's fixed-point theorem from the FixedPoint package).
 [[require]]
 name = "OptimalControl"
-path = "../lean4-optimal-control"
+git = "https://github.com/vltanh/lean4-optimal-control"
+rev = "88689a80ebc400f2e7b3656ee0b9d95a7bf42820"
 
 [[lean_lib]]
 name = "Basic"
