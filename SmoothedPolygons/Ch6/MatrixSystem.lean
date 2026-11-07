@@ -11,8 +11,9 @@ The book applies the Pontryagin maximum principle (§6.2, TeX 4662–4830) to th
 problem (Problem 3.6.2, TeX 3203) on the manifold `SL₂(ℝ) × 𝔰𝔩₂(ℝ)`, with state `q = (g, X)` and
 costate `p = (Λ₁, Λ₂)` (TeX 4806–4822). The maximum principle used here
 (`External.pontryagin_maximum_principle`) is stated on an open subset of a finite-dimensional
-space (its reading D1 of the book's "smooth manifold"). This file poses the problem on such a set,
-in the book's variables:
+space (its reading D1 of the book's "smooth manifold"), and `SL₂(ℝ)` is not open in `Mat₂(ℝ)`.
+This file poses the problem on such a set, in the book's variables (a departure from the book's
+argument, forced by the form of the principle; see `SmoothedPolygons/Ch6/MatrixExtremal.lean`):
 
 * the state space `MatrixState = Mat₂(ℝ) × ℝ³`: the matrix `g` (`stateG`) and the coordinates
   `x = (a, b, c)` of `X = [[a, b], [c, -a]] ∈ 𝔰𝔩₂(ℝ)` (`slMatrix`, `stateX`);

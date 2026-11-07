@@ -15,8 +15,8 @@ name = "mathlib"
 scope = "leanprover-community"
 rev = "v4.36.0-rc2"
 
-# Development only: the coordinator switches to the published repository at a pinned commit
-# (git = "https://github.com/vltanh/lean4-optimal-control", rev = "<full commit hash>").
+# Filippov's theorem and the Pontryagin maximum principle, from the published package at a pinned
+# commit (it brings Brouwer's fixed-point theorem from the FixedPoint package).
 [[require]]
 name = "OptimalControl"
 git = "https://github.com/vltanh/lean4-optimal-control"

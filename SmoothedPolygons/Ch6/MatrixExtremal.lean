@@ -23,10 +23,12 @@ Problem 3.6.2 (`IsReinhardtMinimizer`) lifts to a Pontryagin extremal (`IsPontry
 
 ## Route
 
-The proof follows the book on the matrix system of `SmoothedPolygons/Ch6/MatrixSystem.lean`: the
-state `q = (g, X)` lies in the open set `GL₂⁺(ℝ) × C` of `Mat₂(ℝ) × 𝔰𝔩₂(ℝ)`, `C` the open cone of
-the star inequalities, on which `⟨Z_u, X⟩ < 0` for `u ∈ U_T` (Lemma 3.3.4), so that the dynamics
-`g' = gX`, `X' = [P, X]` are smooth there.
+The proof takes the book's steps on the matrix system of
+`SmoothedPolygons/Ch6/MatrixSystem.lean`: the state `q = (g, X)` lies in the open set
+`GL₂⁺(ℝ) × C` of `Mat₂(ℝ) × 𝔰𝔩₂(ℝ)`, `C` the open cone of the star inequalities, on which
+`⟨Z_u, X⟩ < 0` for `u ∈ U_T` (Lemma 3.3.4), so that the dynamics `g' = gX`, `X' = [P, X]` are
+smooth there. Step 1 and the last item of step 3 are not in the book; they come from the two
+departures below.
 
 1. A global minimizer of Problem 3.6.2 is a strong local minimizer of the matrix system
    (`IsReinhardtMinimizer.isStrongLocalMinimizer_matrix`,
@@ -51,7 +53,9 @@ the star inequalities, on which `⟨Z_u, X⟩ < 0` for `u ∈ U_T` (Lemma 3.3.4)
      and terminal submanifolds coincide after rotation by `R`" (`covectorΛR_transversality`), and
      `Λ₁(t_f) = R⁻¹Λ₁(0)R` from `g(t_f) = R` by Corollary 6.5.3, as Remark 6.6.1 says
      (`remark6_6_1_lambda1`);
-   * nontriviality of the reduced costate: if `ν = 0`, `Λ₁(t₀) = 0` and `Λ_R(t₀) = 0`, then
+   * nontriviality of the reduced costate (the book reads the nontriviality of
+     `(λ_cost, Λ₁, Λ₂)` off the maximum principle, TeX 4764–4766; the reduced form needs an
+     argument, second departure below): if `ν = 0`, `Λ₁(t₀) = 0` and `Λ_R(t₀) = 0`, then
      `Λ₁ ≡ 0` (Corollary 6.5.3, `IsStateTrajectory.eq_conj_of_isIntegralCurve`), so the `Λ_R`
      equation is linear homogeneous, with coefficients bounded by Lemma 3.3.4, and `Λ_R ≡ 0`
      (`IsStateTrajectory.eq_zero_of_isIntegralCurve_costateRHS`); at `t_f` the covector `p(t_f)`
@@ -63,20 +67,34 @@ The identity of Proposition 6.4.1 (for the left-trivialized costate, `⟨p, gX�
 checked in matrix coordinates, where it is the associativity `tr(p(gX)) = tr((pg)X)`, rather than
 obtained from `proposition6_4_1`, which is stated for Mathlib's Lie groups; the reason is in the
 docstring of `controlHamiltonian_matrix_eq_fullHamiltonian`. Likewise the trivialization of
-Proposition 3.6.1 is written in matrix coordinates, `Λ₁ = pg`. The book's "smooth manifold" is
-read as the open set `GL₂⁺(ℝ) × C`, with `g(0) = I₂` and `det X(0) = 1` (§3.5) as boundary
-conditions, and its "closed control set" as the compact `U_T` (readings D1, D4 of
-`External/Pontryagin.lean`).
+Proposition 3.6.1 is written in matrix coordinates, `Λ₁ = pg`. The book's "closed control set"
+is read as the compact `U_T` (reading D4 of `External/Pontryagin.lean`).
 
-## Departure from the paper
+## Departures from the paper
 
-The only one (E21; see `SmoothedPolygons/Ch6/MatrixSystem.lean`): the maximum principle is applied
-with the boundary condition of Problem 3.6.2 less the two equations of `g(t_f) = R` and
-`X(t_f) = R⁻¹X(0)R` that the first integrals `det g`, `det X` make redundant. With the book's
-boundary condition every admissible trajectory satisfies the conclusions of the maximum principle
-with `λ_cost = 0` and `(p g, Λ₂) = (k I₂, 0)` or `(0, c X)`, whose reduced costate `(Λ₁, Λ_R)`
-vanishes, so the nontriviality of the reduced costate cannot be derived; with the two equations
-left out, transversality excludes these covectors.
+1. **The state space.** The book applies the maximum principle on the manifold
+   `SL₂(ℝ) × 𝔰𝔩₂(ℝ)` (dimension 6), with costate `(Λ₁, Λ₂) ∈ 𝔰𝔩₂ × 𝔰𝔩₂` (TeX 4806–4822). The
+   maximum principle available in Lean (`External.pontryagin_maximum_principle`) is stated on an
+   open subset of a finite-dimensional space, and `SL₂(ℝ)` is not open in `Mat₂(ℝ)`; so it is
+   applied on the open set `GL₂⁺(ℝ) × C` of `Mat₂(ℝ) × 𝔰𝔩₂(ℝ)` (dimension 7), with `g(0) = I₂`
+   and `det X(0) = 1` (§3.5) among the boundary conditions (reading D1 of
+   `External/Pontryagin.lean`). The costate is then a covector on `Mat₂(ℝ) × ℝ³`; its `Λ₁` (the
+   traceless part of `pg`) is the book's `Λ₁` of the restriction of `p` to `T_g SL₂(ℝ)`. Three
+   steps exist only because of this: step 1 (`det g` and `det X` are first integrals, so the
+   competitors are Reinhardt trajectories), the shifted momentum `p - (tr(pg)/2) g⁻¹` through
+   which the adjoint equation meets the hypotheses of Proposition 6.5.1
+   (`hasDerivAt_covectorΛ_of_adjoint`), and the covector `pg = kI₂` in the second departure.
+2. **The boundary conditions and nontriviality** (E21; see
+   `SmoothedPolygons/Ch6/MatrixSystem.lean`). The maximum principle is applied with the boundary
+   condition of Problem 3.6.2 less the two equations of `g(t_f) = R` and `X(t_f) = R⁻¹X(0)R`
+   that the first integrals `det g`, `det X` make redundant. With the book's boundary condition
+   every admissible trajectory satisfies the conclusions of the maximum principle with
+   `λ_cost = 0` and `(p g, Λ₂) = (k I₂, 0)` or `(0, c X)`, whose reduced costate `(Λ₁, Λ_R)`
+   vanishes, so the nontriviality of the reduced costate cannot be derived; with the two
+   equations left out, transversality excludes these covectors. The book obtains nontriviality
+   of `(λ_cost, Λ₁, Λ₂)` directly from the maximum principle; the nontriviality of the reduced
+   costate needs the argument of step 3 (Corollary 6.5.3, uniqueness for the linear `Λ_R`
+   equation, transversality at `t_f`), which the book does not have.
 -/
 
 @[expose] public section
@@ -549,15 +567,18 @@ the state–costate equations of Problem 6.7.1, the maximum condition and `H = 0
 everywhere, the nontriviality `(λ_cost, Λ₁, Λ_R) ≠ 0` at every time, and the transversality
 conditions (6.6.1).
 
-The proof follows the book's route (see the module docstring): the maximum principle on
-`SL₂(ℝ) × 𝔰𝔩₂(ℝ)`, read as the open set `GL₂⁺(ℝ) × C` of the matrix system, the costate
-equations by Proposition 6.5.1, and the transversality conditions of §6.6, the one for `Λ₁` by
-Corollary 6.5.3 (Remark 6.6.1).
+The proof follows the book's route (see the module docstring): the maximum principle, the
+costate equations by Proposition 6.5.1, and the transversality conditions of §6.6, the one for
+`Λ₁` by Corollary 6.5.3 (Remark 6.6.1).
 
-Departure from the paper (E21): the maximum principle is applied with the boundary condition less
-the two equations made redundant by the first integrals `det g`, `det X` (`matrixBoundary`),
-since with them it admits, for every admissible trajectory, covectors whose reduced costate
-vanishes, and the nontriviality of `(λ_cost, Λ₁, Λ_R)` would not follow.
+Departures from the paper (module docstring): (1) the maximum principle is applied on the open
+set `GL₂⁺(ℝ) × C` of `Mat₂(ℝ) × 𝔰𝔩₂(ℝ)` instead of the manifold `SL₂(ℝ) × 𝔰𝔩₂(ℝ)`, since the
+principle available in Lean is stated on open subsets of a finite-dimensional space; (2) (E21) it
+is applied with the boundary condition less the two equations made redundant by the first
+integrals `det g`, `det X` (`matrixBoundary`), since with them it admits, for every admissible
+trajectory, covectors whose reduced costate vanishes, and the nontriviality of
+`(λ_cost, Λ₁, Λ_R)`, which the book does not derive, is proved from Corollary 6.5.3, uniqueness for
+the linear `Λ_R` equation and transversality at `t_f`.
 
 Proof: `IsReinhardtMinimizer.isStrongLocalMinimizer_matrix`,
 `External.pontryagin_maximum_principle` (with `isOpen_matrixDomain`, `isCompact_controlSimplex`,
