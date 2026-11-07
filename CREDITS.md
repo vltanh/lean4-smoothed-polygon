@@ -226,3 +226,45 @@ completes the round's REPORT.md (7 November, 14:41 CST), from the session transc
 For the whole project (four rounds, to the same time): 48.6 hours elapsed, 108 sub-agents (97 on
 the formalization; at most 13 at once), 47.4 hours of sub-agent work, 8,447 tool calls by
 sub-agents and 1,146 by the main session.
+
+## Fifth round (7 November 2026)
+
+The user asked to continue with the plan's second layer: the existence of a global minimizer of the
+Reinhardt control problem by the book's route (Chapter 5 and §6.1), which the user had chosen in
+the fourth round over a shortcut through Reinhardt's K_min, and the identification of the
+minimizers with K_min. No question needed the user's decision: an agent found that Problem 3.6.2
+admits trajectories that wind several times, for which the converse the book uses in §6.1 is
+false (E15), and a new lower bound on their cost (at least 7π/2) kept every statement and
+definition as the book has it.
+
+How it was made:
+
+- **Statements** (two agents): every statement of the layer, with `sorry`, in seven modules for
+  Chapter 5 and five for §6.1, the winding number, the converse of Problem 3.6.2 and K_min, and a
+  general form of Filippov's theorem in the optimal-control package; an independent agent reviewed
+  them against the TeX (all confirmed; four small fixes and the layer's combined statement).
+- **Proofs** (ten agents, at most seven at once, one module each): the package's Filippov theorem
+  with a closed state constraint; the winding lemmas; the converse; §6.1; Lemmas 5.0.3–5.0.5;
+  Theorem 5.0.6; Lemma 5.0.7; Definition 5.0.1 and re-centering; the edge bound and Theorem 5.0.2;
+  the identification with K_min (with the arclength parameterization and the existence of the
+  reparameterization of §3.5, which the book takes for granted).
+- **Verification and cleanup** (two agents): an independent comparison of the proofs with the
+  book's (one departure that was not forced, in Lemma 5.0.7(4), was rewritten along the book's
+  chain; three docstrings corrected; twelve gaps and errors of the book proposed as E-items), and a
+  cleanup (redundant hypotheses, helper names, duplicates, the route review: every difference
+  recorded or fixed).
+- **Audit** (one agent): REPORT.md (E39–E47, E15 rewritten), README.md, formalization.yaml.
+
+Figures, from the start of the round (7 November 2026, 14:52 CST) to the commit that completes the
+round's REPORT.md (7 November, 17:18 CST), from the session transcript:
+
+- elapsed time: 2.4 hours;
+- sub-agents: 15, at most 7 running at once, no resumptions; their total working time 5.2 hours;
+- tool calls: 1,243 by the sub-agents, 75 by the main session;
+- tokens: sub-agents 2.00M output, 4.58M input (uncached input and cache writes), 277M cache reads;
+  main session 0.07M output, 0.18M input, 25M cache reads;
+- model calls: `claude-opus-5-5` only, 1,179 by the sub-agents and 77 by the main session.
+
+For the whole project (five rounds, to the same commit): 51.2 hours elapsed, 123 sub-agents (112 on
+the formalization and its packages; at most 13 at once), 52.6 hours of sub-agent work, 9,690 tool
+calls by sub-agents and 1,258 by the main session.
