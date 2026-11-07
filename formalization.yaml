@@ -287,7 +287,7 @@ automation:
       tool_setup: >-
         The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, local copy
         dated 2026-10-17, and versions 3.0.1 to 3.2.5 of its repository in the fourth round) in one
-        Claude Code session, in four rounds, with 97 sub-agents of the same model on the
+        Claude Code session, in five rounds, with 112 sub-agents of the same model on the
         formalization and its two packages (at most 9 at once): statement reviews against the TeX
         source and the cited sources, parallel proofs by chapter and by part, proof reviews,
         verification of the audit and of its literature section, and an exploration of follow-up
@@ -296,10 +296,10 @@ automation:
         Comparator were run locally.
       cost:
         wall_time: >-
-          48.6 hours elapsed from the start to the completed audit report of the fourth round
+          51.2 hours elapsed from the start to the completed audit report of the fifth round
           (5-7 November 2026, including two nights and about 15 hours stopped by a usage limit);
-          the rounds took 3.2, 15.5, 21.5 and 5.6 hours; 47.4 hours of sub-agent working time in
-          all (0.6 of them evaluating the skill)
+          the rounds took 3.2, 15.5, 21.5, 5.6 and 2.4 hours; 52.6 hours of sub-agent working time
+          in all (0.6 of them evaluating the skill)
         spend_usd: "not tracked"
         hardware: "local machine (Linux) for Lean builds; models via API"
       prompting_notes: >-
