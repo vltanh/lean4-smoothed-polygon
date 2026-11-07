@@ -33,14 +33,11 @@ public import SmoothedPolygons.Ch4.StarDomain
 public import SmoothedPolygons.Ch4.TerminalTime
 public import SmoothedPolygons.Ch6.HalfPlane
 public import SmoothedPolygons.Ch6.Hamiltonian
-public import SmoothedPolygons.Ch6.IwasawaChart
 public import SmoothedPolygons.Ch6.LeftInvariant
-public import SmoothedPolygons.Ch6.LiftedSystem
 public import SmoothedPolygons.Ch6.MatrixCostate
 public import SmoothedPolygons.Ch6.MatrixExtremal
 public import SmoothedPolygons.Ch6.MatrixMinimizer
 public import SmoothedPolygons.Ch6.MatrixSystem
-public import SmoothedPolygons.Ch6.MaximumPrinciple
 public import SmoothedPolygons.Ch6.PeriodicExtension
 public import SmoothedPolygons.Ch7.ConstantControl
 public import SmoothedPolygons.Ch7.DiscreteK

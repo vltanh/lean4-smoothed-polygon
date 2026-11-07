@@ -33,7 +33,7 @@ boundary condition, and the two equations left out hold automatically: `det g(t_
 `X(t_f)₁₀ = -(1 + X(t_f)₀₀²)/X(t_f)₀₁ = (R⁻¹X(0)R)₁₀`. So these pairs are exactly the admissible
 trajectories of Problem 3.6.2 (`SmoothedPolygons/Ch6/MatrixMinimizer.lean`).
 
-Departure from the paper (E21, inventory §3.4): the boundary condition leaves out the two
+Departure from the paper (E21): the boundary condition leaves out the two
 equations `g(t_f)₁₁ = R₁₁` and `X(t_f)₁₀ = (R⁻¹X(0)R)₁₀`, which the first integrals `det g` and
 `det X` make redundant. Were they kept, `ker G'` would lose the directions `(0, E₁₁)` of `g(t_f)`
 and `(0, E₁₀)` of `X(t_f)`, and every admissible trajectory would satisfy the conclusions of the
@@ -87,6 +87,11 @@ theorem stateG_toMatrixState (g X : Mat2) : stateG (toMatrixState g X) = g := rf
 theorem stateX_toMatrixState (g : Mat2) {X : Mat2} (hX : X.trace = 0) :
     stateX (toMatrixState g X) = X :=
   slMatrix_slCoords hX
+
+/-- `⟨X, [W, X]⟩ = tr(XWX) - tr(XXW) = 0`. -/
+theorem traceForm_commutator_self (W X : Mat2) : traceForm X (W * X - X * W) = 0 := by
+  rw [traceForm, Matrix.mul_sub, Matrix.trace_sub, ← Matrix.mul_assoc, ← Matrix.mul_assoc,
+    Matrix.trace_mul_cycle, sub_self]
 
 /-- `R⁻¹ = [[1/2, √3/2], [-√3/2, 1/2]]`. -/
 theorem mx_R_inv : R⁻¹ = !![1 / 2, √3 / 2; -(√3 / 2), 1 / 2] := by
@@ -152,9 +157,8 @@ theorem stateX_zero_one_neg {q : MatrixState} (hq : q ∈ matrixDomain) : stateX
 
 /-! ### Regularity -/
 
-/-- The control simplex `U_T` is compact. (The same statement as `isCompact_controlSimplex` of
-`SmoothedPolygons/Ch6/LiftedSystem.lean`, to be merged with it when that file is removed.) -/
-theorem mx_isCompact_controlSimplex : IsCompact controlSimplex := by
+/-- The control simplex `U_T` is compact. -/
+theorem isCompact_controlSimplex : IsCompact controlSimplex := by
   have hsub : controlSimplex ⊆ Set.pi univ (fun _ : Fin 3 ↦ Icc (0 : ℝ) 1) :=
     fun u hu i _ ↦ hu.1 i
   refine (isCompact_univ_pi fun _ ↦ isCompact_Icc).of_isClosed_subset ?_ hsub
@@ -188,8 +192,7 @@ theorem traceForm_controlMatrix_stateX_neg {q : MatrixState} (hq : q ∈ matrixD
   (lemma3_3_4 (stateX q) (trace_slMatrix _)).1 hq.2 u hu
 
 /-- A family `f(·, u)` that is `C¹` jointly in `(q, u)` on an open set containing `Ω × U` is `C¹` in
-the sense of the maximum principle. (The same as the private `iw_isC1On_of_contDiffOn` of
-`SmoothedPolygons/Ch6/LiftedSystem.lean`.) -/
+the sense of the maximum principle. -/
 private lemma mxa_isC1On_of_contDiffOn {E V F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]

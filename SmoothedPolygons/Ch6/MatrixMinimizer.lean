@@ -39,9 +39,7 @@ theorem cost_matrixCost (T : ℝ) (u : ℝ → Fin 3 → ℝ) (q : ℝ → Matri
 
 A curve in integral form `x(t) = x(0) + ∫₀ᵗ v` is absolutely continuous, has derivative `v(t)` at
 almost every time (Lebesgue's differentiation theorem), and a `C¹` function of it is again
-absolutely continuous; such a function with derivative `0` almost everywhere is constant. (The
-first three facts are proved as in `SmoothedPolygons/Ch6/IwasawaChart.lean`, whose `iw_` lemmas
-are copied here.) -/
+absolutely continuous; such a function with derivative `0` almost everywhere is constant. -/
 
 section Caratheodory
 
@@ -56,19 +54,17 @@ private lemma mxb_continuousOn_of_eq_add_integral {T : ℝ} (hT : 0 ≤ T) {x v 
   rw [uIcc_of_le hT] at hc
   exact (continuousOn_const.add hc).congr hx
 
-/-- A curve in integral form `x(t) = x(0) + ∫₀ᵗ v` has derivative `v(t)` at almost every
-`t ∈ (0, T)` (Lebesgue's differentiation theorem). -/
-private lemma mxb_ae_hasDerivAt_of_eq_add_integral {T : ℝ} {x v : ℝ → E}
-    (hv : IntervalIntegrable v volume 0 T)
-    (hx : ∀ t ∈ Icc 0 T, x t = x 0 + ∫ s in (0 : ℝ)..t, v s) :
+/-- A curve in integral form `x(t) = a + ∫_c^t v` on `[0, T]`, with `c ∈ [0, T]`, has derivative
+`v(t)` at almost every `t ∈ (0, T)` (Lebesgue's differentiation theorem). -/
+theorem ae_hasDerivAt_of_eq_add_integral {T c : ℝ} {x v : ℝ → E} {a : E}
+    (hv : IntervalIntegrable v volume 0 T) (hc : c ∈ Icc 0 T)
+    (hx : ∀ t ∈ Icc 0 T, x t = a + ∫ s in c..t, v s) :
     ∀ᵐ t, t ∈ Ioo 0 T → HasDerivAt x (v t) t := by
-  filter_upwards [IntervalIntegrable.ae_hasDerivAt_integral hv] with t ht htT
-  have hT : 0 ≤ T := (htT.1.trans htT.2).le
-  have h0 : (0 : ℝ) ∈ uIcc 0 T := left_mem_uIcc
-  have htm : t ∈ uIcc 0 T := by rw [uIcc_of_le hT]; exact Ioo_subset_Icc_self htT
-  have hd := (ht htm 0 h0).const_add (x 0)
-  exact hd.congr_of_eventuallyEq
-    (Filter.eventually_of_mem (Icc_mem_nhds htT.1 htT.2) fun s hs ↦ hx s hs)
+  filter_upwards [IntervalIntegrable.ae_hasDerivAt_integral hv] with t ht htI
+  have hIcc : Icc 0 T ⊆ uIcc 0 T := Icc_subset_uIcc
+  have h := (ht (hIcc (Ioo_subset_Icc_self htI)) c (hIcc hc)).const_add a
+  exact h.congr_of_eventuallyEq (eventually_of_mem (Icc_mem_nhds htI.1 htI.2)
+    fun s hs ↦ hx s hs)
 
 /-- Absolute continuity by comparison: if `dist (f s) (f t) ≤ dist (g s) (g t)` on `[a, b]` and
 `g` is absolutely continuous, so is `f`. -/
@@ -127,7 +123,8 @@ private lemma mxb_comp_eq_of_hasDerivAt_zero {F : E → ℝ} (hF : ContDiff ℝ 
   have hneT : ∀ᵐ t : ℝ, t ≠ T := by simp [ae_iff, measure_singleton]
   have hac := mxb_absolutelyContinuousOnInterval_comp hF hT hv hx
   obtain ⟨C, hC⟩ := hac.const_of_ae_hasDerivAt_zero (by
-      filter_upwards [mxb_ae_hasDerivAt_of_eq_add_integral hv hx, hne0, hneT] with t ht h1 h2 htm
+      filter_upwards [ae_hasDerivAt_of_eq_add_integral hv ⟨le_rfl, hT⟩ hx, hne0, hneT]
+        with t ht h1 h2 htm
       rw [uIcc_of_le hT] at htm
       exact h0 t (ht ⟨lt_of_le_of_ne htm.1 (Ne.symm h1), lt_of_le_of_ne htm.2 h2⟩))
   intro t ht
@@ -230,11 +227,6 @@ private lemma mxb_hasDerivAtEntrywise_stateX {q : ℝ → MatrixState} {u : Fin 
   funext s
   exact hL1 (q s)
 
-/-- `⟨X, [P, X]⟩ = tr(XPX) - tr(XXP) = 0`. -/
-private lemma mxb_traceForm_commutator (P X : Mat2) : traceForm X (P * X - X * P) = 0 := by
-  rw [traceForm, Matrix.mul_sub, Matrix.trace_sub, ← Matrix.mul_assoc, ← Matrix.mul_assoc,
-    Matrix.trace_mul_cycle, sub_self]
-
 /-- A Reinhardt state trajectory is an admissible pair of the matrix system in `GL₂⁺(ℝ) × C`
 (the entrywise integral equations of `IsStateTrajectory` are the integral equation of the pair;
 `det g = 1 > 0`, and the star conditions put `X` in `C`). -/
@@ -334,7 +326,7 @@ theorem det_stateX_eq_of_isAdmissibleIn {T : ℝ} (hT : 0 ≤ T) {u : ℝ → Fi
     simp only [Matrix.trace_fin_two, Matrix.sub_apply, Matrix.mul_apply, Fin.sum_univ_two]
     simp [stateX, slMatrix]
     ring
-  rwa [mxb_traceForm_commutator, neg_zero] at hJ
+  rwa [traceForm_commutator_self, neg_zero] at hJ
 
 /-- An admissible pair of the matrix system with `det g(0) = 1` and `det X(0) = 1` projects to a
 Reinhardt state trajectory (the first integrals keep `g` in `SL₂(ℝ)` and `X` among the star

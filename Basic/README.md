@@ -21,8 +21,8 @@ field as Mathlib files it. Nothing here imports [`External`](../External) or [`S
 | `Analysis/Convex/LatticePacking.lean` | a centrally symmetric convex body free of half-lattice points lies in a maximal one, which is cut out by at most three strips (a parallelogram or a hexagon); a packed convex body has area at most the covolume (Blichfeldt) | Mathlib (`Mathlib/Algebra/Module/ZLattice/`) |
 
 The general theory of control systems moved to the OptimalControl package
-(`../lean4-optimal-control`, to be published as `https://github.com/vltanh/lean4-optimal-control`),
-which the project requires: control systems with Carathéodory trajectories, Filippov's
+(`https://github.com/vltanh/lean4-optimal-control`), which the project requires at the commit
+pinned in [`lakefile.toml`](../lakefile.toml): control systems with Carathéodory trajectories, Filippov's
 compactness theorem and the existence of optimal controls (formerly
 `Analysis/ODE/ControlSystem.lean`), measurable selection (formerly
 `MeasureTheory/MeasurableSelection.lean`), Lebesgue points, Carathéodory theory, flows and needle

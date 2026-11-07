@@ -33,15 +33,17 @@ condition and `H = 0` for almost every `t` (A–S (12.15); the book's "vanishes 
 read a.e.), and the transversality condition (12.53). The book's `closed control set` is read as
 compact (D4); its "smooth" as `C¹` with `∂f/∂q` jointly continuous (A–S's (10.4), which the
 book's summary omits; D3); its manifold `M` as an open subset `Ω` of a finite-dimensional real
-normed space (D1: the Reinhardt state space `SL₂(ℝ) × 𝔥*` has a global chart through the
-universal cover of `SL₂(ℝ)` in Iwasawa coordinates); optimality as strong local minimality (D5).
+normed space (D1: for the Reinhardt problem, the book's `SL₂(ℝ) × 𝔰𝔩₂(ℝ)` is read as the open set
+`GL₂⁺(ℝ) × C` of `Mat₂(ℝ) × 𝔰𝔩₂(ℝ)`, in the coordinates `(Fin 2 → Fin 2 → ℝ) × (Fin 3 → ℝ)`,
+with `C` the open cone of `𝔰𝔩₂(ℝ)` cut out by the star inequalities and with `g(0) = I₂` and
+`det X(0) = 1` among the boundary conditions); optimality as strong local minimality (D5).
 The departures D1–D11 from Agrachev–Sachkov are listed in the README of the OptimalControl
 package.
 
 ## Proof
 
-The proof is in the OptimalControl package (`../lean4-optimal-control`, to be published as
-`https://github.com/vltanh/lean4-optimal-control`): `Pontryagin.maximum_principle`, in the module
+The proof is in the OptimalControl package (`https://github.com/vltanh/lean4-optimal-control`,
+at the commit pinned in `lakefile.toml`): `Pontryagin.maximum_principle`, in the module
 `OptimalControl.Pontryagin.MaximumPrinciple`, has the same statement and is proved there by
 Agrachev and Sachkov's argument (Lemmas 12.1–12.2, Theorems 12.1–12.5 and their reductions, with
 Brouwer's fixed-point theorem from the FixedPoint package).

@@ -468,12 +468,6 @@ private theorem mxc_traceForm_bracket (D X W : Mat2) :
     Matrix.sub_apply]
   ring
 
-/-- `⟨X, [W, X]⟩ = 0`. -/
-private theorem mxc_traceForm_bracket_self (X W : Mat2) : traceForm X (W * X - X * W) = 0 := by
-  simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two,
-    Matrix.sub_apply]
-  ring
-
 /-- **Transversality for `Λ_R`** (§6.6, `eqn:transversality`, TeX 5191–5212): "the initial and
 terminal submanifolds coincide after rotation by `R`". On the variations
 `(δX(0), δX(t_f)) = (Y, R⁻¹YR)` with `⟨X(0), Y⟩ = 0` (`fderiv_matrixBoundary_conj`) the
@@ -510,7 +504,7 @@ theorem covectorΛR_transversality {q₀ q₁ : MatrixState} {π₀ π₁ : Stro
     refine mxc_eq_zero_of_trace_mul fun W ↦ ?_
     rw [← mxc_traceForm_bracket]
     exact hY _ (by rw [Matrix.trace_sub, Matrix.trace_mul_comm, sub_self])
-      (mxc_traceForm_bracket_self _ _)
+      (traceForm_commutator_self _ _)
   -- so `Λ_R(0) = [RΛ₂(t_f)R⁻¹, X(0)]`, and `Λ_R(t_f) = [Λ₂(t_f), R⁻¹X(0)R] = R⁻¹Λ_R(0)R`
   have hΛ₀ : covectorΛR q₀ π₀ = R * covectorΛ₂ π₁ * R⁻¹ * stateX q₀ -
       stateX q₀ * (R * covectorΛ₂ π₁ * R⁻¹) := by

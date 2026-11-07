@@ -8,53 +8,75 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferenti
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
 
 /-!
-# The global minimizer is a Pontryagin extremal: the book's route (§6.2, §6.5, §6.6)
+# The global minimizer is a Pontryagin extremal (§6.2, §6.5, §6.6)
 
 The book applies the Pontryagin maximum principle, cited from `zelikin2004control`
-(Agrachev–Sachkov), to the Reinhardt control problem on `SL₂(ℝ) × 𝔰𝔩₂(ℝ)` (§6.2, TeX
-4662–4830), derives the costate equations in Lie-algebra form (Proposition 6.5.1, TeX 4999–5085)
-and the transversality conditions (6.6.1) (§6.6, TeX 5157–5215, with Remark 6.6.1), and collects
-them as Problem 6.7.1; Proposition 8.1.3 then says (TeX 6791) "We have seen that the global
-minimizer must be extremal". This file follows that route on the matrix system of
-`SmoothedPolygons/Ch6/MatrixSystem.lean` (state space `GL₂⁺(ℝ) × C ⊆ Mat₂(ℝ) × 𝔰𝔩₂(ℝ)`):
+(Agrachev–Sachkov), to the Reinhardt control problem (Problem 3.6.2) on `SL₂(ℝ) × 𝔰𝔩₂(ℝ)`, with
+the costate `(Λ₁, Λ₂)` read through the left trivialization of `T*SL₂(ℝ)` (Proposition 3.6.1) and
+the trace form (§6.2, TeX 4662–4835); it computes the Hamiltonian (§6.4, Proposition 6.4.1) and
+the costate equations in Lie-algebra form (Proposition 6.5.1, TeX 4999–5085), derives the
+transversality conditions (6.6.1), the one for `Λ₁` from `g(t_f) = R` by Corollary 6.5.3
+(§6.6 and Remark 6.6.1, TeX 5157–5242), and collects the result as Problem 6.7.1. Proposition
+8.1.3 then says (TeX 6791) "We have seen that the global minimizer must be extremal". That
+statement is `exists_isPontryaginExtremal_of_isReinhardtMinimizer`: every global minimizer of
+Problem 3.6.2 (`IsReinhardtMinimizer`) lifts to a Pontryagin extremal (`IsPontryaginExtremal`).
+
+## Route
+
+The proof follows the book on the matrix system of `SmoothedPolygons/Ch6/MatrixSystem.lean`: the
+state `q = (g, X)` lies in the open set `GL₂⁺(ℝ) × C` of `Mat₂(ℝ) × 𝔰𝔩₂(ℝ)`, `C` the open cone of
+the star inequalities, on which `⟨Z_u, X⟩ < 0` for `u ∈ U_T` (Lemma 3.3.4), so that the dynamics
+`g' = gX`, `X' = [P, X]` are smooth there.
 
 1. A global minimizer of Problem 3.6.2 is a strong local minimizer of the matrix system
-   (`IsReinhardtMinimizer.isStrongLocalMinimizer_matrix`).
+   (`IsReinhardtMinimizer.isStrongLocalMinimizer_matrix`,
+   `SmoothedPolygons/Ch6/MatrixMinimizer.lean`; `det g` and `det X` are first integrals, so the
+   competitors are Reinhardt trajectories).
 2. The maximum principle (`External.pontryagin_maximum_principle`: free terminal time, integral
    cost, the boundary map `matrixBoundary` a submersion) gives `λ_cost = ν ≤ 0` and a Lipschitz
    covector curve `p` with `(ν, p(t)) ≠ 0`, the adjoint equation, the maximum condition, `H = 0`
    and transversality.
-3. Translation (`isPontryaginExtremal_of_matrixCostate`), with `Λ₁ = covectorΛ₁ q p` and
-   `Λ_R = covectorΛR q p` (`SmoothedPolygons/Ch6/MatrixCostate.lean`):
+3. Translation (`isPontryaginExtremal_of_matrixCostate`), with the costates `Λ₁ = covectorΛ₁ q p`,
+   the left trivialization `p g` made traceless, and `Λ_R = covectorΛR q p = [Λ₂, X]`
+   (`SmoothedPolygons/Ch6/MatrixCostate.lean`):
    * the Hamiltonian of the maximum principle is `hamiltonian ν Λ₁ Λ_R X u`
-     (`controlHamiltonian_matrix_eq_hamiltonian`), so the maximum condition and `H = 0` transfer;
-   * the costate equations `Λ₁' = [Λ₁, X]` and `eqn:lamR` hold at almost every time
-     (`hasDerivAt_covectorΛ_of_adjoint`: Proposition 6.5.1), hence in integral form
+     (§6.4, `controlHamiltonian_matrix_eq_hamiltonian`), so the maximum condition and `H = 0`
+     transfer;
+   * the adjoint equation is Hamilton's equations, the hypotheses of Proposition 6.5.1, whose
+     conclusion gives the costate equations `Λ₁' = [Λ₁, X]` and `eqn:lamR` at almost every time
+     (`hasDerivAt_covectorΛ_of_adjoint`), hence in integral form
      (`isIntegralCurve_covectorΛ_of_adjoint`: `q`, `p` are Lipschitz and `Λ₁`, `Λ_R` polynomial
      in `(q, p)`, so absolutely continuous);
-   * transversality: `Λ_R(t_f) = R⁻¹Λ_R(0)R` (`covectorΛR_transversality`), and
-     `Λ₁(t_f) = R⁻¹Λ₁(0)R` from `g(t_f) = R` (Remark 6.6.1 with Corollary 6.5.3,
-     `remark6_6_1_lambda1`);
+   * transversality (§6.6): `Λ_R(t_f) = R⁻¹Λ_R(0)R` from the variations along which "the initial
+     and terminal submanifolds coincide after rotation by `R`" (`covectorΛR_transversality`), and
+     `Λ₁(t_f) = R⁻¹Λ₁(0)R` from `g(t_f) = R` by Corollary 6.5.3, as Remark 6.6.1 says
+     (`remark6_6_1_lambda1`);
    * nontriviality of the reduced costate: if `ν = 0`, `Λ₁(t₀) = 0` and `Λ_R(t₀) = 0`, then
      `Λ₁ ≡ 0` (Corollary 6.5.3, `IsStateTrajectory.eq_conj_of_isIntegralCurve`), so the `Λ_R`
-     equation is linear homogeneous and `Λ_R ≡ 0`
+     equation is linear homogeneous, with coefficients bounded by Lemma 3.3.4, and `Λ_R ≡ 0`
      (`IsStateTrajectory.eq_zero_of_isIntegralCurve_costateRHS`); at `t_f` the covector `p(t_f)`
      then vanishes by the transversality conditions in the directions of the two boundary
      equations left out (`covector_transversality_dropped`, `eq_zero_of_covectorΛ_eq_zero`),
      against `(ν, p(t_f)) ≠ 0`.
 
-Departure from the paper (the only one; E21, see `SmoothedPolygons/Ch6/MatrixSystem.lean`): the
-maximum principle is applied with the boundary condition of Problem 3.6.2 less the two equations
-of `g(t_f) = R` and `X(t_f) = R⁻¹X(0)R` that the first integrals `det g`, `det X` make redundant.
-With the book's boundary condition every admissible trajectory satisfies the conclusions of the
-maximum principle with `λ_cost = 0` and `(p g, Λ₂) = (k I₂, 0)` or `(0, c X)`, whose reduced
-costate `(Λ₁, Λ_R)` vanishes, so the nontriviality of the reduced costate cannot be derived; with
-the two equations left out, transversality excludes these covectors. The rest is the book's
-route: Hamilton's equations give Proposition 6.5.1 (`proposition6_5_1`, with the Euler–Arnold
-equation `External.euler_arnold`) and the book's derivation of the `Λ_R` equation; §6.8 is not
-used. The book's "smooth manifold" `SL₂(ℝ) × 𝔰𝔩₂(ℝ)` is read as the open set `GL₂⁺(ℝ) × C`, with
-`g(0) = I₂` and `det X(0) = 1` (§3.5) as boundary conditions, and its "closed control set" as the
-compact `U_T` (readings D1, D4 of `External/Pontryagin.lean`).
+The identity of Proposition 6.4.1 (for the left-trivialized costate, `⟨p, gX⟩ = ⟨Λ₁, X⟩`) is
+checked in matrix coordinates, where it is the associativity `tr(p(gX)) = tr((pg)X)`, rather than
+obtained from `proposition6_4_1`, which is stated for Mathlib's Lie groups; the reason is in the
+docstring of `controlHamiltonian_matrix_eq_fullHamiltonian`. Likewise the trivialization of
+Proposition 3.6.1 is written in matrix coordinates, `Λ₁ = pg`. The book's "smooth manifold" is
+read as the open set `GL₂⁺(ℝ) × C`, with `g(0) = I₂` and `det X(0) = 1` (§3.5) as boundary
+conditions, and its "closed control set" as the compact `U_T` (readings D1, D4 of
+`External/Pontryagin.lean`).
+
+## Departure from the paper
+
+The only one (E21; see `SmoothedPolygons/Ch6/MatrixSystem.lean`): the maximum principle is applied
+with the boundary condition of Problem 3.6.2 less the two equations of `g(t_f) = R` and
+`X(t_f) = R⁻¹X(0)R` that the first integrals `det g`, `det X` make redundant. With the book's
+boundary condition every admissible trajectory satisfies the conclusions of the maximum principle
+with `λ_cost = 0` and `(p g, Λ₂) = (k I₂, 0)` or `(0, c X)`, whose reduced costate `(Λ₁, Λ_R)`
+vanishes, so the nontriviality of the reduced costate cannot be derived; with the two equations
+left out, transversality excludes these covectors.
 -/
 
 @[expose] public section
@@ -65,19 +87,6 @@ open Set MeasureTheory Filter Matrix Pontryagin ControlSystem
 open scoped NNReal
 
 /-! ### Calculus tools -/
-
-/-- A curve given by an indefinite integral has the integrand as derivative at almost every
-interior point (Lebesgue's differentiation theorem). -/
-private lemma mxd_ae_hasDerivAt {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [CompleteSpace E] {f v : ℝ → E} {T c : ℝ} (hv : IntervalIntegrable v volume 0 T)
-    (hc : c ∈ Icc 0 T) {a : E} (hf : ∀ t ∈ Icc 0 T, f t = a + ∫ s in c..t, v s) :
-    ∀ᵐ t, t ∈ Ioo 0 T → HasDerivAt f (v t) t := by
-  have hT : 0 ≤ T := hc.1.trans hc.2
-  filter_upwards [IntervalIntegrable.ae_hasDerivAt_integral hv] with t ht htI
-  have hIcc : Icc 0 T ⊆ uIcc 0 T := Icc_subset_uIcc
-  have h := (ht (hIcc (Ioo_subset_Icc_self htI)) c (hIcc hc)).const_add a
-  exact h.congr_of_eventuallyEq (eventually_of_mem (Icc_mem_nhds htI.1 htI.2)
-    fun s hs ↦ hf s hs)
 
 /-- **FTC for absolutely continuous functions**, in integral form: an absolutely continuous `f`
 with derivative `v` at almost every point of `(0, T)` is the indefinite integral of `v`. -/
@@ -171,7 +180,7 @@ theorem isIntegralCurve_covectorΛ_of_adjoint {T : ℝ} {u : ℝ → Fin 3 → �
   -- the costates, smooth in `(q, p)`, are absolutely continuous
   obtain ⟨Kp, hKp⟩ := hlip
   have hKq : IsCompact ((q '' Icc 0 T) ×ˢ controlSimplex) :=
-    (isCompact_Icc.image_of_continuousOn hadm.1.2.2.1).prod mx_isCompact_controlSimplex
+    (isCompact_Icc.image_of_continuousOn hadm.1.2.2.1).prod isCompact_controlSimplex
   obtain ⟨M, hM⟩ := hKq.exists_bound_of_continuousOn (isC1On_matrixField.continuousOn.mono (by
     rintro ⟨_, v⟩ ⟨⟨s, hs, rfl⟩, hv⟩
     exact ⟨hdom s hs, hv⟩))
@@ -186,12 +195,13 @@ theorem isIntegralCurve_covectorΛ_of_adjoint {T : ℝ} {u : ℝ → Fin 3 → �
   -- almost everywhere, `q` and `p` are differentiable, with `q' = f(q, u)` and the adjoint
   -- equation (Lebesgue's differentiation theorem)
   have hq' : ∀ᵐ t, t ∈ Ioo 0 T → HasDerivAt q (matrixField (q t) (u t)) t :=
-    mxd_ae_hasDerivAt hadm.1.2.2.2.1 ⟨le_rfl, hT0.le⟩ hadm.1.2.2.2.2
+    ae_hasDerivAt_of_eq_add_integral hadm.1.2.2.2.1 ⟨le_rfl, hT0.le⟩ hadm.1.2.2.2.2
   have hp' : ∀ᵐ t, t ∈ Ioo 0 T →
       HasDerivAt p (-((p t).comp (fderiv ℝ (matrixField · (u t)) (q t)) +
         ν • fderiv ℝ (matrixCost · (u t)) (q t))) t := by
-    refine mxd_ae_hasDerivAt (v := fun r ↦ -((p r).comp (linearization matrixField u q r) +
-      ν • fderiv ℝ (matrixCost · (u r)) (q r))) hA.1.neg ⟨hT0.le, le_rfl⟩ (a := p T)
+    refine ae_hasDerivAt_of_eq_add_integral
+      (v := fun r ↦ -((p r).comp (linearization matrixField u q r) +
+        ν • fderiv ℝ (matrixCost · (u r)) (q r))) hA.1.neg ⟨hT0.le, le_rfl⟩ (a := p T)
       fun t ht ↦ ?_
     rw [hA.2 t ht, intervalIntegral.integral_neg, intervalIntegral.integral_symm]
   -- there Proposition 6.5.1 gives the derivatives of the costates
@@ -405,7 +415,7 @@ theorem IsStateTrajectory.eq_zero_of_isIntegralCurve_costateRHS {T : ℝ} {u : �
   -- `∑ₖₗ |Pₖₗ| ≤ C_P` on the compact set `X([0, t_f]) × U_T`, where `⟨Z_u, X⟩ < 0`
   -- (Lemma 3.3.4), so that `P = Z_u/⟨Z_u, X⟩` is continuous there
   have hK : IsCompact ((X '' Icc 0 T) ×ˢ controlSimplex) :=
-    (isCompact_Icc.image_of_continuousOn hXc).prod mx_isCompact_controlSimplex
+    (isCompact_Icc.image_of_continuousOn hXc).prod isCompact_controlSimplex
   have hZ := mxd_continuous_controlMatrix
   have hPc : ContinuousOn (fun w : Mat2 × (Fin 3 → ℝ) ↦ mxd_S (controlP w.2 w.1))
       ((X '' Icc 0 T) ×ˢ controlSimplex) := by
@@ -530,30 +540,36 @@ theorem isPontryaginExtremal_of_matrixCostate {T : ℝ} {u : ℝ → Fin 3 → �
     rw [hH, hH]
     exact hMt ht v hv
 
-/-- **The global minimizer is a Pontryagin extremal**, by the book's route (§6.2, §6.5, §6.6;
-TeX 4662–4830, 4999–5085, 5157–5242; Problem 6.7.1; used in the proof of Proposition 8.1.3,
-TeX 6791: "We have seen that the global minimizer must be extremal"). The statement is that of
-`exists_isPontryaginExtremal_of_isReinhardtMinimizer`
-(`SmoothedPolygons/Ch6/MaximumPrinciple.lean`, proved there through the Iwasawa chart); this proof
-is to replace that one.
+/-- **The global minimizer is a Pontryagin extremal** (`sec:PMP`, label of this formalization:
+§6.2 and §6.6 of the book, TeX 4662–4835 and 5157–5242, summarized in Problem 6.7.1 and used in
+the proof of Proposition 8.1.3, TeX 6791: "We have seen that the global minimizer must be
+extremal"). Every global minimizer `(u, g, X)` of the Reinhardt control problem (Problem 3.6.2)
+lifts to a Pontryagin extremal: there are costates `Λ₁, Λ_R` and a multiplier `λ_cost ≤ 0` with
+the state–costate equations of Problem 6.7.1, the maximum condition and `H = 0` almost
+everywhere, the nontriviality `(λ_cost, Λ₁, Λ_R) ≠ 0` at every time, and the transversality
+conditions (6.6.1).
+
+The proof follows the book's route (see the module docstring): the maximum principle on
+`SL₂(ℝ) × 𝔰𝔩₂(ℝ)`, read as the open set `GL₂⁺(ℝ) × C` of the matrix system, the costate
+equations by Proposition 6.5.1, and the transversality conditions of §6.6, the one for `Λ₁` by
+Corollary 6.5.3 (Remark 6.6.1).
+
+Departure from the paper (E21): the maximum principle is applied with the boundary condition less
+the two equations made redundant by the first integrals `det g`, `det X` (`matrixBoundary`),
+since with them it admits, for every admissible trajectory, covectors whose reduced costate
+vanishes, and the nontriviality of `(λ_cost, Λ₁, Λ_R)` would not follow.
 
 Proof: `IsReinhardtMinimizer.isStrongLocalMinimizer_matrix`,
-`External.pontryagin_maximum_principle` (with `isOpen_matrixDomain`,
-`mx_isCompact_controlSimplex`, `isC1On_matrixField`, `isC1On_matrixCost`,
-`contDiff_matrixBoundary`, `surjective_fderiv_matrixBoundary`), and
-`isPontryaginExtremal_of_matrixCostate`.
-
-Departure from the paper: the maximum principle is applied with the boundary condition less the
-two equations made redundant by the first integrals `det g`, `det X` (`matrixBoundary`), since
-with them it admits, for every admissible trajectory, covectors whose reduced costate vanishes
-(E21; see the module docstring). -/
-theorem mx_exists_isPontryaginExtremal_of_isReinhardtMinimizer {T : ℝ} {u : ℝ → Fin 3 → ℝ}
+`External.pontryagin_maximum_principle` (with `isOpen_matrixDomain`, `isCompact_controlSimplex`,
+`isC1On_matrixField`, `isC1On_matrixCost`, `contDiff_matrixBoundary`,
+`surjective_fderiv_matrixBoundary`), and `isPontryaginExtremal_of_matrixCostate`. -/
+theorem exists_isPontryaginExtremal_of_isReinhardtMinimizer {T : ℝ} {u : ℝ → Fin 3 → ℝ}
     {g X : ℝ → Mat2} (h : IsReinhardtMinimizer T u g X) :
     ∃ (Λ₁ ΛR : ℝ → Mat2) (lam : ℝ), IsPontryaginExtremal T u g X Λ₁ ΛR lam := by
   have hmin := h.isStrongLocalMinimizer_matrix
   have h0 : toMatrixState (g 0) (X 0) ∈ matrixDomain := hmin.2.1.2 0 ⟨le_rfl, hmin.1.le⟩
   obtain ⟨ν, p, hν, hlip, hN, hA, hM, hZ, hT⟩ :=
-    External.pontryagin_maximum_principle isOpen_matrixDomain mx_isCompact_controlSimplex
+    External.pontryagin_maximum_principle isOpen_matrixDomain isCompact_controlSimplex
       isC1On_matrixField isC1On_matrixCost hmin contDiff_matrixBoundary.contDiffAt
       (surjective_fderiv_matrixBoundary
         (w := (toMatrixState (g 0) (X 0), toMatrixState (g T) (X T))) h0)

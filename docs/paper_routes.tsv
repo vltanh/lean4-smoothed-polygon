@@ -53,13 +53,15 @@ lem:triangle-areas	lemma	1	lem:pt-to-hexagon
 lem:geom-thales	lemma	1	
 lem:compactification-lemma	lemma	1	
 lem:control-convex	lemma	1	lem:triangle-areas
-# Running text of §6.2 and §6.6 (lines 4662-4830, 5157-5215), summarized in Problem 6.7.1 and used in the proof of
+# Running text of §6.2 and §6.6 (lines 4662-4835, 5157-5242), summarized in Problem 6.7.1 and used in the proof of
 # Proposition 8.1.3 (line 6791, "We have seen that the global minimizer must be extremal"): every minimizer of the
 # Reinhardt problem lifts to a Pontryagin extremal, by the PMP cited from zelikin2004control (Agrachev-Sachkov)
 # with the costate equations of §6.4-6.5 and the transversality conditions (6.6.1). The label is the section
-# label of §6.2. Cited: the trivialization of T*SL2 (line 4813), the costate equations of §6.4-6.5 and, for the
-# condition on Λ1, Corollary 6.5.3 (Remark 6.6.1).
-sec:PMP	theorem	1	cor:control-dep-ad-alternate,cor:lam1-gen-sol,eqn:lamR,prop:left-invariant-hams,prop:trivialization
+# label of §6.2. Cited: the trivialization of T*SL2 (line 4814), the isomorphism Φ for the upper half-plane
+# coordinates (line 4834), the Hamiltonian and the costate equations of §6.4-6.5 (Propositions 6.4.1, 6.5.1) and,
+# for the condition on Λ1, Remark 6.6.1 with Corollary 6.5.3 (line 5238). Corollary 6.5.4 is an alternative
+# expression of the Λ_R equation, not a step.
+sec:PMP	theorem	1	cor:lam1-gen-sol,eqn:lamR,lem:def-phi,prop:left-invariant-hams,prop:trivialization,rem:lam1-transversality
 prop:left-invariant-hams	proposition	1	prop:trivialization
 eqn:lamR	proposition	1	
 cor:lam1-gen-sol	corollary	1	
