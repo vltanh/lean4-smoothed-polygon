@@ -25,8 +25,17 @@ project:
     symmetric disks and Mahler's theorems on critical lattices, and so is Filippov's theorem. Four
     results of the book are false as printed and are proved in corrected form: Lemma 2.2.1
     (refuted in Lean), Lemma 3.1.8 and Filippov's theorem (each missing a hypothesis), and Theorem
-    7.7.1 (true up to time translation, for terminal times near t_f). The book's main theorem
-    (Mahler's First conjecture) is not formalized.
+    7.7.1 (true up to time translation, for terminal times near t_f).
+
+
+    A fourth round, the first layer of a plan for the book's remaining chapters, proves the claim
+    of Section 6.2 that every minimizer of the Reinhardt control problem lifts to a Pontryagin
+    extremal, along the book's route, through the Pontryagin maximum principle (free terminal time,
+    integral cost, mixed boundary conditions), which the book cites from Agrachev and Sachkov and
+    which the package OptimalControl proves by their argument, with Brouwer's fixed-point theorem
+    from the package FixedPoint; and Remark 6.6.1, that every extremal extends to a periodic one.
+    The existence of a minimizer (Chapter 5) and the book's main theorem (Mahler's First
+    conjecture) are not formalized.
   authors:
     - "The-Anh Vu-Le"
   license: "Apache-2.0"
@@ -83,14 +92,38 @@ sources:
       - "Andrei A. Agrachev"
       - "Yuri L. Sachkov"
     type: "book"
-    location: "Encyclopaedia of Mathematical Sciences 87, Springer, 2004, Theorem 10.1"
+    location: "Encyclopaedia of Mathematical Sciences 87, Springer, 2004, Theorem 10.1 and Chapter 12"
     relationship: "background"
     note: >-
       The book's reference for the maximum principle (bibliography entry zelikin2004control, which
-      names M. I. Zelikin as first author). Filippov's theorem, stated in the book as Theorem 6.1.1
-      without a source and cited from this book (Theorem 10.1) by Hales's 2017 preprint, is proved
-      on R^n (External.filippov) by the standard argument; Agrachev and Sachkov's text was not
-      available to compare with.
+      names M. I. Zelikin as first author). The maximum principle with free terminal time, an
+      integral cost and mixed boundary conditions (Theorem 12.5 with the remark after it) is
+      stated in External.pontryagin_maximum_principle and proved in the OptimalControl package by
+      Agrachev and Sachkov's argument (Chapter 12, read in the authors' draft with preface dated
+      September 2003, from the first author's home page), with the departures D1-D11 that the
+      package's README lists; three gaps of the proof are repaired (REPORT.md, Section 7).
+      Filippov's theorem, stated in the book as Theorem 6.1.1 without a source and cited from this
+      book (Theorem 10.1) by Hales's 2017 preprint, is proved on R^n (External.filippov) by the
+      standard argument, written before Agrachev and Sachkov's text was available to us and not
+      compared with it.
+  - title: "Analytic proofs of the \"hairy ball theorem\" and the Brouwer fixed point theorem"
+    authors:
+      - "John Milnor"
+    type: "article"
+    location: "Amer. Math. Monthly 85 (1978) 521-524"
+    relationship: "background"
+    note: >-
+      Not cited by the book. Brouwer's fixed-point theorem, which Agrachev and Sachkov's proof of
+      the maximum principle uses without reference, is proved in the FixedPoint package by the
+      analytic argument that this paper and the next are known for; their full texts were not
+      available, and the proof was not compared with them line by line.
+  - title: "A less strange version of Milnor's proof of Brouwer's fixed-point theorem"
+    authors:
+      - "C. A. Rogers"
+    type: "article"
+    location: "Amer. Math. Monthly 87 (1980) 525-527"
+    relationship: "background"
+    note: "Not cited by the book; see the previous entry."
 
   - title: "Some packing and covering theorems"
     authors:
@@ -160,6 +193,25 @@ related_formalizations:
       Independent, unreviewed Lean 4 development (created 2 November 2026) claiming a lower bound
       for the least packing density and formalizing parts of the book's Chapters 2, 3 and 5. It
       does not formalize Theorem 7.5.6. This work did not consult or use it.
+  - id: "https://github.com/vltanh/lean4-optimal-control"
+    relationship: "builds-on"
+    note: >-
+      The package OptimalControl, by the same maintainer, required at the commit pinned in
+      lake-manifest.json: control systems with Caratheodory trajectories, Filippov's theorem,
+      measurable selection, and the Pontryagin maximum principle proved by Agrachev and Sachkov's
+      argument. External/Filippov.lean and External/Pontryagin.lean state the cited results in the
+      book's terms and prove them from it. The Challenge does not import it.
+  - id: "https://github.com/vltanh/lean4-fixed-point"
+    relationship: "builds-on"
+    note: >-
+      The package FixedPoint, by the same maintainer, required by OptimalControl: Brouwer's
+      fixed-point theorem, by Milnor and Rogers' analytic argument, used in the proof of the
+      maximum principle.
+  - id: "https://github.com/willcforte/pontryagin-lean"
+    relationship: "independent"
+    note: >-
+      An earlier Lean attempt at the Pontryagin maximum principle (13 May 2026), which states its
+      key steps as axioms. This work does not use it.
 
 status:
   scope: >-
@@ -172,18 +224,27 @@ status:
     corrected form (REPORT.md, E1); Theorem 7.7.1 is false read literally and is proved up to time
     translation, for terminal times near t_f (E32); Lemma 3.1.8 and the existence claim of Theorem
     6.1.1 are proved with a missing hypothesis added (E34, E35); the user approved the four
-    corrected statements. Not formalized: Chapters 1, 5 and 8-16, including the main theorem
-    (Mahler's First conjecture, Theorem 16.3.1); Appendices A.1-A.5, A.7-A.10 and B; within the
-    formalized chapters, the conjectural Remarks 7.6.1 and 7.6.3 and the application of Filippov's
-    theorem in Section 6.1, which rests on Chapter 5. Pontryagin extremals are defined by the
-    conditions of the maximum principle, which is not proved and not needed. No cited theorem is
-    assumed: Fejes Toth's theorem, Gruber's density formula, the theorems of Minkowski and Mahler
-    on critical lattices and circumscribed hexagons, Mahler's Lemma 3 on irreducible domains (in
-    full, along the two earlier papers of Mahler on which it rests), and the Euler-Arnold equation
-    are proved, and so is Filippov's theorem. Statements and definitions corrected
-    (REPORT.md, Section 3): E1 (false lemma), E6, E13 (a hypothesis approved by the user), E16,
-    E17, E20, E21, E26, E32 (Theorem 7.7.1's reading), E34 and E35 (hypotheses approved by the
-    user).
+    corrected statements. Also proved (fourth round, the first layer of a plan for Chapters 5 and
+    8-16): the claim of Sections 6.2 and 6.6, used in Proposition 8.1.3, that every global
+    minimizer of the Reinhardt control problem lifts to a Pontryagin extremal
+    (SmoothedPolygons.exists_isPontryaginExtremal_of_isReinhardtMinimizer), with the boundary
+    conditions written without two equations made redundant by first integrals (E21), and Remark
+    6.6.1, stated in the book without proof (E38). Not formalized: Chapters 1, 5 and 8-16, including
+    the main theorem (Mahler's First conjecture, Theorem 16.3.1); Appendices A.1-A.5, A.7-A.10 and
+    B; within the formalized chapters, the conjectural Remarks 7.6.1 and 7.6.3 and the application
+    of Filippov's theorem in Section 6.1, which rests on Chapter 5 and gives the existence of a
+    minimizer (the next layer). Pontryagin extremals are defined by the conditions of the maximum
+    principle (IsPontryaginExtremal), and the maximum principle shows that minimizers are
+    extremals. No cited theorem is assumed: Fejes Toth's theorem, Gruber's density formula, the
+    theorems of Minkowski and Mahler on critical lattices and circumscribed hexagons, Mahler's
+    Lemma 3 on irreducible domains (in full, along the two earlier papers of Mahler on which it
+    rests), the Euler-Arnold equation and the Pontryagin maximum principle are proved, and so is
+    Filippov's theorem; the last two are stated in External/ and proved in the OptimalControl
+    package (github.com/vltanh/lean4-optimal-control, at a pinned commit), which takes Brouwer's
+    fixed-point theorem from the FixedPoint package (github.com/vltanh/lean4-fixed-point).
+    Statements and definitions corrected (REPORT.md, Section 3): E1 (false lemma), E6, E13 (a
+    hypothesis approved by the user), E16, E17, E20, E21, E26, E32 (Theorem 7.7.1's reading), E34
+    and E35 (hypotheses approved by the user).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -195,17 +256,20 @@ automation:
       framework: "Claude Code 2.1.318 (VS Code extension, Claude Agent SDK)"
       tool_setup: >-
         The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, local copy
-        dated 2026-10-17) in one Claude Code session, in three rounds, with 65 sub-agents of the same
-        model (at most 9 at once): statement reviews against the TeX source, parallel proofs by
-        chapter and by part, proof reviews, verification of the audit and of its literature
-        section, and an exploration of follow-up directions. Lean builds, the axiom audit, a route
-        check of every proof against the results the book's proof cites, and Comparator were run
-        locally.
+        dated 2026-10-17, and versions 3.0.1 to 3.2.5 of its repository in the fourth round) in one
+        Claude Code session, in four rounds, with 97 sub-agents of the same model on the
+        formalization and its two packages (at most 9 at once): statement reviews against the TeX
+        source and the cited sources, parallel proofs by chapter and by part, proof reviews,
+        verification of the audit and of its literature section, and an exploration of follow-up
+        directions; 11 more sub-agents evaluated revisions of the skill. Lean builds, the axiom
+        audit, a route check of every proof against the results the book's proof cites, and
+        Comparator were run locally.
       cost:
         wall_time: >-
-          43.0 hours elapsed from the start to the completed audit report of the third round
+          48.6 hours elapsed from the start to the completed audit report of the fourth round
           (5-7 November 2026, including two nights and about 15 hours stopped by a usage limit);
-          the rounds took 3.2, 15.5 and 21.5 hours; 35.0 hours of sub-agent working time in all
+          the rounds took 3.2, 15.5, 21.5 and 5.6 hours; 47.4 hours of sub-agent working time in
+          all (0.6 of them evaluating the skill)
         spend_usd: "not tracked"
         hardware: "local machine (Linux) for Lean builds; models via API"
       prompting_notes: >-
@@ -214,19 +278,29 @@ automation:
         and the hypothesis of Theorem 3.1.4(3) (first round); proving every cited theorem, the
         routes for Lemmas 2.2.1 and 2.2.5, and the corrected form of Lemma 2.2.1 (second round);
         the hypothesis of Lemma 3.1.8, the statement of Filippov's theorem, the reading of
-        Theorem 7.7.1, and following Mahler's 1946 paper for his Lemma 3 (third round).
+        Theorem 7.7.1, and following Mahler's 1946 paper for his Lemma 3 (third round); a layered
+        plan for Chapters 5 and 8-16, beginning with the maximum principle; proving it by Agrachev
+        and Sachkov's argument, with our own proof of Brouwer's fixed-point theorem, in a separate
+        public package, rather than one taken from another development; the general control theory
+        in a separate public package; the book's route for the Reinhardt instance (the costate
+        equations through Proposition 6.5.1, with non-redundant boundary conditions); and the
+        book's route through Chapter 5 for the existence of a minimizer, the next layer (fourth
+        round).
   spend_usd: "not tracked"
   notes: >-
-    The-Anh Vu-Le requested the formalization, chose its scope (first the control-theoretic core,
-    then Chapter 2 with every cited theorem proved, then the rest of the formalized chapters) and
-    made the decisions it needed (the proof of Jacobi's formula, the hypothesis of Theorem
-    3.1.4(3), the routes for Lemmas 2.2.1 and 2.2.5 and for Mahler's Lemma 3 (along Mahler's 1946
-    paper), the corrected form of the false Lemma 2.2.1, the hypothesis of Lemma 3.1.8, the
-    statement of Filippov's theorem and the reading of Theorem 7.7.1). Claude Opus 5.5 wrote the
-    statements, the
-    proofs, the audit report and the packaging; independent agents reviewed the statements, the
-    proofs and the report. No person has reviewed the proofs. Details and token counts in
-    CREDITS.md.
+    The-Anh Vu-Le requested the formalization, chose its scope in four rounds (first the
+    control-theoretic core, then Chapter 2 with every cited theorem proved, then the rest of the
+    formalized chapters, then the first layer of a plan for Chapters 5 and 8-16: the maximum
+    principle and the lift of every minimizer to an extremal) and made the decisions it needed
+    (the proof of Jacobi's formula, the hypothesis of Theorem 3.1.4(3), the routes for Lemmas
+    2.2.1 and 2.2.5 and for Mahler's Lemma 3 (along Mahler's 1946 paper), the corrected form of
+    the false Lemma 2.2.1, the hypothesis of Lemma 3.1.8, the statement of Filippov's theorem, the
+    reading of Theorem 7.7.1; in the fourth round the layered plan, proving the maximum principle
+    by Agrachev and Sachkov's argument with our own Brouwer's theorem in a separate public
+    package, and the book's route for the Reinhardt instance). Claude Opus 5.5 wrote the
+    statements, the proofs, the two packages, the audit report and the packaging; independent
+    agents reviewed the statements, the proofs and the report. No person has reviewed the proofs.
+    Details and token counts in CREDITS.md.
 
 fidelity:
   divergences: >-
@@ -240,7 +314,11 @@ fidelity:
     condition of Problem 3.6.2 is R^-1 X(0) R (misprint R X(0) R^-1); E17, Lemma 4.2.3 needs X != 0;
     E20, the sign of a(u) in Problem 4.5.1; E21, the nontriviality condition of a Pontryagin
     extremal is imposed on the reduced costate (lambda_cost, Lambda_1, Lambda_R), since on the full
-    costate (Lambda_1, Lambda_2) of Section 6.2 every admissible trajectory would lift; E26, Lemma
+    costate (Lambda_1, Lambda_2) of Section 6.2 every admissible trajectory would lift, and, in the
+    proof that minimizers are extremals, the maximum principle is applied with the boundary
+    conditions g(0) = I2, g(t_f) = R, X(t_f) = R^-1 X(0) R less the two equations that the first
+    integrals det g and det X make redundant, for with them its conclusions hold for every
+    admissible trajectory with a covector whose reduced costate vanishes; E26, Lemma
     7.3.1 needs <X, Z_u> != 0 on the control set; E32, Theorem 7.7.1 (the smoothed octagon is an
     isolated extremal) is false read literally (the octagon's lift started at another time, or run
     for several laps, is another extremal with all the transversality conditions and a nearby or
@@ -285,7 +363,25 @@ fidelity:
     are points of Mathlib's OnePoint R, acted on by GL2(R); Remark 7.5.2's "monotonic increasing"
     is strict; Remark 7.6.4's "when k = 1" is the limit k -> 1+ of the (6k-2)-gons interpolated to
     real k (cost tending to sqrt(12), arcs tending in the Hausdorff distance to the boundary of a
-    rectangle of area sqrt(12)); Theorem 7.7.1 is read as in E32.
+    rectangle of area sqrt(12)); Theorem 7.7.1 is read as in E32. The maximum principle of Section
+    6.2 is stated on an open subset of a finite-dimensional space, with a compact control set (the
+    book's "closed"), dynamics C1 in the state with jointly continuous state derivative (the book's
+    "smooth", with Agrachev and Sachkov's (10.4), which its summary omits), strong local
+    minimizers, free terminal time, an integral cost and mixed boundary conditions; it is applied
+    on the open set GL2+(R) x C of Mat2(R) x sl2(R), C the open cone of the star inequalities,
+    with g(0) = I2 and det X(0) = 1 among the boundary conditions, instead of the book's manifold
+    SL2(R) x sl2(R) (a departure, below);
+    Hamilton's equations, which the book writes for the maximized Hamiltonian, are the adjoint
+    equation of the control-dependent Hamiltonian at the optimal control (as in Agrachev and
+    Sachkov), in integral form; "the Hamiltonian vanishes identically" is read almost everywhere;
+    the book's separated transversality conditions (initial and terminal manifolds) are replaced by
+    the mixed form for the coupled boundary condition X(t_f) = R^-1 X(0) R; the costates are
+    Lambda_1 = p g made traceless and Lambda_R = [Lambda_2, X], for the covector p of the maximum
+    principle; Propositions 3.6.1 and 6.4.1, stated on Mathlib's Lie groups, are checked in matrix
+    coordinates for this application (Mathlib does not identify the bracket of left-invariant
+    vector fields on the units of Mat2(R) with the commutator); Remark 6.6.1's "transversal
+    trajectory" is a Pontryagin extremal, extended with the control rotated from one period to the
+    next.
 
 
     Departures from the book's proofs (REPORT.md, Section 7), each forced by an error or gap of the
@@ -296,15 +392,20 @@ fidelity:
     integral curve is not shown to stay on the boundary) and Lemma 2.4.6 (Shifrin's Proposition 3.8 is about smooth curves; a direct argument); the area
     formula of Section 3.2 (Green's theorem replaced by its polar-coordinates form for star-shaped
     regions); Lemma 3.1.12 (Jacobi's formula by the Leibniz expansion, approved by the user); Lemma
-    4.3.1 (comparison with the smoothed octagon); one step of Theorem 7.7.1 (the fixed points of the
-    fourth iterate of the Poincare map near the octagon's: the book applies the implicit function
+    4.3.1 (comparison with the smoothed octagon); the application of the maximum principle in
+    Section 6.2 (on the open set GL2+(R) x C instead of the manifold SL2(R) x sl2(R), since the
+    principle available in Lean is stated on open subsets of a finite-dimensional space; with the
+    boundary conditions without the two equations made redundant by first integrals, E21; and
+    with an argument the book does not give for the nontriviality of the reduced costate:
+    Corollary 6.5.3, uniqueness for the linear Lambda_R equation, transversality at t_f); one step
+    of Theorem 7.7.1 (the fixed points of the fourth iterate of the Poincare map near the octagon's: the book applies the implicit function
     theorem for each value of the parameter d = det Lambda_1 separately, which does not give the
     neighbourhoods uniform in d that its conclusion needs; the formal proof applies the inverse
     function theorem once, at the octagon's fixed point, to the map (section constraints, f^4 - id),
     whose constraints include d). Every other proof follows the book's argument; the remaining gaps
     are filled along the book's lines (among them those of Lemma 3.1.8 and of the sketch of Theorem
     7.7.1, whose "direct calculation" of hyperbolicity is supplied in closed form), and the index
-    slip of Lemma 2.4.5 is corrected. Remarks 7.5.2 and 7.6.4 have no proof in the book. Proofs of the cited results follow their sources, except where a source quotes
+    slip of Lemma 2.4.5 is corrected. Remarks 6.6.1, 7.5.2 and 7.6.4 have no proof in the book. Proofs of the cited results follow their sources, except where a source quotes
     another paper without proof (Mahler 1947's Lemma 5 and footnote 8, used in its Theorem 2) and in Fejes Toth's theorem (Dowker's theorem by an alternating merge; the cell lemma by
     Boroczky's maximal cells, with a counting argument and angle sums in place of boundary cycles
     and Euler's formula). Lemma 3 of Mahler 1947, stated there without proof, follows Mahler's
@@ -318,8 +419,22 @@ fidelity:
     The domains are symmetric convex domains in the plane, with their gauge as distance function,
     and irreducibility is tested against symmetric convex subdomains (paper A's Lemma 13 is the
     bridge to Mahler's star domains). Filippov's theorem is proved by the standard argument (equi-Lipschitz
-    trajectories, a limit by Tychonoff's theorem, measurable selection); its source's text was not
-    available to compare with.
+    trajectories, a limit by Tychonoff's theorem, measurable selection), not compared with its
+    source's. The maximum principle (in the OptimalControl package) follows Agrachev and Sachkov's
+    Chapter 12, with the departures D1-D11 listed in the package's README: in coordinates on an
+    open subset of a finite-dimensional space, the chronological calculus read pointwise along
+    trajectories; C1 instead of smooth, strong local instead of global minimizers (both
+    generalizations); a compact control set; free time with a cost and mixed boundary conditions,
+    left to the reader, through one auxiliary system; measurable time changes (the source's
+    reparametrization assumes a smooth new time); Lemma 12.1 on any convex cone; one supporting
+    covector for all needle variations (the source's proof of Theorem 12.4 takes one for each);
+    Brouwer's theorem from the FixedPoint package; and the well-posedness of Caratheodory
+    solutions, which the source cites from Gamkrelidze, proved by Picard iteration and Gronwall's
+    inequality, with a cut-off near the reference trajectory instead of complete vector fields.
+    Three gaps of the source are repaired: the proof of Remark (1) after Lemma 12.1 (any convex
+    cone) uses interior points, which a cone may lack; a needle variation placed at the final time
+    t1 varies nothing (such times are moved); and the Lipschitz property and derivative of the
+    end-point map of the needle variations (p. 172) are stated without proof.
 
 review:
   status: "agent-reviewed"
@@ -329,7 +444,10 @@ review:
     The statements were reviewed against the book's TeX source by an independent agent before
     the proofs were written; the proofs were compared with the book's by two further agents; the
     findings of REPORT.md and its sections on the literature were checked against the TeX source
-    and the cited works by independent agents. No person has reviewed the proofs.
+    and the cited works by independent agents. In the fourth round an independent agent reviewed
+    the new statements before the proofs, and another compared the proof of the maximum principle
+    with Agrachev and Sachkov's and confirmed the gaps it repairs. No person has reviewed the
+    proofs.
 
 alignment:
   namespace: "SmoothedPolygonsChallenge"

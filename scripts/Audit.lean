@@ -27,8 +27,6 @@ import all Basic.Analysis.Convex.PolygonAngle
 import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.StarCurveConvex
 import all Basic.Analysis.Convex.TietzeNakajima
-import all Basic.Analysis.ODE.ControlSystem
-import all Basic.MeasureTheory.MeasurableSelection
 import all External.EulerArnold
 import all External.FejesToth
 import all External.Filippov
@@ -39,6 +37,7 @@ import all External.Mahler1947
 import all External.MahlerIrreducible
 import all External.MahlerIrreducible.Lemma3
 import all External.MinkowskiMahler
+import all External.Pontryagin
 import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.MatrixIdentities
 import all SmoothedPolygons.AppA.Riemannian
@@ -67,6 +66,11 @@ import all SmoothedPolygons.Ch4.TerminalTime
 import all SmoothedPolygons.Ch6.HalfPlane
 import all SmoothedPolygons.Ch6.Hamiltonian
 import all SmoothedPolygons.Ch6.LeftInvariant
+import all SmoothedPolygons.Ch6.MatrixCostate
+import all SmoothedPolygons.Ch6.MatrixExtremal
+import all SmoothedPolygons.Ch6.MatrixMinimizer
+import all SmoothedPolygons.Ch6.MatrixSystem
+import all SmoothedPolygons.Ch6.PeriodicExtension
 import all SmoothedPolygons.Ch7.ConstantControl
 import all SmoothedPolygons.Ch7.DiscreteK
 import all SmoothedPolygons.Ch7.Faces
@@ -90,6 +94,8 @@ import all SmoothedPolygons.Ch7.SmoothedPolygonDisk
 import all SmoothedPolygons.Ch7.StrongTransversality
 import all SmoothedPolygons.Defs
 import all Solution
+-- The OptimalControl package needs no `import all`: the traversal stays inside the libraries,
+-- and `collectAxioms` sees the axioms of the package's proofs (its `sorry`s too) without it.
 
 /-!
 # Axiom and dependency audit
@@ -139,7 +145,9 @@ meta def externalResults : List (String × Name) :=
    ("Mahler 1947", ``External.mahler_1947),
    ("Mahler 1947, Lemma 3", ``External.mahler_irreducible),
    ("Mahler 1947, Lemma 3 (full)", ``External.mahler_irreducible_iff),
-   ("Filippov (Agrachev–Sachkov, Th. 10.1)", ``External.filippov)]
+   ("Filippov (Agrachev–Sachkov, Th. 10.1)", ``External.filippov),
+   ("Pontryagin maximum principle (Agrachev–Sachkov, Ch. 12)",
+     ``External.pontryagin_maximum_principle)]
 
 /-- The numbered results of the paper, in the order of the paper. -/
 meta def paperResults : List (String × Name) :=
@@ -193,10 +201,14 @@ meta def paperResults : List (String × Name) :=
    ("§4.6 R, S on ideal vertices", ``SmoothedPolygons.dihedral_smul_idealVertices),
    ("§4.6 Dih permutes ideal vertices", ``SmoothedPolygons.dihedral_permutes_idealVertices),
    ("Lemma 6.1.2", ``SmoothedPolygons.lemma6_1_2),
+   ("§6.2 minimizers are extremals",
+     ``SmoothedPolygons.exists_isPontryaginExtremal_of_isReinhardtMinimizer),
    ("Prop 6.4.1", ``SmoothedPolygons.proposition6_4_1),
    ("Prop 6.5.1", ``SmoothedPolygons.proposition6_5_1),
    ("Cor 6.5.3", ``SmoothedPolygons.corollary6_5_3),
    ("Cor 6.5.4", ``SmoothedPolygons.corollary6_5_4),
+   ("Remark 6.6.1", ``SmoothedPolygons.remark6_6_1),
+   ("Remark 6.6.1 (Λ₁)", ``SmoothedPolygons.remark6_6_1_lambda1),
    ("Lemma 6.8.1", ``SmoothedPolygons.lemma6_8_1),
    ("Thm 6.8.2", ``SmoothedPolygons.theorem6_8_2),
    ("Thm 6.8.3", ``SmoothedPolygons.theorem6_8_3),

@@ -13,10 +13,10 @@ How this formalization was made, from the run log and the session transcript.
   extension, Claude Agent SDK), in one session, with sub-agents of the same model. There was no
   earlier draft; the project was written from scratch.
 - **Procedure:** the [formalize-math-paper](https://github.com/vltanh/formalize-math-paper) skill
-  (local copy dated 17 October 2026): inventory of the paper, statements reviewed against the TeX
-  source before any proof, proofs that follow the book's, a route check of every proof against the
-  results the book's proof cites, cleanup, an audit report checked by independent agents, and
-  packaging for Palomar.
+  (local copy dated 17 October 2026; versions 3.0.1 to 3.2.5 of its repository in the fourth
+  round): inventory of the paper, statements reviewed against the TeX source before any proof,
+  proofs that follow the book's, a route check of every proof against the results the book's proof
+  cites, cleanup, an audit report checked by independent agents, and packaging for Palomar.
 - **Review:** no person has reviewed the proofs. Independent agents checked the statements against
   the TeX source (before the proofs were written), compared the proofs with the book's (in
   every round), verified every finding of the report against the TeX source, and checked the report's
@@ -162,3 +162,67 @@ round's REPORT.md (7 November, 09:07 CST), from the session transcript:
 For the whole project (three rounds, to the same commit): 43.0 hours elapsed, 65 sub-agents (at
 most 9 at once), 35.0 hours of sub-agent work, 5,721 tool calls by sub-agents and 766 by the main
 session.
+
+## Fourth round (7 November 2026)
+
+The user asked for a plan to formalize the chapters the report listed as not formalized (Chapters
+5 and 8–16), in layers that each end in a state that can be released, and for the first layer: the
+Pontryagin maximum principle, which the book cites (from Agrachev and Sachkov) to show that a
+minimizer of the Reinhardt problem lifts to a Pontryagin extremal (§6.2, §6.6). The user decided:
+to prove the principle by Agrachev and Sachkov's own proof, which needs Brouwer's fixed-point
+theorem; to write that theorem ourselves rather than adapt an existing Lean proof, as a separate
+public package ([lean4-fixed-point](https://github.com/vltanh/lean4-fixed-point)); to put the
+general control theory in a second package
+([lean4-optimal-control](https://github.com/vltanh/lean4-optimal-control)), published only once it
+was proved; to redo the Reinhardt instance along the book's route once a first version, through an
+Iwasawa chart, turned out to depart from the book without need; to prepare both packages for
+Palomar, since neither result had been submitted; and, for the next layer, to prove that a
+minimizer exists by the book's route (Chapter 5 and §6.1).
+
+How it was made:
+
+- **Plan** (seven agents): an inventory of Chapters 5 and 8–16 (one agent, with five helpers for
+  the chapters), with the layers and the cited results each needs, and a plan for the first layer.
+- **Brouwer's theorem** (two agents): the analytic proof of Milnor and Rogers, in its own package.
+  A first agent had begun to adapt an existing Lean proof; it was stopped when the user chose to
+  write our own.
+- **Statements** (two agents): every statement of the layer, with `sorry`; an independent agent
+  reviewed them against Agrachev and Sachkov's text and the book.
+- **The maximum principle** (seven agents): one agent set up the optimal-control package; five
+  proved its parts in parallel (Carathéodory equations; linear equations and the derivative of the
+  flow; variations and needles; Lebesgue points, cones and Lemmas 12.1–12.2; the time change,
+  Theorems 12.2–12.5 and the combined principle); one prepared it for publication.
+- **The Reinhardt instance** (eight agents): a first version through an Iwasawa chart (two
+  agents, in parallel with the package's five); after the independent comparison below, one agent
+  designed and stated the book's route (the costate equations from Proposition 6.5.1, boundary
+  conditions without the two redundant equations of E21), four proved its modules in parallel,
+  and one switched the main theorem to it and removed the chart route.
+- **Verification** (three agents): independent comparisons of the package's proofs with Agrachev
+  and Sachkov's (two departures that were not forced were found and removed) and of the
+  instance's proofs with the book's, twice: the chart route, which led to the rework, and the
+  book's route, which confirmed it step by step and led the main session to record the change of
+  state space as a departure and to correct four sentences of the documentation.
+- **Packaging and audit** (three agents): Palomar files for each package (the main session added
+  an earlier Lean proof of Brouwer's theorem that the list of related work had missed, and renamed
+  modules that would have clashed with a dependent project's); REPORT.md, README.md and
+  formalization.yaml.
+- **Procedure:** during the round the main session also revised the skill (versions 3.0.1 to
+  3.2.5), to state Palomar's rule on dependencies correctly and to add guidance on separate
+  packages; eleven further sub-agents evaluated those revisions. They are counted in the figures
+  below.
+
+Figures, from the start of the round (7 November 2026, 09:08 CST) to just before the commit that
+completes the round's REPORT.md (7 November, 14:41 CST), from the session transcript:
+
+- elapsed time: 5.6 hours;
+- sub-agents: 43 (32 on the formalization and its packages, 11 evaluating the skill; 5 started by
+  another agent), at most 13 running at once (7 on the formalization), no resumptions; their total
+  working time 12.4 hours (11.9 on the formalization);
+- tool calls: 2,726 by the sub-agents, 377 by the main session;
+- tokens: sub-agents 4.51M output, 10.82M input (uncached input and cache writes), 501M cache reads;
+  main session 0.34M output, 0.77M input, 220M cache reads;
+- model calls: `claude-opus-5-5` only, 2,470 by the sub-agents and 401 by the main session.
+
+For the whole project (four rounds, to the same time): 48.6 hours elapsed, 108 sub-agents (97 on
+the formalization; at most 13 at once), 47.4 hours of sub-agent work, 8,447 tool calls by
+sub-agents and 1,146 by the main session.
