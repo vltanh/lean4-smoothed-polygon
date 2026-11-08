@@ -28,6 +28,9 @@ import all Basic.Analysis.Convex.PolygonAngle
 import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.StarCurveConvex
 import all Basic.Analysis.Convex.TietzeNakajima
+import all Basic.Analysis.Polynomial.SignNearZero
+import all Basic.Dynamics.LinearizedStability
+import all Basic.Dynamics.Stability
 import all Basic.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
 import all Basic.MeasureTheory.SpecificCodomains.Pi
 import all External.EulerArnold
@@ -45,6 +48,18 @@ import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.Gronwall
 import all SmoothedPolygons.AppA.MatrixIdentities
 import all SmoothedPolygons.AppA.Riemannian
+import all SmoothedPolygons.Ch13.Blowup
+import all SmoothedPolygons.Ch13.Defs
+import all SmoothedPolygons.Ch13.Extremals
+import all SmoothedPolygons.Ch13.FirstControl
+import all SmoothedPolygons.Ch13.FixedPoints
+import all SmoothedPolygons.Ch13.FixedPointsClassification
+import all SmoothedPolygons.Ch13.Jacobian
+import all SmoothedPolygons.Ch13.PoincareMap
+import all SmoothedPolygons.Ch13.RScale
+import all SmoothedPolygons.Ch13.SingularLocus
+import all SmoothedPolygons.Ch13.Stability
+import all SmoothedPolygons.Ch13.Symmetry
 import all SmoothedPolygons.Ch16.MahlerFirst
 import all SmoothedPolygons.Ch2.BalancedCircle
 import all SmoothedPolygons.Ch2.BalancedDensity
@@ -294,6 +309,24 @@ meta def paperResults : List (String × Name) :=
    ("Thm 8.3.2", ``SmoothedPolygons.theorem8_3_2),
    ("Remark 8.3.3", ``SmoothedPolygons.remark8_3_3),
    ("Lemma 8.3.4", ``SmoothedPolygons.lemma8_3_4),
+   ("eqn:z1z2z3 (13.2.2)", ``SmoothedPolygons.eqn_z1z2z3),
+   ("Lemma 13.2.1", ``SmoothedPolygons.lemma13_2_1),
+   ("Lemma 13.2.2", ``SmoothedPolygons.lemma13_2_2),
+   ("Lemma 13.2.3", ``SmoothedPolygons.lemma13_2_3),
+   ("Lemma 13.2.4", ``SmoothedPolygons.lemma13_2_4),
+   ("(13.2.7) ζ-invariance of χ", ``SmoothedPolygons.eqn13_2_7),
+   ("Lemma 13.2.5", ``SmoothedPolygons.lemma13_2_5),
+   ("Lemma 13.2.6", ``SmoothedPolygons.lemma13_2_6),
+   ("Cor 13.2.7", ``SmoothedPolygons.corollary13_2_7),
+   ("Lemma 13.2.8", ``SmoothedPolygons.lemma13_2_8),
+   ("Lemma 13.3.1", ``SmoothedPolygons.lemma13_3_1),
+   ("eqn:u3 (13.3.1)", ``SmoothedPolygons.eqn_u3),
+   ("eqn:z3u3 (13.3.2)", ``SmoothedPolygons.eqn_z3u3),
+   ("Lemma 13.3.2", ``SmoothedPolygons.lemma13_3_2),
+   ("Lemma 13.5.2", ``SmoothedPolygons.lemma13_5_2),
+   ("Remark 13.5.3", ``SmoothedPolygons.remark13_5_3),
+   ("Remark 13.5.4 (q_fix; asymptotic claim not formalized)", ``SmoothedPolygons.remark13_5_4),
+   ("Lemma 13.5.5", ``SmoothedPolygons.lemma13_5_5),
    ("Thm 16.3.1 away from 𝒮_sing (unconditional)",
      ``SmoothedPolygons.isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus),
    ("Thm 16.3.1 (conditional on NoChatteringIntoSingularLocus)",

@@ -114,6 +114,18 @@ thm:no-singular-arcs	+lem:LambdaR	forced: the authors' reading (the user's decis
 thm:avoid-singular	-thm:edge	forced: Theorem 8.3.1 is formalized in its one-sided maximizer form (the user's decision; E56), which the proof's claims (a)–(c) give without passing to the control; the book uses Theorem 8.1.4 only for that passage, which is the corollary IsExtremalOn.exists_ae_mem_controlEdge_of_isEdgeExtremalOn quoted by Theorem 8.3.2
 thm:finite-bang-bang	+thm:avoid-singular	"According to the theorem, for every t₀ ∈ [t₁, t₂], there exists a neighborhood of t₀ on which the control takes values in a single edge" (TeX 7598–7600): Theorem 8.3.1, cited without \ref (in its control form, the corollary of theorem8_3_1)
 #
+# Chapter 13
+lem:first-negative-control	-lem:reversal	forced: Lemma 13.2.3 (lemma13_2_3) is about solutions with H_F = 0 (13.2.6), while Lemma 13.2.5 concerns every z⁰ (the Hamiltonian need not vanish); the proof uses the substitution behind Lemma 13.2.3 for constant controls (tau_flow_neg, ham_tau), as its docstring records
+lem:first-negative-control	+lem:first-control	the identity mostRecentSwitchTime z⁰ = -firstSwitchTime(τ z⁰) needs the first control of τ(z⁰) ≠ 0 to exist and be unique (Lemma 13.2.6, IsFirstControl.unique), which the book's "the most recent control is the conjugate of the first control of τ(z⁰)" (TeX 10891–10906) presupposes without naming it
+cor:10	+lem:first-control	the book's proof: "By the lemma, ..." and "Again, by the lemma" (TeX 11011–11045): Lemma 13.2.6, cited without \ref
+lemma:no-singular	+eqn:u3	equation (13.3.1) is displayed in the book's proof itself (TeX 11118–11129); the formalization states it as a separate result
+lemma:no-singular	+eqn:z3u3	equation (13.3.2) is displayed in the book's proof itself (TeX 11131–11134); the formalization states it as a separate result
+lem:qout	+lem:first-control	the Fuller–Poincaré map F is defined by the first control and the first switching time (TeX 11236–11251), which exist for z⁰ ≠ 0 by Lemma 13.2.6; the book's proof uses F and its well-definedness without naming the lemma (REPORT.md, E67)
+lem:qout	+lem:first-negative-control	"q_in = τ q_out", the inward spiral (TeX 11381–11383): the time reversal F(τ F(z⁰)) = τ(z⁰) at a genuine switching point (poincare_tau_poincare), whose first step is the first assertion of Lemma 13.2.5, used without naming it
+rem:spirals	+lem:first-control	iterating the fixed-point equation uses the equivariance of F under V_T and the rescalings (poincare_smul, poincare_scale), which rests on the existence of the first control of z⁰ ≠ 0 (Lemma 13.2.6); the book takes it for granted
+lem:eigenvalues	+lem:first-control	the map F_ang and its chart near q_out are built from the first control and the first switching time, which exist for z⁰ ≠ 0 by Lemma 13.2.6; the book uses this without naming the lemma
+lem:eigenvalues	+lem:first-negative-control	"q_in is obtained by time reversal from q_out" (TeX 11441–11442): the time reversal F(τ F(ξ)) = τ(ξ) near q_out and q_in (poincare_tau_poincare), from the first assertion of Lemma 13.2.5, used without naming it
+#
 # Chapter 16
 thm:mahler	-thm:no-chatter	forced: Theorem 16.3.1 is formalized conditional on the named hypothesis NoChatteringIntoSingularLocus, which replaces the last step of the proof (Theorems 16.4.1 and 14.4.1, TeX 12820–12833), proved in later layers
 thm:mahler	-thm:no-return	forced: Theorem 16.3.1 is formalized conditional on the named hypothesis NoChatteringIntoSingularLocus, which replaces the last step of the proof (Theorems 16.4.1 and 14.4.1, TeX 12820–12833), proved in later layers

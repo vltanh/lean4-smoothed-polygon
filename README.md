@@ -7,10 +7,11 @@ A Lean 4 formalization of Thomas Hales and Koundinya Vajjha, *Packings of Smooth
 problem (which centrally symmetric convex disk packs least densely?) as an optimal control problem
 on `SL₂(ℝ)` and studies its Pontryagin extremals.
 
-Chapters 2–8 are formalized: every numbered result is proved, some in corrected form (see below),
-except two conjectural remarks. The book's main theorem, Mahler's First conjecture (Theorem
-16.3.1), is proved **conditionally**, on one named hypothesis that stands for results of Chapters
-13–16 not yet formalized. The Reinhardt conjecture itself (that
+Chapters 2–8 and 13 are formalized: every numbered result is proved, some in corrected form (see
+below), except two conjectural remarks and the Mathematica-based part of Remark 13.5.4. The
+book's main theorem, Mahler's First conjecture (Theorem 16.3.1), is proved **conditionally**, on
+one named hypothesis that stands for Theorems 16.4.1 and 14.4.1, not yet formalized; they rest on
+Chapters 13–16, of which Chapter 13 is formalized. The Reinhardt conjecture itself (that
 the smoothed octagon is the worst disk) is open and not claimed.
 
 ## Status
@@ -23,9 +24,10 @@ the smoothed octagon is the worst disk) is open and not claimed.
 | Ch. 6, Hamiltonians; existence of a minimizer (§6.1); every minimizer is an extremal (§6.2) | proved |
 | Ch. 7, the smoothed `(6k+2)`-gons are extremals; the octagon is an isolated extremal | proved |
 | Ch. 8, edge problems, singular locus, finite bang-bang | proved (two theorems restated, see below) |
+| Ch. 13, the triangular Fuller system: blow-up, Poincaré map, fixed points `q_out`, `q_in` and their stability | proved |
 | Appendix A.1 (Corollary A.1.3), A.6, A.11 | proved |
 | Theorem 16.3.1, Mahler's First conjecture | **conditional** on [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107) |
-| Ch. 9–12 (circular control, off the main path), Ch. 13–15, §16.1–16.4 | not yet formalized |
+| Ch. 9–12 (circular control, off the main path), Ch. 14–15, §16.1–16.4 | not yet formalized |
 
 ## Main results
 
@@ -37,6 +39,7 @@ the smoothed octagon is the worst disk) is open and not claimed.
 | §6.2, §6.6 | [`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L564) | every global minimizer lifts to a Pontryagin extremal |
 | §6.1 and `K_min` | [`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250) | a global minimizer exists, is an extremal, and bounds a worst disk `K_min` |
 | Theorem 8.3.2 with 8.1.3 | [`isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L165) | the minimizer is bang-bang with finitely many switches away from the singular locus |
+| Lemma 13.5.5 | [`lemma13_5_5`](SmoothedPolygons/Ch13/Stability.lean#L281) | the fixed point `q_out` of the Fuller–Poincaré map (Lemma 13.5.2) is asymptotically stable, and `q_in = τ(q_out)` is unstable |
 | Theorem 16.3.1 | [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343) | **under the hypothesis**: the minimizer is bang-bang with finitely many switches, and every `K_min` is a smoothed polygon |
 
 The first two are the Palomar Challenge ([`Challenge.lean`](Challenge.lean)).
@@ -52,7 +55,7 @@ the audit lists it among the results [`theorem16_3_1`](SmoothedPolygons/Ch16/Mah
 
 ## What the audit found
 
-[REPORT.md](REPORT.md) checks the book against the formalization; 61 findings (E1–E61). The main
+[REPORT.md](REPORT.md) checks the book against the formalization; 69 findings (E1–E69). The main
 ones:
 
 | | Finding |
@@ -65,6 +68,8 @@ ones:
 | E47 | The book identifies the control minimizers with Reinhardt's `K_min` without proof; proved here. |
 | E55 | Theorem 8.2.7's proof covers only part of its statement. By the user's decision it is proved in the authors' reading; the printed form is proved for normal lifts and open for abnormal ones. |
 | E56 | Theorem 8.3.1 is false as printed; by the user's decision it is proved in a one-sided form, which suffices for Theorem 8.3.2. |
+| E65 | The proof of Lemma 13.3.2 assumes the maximizing face constant in time; repaired along its lines. |
+| E68 | Lemma 13.5.5 (stability of `q_out`) rests on a Mathematica computation; proved here with an exact Jacobian and certified eigenvalue bounds. |
 
 Every proof follows the book's argument; the departures, each forced, are listed in
 [REPORT.md, Section 7](REPORT.md#7-departures-from-the-papers-proofs).
@@ -104,12 +109,23 @@ Lean and Mathlib `v4.36.0-rc2`.
 
 | Path | Content |
 | --- | --- |
-| [`SmoothedPolygons/`](SmoothedPolygons) | the book, one directory per chapter (`Ch2`–`Ch8`, `Ch16`, `AppA`) |
+| [`SmoothedPolygons/`](SmoothedPolygons) | the book, one directory per chapter (`Ch2`–`Ch8`, `Ch13`, `Ch16`, `AppA`) |
 | [`External/`](External) | cited results, all proved ([External/README.md](External/README.md)) |
 | [`Basic/`](Basic) | general mathematics written for this project ([Basic/README.md](Basic/README.md)) |
 | [`Challenge.lean`](Challenge.lean), [`Solution.lean`](Solution.lean) | Palomar's statement of record and its proof |
 | [`scripts/`](scripts), [`docs/`](docs) | the audit, the route check and its data |
 | [REPORT.md](REPORT.md), [CREDITS.md](CREDITS.md) | the audit of the book; how this was made |
+
+## What's next
+
+The plan's remaining layers are to prove [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107) (details in
+[REPORT.md, Section 11](REPORT.md#11-whats-next)):
+
+| Layer | Content | Status |
+| --- | --- | --- |
+| 5 | Ch. 15 and Theorem 16.1.1, the global basin of the Fuller system: numerical facts first as named hypotheses, then certified | planned |
+| 6 | Ch. 14 and Theorem 16.4.1, the cluster point theorem (stable manifolds, Weierstrass preparation) | planned |
+| 7 | Theorem 14.4.1 (no return, an unstable curve to certify) and the final assembly | planned |
 
 ## Related work
 
@@ -125,7 +141,7 @@ Lean and Mathlib `v4.36.0-rc2`.
 - Written by Claude (Opus 5.5, model `claude-opus-5-5`) in Claude Code, with parallel sub-agents,
   at the request of The-Anh Vu-Le, who chose the scope and made the decisions recorded in REPORT.md,
   following the [formalize-math-paper](https://github.com/vltanh/formalize-math-paper) skill.
-- Made on 5–7 November 2026 in six rounds; [CREDITS.md](CREDITS.md) has the procedure and figures.
+- Made on 5–7 November 2026 in seven rounds; [CREDITS.md](CREDITS.md) has the procedure and figures.
 
 ## License
 

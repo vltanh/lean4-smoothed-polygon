@@ -14,9 +14,10 @@ How this formalization was made, from the run log and the session transcript.
   earlier draft; the project was written from scratch.
 - **Procedure:** the [formalize-math-paper](https://github.com/vltanh/formalize-math-paper) skill
   (local copy dated 17 October 2026; versions 3.0.1 to 3.2.5 of its repository in the fourth
-  round): inventory of the paper, statements reviewed against the TeX source before any proof,
-  proofs that follow the book's, a route check of every proof against the results the book's proof
-  cites, cleanup, an audit report checked by independent agents, and packaging for Palomar.
+  round, 3.3.0 and 3.4.0 in the seventh): inventory of the paper, statements reviewed against
+  the TeX source before any proof, proofs that follow the book's, a route check of every proof
+  against the results the book's proof cites, cleanup, an audit report checked by independent
+  agents, and packaging for Palomar.
 - **Review:** no person has reviewed the proofs. Independent agents checked the statements against
   the TeX source (before the proofs were written), compared the proofs with the book's (in
   every round), verified every finding of the report against the TeX source, and checked the report's
@@ -314,3 +315,46 @@ that completes the round's REPORT.md (20:44 CST), from the session transcript:
 For the whole project (six rounds, to the same time): 54.6 hours elapsed, 145 sub-agents (134 on
 the formalization and its packages; at most 13 at once), 61.7 hours of sub-agent work, 11,528 tool
 calls by sub-agents and 1,368 by the main session.
+
+## Seventh round (7 November 2026)
+
+After publishing the third layer (with the user's approval), the round proved the plan's fourth
+layer, Chapter 13 (the triangular Fuller system), whose statements the sixth round had written. At
+the user's request the main session also shortened the READMEs of this repository and of its two
+packages, which had grown into long paragraphs, and moved their details to REPORT.md and the
+packages' docs/ files.
+
+How it was made:
+
+- **Proofs** (ten agents, at most seven at once): linearized stability for maps (Basic/), the
+  definitions and symmetries, the first control and switching time, the singular locus and the
+  extremals, the weighted blow-up, the Fuller–Poincaré map, the R-scaling and the fixed points,
+  the classification of fixed points (Lemma 13.5.2), the exact Jacobian at `q_out` with a
+  certificate for its eigenvalues, and the assembly of Lemma 13.5.5.
+- **Verification and cleanup** (two agents): an independent comparison with the book found no
+  unforced departure and four docstrings that misdescribed the book; a cleanup renamed and merged
+  helpers, fixed those docstrings and recorded every route difference.
+- **Audit** (one agent): REPORT.md (E62–E69), README.md, formalization.yaml.
+- **Packages** (one agent): the shorter READMEs of the two packages.
+- **Fifth layer** (one agent, still running at the end of the round): the statements of Chapter 15
+  and Theorem 16.1.1.
+- **Procedure:** the main session also revised the skill (versions 3.3.0 and 3.4.0: a short README
+  rewritten each round, and general guidance in place of rules tied to one project); ten further
+  sub-agents evaluated the revision against the previous version. They are counted in the figures
+  below.
+
+Figures, from the end of the sixth round (7 November 2026, 20:44 CST) to just before the commit
+that completes the round's REPORT.md (22:44 CST), from the session transcript:
+
+- elapsed time: 2.0 hours (including the publication of the third layer);
+- sub-agents: 26 (15 started on the formalization and its packages, 10 evaluating the skill, and
+  one still running from the sixth round), at most 11 running at once, no resumptions; their total
+  working time 6.5 hours (0.9 of them on the skill);
+- tool calls: 1,339 by the sub-agents, 165 by the main session;
+- tokens: sub-agents 2.50M output, 5.76M input (uncached input and cache writes), 254M cache reads;
+  main session 0.13M output, 0.38M input, 127M cache reads;
+- model calls: `claude-opus-5-5` only, 1,212 by the sub-agents and 167 by the main session.
+
+For the whole project (seven rounds, to the same time): 56.6 hours elapsed, 170 sub-agents (149 on
+the formalization and its packages; at most 13 at once), 68.1 hours of sub-agent work, 12,861 tool
+calls by sub-agents and 1,529 by the main session.

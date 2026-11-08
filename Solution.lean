@@ -2,6 +2,8 @@ module
 
 public import Basic.Analysis.Calculus.MatrixEntrywise
 public import Basic.Analysis.Convex.LatticePacking
+public import Basic.Dynamics.LinearizedStability
+public import Basic.Dynamics.Stability
 public import External.MahlerIrreducible
 public import External.MahlerIrreducible.Lemma3
 public import External.Filippov
@@ -10,6 +12,18 @@ public import SmoothedPolygons.AppA.FunctionalDerivative
 public import SmoothedPolygons.AppA.Gronwall
 public import SmoothedPolygons.AppA.MatrixIdentities
 public import SmoothedPolygons.AppA.Riemannian
+public import SmoothedPolygons.Ch13.Blowup
+public import SmoothedPolygons.Ch13.Defs
+public import SmoothedPolygons.Ch13.Extremals
+public import SmoothedPolygons.Ch13.FirstControl
+public import SmoothedPolygons.Ch13.FixedPoints
+public import SmoothedPolygons.Ch13.FixedPointsClassification
+public import SmoothedPolygons.Ch13.Jacobian
+public import SmoothedPolygons.Ch13.PoincareMap
+public import SmoothedPolygons.Ch13.RScale
+public import SmoothedPolygons.Ch13.SingularLocus
+public import SmoothedPolygons.Ch13.Stability
+public import SmoothedPolygons.Ch13.Symmetry
 public import SmoothedPolygons.Ch16.MahlerFirst
 public import SmoothedPolygons.Ch2.BalancedCircle
 public import SmoothedPolygons.Ch2.BalancedDensity
