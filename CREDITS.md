@@ -274,7 +274,7 @@ calls by sub-agents and 1,258 by the main session.
 After publishing the second layer (with the user's approval), the round took the plan's third
 layer: Chapter 8 (the edge control problems and the singular locus), Corollary A.1.3, and Theorem
 16.3.1 (Mahler's First conjecture) conditional on one named hypothesis,
-`NoChatteringIntoSingularLocus`, which stands for Theorems 16.4.1 and 14.4.1 (Chapters 13–16, later
+[`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107), which stands for Theorems 16.4.1 and 14.4.1 (Chapters 13–16, later
 layers). The user decided two questions: Theorem 8.3.1, false as printed (two counterexamples,
 checked independently), is formalized in its one-sided maximizer form; Theorem 8.2.7, whose proof
 covers only one kind of singular subarc, is formalized in the authors' reading (singular includes
