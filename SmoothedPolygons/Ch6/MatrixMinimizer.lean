@@ -3,6 +3,7 @@ module
 public import SmoothedPolygons.Ch6.MatrixSystem
 public import Mathlib.MeasureTheory.SpecificCodomains.Pi
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferentiationThm
+public import Basic.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
 
 /-!
 # Reinhardt trajectories and the matrix system (§3.5, §6.2)
@@ -46,72 +47,6 @@ section Caratheodory
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-omit [CompleteSpace E] in
-/-- A curve in integral form `x(t) = x(0) + ∫₀ᵗ v` is continuous on `[0, T]`. -/
-private lemma mxb_continuousOn_of_eq_add_integral {T : ℝ} (hT : 0 ≤ T) {x v : ℝ → E}
-    (hv : IntervalIntegrable v volume 0 T)
-    (hx : ∀ t ∈ Icc 0 T, x t = x 0 + ∫ s in (0 : ℝ)..t, v s) : ContinuousOn x (Icc 0 T) := by
-  have hc := intervalIntegral.continuousOn_primitive_interval' hv left_mem_uIcc
-  rw [uIcc_of_le hT] at hc
-  exact (continuousOn_const.add hc).congr hx
-
-/-- A curve in integral form `x(t) = a + ∫_c^t v` on `[0, T]`, with `c ∈ [0, T]`, has derivative
-`v(t)` at almost every `t ∈ (0, T)` (Lebesgue's differentiation theorem). -/
-theorem ae_hasDerivAt_of_eq_add_integral {T c : ℝ} {x v : ℝ → E} {a : E}
-    (hv : IntervalIntegrable v volume 0 T) (hc : c ∈ Icc 0 T)
-    (hx : ∀ t ∈ Icc 0 T, x t = a + ∫ s in c..t, v s) :
-    ∀ᵐ t, t ∈ Ioo 0 T → HasDerivAt x (v t) t := by
-  filter_upwards [IntervalIntegrable.ae_hasDerivAt_integral hv] with t ht htI
-  have hIcc : Icc 0 T ⊆ uIcc 0 T := Icc_subset_uIcc
-  have h := (ht (hIcc (Ioo_subset_Icc_self htI)) c (hIcc hc)).const_add a
-  exact h.congr_of_eventuallyEq (eventually_of_mem (Icc_mem_nhds htI.1 htI.2)
-    fun s hs ↦ hx s hs)
-
-/-- Absolute continuity by comparison: if `dist (f s) (f t) ≤ dist (g s) (g t)` on `[a, b]` and
-`g` is absolutely continuous, so is `f`. -/
-private lemma mxb_absolutelyContinuousOnInterval_of_dist_le {X : Type*} [PseudoMetricSpace X]
-    {f : ℝ → X} {g : ℝ → ℝ} {a b : ℝ} (hg : AbsolutelyContinuousOnInterval g a b)
-    (h : ∀ s ∈ uIcc a b, ∀ t ∈ uIcc a b, dist (f s) (f t) ≤ dist (g s) (g t)) :
-    AbsolutelyContinuousOnInterval f a b := by
-  apply squeeze_zero' ?_ ?_ hg
-  · exact .of_forall fun _ ↦ Finset.sum_nonneg fun _ _ ↦ dist_nonneg
-  rw [Filter.eventually_inf_principal]
-  filter_upwards with E hE
-  exact Finset.sum_le_sum fun i hi ↦ h _ (hE.left i hi).left _ (hE.left i hi).right
-
-omit [CompleteSpace E] in
-/-- If `F` is `C¹` and `x(t) = x(0) + ∫₀ᵗ v`, then `F ∘ x` is absolutely continuous on `[0, T]`:
-`F` is Lipschitz on the compact set `x([0, T])`, and `‖x(t) - x(s)‖ ≤ |∫ₛᵗ ‖v‖|`. -/
-private lemma mxb_absolutelyContinuousOnInterval_comp {F : E → ℝ} (hF : ContDiff ℝ 1 F)
-    {T : ℝ} (hT : 0 ≤ T) {x v : ℝ → E} (hv : IntervalIntegrable v volume 0 T)
-    (hx : ∀ t ∈ Icc 0 T, x t = x 0 + ∫ s in (0 : ℝ)..t, v s) :
-    AbsolutelyContinuousOnInterval (fun t ↦ F (x t)) 0 T := by
-  have hxc := mxb_continuousOn_of_eq_add_integral hT hv hx
-  have hK : IsCompact (x '' Icc 0 T) := isCompact_Icc.image_of_continuousOn hxc
-  have hloc : LocallyLipschitzOn (x '' Icc 0 T) F := by
-    rintro _ ⟨t, -, rfl⟩
-    obtain ⟨K, U, hU, hKU⟩ := hF.contDiffAt.exists_lipschitzOnWith
-    exact ⟨K, U, nhdsWithin_le_nhds hU, hKU⟩
-  obtain ⟨L, hL⟩ := hloc.exists_lipschitzOnWith_of_compact hK
-  have hN := (hv.norm.absolutelyContinuousOnInterval_intervalIntegral
-    (c := 0) left_mem_uIcc).const_mul (L : ℝ)
-  refine mxb_absolutelyContinuousOnInterval_of_dist_le hN fun s hs t ht ↦ ?_
-  rw [uIcc_of_le hT] at hs ht
-  have hvs : IntervalIntegrable v volume 0 s := hv.mono_set (by
-    rw [uIcc_of_le hT, uIcc_of_le hs.1]; exact Icc_subset_Icc_right hs.2)
-  have hvt : IntervalIntegrable v volume 0 t := hv.mono_set (by
-    rw [uIcc_of_le hT, uIcc_of_le ht.1]; exact Icc_subset_Icc_right ht.2)
-  calc dist (F (x s)) (F (x t)) ≤ L * dist (x s) (x t) :=
-        hL.dist_le_mul _ ⟨s, hs, rfl⟩ _ ⟨t, ht, rfl⟩
-    _ = L * ‖∫ r in t..s, v r‖ := by
-        rw [dist_eq_norm, hx s hs, hx t ht, add_sub_add_left_eq_sub,
-          intervalIntegral.integral_interval_sub_left hvs hvt]
-    _ ≤ L * |∫ r in t..s, ‖v r‖| := by
-        gcongr; exact intervalIntegral.norm_integral_le_abs_integral_norm
-    _ = dist (L * ∫ r in (0 : ℝ)..s, ‖v r‖) (L * ∫ r in (0 : ℝ)..t, ‖v r‖) := by
-        rw [Real.dist_eq, ← mul_sub, abs_mul, NNReal.abs_eq,
-          intervalIntegral.integral_interval_sub_left hvs.norm hvt.norm]
-
 /-- **First integrals of Carathéodory curves.** If `F` is `C¹`, `x(t) = x(0) + ∫₀ᵗ v` on
 `[0, T]`, and `F ∘ x` has derivative `0` wherever `x` has derivative `v`, then `F ∘ x` is constant
 on `[0, T]` (`F ∘ x` is absolutely continuous with derivative `0` almost everywhere). -/
@@ -122,7 +57,8 @@ private lemma mxb_comp_eq_of_hasDerivAt_zero {F : E → ℝ} (hF : ContDiff ℝ 
     ∀ t ∈ Icc 0 T, F (x t) = F (x 0) := by
   have hne0 : ∀ᵐ t : ℝ, t ≠ 0 := by simp [ae_iff, measure_singleton]
   have hneT : ∀ᵐ t : ℝ, t ≠ T := by simp [ae_iff, measure_singleton]
-  have hac := mxb_absolutelyContinuousOnInterval_comp hF hT hv hx
+  have hac := absolutelyContinuousOnInterval_comp_of_eq_add_integral hT hv hx
+    fun _ _ ↦ hF.contDiffAt
   obtain ⟨C, hC⟩ := hac.const_of_ae_hasDerivAt_zero (by
       filter_upwards [ae_hasDerivAt_of_eq_add_integral hv ⟨le_rfl, hT⟩ hx, hne0, hneT]
         with t ht h1 h2 htm
@@ -251,7 +187,7 @@ theorem IsStateTrajectory.isAdmissibleIn_matrix {T : ℝ} {u : ℝ → Fin 3 →
     exacts [⟨0, 0, fun _ ↦ rfl⟩, ⟨0, 1, fun _ ↦ rfl⟩, ⟨1, 0, fun _ ↦ rfl⟩]
   have hint := mxb_eq_add_integral_of_coords (x := fun t ↦ toMatrixState (g t) (X t))
     (v := fun s ↦ matrixField (toMatrixState (g s) (X s)) (u s)) hT.le ?_ ?_
-  · refine ⟨⟨hmeas, hU, mxb_continuousOn_of_eq_add_integral hT.le hint.1 hint.2, hint.1,
+  · refine ⟨⟨hmeas, hU, continuousOn_Icc_of_eq_add_integral hT.le hint.1 hint.2, hint.1,
       hint.2⟩, fun t ht ↦ ?_⟩
     obtain ⟨hdet, -, -, h0, h1, h2⟩ := hstate t ht
     refine ⟨?_, ?_, ?_, ?_⟩

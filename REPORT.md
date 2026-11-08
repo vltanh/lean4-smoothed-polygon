@@ -17,11 +17,15 @@ Status of the formalization:
   every minimizer of the Reinhardt problem lifts to a Pontryagin extremal. A fifth round, the
   second layer, added Chapter 5 (the compactification of the star domain) and §6.1 (the existence
   of a minimizer), with the converse of Problem 3.6.2 that §6.1 uses and the identification of the
-  minimizers of the control problem with Reinhardt's `K_min`, which the later chapters use. The
-  book's main theorem, Mahler's First conjecture (Theorem 16.3.1), and Chapters 1 and 8–16 are not
-  formalized (Section 9).
-- **Proved.** Every numbered result of Chapters 2, 3, 4, 5, 6 and 7 is formalized and proved,
-  among them Filippov's theorem (Theorem 6.1.1, cited without a source), Proposition 6.4.1 with
+  minimizers of the control problem with Reinhardt's `K_min`, which the later chapters use. A
+  sixth round, the third layer, added Chapter 8 (the edge control problem, singular subarcs and
+  finite bang-bang control away from the singular locus) and Corollary A.1.3 (the case of
+  Gronwall's inequality that Chapter 8 uses), and proves the book's main theorem, Mahler's First
+  conjecture (Theorem 16.3.1), **only conditionally**, on one named hypothesis that stands for
+  Theorems 16.4.1 and 14.4.1 of Chapters 13–16 (below). Chapter 1 and Chapters 9–16 apart from
+  that conditional theorem are not formalized (Section 9).
+- **Proved.** Every numbered result of Chapters 2, 3, 4, 5, 6, 7 and 8 and Corollary A.1.3 is
+  formalized and proved, among them Filippov's theorem (Theorem 6.1.1, cited without a source), Proposition 6.4.1 with
   Definition 6.3.1 (general left-invariant systems, on Mathlib's Lie groups), Theorem 5.0.6, whose
   second case the book only sketches, and Theorem 7.7.1 (the smoothed octagon is an isolated
   extremal), whose proof the book only sketches. So are the remark after Definition 2.3.5 (the
@@ -31,23 +35,51 @@ Status of the formalization:
   text that the book's later chapters use: that every minimizer of the Reinhardt control problem
   lifts to a Pontryagin extremal (§6.2 and §6.6; "We have seen that the global minimizer must be
   extremal", TeX 6791), that a global minimizer exists (§6.1, E46), and that the global minimizers
-  are Reinhardt's `K_min` (E47). Lemma 2.2.1 is false as printed and Theorem 7.7.1 is false read
-  literally (E1, E32); Lemma 3.1.8 and the existence claim of Theorem 6.1.1 lack a hypothesis
-  (E34, E35); all four are proved in corrected forms approved by the user. The converse of
+  are Reinhardt's `K_min` (E47). Lemma 2.2.1 and Theorem 8.3.1 are false as printed and Theorem
+  7.7.1 is false read literally (E1, E56, E32); Lemma 3.1.8 and the existence claim of Theorem
+  6.1.1 lack a hypothesis (E34, E35); all five are proved in corrected forms approved by the user.
+  The proof of Theorem 8.2.7 covers only part of its statement; the theorem is proved in the
+  authors' reading, the user's decision, in which "singular" refers to the edge control problem
+  on intervals where the control lies in an edge; its printed statement is proved for normal lifts
+  and is open for abnormal ones (E55). Remark 8.3.3, stated without proof, is proved, with the
+  balanced disk it speaks of as a hypothesis (E58). The converse of
   Problem 3.6.2, which §6.1 uses without proof, is false for trajectories that wind more than once
   around the origin and is proved for winding number one, which every trajectory cheaper than
-  `7π/2` has (E15). What is left within these chapters is conjectural (Section 9). The main
+  `7π/2` has (E15). What is left within these chapters is two conjectural remarks and the printed
+  Theorem 8.2.7 for abnormal lifts (Section 9). The main
   results are Theorem 7.5.6 (each smoothed `(6k+2)`-gon is a Pontryagin extremal of the Reinhardt
   control problem with bang-bang control), the smoothed octagon's packing density (the octagon's
   trajectory bounds a balanced disk `K` whose area is the cost `√12(8 - √32 - ln 2)/(√8 - 1)` and
   whose greatest packing density is `δ(K) = (8 - √32 - ln 2)/(√8 - 1)`), Theorem 7.7.1, the lift of
   every minimizer to an extremal
-  ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L587)), Theorem 5.0.2 (a balanced
-  disk whose trajectory leaves `𝔥**` is worse than the smoothed octagon), and the layer's result:
-  the Reinhardt control problem has a global minimizer, which lifts to a Pontryagin extremal and
-  bounds a `K_min`
-  ([`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250)).
-- **Nothing is assumed.** Every cited result that a proof uses is proved: Fejes
+  ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L564)), Theorem 5.0.2 (a balanced
+  disk whose trajectory leaves `𝔥**` is worse than the smoothed octagon), the second layer's
+  result: the Reinhardt control problem has a global minimizer, which lifts to a Pontryagin
+  extremal and bounds a `K_min`
+  ([`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250)), and the third layer's: a global minimizer
+  is edge extremal (Proposition 8.1.3), has no singular subarc in the authors' reading of Theorem
+  8.2.7, and is bang-bang with finitely many switches on every interval on which its lift avoids
+  the singular locus `𝒮_sing`
+  ([`isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L165), the unconditional part of
+  Theorem 16.3.1).
+- **Conditional: Theorem 16.3.1.** Mahler's First conjecture, the book's main theorem (the global
+  minimizer of the Reinhardt control problem is bang-bang with finitely many switches, and every
+  `K_min` is a finite-sided smoothed polygon with hyperbolic arcs at its corners), is proved only
+  under one named hypothesis, [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107) ([`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343)): for every
+  Pontryagin extremal of the Reinhardt problem (with the boundary conditions of Problem 3.6.2)
+  that is edge extremal, and every time `t ∈ (0, T]` at which its lift meets `𝒮_sing`, the
+  switching times of the control do not accumulate at `t` from the left while the trajectory is
+  bang-bang off `𝒮_sing` before `t`. The hypothesis stands for Theorems 16.4.1 (the cluster point
+  theorem) and 14.4.1 (no return), with their time reversals and the periodicity of extremals, as
+  the last step of the book's proof uses them (TeX 12820–12833); Chapters 13–16, which prove
+  them, are not formalized, and later layers of the plan are to prove the hypothesis (Section 11).
+  It is not an axiom: it is a proposition in the statement of [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343), which reads
+  "[`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107) implies Mahler's First conjecture"; no other result assumes it;
+  the audit lists it among the results that [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343) uses, and the axioms of
+  [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343) are Lean's three standard ones. Theorem 16.3.1 is therefore not yet proved: it
+  will follow once the hypothesis is. The book's proof also leaves out the set of times at which
+  the lift meets `𝒮_sing`, which the formalization handles (E60).
+- **No cited result is assumed.** Every cited result that a proof uses is proved: Fejes
   Tóth's theorem (`δ = δ_L`), Gruber's lattice density formula, the theorems of Minkowski and
   Mahler on critical lattices and circumscribed hexagons, Mahler's Lemma 3 on irreducible domains
   (in full, along the two papers of Mahler on which its proof rests, with their errors and gaps
@@ -59,19 +91,29 @@ Status of the formalization:
   ([github.com/vltanh/lean4-optimal-control](https://github.com/vltanh/lean4-optimal-control),
   required at a pinned commit), the maximum principle by Agrachev and Sachkov's own argument, with
   Brouwer's fixed-point theorem from the FixedPoint package
-  ([github.com/vltanh/lean4-fixed-point](https://github.com/vltanh/lean4-fixed-point)). A
+  ([github.com/vltanh/lean4-fixed-point](https://github.com/vltanh/lean4-fixed-point)). The
+  integral form of Gronwall's inequality, from which §6.1 and Corollary A.1.3 need only the case
+  with constant coefficients, is proved in the package too. A
   Pontryagin extremal is defined by the conditions of the maximum principle (Section 6), and the
   maximum principle shows that every minimizer is one. Theorem 3.1.4(3) keeps one hypothesis for a
-  general convex disk (E13, approved by the user); for balanced disks it holds.
+  general convex disk (E13, approved by the user); for balanced disks it holds. The only
+  assumption of the formalization is the hypothesis of Theorem 16.3.1 above, which stands for
+  results of the book itself, not for a cited result (Section 2).
 - **Build.** `lake build` succeeds; the only `sorry`s are the two statements of [`Challenge.lean`](Challenge.lean),
   by design. There is no `axiom`, `admit` or `native_decide`. [`scripts/Audit.lean`](scripts/Audit.lean) checks that every
   declaration of the library and the two Challenge theorems depend only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext),
   [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound). Palomar's Comparator accepts [`Solution.lean`](Solution.lean) against
   [`Challenge.lean`](Challenge.lean) under Lean's kernel and NanoDa.
-- **Statements.** Two results of the book are false as stated and are formalized in corrected
+- **Statements.** Three results of the book are false as stated and are formalized in corrected
   form, approved by the user: Lemma 2.2.1, with a machine-checked counterexample to the printed
-  statement (E1), and Theorem 7.7.1, which holds only up to time translation and for terminal times
-  near `t_f` (E32). Nine further statements and definitions are corrected: a definition missing a
+  statement (E1), Theorem 7.7.1, which holds only up to time translation and for terminal times
+  near `t_f` (E32), and Theorem 8.3.1, whose conclusion fails at a time where `Λ_R` vanishes and
+  which is proved in a one-sided form, from which the form that Theorem 8.3.2 quotes follows
+  (E56). Theorem 8.2.7 is formalized in the authors' reading, also the user's decision (E55). The
+  restatement of Theorem 8.3.2 in Chapter 1, without "edge extremal", is false and is not
+  formalized; the statement of Chapter 8 is (E57). Remark 8.1.6 has the wrong signs (E51), Lemma
+  8.2.1 needs `⟨X, Z_u⟩ ≠ 0` on `U_T` (E52), and Remark 8.3.3 is stated with its balanced disk as
+  a hypothesis (E58). Nine further statements and definitions are corrected: a definition missing a
   hypothesis (Definition 2.3.4, E6), two misprints in definitions (E16, E20), the nontriviality
   condition of a Pontryagin extremal, which the maximum principle yields only for boundary
   conditions written without two redundant equations (E21), and missing hypotheses in Theorem
@@ -79,11 +121,12 @@ Status of the formalization:
   and Lemma 7.3.1 (E26). The converse of Problem 3.6.2, which §6.1 uses without stating it, is
   false in general and is stated and proved for winding number one (E15); the fundamental domain of
   the dihedral group is the sector that the proof of Theorem 5.0.2 needs, not the set that §4.6
-  prints (E40, E45). Slips in proofs (E8, E14, E24, E44) are corrected where they occur. Otherwise
+  prints (E40, E45). Slips in proofs (E8, E14, E24, E44, E50, E59) are corrected where they occur. Otherwise
   the Lean statements differ from the book's only by the omitted hypotheses of Section 5 and the
   readings of Section 6.
 - **Proofs.** Every proof follows the book's argument, except the departures listed in Section 7,
-  each forced by an error or gap of the book or by mathematics Mathlib lacks: Lemma 2.2.1 (its
+  each forced by an error or gap of the book or by mathematics Mathlib lacks, or, for the last step
+  of Theorem 16.3.1, by the chapters not yet formalized: Lemma 2.2.1 (its
   printed form is false), Lemma 2.2.5 (a gap the book's lines cannot close, closed by Mahler's
   lattice route, chosen by the user), one step each of Lemmas 2.4.2 and 2.4.6, the area formula of
   §3.2 (Green's theorem), Jacobi's formula (Lemma 3.1.12, approved by the user), Lemma 4.3.1,
@@ -92,17 +135,23 @@ Status of the formalization:
   argue), the existence of a minimizer in §6.1 (Filippov's theorem with a closed state constraint
   in place of the book's cut-off, which changes the problem, and a time bound that does not
   presuppose a minimizer), the boundary conditions to which §6.2 applies the maximum principle
-  (E21), and one step of Theorem 7.7.1 (the fixed points of the Poincaré map near the octagon's,
-  which the book's argument does not give uniformly). The other gaps are filled along the book's
-  lines. The maximum principle is
+  (E21), one step of Theorem 7.7.1 (the fixed points of the Poincaré map near the octagon's,
+  which the book's argument does not give uniformly), Proposition 8.1.3 (the principle of
+  optimality, made precise by splicing in only competitors close to the edge arc, E48), two steps
+  of Theorem 8.1.4 (the derivative of the switching function only at its zeros, and a zero at an
+  end of the interval, E49), Theorem 8.2.7 (the authors' reading, E55), Theorem 8.3.1 (its
+  passage to the control moved to a corollary with the restatement, E56), and Theorem 16.3.1 (its
+  last step replaced by the named hypothesis, and the set of meeting times handled, E60). The
+  other gaps are filled along the book's lines. The maximum principle is
   proved by Agrachev and Sachkov's argument, with the departures and the three gaps of the source
   listed in Section 7.
   The route check ([`scripts/route_check.py`](scripts/route_check.py) against [`docs/paper_routes.tsv`](docs/paper_routes.tsv)) passes; its recorded differences are
   listed with their reasons in [`docs/route_differences.tsv`](docs/route_differences.tsv) (Section 8).
 - **Redundant hypotheses.** Nine results of the book and one cited result hold without some of
   their hypotheses; the Lean statements omit them (Section 5). The Challenge keeps the book's
-  hypotheses. Lemma 3.1.8, Proposition 6.4.1 and Filippov's theorem keep hypotheses of the book or
-  of the source that their proofs do not use (Section 5).
+  hypotheses. Lemma 3.1.8, Proposition 6.4.1, Lemma 8.1.5, Theorem 8.3.1, Corollary A.1.3 and
+  Filippov's theorem keep hypotheses of the book or of the source that their proofs do not use
+  (Section 5).
 
 ## 1. Summary
 
@@ -129,14 +178,22 @@ Status of the formalization:
   that is not in the book (the cost is at least `3/2` times the angle that `σ₀` sweeps). The set
   that §4.6 gives as a fundamental domain of the dihedral group on `𝔥*` is the union of two of the
   six sectors, and the proof of Theorem 5.0.2, citing it, prints a curve; the proof needs a third
-  set, a sector, which the formalization uses (E40, E45). Slips that do not affect any result:
+  set, a sector, which the formalization uses (E40, E45). Theorem 8.3.1 is false as printed: at a
+  time where `Λ_R` vanishes every control maximizes the Hamiltonian, and such times occur off the
+  singular locus on edge-extremal extremals; its one-sided form holds, and so does the form about
+  the control that the proof of Theorem 8.3.2 quotes (E56). The restatement of Theorem 8.3.2 in
+  Chapter 1 drops edge extremality and is false for extremals on an interval (E57). The abnormal
+  costates of Remark 8.1.6 have the wrong sign: as printed, the edge minimizes the Hamiltonian
+  (E51). Slips that do not affect any result:
   the definition of a critical lattice omits admissibility (E6), an equation written too early in
   the proof of Theorem 2.3.9 (E7), a sign in the proof of Lemma 2.4.2 (E8), an index in the proof
   of Lemma 2.4.5 (E10), an index in the proof of Theorem 3.4.2 (E14), the centres of two geodesics
   in §4.6 (E40), a region in the proof of Lemma 5.0.7 (3) (E44), the claim in the proof of Theorem
   5.0.2 that `Π₂⁺` misses the fundamental domain, which it meets inside `B(i∞)` (E45), a sign
-  convention in the proof of Proposition 6.5.1 (E22), the eigenvectors of §7.1 (E24), and the sign
-  of the switching functions in the proof of Theorem 7.7.1 (E32).
+  convention in the proof of Proposition 6.5.1 (E22), the eigenvectors of §7.1 (E24), the sign
+  of the switching functions in the proof of Theorem 7.7.1 (E32), the constant of Lemma 8.1.5
+  (E50), two typos in the proof of Theorem 8.2.6 (E54), slips in the second variation of Theorem
+  8.2.7 (E55), a reference in Theorem 8.3.1 (E56), and a sign in the proof of Lemma 8.3.4 (E59).
 - **Gaps.** The proof of Lemma 2.2.5 (the minimizer has no corners) has a gap that its shaving
   argument cannot close; the formalization closes it by Mahler's lattice route (E4). The smoothed
   octagon's density value rests on a fact the book never proves, that a balanced disk has least
@@ -163,24 +220,40 @@ Status of the formalization:
   repairs it along its lines, with Filippov's theorem under a closed state constraint (E46). The
   book identifies the minimizers of the control problem with Reinhardt's `K_min` without proof;
   both directions are proved (E47), with the reparameterization of §3.5 that the book takes for
-  granted (E39). Further gaps, all filled: E2, E3, E5, E7, E8, E9, E18, E23, E30, E31, E34.
+  granted (E39). In Chapter 8, the proof of Theorem 8.2.7 covers only the singular subarcs on
+  which the Hamiltonian does not depend on the control; the edge case is left to the edge control
+  problem in the authors' comments, and the formalization proves the theorem in that reading, with
+  the printed statement for normal lifts, while for abnormal lifts it is open (E55). Proposition
+  8.1.3 invokes the principle of optimality without saying how a competitor of the edge problem,
+  whose state space is larger than the star domain, gives one of the Reinhardt problem (E48).
+  Claim (b) of the proof of Theorem 8.3.1 is a sketch (E56); Remark 8.3.3 has no proof, and the
+  disk it speaks of exists only for trajectories of winding number one (E58); the proof of Theorem
+  16.3.1 does not handle the set of times at which the lift meets the singular locus (E60).
+  Smaller gaps of Chapter 8: E49, E52, E53 (the Hamiltonian vanishes at a given time, which the
+  maximum principle gives only almost everywhere), E54, E59, and Corollary A.1.3, stated for
+  `t ≥ 0` but applied on both sides of `0` (E61). All of these are filled, except the abnormal case
+  of the printed Theorem 8.2.7, and so are the further gaps E2, E3, E5, E7, E8, E9, E18, E23, E30,
+  E31 and E34.
 - **Missing hypotheses.** Theorem 3.1.4(3) is false for a general convex disk; it holds under the
   standing assumptions of §2.4 (E13). Lemma 3.1.8 is false unless the curves are regular, as §2.4
   assumes (E34). Filippov's theorem (Theorem 6.1.1) claims that an optimal control exists when
   the velocity sets are convex; this fails for costs that depend on the control, and holds when the
   velocity sets extended by the cost are convex (E35). Lemma 4.2.3 needs `X ≠ 0` (E17). Lemma
-  7.3.1 needs `⟨X, Z_u⟩ ≠ 0` on the control set, which its proof uses (E26). The converse of
-  Problem 3.6.2 that §6.1 uses needs the trajectory to wind once around the origin (E15).
+  7.3.1 needs `⟨X, Z_u⟩ ≠ 0` on the control set, which its proof uses (E26), and so does Lemma
+  8.2.1 (E52). The converse of Problem 3.6.2 that §6.1 uses needs the trajectory to wind once
+  around the origin (E15). Chapter 1's restatement of Theorem 8.3.2 needs edge extremality (E57).
 - **Redundant hypotheses.** Several hypotheses are not needed; the Lean statements drop them
   (Section 5). The most notable: Lemma 7.3.1 holds for every compact convex control set on which
-  `⟨X, Z_u⟩ ≠ 0`, not only one in the plane `u₀ + u₁ + u₂ = 1`.
+  `⟨X, Z_u⟩ ≠ 0`, not only one in the plane `u₀ + u₁ + u₂ = 1`. Some Lean statements keep a
+  hypothesis of the book that their proofs do not use, among them the edge extremality of Theorem
+  8.3.1, which the book needs only to pass to the control (E56).
 - **Use of cited results.** Chapter 2 rests on cited theorems: Fejes Tóth's `δ = δ_L`, Gruber's
   lattice density formula, Minkowski's and Mahler's theorems on critical lattices and circumscribed
   hexagons, and Shifrin's characterization of convex curves; the control-theoretic chapters cite
   the Pontryagin maximum principle (Agrachev–Sachkov), the Euler–Arnold equations (Cushman–Bates,
   with a sign slip, E22), the Iwasawa decomposition, Rademacher's theorem and Gronwall's
   inequality, and state Filippov's theorem without a source (Theorem 6.1.1, E35). All are proved
-  here (Gronwall's inequality in the case §6.1 uses), in [`External/`](External) (with the
+  here (Gronwall's inequality in the cases that §6.1 and Corollary A.1.3 use), in [`External/`](External) (with the
   OptimalControl package) or from Mathlib, except Shifrin's, which is applied outside its
   hypotheses and replaced by a direct argument (E11) (Section 2). §6.1 applies Filippov's theorem
   to a problem it does not cover (a free initial point, coupled endpoints, and a cut-off that
@@ -188,8 +261,11 @@ Status of the formalization:
   package by the same argument, does (E46). §6.1 also recalls Reinhardt's existence theorem, which
   concerns `K_min` and not the control problem (E47). The book's summary of the
   maximum principle omits one of its source's regularity hypotheses, which the Reinhardt problem
-  satisfies. Agrachev and Sachkov's proof of the maximum principle has three gaps, all repaired
-  (Section 7).
+  satisfies. Proposition 8.1.3 applies the maximum principle to the edge control problem, which it
+  covers, but does not say how minimality for the edge problem follows from minimality for the
+  Reinhardt problem (E48). Chapter 8 applies Gronwall's inequality through Corollary A.1.3, which
+  is stated for `t ≥ 0` and applied on both sides of `0` (E61). Agrachev and Sachkov's proof of
+  the maximum principle has three gaps, all repaired (Section 7).
 - **Literature.** Theorem 7.5.6 was announced in Hales's 2017 preprint, which also sketches another
   proof of Theorem 7.7.1 (Section 10). The book is still an unrefereed preprint, with no newer
   version or erratum. One date in its bibliography is wrong, two citations are to later editions,
@@ -211,7 +287,7 @@ Status of the formalization:
 | The circumscribed hexagon of a critical lattice: unique tac-lines, area `4Δ(K)`, sides bisected, least area | Mahler 1947, Theorems 1 and 2; cited as Theorem 2.3.7 | [`External.mahler_1947`](External/Mahler1947.lean#L1700) | [`theorem2_3_7`](SmoothedPolygons/Ch2/Mahler.lean#L182) |
 | A symmetric convex domain is irreducible (no symmetric convex proper subdomain has the same `Δ`) if and only if every boundary point lies on a critical lattice; hence, in an irreducible domain, every tac-line contains a point of a critical lattice, one of the six boundary points of a configuration of Mahler's Lemma 2 | Mahler 1947, Lemma 3, stated there without proof; cited after Definition 2.3.5. Proved along Mahler's paper A and Mahler 1946 (below) | [`External.mahler_irreducible_iff`](External/MahlerIrreducible/Lemma3.lean#L367); [`External.mahler_irreducible`](External/MahlerIrreducible/Lemma3.lean#L383), derived from it | [`isIrreducible_iff_mahlerIrreducible`](SmoothedPolygons/Ch2/Mahler.lean#L99) (the remark after Definition 2.3.5); [`lemma2_2_5`](SmoothedPolygons/Ch2/Reinhardt.lean#L3754) |
 | Filippov's theorem: for a control system on `ℝⁿ` with compact control set, convex velocity sets and `f` of compact support, the attainable sets (at time `T` and up to time `T`) are compact, and an optimal control exists for an integral cost when the velocity sets extended by the cost are convex, with fixed or free terminal time | Agrachev–Sachkov, *Control Theory from the Geometric Viewpoint*, Thm 10.1; cited as Theorem 6.1.1 without a source (E35) | [`External.filippov`](External/Filippov.lean#L153); for §6.1, its form with a closed state constraint, a compact set of initial points, a closed endpoint relation and a window of terminal times, `ControlSystem.exists_optimal_constrained` of the OptimalControl package (same proof) | Theorem 6.1.1; the form with a state constraint, in §6.1: [`exists_isReinhardtMinimizer`](SmoothedPolygons/Ch6/Existence.lean#L436) (E46) |
-| The Pontryagin maximum principle with free terminal time, an integral cost and mixed boundary conditions `(q(0), q(t_f)) ∈ N` (`N` cut out near the end points by a `C¹` submersion), for strong local minimizers on an open subset of a finite-dimensional space with a compact control set: `ν ≤ 0` and a Lipschitz covector curve `p` with `(ν, p(t)) ≠ 0` for every `t`, the adjoint equation, the maximum condition and `H = 0` almost everywhere, and the transversality condition `(-p(0), p(t_f)) ⊥ T N` | Agrachev–Sachkov, *Control Theory from the Geometric Viewpoint*, Ch. 12, Theorem 12.5 with the remark after it (free time), read in the authors' draft; cited in §6.2 from the entry `zelikin2004control` (E33) | [`External.pontryagin_maximum_principle`](External/Pontryagin.lean#L80), proved in the OptimalControl package (`Pontryagin.maximum_principle`) | [`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L587) (§6.2 and §6.6: every minimizer is an extremal) |
+| The Pontryagin maximum principle with free terminal time, an integral cost and mixed boundary conditions `(q(0), q(t_f)) ∈ N` (`N` cut out near the end points by a `C¹` submersion), for strong local minimizers on an open subset of a finite-dimensional space with a compact control set: `ν ≤ 0` and a Lipschitz covector curve `p` with `(ν, p(t)) ≠ 0` for every `t`, the adjoint equation, the maximum condition and `H = 0` almost everywhere, and the transversality condition `(-p(0), p(t_f)) ⊥ T N` | Agrachev–Sachkov, *Control Theory from the Geometric Viewpoint*, Ch. 12, Theorem 12.5 with the remark after it (free time), read in the authors' draft; cited in §6.2 from the entry `zelikin2004control` (E33) | [`External.pontryagin_maximum_principle`](External/Pontryagin.lean#L80), proved in the OptimalControl package (`Pontryagin.maximum_principle`) | [`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L564) (§6.2 and §6.6: every minimizer is an extremal); [`proposition8_1_3`](SmoothedPolygons/Ch8/EdgeExtremal.lean#L850) (Proposition 8.1.3: the minimizer is edge extremal, by the principle for the edge control problem, E48) |
 
 Mahler 1947 states Lemma 3 without proof and refers to Lemmas 8 and 12 of "paper A", Mahler's *On
 irreducible convex domains* (Proc. KNAW 50 (1947) 98–107; the book does not cite it). Paper A
@@ -263,7 +339,7 @@ proof from the package; the departures from the source (D1–D11 of the package'
 three gaps are in Section 7.
 
 The book applies the maximum principle in §6.2 and §6.6 to the Reinhardt problem; the
-formalization follows it ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L587), in
+formalization follows it ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L564), in
 [`SmoothedPolygons/Ch6/MatrixExtremal.lean`](SmoothedPolygons/Ch6/MatrixExtremal.lean)): the state `(g, X)` lies in the open set `GL₂⁺(ℝ) × C` of
 `Mat₂(ℝ) × 𝔰𝔩₂(ℝ)`, with `C` the open cone of the star inequalities (on which `⟨Z_u, X⟩ < 0` for
 `u ∈ U_T`, so the dynamics are smooth); a global minimizer of Problem 3.6.2 is a strong local minimizer
@@ -276,7 +352,34 @@ Corollary 6.5.3, as Remark 6.6.1 says. The one departure, in the boundary condit
 
 ### Assumed
 
-None.
+No result from prior work is assumed. One theorem, Theorem 16.3.1, is proved conditionally on a
+hypothesis that stands for results of the book itself, from chapters not yet formalized:
+
+| Result | Where the paper uses it | Source | Hypothesis in the formalization | What Lean lacks | Plan |
+| --- | --- | --- | --- | --- | --- |
+| No chattering into the singular locus: the switching times of a Pontryagin extremal do not accumulate at a time where its lift meets `𝒮_sing` | the last step of the proof of Theorem 16.3.1 (TeX 12820–12833) | the book: Theorem 16.4.1 (the cluster point theorem, with §16.4.2) and Theorem 14.4.1 (no return), with their time reversals and the periodicity of extremals (Remark 6.6.1) | [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107), a hypothesis of [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343) and of no other result | Chapters 13–16 are not formalized: the triangular Fuller system and the blow-up of `𝒮_sing`, the analytic extension of Chapter 14 with a stable manifold theorem and Weierstrass preparation, and certified versions of the book's numerical computations (the global basin of Chapter 15, the unstable curve of Theorem 14.4.1) | later layers of the plan (Section 11) |
+
+The hypothesis is stated for every Pontryagin extremal of the Reinhardt problem on `[0, T]`, with
+the boundary conditions of Problem 3.6.2 and the transversality conditions, that is edge extremal,
+and for every time `t ∈ (0, T]` at which its lift meets `𝒮_sing`: there is no interval
+`(t - δ, t)` on which the lift avoids `𝒮_sing`, the control is bang-bang with finitely many
+switches on every compact subinterval, and the switching times accumulate at `t`
+([`IsChatteringInto`](SmoothedPolygons/Ch16/MahlerFirst.lean#L58); a switching time is a time on each side of which the control is almost
+everywhere constant at a vertex, with different vertices, [`IsSwitchingTime`](SmoothedPolygons/Ch16/MahlerFirst.lean#L48)). Its
+docstring checks it against the book's argument: at `t` the lift is in `𝒮_sing`, so the extremal
+is normal (Lemma 8.2.2) and its costate may be normalized to `λ_cost = -1`; in the blow-up of
+`𝒮_sing` the switching points have a cluster point on the compact exceptional divisor, reached at
+the finite time `t`; by Theorem 16.4.1 it is the fixed point `q_in`, approached along its stable
+curve; by Theorem 14.4.1 and its time reversal, such a trajectory did not come from the divisor
+at an earlier time; and the transversality conditions make the extremal periodic (Remark 6.6.1),
+so that it meets `𝒮_sing` one period later and chatters into it again, a contradiction ("Thus,
+the trajectory is not periodic. This is contrary to the boundary conditions"). The restriction to
+edge-extremal extremals weakens the hypothesis: the book uses the argument only for the
+minimizer, which is edge extremal (Proposition 8.1.3), and the proof of Theorem 14.4.1 needs the
+trajectory between two meetings to be bang-bang, which Chapter 8 gives only under edge
+extremality. The boundary conditions matter: near `𝒮_sing`, trajectories that chatter into it
+exist (the inward spirals along the stable curve of `q_in` in Chapters 13–16). With Chapters 2–8
+the hypothesis excludes every meeting of the minimizer's lift with `𝒮_sing` (E60).
 
 ### Standard facts used without citation
 
@@ -295,6 +398,9 @@ None.
 | Uniqueness of solutions of linear ODEs | §7.1 general solutions, Theorem 7.5.1 | [`Matrix.ODE_solution_unique_of_bound`](Basic/Analysis/Calculus/MatrixFTC.lean#L281) and relatives in [`Basic/`](Basic) (Grönwall) |
 | Implicit and inverse function theorems | proof of Theorem 7.7.1 (TeX 6588–6591, 6616) | Mathlib (`HasStrictFDerivAt.implicitFunctionOfProdDomain`; local injectivity from `ApproximatesLinearOn`) |
 | Parameterization by arclength of the boundary of a convex disk with a unique support line at each boundary point, as a regular `C¹` curve | §2.4, the standing assumption for `K_min` (TeX 2157–2158) | proved for worst disks in [`IsWorstDisk.exists_isBalancedPair`](SmoothedPolygons/Ch6/WdBoundaryParam.lean#L437), with the inverse of the arclength from [`exists_inverse_of_hasDerivAt_pos`](Basic/Analysis/Calculus/DerivInverse.lean#L29) in [`Basic/`](Basic) (E47) |
+| The faces of a triangle other than itself are its vertices and its edges | Lemma 8.2.1 (TeX 7121–7123) | proved in the proof of [`lemma8_2_1`](SmoothedPolygons/Ch8/SingularLocus.lean#L586) |
+| A plane curve with nonvanishing velocity and zero curvature lies on a line | §7.2 (TeX 5615–5621), in Remark 8.3.3 | proved in the proof of [`remark8_3_3`](SmoothedPolygons/Ch8/PolygonBoundary.lean#L877): `det(w(c), w)²/\|w\|²` has zero derivative, for the velocity `w` (Section 11) |
+| Solutions of differential equations with analytic right-hand sides are analytic | proof of Lemma 8.3.4 (TeX 7637) | not used: Taylor expansions with remainder, by the mean value inequality, in the proof of [`lemma8_3_4`](SmoothedPolygons/Ch8/VertexControl.lean#L662) (E59) |
 
 ### Does the paper use each cited result correctly?
 
@@ -313,21 +419,26 @@ None.
 | Iwasawa decomposition | proof of Lemma 4.1.1 | Correct. |
 | Rademacher's theorem | Corollary 3.1.10 | Correct. |
 | Jurdjevic (attribution) | Definition 6.3.1, Proposition 6.4.1, Corollary 6.5.3 | The book proves Proposition 6.4.1 (in one line) and Corollary 6.5.3 (by differentiation); correct. |
-| Pontryagin maximum principle (Agrachev–Sachkov; the bibliography names Zelikin first, E33) | §6.2, §6.6, Problem 6.7.1; the proof of Proposition 8.1.3 (TeX 6791) | Correct for the Reinhardt problem, with the readings of Section 6. The book's summary states it for a smooth manifold and a closed control set; its source needs `∂f/∂q` jointly continuous in `(q, u)` (Agrachev–Sachkov's (10.4), which the summary omits) and, tacitly, locally bounded velocities `f(q, u(t))`, which a compact control set gives. Both hold for the Reinhardt problem (smooth dynamics on `GL₂⁺(ℝ) × C`, compact `U_T`). Applied with the full boundary conditions, its conclusions hold for every admissible trajectory with a covector whose reduced costate vanishes (E21); applied with the boundary conditions written without the two equations that first integrals make redundant, it gives the extremal lift of a minimizer, with nontrivial reduced costate ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L587)). The source's proof has three gaps, repaired in the formalization (Section 7). |
+| Pontryagin maximum principle (Agrachev–Sachkov; the bibliography names Zelikin first, E33) | §6.2, §6.6, Problem 6.7.1; the proof of Proposition 8.1.3 (TeX 6791) | Correct for the Reinhardt problem, with the readings of Section 6. The book's summary states it for a smooth manifold and a closed control set; its source needs `∂f/∂q` jointly continuous in `(q, u)` (Agrachev–Sachkov's (10.4), which the summary omits) and, tacitly, locally bounded velocities `f(q, u(t))`, which a compact control set gives. Both hold for the Reinhardt problem (smooth dynamics on `GL₂⁺(ℝ) × C`, compact `U_T`). Applied with the full boundary conditions, its conclusions hold for every admissible trajectory with a covector whose reduced costate vanishes (E21); applied with the boundary conditions written without the two equations that first integrals make redundant, it gives the extremal lift of a minimizer, with nontrivial reduced costate ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L564)). The source's proof has three gaps, repaired in the formalization (Section 7). In Proposition 8.1.3 the principle is applied to the edge control problem (an open subset of `ℝ³`, fixed endpoints, free terminal time), which it covers; what the book leaves out is how the minimizer's edge arc minimizes, locally, the cost of the edge problem (E48). |
 | Filippov's theorem (no source given; Agrachev–Sachkov, Thm 10.1) | Theorem 6.1.1, its application in §6.1 | The existence of an optimal control needs the convexity of the velocity sets extended by the cost, which holds for the Reinhardt problem, whose cost depends only on the state (E35). The application in §6.1 is outside the theorem as stated: the initial point `X(0)` is free and the endpoints are coupled, and the cut-off that gives the fields compact support changes the minimizers. The form with a closed state constraint, a compact set of initial points and a closed endpoint relation, proved by the same argument, applies (E46). |
-| Gronwall's inequality (Appendix A.1, from Amann) | §6.1, the bound on `g` (TeX 4584–4586) | Correct. The formal proof uses its case with constant coefficients, proved in the OptimalControl package (`ControlSystem.le_mul_exp_of_le_add_integral`). |
+| Gronwall's inequality (Appendix A.1, from Amann) | §6.1, the bound on `g` (TeX 4584–4586); through Corollary A.1.3, Lemma 8.1.5 (TeX 7008) and the proof of Theorem 8.3.1 (TeX 7539, 7572) | Correct. Corollary A.1.3, which the book derives from it without proof, is stated for `t ≥ 0` and applied on both sides of `0`; the case `t < 0` follows by reversing time (E61). The formal proofs use its case with constant coefficients, proved in the OptimalControl package (`ControlSystem.le_mul_exp_of_le_add_integral`). |
 | Reinhardt 1934, existence of a minimizer | §6.1 (TeX 4569–4572) | Not what §6.1 needs: Reinhardt's theorem gives `K_min`, a disk, not a minimizer of the control problem, and the book does not prove that the two correspond (E47). The formal existence proof does not use it; the identification with `K_min` does, as proved with Lemma 2.2.5 (E4). |
 
 The other citations of the formalized chapters (Reinhardt 1934 apart from §6.1, Minkowski's other works, Hales 2017, Jurdjevic 2016,
-Perelomov, Babelon et al., Colombo–de Diego, Gay-Balmaz et al., Vajjha's thesis) give context and
-are not used in proofs; Vajjha's thesis is cited for the omitted proof of Theorem 6.8.3.
+Perelomov, Babelon et al., Colombo–de Diego, Gay-Balmaz et al., Vajjha's thesis, and in Chapter 8
+Hartl, Sethi and Vickson's survey of maximum principles with state constraints, cited in Remark
+8.1.6, and Mahler's second-variation proof that the circle is not a local minimizer, cited before
+Theorem 8.2.7, whose proof gives its own computation) give context and are not used in proofs;
+Vajjha's thesis is cited for the omitted proof of Theorem 6.8.3. Lemma A.1.2 (Clarke) is not used.
 
 ## 3. Errors and gaps in the paper
 
 E1–E32 follow the order of the book and E33 concerns its bibliography. E34–E37, found when the
 remaining results of the formalized chapters were formalized, follow, again in the book's order,
-then E38, found in the fourth round, and E39–E47, found in the fifth round (Chapter 5 and §6.1),
-in the book's order. E15 was revised in the fifth round.
+then E38, found in the fourth round, E39–E47, found in the fifth round (Chapter 5 and §6.1),
+and E48–E61, found in the sixth round (Chapter 8, Theorem 16.3.1 and Corollary A.1.3), each group
+in the book's order. E15 was revised in the fifth round; E15, E21 and E47 were extended in the
+sixth.
 
 **E1. Lemma 2.2.1, §2.2 (TeX 1317–1351): false.** The lemma says that every lattice packing
 `K + L` of a centrally symmetric convex disk is realized by a parallelogram or centrally symmetric
@@ -449,7 +560,7 @@ conditions, chosen so that "the curves `σ_j` close up seamlessly to form a simp
 (TeX 3135–3139), do not force simplicity, and an admissible trajectory may wind `1 + 6m` times
 around the origin. The unit circle traversed seven times (`X ≡ J`, `u ≡ (1/3, 1/3, 1/3)`,
 `t_f = 7π/3`) is admissible, has cost `7π`, and is not the boundary trajectory of any balanced pair
-([`exists_isReinhardtAdmissible_not_isWindingOne`](SmoothedPolygons/Ch6/Winding.lean#L564)). The book meets the phenomenon in the proof of
+([`exists_isReinhardtAdmissible_not_isWindingOne`](SmoothedPolygons/Ch6/Winding.lean#L550)). The book meets the phenomenon in the proof of
 Lemma 7.5.5, where other eigenvalues "will produce the right boundary conditions, but the
 corresponding multi-curves `σ_i` will have the wrong winding number around the origin" (TeX
 6323–6326). The converse holds for trajectories of winding number one ([`IsWindingOne`](SmoothedPolygons/Ch6/Winding.lean#L82);
@@ -464,14 +575,16 @@ angle of `σ₀` ends, `κ = -tr(JX)` (the cost is `(3/2)∫κ`) satisfies `κ �
 and `c > 0` on star states. So
 every admissible trajectory cheaper than `7π/2` has winding number one
 ([`isWindingOne_of_reinhardtCost_lt`](SmoothedPolygons/Ch6/Winding.lean#L497)), in particular every one at most as costly as the smoothed
-octagon, which is all §6.1 needs.
+octagon, which is all §6.1 needs. Remark 8.3.3 takes the converse for granted again, for
+extremals that avoid the singular locus, and the formalization takes the disk there as a
+hypothesis; it exists for the global minimizer (E58).
 
 **E16. Problem 3.6.2, §3.6 (TeX 3235): misprint in a definition.** The terminal condition is
 printed `X(t_f) = R X₀ R⁻¹`. The derivation just before (TeX 3152–3156), the half-plane form
 (TeX 3606), the transversality conditions (TeX 5207) and the remark after them (TeX 5221) all give
 `X(t_f) = R⁻¹ X₀ R`, and the two differ because `Ad_R` has order 3. For the smoothed octagon,
 `X(t_f) = R⁻¹X₀R`, and `R⁻¹X₀R - RX₀R⁻¹ = diag(δ, -δ)` with `δ ≈ 0.433`. The formalization uses `R⁻¹X₀R`
-([`IsReinhardtAdmissible`](SmoothedPolygons/Ch3/ControlProblem.lean#L96), [`IsPontryaginExtremal`](Challenge.lean#L171)).
+([`IsReinhardtAdmissible`](SmoothedPolygons/Ch3/ControlProblem.lean#L110), [`IsPontryaginExtremal`](Challenge.lean#L171)).
 
 **E17. Lemma 4.2.3, §4.2 (TeX 3382): missing hypothesis `X ≠ 0`.** Lemma 4.2.3 is stated "for
 any `X ∈ 𝔰𝔩₂(ℝ)`": `T_X O_X = {[Y, X]} ≅ 𝔰𝔩₂(ℝ)/ℝX`. For `X = 0` the orbit is a point and
@@ -527,13 +640,22 @@ trajectory, with `λ_cost = 0` and `Λ₂ = cX` (from the first integral `det X`
 the nontriviality of `(λ_cost, Λ₁, Λ_R)` cannot be derived. Because `det g` and `det X` are
 constant, the equations `g(t_f)₁₁ = R₁₁` and `X(t_f)₁₀ = (R⁻¹X(0)R)₁₀` follow from the others
 (with `det g(0) = det X(0) = 1`, `R₀₀ ≠ 0` and `X₀₁ < 0` on `C`), so leaving them out changes no
-admissible trajectory ([`isReinhardtAdmissible_of_mem_matrixEndpoints`](SmoothedPolygons/Ch6/MatrixMinimizer.lean#L361)). The formalization applies the
+admissible trajectory ([`isReinhardtAdmissible_of_mem_matrixEndpoints`](SmoothedPolygons/Ch6/MatrixMinimizer.lean#L297)). The formalization applies the
 maximum principle with the boundary condition without them ([`matrixBoundary`](SmoothedPolygons/Ch6/MatrixSystem.lean#L136)); transversality in the
 two directions this frees gives `p(t_f)₁₁ = 0` and `Λ₂(t_f)₀₁ = 0`, which exclude these covectors
 ([`eq_zero_of_covectorΛ_eq_zero`](SmoothedPolygons/Ch6/MatrixCostate.lean#L526)), and the nontriviality of the reduced costate follows: if
 `λ_cost = 0` and `Λ₁, Λ_R` vanish at one time, they vanish identically (Corollary 6.5.3 and the
 linear `Λ_R` equation), so the covector vanishes at `t_f`
-([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L587); Section 7).
+([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L564); Section 7).
+Chapter 8 depends on this reading. Lemma 8.2.2 (TeX 7163–7166) and the proof of Theorem 8.3.1
+(TeX 7583–7584) obtain `λ_cost ≠ 0` at a time where `Λ_R = Λ_R' = 0` from "the non-vanishing of
+the costate variables in the maximum principle", that is, from the nontriviality of
+`(λ_cost, Λ₁, Λ_R)`. Under the book's condition on `(λ_cost, Λ₁, Λ₂)` this step fails: the
+spurious lift `(0, 0, X)` above has `Λ_R ≡ 0` and `λ_cost = 0`, so Lemma 8.2.2 would be false,
+and Theorem 8.2.3 would make every admissible trajectory a circular arc. Under the formalization's
+condition both hold as printed ([`lemma8_2_2`](SmoothedPolygons/Ch8/SingularLocus.lean#L783), [`theorem8_3_1`](SmoothedPolygons/Ch8/FiniteBangBang.lean#L1288)). The corresponding step for the edge
+control problem (the proof of Theorem 8.1.4, TeX 6871–6874) concerns that problem's own costate
+`(λ₁, λ₂, λ₃)`, and holds as printed.
 
 **E22. Proof of Proposition 6.5.1, §6.5 (TeX 5030–5040): sign convention.** The proof writes the
 Euler–Arnold equation as `Λ₁' = ad*_{δH/δΛ₁} Λ₁ = -ad_X Λ₁`, identifying `𝔰𝔩₂*` with `𝔰𝔩₂` by the
@@ -893,7 +1015,282 @@ costlier one costs more than the area `π` of the unit disk, hence more than `�
 Conversely, the disk bounded by a global minimizer is a `K_min`, with `δ_min = cost/√12` (E12;
 [`isWorstDisk_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/WorstDisk.lean#L217)). With E46 and §6.2: the Reinhardt control problem has a global
 minimizer, which lifts to a Pontryagin extremal and bounds a `K_min`
-([`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250)).
+([`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250)). The second sentence of Theorem 16.3.1, about `K_min`, rests on this
+identification (E60). The definite articles of "the global solution", "the global minimizer"
+(Proposition 8.1.3, Theorem 8.2.7, Theorem 16.3.1) and "the minimizer `K_min`" presuppose a
+uniqueness that is not known; the formalization states these results for every global minimizer
+and every `K_min` (E48, E55, E60).
+
+**E48. Proposition 8.1.3, §8.1 (TeX 6785–6798): the principle of optimality, invoked without a
+construction.** The proof says that on a subinterval where the control lies in an edge of `U_T`,
+"the globally minimizing trajectory must minimize cost among all trajectories with the same
+endpoint conditions on the subinterval and that have their control function similarly restricted
+to the edge. Thus, the global minimizer is also edge extremal." Two steps are left out. The first
+is how a competitor of the edge control problem (Definition 8.1.1) gives a competitor of the
+Reinhardt problem: the running text of §8.1 relates the two problems through (8.1.1) and a cost
+identity, but the proof does not use them, and the state space of the edge problem (`y > 0`,
+`|x| < 1/√3`) is larger than the star domain, so a competitor may leave the state space of the
+Reinhardt problem and give no admissible trajectory. The second is the maximum principle for the
+edge problem, which turns minimality into edge extremality. Both are supplied along the book's
+lines ([`proposition8_1_3`](SmoothedPolygons/Ch8/EdgeExtremal.lean#L850)). Only competitors uniformly close to the minimizer's edge arc are
+spliced in, so that they stay in the star domain (strong local minimality, which is all the
+maximum principle needs); a competitor's trajectory is rebuilt from `(x, y, s)` by (8.1.1)
+([`eqn_g_edge`](SmoothedPolygons/Ch8/EdgeProblem.lean#L494)), so that it ends at the minimizer's `g(d)` and `X(d)`; the rest of the minimizer is
+shifted in time (the terminal time is free); and the costs differ by `3/2` times the difference of
+the edge costs, by the cost identity `(3/2)((s + x)| + ∫x²/y)` of §8.1 ([`edgeCost_identity`](SmoothedPolygons/Ch8/EdgeProblem.lean#L601)). The
+maximum principle for the edge problem (an open subset of `ℝ³`, fixed endpoints, free terminal
+time, an integral cost) is [`External.pontryagin_maximum_principle`](External/Pontryagin.lean#L80). "We have seen that the global
+minimizer must be extremal" (TeX 6791) is §6.1–§6.2 (E46,
+[`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L564)), and "the global solution" presupposes
+uniqueness (E47).
+
+**E49. Theorem 8.1.4, §8.1 (TeX 6807–6894): "optimal" in the statement, and three steps of the
+proof.** The theorem concerns "an extremal lifted trajectory in the edge control system" but
+says "Then the optimal control function `u_e` is bang-bang"; the proof uses extremality only, and
+Theorems 8.2.7 and 8.3.2 apply the theorem to extremals that need not be optimal. The
+formalization states it for every extremal, normal or abnormal ([`theorem8_1_4`](SmoothedPolygons/Ch8/EdgeBangBang.lean#L823)). In the proof:
+(a) "The function `λ₂'` is also continuous by the form of the ODE it satisfies" (TeX 6846–6852):
+the right-hand side of (8.1.7) contains the measurable control, so `λ₂` is only absolutely
+continuous, and its derivative is continuous only after the control is changed on a null set,
+which the book does at the end of the proof. The proof uses `λ₂'` only at the zeros of `λ₂`, where
+the control-dependent term, `λ₂` times a bounded function, tends to `0`; the formalization proves
+the derivative there and nothing more (Section 7). (b) At a zero `t₂` with `λ₂(t₂) = λ₂'(t₂) = 0`
+the proof solves `H = ∂H/∂y = 0` (TeX 6866–6869), but the maximum principle gives `H = 0` only
+almost everywhere; at `t₂` it holds by continuity, for the same reason (E53). (c) "The next lemma
+shows that even at times when the conditions of (8.1.8) are met, the zeros of the switching
+function `λ₂` are isolated" (TeX 6884–6886): Lemma 8.1.5 assumes solutions on an interval
+`(-t₁, t₁)` around the zero, which can be an end of `[t₀, t₁]`. The formalization continues the
+state and the costate past the end with the control `u_e = 0`, for which the solution is
+explicit (with `λ_cost = -1`: `x = x₀ + y₀t`, `y = y₀`, `λ₁ = 2x₀t/y₀ + t²`,
+`λ₂ = -2x₀t²/y₀ - 2t³/3`). The count of the zeros at which `λ₂' = 0` ("at most two times", TeX
+6875–6879, since `x' = y > 0`) is proved
+([`IsEdgeProblemExtremal.exists_tangentialZeros_subset_pair`](SmoothedPolygons/Ch8/EdgeBangBang.lean#L414)). The theorem is true.
+
+**E50. Lemma 8.1.5, §8.1 (TeX 6908–7015): a wrong constant.** For `x₀ ≠ 0` the proof sets
+`C = -x₀(1 + y₀)/y₀²` (TeX 6934) and integrates `2x₀(1 + y₀)τ/y₀²` (TeX 6973). Its own preceding
+lines give `(x² - x₀²)/y² = 2x₀t/y₀ + O(t²)` (TeX 6970) and `λ̃₁ = 2x₀t/y₀ + O(t²)`, so
+`λ̃₂ = -∫₀ᵗ 4x₀τ/y₀ dτ + O(t³) = -2x₀t²/y₀ + O(t³)`, and `C = -2x₀/y₀`. The statement claims only
+`C ≠ 0`, which holds with the correct value, and for `x₀ = 0` the book's `C = -2/3` is right; the
+formalization proves the lemma with `C = -2x₀/y₀` ([`lemma8_1_5`](SmoothedPolygons/Ch8/EdgeLandau.lean#L504)). The book's Landau notation is
+two-sided (TeX 6903–6907), and the Gronwall step applies Corollary A.1.3, stated for `t ≥ 0`, on
+both sides of `0` (E61).
+
+**E51. Remark 8.1.6, §8.1 (TeX 7035–7070): wrong signs.** With `λ_cost = 0` and the printed
+`Λ_R = [[x, y² - x²], [1, -x]]`, `Λ₁ = [[-x, x²], [-1, x]]`, the costate equations hold and
+`H ≡ 0` on the edge `{u₀ = 0}` ("It can be checked", MCA:4647835), but
+`H(u) = 6u₀y³/D` with `D = -3y⟨X, Z_u⟩ > 0` on the star domain (Lemma 3.3.4), so the edge is the
+set of *minimizers* of the Hamiltonian over `U_T`, and "any measurable control function
+`u_e(t) ∈ [-1/2, 1/2]` maximizes the Hamiltonian" fails. Reversing the sign of both costates,
+which the linear costate equations allow when `λ_cost = 0`, gives `H(u) = -6u₀y³/D ≤ 0`, with
+equality exactly on the edge (checked with sympy). With these signs the remark is true, and the
+formalization proves it ([`remark8_1_6`](SmoothedPolygons/Ch8/EdgeAbnormal.lean#L214)). These abnormal costates belong to a two-parameter
+family, the costates conormal to the edge submanifold of (8.1.1), which E55 and E57 meet again.
+
+**E52. Lemma 8.2.1, §8.2 (TeX 7095–7126): a quantifier too broad, and a step left implicit.** The
+lemma is stated "for all `X ∈ 𝔰𝔩₂(ℝ)` and all `Λ ∈ X^⊥`", but the control-dependent term
+`H₂ = -⟨Λ, Z_u⟩/⟨X, Z_u⟩` of the Hamiltonian is defined only when `⟨X, Z_u⟩ ≠ 0` for every
+`u ∈ U_T`, and for `X = 0` the statement has no meaning. The condition holds on the state space
+(Lemma 3.3.4), where the lemma is used, and Lemma 7.3.1 needs it too (E26); the formalization
+adds it (`hden` in [`lemma8_2_1`](SmoothedPolygons/Ch8/SingularLocus.lean#L586)). In the proof, the step from the independence of the control to
+`Λ = 0` is one sentence, "The value of `H₂` must then be zero, and `Λ` must lie in the orthogonal
+complement `{0}` of the entire tangent space" (TeX 7117–7119). What it needs is that the linear
+form `ν = T*Φ(-Λ)` (Theorem 6.8.2), constant on the velocities `f(z; u)`, `u ∈ U_T`, whose affine
+hull is the tangent space, vanishes on their span, the whole tangent space; the formalization
+fills the step so.
+
+**E53. Lemma 8.2.2 and Theorem 8.2.3, §8.2 (TeX 7128–7216): the Hamiltonian at one time, and a
+closed interval.** The proof of Lemma 8.2.2 uses `H = 0` at the time `t₀` where `Λ_R(t₀) = 0`:
+"The maximum principle states that the Hamiltonian vanishes identically along the lifted
+extremal" (TeX 7140–7141). The maximum principle gives `H = 0` only almost everywhere (Section 6),
+and `t₀` is a single time. It holds there by continuity: the control-dependent term
+`-⟨Λ_R, Z_u⟩/⟨X, Z_u⟩` tends to `0` with `Λ_R`, uniformly in `u ∈ U_T`, and the rest of `H` is
+continuous; the book does not say so. The proofs of Theorem 8.1.4 (TeX 6866–6869, at a zero of
+`λ₂`; E49) and Theorem 8.3.1 (TeX 7533–7535; E56) take the same step, and the formalization
+proves the vanishing at the given time by this continuity in each case ([`eqn_edge_zero`](SmoothedPolygons/Ch8/EdgeBangBang.lean#L342),
+[`lemma8_2_2`](SmoothedPolygons/Ch8/SingularLocus.lean#L783), [`theorem8_3_1`](SmoothedPolygons/Ch8/FiniteBangBang.lean#L1288)). The
+nontriviality of the costate that the lemma then uses is E21's. The proof of Theorem 8.2.3 assumes
+`Λ_R ≡ 0` on the closed interval `[t₁, t₂]` (TeX 7189), while the statement assumes it on
+`(t₁, t₂)`; by continuity the two are the same ([`theorem8_2_3`](SmoothedPolygons/Ch8/SingularLocus.lean#L924)).
+
+**E54. Theorem 8.2.6, §8.2 (TeX 7259–7298): a converse argued by necessary conditions, and two
+typos.** "Conversely, the lifted trajectory attached to a multi-curve of circular arcs is a
+Pontryagin extremal singular subarc" is argued by deriving what a lift must satisfy (the control
+is the centre of `U_T`, `Λ_R = 0` by Lemma 8.2.1, `Λ₁ = (3/2)λ_cost J` by Lemma 8.2.2), not by
+exhibiting one. A lift exists: `λ_cost = -1`, `Λ₁ = -(3/2)J`, `Λ_R = 0` solve the costate
+equations, with `H ≡ 0` and a nontrivial reduced costate, and the formalization exhibits it
+([`theorem8_2_6`](SmoothedPolygons/Ch8/SingularLocus.lean#L1022)). In the proof, `g' = Xg` (TeX 7288) should be `g' = gX`, and
+"Lemma~\ref{thm:circle-singular}" (TeX 7290) refers to Theorem 8.2.3.
+
+**E55. Theorem 8.2.7, §8.2 (TeX 7300–7391): the proof covers one kind of singular subarc; slips in
+the second variation.** The theorem says that "the global minimizer of the Reinhardt problem does
+not contain any singular subarcs", and by Definition 6.2.1(3) these include the intervals on
+which the maximizers of the Hamiltonian form an edge of `U_T` at every time. The proof ("The
+previous theorem shows that the singular subarc comes from a multi-curve of circular arcs")
+covers only the subarcs on which the Hamiltonian does not depend on the control, through Theorem
+8.2.6, and shows by a second variation that a circular arc is not a local minimizer. The
+authors' comments leave the edge case to the edge control problem: "Theorem is only true if we
+include secondary edge optimal control problem" (TeX 7300–7302), "We say Reinhardt problem here
+rather than Reinhardt control problem because we want to include the edge control problem" (TeX
+7312–7313), and Chapter 1 (TeX 806–821). With the user's approval, the formalization states the
+theorem in this reading ([`theorem8_2_7`](SmoothedPolygons/Ch8/NoSingularArcs.lean#L375)): on an interval where the control lies in an edge, the
+minimizer's edge arc has edge costates (Proposition 8.1.3), none of which has a singular subarc of
+the edge problem (by the argument of Theorem 8.1.4: on such a subarc `λ₂ ≡ 0`, and (8.1.8) makes
+`x²` constant, against `x' = y > 0`); on an interval no subinterval of which has the control in an
+edge, no lift is a singular subarc (the circle argument, after a localization: near a time where
+`Λ_R ≠ 0` the maximizers on a singular subarc are one edge, by Lemma 8.2.1, and the control lies
+in it). For normal lifts the theorem holds as printed
+([`not_isSingularSubarc_of_isReinhardtMinimizer_of_isNormalExtremal`](SmoothedPolygons/Ch8/NoSingularArcs.lean#L418)): on an edge interval, the
+Reinhardt costate pulled back to the edge submanifold of (8.1.1) and shifted by
+`(3/2)λ_cost d(s + x)` is a costate of the edge problem with the same Hamiltonian
+([`IsExtremalOn.isEdgeProblemExtremal_edgePullback`](SmoothedPolygons/Ch8/EdgePullback.lean#L870)), so a singular subarc there would be one of
+the edge problem. For abnormal lifts the printed statement is open, neither proved nor refuted.
+Along every edge arc there is a two-parameter family of abnormal costates conormal to the edge
+submanifold of (8.1.1), which contains those of Remark 8.1.6 with the signs of E51, and whose
+pull-back vanishes; excluding a global abnormal lift of the minimizer that is conormal on some
+interval needs an argument the book does not give. No counterexample is known, and Theorem 16.3.1
+does not depend on it (E60). Two other readings are not provable. Reading "elsewhere" as "on an
+interval on which the control does not lie in a single edge" brings the abnormal case back (the
+control may alternate between the vertices of the edge `{u₀ = 0}` and then stay at the third
+vertex, with a lift conormal to one edge submanifold and then to another). Reading singularity
+at a time `t` of an edge interval through *some* edge costate on *some* edge interval containing
+`t` makes every edge arc with `x > 0` singular: on an arc with `u_e ≡ ½`, the covector
+`(λ₁, λ₂, λ₃) = (0, 0, x(t)²)` with `λ_cost = -1` at `t`, continued by (8.1.7), has
+`λ₂(t) = λ₂'(t) = 0` and `λ₂''(t) = -4x(t)/y(t) < 0`, so it is an edge costate near `t` whose
+Hamiltonian does not depend on the control at `t`.
+The second variation has slips. `cost(g₀) = π` (TeX 7382) holds only on an interval of length
+`π/3`; on `[t₁, t₂]` the arc costs `3(t₂ - t₁)`. The condition "`ψ₁'(t) > 0` and `ψ₂'(t) < 0` on
+their common support" (TeX 7376–7378) cannot hold literally for smooth nonnegative functions with
+compact support (where `ψᵢ` vanishes, so does `ψᵢ'`); it is read on the interior of the overlap
+of the supports, which is what the sign of `ψ₁'ψ₂ - ψ₁ψ₂'` needs. `σ_i = g_s e_i` (TeX 7385) should
+be `g_s s_i*`. The admissibility of the competitor is asserted in two sentences (TeX 7384–7390).
+The formalization follows the book's route ([`exists_lt_reinhardtCost_of_circleArc`](SmoothedPolygons/Ch8/CircleVariation.lean#L1209)). With
+`L = t₂ - t₁` and `ρ = |ψ|`, the cost of the deformed arc is exactly
+`3L - 3∫₀ᴸ (sinh(sρ)/ρ)²(ψ₁'ψ₂ - ψ₁ψ₂') dt`, whose second-order truncation is the book's
+expansion, so the cost drops for every `s ≠ 0`; smallness of `s` is needed only for the
+admissibility, which is carried out (positive curvatures, the reparameterization to `det X = 1`,
+the control through Theorem 3.4.2, and the splice into the trajectory). In Remark 8.2.8, the
+conditions of the three cases of `ψ₁` are commented out in the TeX (TeX 7397–7405).
+
+**E56. Theorem 8.3.1, §8.3 (TeX 7448–7586): false as printed; one claim sketched.** (a) The
+theorem says that if an edge-extremal extremal lifted trajectory on `[t₁, t₂]` does not meet
+`𝒮_sing` at `t₀`, then "there exists an edge `{i, j}` and a neighborhood of `t₀` in `[t₁, t₂]` on
+which `(X(t), Λ_R(t)) ∈ ⋃_{I ⊆ {i,j}} (T*O_J)_I`": the maximizers of the Hamiltonian lie in one
+edge at every time of a neighbourhood of `t₀`. This is false. At a time `t₀` where `Λ_R(t₀) = 0`,
+every control maximizes, and such times occur off `𝒮_sing` on edge-extremal extremals. A normal
+example (checked numerically): `λ_cost = -1`, `X(0) = Φ(0.1 + 0.9i)`, `Λ_R(0) = 0`,
+`Λ₁(0) = -(3/2)J + L` with `0 ≠ L ⊥ X(0)`; with `e_a`, `e_b` the vertices that maximize and
+minimize `⟨[L, X(0)], P_u⟩`, the control `e_b` on `(-ε, 0)` and `e_a` on `(0, ε)` gives, for small
+`ε`, an edge-extremal extremal that does not meet `𝒮_sing`, and all of `U_T` maximizes at `0`.
+Reading the conclusion off `t₀`, or almost everywhere, does not save it: along an abnormal costate
+conormal to the edge submanifold of `{u₀ = 0}` (the family of E51) with `Λ_R(t₀) = 0`, the control
+`e₂` before `t₀` and `e₁` after gives
+an edge-extremal extremal off `𝒮_sing` whose maximizers are the edge `{e₂, e₃}` before `t₀` and
+the vertex `e₁` after, which no edge contains. The proof's claim (a) finds exactly this ("If the
+set of maximizers is an edge when `t` has one sign, then the maximizer is the complementary vertex
+of `U_T` when `t` has the other sign", TeX 7555–7557), which does not contradict the assumption of
+its contrapositive; and it passes, through Theorem 8.1.4, to a conclusion about the control,
+while that assumption is about the maximizers. With the user's approval, the formalization proves
+the one-sided form ([`theorem8_3_1`](SmoothedPolygons/Ch8/FiniteBangBang.lean#L1288)): there are `ε > 0` and edges `k₋`, `k₊` such that the
+maximizers lie in `k₋` at every time of `(t₀ - ε, t₀)` and in `k₊` at every time of
+`(t₀, t₀ + ε)` (within `[t₁, t₂]`); both examples satisfy it. The form that the proof of Theorem
+8.3.2 quotes, that the control lies in a single edge almost everywhere on a neighbourhood of
+`t₀`, is true, and follows from the one-sided form with edge extremality and Theorem 8.1.4
+([`IsExtremalOn.exists_ae_mem_controlEdge_of_isEdgeExtremalOn`](SmoothedPolygons/Ch8/FiniteBangBang.lean#L1349)): on each side the control is
+eventually one vertex, and any two vertices lie in a common edge. Edge extremality, a hypothesis
+of the theorem, is used only there (Section 5).
+(b) Claim (b) is "a brief sketch" (TeX 7565–7575). It is carried out as a second-order expansion:
+if `[Λ_{1,cost}(t₀), X(t₀)] = 0` and `W' = [Λ_{1,cost}'(t₀), X(t₀)] ≠ 0`, then
+`Λ_R(t) = -(t - t₀)²W'/2 + o((t - t₀)²)`, with the same leading direction on both sides of `t₀`.
+(c) Smaller points. "Edge-extremal \eqref{def:edge-extremal}" (TeX 7452) points to Definition
+8.1.1, the edge control problem, and prints "(8.1.1)", the number of an equation; Definition
+8.1.2, which has no label, is meant. "Reparameterizing by a time translation, we may assume that
+`t₀ = 0`" (TeX 7472–7473) overlooks that `t₀` may be an end of `[t₁, t₂]`, where the Gronwall
+step on a two-sided neighbourhood needs the functions beyond the end (the formalization extends
+them by their value there). The proof uses `H = 0` at `t₀` (TeX 7533–7535; E53), the
+nontriviality of the reduced costate (TeX 7583–7584; E21) and Corollary A.1.3 on both sides of
+`t₀` (TeX 7539, 7572; E61), and "the hypothesis of the lemma" (TeX 7575) means the theorem's.
+
+**E57. Theorem 8.3.2, §8.3 (TeX 7590–7605), and its restatement in Chapter 1 (TeX 851–856).** The
+statement has no interval ("Consider a controlled extremal lifted trajectory"), and the proof uses
+`[t₁, t₂]` without introducing it; "According to the theorem" means Theorem 8.3.1, quoted in its
+form about the control (E56). The formalization states the theorem on a compact interval
+([`theorem8_3_2`](SmoothedPolygons/Ch8/FiniteBangBang.lean#L1419)). Chapter 1 restates it as "Every Pontryagin extremal of the Reinhardt control
+problem which does not meet the singular locus is given by a bang-bang control function with
+finitely many switches", without edge extremality. For extremals on an interval this is false: by
+Remark 8.1.6, with the signs of E51, every trajectory with an arbitrary measurable control in an
+edge lifts to an abnormal extremal, which never meets `𝒮_sing` (its `Λ_R` never vanishes) and
+need not be bang-bang (the midpoint of the edge as control, for instance). For normal extremals
+the restatement follows from Theorem 8.3.2, since every normal extremal is edge extremal: the
+pulled-back costate of E55 is an edge costate ([`IsNormalExtremal.isEdgeExtremalOn`](SmoothedPolygons/Ch8/EdgePullback.lean#L903),
+[`IsExtremalOn.isEdgeExtremalOn_of_ne_zero`](SmoothedPolygons/Ch8/EdgePullback.lean#L895)), as a comment of the authors in the TeX expects ("a
+normal extremal solution should also be edge extremal", TeX 6664–6666). Whether the restatement
+fails for extremals with the boundary conditions of Problem 3.6.2 is not settled: the costates of
+Remark 8.1.6 are tied to one edge and need not satisfy the transversality conditions. The
+formalization states Theorem 8.3.2 as Chapter 8 does.
+
+**E58. Remark 8.3.3, §8.3 (TeX 7610–7616): a disk that need not exist, and no proof.** The remark
+says that a trajectory that is extremal and edge extremal and does not meet `𝒮_sing` "defines a
+balanced disk `K(g, X) ∈ 𝔎_bal` whose boundary is a smoothed polygon, consisting of finitely many
+straight edges and hyperbolic arcs". That the trajectory bounds a balanced disk is the converse of
+Problem 3.6.2, which holds only for trajectories of winding number one (E15), and the book does
+not show it for extremals. The formalization takes the disk as a hypothesis (a balanced pair with
+`σ_j = g s_j*` and `σ_j(t + t_f) = σ_{j+1}(t)`); it exists for the global minimizer, whose cost
+is below `7π/2`. The remark has no proof. Its content is Theorem 8.3.2 with the discussion of §7.2
+(on an interval of constant vertex control, two of the state-dependent curvatures vanish, so two
+pairs of the curves move along straight lines, TeX 5613–5621) and Lemma 3.1.8 (the third pair
+moves along hyperbolic arcs whose asymptotes are those lines); the formalization proves it so
+([`remark8_3_3`](SmoothedPolygons/Ch8/PolygonBoundary.lean#L877)), with the smoothed polygon defined as in the gloss of Theorem 16.3.1 (Section 6).
+
+**E59. Lemma 8.3.4, §8.3 (TeX 7619–7670): a sign and a garbled display.** With
+`P_i = Z_{e_i}/⟨J, Z_{e_i}⟩`, `Λ_R'''(0) = +6λ_cost[J, P₃]`, not `-6λ_cost[J, P₃]` (TeX 7648;
+checked with sympy), and the display at TeX 7657–7660 lacks an `=` and the factor `λ_cost`. The
+leading terms of the control-dependent term `-⟨Λ_R(t), P_i⟩` at `e₁`, `e₂`, `e₃` are
+`(2√3, -2√3, 0)λ_cost t³`, opposite and nonzero at `e₁` and `e₂` as the book says, so the
+conclusion is unaffected. The argument works on either side of the meeting time, which covers a
+meeting at an end of the interval, the case that Theorem 16.3.1 needs ("A trajectory cannot reach
+the singular locus with finitely many switches", TeX 12817–12819). The formalization proves the
+lemma ([`lemma8_3_4`](SmoothedPolygons/Ch8/VertexControl.lean#L662)) with Taylor expansions with remainder in place of "The solutions are
+analytic" (TeX 7637), and treats the three vertices alike where the book treats `e₃`, "(say)".
+
+**E60. Theorem 16.3.1, §16.3 (TeX 12789–12833): the set of meeting times is not handled; the last
+step rests on Chapters 13–16.** (a) After Proposition 8.1.3 and Theorem 8.3.2 (finite bang-bang
+away from `𝒮_sing`), Theorem 8.2.7 ("A trajectory cannot remain on the singular locus for any
+positive interval of time") and Lemma 8.3.4 ("A trajectory cannot reach the singular locus with
+finitely many switches"), the proof goes on: "The proof then reduces to the consideration of a
+trajectory such that the infinite sequence of switching points has a subsequence tending to the
+singular locus" (TeX 12821–12823). It does not handle the set of times at which the lift meets
+`𝒮_sing`, which is closed but may a priori be infinite and contain `0`. The formalization repairs
+the step. The meeting set has empty interior (Theorem 8.2.7 in its part without edges, through
+Theorem 8.2.3: on an interval of `𝒮_sing` the control is the centre of `U_T`); a meeting at `0`
+gives one at `T`, by the transversality conditions and `R⁻¹JR = J`; take a meeting time `z > 0`,
+a time `p < z` off the meeting set, and the first meeting time `d` after `p`. On `(p, d)` the
+control is bang-bang with finitely many switches on every compact subinterval (Theorem 8.3.2).
+Either the switching times accumulate at `d`, the configuration that the book excludes by
+Theorems 16.4.1 and 14.4.1, or the control is one vertex just before `d`, which Lemma 8.3.4,
+applied at the end of an interval, excludes (E59). (b) The second sentence ("In particular, the
+minimizer `K_min` of the Reinhardt problem is a finite-sided smoothed polygon …") follows from the
+first by Remark 8.3.3 ("A bang-bang trajectory with finitely many switches is a polygon with
+rounded corners", TeX 12807–12808), with the identification of the minimizers with `K_min` (E47)
+and Lemma 2.2.5 for "no corners"; the book takes the passage from the control problem to `K_min`
+for granted. (c) "The global minimizer" and "the minimizer `K_min`" presuppose uniqueness; the
+theorem is formalized for every global minimizer and every `K_min` (E47). The formalization proves
+the theorem conditionally, on one named hypothesis, [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107): the
+consequence of Theorems 16.4.1 and 14.4.1 that the last step uses, that the switching times of a
+Pontryagin extremal do not accumulate, from the left, at a time where its lift meets `𝒮_sing`
+([`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343); Sections 2 and 9). Without the hypothesis it proves the first sentence on every
+interval on which the lift avoids `𝒮_sing`
+([`isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L165)). (The proof also has a typo,
+"is is an extremal", TeX 12812.)
+
+**E61. Corollary A.1.3, Appendix A.1 (TeX 13134–13142): stated for `t ≥ 0`, applied on both sides
+of `0`; no proof.** The corollary is stated on `[0, t₁]`, with the conclusion "`x(t) = O(tⁿ)` for
+`t` nonnegative", but Lemma 8.1.5 (TeX 7008) and the proof of Theorem 8.3.1 (TeX 7539, 7572) apply
+it on `(-t₁, t₁)`, where the book's Landau notation is two-sided (TeX 6903–6907). The case `t < 0`
+follows by applying the corollary to `t ↦ x(-t)` ([`corollaryA_1_3_two_sided`](SmoothedPolygons/AppA/Gronwall.lean#L76)). The corollary has
+no proof; it follows from Lemma A.1.1 with constant data, and the formalization proves it so,
+through the integral form of Gronwall's inequality in the OptimalControl package
+([`corollaryA_1_3`](SmoothedPolygons/AppA/Gronwall.lean#L46)). The hypothesis that `n` is positive is not needed (Section 5), and
+`∫₀ᵗ x(t) dt` uses `t` both as the bound and as the variable of integration.
 
 ## 4. Missing hypotheses
 
@@ -905,6 +1302,8 @@ minimizer, which lifts to a Pontryagin extremal and bounds a `K_min`
 | Lemma 4.2.3 | `X ≠ 0` | `X = 0`: `T_0 O_0 = 0` but `𝔰𝔩₂/ℝ·0` has dimension 3 | hypothesis of [`lemma4_2_3`](SmoothedPolygons/Ch4/AdjointOrbit.lean#L432) |
 | Theorem 6.1.1 (Filippov), "an optimal control exists" | the velocity sets extended by the cost, `{(f(q, u), φ(q, u)) \| u ∈ U}`, are convex (the book's hypothesis when `φ` does not depend on `u`) | on `ℝ`, `q' = uψ(q)`, `U = [-1, 1]`, a bump `ψ` with `ψ = 1` on `[-1, 1]`: `∫₀¹ (q² + 1 - u²) dt` from `q(0) = 0` to `q(1) = 0` has infimum `0` and no minimizer (E35) | hypothesis of the second part of [`External.filippov`](External/Filippov.lean#L153) (approved by the user) |
 | Lemma 7.3.1 | `⟨X, Z_u⟩ ≠ 0` on `U` (used by the proof, TeX 5792) | a segment `U` of the plane `u₀ + u₁ + u₂ = 1` crossing the line where `⟨X, Z_u⟩ = 0`: the Hamiltonian is undefined there | hypothesis `hden` of [`lemma7_3_1`](SmoothedPolygons/Ch7/Faces.lean#L49) |
+| Lemma 8.2.1 | `⟨X, Z_u⟩ ≠ 0` for every `u ∈ U_T` (true on the state space, Lemma 3.3.4) | `X = 0`, or any `X` with `⟨X, Z_u⟩ = 0` for some `u ∈ U_T`: the control-dependent term `H₂` is undefined there (E52) | hypothesis `hden` of [`lemma8_2_1`](SmoothedPolygons/Ch8/SingularLocus.lean#L586) |
+| Theorem 8.3.2 as restated in Chapter 1 (TeX 851–856) | the trajectory is edge extremal, as in Chapter 8 | an abnormal extremal of Remark 8.1.6 (with the signs of E51) whose control is the midpoint of an edge: it never meets `𝒮_sing` and is not bang-bang (E57) | hypothesis `hedge` of [`theorem8_3_2`](SmoothedPolygons/Ch8/FiniteBangBang.lean#L1419), the statement of Chapter 8 |
 
 ## 5. Redundant hypotheses
 
@@ -924,7 +1323,7 @@ than the book's. The Challenge statements keep the book's hypotheses.
 | Lemma 7.3.1 ([`lemma7_3_1`](SmoothedPolygons/Ch7/Faces.lean#L49)) | the control set lies in the plane `u₀ + u₁ + u₂ = 1` | `Z_u` is linear in `u`, so `H` is a linear-fractional function of `u` on any compact convex set on which `⟨X, Z_u⟩ ≠ 0` (hypothesis `hden`, E26) |
 | Gruber, Cor. 30.1 ([`External.gruber_corollary_30_1`](External/Gruber.lean#L320), cited in Definition 2.1.2) | the translates form a packing | the lattice-point count bounds the sums of the areas of the translates meeting a disk, overlaps counted with multiplicity |
 
-Three Lean statements keep hypotheses that their proofs do not use, because the book or the source
+Six Lean statements keep hypotheses that their proofs do not use, because the book or the source
 states them:
 - Lemma 3.1.8 ([`lemma3_1_8`](SmoothedPolygons/Ch3/HyperbolicArc.lean#L772)) keeps `hcover`, that the arcs of `σ` cover `∂K` (part of "the
   boundary is parameterized by `σ`"); of that hypothesis the proof uses only `hbd`, that the curves
@@ -932,6 +1331,14 @@ states them:
 - Proposition 6.4.1 ([`proposition6_4_1`](SmoothedPolygons/Ch6/LeftInvariant.lean#L91)) keeps the nondegeneracy, symmetry and invariance of the bilinear
   form: nondegeneracy is what makes `p ↦ ⟨p, ·⟩` the identification `𝔤 ≅ 𝔤*`, and the identity
   `H = ⟨p, f(e, u)⟩` holds for every bilinear form.
+- Lemma 8.1.5 ([`lemma8_1_5`](SmoothedPolygons/Ch8/EdgeLandau.lean#L504)) keeps the hypothesis that the state stays in the state space of the
+  edge problem (`y > 0`, `|x| < 1/√3`) on all of `(-t₁, t₁)`, as the book's solutions of the edge
+  problem do; the proof works on a smaller interval around `0`, where continuity gives it.
+- Theorem 8.3.1 ([`theorem8_3_1`](SmoothedPolygons/Ch8/FiniteBangBang.lean#L1288)) keeps edge extremality, which the book uses only to pass from the
+  maximizers to the control through Theorem 8.1.4; the one-sided form about the maximizers does
+  not need it, and the form about the control, its corollary, does (E56).
+- Corollary A.1.3 ([`corollaryA_1_3`](SmoothedPolygons/AppA/Gronwall.lean#L46), and its two-sided form) keeps "`n` a positive integer": the
+  bound holds for `n = 0` as well (E61).
 - Filippov's theorem ([`External.filippov`](External/Filippov.lean#L153)) keeps the source's standing assumptions that `f` is smooth
   in `q` with `∂f/∂q` jointly continuous (`hfq`, `hfq'`), which give existence and uniqueness of
   trajectories; the proof uses only the continuity of `f`, the compactness of `U`, the compact
@@ -1124,7 +1531,7 @@ states them:
   3.6.2 (E15) is stated with that extension `G` of `g` to `ℝ`: `σ_j = G s_j*` is the multi-curve of
   a balanced pair `(K, σ)` in circle representation, and `area(K)` is the cost.
 - **The existence of a minimizer and `K_min` (§6.1).** "An optimal control exists" is read as the
-  existence of a global minimizer of Problem 3.6.2 ([`IsReinhardtMinimizer`](SmoothedPolygons/Ch3/ControlProblem.lean#L101): an admissible
+  existence of a global minimizer of Problem 3.6.2 ([`IsReinhardtMinimizer`](SmoothedPolygons/Ch3/ControlProblem.lean#L115): an admissible
   trajectory whose cost is at most that of every admissible trajectory, of any terminal time).
   `K_min` is a centrally symmetric convex disk of least greatest packing density `δ_min`
   ([`IsWorstDisk`](SmoothedPolygons/Ch2/Density.lean#L326), [`minimaxDensity`](SmoothedPolygons/Ch2/Density.lean#L321)). The identification of the global minimizers with `K_min` (E47)
@@ -1155,6 +1562,63 @@ states them:
   `λ_cost = -1` (`g(0) = I₂` is a transversality condition). "The only extremal ... is that of the
   smoothed octagon" is read up to time translation and for terminal times near `t_f`; without these
   the statement is false (E32).
+- **Extremals on an interval (Chapter 8).** "An extremal lifted trajectory on `[t₁, t₂]`" is the
+  state–costate system of Problem 6.7.1 on that interval with the conditions of the maximum
+  principle (`λ_cost ≤ 0` constant, nontriviality of `(λ_cost, Λ₁, Λ_R)`, the maximum condition
+  and `H = 0` almost everywhere) and no boundary conditions ([`IsExtremalOn`](SmoothedPolygons/Ch8/Defs.lean#L59)); a Pontryagin
+  extremal restricts to one on every subinterval. Normal and abnormal are as in Definition 6.2.1.
+- **The edge control problem (§8.1).** Its state `(x, y, s)` is a point of `ℝ³` (`Fin 3 → ℝ`),
+  its control `u_e ∈ [-½, ½]`, its state space `y > 0`, `|x| < 1/√3` (Definition 8.1.1), its
+  dynamics (8.1.3) and its cost `∫x²/y` (8.1.5); its extremals ([`IsEdgeProblemExtremal`](SmoothedPolygons/Ch8/Defs.lean#L110)) are the
+  conclusions of the maximum principle for it, with fixed endpoints (8.1.4), so that there are no
+  transversality conditions. The book treats the edge `{u₀ = 0}` and the others "by rotational
+  symmetry" (TeX 6774–6775); the formalization rotates explicitly: conjugation by `Rʲ`
+  ([`edgeFrame`](SmoothedPolygons/Ch8/Defs.lean#L124)) takes a control in the edge `{u_j = 0}` to one in `{u₀ = 0}`, and is applied to `g`,
+  `X`, `Λ₁` and `Λ_R`. The edge state of a Reinhardt trajectory ([`edgeState`](SmoothedPolygons/Ch8/Defs.lean#L135)) is `z = x + iy` with
+  `Φ(z) = RʲXR⁻ʲ` (Lemma 4.2.1) and `s = ∫dt/y`, with `s = 0` at the start ("We can take
+  `s₀ = 0`").
+- **Edge extremality (Definition 8.1.2).** A trajectory is edge extremal on `[a, b]`
+  ([`IsEdgeExtremalOn`](SmoothedPolygons/Ch8/Defs.lean#L148)) if on every subinterval on which some `u_j` vanishes almost everywhere, its
+  edge state and edge control lift to an extremal of the `j`-th edge problem. The definition takes
+  `u` and `X` only, since `g` is determined there by (8.1.1).
+- **Maximizers and singular subarcs (§8.2).** `(X, Λ_R) ∈ ⋃_{I ⊆ {i,j}} (T*O_J)_I` is read as
+  "the set of maximizers of the Hamiltonian over `U_T` ([`hamiltonianArgmax`](SmoothedPolygons/Ch8/Defs.lean#L158)) is contained in the
+  edge `{i, j}` ([`controlEdge`](SmoothedPolygons/Ch8/Defs.lean#L164))". A singular subarc (Definition 6.2.1(3), [`IsSingularSubarc`](SmoothedPolygons/Ch6/Hamiltonian.lean#L255)) is an
+  open interval at each time of which the Hamiltonian has at least two maximizers in `U_T`; a
+  singular subarc of the edge problem ([`IsEdgeSingularSubarc`](SmoothedPolygons/Ch8/NoSingularArcs.lean#L217)) likewise, for the edge Hamiltonian
+  (8.1.6) over `[-½, ½]`. Theorem 8.2.7 is read as E55 says. The singular locus (Definition 8.2.4,
+  [`singularLocus`](SmoothedPolygons/Ch8/Defs.lean#L177)) is the printed set of quadruples `(g, Λ₁, X, Λ_R)`; along an extremal, the lift
+  meets it at `t` exactly when `λ_cost ≠ 0`, `Λ₁(t) = (3/2)λ_cost J`, `X(t) = J` and `Λ_R(t) = 0`
+  with the extremal's own `λ_cost`.
+- **Lemma 8.2.1** is stated for `X` with `⟨X, Z_u⟩ ≠ 0` on `U_T` (E52), and **Theorem 8.1.4** for
+  every extremal of the edge problem on a closed interval (E49). **Lemma 8.1.5**'s Landau notation
+  is two-sided, as the book defines it (TeX 6903–6907), with the solutions continuous and in
+  integral form. **Theorem 8.3.1** is read in its one-sided form (E56), and **Theorem 8.3.2** on a
+  compact interval `[a, b]` (E57).
+- **Bang-bang with finitely many switches.** [`IsFiniteBangBang`](SmoothedPolygons/Ch8/Defs.lean#L195) asks for a finite set of times off
+  which the control is, near each time of `(a, b)`, almost everywhere constant at a vertex of
+  `U_T`; the book's "adjusting the control on a set of measure zero" is this almost-everywhere
+  formulation. A switching time ([`IsSwitchingTime`](SmoothedPolygons/Ch16/MahlerFirst.lean#L48)) is a time on each side of which the control is
+  almost everywhere one vertex, the two vertices being different.
+- **Smoothed polygons (Remark 8.3.3, Theorem 16.3.1).** A hyperbolic arc ([`IsHyperbolicArc`](SmoothedPolygons/Ch8/PolygonBoundary.lean#L47)) is
+  an injective continuous arc of a hyperbola `det(d₁, x - p₁)·det(d₂, x - p₂) = c`, `c ≠ 0`, with
+  non-parallel asymptotes, the form of the conclusion of Lemma 3.1.8. The boundary of a smoothed
+  polygon ([`IsSmoothedPolygonBoundary`](SmoothedPolygons/Ch8/PolygonBoundary.lean#L58)) is the union of finitely many segments and finitely many
+  hyperbolic arcs, each arc beginning and ending on segments and having as asymptotes the lines
+  that extend two of the segments. "A finite-sided smoothed polygon with rounded hyperbolic arcs at
+  each corner of the sort described by Reinhardt and Mahler", glossed as "no corners and the
+  boundary alternates between straight edge segments and hyperbolic arcs, whose asymptotes are
+  lines extending the straight edge segments" (TeX 12800–12804), is a centrally symmetric convex
+  disk with a unique support line at each boundary point whose boundary is that of a smoothed
+  polygon ([`IsSmoothedPolygon`](SmoothedPolygons/Ch8/PolygonBoundary.lean#L72)). "Defines a balanced disk `K(g, X)`" in Remark 8.3.3 is read as a
+  hypothesis: a balanced pair `(K, σ)` with `σ_j = g s_j*` and `σ_j(t + t_f) = σ_{j+1}(t)` (E58).
+- **Theorem 16.3.1.** "The global minimizer" is read as every global minimizer of Problem 3.6.2
+  ([`IsReinhardtMinimizer`](SmoothedPolygons/Ch3/ControlProblem.lean#L115)) and "the minimizer `K_min`" as every `K_min` ([`IsWorstDisk`](SmoothedPolygons/Ch2/Density.lean#L326)); one of
+  each exists (E46, E4). The theorem is stated as two conclusions under the hypothesis
+  [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107) (Section 2): every global minimizer has a bang-bang control with
+  finitely many switches on `[0, T]`, and every `K_min` is a smoothed polygon (E60).
+- **Corollary A.1.3** is stated as printed, on `[0, t₁]` with the conclusion as `t → 0⁺`; the
+  two-sided form that Chapter 8 uses is a separate statement (E61).
 - **Balanced pairs exist.** The unit disk, with `σ_j(t) = Rot(t) s_j*` and `t_f = π/3`, is a
   balanced pair ([`circle_isBalancedPair`](SmoothedPolygons/Ch2/BalancedCircle.lean#L241)), so the hypotheses of the results of Chapter 3 about
   balanced pairs can be met.
@@ -1164,7 +1628,10 @@ states them:
   E26 (`⟨X, Z_u⟩ ≠ 0`), E32 (Theorem 7.7.1 up to time translation, with
   terminal time near `t_f`, user-approved), E34 (regularity, user-approved), E35 (the extended
   velocity sets, user-approved), E15 (the converse of Problem 3.6.2 for winding number one), E40
-  and E45 (the fundamental domain), and in proofs E14, E24 and E44.
+  and E45 (the fundamental domain), E51 (the signs of Remark 8.1.6), E52 (`⟨X, Z_u⟩ ≠ 0` in Lemma
+  8.2.1), E55 (Theorem 8.2.7 in the authors' reading, user-approved), E56 (Theorem 8.3.1 in its
+  one-sided form, user-approved), E57 (Theorem 8.3.2 as Chapter 8 states it), E58 (the disk of
+  Remark 8.3.3 as a hypothesis), and in proofs E14, E24, E44, E50 and E59.
 
 ## 7. Departures from the paper's proofs
 
@@ -1181,8 +1648,13 @@ states them:
 | Theorem 5.0.6, Case 2 and the area bound | Case 1 for `z ∈ h₀ ∖ (h₁ ∪ h₂)`, with `area(K) ≥ area(conv{s_j*, ±r})`; Case 2, `z ∈ h₀ ∩ h₁`, "adapted"; `h₀ ∩ h₁ ∩ h₂ = ∅` leaves no other case | the claim at each corner `i` with `z ∈ h_i` separately (the construction changes `H_K(z)` only near `p_i` and `p_{i+3}`); `area(K)` bounded below by the measure of the union of `conv{s_j*}` and the triangles `±△s_i r_i s_{i+1}`, `z ∈ h_i`, which have pairwise disjoint interiors ([`theorem5_0_6`](SmoothedPolygons/Ch5/AreaBound.lean#L777)) | Case 2 is only sketched (E43); the corner-by-corner argument covers it, Case 1 and `z ∉ h₀ ∪ h₁ ∪ h₂` at once, and in Case 1 the union has the area of the book's convex hull; `h₀ ∩ h₁ ∩ h₂ = ∅` is then not used | E43 |
 | Lemma 5.0.7 (3) | the sum (5.0.1) is continuous and increases in `x` on `h₀ ∖ h₂` and on `h₀ ∩ h₂`, hence on `h₀ ∩ {x > 0, y ≥ √3}`; it is even, so least at `x = 0` | `{x ≥ 0, y ≥ √3} ⊆ h₀`, and there `I₀area₀ + I₂area₂ = max(area₀ + area₂, area₀)`, the maximum of the functions that (2) and (1) show increasing; even in `x` ([`lemma5_0_7_3`](SmoothedPolygons/Ch5/Monotonicity.lean#L541)) | the book does not show that the points with `x > 0`, `y ≥ √3` lie in `h₀`; the maximum makes its "increasing on each piece, and continuous" precise (E44) | E44 |
 | §6.1, the existence of a minimizer | Filippov's theorem (Theorem 6.1.1) applied to the half-plane system (Problem 4.5.1), with the vector fields multiplied by a cut-off `ψ`, `ψ = 1` on `𝔥**`; `t_f ≤ π/3` by Lemma 4.3.1 | Filippov's theorem with the closed state constraint `z ∈ 𝔥**`, a compact set of initial points, the closed endpoint relation of Problem 3.6.2 and the window `[0, π/3]` (`ControlSystem.exists_optimal_constrained`, OptimalControl package), applied to the matrix system of §6.2 (Lemma 6.1.2 carried over by Lemma 4.5.2); `t_f < π/3` for competitors cheaper than the smoothed octagon from `cost ≥ 3t_f` ([`three_mul_le_reinhardtCost`](SmoothedPolygons/Ch4/TerminalTime.lean#L71)); the octagon is in the class ([`exists_isReinhardtMinimizer`](SmoothedPolygons/Ch6/Existence.lean#L436)) | the cut-off changes the dynamics outside `𝔥**`, so a minimizer of the cut-off problem need not be a Reinhardt trajectory; Theorem 6.1.1 fixes the initial point, while `X(0)` is free and the endpoints are coupled; Lemma 4.3.1 assumes the minimizer whose existence is proved (E46). The matrix system is the one whose admissible pairs §6.2 already identifies with the trajectories of Problem 3.6.2 | E46 |
-| §6.2 and §6.6, every minimizer is a Pontryagin extremal | the maximum principle on `SL₂(ℝ) × 𝔰𝔩₂(ℝ)` with the boundary conditions `g(0) = I₂`, `g(t_f) = R`, `X(t_f) = R⁻¹X(0)R`; the Hamiltonian by Proposition 6.4.1, the costate equations by Proposition 6.5.1, the transversality conditions of §6.6 (for `Λ₁` by Corollary 6.5.3) | the same steps, with two changes. (1) The maximum principle is applied on the open set `GL₂⁺(ℝ) × C` of `Mat₂(ℝ) × 𝔰𝔩₂(ℝ)` ([`matrixDomain`](SmoothedPolygons/Ch6/MatrixSystem.lean#L118)), with `g(0) = I₂` and `det X(0) = 1` among the boundary conditions; this adds three steps: `det g` and `det X` are first integrals, so the competitors are Reinhardt trajectories; the adjoint equation meets the hypotheses of Proposition 6.5.1 through the momentum `p - (tr(pg)/2)g⁻¹`; and the covector `pg = kI₂` of (2). (2) The boundary condition is applied less the equations `g(t_f)₁₁ = R₁₁` and `X(t_f)₁₀ = (R⁻¹X(0)R)₁₀`, which the first integrals `det g` and `det X` make redundant ([`matrixBoundary`](SmoothedPolygons/Ch6/MatrixSystem.lean#L136)); transversality in the two directions this frees excludes the covectors whose reduced costate vanishes, and the nontriviality of `(λ_cost, Λ₁, Λ_R)`, which the book does not derive, is proved by Corollary 6.5.3, uniqueness for the linear `Λ_R` equation and transversality at `t_f` ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L587)) | (1) the maximum principle available in Lean is stated on open subsets of a finite-dimensional space, and `SL₂(ℝ)` is not open in `Mat₂(ℝ)`; (2) with the full boundary conditions the conclusions of the maximum principle hold for every admissible trajectory with a covector whose reduced costate vanishes, so the nontriviality of `(λ_cost, Λ₁, Λ_R)` does not follow (E21) | E21 |
+| §6.2 and §6.6, every minimizer is a Pontryagin extremal | the maximum principle on `SL₂(ℝ) × 𝔰𝔩₂(ℝ)` with the boundary conditions `g(0) = I₂`, `g(t_f) = R`, `X(t_f) = R⁻¹X(0)R`; the Hamiltonian by Proposition 6.4.1, the costate equations by Proposition 6.5.1, the transversality conditions of §6.6 (for `Λ₁` by Corollary 6.5.3) | the same steps, with two changes. (1) The maximum principle is applied on the open set `GL₂⁺(ℝ) × C` of `Mat₂(ℝ) × 𝔰𝔩₂(ℝ)` ([`matrixDomain`](SmoothedPolygons/Ch6/MatrixSystem.lean#L118)), with `g(0) = I₂` and `det X(0) = 1` among the boundary conditions; this adds three steps: `det g` and `det X` are first integrals, so the competitors are Reinhardt trajectories; the adjoint equation meets the hypotheses of Proposition 6.5.1 through the momentum `p - (tr(pg)/2)g⁻¹`; and the covector `pg = kI₂` of (2). (2) The boundary condition is applied less the equations `g(t_f)₁₁ = R₁₁` and `X(t_f)₁₀ = (R⁻¹X(0)R)₁₀`, which the first integrals `det g` and `det X` make redundant ([`matrixBoundary`](SmoothedPolygons/Ch6/MatrixSystem.lean#L136)); transversality in the two directions this frees excludes the covectors whose reduced costate vanishes, and the nontriviality of `(λ_cost, Λ₁, Λ_R)`, which the book does not derive, is proved by Corollary 6.5.3, uniqueness for the linear `Λ_R` equation and transversality at `t_f` ([`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L564)) | (1) the maximum principle available in Lean is stated on open subsets of a finite-dimensional space, and `SL₂(ℝ)` is not open in `Mat₂(ℝ)`; (2) with the full boundary conditions the conclusions of the maximum principle hold for every admissible trajectory with a covector whose reduced costate vanishes, so the nontriviality of `(λ_cost, Λ₁, Λ_R)` does not follow (E21) | E21 |
 | Theorem 7.7.1, step 6 (the fixed points of `f⁴` near `q_oct`) | for each `d` near `d_oct`, `q_fix(d)` stays hyperbolic and the implicit function theorem inverts `f_d⁴ - I` near `q_fix(d)`; "thus, the only fixed points near `q_oct` are the fixed points `q_fix(d)`" (TeX 6612–6620) | the inverse function theorem applied once, at `q_oct`, to `Ψ = (section constraints, f⁴ - id)`, whose constraints include `d = det Λ₁`: its derivative is injective because `A⁴ - I` is invertible on the tangent space of the section (step 5), so `Ψ` is injective near `q_oct`, and a fixed point with `det Λ₁ = d` has the same image as `q_fix(y₀(d))`, with `y₀(d)` from Remark 7.5.2 as in the book ([`iso_fixedPoints`](SmoothedPolygons/Ch7/Isolated/FixedPoints.lean#L179)) | a separate application for each `d` gives a neighbourhood of each `q_fix(d)`, not one uniform in `d`, which the conclusion needs; the single application gives the uniformity, and the hyperbolicity of `q_fix(d)` for `d ≠ d_oct` is not needed | E32 |
+| Proposition 8.1.3, edge extremality | "the globally minimizing trajectory must minimize cost among all trajectories with the same endpoint conditions on the subinterval and that have their control function similarly restricted to the edge" (TeX 6793–6797) | competitors of the edge problem uniformly close to the minimizer's edge arc are spliced into the minimizer: the middle arc rebuilt from `(x, y, s)` by (8.1.1), the rest of the minimizer shifted in time, the costs compared by the cost identity of §8.1; the edge arc is then a strong local minimizer of the edge problem, to which the maximum principle applies ([`proposition8_1_3`](SmoothedPolygons/Ch8/EdgeExtremal.lean#L850)) | the state space of the edge problem is larger than the star domain, so a competitor far from the arc may give no Reinhardt trajectory, and the book gives no construction (E48) | E48 |
+| Theorem 8.1.4, two steps | "The function `λ₂'` is also continuous" (TeX 6846–6852); Lemma 8.1.5 applied at every zero of `λ₂` with `λ₂' = 0` (TeX 6884–6886) | the derivative of `λ₂` is proved to exist at each zero of `λ₂`, equal there to the right-hand side of (8.1.7), and only that is used; at a zero at an end of the interval, the state and the costate are continued beyond it with the control `u_e = 0`, where they are explicit, before Lemma 8.1.5 is applied ([`theorem8_1_4`](SmoothedPolygons/Ch8/EdgeBangBang.lean#L823)) | `λ₂'` is continuous only after a change of the control on a null set; Lemma 8.1.5 needs a solution on both sides of the zero (E49) | E49 |
+| Theorem 8.2.7 | Theorem 8.2.6 makes a singular subarc a circular arc, which the second variation excludes | the authors' reading (the user's decision): on an interval with the control in an edge, the costates of the edge arc (Proposition 8.1.3) have no singular subarc of the edge problem, by the argument of Theorem 8.1.4; elsewhere a localization by Lemma 8.2.1 leaves the subarcs with `Λ_R ≡ 0`, which the book's argument excludes (Theorems 8.2.6 and 8.2.3 and the second variation) ([`theorem8_2_7`](SmoothedPolygons/Ch8/NoSingularArcs.lean#L375)); for normal lifts the printed statement, through the pull-back of the costate to the edge ([`not_isSingularSubarc_of_isReinhardtMinimizer_of_isNormalExtremal`](SmoothedPolygons/Ch8/NoSingularArcs.lean#L418)) | the book's proof covers only the subarcs on which the Hamiltonian does not depend on the control (E55) | E55 |
+| Theorem 8.3.1 (in its one-sided form) | in the contrapositive: if the maximizers are not confined to one edge near `t₀`, claims (a)–(c) put the lift in `𝒮_sing` at `t₀`; claim (a) passes to the control through Theorem 8.1.4 | claims (a)–(c) run directly, on each side of `t₀` separately, and give an edge containing the maximizers on each side ([`theorem8_3_1`](SmoothedPolygons/Ch8/FiniteBangBang.lean#L1288)); the passage to the control, with edge extremality and Theorem 8.1.4, is the corollary that the proof of Theorem 8.3.2 quotes ([`IsExtremalOn.exists_ae_mem_controlEdge_of_isEdgeExtremalOn`](SmoothedPolygons/Ch8/FiniteBangBang.lean#L1349)); at an end of the interval the Gronwall step uses the functions extended by their values there | the printed statement is false, and the form the user chose needs no passage to the control (E56) | E56 |
+| Theorem 16.3.1, the last step | after Theorems 8.2.7 and 8.3.2 and Lemma 8.3.4, "the proof then reduces to" switching points accumulating at the singular locus, which the blow-up, Theorems 16.4.1 and 14.4.1 and periodicity exclude (TeX 12820–12833) | the set of meeting times is handled (empty interior, a meeting at `0` moved to `T`, the first meeting time `d` after a time off the set); switching times accumulating at `d` are excluded by the hypothesis [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107), and a vertex control just before `d` by Lemma 8.3.4 ([`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343)) | Chapters 13–16 are not formalized, so the consequence of their theorems that the step uses is a named hypothesis; the book does not handle the set of meeting times (E60) | E60 |
 
 Every other proof follows the book's argument. The gaps of Theorem 2.2.2 (E2), Theorem 2.3.9 (E7),
 Lemmas 2.2.6, 2.2.7, 2.4.3 (E5, E9), Lemma 3.1.8 (E34), the shift of §3.5 (E39), Definition 5.0.1
@@ -1208,6 +1680,25 @@ the book (E38, E36, E37); the proof of Remark 7.5.2 follows the hint of a TeX co
 that minimizers are extremals (§6.2), the identity of Proposition 6.4.1 and the trivialization of
 Proposition 3.6.1 are checked in matrix coordinates instead of being taken from their Lean
 statements, which are about Mathlib's Lie groups (Section 6); the identity is the same.
+
+In Chapter 8 and Appendix A.1, the gaps of Lemma 8.2.1 (E52), the vanishing of the Hamiltonian at
+a single time in Theorem 8.1.4, Lemma 8.2.2 and Theorem 8.3.1 (E53), the converse of Theorem
+8.2.6 (E54), the second variation of Theorem 8.2.7 (E55), claim (b) of Theorem 8.3.1 (E56) and
+Corollary A.1.3 (E61) are filled along the book's lines, and the slips of Lemma 8.1.5 (E50) and
+Lemma 8.3.4 (E59) are corrected. The second variation follows the book's route, with its condition on `ψ` read on the
+interior of the overlap of the supports; the formal proof computes the cost of the deformed arc
+exactly, and the book's expansion is the second-order truncation of that formula (E55). Remark
+8.3.3 has no proof in the book; its proof assembles Theorem 8.3.2, the discussion of §7.2 and
+Lemma 3.1.8 (E58). Three changes are inessential. In Lemma 8.1.5 the norm of the error `v` is
+`|v₁| + |v₂|` instead of the Euclidean one, and `‖v‖' ≤ ‖v'‖` is used in its integrated form
+`‖v(t)‖ ≤ |∫₀ᵗ ‖v'‖|`, which avoids differentiating the norm; the estimates of Theorem 8.3.1 use
+the entrywise `ℓ¹` norm on `2 × 2` matrices likewise (the book's Euclidean norm on `𝔰𝔩₂(ℝ)`; any
+norm does). In Lemma 8.3.4, "The solutions are analytic" is replaced by Taylor expansions with
+remainder, obtained from the mean value inequality, which need only the first derivatives of the
+solutions, and the three vertices are computed alike where the book treats `e₃` "(say)" (E59).
+In Theorem 8.1.4, the count of the zeros at which `λ₂' = 0` (at most two) is proved and used as
+the book uses it, although finiteness would follow from the isolation of every zero alone
+(Section 11).
 
 The cited results that [`External/`](External) proves are proved by their sources' arguments, except:
 
@@ -1300,28 +1791,47 @@ Minkowski and Mahler (Theorems 2.3.6, 2.3.7 and everything that uses them, Chapt
 Theorem 2.3.9), Mahler's Lemma 3 with the results of paper A and Mahler 1946 that prove it
 (Lemma 2.2.5, the remark after Definition 2.3.5, and the identification of the minimizers with
 `K_min`), the Euler–Arnold equation (Proposition 6.5.1 and the proof that minimizers are
-extremals), and the Pontryagin maximum principle (that proof), which is proved in the
-OptimalControl package with Brouwer's theorem from the FixedPoint package. Filippov's theorem is
-proved as Theorem 6.1.1, which no other result uses; the existence of a minimizer (§6.1) uses its
-form with a state constraint and Gronwall's inequality, both from the OptimalControl package.
+extremals), and the Pontryagin maximum principle (that proof, and, through it and the maximum
+principle for the edge control problem, Proposition 8.1.3, Theorem 8.2.7 and Theorem 16.3.1), which
+is proved in the OptimalControl package with Brouwer's theorem from the FixedPoint package.
+Filippov's theorem is proved as Theorem 6.1.1, which no other result uses; the existence of a
+minimizer (§6.1) uses its form with a state constraint and Gronwall's inequality, both from the
+OptimalControl package, and Corollary A.1.3, in Lemma 8.1.5 and Theorem 8.3.1, uses Gronwall's
+inequality too. Theorem 16.3.1 ([`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343)) uses, besides results from prior work, its
+hypothesis [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107), which the audit lists among the results it uses: a
+hypothesis of its statement, not an axiom (Section 2). The audit's row for it lists as results
+used [`External.euler_arnold`](External/EulerArnold.lean#L72), [`External.fejes_toth`](External/FejesToth.lean#L882), [`External.gruber_corollary_30_1`](External/Gruber.lean#L320),
+[`External.mahler_1947`](External/Mahler1947.lean#L1700), [`External.mahler_irreducible`](External/MahlerIrreducible/Lemma3.lean#L383), [`External.pontryagin_maximum_principle`](External/Pontryagin.lean#L80) and
+[`SmoothedPolygons.NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107), and as axioms [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and
+[`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound). No other result uses the hypothesis, not even the unconditional part of Theorem
+16.3.1.
 Every declaration depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound)
-(`lake env lean scripts/Audit.lean`, which checks the 5760 declarations of the library and the
-axioms of each numbered result, through the packages it uses).
+(`lake env lean scripts/Audit.lean`, which checks the 6544 declarations of the library and the
+axioms of each numbered result, through the packages it uses); [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343) too, since its
+hypothesis is part of its statement.
 
 The route check (`python3 scripts/route_check.py check docs/paper_routes.tsv --accept
-docs/route_differences.tsv`) compares, for each of the 78 results of the book found in the Lean
+docs/route_differences.tsv`) compares, for each of the 100 results of the book found in the Lean
 code, the numbered results that the Lean proof uses with those that the book's proof cites. It
-passes: every difference is recorded in [`docs/route_differences.tsv`](docs/route_differences.tsv) with its reason. The 86
-differences are of these kinds (four more, which the other route explains, are shown by `--all`:
+passes: every difference is recorded in [`docs/route_differences.tsv`](docs/route_differences.tsv) with its reason. The 128
+differences are of these kinds (seven more, which the other route explains, are shown by `--all`:
 a result that the Lean proof uses directly where the book reaches it through a cited result, or
 conversely):
 
 - results the book uses without `\ref` ("by the previous lemma", "immediate from the previous
   proposition", an equation cited by number such as the transversality condition `eqn:theta-k` of
   Lemma 7.5.5 in Theorem 7.7.1, "the real number constructed in Section 7.5" for Remark 7.5.2's
-  `y₀(d)`, Lemma 5.0.4 in Lemma 5.0.7, the compactness of `𝔥**` in §6.1) or implicitly (for
-  instance the star domain of Theorem 4.4.1 as the state space, in Lemma 4.5.2, Chapter 5, §6.1 and
-  Theorems 7.5.6 and 7.7.1, and the half-plane coordinates of Lemmas 4.1.1 and 4.2.1 in §6.1), and
+  `y₀(d)`, Lemma 5.0.4 in Lemma 5.0.7, the compactness of `𝔥**` in §6.1, "We have seen that the
+  global minimizer must be extremal" for §6.2 in Proposition 8.1.3, "The next lemma" for Lemma
+  8.1.5 in Theorem 8.1.4, "By the lemma" for Lemma 8.2.2 in Theorem 8.2.3, "The previous theorem"
+  for Theorem 8.2.6 in Theorem 8.2.7, "According to the theorem" for Theorem 8.3.1 in Theorem
+  8.3.2, the sentence of Remark 8.3.3 and Lemma 2.2.5 ("no corners") in Theorem 16.3.1) or
+  implicitly (for instance the star domain of Theorem 4.4.1 as the state space, in Lemma 4.5.2,
+  Chapter 5, §6.1, Theorems 7.5.6 and 7.7.1, (8.1.3) and Lemma 8.2.1, the half-plane coordinates of
+  Lemmas 4.1.1 and 4.2.1 in §6.1, (8.1.3) in the cost identity of §8.1, Theorem 6.8.2 in Lemma
+  8.2.1, the costate equations and the
+  Hamiltonian of the edge problem in (8.1.8), and Theorem 3.4.2 for the control of the deformed arc
+  in Theorem 8.2.7), and
   three basic facts used throughout (Lemma 7.1.1, Lemma A.6.4, Lemma 3.3.4); conversely, Lemma
   2.4.2 cites Lemma 2.4.5 only by "Compare the proof of Lemma 2.4.5" and does not use it;
 - in Theorem 5.0.2, the cost of a trajectory as the area of its disk (the area formula of §3.2),
@@ -1350,7 +1860,19 @@ conversely):
 - the repairs of gaps: Lemma 2.2.5 (E4), Theorem 2.3.9 (E7), Lemma 2.4.3 (E9), Lemma 4.3.1 (E19),
   Lemma 5.0.3 (E42: Theorems 2.2.2 and 2.3.9), the existence of a minimizer in §6.1 (E46: the
   converse of Problem 3.6.2 for winding number one, E15, and the time bound by comparison with the
-  smoothed octagon in place of Lemma 4.3.1), and the added uniqueness step in Lemma 7.5.5 (E30);
+  smoothed octagon in place of Lemma 4.3.1), the added uniqueness step in Lemma 7.5.5 (E30), the
+  principle of optimality in Proposition 8.1.3 (E48: (8.1.1), (8.1.3), the cost identity of §8.1
+  and the star domain), and, in Theorem 16.3.1, the set of meeting times (E60: Theorem 8.2.3) and
+  the passage from the control problem to `K_min` (E47);
+- equations that the book displays inside a proof and the formalization states separately: (8.1.7)
+  and (8.1.8) in the proof of Theorem 8.1.4, which also cites (8.1.6) by `\eqref`, which the route
+  extraction does not read; and the adjoint equation of the edge problem, written with the partial
+  derivatives of the dynamics and the cost rather than of the Hamiltonian (8.1.6);
+- the forced differences of the user's decisions and of the conditional theorem: Theorem 8.2.7 in
+  the authors' reading uses Proposition 8.1.3, (8.1.6)–(8.1.8) and Lemma 8.2.1 (E55); Theorem
+  8.3.1 in its one-sided form does not use Theorem 8.1.4, which only its corollary needs (E56);
+  Theorem 16.3.1 does not use Theorems 16.4.1 and 14.4.1, which its hypothesis replaces, and states
+  its unconditional part (Theorem 8.3.2 with Proposition 8.1.3) separately (E60);
 - Theorem 7.5.6 uses the explicit lift constructed for Theorem 7.5.1 rather than the statement of
   Theorem 7.5.1, Lemma 7.5.3 identifies its switching functions with that lift, and Lemma 7.5.5
   uses the trace computed in the proof of Theorem 7.5.1;
@@ -1359,10 +1881,18 @@ conversely):
 
 ## 9. Not formalized
 
-- **Outside the chosen scope:** Chapter 1; Chapters 8–16, including the main theorem (Mahler's
-  First conjecture, Theorem 16.3.1), the next layers of the plan for the remaining chapters
-  (Section 11); Appendix A.1–A.5 and A.7–A.10 (the case of Gronwall's inequality of A.1 that §6.1
-  uses is proved in the OptimalControl package); Appendix B.
+- **Proved only conditionally:** Theorem 16.3.1, the main theorem (Mahler's First conjecture), on
+  the hypothesis [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107), which stands for Theorems 16.4.1 and 14.4.1
+  (Section 2, E60). Those two theorems, and the rest of Chapters 13–16 on which they rest, are the
+  later layers of the plan (Section 11).
+- **Outside the chosen scope:** Chapter 1 (its restatements of results of the later chapters among
+  them; the restatement of Theorem 8.3.2 is false, E57); Chapters 9–16, apart from the conditional
+  Theorem 16.3.1; Appendix A.1 apart from Corollary A.1.3 (Lemmas A.1.1 and A.1.2, cited from
+  Amann and Clarke, are not stated; the case of Lemma A.1.1 that §6.1 and Corollary A.1.3 use is
+  proved in the OptimalControl package), Appendix A.2–A.5 and A.7–A.10; Appendix B.
+- **Open within the formalized chapters:** the printed Theorem 8.2.7 for abnormal lifts of the
+  global minimizer, which is neither proved nor refuted (E55); the formalization proves the
+  authors' reading and the printed statement for normal lifts.
 - **Within the formalized chapters:**
   - Remarks 7.6.1 and 7.6.3, which report numerical observations as conjectures: the area of the
     smoothed `(6k+2)`-gon "appears" to increase with `k` to `π`, and the smoothed `(6k−2)`-gons
@@ -1374,7 +1904,12 @@ conversely):
     4.2.2); the positive slope of `χ₃₂` at `0` (Remark 7.5.4) in the proof of Theorem 7.7.1; the
     smoothed `(6k−2)`-gons of Remark 7.6.2 in Remark 7.6.4. Remark 4.3.2 (the cost in the disk and
     hyperboloid models) is not formalized; Remarks 3.1.2, 3.4.3, 4.1.2, 6.5.2 and 7.7.2 are
-    commentary and pointers to the literature or to the appendices.
+    commentary and pointers to the literature or to the appendices. In Chapter 8, Remarks 8.1.6
+    and 8.3.3 are proved (E51, E58); Remarks 8.1.7 (on the 2017 preprint) and 8.2.5 (the singular
+    locus gives the initial conditions of the circle) are commentary, and Remark 8.2.8, a numerical
+    illustration of the deformation of Theorem 8.2.7 with a figure, is not formalized. The
+    explicit solutions with constant edge control after Lemma 8.1.5, computed "in Mathematica" and
+    not recorded, are not stated.
 
 ## 10. The paper in the literature
 
@@ -1446,8 +1981,11 @@ August 2026) include a chapter of open problems.
 ### Formalizations
 
 - This is, to our knowledge, the first formalization of Theorems 7.5.6 and 7.7.1 and of the
-  Hamiltonian part of the book (Chapters 6–7: costates, switching functions, Pontryagin
-  extremals, and the lift of a minimizer to an extremal). The state
+  Hamiltonian part of the book (Chapters 6–8: costates, switching functions, Pontryagin
+  extremals, the lift of a minimizer to an extremal, the edge control problem, singular subarcs
+  and finite bang-bang control), and of Mahler's First conjecture conditionally on one named
+  hypothesis (the search of 5 November found no formalization of Chapter 8 or of Theorem 16.3.1
+  either). The state
   dynamics and the cost of Chapter 3 were formalized independently, three days earlier, in
   M. Ho's repository below.
 - M. Ho, [github.com/sunfishho/reinhardt-density-bound](https://github.com/sunfishho/reinhardt-density-bound)
@@ -1490,21 +2028,28 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   the balanced Reinhardt problem in circle representation (Problem 2.4.8) is in place, and the
   control problem of Chapter 3 is its reformulation. What separates this from Mahler's First
   conjecture (Theorem 16.3.1) is Chapters 8–16, which a plan divides into layers, each ending in a
-  releasable state whose remaining assumptions are explicit hypotheses. Layer 1, the maximum
-  principle and the extremal lift of every minimizer, and Layer 2, Chapter 5 and the existence of
-  a minimizer by the book's route (§6.1, with Filippov's theorem under a closed state constraint,
-  E46) with the identification of the minimizers with `K_min` (E47), are done: the Reinhardt
-  control problem has a global minimizer, which is a Pontryagin extremal and bounds a `K_min`
-  ([`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250)). Layer 3, next, is Chapter 8, with
-  Proposition 8.1.3 (the global minimizer is edge extremal, through the maximum principle for the
-  edge problem), and Mahler's First conjecture conditional on one named hypothesis, to be called
-  `NoChatteringIntoSingularLocus`: that the switching times of a Pontryagin extremal do not
-  accumulate at a time where its lift meets the singular locus. Layer 3 also derives the second
-  sentence of Theorem 16.3.1, that `K_min` is a smoothed polygon, from the first, through the
-  identification of E47 and the shape of a trajectory with finitely many switches (Lemmas 7.2.1
-  and 3.1.8). The later layers discharge the hypothesis: the triangular Fuller system of Chapter 13 and its global basin (Chapter 15,
-  Theorem 16.1.1), the analytic extension of Chapter 14 with Theorem 16.4.1, and Theorem 14.4.1
-  (no return), whose proof rests on a numerical computation of an unstable curve.
+  releasable state whose remaining assumptions are explicit hypotheses. Layers 1–3 are done.
+  Layer 1 is the maximum principle and the extremal lift of every minimizer; Layer 2, Chapter 5
+  and the existence of a minimizer by the book's route (§6.1, with Filippov's theorem under a
+  closed state constraint, E46), with the identification of the minimizers with `K_min` (E47):
+  the Reinhardt control problem has a global minimizer, which is a Pontryagin extremal and bounds a
+  `K_min`
+  ([`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250)). Layer 3 is Chapter 8 and
+  Corollary A.1.3, with Theorem 16.3.1 conditional on one named hypothesis,
+  [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107): the switching times of a Pontryagin extremal do not accumulate
+  at a time where its lift meets the singular locus ([`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343); Section 2). It also derives
+  the second sentence of Theorem 16.3.1, that `K_min` is a smoothed polygon, from the first,
+  through the identification of E47 and the shape of a trajectory with finitely many switches
+  (Remark 8.3.3, with Lemmas 7.2.1 and 3.1.8). The later layers, planned, are to discharge the
+  hypothesis: Layer 4, the triangular Fuller system of Chapter 13 (its blow-up, Poincaré map and
+  fixed points); Layer 5, its global basin (Chapter 15 and Theorem 16.1.1), whose containments
+  the book reads off computer plots and which need certified numerics; Layer 6, the analytic
+  extension of Chapter 14 with the cluster point theorem 16.4.1, which needs a stable manifold
+  theorem and Weierstrass preparation; and Layer 7, Theorem 14.4.1 (no return), whose proof rests
+  on a numerical computation of an unstable curve, to be certified, and the final assembly. Once
+  they are done, [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343) applied to a proof of the hypothesis gives Mahler's First
+  conjecture without hypotheses. The printed Theorem 8.2.7 for abnormal lifts (E55) is open and
+  is not needed for it.
 - **Local optimality of the octagon.** Theorem 7.7.1 is proved (E32): the octagon is isolated among
   extremals. Hales's 2017 preprint (§4.5) sketches another proof of the isolation, by an
   interval-arithmetic expansion of the cost along the one-parameter family of deformations
@@ -1583,6 +2128,23 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   negative on `U_T` (Lemma 3.3.4), so it maps the convex `U_T` onto a convex set, and neither `gX`
   nor the cost depends on `u`. The formal proof follows the book (Lemma 6.1.2, carried to the
   matrix system by Lemma 4.5.2).
+- **Lemma 8.2.1.** `Z_{e₁}`, `Z_{e₂}`, `Z_{e₃}` span `𝔰𝔩₂(ℝ)`, so if `⟨Λ, Z_u⟩/⟨X, Z_u⟩` is a
+  constant `c` on `U_T`, then `⟨Λ - cX, Z_{e_i}⟩ = 0` for each `i` and `Λ = cX`; with `⟨Λ, X⟩ = 0`
+  and `⟨X, X⟩ = -2 det X ≠ 0`, `c = 0` and `Λ = 0`. This needs neither the plane velocities nor
+  Theorem 6.8.2; the formal proof follows the book's route through them (E52).
+- **Theorem 8.1.4.** Finiteness of the switches needs no count of the zeros at which `λ₂' = 0`:
+  every zero of `λ₂` is isolated (by `λ₂' ≠ 0`, or by Lemma 8.1.5), so the zero set, closed in the
+  compact interval, is finite. The book's "at most two times", from `x' = y > 0`, is proved and
+  used as the book uses it.
+- **Theorem 8.3.1, claim (a).** Lemma 8.2.2 already gives the derivative of `Λ_R` at a zero:
+  `Λ_R'(t₀) = -[Λ_{1,cost}(t₀), X(t₀)]`, so `Λ_R(t) = -(t - t₀)[Λ_{1,cost}(t₀), X(t₀)] +
+  o(t - t₀)` without the Gronwall step (8.3.1), which only claim (b) needs. The formal proof
+  follows the book, with the Gronwall step in both claims.
+- **Straight edges in Remark 8.3.3.** That a plane curve with nonvanishing velocity `w` and zero
+  curvature, `det(w, w') = 0`, lies on a line, which §7.2 uses without proof, has a proof without
+  angle functions: `det(w(c), w)²/|w|²` has derivative
+  `2 det(w(c), w)⟨w(c), w⟩ det(w, w')/|w|⁴ = 0`, so `det(w(c), w) = 0`, and then
+  `det(w(c), σ - σ(c))` has derivative `0`. The formal proof uses it.
 
 ### The formalization
 
@@ -1593,8 +2155,10 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   when the tangent turns one way; Dowker's theorem on least-area circumscribed polygons; the lattice
   tiling by a centrally symmetric hexagon; the angles and angle sum of convex polygons; Fejes Tóth's
   cell lemma for finite packings; the planar Tietze–Nakajima theorem; the existence of critical
-  lattices; the structure of lattice-packed centrally symmetric convex bodies; and the inverse of a
-  function with positive derivative and periodic increments (the arclength of a closed curve).
+  lattices; the structure of lattice-packed centrally symmetric convex bodies; the inverse of a
+  function with positive derivative and periodic increments (the arclength of a closed curve); and
+  the fundamental theorem of calculus for absolutely continuous functions in the integral form of
+  Carathéodory solutions, with interval integrals of functions with values in `ι → ℝ`.
 - **Two packages of their own** hold the general theory that this formalization needed and that
   others may import: OptimalControl
   ([github.com/vltanh/lean4-optimal-control](https://github.com/vltanh/lean4-optimal-control)),
@@ -1618,7 +2182,8 @@ Plans for follow-up papers are kept in `NEXT.md`, which is not published.
   state space (`OptimalControl.ODE.ControlSystem`, in the OptimalControl package, is stated so).
   Its form with a state constraint, used in §6.1, needs no compact support either: continuity,
   bounded velocities and convexity on the constraint set suffice.
-- **Toward the main theorem.** With the maximum principle and the existence of a minimizer proved,
-  Chapters 8–16 still need the stable manifold theorem, Weierstrass preparation, and a rigorous
-  version of the numerical containments of the global basin theorem (Theorem 16.1.1), which the
-  book checks from Mathematica plots.
+- **Toward the main theorem.** With the maximum principle, the existence of a minimizer and
+  Chapter 8 proved, Chapters 13–16 still need the stable manifold theorem, Weierstrass
+  preparation, and rigorous versions of the numerical containments of the global basin theorem
+  (Theorem 16.1.1), which the book checks from Mathematica plots, and of the unstable curve of
+  Theorem 14.4.1.

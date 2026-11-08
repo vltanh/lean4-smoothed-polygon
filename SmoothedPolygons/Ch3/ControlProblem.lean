@@ -84,6 +84,20 @@ theorem proposition3_6_1 {E H G : Type*} [NormedAddCommGroup E] [NormedSpace ℝ
     ext v
     exact congrArg φ (hTS g v)
 
+/-- `R⁻¹ J R = J`: the rotation `R` by `π/3` commutes with the generator `J` of rotations. -/
+theorem R_inv_mul_J_mul_R : R⁻¹ * J * R = J := by
+  have hRJ : J * R = R * J := by
+    ext i j
+    fin_cases i <;> fin_cases j <;> simp [R, J, Matrix.mul_apply, Fin.sum_univ_two]
+  have hdet : R.det = 1 := by
+    rw [Matrix.det_fin_two]
+    simp only [R, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.empty_val', Matrix.cons_val_fin_one]
+    have := Real.mul_self_sqrt (show (0 : ℝ) ≤ 3 by norm_num)
+    linear_combination (1 / 4 : ℝ) * this
+  rw [Matrix.mul_assoc, hRJ, ← Matrix.mul_assoc,
+    Matrix.nonsing_inv_mul R (by rw [hdet]; exact isUnit_one), Matrix.one_mul]
+
 /-- **Problem 3.6.2** (`pbm:reinhardt-optimal-control`). An admissible trajectory of the
 Reinhardt control problem: a state trajectory on `[0, t_f]` (`g' = gX`, `X' = [Z_u, X]/⟨Z_u, X⟩`,
 control in `U_T`, `X(t)` satisfying the star conditions with `det X = 1`) with the initial

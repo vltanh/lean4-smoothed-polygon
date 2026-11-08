@@ -7,8 +7,10 @@ public import External.MahlerIrreducible.Lemma3
 public import External.Filippov
 public import External.Pontryagin
 public import SmoothedPolygons.AppA.FunctionalDerivative
+public import SmoothedPolygons.AppA.Gronwall
 public import SmoothedPolygons.AppA.MatrixIdentities
 public import SmoothedPolygons.AppA.Riemannian
+public import SmoothedPolygons.Ch16.MahlerFirst
 public import SmoothedPolygons.Ch2.BalancedCircle
 public import SmoothedPolygons.Ch2.BalancedDensity
 public import SmoothedPolygons.Ch2.Boundary
@@ -73,6 +75,19 @@ public import SmoothedPolygons.Ch7.Remarks
 public import SmoothedPolygons.Ch7.SmoothedPolygon
 public import SmoothedPolygons.Ch7.SmoothedPolygonDisk
 public import SmoothedPolygons.Ch7.StrongTransversality
+public import SmoothedPolygons.Ch8.CircleVariation
+public import SmoothedPolygons.Ch8.Defs
+public import SmoothedPolygons.Ch8.EdgeAbnormal
+public import SmoothedPolygons.Ch8.EdgeBangBang
+public import SmoothedPolygons.Ch8.EdgeExtremal
+public import SmoothedPolygons.Ch8.EdgeLandau
+public import SmoothedPolygons.Ch8.EdgeProblem
+public import SmoothedPolygons.Ch8.EdgePullback
+public import SmoothedPolygons.Ch8.FiniteBangBang
+public import SmoothedPolygons.Ch8.NoSingularArcs
+public import SmoothedPolygons.Ch8.PolygonBoundary
+public import SmoothedPolygons.Ch8.SingularLocus
+public import SmoothedPolygons.Ch8.VertexControl
 public import SmoothedPolygons.Defs
 
 /-!

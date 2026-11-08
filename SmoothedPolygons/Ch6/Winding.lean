@@ -531,20 +531,6 @@ private lemma wn_rot_isIntegralCurve (T : ℝ) :
       fun_prop) _ _, fun t _ ↦ ?_⟩ <;>
     simp [wn_rot, intervalIntegral.integral_neg, integral_sin, integral_cos]
 
-private lemma wn_det_R : R.det = 1 := by
-  rw [Matrix.det_fin_two]
-  simp only [R, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
-    Matrix.empty_val', Matrix.cons_val_fin_one]
-  have := Real.mul_self_sqrt (show (0 : ℝ) ≤ 3 by norm_num)
-  linear_combination (1 / 4 : ℝ) * this
-
-private lemma wn_Rinv_J_R : R⁻¹ * J * R = J := by
-  have hRJ : J * R = R * J := by
-    ext i j
-    fin_cases i <;> fin_cases j <;> simp [R, J, Matrix.mul_apply, Fin.sum_univ_two]
-  rw [Matrix.mul_assoc, hRJ, ← Matrix.mul_assoc,
-    Matrix.nonsing_inv_mul R (by rw [wn_det_R]; exact isUnit_one), Matrix.one_mul]
-
 private lemma wn_isStarState_J : IsStarState J := by
   refine ⟨by simp [J, Matrix.trace_fin_two], by simp [J, Matrix.det_fin_two], ?_, ?_, ?_⟩ <;>
     simp [ρ₀, ρ₁, ρ₂, J]
@@ -555,8 +541,8 @@ private lemma wn_rot_two_pi : wn_rot (2 * Real.pi) = wn_rot 0 := by
 
 end Circle
 
-/-- **Admissible trajectories of higher winding exist** (the winding-number question of the
-inventory, Part I §3.5, item 6). The unit circle traversed seven times, `X ≡ J`,
+/-- **Admissible trajectories of higher winding exist** (REPORT.md,
+E15). The unit circle traversed seven times, `X ≡ J`,
 `u ≡ (1/3, 1/3, 1/3)`, `g(t) = exp(tJ)` on `[0, 7π/3]`, is admissible for Problem 3.6.2, does not
 have winding number one, costs `7π`, and is not the boundary trajectory of any balanced pair with
 period parameter `t_f = 7π/3` and `σ_j = g s_j*` on `[0, t_f]`: so the converse of Problem 3.6.2
@@ -590,7 +576,7 @@ theorem exists_isReinhardtAdmissible_not_isWindingOne :
     simp only [wn_rot, e, Real.cos_add_two_pi, Real.sin_add_two_pi, Real.cos_pi_div_three,
       Real.sin_pi_div_three, R]
   · -- `X(t_f) = R⁻¹ X(0) R`
-    exact wn_Rinv_J_R.symm
+    exact R_inv_mul_J_mul_R.symm
   · -- not of winding number one
     rintro ⟨θ, hθc, hθ0, hθT, hθ⟩
     have hTmem : 7 * Real.pi / 3 ∈ Icc 0 (7 * Real.pi / 3) := ⟨by positivity, le_rfl⟩

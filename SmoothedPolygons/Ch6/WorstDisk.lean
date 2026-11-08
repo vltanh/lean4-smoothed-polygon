@@ -27,7 +27,7 @@ What the later chapters need:
 * `isWorstDisk_of_isReinhardtMinimizer`: conversely, the disk bounded by a global minimizer is a
   `K_min`, and `δ_min = cost/√12`.
 
-Both rest on `exists_isReinhardtAdmissible_of_isWorstDisk` (the inventory's step B1): every
+Both rest on `exists_isReinhardtAdmissible_of_isWorstDisk` (step B1; REPORT.md, E47): every
 `K_min`, after a linear normalization, is a balanced disk in circle representation whose boundary
 trajectory, parameterized with `det X = 1`, is admissible.
 

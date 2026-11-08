@@ -28,7 +28,7 @@ Proposition 8.1.3 ("We have seen that the global minimizer must be extremal", Te
 * the fields are multiplied by a smooth cut-off `ψ` with `ψ = 1` on `𝔥**`, and Filippov's theorem is
   applied to the cut-off system.
 
-## Gaps, and their repair along the book's lines (inventory, Part I §3.5)
+## Gaps, and their repair along the book's lines (REPORT.md, E46)
 
 1. *Theorem 5.0.2 is about balanced disks; §6.1 applies it to admissible trajectories.* That needs
    the converse of Problem 3.6.2 (E15), which is false for trajectories of higher winding number

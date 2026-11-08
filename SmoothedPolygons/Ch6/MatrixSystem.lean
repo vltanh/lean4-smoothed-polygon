@@ -194,7 +194,7 @@ theorem traceForm_controlMatrix_stateX_neg {q : MatrixState} (hq : q ∈ matrixD
 
 /-- A family `f(·, u)` that is `C¹` jointly in `(q, u)` on an open set containing `Ω × U` is `C¹` in
 the sense of the maximum principle. -/
-private lemma mxa_isC1On_of_contDiffOn {E V F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+theorem isC1On_of_contDiffOn {E V F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
     {f : E → V → F} {Ω : Set E} {U : Set V} {O : Set (E × V)} (hO : IsOpen O)
@@ -218,7 +218,7 @@ private lemma mxa_isC1On_of_contDiffOn {E V F : Type*} [NormedAddCommGroup E] [N
 it is jointly smooth where `⟨Z_u, X⟩ ≠ 0`, an open set containing `GL₂⁺(ℝ) × C × U_T`
 (`traceForm_controlMatrix_stateX_neg`). -/
 theorem isC1On_matrixField : IsC1On matrixField matrixDomain controlSimplex := by
-  refine mxa_isC1On_of_contDiffOn
+  refine isC1On_of_contDiffOn
     (O := {p | traceForm (controlMatrix p.2) (stateX p.1) ≠ 0}) ?_ ?_ ?_
   · refine isOpen_ne_fun ?_ continuous_const
     simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two,
@@ -251,7 +251,7 @@ theorem isC1On_matrixField : IsC1On matrixField matrixDomain controlSimplex := b
 
 /-- The cost integrand is smooth (linear in `X`). -/
 theorem isC1On_matrixCost : IsC1On matrixCost matrixDomain controlSimplex := by
-  refine mxa_isC1On_of_contDiffOn (O := univ) isOpen_univ (subset_univ _) (ContDiff.contDiffOn ?_)
+  refine isC1On_of_contDiffOn (O := univ) isOpen_univ (subset_univ _) (ContDiff.contDiffOn ?_)
   simp only [matrixCost, traceForm, J, stateX, slMatrix, Matrix.trace_fin_two, Matrix.mul_apply,
     Fin.sum_univ_two, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
     Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]

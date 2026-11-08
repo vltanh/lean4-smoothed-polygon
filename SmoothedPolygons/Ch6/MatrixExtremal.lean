@@ -106,31 +106,6 @@ open scoped NNReal
 
 /-! ### Calculus tools -/
 
-/-- **FTC for absolutely continuous functions**, in integral form: an absolutely continuous `f`
-with derivative `v` at almost every point of `(0, T)` is the indefinite integral of `v`. -/
-private lemma mxd_eq_add_integral {f v : ℝ → ℝ} {T : ℝ} (hT : 0 ≤ T)
-    (hf : AbsolutelyContinuousOnInterval f 0 T) (hd : ∀ᵐ t, t ∈ Ioo 0 T → HasDerivAt f (v t) t) :
-    IntervalIntegrable v volume 0 T ∧ ∀ t ∈ Icc 0 T, f t = f 0 + ∫ s in (0 : ℝ)..t, v s := by
-  have hae : ∀ᵐ t, t ∈ Ioc 0 T → deriv f t = v t := by
-    have hT' : ∀ᵐ t : ℝ, t ≠ T := by simp [ae_iff, measure_singleton]
-    filter_upwards [hd, hT'] with t ht htT htI
-    exact (ht ⟨htI.1, lt_of_le_of_ne htI.2 htT⟩).deriv
-  have hint : IntervalIntegrable v volume 0 T := by
-    refine (hf.intervalIntegrable_deriv).congr_ae ?_
-    rw [uIoc_of_le hT]
-    exact (ae_restrict_iff' measurableSet_Ioc).2 hae
-  refine ⟨hint, fun t ht ↦ ?_⟩
-  have hsub : uIcc 0 t ⊆ uIcc 0 T := by
-    rw [uIcc_of_le ht.1, uIcc_of_le hT]; exact Icc_subset_Icc_right ht.2
-  have h := (hf.mono hsub).integral_deriv_eq_sub
-  have h' : ∫ s in (0 : ℝ)..t, v s = ∫ s in (0 : ℝ)..t, deriv f s := by
-    refine intervalIntegral.integral_congr_ae ?_
-    rw [uIoc_of_le ht.1]
-    filter_upwards [hae] with s hs hst
-    exact (hs ⟨hst.1, hst.2.trans ht.2⟩).symm
-  rw [h', h]
-  ring
-
 /-- A `C¹` function of a curve that is Lipschitz on `[0, T]` is absolutely continuous on
 `[0, T]`. -/
 private lemma mxd_absolutelyContinuous_comp {F : Type*} [NormedAddCommGroup F]
@@ -218,8 +193,8 @@ theorem isIntegralCurve_covectorΛ_of_adjoint {T : ℝ} {u : ℝ → Fin 3 → �
       HasDerivAt p (-((p t).comp (fderiv ℝ (matrixField · (u t)) (q t)) +
         ν • fderiv ℝ (matrixCost · (u t)) (q t))) t := by
     refine ae_hasDerivAt_of_eq_add_integral
-      (v := fun r ↦ -((p r).comp (linearization matrixField u q r) +
-        ν • fderiv ℝ (matrixCost · (u r)) (q r))) hA.1.neg ⟨hT0.le, le_rfl⟩ (a := p T)
+      (w := fun r ↦ -((p r).comp (linearization matrixField u q r) +
+        ν • fderiv ℝ (matrixCost · (u r)) (q r))) hA.1.neg ⟨hT0.le, le_rfl⟩ (x₀ := p T)
       fun t ht ↦ ?_
     rw [hA.2 t ht, intervalIntegral.integral_neg, intervalIntegral.integral_symm]
   -- there Proposition 6.5.1 gives the derivatives of the costates
@@ -234,10 +209,12 @@ theorem isIntegralCurve_covectorΛ_of_adjoint {T : ℝ} {u : ℝ → Fin 3 → �
       (hpt htI)
   -- in integral form (FTC for absolutely continuous functions)
   refine ⟨fun i j ↦ ?_, fun i j ↦ ?_⟩
-  · refine mxd_eq_add_integral (f := fun t ↦ covectorΛ₁ (q t) (p t) i j) hT0.le
+  · refine AbsolutelyContinuousOnInterval.eq_add_integral_of_ae_hasDerivAt
+      (f := fun t ↦ covectorΛ₁ (q t) (p t) i j) hT0.le
       (hac (fun w ↦ covectorΛ₁ w.1 w.2 i j) (mxd_contDiff_covectorΛ₁ i j)) ?_
     filter_upwards [hd] with t ht htI using (ht htI).1 i j
-  · refine mxd_eq_add_integral (f := fun t ↦ covectorΛR (q t) (p t) i j) hT0.le
+  · refine AbsolutelyContinuousOnInterval.eq_add_integral_of_ae_hasDerivAt
+      (f := fun t ↦ covectorΛR (q t) (p t) i j) hT0.le
       (hac (fun w ↦ covectorΛR w.1 w.2 i j) (mxd_contDiff_covectorΛR i j)) ?_
     filter_upwards [hd] with t ht htI using (ht htI).2 i j
 
