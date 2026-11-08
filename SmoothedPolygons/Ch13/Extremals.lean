@@ -14,7 +14,7 @@ condition (13.2.5), and that connect them with the constant-control objects (fir
 switching time, the Poincaré map):
 
 * "if `u` is chosen according to the maximum principle, then `H_F` is constant along trajectories"
-  (TeX 10741–10742; asserted; inventory, gap 1): `hamMax_eq_of_maxCondition`;
+  (TeX 10741–10742; asserted; REPORT.md, E62): `hamMax_eq_of_maxCondition`;
 * "The first control is determined by the maximum principle for `t` small and nonnegative"
   (proof of Lemma 13.2.6, TeX 10978–10979): every such solution starting at `z⁰ ≠ 0` uses the
   first control up to the first switching time, `eq_flow_of_maxCondition`. This is what makes

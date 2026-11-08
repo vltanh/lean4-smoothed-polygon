@@ -18,7 +18,7 @@ The book's proof, step by step, with the helper statements of this file:
    (`fixedPointCandidate`, `l4st_eq_fixedPointCandidate`; TeX 11353–11358). (The book also notes
    `z₃⁰ ≠ 0`; the argument below does not need it.)
 3. The maximum principle gives `z₃⁰ ū ζ₁² ∈ ℝ_{≤0}` (TeX 11359–11372; the book's displayed
-   inequalities are garbled, inventory gap 10(a), the final condition is right), whence
+   inequalities are garbled, REPORT.md, E67, the final condition is right), whence
    `(r, ζ₁) ∈ {(1, ζ), (r_scale, ζ²), (1/r_scale, ζ²)}` (`l4st_fixedPoint_cases`). In detail:
    `ζ₁ = 1` is impossible, since the first control of `F(z⁰)`, which is `ζ₁ u` by the equivariance
    of `F` (Lemmas 13.2.1, 13.2.2), differs from `u` (the control switches at `t_sw`); this
@@ -40,7 +40,7 @@ The book's proof, step by step, with the helper statements of this file:
    the normalization `t_sw = 1`).
 5. The two remaining solutions are, up to the virial group, `qOutCart` and `τ(qOutCart)`
    (`l4st_fixedPointCandidate_virialEquiv`), which are fixed points with `H_F⁺ = 0`
-   (`SmoothedPolygons/Ch13/FixedPoints.lean`: the verification the book leaves out, gap 10(b),(c))
+   (`SmoothedPolygons/Ch13/FixedPoints.lean`: the verification the book leaves out, REPORT.md, E67)
    and are distinct (`l4st_qOut_ne_qIn`). The book identifies the solutions with (13.5.1) by
    substitution ("choosing the first control `u = ζ₁²`"); here `qOutCart` and `τ(qOutCart)` satisfy
    the fixed-point equation (`poincare_qOutCart`, `poincare_tau_qOutCart`), so by step 2

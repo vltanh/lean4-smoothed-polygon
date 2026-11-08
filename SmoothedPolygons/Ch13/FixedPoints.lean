@@ -15,11 +15,11 @@ TeX 11298–11387), and the verification that they are what the lemma says; the 
   `qOutCart = equilExact r_scale`, the representative of `q_out` normalized by `Re z₁ = -1` and
   `z₃ ∈ ℝ_{<0}`;
 * `qOut`, `qIn`: the classes in `Ξ_𝒲/V_T` of the angular parts of `qOutCart` and `τ(qOutCart)`;
-* the facts that the proof of Lemma 13.5.2 leaves out (inventory, gap 10): the first control of
+* the facts that the proof of Lemma 13.5.2 leaves out (REPORT.md, E67): the first control of
   `qOutCart` is `ζ` (TeX 11384–11386), its first switching time is
-  `t_sw = 2(1 + r + r²)/(√3(r + 1))` (TeX 11340–11344) — in particular `t_sw` is the *first*
-  switching time, the control `ζ` staying optimal on `(0, t_sw)` (gap (b)) — the fixed-point
-  equation (13.5.2) holds with `(r, ζ₁) = (r_scale, ζ²)`, and `H_F⁺ = 0` there (gap (c));
+  `t_sw = 2(1 + r + r²)/(√3(r + 1))` (TeX 11336–11340) — in particular `t_sw` is the *first*
+  switching time, the control `ζ` staying optimal on `(0, t_sw)` — the fixed-point
+  equation (13.5.2) holds with `(r, ζ₁) = (r_scale, ζ²)`, and `H_F⁺ = 0` there;
 * the inward spiral: `F(τ qOutCart) = ζ² · (r_scale⁻¹ scaling)(τ qOutCart)` and `τ(q_out) = q_in`;
 * Remark 13.5.4 (the fixed point `q_fix` for `(r, ζ₁) = (1, ζ)`).
 
@@ -481,7 +481,7 @@ private theorem l4st_firstControl_qOutCart : firstControl qOutCart = ζ := by
     ⟨ζ_mem_VT, l4g_T rScale √3, l4g_T_pos (by linarith) hs0,
       fun t ht v hv ↦ l4g_max ht.1 ht.2 v hv⟩
 
-/-- **The first switching time of (13.5.1)** (TeX 11340–11344, and inventory gap 10(b)):
+/-- **The first switching time of (13.5.1)** (TeX 11336–11340, and REPORT.md, E67):
 `t_sw = 2(1 + r + r²)/(√3(r + 1))` with `r = r_scale`, and it is the *first* switching time: along
 `t ↦ z(t, qOutCart, ζ)` the switching function from `ζ` to `ζ²` is nonnegative on `[0, t_sw]`
 (it vanishes at `0` because `z₃` is real), the switching function from `ζ` to `1` is positive on
@@ -518,7 +518,7 @@ theorem poincare_qOutCart : poincare qOutCart = ζ ^ 2 • scale rScale qOutCart
   rw [poincare, firstSwitchTime_qOutCart, l4st_firstControl_qOutCart]
   exact l4g_flow_T
 
-/-- **The Hamiltonian vanishes at `q_out`** (inventory, gap 10(c): the statement of Lemma 13.5.2
+/-- **The Hamiltonian vanishes at `q_out`** (REPORT.md, E67: the statement of Lemma 13.5.2
 asserts it, the proof does not show it). Along (13.5.1) as a function of `r`, `z₃` is real, so
 the controls `ζ` and `ζ²` tie and `H_F(z, ζ) = H_F(z, ζ²) = (r² + r + 1) P(r) /
 (9 (r + 1)² (1 + r³ + r⁶))`, which vanishes exactly at the roots of `P`; and
@@ -546,7 +546,7 @@ theorem hamMax_qOutCart : hamMax qOutCart = 0 := by
   rw [e2, e3, max_self]
   exact max_eq_right (by linarith)
 
-/-- **The inward spiral** (TeX 11381–11383): `F(τ qOutCart) = ζ² · (r⁻¹ z₁, r⁻² z₂, r⁻³ z₃)` with
+/-- **The inward spiral** (TeX 11382–11384): `F(τ qOutCart) = ζ² · (r⁻¹ z₁, r⁻² z₂, r⁻³ z₃)` with
 `r = r_scale`. Proof route: `qOutCart` is a genuine switching point (its most recent control is
 `ζ²`, the conjugate of the first control `ζ` of `τ(qOutCart)`, Lemma 13.2.5), so
 `F(τ F(qOutCart)) = τ(qOutCart)` (`poincare_tau_poincare`); with
@@ -570,7 +570,7 @@ theorem poincare_tau_qOutCart :
           one_smul, scale_one]
     _ = ζ ^ 2 • scale rScale⁻¹ (tau qOutCart) := by rw [h1]
 
-/-- `τ(q_out) = q_in` in `Ξ_𝒲/V_T` (TeX 11302–11303). -/
+/-- `τ(q_out) = q_in` in `Ξ_𝒲/V_T` (TeX 11304). -/
 theorem tauQuot_qOut : tauQuot qOut = qIn := by
   unfold tauQuot qOut qIn
   rw [Quotient.map'_mk'']

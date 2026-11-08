@@ -880,7 +880,8 @@ computed with its own control.
 
 Proof (book: "an easy computation"): the two cubics differ only in their `t³` terms, and the sum is
 `(1/√3) RR(ζ - ζ², -i(ζ - ζ²)) t³/6 = 0`. The hypotheses `z⁰ ≠ 0` and `z₃⁰ ∈ ℝ_{≤0}` are not used
-(the identity holds for every `z⁰`; inventory, gap 5); the statement is kept as printed. -/
+(the identity holds for every `z⁰`; REPORT.md, E64 and Section 5); the statement is kept as
+printed. -/
 theorem lemma13_2_8 {z : Fin 3 → ℂ} (hz : z ≠ 0) (h₃ : z 2 ∈ wall 0) (t : ℝ) :
     switchingFunction ζ (ζ - ζ ^ 2) t z + switchingFunction (ζ ^ 2) (ζ ^ 2 - ζ) t z = 0 := by
   -- the two cubics differ only in their `t³` terms, and `RR(d, -i c d) = 0`

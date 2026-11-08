@@ -146,7 +146,7 @@ Proof (the book's): if `z(t₀) = 0`, solving the linear equations (13.2.2) give
 contradiction. The book first reduces to `u = 1` by the rotation of Lemma 13.2.2; the computation is
 the same for every vertex `u`, and it is done directly (no rotation). The argument covers every
 `t₀ ∈ ℝ`, and it does not use that the control is the first control (any constant control in `V_T`
-will do; inventory, gap 6). -/
+will do; REPORT.md, Section 5). -/
 theorem lemma13_3_1 {z : Fin 3 → ℂ} (hz : z ≠ 0) (h₃ : z 2 ∈ walls) (t : ℝ) :
     flow t z (firstControl z) ≠ 0 := by
   intro h0
@@ -694,7 +694,7 @@ RR(v, z₃(t))` on `U_T` is all of `U_T` if `z₃(t) = 0`, an edge if `z₃(t)` 
 `𝒲`, and a vertex otherwise; so the hypothesis says `z₃(t) ∈ 𝒲` for every t
 (`l4d_mem_walls_of_maximizers_UT`; only "not a vertex" is used).
 1. (Book's second case, on a subinterval.) The book assumes that the maximizing edge is the same
-   on the whole interval (TeX 11145–11147; inventory, gap 7). Repair: if `z₃(t₀) ≠ 0` for some
+   on the whole interval (TeX 11145–11147; REPORT.md, E65). Repair: if `z₃(t₀) ≠ 0` for some
    `t₀`, it lies on the open ray `ℝ_{<0} c` of a vertex `c` (`RR(z₃(t₀), c) < 0`), and by continuity
    `RR(z₃, c) < 0` on an interval `[a, b] ∋ t₀` of positive length; a point of `𝒲` with
    `RR(·, c) < 0` lies on the ray of `c`, so `z₃` stays on that ray on `[a, b]` and the maximizing

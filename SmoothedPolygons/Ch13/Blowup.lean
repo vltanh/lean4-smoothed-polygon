@@ -29,7 +29,7 @@ import Mathlib.Analysis.SpecialFunctions.Sqrt
 **Regularity of the identification (a correction).** The book calls the identification a
 diffeomorphism (TeX 11169–11177). The function `φ⁶ = |z₁|⁶ + |z₂|³ + |z₃|²` is `C²` but not `C³`
 at points with `z₂ = 0` (the term `|z₂|³`), so `Ξ` is a `C²` hypersurface of `ℂ³` and the
-identification is a `C²` diffeomorphism, smooth away from `{z₂ = 0}` (inventory, gap 8). Only the
+identification is a `C²` diffeomorphism, smooth away from `{z₂ = 0}` (REPORT.md, E66). Only the
 one reading is possible, and it is recorded here: the identification is stated as a homeomorphism
 together with the regularity of `φ` (`contDiffOn_weightedNorm`,
 `contDiffOn_weightedNorm_infty`); the inverse map is polynomial. The book uses the

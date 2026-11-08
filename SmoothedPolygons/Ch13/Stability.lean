@@ -32,8 +32,8 @@ The book's proof, and its formalization:
 2. "The second assertion follows from the first, because `q_in` is obtained by time reversal from
    `q_out`": `τ ∘ F_ang` is an involution near `q_out` and near `q_in`
    (`l4st_tauZero_poincareAngZero_involutive`, from `F(τ F(z)) = τ(z)` at genuine switching points,
-   `poincare_tau_poincare`, Lemmas 13.2.3 and 13.2.5; not spelled out in the book, inventory
-   gap 12), `τ(q_out) = q_in` (`tauQuot_qOut`), and an asymptotically stable fixed point is
+   `poincare_tau_poincare`, Lemmas 13.2.3 and 13.2.5; not spelled out in the book, REPORT.md,
+   E68), `τ(q_out) = q_in` (`tauQuot_qOut`), and an asymptotically stable fixed point is
    carried by such a time reversal to an unstable one
    (`Function.IsAsymptoticallyStable.isUnstable_of_involutive`). Its hypotheses: `Ξ_{𝒲,0}/V_T` is
    compact Hausdorff (`compact_t2_isClosed_XiWQuot`; a closed subset of a compact Hausdorff space),

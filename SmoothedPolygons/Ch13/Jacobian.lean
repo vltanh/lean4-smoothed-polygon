@@ -16,7 +16,7 @@ The computation behind Lemma 13.5.5 of Hales–Vajjha, *Packings of Smoothed Pol
 diffeomorphic to an open subset of `ℝ³`. An explicit calculation of the eigenvalues of the Jacobian
 matrix in terms of local coordinates centered at `q_out` gives the result. Numerically, the three
 eigenvalues have absolute value less than `0.1`. The calculations were made in Mathematica." The
-book gives no chart, matrix or values (inventory, gap 12); this file fixes them and states them
+book gives no chart, matrix or values (REPORT.md, E68); this file fixes them and states them
 exactly.
 
 **The chart.** Near `q_out`, every point of `Ξ_{𝒲,0}/V_T` has a unique representative `z ∈ ℂ³` with
@@ -40,8 +40,8 @@ function of `x` by the implicit function theorem. With `w = F(z) = z(t_sw, z, ζ
 [-0.0441430, -0.0198735, -0.0011447]]`. Its characteristic polynomial is
 `λ³ - T λ² + M λ - D` with `T, M, D ∈ ℚ(r_scale)` (the `√3` cancel) given by `jacTrace`,
 `jacMinorSum`, `jacDet`; numerically `T = -0.0873902`, `M = 0.000588510`, `D = 4.16439 × 10⁻⁷`,
-and the eigenvalues are `-0.0799655`, `-0.0080700`, `0.00064532` (the coordinator's independent
-finite-difference computation in another chart agrees; inventory §13.5).
+and the eigenvalues are `-0.0799655`, `-0.0080700`, `0.00064532` (an independent
+finite-difference computation in another chart agrees).
 
 **The certificate** (`norm_lt_of_aeval_charpoly_jacobianOut_eq_zero`). With
 `χ(λ) = λ³ - Tλ² + Mλ - D`: `χ(-1/10) < 0 < χ(-1/20)`, `χ(-1/1000) < 0 < χ(1/10)`, so `χ`

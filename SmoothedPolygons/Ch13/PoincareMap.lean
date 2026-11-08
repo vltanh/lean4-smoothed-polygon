@@ -18,7 +18,7 @@ Points", TeX 11234–11290, 11429–11431):
   `(ℂ³ ∖ 0)_𝒲` it is well defined in the book's sense: `0 < t_sw < 10 φ(z⁰)` (Lemma 13.2.6,
   Corollary 13.2.7), `F(z⁰) ≠ 0` (Lemma 13.3.1; in fact for every `z⁰ ≠ 0`,
   `flow_firstControl_ne_zero`) and `F(z⁰)₃ ∈ 𝒲`; these uses are silent in the book
-  (inventory, gap 9);
+  (REPORT.md, E67);
 * the equivariance of `F` under `V_T` (Lemma 13.2.2, (13.2.7)) and under rescaling (Lemma 13.2.1),
   so that `F` descends to `(ℝ_{>0} × Ξ)_𝒲/V_T` and induces `F_ang` on `Ξ_𝒲` (`poincareAng`) and on
   `Ξ_𝒲/V_T` (`poincareAngQuot`) (TeX 11251–11275);
@@ -218,7 +218,7 @@ theorem firstSwitchTime_lt {z : Fin 3 → ℂ} (hz : z ≠ 0) :
 
 /-- `F` maps `ℂ³ ∖ 0` into `ℂ³ ∖ 0`: `flow_firstControl_ne_zero` at `t = t_sw`
 (`0 < t_sw`, `firstSwitchTime_pos`). On the section `(ℂ³ ∖ 0)_𝒲` this is also Lemma 13.3.1 at
-`t = t_sw`, the book's silent justification (inventory, gap 9); off the walls Lemma 13.3.1 does not
+`t = t_sw`, the book's silent justification (REPORT.md, E67); off the walls Lemma 13.3.1 does not
 apply, and `poincare_tau_poincare` needs `τ F(z⁰) ≠ 0` for every `z⁰ ≠ 0`. -/
 theorem poincare_ne_zero {z : Fin 3 → ℂ} (hz : z ≠ 0) : poincare z ≠ 0 := by
   exact flow_firstControl_ne_zero hz ⟨(firstSwitchTime_pos hz).le, le_rfl⟩

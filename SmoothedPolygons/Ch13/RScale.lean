@@ -15,11 +15,11 @@ Certified bounds replace the book's numerical values (`≈ 6.27`): `rScale_bound
 statement of Lemma 13.5.2 uses `6.27 < r_scale < 6.28`) and a fine enclosure for the certified
 eigenvalue computation of Lemma 13.5.5.
 
-Proof route (inventory, §13.5): `P(r) = r³ Q(r + 1/r)` with `Q(y) = y³ - 5y² - 10y + 5`
-(`l4st_rScalePoly_eq`); `Q` has one root `y_s ≈ 6.4336 > 2` and two roots in `(-2, -1)` and
-`(0, 1)`, which give no real `r` (`|r + 1/r| ≥ 2`); so the real roots of `P` are the two roots
-`r_s > 1 > 1/r_s` of `r + 1/r = y_s`. The bounds are sign changes of `P` at rational points
-(`norm_num`).
+Proof route (the book asserts these facts without proof, REPORT.md, E67):
+`P(r) = r³ Q(r + 1/r)` with `Q(y) = y³ - 5y² - 10y + 5` (`l4st_rScalePoly_eq`); `Q` has one root
+`y_s ≈ 6.4336 > 2` and two roots in `(-2, -1)` and `(0, 1)`, which give no real `r`
+(`|r + 1/r| ≥ 2`); so the real roots of `P` are the two roots `r_s > 1 > 1/r_s` of
+`r + 1/r = y_s`. The bounds are sign changes of `P` at rational points (`norm_num`).
 
 In the proofs: a root `r > 1` gives a root `y = r + 1/r ≥ 2` of `Q`; `Q < 0` on `[2, 6]`, so
 `y > 6`, and two roots `y₁, y₂ > 6` coincide because
@@ -84,7 +84,7 @@ private lemma l4g_six_lt_of_Q {y : ℝ} (hy : 2 ≤ y) (h : y ^ 3 - 5 * y ^ 2 - 
   nlinarith [mul_nonneg (sub_nonneg.2 hy) (sub_nonneg.2 hy6),
     mul_nonneg (mul_nonneg (sub_nonneg.2 hy) (sub_nonneg.2 hy6)) (sub_nonneg.2 hy)]
 
-/-- **Uniqueness of the root greater than `1`** (inventory, §13.5): `Q` has one root `y > 2`
+/-- **Uniqueness of the root greater than `1`**: `Q` has one root `y > 2`
 (`Q < 0` on `[2, 6]` and `Q` is increasing on `[6, ∞)`), and `r ↦ r + 1/r` is injective on
 `(1, ∞)`. -/
 private lemma l4g_root_unique {r₁ r₂ : ℝ} (h₁ : 1 < r₁) (h₂ : 1 < r₂) (hP₁ : rScalePoly r₁ = 0)
