@@ -21,11 +21,11 @@ public import SmoothedPolygons.Ch6.MatrixSystem
 
 Notes on the statements:
 * Lemma 8.2.1 is printed "for all `X ∈ 𝔰𝔩₂(ℝ)`", but `H₂` is defined only where
-  `⟨X, Z_u⟩ ≠ 0` on `U_T` (gap G7); that is the hypothesis here (it holds on the state space by
+  `⟨X, Z_u⟩ ≠ 0` on `U_T` (E52); that is the hypothesis here (it holds on the state space by
   Lemma 3.3.4, and Lemma 7.3.1 has the same hypothesis). For `X = 0` the printed statement would
   be meaningless.
 * The converse of Theorem 8.2.6 is argued in the book through necessary conditions only
-  (gap G9); the formal statement exhibits the lift `λ_cost = -1`, `Λ₁ = -(3/2) J`, `Λ_R = 0`.
+  (E54); the formal statement exhibits the lift `λ_cost = -1`, `Λ₁ = -(3/2) J`, `Λ_R = 0`.
 -/
 
 @[expose] public section
@@ -560,7 +560,7 @@ private lemma l3f_face_classify {F : Set (Fin 3 → ℝ)} (hne : F.Nonempty) (hc
 
 /-- **Lemma 8.2.1** (`lem:LambdaR`). Let `X ∈ 𝔰𝔩₂(ℝ)` with `⟨X, Z_u⟩ ≠ 0` for every `u ∈ U_T`
 (where the control-dependent term `H₂(Λ, X, Z_u) = -⟨Λ, Z_u⟩/⟨X, Z_u⟩` of the Hamiltonian is
-defined; gap G7), and `Λ ∈ X^⊥` (traceless, `⟨Λ, X⟩ = 0`). If `H₂` does not depend on the control
+defined; E52), and `Λ ∈ X^⊥` (traceless, `⟨Λ, X⟩ = 0`). If `H₂` does not depend on the control
 `u ∈ U_T`, then `Λ = 0`. If `Λ ≠ 0`, the set of controls maximizing the Hamiltonian is a vertex or
 an edge of `U_T`.
 
@@ -773,7 +773,7 @@ almost everywhere, extended to `t₀` by the same continuity), which at `t₀` r
 `⟨Λ_{1,cost}, X⟩ = 0`, `Λ_{1,cost} = Λ₁ - (3/2) λ_cost J` (8.2.1); `0 = Λ_R'(t₀)
 = -[Λ_{1,cost}, X(t₀)]` puts `Λ_{1,cost}(t₀)` in the centralizer `ℝX(t₀)`; `ℝX ∩ X^⊥ = 0`
 (`⟨X, X⟩ = -2`) gives `Λ_{1,cost}(t₀) = 0`. If `λ_cost = 0` then `(λ_cost, Λ₁, Λ_R) = 0` at `t₀`,
-against the nontriviality of the reduced costate (gap G1; part of `IsStateCostateSolution`).
+against the nontriviality of the reduced costate (E21; part of `IsStateCostateSolution`).
 
 Formal details. Near `t₀`, `⟨Z_u, X⟩ ≤ -δ` uniformly in `u ∈ U_T` (`l3f_eventually_denom`), so
 `Σ|P_ij| ≤ 4/δ` and the control-dependent terms are at most `Σ|Λ_R|_ij` times a bound
@@ -897,7 +897,7 @@ theorem lemma8_2_2 {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ 
     linarith
   have hΛ₁ : Λ₁ t₀ = (3 / 2 * lam) • J := by
     rw [← sub_eq_zero, ← hWdef, hk, hk0, zero_smul]
-  -- `λ_cost ≠ 0`, or the reduced costate would vanish at `t₀` (nontriviality, gap G1)
+  -- `λ_cost ≠ 0`, or the reduced costate would vanish at `t₀` (nontriviality, E21)
   refine ⟨fun hl ↦ ?_, hΛ₁⟩
   have hnt := (hpt t₀ ht₀).2.2.2.2.2.2
   rw [hΛ₁, hl, hΛ] at hnt
@@ -1014,7 +1014,7 @@ lift on the interval of the arc (an arc has no boundary conditions of Problem 3.
 Proof (the book's, TeX 7271–7298, "a summary of results already obtained"): forward, the
 Hamiltonian is independent of the control, so `Λ_R = 0` on the interval (Lemma 8.2.1,
 `lemma8_2_1`, with `X(t)` a star state, Lemma 3.3.4), and Theorem 8.2.3 (`theorem8_2_3`) gives
-the circle and the costates, which lie in `𝒮_sing`. Converse (gap G9: the book derives necessary
+the circle and the costates, which lie in `𝒮_sing`. Converse (E54: the book derives necessary
 conditions; here the lift is exhibited): `λ_cost = -1`, `Λ₁ = -(3/2) J`, `Λ_R = 0` solve the costate
 equations (`[J, J] = 0`), `H ≡ 0` is independent of the control, and `(λ_cost, Λ₁) ≠ 0`.
 In the forward direction `Λ_R = 0` on `[t₁, t₂]` by continuity, so the lift is in `𝒮_sing` at the
@@ -1053,7 +1053,7 @@ theorem theorem8_2_6 :
     have hR' := l3f_eqOn_Icc ((Matrix.continuousOn_of_eq_add_integral hIR).mono hsub) h₁₂ hR
     exact ⟨fun t ht ↦ ⟨lam, hlam, (hpt t (hsub ht)).2.1, (hXΛ t ht).2, (hXΛ t ht).1, hR' t ht⟩,
       hu.mono fun t ht hti ↦ (ht hti).1, hg⟩
-  · -- converse (gap G9): the lift `λ_cost = -1`, `Λ₁ = -(3/2) J`, `Λ_R = 0` solves the costate
+  · -- converse (E54): the lift `λ_cost = -1`, `Λ₁ = -(3/2) J`, `Λ_R = 0` solves the costate
     -- equations (`[J, J] = 0`), and `H ≡ 0` does not depend on the control
     have hT : 0 < t₂ - t₁ := by linarith
     have hJJ : ∀ c : ℝ, (c • J) * J - J * (c • J) = 0 := fun c ↦ by

@@ -55,7 +55,7 @@ conditions, written after the time shift `t ↦ a + t` as `IsStateCostateSolutio
 `[0, b - a]`. It includes `a < b`.
 
 Nontriviality is imposed on the reduced costate, as Chapter 8 uses it (TeX 7163–7166, 7583;
-inventory, gap G1); `IsPontryaginExtremal` imposes the same condition. -/
+REPORT.md, E21); `IsPontryaginExtremal` imposes the same condition. -/
 def IsExtremalOn (a b : ℝ) (u : ℝ → Fin 3 → ℝ) (g X Λ₁ ΛR : ℝ → Mat2) (lam : ℝ) : Prop :=
   IsStateCostateSolution (b - a) (fun t ↦ u (a + t)) (fun t ↦ g (a + t)) (fun t ↦ X (a + t))
     (fun t ↦ Λ₁ (a + t)) (fun t ↦ ΛR (a + t)) lam

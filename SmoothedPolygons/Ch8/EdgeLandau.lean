@@ -14,9 +14,9 @@ edge problem where also `λ₂' = 0` (normalized as in (8.1.8)), `λ₂(t) = C t
 Notes on the statement:
 * The book's Landau notation is two-sided (TeX 6903–6907): `f₁ = O(f₂)` on some `(-t₁, t₁)`, i.e.
   `Asymptotics.IsBigO` at `𝓝 0`. The proof applies Corollary A.1.3 on both sides of `0`
-  (gap G14; `corollaryA_1_3_two_sided`).
+  (E61; `corollaryA_1_3_two_sided`).
 * The constant `C` printed for `x₀ ≠ 0`, `-x₀(1 + y₀)/y₀²` (TeX 6934, 6973), is wrong: the
-  computation gives `C = -2x₀/y₀` (gap G5; the intermediate line TeX 6970 already gives
+  computation gives `C = -2x₀/y₀` (E50; the intermediate line TeX 6970 already gives
   `(x² - x₀²)/y² = 2x₀t/y₀ + O(t²)`). The statement only claims `C ≠ 0`, which holds with the
   correct value.
 
@@ -100,7 +100,7 @@ private noncomputable def l3c_cmp₂ (x₀ : ℝ) (x y : ℝ → ℝ) (t : ℝ) 
 `x = x₀ + ∫₀ᵗ y` with `y` continuous and positive and `|y - y₀| ≤ M|t|` (`y = y₀ + O(t)`, `y'`
 being bounded). Then `x = x₀ + y₀t + O(t²)` and
 * if `x₀ ≠ 0`: `(x² - x₀²)/y² = 2x₀t/y₀ + O(t²)`, `λ̃₁ = 2x₀t/y₀ + O(t²)`, and
-  `λ̃₂ = -2x₀t²/y₀ + O(t³)` (the book's constant `-x₀(1 + y₀)/y₀²` is a slip, gap G5);
+  `λ̃₂ = -2x₀t²/y₀ + O(t³)` (the book's constant `-x₀(1 + y₀)/y₀²` is a slip, E50);
 * if `x₀ = 0`: `x = y₀t + O(t²)`, `λ̃₁ = t² + O(t³)`, and `λ̃₂ = -2t³/3 + O(t⁴)`. -/
 private lemma l3c_taylor {x y : ℝ → ℝ} {x₀ y₀ τ M : ℝ} (hτ : 0 < τ) (hy₀ : 0 < y₀)
     (hxc : ContinuousOn x (Icc (-τ) τ)) (hyc : ContinuousOn y (Icc (-τ) τ))
@@ -480,7 +480,7 @@ but not on the control `u_e`, such that `λ₂(t) = C tⁿ + O(tⁿ⁺¹)` (two-
 particular `t = 0` is an isolated zero of `λ₂`.
 
 Proof (the book's, TeX 6932–7015):
-1. `n = 2` if `x₀ ≠ 0`, `n = 3` if `x₀ = 0`; `C = -2x₀/y₀` if `x₀ ≠ 0` (gap G5: the printed
+1. `n = 2` if `x₀ ≠ 0`, `n = 3` if `x₀ = 0`; `C = -2x₀/y₀` if `x₀ ≠ 0` (E50: the printed
    `-x₀(1 + y₀)/y₀²` is a slip) and `C = -2/3` if `x₀ = 0`.
 2. Comparison functions `λ̃₁(t) = ∫₀ᵗ 2x/y`, `λ̃₂(t) = -∫₀ᵗ ((x² - x₀²)/y² + λ̃₁)`.
 3. The Taylor expansions `y = y₀ + O(t)` (`y'` is bounded), `x = x₀ + y₀ t + O(t²)` give

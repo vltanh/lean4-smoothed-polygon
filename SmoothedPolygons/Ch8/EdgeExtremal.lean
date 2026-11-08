@@ -17,7 +17,7 @@ The book's proof (TeX 6791–6798) has two sentences:
    minimizer minimizes the cost among trajectories with the same endpoint conditions whose control
    lies in that edge; hence it is extremal for the edge control problem.
 
-The second sentence needs (inventory, gap G10): the maximum principle for the edge problem (an
+The second sentence needs (REPORT.md, E48): the maximum principle for the edge problem (an
 open subset of `ℝ³`, fixed endpoints, free terminal time, integral cost), which is
 `External.pontryagin_maximum_principle`; and the principle of optimality made precise. A
 competitor of the edge problem with the same endpoints is spliced into the minimizer: its
@@ -746,7 +746,7 @@ private lemma l3e_isOpen_starDomain : IsOpen starDomain := by
       ((isOpen_lt continuous_fst continuous_const).inter (isOpen_lt continuous_const h)))
 
 /-- **The principle of optimality for an edge arc** (proof of Proposition 8.1.3, TeX 6793–6797,
-with gap G10 repaired). Let `(T, u, g, X)` be a global minimizer of the Reinhardt problem and let
+with E48's gap repaired). Let `(T, u, g, X)` be a global minimizer of the Reinhardt problem and let
 `u_j = 0` almost everywhere on `[c, d] ⊆ [0, T]`. Then the edge arc `(u_e, (x, y, s))` of the
 minimizer on `[c, d]` (`edgeParam j u`, `edgeState j X c`) is a strong local minimizer of the
 `j`-th edge control problem with fixed endpoints (8.1.4) and free terminal time.
@@ -837,7 +837,7 @@ on its whole domain `[0, T]`.
 "The global solution" presupposes existence and uniqueness; the statement is for every global
 minimizer (`IsReinhardtMinimizer`), and one exists (`exists_isReinhardtMinimizer`).
 
-Proof (the book's, TeX 6791–6798, with gap G10 repaired):
+Proof (the book's, TeX 6791–6798, with E48's gap repaired):
 1. Extremal: `exists_isPontryaginExtremal_of_isReinhardtMinimizer` ("We have seen that the global
    minimizer must be extremal", §6.1–§6.2).
 2. Edge extremal: for `j`, `[c, d]` with `u_j = 0` a.e., the edge arc is a strong local minimizer

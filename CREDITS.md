@@ -268,3 +268,49 @@ round's REPORT.md (7 November, 17:18 CST), from the session transcript:
 For the whole project (five rounds, to the same commit): 51.2 hours elapsed, 123 sub-agents (112 on
 the formalization and its packages; at most 13 at once), 52.6 hours of sub-agent work, 9,690 tool
 calls by sub-agents and 1,258 by the main session.
+
+## Sixth round (7 November 2026)
+
+After publishing the second layer (with the user's approval), the round took the plan's third
+layer: Chapter 8 (the edge control problems and the singular locus), Corollary A.1.3, and Theorem
+16.3.1 (Mahler's First conjecture) conditional on one named hypothesis,
+`NoChatteringIntoSingularLocus`, which stands for Theorems 16.4.1 and 14.4.1 (Chapters 13–16, later
+layers). The user decided two questions: Theorem 8.3.1, false as printed (two counterexamples,
+checked independently), is formalized in its one-sided maximizer form; Theorem 8.2.7, whose proof
+covers only one kind of singular subarc, is formalized in the authors' reading (singular includes
+the edge problems), with the literal statement proved for normal lifts and left open for abnormal
+ones. The statements of the fourth layer (Chapter 13) were also written and reviewed.
+
+How it was made:
+
+- **Statements** (two agents for the layer, one per restated theorem): every statement with
+  `sorry`; an independent agent reviewed them, verified both counterexamples to Theorem 8.3.1 and
+  narrowed the named hypothesis to edge extremals.
+- **Proofs** (thirteen agents, at most nine at once): the edge problem and its maximum principle,
+  Proposition 8.1.3 with the principle of optimality made precise, Theorem 8.1.4 and Lemma 8.1.5,
+  the singular locus, the second variation of the circle, Theorems 8.2.7, 8.3.1–8.3.2 and Lemma
+  8.3.4, smoothed polygons, and the assembly of Theorem 16.3.1.
+- **Verification and cleanup** (four agents): an independent comparison with the book found the
+  second variation's route an unforced departure (redone along the book: a fixed ψ in the book's
+  time, with an exact cost formula), a skipped intermediate claim of Theorem 8.1.4 (restored) and a
+  shortcut in Lemma 8.3.4 (replaced by the book's derivation); a cleanup renamed and merged
+  helpers and recorded every route difference.
+- **Audit** (one agent): REPORT.md (E48–E61; E21, E15 and E47 extended), README.md,
+  formalization.yaml, with Theorem 16.3.1 marked as conditional throughout.
+- **Fourth layer** (three agents): the statements of Chapter 13, an independent review (which
+  recomputed the Jacobian at the outward fixed point to 38 digits) and its fixes.
+
+Figures, from the end of the fifth round (7 November 2026, 17:18 CST) to just before the commit
+that completes the round's REPORT.md (20:44 CST), from the session transcript:
+
+- elapsed time: 3.4 hours (including the publication of the second layer);
+- sub-agents: 22 (19 on the third layer, 3 on the fourth), at most 9 running at once, 2
+  resumptions; their total working time 9.1 hours;
+- tool calls: 1,836 by the sub-agents, 109 by the main session;
+- tokens: sub-agents 3.58M output, 8.12M input (uncached input and cache writes), 413M cache reads;
+  main session 0.10M output, 0.24M input, 62M cache reads;
+- model calls: `claude-opus-5-5` only, 1,727 by the sub-agents and 116 by the main session.
+
+For the whole project (six rounds, to the same time): 54.6 hours elapsed, 145 sub-agents (134 on
+the formalization and its packages; at most 13 at once), 61.7 hours of sub-agent work, 11,528 tool
+calls by sub-agents and 1,368 by the main session.

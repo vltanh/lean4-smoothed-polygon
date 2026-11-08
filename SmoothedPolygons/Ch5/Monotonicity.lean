@@ -32,7 +32,7 @@ The book uses `ρ₀,ₓ > 0`, `ρ₁,ₓ < 0` and `ρ₂,ₓ = √3x/y` through
   hence on `h₀ ∩ {x > 0, y ≥ √3}`; it is even in `x` (`areaFn_two_eq`), so it is least at `x = 0`.
   (TeX 4447's "monotonic decreasing in `x` on `h₀ ∩ {x < 0, y ≥ √3}`" should read
   `h₂ ∩ {x < 0, y ≥ √3}`: the mirror image of `h₀ ∩ {x > 0}` under `x ↦ -x` is in `h₂`.)
-  **Gap (inventory, Part I §6):** the book treats only `h₀ ∩ {x > 0, y ≥ √3}` and does not show
+  **Gap (REPORT.md, E44):** the book treats only `h₀ ∩ {x > 0, y ≥ √3}` and does not show
   that the points with `x > 0` lie in `h₀`, nor how `I₁area₁` enters. Repair along its lines: for
   `y ≥ √3`, `x ≥ 0`, `T₀ - T₀^ext` has the sign of
   `(1 + √3x)(3x² + 3y² - 1) - 8(1 - √3x)² ≥ x(3√3x² - 21x + 24√3) ≥ 0` (the quadratic has negative

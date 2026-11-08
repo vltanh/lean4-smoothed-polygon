@@ -794,7 +794,7 @@ with finitely many switches: it is equal almost everywhere to a piecewise consta
 values `±½` and finitely many switches on `[0, T]`.
 
 (The book says "the optimal control function"; the statement and the proof concern any extremal,
-gap G13.)
+E49.)
 
 Proof (the book's, TeX 6820–6894):
 1. The costate equations (8.1.7) (`eqn_costate_edge`); `λ₃` is constant.

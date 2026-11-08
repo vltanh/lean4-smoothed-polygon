@@ -22,7 +22,7 @@ import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
   values in a single edge of `U_T` almost everywhere", applies Theorem 8.1.4 on each such
   neighbourhood, and concludes by compactness.
 
-## Theorem 8.3.1 as printed is false (gap G2)
+## Theorem 8.3.1 as printed is false (REPORT.md, E56)
 
 Theorem 8.3.1 (TeX 7448–7458) is printed about the *maximizers*: there are an edge `{i, j}` and a
 neighbourhood of `t₀` in `[t₁, t₂]` on which `(X(t), Λ_R(t)) ∈ ⋃_{I ⊆ {i, j}} (T*O_J)_I`, i.e. the
@@ -57,7 +57,7 @@ lie in the edge `k₋` at every time of `(t₀ - ε, t₀) ∩ [a, b]` and in th
 of `(t₀, t₀ + ε) ∩ [a, b]`. The time `t₀` itself is excluded, and the two edges may differ; both
 counterexamples satisfy this form (the first with the vertices `e_b` before and `e_a` after `0`,
 the second with the edge `{e₂, e₃}` before and the vertex `e₁` after `t₀`). This is the
-inventory's repair of G2 ("restate it with one-sided neighbourhoods; Thm 8.3.2 survives"). The
+repair of E56 planned before the proofs were written, under which Theorem 8.3.2 survives. The
 book's hypotheses are kept, edge extremality included (the binder `_hedge`), although the proof
 of the maximizer form does not use it (the book uses it, through Theorem 8.1.4, only to pass to
 the control).
@@ -71,7 +71,7 @@ edge. It is the corollary `IsExtremalOn.exists_ae_mem_controlEdge_of_isEdgeExtre
 
 The proof of Theorem 8.3.1 is the book's (claims (a), (b), (c), with the Gronwall–Bellman
 inequality (8.3.1), Corollary A.1.3 two-sided and Lemma 8.2.1), run directly on each side of `t₀`
-instead of in the contrapositive; claim (b), a sketch in the book (gap G3), is carried out as a
+instead of in the contrapositive; claim (b), a sketch in the book (E56), is carried out as a
 second-order expansion of `Λ_R`. The step of claim (a) that passes to the control through
 Theorem 8.1.4 is not needed for the maximizer form and is the corollary's (a departure forced by
 the restatement). The estimates use the entrywise `ℓ¹` norm on `2 × 2` matrices (`l3hN`; the book
@@ -817,7 +817,7 @@ private lemma l3h_claim_a {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR :
   have := l3h_expansion h ht₀ hR (by positivity) hY hYV
   simpa only [pow_one] using this
 
-/-- **Claim (b)'s expansion** (TeX 7566–7576, a sketch in the book; gap G3): at a zero `t₀` of
+/-- **Claim (b)'s expansion** (TeX 7566–7576, a sketch in the book; E56): at a zero `t₀` of
 `Λ_R` with `Λ_{1,cost}(t₀) = 0`, `Λ_R(t) = (t - t₀)²/2 · G + o((t - t₀)²)` with
 `G = -[Λ₁'(t₀), X(t₀)]`, `Λ₁'(t₀) = [Λ₁(t₀), X(t₀)]` (the book's `-W'`). Here
 `[-Λ_{1,cost}, X](s) = -[Λ₁(s) - Λ₁(t₀), X(s)]` is `O(|s - t₀|)` and `(s - t₀) G + o(s - t₀)`
@@ -1230,7 +1230,7 @@ time `t ∈ [a, b]` with `t₀ < t < t₀ + ε` it is contained in the edge `{u_
 **Restatement.** The book prints (TeX 7448–7458): "there exists an edge `{i, j}` and a
 neighborhood of `t₀` in `[t₁, t₂]` on which `(X(t), Λ_R(t)) ∈ ⋃_{I ⊆ {i,j}} (T*O_J)_I`", i.e. the
 maximizers lie in one edge at every time of a two-sided neighbourhood of `t₀`. That is false
-(gap G2; module docstring): at a time `t₀` off `𝒮_sing` with `Λ_R(t₀) = 0` all of `U_T` maximizes,
+(E56; module docstring): at a time `t₀` off `𝒮_sing` with `Λ_R(t₀) = 0` all of `U_T` maximizes,
 which happens on edge-extremal extremals (normal counterexample `λ_cost = -1`,
 `X(0) = Φ(0.1 + 0.9i)`, `Λ_R(0) = 0`, `Λ₁(0) = -(3/2) J + L`, `0 ≠ L ⊥ X(0)`), and the maximizers
 can lie in different edges before and after `t₀` (abnormal counterexample on the edge
@@ -1258,7 +1258,7 @@ maximizers form a face of `U_T` (Lemma 7.3.1, `lemma7_3_1`), they lie in the edg
    with `A(Λ, t) = [P, Λ] - ⟨Λ, P⟩[P, X]` bounded on `[0, b - a]` (`P = Z_u/⟨Z_u, X⟩`,
    Lemma 3.3.4 and compactness), so `‖Λ‖ ≤ C₀ |∫_{t₀}^t (‖Λ‖ + ‖Y‖)|` (8.3.1,
    `eqn:Lambda-bellman`, in the entrywise `ℓ¹` norm), and Corollary A.1.3 two-sided
-   (`corollaryA_1_3_two_sided`, gap G14; at `t₀ = a` or `b` applied to the function extended
+   (`corollaryA_1_3_two_sided`, E61; at `t₀ = a` or `b` applied to the function extended
    past the end by its value there, `l3h_gronwall`) gives `‖Λ‖ = O(|t - t₀|ⁿ⁺¹)` when
    `‖Y‖ = O(|t - t₀|ⁿ)`; then `Λ_R/(t - t₀)ⁿ` has the limit of `Y/(t - t₀)ⁿ` (`l3h_expansion`).
 3. Claim (a): `W = [Λ_{1,cost}(t₀), X(t₀)] ≠ 0`. Then `Λ_R(t)/(t - t₀) → -W` (`l3h_claim_a`,
@@ -1266,7 +1266,7 @@ maximizers form a face of `U_T` (Lemma 7.3.1, `lemma7_3_1`), they lie in the edg
    `t₀` and `σ = t₀ - t`, `V = W` before (`±W ∈ X(t₀)^⊥ ∖ 0`) gives `kᵣ` and `kₗ` (the book: "for
    sufficiently small `t > 0` (or `t < 0`) there exists a vertex or edge of `U_T` that maximizes
    this Hamiltonian").
-4. Claim (b) (a "brief sketch" in the book, gap G3): `W = 0`, so `Λ_{1,cost}(t₀) = 0` (it commutes
+4. Claim (b) (a "brief sketch" in the book, E56): `W = 0`, so `Λ_{1,cost}(t₀) = 0` (it commutes
    with `X(t₀)` and is orthogonal to it, `l3h_eq_zero_of_bracket_eq_zero`), and
    `W' = [Λ_{1,cost}'(t₀), X(t₀)] ≠ 0`. Then `[Λ_{1,cost}, X] = O(|t - t₀|)` and
    `= (t - t₀) W' + o(t - t₀)`, so `‖Y‖ = O(|t - t₀|²)`, `Y/(t - t₀)² → -W'/2`
@@ -1276,7 +1276,7 @@ maximizers form a face of `U_T` (Lemma 7.3.1, `lemma7_3_1`), they lie in the edg
    are chosen on each side separately, and `kₗ = kᵣ` is not shown.
 5. Claim (c): `W = W' = 0`. Then `Λ_{1,cost}'(t₀) = [Λ₁(t₀), X(t₀)] = (3/2) λ_cost [J, X(t₀)]`
    commutes with `X(t₀)` and is orthogonal to it, so it vanishes; nontriviality of
-   `(λ_cost, Λ₁, Λ_R)` at `t₀` (gap G1) gives `λ_cost ≠ 0`, so `[J, X(t₀)] = 0` and
+   `(λ_cost, Λ₁, Λ_R)` at `t₀` (E21) gives `λ_cost ≠ 0`, so `[J, X(t₀)] = 0` and
    `X(t₀) ∈ ℝ J ∩ O_J = {J}` (`l3h_eq_J_of_commute`): the lift is in `𝒮_sing` at `t₀`, against
    the hypothesis.
 
@@ -1403,8 +1403,8 @@ interval `[a, b]` that does not meet the singular locus `𝒮_sing`, and assume 
 `[a, b]`.
 
 Chapter 1 restates this theorem (TeX 851–856) without the hypothesis "edge extremal"; that
-restatement is false for extremal lifted trajectories on an interval (gap G12): by Remark 8.1.6
-(`remark8_1_6`, with the sign of G4), every trajectory with an arbitrary measurable control in an
+restatement is false for extremal lifted trajectories on an interval (E57): by Remark 8.1.6
+(`remark8_1_6`, with the sign of E51), every trajectory with an arbitrary measurable control in an
 edge of `U_T` lifts to an abnormal extremal lifted trajectory, which does not meet `𝒮_sing`
 (`Λ_R ≠ 0`) and need not be bang-bang. The Chapter 8 statement is formalized.
 

@@ -82,7 +82,7 @@ For abnormal lifts (`λ_cost = 0`) the printed statement (no `IsSingularSubarc` 
 lift of the global minimizer) is neither proved nor refuted, and is not formalized. Along every
 trajectory with control in an edge there is a two-parameter family of abnormal costates (the
 conormal bundle of the edge submanifold of (8.1.1), which contains Remark 8.1.6's, `remark8_1_6`,
-with the sign of gap G4) for which the Hamiltonian vanishes on the edge; the edge is the set of
+with the sign of E51) for which the Hamiltonian vanishes on the edge; the edge is the set of
 maximizers where the Hamiltonian at the third vertex is negative. An abnormal lift is
 edge-singular on an interval exactly when it is conormal there, and then its pulled-back costate
 vanishes, so it gives no edge costate. What is missing is the exclusion of global abnormal lifts
@@ -398,7 +398,7 @@ theorem theorem8_2_7 {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
 
 /-- **Theorem 8.2.7 for normal lifts, as printed**: a lift of a global minimizer to a normal
 Pontryagin extremal (`λ_cost ≠ 0`, Definition 6.2.1(2)) has no singular subarc
-(Definition 6.2.1(3)) at all. This is the repair, along the book's lines, of gap G8 for normal
+(Definition 6.2.1(3)) at all. This is the repair, along the book's lines, of E55 for normal
 lifts (module docstring); for abnormal lifts the printed statement is open.
 
 Proof:

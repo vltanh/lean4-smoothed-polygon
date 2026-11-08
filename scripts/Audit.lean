@@ -284,7 +284,7 @@ meta def paperResults : List (String × Name) :=
    ("(8.1.8) edge-zero", ``SmoothedPolygons.eqn_edge_zero),
    ("Thm 8.1.4", ``SmoothedPolygons.theorem8_1_4),
    ("Lemma 8.1.5", ``SmoothedPolygons.lemma8_1_5),
-   ("Remark 8.1.6 (sign of G4 corrected)", ``SmoothedPolygons.remark8_1_6),
+   ("Remark 8.1.6 (signs corrected, E51)", ``SmoothedPolygons.remark8_1_6),
    ("Lemma 8.2.1", ``SmoothedPolygons.lemma8_2_1),
    ("Lemma 8.2.2", ``SmoothedPolygons.lemma8_2_2),
    ("Thm 8.2.3", ``SmoothedPolygons.theorem8_2_3),
