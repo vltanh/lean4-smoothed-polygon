@@ -37,9 +37,10 @@ This is the repair, along the book's lines, of the edge case of Theorem 8.2.7 fo
 (TeX 7253–7258, 806–821), without relating the costates. For abnormal lifts (`λ_cost = 0`) the
 pulled-back covector can vanish identically: exactly when the Reinhardt costate is conormal to the
 edge submanifold (the family that contains Remark 8.1.6's, `remark8_1_6`); then it gives no edge
-costate. The formulas were checked numerically along a normal extremal
-(scratchpad `l3rev_pullback.py`: `H_e = H_R`, the adjoint equation (8.1.7), the maximum
-condition).
+costate. Before the proofs were written, the formulas were checked numerically: along a normal
+extremal with control in an edge, integrated together with the edge state `(x, y, s)`, the
+pulled-back covector satisfies `H_e = H_R`, the adjoint equation (8.1.7) and the maximum
+condition of the edge problem.
 -/
 
 @[expose] public section

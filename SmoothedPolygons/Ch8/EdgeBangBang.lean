@@ -801,7 +801,11 @@ Proof (the book's, TeX 6820–6894):
 2. `λ₂` is the switching function (`IsEdgeProblemExtremal.ae_control_eq_of_switching`).
 3. `λ₂` is differentiable within `[0, T]` at each of its zeros, with derivative the right-hand
    side of (8.1.7) at that time (`l3d_hasDerivWithinAt`: its control-dependent term
-   `λ₂ · (bounded)` tends to `0` with `λ₂`; the book's "`λ₂'` is continuous", TeX 6846–6852).
+   `λ₂ · (bounded)` tends to `0` with `λ₂`, the book's reason). Departure from the paper: the
+   book claims that `λ₂'` is continuous (TeX 6846–6852), which holds only after changing the
+   control on a null set (the right-hand side of (8.1.7) involves the measurable control, so
+   `λ₂` is only absolutely continuous); the proof uses `λ₂'` only at the zeros of `λ₂`, so only
+   the derivative there is proved and used.
 4. At a zero with `λ₂' = 0`, (8.1.8) holds (`eqn_edge_zero`): `λ_cost ≠ 0` and
    `x = ±√(-λ₃/λ_cost)`. Since `x` is strictly increasing (`x' = y > 0`), there are at most two
    such zeros (`IsEdgeProblemExtremal.exists_tangentialZeros_subset_pair`, TeX 6875–6879). Every

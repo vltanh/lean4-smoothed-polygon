@@ -397,8 +397,7 @@ invariance of the trace form, as in `poly_conj_pow_rhs`), and `X̃` is a star st
 `theorem4_4_1`). Lemma 4.5.2 (`lemma4_5_2`) gives `(x', y') = (f₁, f₂)(x, y; u')` at almost every
 time, and for `u' = (0, ½ + u_e, ½ - u_e)` the entries `Z₁₀ = 0`, `Z₀₀ = 2u_e/√3`, `Z₀₁ = -2/3`
 give `f₁ = y` and `f₂ = 2√3 y² u_e/(-1 + 2√3 x u_e)` (field_simp). The integral form follows from
-the absolute continuity of `x = X̃₀₀/X̃₁₀`, `y = 1/X̃₁₀` (`X̃₁₀ > 0`, bounded below on `[c, d]`).
-Expected size: 150–300 lines. -/
+the absolute continuity of `x = X̃₀₀/X̃₁₀`, `y = 1/X̃₁₀` (`X̃₁₀ > 0`, bounded below on `[c, d]`). -/
 theorem eqn_xy_edge {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2} (h : IsStateTrajectory T u g X)
     {j : Fin 3} {c d : ℝ} (hc : 0 ≤ c) (hcd : c < d) (hd : d ≤ T)
     (hu : ∀ᵐ t, t ∈ Ioo c d → u t j = 0) :
@@ -488,9 +487,10 @@ unchanged).
 
 Proof: `g̃' = g̃ X̃` (`X̃ = Rʲ X R⁻ʲ`), and `h' = h Φ(x, y)` when `x' = y`, `s' = 1/y`
 (`h⁻¹h' = [[x/y, -(x² + y²)/y], [1/y, -x/y]] = Φ(z)`, `det h = 1`; matrix ext and field_simp),
-with `X̃ = Φ(x, y)` (`eqn_xy_edge`); both sides solve `G' = G X̃` with the same value at `c`, so
-they agree (uniqueness for the linear equation, as `IsStateTrajectory.eq_conj_of_isIntegralCurve`
-or Gronwall). Expected size: 100–200 lines. -/
+with `X̃ = Φ(x, y)` and `x' = y` (the specialization of Lemma 4.5.2 to the edge that
+`eqn_xy_edge` is built from, here in the original time) and `s' = X̃₁₀ = 1/y`; both sides solve
+`G' = G X̃` with the same value at `c`, so they agree (uniqueness for the linear equation
+`G' = G X̃` with continuous `X̃`, `Matrix.ODE_solution_unique_mul_right`). -/
 theorem eqn_g_edge {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2} (h : IsStateTrajectory T u g X)
     {j : Fin 3} {c d : ℝ} (hc : 0 ≤ c) (hcd : c < d) (hd : d ≤ T)
     (hu : ∀ᵐ t, t ∈ Ioo c d → u t j = 0) :
@@ -594,9 +594,10 @@ On an interval `[c, d]` on which the control lies in the edge `{u_j = 0}`, the R
 positive factor `3/2` and the constant `(s₁ + x₁) - (s₀ + x₀)` fixed by the boundary conditions,
 the cost is the edge cost `∫ φ_edge`, `φ_edge = x²/y`.
 
-Proof: `⟨J, Rʲ X R⁻ʲ⟩ = ⟨J, X⟩` (`J` commutes with `R`, `poly_conj_pow_J`), the explicit
-`⟨J, Φ(x, y)⟩ = -(1 + x² + y²)/y`, and the fundamental theorem of calculus for the absolutely
-continuous `x` and `s` (`eqn_xy_edge`). Expected size: 80–150 lines. -/
+Proof (the book's computation): after the time shift `t ↦ c + t`, the state equations (8.1.3)
+(`eqn_xy_edge`) give `X̃ = Φ(x, y)` with `y > 0` and, in integral form, `x' = y`, `s' = 1/y`;
+`⟨J, X⟩ = ⟨J, X̃⟩` (`J` commutes with `R`), the explicit `⟨J, Φ(x, y)⟩ = -(1 + x² + y²)/y`
+(equation (4.3.1)), and integration of `s' + x' + x²/y` over `[0, d - c]`. -/
 theorem edgeCost_identity {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
     (h : IsStateTrajectory T u g X) {j : Fin 3} {c d : ℝ} (hc : 0 ≤ c) (hcd : c < d) (hd : d ≤ T)
     (hu : ∀ᵐ t, t ∈ Ioo c d → u t j = 0) :
@@ -604,54 +605,49 @@ theorem edgeCost_identity {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → M
       3 / 2 * ((edgeState j X c (d - c) 2 + edgeState j X c (d - c) 0) -
           (edgeState j X c 0 2 + edgeState j X c 0 0) +
         ∫ t in (0 : ℝ)..d - c, edgeCost (edgeState j X c t) (edgeParam j (u (c + t)))) := by
-  have hmemT : ∀ τ ∈ Icc c d, τ ∈ Icc 0 T := fun τ hτ ↦ ⟨hc.trans hτ.1, hτ.2.trans hd⟩
-  obtain ⟨⟨hyint, hxeq⟩, -⟩ := l3b_integral_xy h j hc hcd.le hd hu
-  have hXt := (continuousOn_iff_entrywise.1 (l3b_continuousOn h j) 1 0).mono
-    (Icc_subset_Icc hc hd)
-  have hsint : IntervalIntegrable (fun τ ↦ edgeFrame j (X τ) 1 0) volume c d :=
-    hXt.intervalIntegrable_of_Icc hcd.le
-  obtain ⟨hxc, hyc⟩ := l3b_continuousOn_xy h j
-  have hφint : IntervalIntegrable (fun τ ↦ l3b_x j X τ ^ 2 / l3b_y j X τ) volume c d := by
-    refine ContinuousOn.intervalIntegrable_of_Icc hcd.le ?_
-    refine ((hxc.pow 2).div hyc fun τ hτ ↦ ?_).mono (Icc_subset_Icc hc hd)
-    have := (l3b_star h j hτ).2.2.2.1
-    exact this.ne'
-  -- `⟨J, X⟩ = ⟨J, Φ(z)⟩ = -(1 + x² + y²)/y = -(s' + x' + x²/y)` on `[c, d]` (equation (4.3.1))
-  have hJ : ∀ τ ∈ uIcc c d, traceForm J (X τ) =
-      -(edgeFrame j (X τ) 1 0 + l3b_y j X τ + l3b_x j X τ ^ 2 / l3b_y j X τ) := by
-    intro τ hτ
-    rw [uIcc_of_le hcd.le] at hτ
-    obtain ⟨-, -, hΦ, hstar⟩ := l3b_star h j (hmemT τ hτ)
-    have hy := hstar.1.ne'
-    rw [← l3b_traceForm_J_edgeFrame j, hΦ]
-    simp only [traceForm, J, Φ, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two,
-      Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
+  -- the state equations (8.1.3) along the edge arc
+  obtain ⟨⟨⟨-, -, hqc, hint, heq⟩, hdom⟩, hΦ, -⟩ := eqn_xy_edge h hc hcd hd hu
+  set q := edgeState j X c with hqdef
+  have hdc : (0 : ℝ) ≤ d - c := by linarith
+  -- the components `x' = y` (`i = 0`) and `s' = 1/y` (`i = 2`), in integral form
+  have hcomp : ∀ i, IntervalIntegrable (fun t ↦ edgeField (q t) (edgeParam j (u (c + t))) i)
+      volume 0 (d - c) := fun i ↦ ⟨hint.1.eval i, hint.2.eval i⟩
+  have hend : ∀ i, q (d - c) i =
+      q 0 i + ∫ t in (0 : ℝ)..d - c, edgeField (q t) (edgeParam j (u (c + t))) i := by
+    intro i
+    have e := congrFun (heq (d - c) ⟨hdc, le_rfl⟩) i
+    rwa [Pi.add_apply, intervalIntegral.eval_integral hint] at e
+  -- the edge cost `x²/y` is integrable (`x`, `y` continuous, `y > 0`)
+  have hφint : IntervalIntegrable (fun t ↦ edgeCost (q t) (edgeParam j (u (c + t)))) volume 0
+      (d - c) := by
+    refine ContinuousOn.intervalIntegrable_of_Icc hdc ?_
+    have h0 : ContinuousOn (fun t ↦ q t 0) (Icc 0 (d - c)) :=
+      (continuous_apply 0).comp_continuousOn hqc
+    have h1 : ContinuousOn (fun t ↦ q t 1) (Icc 0 (d - c)) :=
+      (continuous_apply 1).comp_continuousOn hqc
+    exact (h0.pow 2).div h1 fun t ht ↦ (hdom t ht).1.ne'
+  -- `⟨J, X⟩ = ⟨J, Φ(z)⟩ = -(1 + x² + y²)/y = -(s' + x' + x²/y)` (equation (4.3.1))
+  have hJ : ∀ t ∈ uIcc 0 (d - c), traceForm J (X (c + t)) =
+      -(edgeField (q t) (edgeParam j (u (c + t))) 2 + edgeField (q t) (edgeParam j (u (c + t))) 0 +
+        edgeCost (q t) (edgeParam j (u (c + t)))) := by
+    intro t ht
+    rw [uIcc_of_le hdc] at ht
+    have hy := (hdom t ht).1.ne'
+    rw [← l3b_traceForm_J_edgeFrame j, (hΦ t ht).1]
+    simp only [traceForm, J, Φ, edgeField, edgeCost, Matrix.trace_fin_two, Matrix.mul_apply,
+      Fin.sum_univ_two, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons,
       Matrix.empty_val', Matrix.cons_val_fin_one]
     field_simp
     ring
-  rw [intervalIntegral.integral_congr hJ, intervalIntegral.integral_neg,
-    intervalIntegral.integral_add (hsint.add hyint) hφint,
-    intervalIntegral.integral_add hsint hyint]
-  -- `∫ s' = s(d)`, `∫ x' = x(d) - x(c)`, and the time shift in `∫ φ_edge`
-  have hs : edgeState j X c (d - c) 2 = ∫ τ in c..d, edgeFrame j (X τ) 1 0 := by
-    change ∫ τ in c..c + (d - c), edgeFrame j (X τ) 1 0 = _
-    rw [add_sub_cancel]
-  have hs0 : edgeState j X c 0 2 = 0 := by
-    change ∫ τ in c..c + 0, edgeFrame j (X τ) 1 0 = 0
-    rw [add_zero, intervalIntegral.integral_same]
-  have hx1 : edgeState j X c (d - c) 0 = l3b_x j X d := by
-    change l3b_x j X (c + (d - c)) = _
-    rw [add_sub_cancel]
-  have hx0 : edgeState j X c 0 0 = l3b_x j X c := by
-    change l3b_x j X (c + 0) = _
-    rw [add_zero]
-  have hφ : ∫ t in (0 : ℝ)..d - c, edgeCost (edgeState j X c t) (edgeParam j (u (c + t))) =
-      ∫ τ in c..d, l3b_x j X τ ^ 2 / l3b_y j X τ := by
-    change ∫ t in (0 : ℝ)..d - c, l3b_x j X (c + t) ^ 2 / l3b_y j X (c + t) = _
-    rw [intervalIntegral.integral_comp_add_left (fun τ ↦ l3b_x j X τ ^ 2 / l3b_y j X τ),
-      add_zero, add_sub_cancel]
-  have hxd := hxeq d ⟨hcd.le, le_rfl⟩
-  rw [hs, hs0, hx1, hx0, hφ, hxd]
+  -- the time shift `t ↦ c + t`, then `∫ s' = s(d - c) - s(0)`, `∫ x' = x(d - c) - x(0)`
+  have hshift : ∫ t in c..d, traceForm J (X t) =
+      ∫ t in (0 : ℝ)..d - c, traceForm J (X (c + t)) := by
+    rw [intervalIntegral.integral_comp_add_left (fun τ ↦ traceForm J (X τ)), add_zero,
+      add_sub_cancel]
+  rw [hshift, intervalIntegral.integral_congr hJ, intervalIntegral.integral_neg,
+    intervalIntegral.integral_add ((hcomp 2).add (hcomp 0)) hφint,
+    intervalIntegral.integral_add (hcomp 2) (hcomp 0), hend 2, hend 0]
   ring
 
 /-- A covector on `ℝ³` in terms of its values `λ₁, λ₂, λ₃` on the basis vectors. -/
@@ -741,7 +737,7 @@ noncomputable def edgeHamiltonian (lam l₁ l₂ l₃ x y ue : ℝ) : ℝ :=
 /-- **Equation (8.1.6)** (`eqn:edge:ham`): the Hamiltonian `⟨p, f(q, u_e)⟩ + λ_cost φ_edge(q)` of
 the maximum principle for the edge control problem is
 `λ₁ y + λ₂ f₂(x, y, u_e) + λ₃/y + λ_cost x²/y`, `λ_{i+1} = p(e_i)`. Proof: linearity of `p`
-(`edgeField q u_e = y e₀ + f₂ e₁ + (1/y) e₂`). Expected size: 10–20 lines. -/
+(`edgeField q u_e = y e₀ + f₂ e₁ + (1/y) e₂`). -/
 theorem eqn_edge_ham (ν : ℝ) (q : Fin 3 → ℝ) (p : StrongDual ℝ (Fin 3 → ℝ)) (ue : ℝ) :
     Pontryagin.controlHamiltonian edgeField edgeCost ν q p ue =
       edgeHamiltonian ν (edgeCostate p 0) (edgeCostate p 1) (edgeCostate p 2) (q 0) (q 1) ue := by
@@ -770,8 +766,7 @@ Theorem 8.1.4). Along an extremal of the edge control problem the costates `λ�
 Proof: the adjoint equation `p' = -p ∘ ∂ₓf - ν ∂ₓφ` (`Pontryagin.IsAdjoint`) evaluated on the
 basis vectors `e₀, e₁, e₂`, with the partial derivatives of `edgeField` and `edgeCost`
 (`∂f₂/∂x = -12 y² u_e²/(-1 + 2√3 x u_e)²`, `∂f₂/∂y = 4√3 y u_e/(-1 + 2√3 x u_e)`; nothing depends
-on `s`), and the change from the backward form `p(t) = p(T) + ∫ₜᵀ` to the forward one.
-Expected size: 80–150 lines. -/
+on `s`), and the change from the backward form `p(t) = p(T) + ∫ₜᵀ` to the forward one. -/
 theorem eqn_costate_edge {T : ℝ} {ue : ℝ → ℝ} {q : ℝ → Fin 3 → ℝ} {ν : ℝ}
     {p : ℝ → StrongDual ℝ (Fin 3 → ℝ)} (h : IsEdgeProblemExtremal T ue q ν p) :
     (∀ t ∈ Icc 0 T, edgeCostate (p t) 2 = edgeCostate (p 0) 2) ∧

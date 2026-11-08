@@ -181,10 +181,12 @@ Proof:
    `IsExtremalOn.continuousOn_lift`). Suppose `Z ≠ ∅`.
 2. `Z ∩ (0, T] ≠ ∅`: if `0 ∈ Z` then `T ∈ Z`, since `X(T) = R⁻¹X(0)R`, `Λ₁(T) = R⁻¹Λ₁(0)R`,
    `Λ_R(T) = R⁻¹Λ_R(0)R` and `R⁻¹JR = J`.
-3. `Z` has empty interior: on an open interval inside `Z`, `Λ_R ≡ 0`, the Hamiltonian is
-   independent of the control, against Theorem 8.2.7 in the case its proof covers
-   (`not_forall_hamiltonian_eq_of_isReinhardtMinimizer`; "A trajectory cannot remain on the
-   singular locus for any positive interval of time").
+3. `Z` has empty interior ("A trajectory cannot remain on the singular locus for any positive
+   interval of time by Theorem 8.2.7"): on an open interval `(0, z)` inside `Z`, `Λ_R ≡ 0`, so by
+   Theorem 8.2.3 (`theorem8_2_3`) the interval is a singular subarc and the control is the
+   centre `(⅓, ⅓, ⅓)` of `U_T` almost everywhere; in particular no subinterval has its control
+   in an edge, and Theorem 8.2.7 (`theorem8_2_7`, its part for such intervals) says that the
+   interval is not a singular subarc.
 4. Take `z ∈ Z ∩ (0, T]`, `p ∈ (0, z) ∖ Z` (step 3), and `d = inf (Z ∩ [p, T])`: `d ∈ Z`,
    `p < d ≤ z`, and `[p, d)` avoids `Z`.
 5. On every compact `[α, β] ⊆ (p, d)` the control is bang-bang with finitely many switches
@@ -228,14 +230,29 @@ private theorem l3st_forall_not_mem_singularLocus (hNC : NoChatteringIntoSingula
       · rw [h1T, h1, Matrix.mul_smul, Matrix.smul_mul, R_inv_mul_J_mul_R]
       · rw [hXT, hX, R_inv_mul_J_mul_R]
       · rw [hRT, hR, Matrix.mul_zero, Matrix.zero_mul]
-  -- Step 3: the meeting times have empty interior (Theorem 8.2.7's covered case)
+  -- Step 3: the meeting times have empty interior (Theorem 8.2.7, with Theorem 8.2.3)
   obtain ⟨p, hp, hpS⟩ : ∃ p ∈ Ioo 0 z, (g p, Λ₁ p, X p, ΛR p) ∉ singularLocus := by
     by_contra hcon
     push Not at hcon
-    refine not_forall_hamiltonian_eq_of_isReinhardtMinimizer hmin hext le_rfl hz.1 hz.2 ?_
-    intro t ht v _ w _
-    have hR := ((hZ t ⟨ht.1.le, ht.2.le.trans hz.2⟩).1 (hcon t ht)).2.2
-    simp [hamiltonian, hR, traceForm]
+    -- on `(0, z)` the lift is in `𝒮_sing`, so `Λ_R ≡ 0` there
+    have hR : ∀ t ∈ Ioo 0 z, ΛR t = 0 := fun t ht ↦
+      ((hZ t ⟨ht.1.le, ht.2.le.trans hz.2⟩).1 (hcon t ht)).2.2
+    -- Theorem 8.2.3: `(0, z)` is a singular subarc, with the centre of `U_T` as control a.e.
+    obtain ⟨-, hcentre, -, -, hsing⟩ := theorem8_2_3 h0T le_rfl hz.1 hz.2 hR
+    -- so no subinterval of `(0, z)` has its control in an edge
+    have hno : ∀ (j : Fin 3) (c d : ℝ), 0 ≤ c → c < d → d ≤ z →
+        ¬ ∀ᵐ t, t ∈ Ioo c d → u t j = 0 := by
+      intro j c d hc hcd hd hu
+      have hnull : volume (Ioo c d) = 0 := by
+        rw [measure_eq_zero_iff_ae_notMem]
+        filter_upwards [hu, hcentre] with t h1 h2 ht
+        have h0 := h1 ht
+        rw [(h2 ⟨hc.trans_lt ht.1, ht.2.trans_le hd⟩).1] at h0
+        fin_cases j <;> simp [controlCentre] at h0
+      rw [Real.volume_Ioo, ENNReal.ofReal_eq_zero] at hnull
+      linarith
+    -- Theorem 8.2.7 (the case without edges): `(0, z)` is not a singular subarc
+    exact (theorem8_2_7 hmin le_rfl hz.1 hz.2).2 hno Λ₁ ΛR lam hext hsing
   -- Step 4: the first meeting time `d` after `p`
   set Zp : Set ℝ := Icc p T ∩ (fun t ↦ (g t, Λ₁ t, X t, ΛR t)) ⁻¹'
     {q : Mat2 × Mat2 × Mat2 × Mat2 | q.2.1 = (3 / 2 * lam) • J ∧ q.2.2.1 = J ∧ q.2.2.2 = 0}
@@ -309,7 +326,7 @@ exists, `exists_isReinhardtMinimizer`) and every `K_min` (`IsWorstDisk`; one exi
 Proof (the book's, TeX 12806–12833, with the last step as the hypothesis):
 1. First sentence. Let `(g, X)` be a global minimizer; it lifts to a Pontryagin extremal
    (Proposition 8.1.3, `proposition8_1_3`, which also gives edge extremality). By
-   `l3st_forall_not_mem_singularLocus` (Theorem 8.2.7's covered case, Lemma 8.3.4 and the
+   `l3st_forall_not_mem_singularLocus` (Theorem 8.2.7 with Theorem 8.2.3, Lemma 8.3.4 and the
    hypothesis) the lift avoids `𝒮_sing`, and Theorem 8.3.2 on `[0, T]`
    (`isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus`) gives a bang-bang control
    with finitely many switches.

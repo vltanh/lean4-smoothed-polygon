@@ -20,9 +20,11 @@ then an edge of `U_T` or all of `U_T`.
 The book's proof (TeX 7320–7391) treats only the singular subarcs on which the Hamiltonian is
 independent of the control (all of `U_T` maximizes): by Theorem 8.2.6 they are circular arcs, and a
 circular arc is not a local minimizer (second variation, `l3st_exists_lt_cost_of_circleArc`).
-This covered case is `not_forall_hamiltonian_eq_of_isReinhardtMinimizer`, which is what the proof of
-Theorem 16.3.1 uses ("A trajectory cannot remain on the singular locus for any positive interval
-of time by Theorem 8.2.7", TeX 12816–12817).
+This covered case is `not_forall_hamiltonian_eq_of_isReinhardtMinimizer`. The proof of
+Theorem 16.3.1 ("A trajectory cannot remain on the singular locus for any positive interval of
+time by Theorem 8.2.7", TeX 12816–12817) uses `theorem8_2_7` itself: on an interval of `𝒮_sing`
+the control is the centre of `U_T` almost everywhere (Theorem 8.2.3), so no subinterval has its
+control in an edge, and part 2 of `theorem8_2_7` applies.
 
 The edge case is left to the edge control problem: "The theorem is only true if we include
 secondary edge optimal control problem" (the authors' comment before the theorem, TeX 7300–7302),
@@ -309,8 +311,8 @@ theorem IsEdgeProblemExtremal.not_isEdgeSingularSubarc {T : ℝ} {ue : ℝ → �
 
 /-- **Theorem 8.2.7, the case its proof covers**: a lift of a global minimizer has no singular
 subarc on which the Hamiltonian is independent of the control (equivalently, by Theorem 8.2.6, the
-lift does not stay in the singular locus on any open interval). This is the part of
-Theorem 8.2.7 used by Theorem 16.3.1.
+lift does not stay in the singular locus on any open interval). It gives part 2 of
+`theorem8_2_7`, through which Theorem 16.3.1 uses it.
 
 Proof (the book's, TeX 7320–7391): by Theorem 8.2.6 (`theorem8_2_6`, applied to the restriction
 `IsPontryaginExtremal.isExtremalOn`) the subarc is a circular arc, `X ≡ J` on `[a, b]`;

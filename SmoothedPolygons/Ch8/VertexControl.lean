@@ -16,8 +16,8 @@ Theorem 16.3.1.)
 The book's proof expands the switching functions at a point of `𝒮_sing` to third order. Two slips
 (gap G6, checked with sympy): `Λ_R'''(0) = +6 λ_cost [J, P₃]`, not `-6 λ_cost [J, P₃]` (TeX 7648),
 and the display TeX 7657–7660 lacks an `=` and the factor `λ_cost`. With
-`P_i = Z_{e_i}/⟨J, Z_{e_i}⟩`:
-`[J, P₃] ⊥ J, P₃`, `P₁ + P₂ + P₃ = -(3/2) J`, `⟨[J, P₃], P₁⟩ = -2√3 = -⟨[J, P₃], P₂⟩`, and the
+`P_i = Z_{e_i}/⟨J, Z_{e_i}⟩`, the book's algebra is used as printed: `[J, P₃] ⊥ J, P₃` and
+`P₁ + P₂ + P₃ = -(3/2) J ∈ ℝJ` give `⟨[J, P₃], P₁⟩ = -⟨[J, P₃], P₂⟩`, which is `-2√3 ≠ 0`; the
 control term `-⟨Λ_R(t), P_i⟩` has leading coefficients `(2√3 λ_cost, -2√3 λ_cost, 0) t³` for
 `i = 1, 2, 3`. The conclusion is unaffected, and the argument works on either side of the meeting
 time separately, which covers a meeting time at an end of the interval (the form in which
@@ -40,9 +40,13 @@ The book's argument, step by step (`lemma8_3_4`, `l3j_core`):
    `Λ_R = λ_cost s³ [J, P] + O(s⁴)` (so `Λ_R(t₀) = Λ_R'(t₀) = Λ_R''(t₀) = 0` and
    `Λ_R'''(t₀) = 6 λ_cost [J, P]`, gap G6); the cancellation uses
    `[[J, [P, J]], J] = 4 [P, J]` (`J² = -1`).
-3. *The algebra* (`l3j_traceForm_bracket_self`, `l3j_pairing`): `⟨[J, P_i], P_i⟩ = 0` and
-   `⟨[J, P_i], Z_{e_{i+1}}⟩ = 4√3/3 = -⟨[J, P_i], Z_{e_{i+2}}⟩` (with `P_j = -(3/2) Z_{e_j}` these
-   are the book's `⟨[J, P₃], P₁⟩ = -2√3 = -⟨[J, P₃], P₂⟩`).
+3. *The algebra*, the book's derivation (TeX 7650–7653; `l3j_pairing`): `[J, P_i]` is orthogonal
+   to `J` and to `P_i` (`l3q_traceForm_bracket_J`, `l3j_traceForm_bracket_self`), and
+   `P_i + P_{i+1} + P_{i+2} = -(3/2) J ∈ ℝJ` (`l3q_sum_controlP`), so pairing `[J, P_i]` with the
+   sum gives `⟨[J, P_i], P_{i+2}⟩ = -⟨[J, P_i], P_{i+1}⟩`. The one value computed is the one the
+   book needs to be nonzero: `⟨[J, P_i], P_{i+1}⟩ = -2√3`. Since `Z_{e_j} = -(2/3) P_j`
+   (`l3j_controlP_J`), the coefficients of the switching functions of step 4 are
+   `⟨[J, P_i], Z_{e_{i+1}}⟩ = 4√3/3 = -⟨[J, P_i], Z_{e_{i+2}}⟩`.
 4. *Maximization.* The maximum condition `H(e_j) ≤ H(e_i)` reads
    `φ_j = ⟨Λ_R, Z_{e_j}⟩ - ⟨Λ_R, P_i⟩ ⟨X, Z_{e_j}⟩ ≤ 0` (as `⟨X, Z_{e_j}⟩ < 0`, Lemma 3.3.4), and
    by steps 2–3, `φ_j = λ_cost s³ ⟨[J, P_i], Z_{e_j}⟩ + O(s⁴)` (`l3j_taylor`). The leading
@@ -398,20 +402,58 @@ private lemma l3j_controlP_J (i : Fin 3) :
   rw [h]
   norm_num
 
-/-- **The pairings** (step 3 of the proof of Lemma 8.3.4):
-`⟨[J, P_i], Z_{e_{i+1}}⟩ = 4√3/3 = -⟨[J, P_i], Z_{e_{i+2}}⟩`. With `P_j = -(3/2) Z_{e_j}` these
-are the book's `⟨[J, P₃], P₁⟩ = -2√3 = -⟨[J, P₃], P₂⟩` (TeX 7653). -/
+/-- `[J, P] ⊥ J`: `⟨[J, P], J⟩ = tr(JPJ) - tr(PJ²) = 0`. -/
+private lemma l3q_traceForm_bracket_J (P : Mat2) : traceForm (J * P - P * J) J = 0 := by
+  simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, Matrix.sub_apply,
+    J, of_apply, cons_val', cons_val_zero, cons_val_one, empty_val', cons_val_fin_one]
+  ring
+
+/-- The trace form is additive in its second argument. -/
+private lemma l3q_traceForm_add (A B C : Mat2) :
+    traceForm A (B + C) = traceForm A B + traceForm A C := by
+  simp only [traceForm, Matrix.mul_add, Matrix.trace_add]
+
+/-- The trace form is homogeneous in its second argument. -/
+private lemma l3q_traceForm_smul (A B : Mat2) (r : ℝ) :
+    traceForm A (r • B) = r * traceForm A B := by
+  simp only [traceForm, Matrix.mul_smul, Matrix.trace_smul, smul_eq_mul]
+
+/-- `P_i + P_{i+1} + P_{i+2} = -(3/2) J ∈ ℝJ` (the book's `P₁ + P₂ + P₃ ∈ ℝJ`, TeX 7652), since
+`P_j = -(3/2) Z_{e_j}` and `Z_{e_1} + Z_{e_2} + Z_{e_3} = Z_{(1,1,1)} = J`. -/
+private lemma l3q_sum_controlP (i : Fin 3) :
+    controlP (vertex i) J + controlP (vertex (i + 1)) J + controlP (vertex (i + 2)) J =
+      (-(3 / 2) : ℝ) • J := by
+  simp only [l3j_controlP_J, ← smul_add]
+  congr 1
+  ext a b
+  fin_cases i <;> fin_cases a <;> fin_cases b <;>
+    simp [controlMatrix, vertex, J] <;> ring
+
+/-- **The pairings** (step 3 of the proof of Lemma 8.3.4), by the book's derivation
+(TeX 7650–7653): `[J, P_i]` is orthogonal to `J` (`l3q_traceForm_bracket_J`) and to `P_i`
+(`l3j_traceForm_bracket_self`), and `P_i + P_{i+1} + P_{i+2} ∈ ℝJ` (`l3q_sum_controlP`), so
+`⟨[J, P_i], P_{i+2}⟩ = -⟨[J, P_i], P_{i+1}⟩`; the value `⟨[J, P_i], P_{i+1}⟩ = -2√3` shows that it
+is nonzero ("`⟨[J, P₃], P₁⟩ = -⟨[J, P₃], P₂⟩ ≠ 0`"). -/
 private lemma l3j_pairing (i : Fin 3) :
     traceForm (J * controlP (vertex i) J - controlP (vertex i) J * J)
-        (controlMatrix (vertex (i + 1))) = 4 * √3 / 3 ∧
+        (controlP (vertex (i + 1)) J) = -(2 * √3) ∧
       traceForm (J * controlP (vertex i) J - controlP (vertex i) J * J)
-        (controlMatrix (vertex (i + 2))) = -(4 * √3 / 3) := by
-  rw [l3j_controlP_J]
-  have h3 : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
-  have h3' : √3 ≠ 0 := by positivity
-  fin_cases i <;>
-    simp [traceForm, controlMatrix, vertex, J, Matrix.trace_fin_two] <;>
-    constructor <;> field_simp <;> linarith
+        (controlP (vertex (i + 2)) J) =
+      -traceForm (J * controlP (vertex i) J - controlP (vertex i) J * J)
+        (controlP (vertex (i + 1)) J) := by
+  refine ⟨?_, ?_⟩
+  · -- the value, which is nonzero
+    rw [l3j_controlP_J, l3j_controlP_J]
+    have h3 : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
+    have h3' : √3 ≠ 0 := by positivity
+    fin_cases i <;>
+      simp [traceForm, controlMatrix, vertex, J, Matrix.trace_fin_two] <;> field_simp <;> linarith
+  · -- the antisymmetry: pair `[J, P_i]` with `P_i + P_{i+1} + P_{i+2} = -(3/2) J`
+    have hsum := congrArg (traceForm (J * controlP (vertex i) J - controlP (vertex i) J * J))
+      (l3q_sum_controlP i)
+    simp only [l3q_traceForm_add, l3q_traceForm_smul, l3j_traceForm_bracket_self,
+      l3q_traceForm_bracket_J, mul_zero, zero_add] at hsum
+    linarith
 
 open scoped Matrix.Norms.Operator in
 /-- **Expansion of the switching functions** (steps 2–3 of the proof of Lemma 8.3.4). In the
@@ -516,9 +558,18 @@ private lemma l3j_core {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : �
   obtain ⟨Ca, hCa⟩ := l3j_taylor ht₀ hXd' h1d hRd hX h1 hR (controlMatrix (vertex (i + 1)))
   obtain ⟨Cb, hCb⟩ := l3j_taylor ht₀ hXd' h1d hRd hX h1 hR (controlMatrix (vertex (i + 2)))
   obtain ⟨hKa, hKb⟩ := l3j_pairing i
-  rw [← hP] at hKa hKb
-  rw [hKa] at hCa
-  rw [hKb] at hCb
+  -- the coefficients of `φ_{i+1}`, `φ_{i+2}`: `Z_{e_j} = -(2/3) P_j`
+  have hZP : ∀ j : Fin 3, traceForm (J * P - P * J) (controlP (vertex j) J) =
+      -(3 / 2) * traceForm (J * P - P * J) (controlMatrix (vertex j)) := fun j ↦ by
+    rw [l3j_controlP_J, l3q_traceForm_smul]
+  rw [← hP, hZP] at hKa hKb
+  rw [hZP] at hKb
+  have hKa' : traceForm (J * P - P * J) (controlMatrix (vertex (i + 1))) = 4 * √3 / 3 := by
+    linarith
+  have hKb' : traceForm (J * P - P * J) (controlMatrix (vertex (i + 2))) = -(4 * √3 / 3) := by
+    linarith
+  rw [hKa'] at hCa
+  rw [hKb'] at hCb
   -- Step 4: the maximum condition gives `φ_j ≤ 0` almost everywhere
   have hφ : ∀ᵐ t, t ∈ Ioo 0 T → ∀ j : Fin 3, traceForm (ΛR t) (controlMatrix (vertex j)) -
       traceForm (ΛR t) P * traceForm (X t) (controlMatrix (vertex j)) ≤ 0 := by
@@ -600,9 +651,10 @@ expansions with remainder at `t₀` (the book: "the solutions are analytic"; onl
 and the mean value inequality are used, `l3j_expansion`):
 `Λ_{1,cost}'(t₀) = 0`, `Λ_R'(t₀) = Λ_R''(t₀) = 0` and `Λ_R'''(t₀) = 6 λ_cost [J, P_i]`, so the
 control-dependent term at `e_j` is
-`-⟨Λ_R(t), P_j⟩ = -(t - t₀)³ λ_cost ⟨[J, P_i], P_j⟩ + O((t - t₀)⁴)`,
-with `⟨[J, P_i], P_{i+1}⟩ = -⟨[J, P_i], P_{i+2}⟩ = -2√3` and `⟨[J, P_i], P_i⟩ = 0`
-(`l3j_pairing`, `l3j_traceForm_bracket_self`). For `t ≠ t₀` near `t₀` on either side, one of
+`-⟨Λ_R(t), P_j⟩ = -(t - t₀)³ λ_cost ⟨[J, P_i], P_j⟩ + O((t - t₀)⁴)`.
+As in the book, `[J, P_i]` is orthogonal to `J` and to `P_i`, and `P_i + P_{i+1} + P_{i+2} ∈ ℝJ`,
+so `⟨[J, P_i], P_{i+1}⟩ = -⟨[J, P_i], P_{i+2}⟩`, which is `-2√3 ≠ 0` (`l3j_pairing`), while
+`⟨[J, P_i], P_i⟩ = 0` (`l3j_traceForm_bracket_self`). For `t ≠ t₀` near `t₀` on either side, one of
 `e_{i+1}, e_{i+2}` gives a strictly larger Hamiltonian than `e_i`, against the maximum condition
 for the control `e_i` (which holds almost everywhere); one side of `t₀` lies in `[a, b]`
 (`l3j_core`, after the time shift `t ↦ a + t` of `IsExtremalOn`). The book treats `e₃` and the

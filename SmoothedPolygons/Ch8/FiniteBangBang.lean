@@ -1037,7 +1037,7 @@ private lemma l3h_core {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : �
         rw [hK, Matrix.smul_mul, Matrix.mul_smul, ← smul_sub] at hD0
         exact (smul_eq_zero.1 hD0).resolve_left (mul_ne_zero (by norm_num) hlam)
       exact hS ⟨hlam, hK, l3h_eq_J_of_commute hX₀ hJX, hR0⟩
-    · -- claim (b): the same face on both sides
+    · -- claim (b): the same leading direction `-W'/2` on both sides
       have hT2 := l3h_claim_b h ht₀ hR0 hK
       have hV : (1 / 2 : ℝ) • -((Λ₁ t₀ * X t₀ - X t₀ * Λ₁ t₀) * X t₀ -
           X t₀ * (Λ₁ t₀ * X t₀ - X t₀ * Λ₁ t₀)) ≠ 0 := smul_ne_zero (by norm_num) hG
@@ -1248,9 +1248,11 @@ beaten by a control `v` for the Hamiltonian with `Λ_R = V`; the control-depende
 `-σ(t)⟨Λ_R(t)/σ(t), Z_u⟩/⟨X(t), Z_u⟩` keeps `e_j` below `v` on that side near `t₀`, and as the
 maximizers form a face of `U_T` (Lemma 7.3.1, `lemma7_3_1`), they lie in the edge `{u_j = 0}`.
 0. `Λ_R(t₀) ≠ 0`: the lemma with `σ = 1`, `V = Λ_R(t₀)` (continuity; the book's "by the
-   continuity of the Hamiltonian, … By Lemma 8.2.1, `Λ_R(0) = 0`"), `kₗ = kᵣ`. Otherwise the
-   Hamiltonian vanishes at `t₀` (`l3h_hamiltonian_zero`: it vanishes almost everywhere and is
-   continuous there), so `Λ_{1,cost}(t₀) = Λ₁(t₀) - (3/2) λ_cost J ∈ X(t₀)^⊥`.
+   continuity of the Hamiltonian, … By Lemma 8.2.1, `Λ_R(0) = 0`"), applied on each side of
+   `t₀`, gives `kₗ` and `kᵣ`. The limit `V` is the same on both sides, but the edge is chosen on
+   each side separately, so the proof does not show `kₗ = kᵣ` (the maximizer form does not need
+   it). Otherwise the Hamiltonian vanishes at `t₀` (`l3h_hamiltonian_zero`: it vanishes almost
+   everywhere and is continuous there), so `Λ_{1,cost}(t₀) = Λ₁(t₀) - (3/2) λ_cost J ∈ X(t₀)^⊥`.
 1. `Λ₁` is `C¹` (its equation `Λ₁' = [Λ₁, X]` has a continuous right-hand side).
 2. `Y(t) = -∫_{t₀}^t [Λ_{1,cost}, X]` (`l3hY`) and `Λ = Λ_R - Y` satisfy `Λ' = A(Λ, t) + A(Y, t)`
    with `A(Λ, t) = [P, Λ] - ⟨Λ, P⟩[P, X]` bounded on `[0, b - a]` (`P = Z_u/⟨Z_u, X⟩`,
@@ -1269,8 +1271,9 @@ maximizers form a face of `U_T` (Lemma 7.3.1, `lemma7_3_1`), they lie in the edg
    `W' = [Λ_{1,cost}'(t₀), X(t₀)] ≠ 0`. Then `[Λ_{1,cost}, X] = O(|t - t₀|)` and
    `= (t - t₀) W' + o(t - t₀)`, so `‖Y‖ = O(|t - t₀|²)`, `Y/(t - t₀)² → -W'/2`
    (`l3h_tendsto_integral_div_sq`), and `Λ_R(t)/(t - t₀)² → -W'/2` (`l3h_claim_b`, `n = 2`):
-   `Λ_R` has an isolated zero at `t₀` with the same leading direction on both sides; the lemma
-   with `σ = (t - t₀)²` gives `kₗ = kᵣ`.
+   `Λ_R` has an isolated zero at `t₀` with the same leading direction `-W'/2` on both sides; the
+   lemma with `σ = (t - t₀)²`, applied on each side, gives `kₗ` and `kᵣ`. As in step 0 the edges
+   are chosen on each side separately, and `kₗ = kᵣ` is not shown.
 5. Claim (c): `W = W' = 0`. Then `Λ_{1,cost}'(t₀) = [Λ₁(t₀), X(t₀)] = (3/2) λ_cost [J, X(t₀)]`
    commutes with `X(t₀)` and is orthogonal to it, so it vanishes; nontriviality of
    `(λ_cost, Λ₁, Λ_R)` at `t₀` (gap G1) gives `λ_cost ≠ 0`, so `[J, X(t₀)] = 0` and
