@@ -40,8 +40,10 @@ import all External.MahlerIrreducible.Lemma3
 import all External.MinkowskiMahler
 import all External.Pontryagin
 import all SmoothedPolygons.AppA.FunctionalDerivative
+import all SmoothedPolygons.AppA.Gronwall
 import all SmoothedPolygons.AppA.MatrixIdentities
 import all SmoothedPolygons.AppA.Riemannian
+import all SmoothedPolygons.Ch16.MahlerFirst
 import all SmoothedPolygons.Ch2.BalancedCircle
 import all SmoothedPolygons.Ch2.BalancedDensity
 import all SmoothedPolygons.Ch2.Boundary
@@ -106,6 +108,18 @@ import all SmoothedPolygons.Ch7.Remarks
 import all SmoothedPolygons.Ch7.SmoothedPolygon
 import all SmoothedPolygons.Ch7.SmoothedPolygonDisk
 import all SmoothedPolygons.Ch7.StrongTransversality
+import all SmoothedPolygons.Ch8.CircleVariation
+import all SmoothedPolygons.Ch8.Defs
+import all SmoothedPolygons.Ch8.EdgeAbnormal
+import all SmoothedPolygons.Ch8.EdgeBangBang
+import all SmoothedPolygons.Ch8.EdgeExtremal
+import all SmoothedPolygons.Ch8.EdgeLandau
+import all SmoothedPolygons.Ch8.EdgeProblem
+import all SmoothedPolygons.Ch8.FiniteBangBang
+import all SmoothedPolygons.Ch8.NoSingularArcs
+import all SmoothedPolygons.Ch8.PolygonBoundary
+import all SmoothedPolygons.Ch8.SingularLocus
+import all SmoothedPolygons.Ch8.VertexControl
 import all SmoothedPolygons.Defs
 import all Solution
 -- The OptimalControl package needs no `import all`: the traversal stays inside the libraries,
@@ -161,7 +175,9 @@ meta def externalResults : List (String × Name) :=
    ("Mahler 1947, Lemma 3 (full)", ``External.mahler_irreducible_iff),
    ("Filippov (Agrachev–Sachkov, Th. 10.1)", ``External.filippov),
    ("Pontryagin maximum principle (Agrachev–Sachkov, Ch. 12)",
-     ``External.pontryagin_maximum_principle)]
+     ``External.pontryagin_maximum_principle),
+   ("Hypothesis: Thms 16.4.1 and 14.4.1 (no chattering into 𝒮_sing)",
+     ``SmoothedPolygons.NoChatteringIntoSingularLocus)]
 
 /-- The numbered results of the paper, in the order of the paper. -/
 meta def paperResults : List (String × Name) :=
@@ -256,6 +272,29 @@ meta def paperResults : List (String × Name) :=
    ("Thm 7.5.6", ``SmoothedPolygons.theorem7_5_6),
    ("Thm 7.7.1", ``SmoothedPolygons.theorem7_7_1),
    ("Remark 7.6.4", ``SmoothedPolygons.remark7_6_4),
+   ("eqn:g-edge (8.1.1)", ``SmoothedPolygons.eqn_g_edge),
+   ("eqn:xy-edge (8.1.3)", ``SmoothedPolygons.eqn_xy_edge),
+   ("§8.1 edge cost identity, (8.1.5)", ``SmoothedPolygons.edgeCost_identity),
+   ("(8.1.6) edge Hamiltonian", ``SmoothedPolygons.eqn_edge_ham),
+   ("Prop 8.1.3", ``SmoothedPolygons.proposition8_1_3),
+   ("(8.1.7) edge costate equations", ``SmoothedPolygons.eqn_costate_edge),
+   ("(8.1.8) edge-zero", ``SmoothedPolygons.eqn_edge_zero),
+   ("Thm 8.1.4", ``SmoothedPolygons.theorem8_1_4),
+   ("Lemma 8.1.5", ``SmoothedPolygons.lemma8_1_5),
+   ("Remark 8.1.6 (sign of G4 corrected)", ``SmoothedPolygons.remark8_1_6),
+   ("Lemma 8.2.1", ``SmoothedPolygons.lemma8_2_1),
+   ("Lemma 8.2.2", ``SmoothedPolygons.lemma8_2_2),
+   ("Thm 8.2.3", ``SmoothedPolygons.theorem8_2_3),
+   ("Thm 8.2.6", ``SmoothedPolygons.theorem8_2_6),
+   ("Thm 8.2.7", ``SmoothedPolygons.theorem8_2_7),
+   ("Thm 8.3.2", ``SmoothedPolygons.theorem8_3_2),
+   ("Remark 8.3.3", ``SmoothedPolygons.remark8_3_3),
+   ("Lemma 8.3.4", ``SmoothedPolygons.lemma8_3_4),
+   ("Thm 16.3.1 away from 𝒮_sing (unconditional)",
+     ``SmoothedPolygons.isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus),
+   ("Thm 16.3.1 (conditional on NoChatteringIntoSingularLocus)",
+     ``SmoothedPolygons.theorem16_3_1),
+   ("Cor A.1.3", ``SmoothedPolygons.corollaryA_1_3),
    ("Prop A.6.1", ``SmoothedPolygons.propositionA_6_1),
    ("Prop A.6.2", ``SmoothedPolygons.propositionA_6_2),
    ("Prop A.6.3", ``SmoothedPolygons.propositionA_6_3),

@@ -117,16 +117,50 @@ thm:6k+2	theorem	1	lem:H-max-6k+2,lem:discrete-k,thm:strong-transversality
 # (a numerical observation, no proof). Label of this formalization.
 rem:6k-2-rectangle	remark	0	
 thm:oct-isolated	theorem	1	lem:H-max-6k+2
+# Running text of §8.1 (lines 6704-6730): equation (8.1.1), g(t) = g0 h(t0)^-1 h(t) with h = [[1, -x], [s, 1 - sx]],
+# for a trajectory whose control lies in an edge of U_T; asserted without derivation ("we can solve the state ODE g' = gX
+# explicitly").
+eqn:g-edge	proposition	0	
+# Running text of §8.1 (lines 6690-6728): the edge state equations (8.1.3), x' = y, y' = f2(x, y, u_e), s' = 1/y, the
+# specialization of Lemma 4.5.2 (cited at line 6693) to a control in an edge of U_T.
+eqn:xy-edge	proposition	1	lem:X-dynamics
+# Running text of §8.1 (lines 6739-6754): the Reinhardt cost of an edge arc is (3/2)((s + x)| + ∫ x²/y), by
+# eqn:cost-upper-half-plane (equation 4.3.1, cited at line 6740, which has no row: it is used inside the proof of
+# lem:tf-pi3); the edge cost (8.1.5). The label is that of (8.1.5).
+eqn:edge:cost	proposition	1	
+# Equation (8.1.6) (line 6766): the Hamiltonian of the edge control problem, a definition; the formal statement
+# identifies it with the Hamiltonian of the maximum principle for the edge problem.
+eqn:edge:ham	proposition	0	
 prop:edge-extremal	proposition	1	
 thm:edge	theorem	1	
+# Equation (8.1.7) (lines 6822-6838), in the proof of Theorem 8.1.4: the costate equations of the edge problem,
+# λ' = -∂H/∂(x, y, s), derived from the Hamiltonian (8.1.6) (cited at line 6821).
+eqn:costate-edge	proposition	1	eqn:edge:ham
+# Equation (8.1.8) (lines 6854-6874), the claim in the proof of Theorem 8.1.4 at a zero of λ2 with λ2' = 0:
+# λ3 = -x² λcost, λ1 = 0, λcost ≠ 0.
+eqn:edge-zero	proposition	1	
 lem:lambda2-Landau	lemma	1	thm:Gronwall
+# Remark 8.1.6 (line 7035): abnormal extremals with an arbitrary measurable control in an edge ("It can be checked",
+# MCA:4647835; no proof). The formal statement reverses the sign of both costates (gap G4: as printed the edge minimizes
+# the Hamiltonian).
+rem:edge-abnormal	remark	0	
 lem:LambdaR	lemma	1	lem:control-convex,lem:control-face-lemma
 lem:Lambda1	lemma	1	
 thm:circle-singular	theorem	1	
 thm:circle-iff-singular	theorem	1	lem:Lambda1,lem:LambdaR,thm:circle-singular
+# thm:no-singular-arcs (Theorem 8.2.7) is formalized as printed (theorem8_2_7); the book's proof covers only the
+# singular subarcs on which H does not depend on the control (gap G8); the edge-singular subarcs of abnormal lifts are
+# not settled. Theorem 16.3.1 uses only the covered case (l3st_not_hamiltonian_const_of_isReinhardtMinimizer).
 thm:no-singular-arcs	theorem	1	
+# thm:avoid-singular (Theorem 8.3.1) is false as printed (at a zero of Λ_R off the singular locus all of U_T maximizes
+# H; gap G2, counterexamples in SmoothedPolygons/Ch8/FiniteBangBang.lean) and is not formalized, pending a decision on
+# its restatement. The control form that the proof of thm:finite-bang-bang quotes is l3st_exists_controlEdge_ae_nhds.
 thm:avoid-singular	theorem	1	lem:LambdaR,thm:Gronwall,thm:edge
 thm:finite-bang-bang	theorem	1	thm:edge
+# Unlabelled Remark 8.3.3 (line 7610): an extremal, edge-extremal trajectory that avoids the singular locus defines a
+# balanced disk whose boundary is a smoothed polygon (no proof; it rests on Theorem 8.3.2 and the discussion of §7.2
+# with lem:hyp-arc). Label of this formalization.
+rem:smoothed-polygon	remark	0	
 lem:constant-not-singular	lemma	1	
 thm:symmetries	theorem	1	
 thm:angular-momentum	theorem	1	cor:lam1-gen-sol,thm:symmetries
@@ -163,6 +197,10 @@ thm:no-return	theorem	1
 thm:basin	theorem	1	
 thm:outward-fuller	theorem	1	
 thm:mahler	theorem	1	lem:constant-not-singular,prop:edge-extremal,thm:finite-bang-bang,thm:no-chatter,thm:no-return,thm:no-singular-arcs
+# The part of Theorem 16.3.1 that does not use Theorems 16.4.1 and 14.4.1 (lines 12811-12815): a global minimizer is
+# bang-bang with finitely many switches on every interval on which its lift avoids the singular locus. Label of this
+# formalization.
+thm:mahler:away	theorem	1	prop:edge-extremal,thm:finite-bang-bang
 thm:no-chatter	theorem	0	
 thm:Gronwall	corollary	0	
 eqn:SL2-SU11	lemma	1	
