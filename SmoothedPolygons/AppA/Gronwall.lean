@@ -16,7 +16,7 @@ the corollary that Chapter 8 uses (Corollary A.1.3, `thm:Gronwall`, TeX 13134):
 
 The corollary is stated on `[0, t₁]` but Chapter 8 applies it on two-sided intervals `(-t₁, t₁)`
 (Lemma 8.1.5, TeX 7008; Theorem 8.3.1, TeX 7539, 7572), with the time reversal left implicit
-(inventory, gap G14). `corollaryA_1_3` is the book's statement; `l3st_corollaryA_1_3_two_sided`
+(inventory, gap G14). `corollaryA_1_3` is the book's statement; `corollaryA_1_3_two_sided`
 is the two-sided form that Chapter 8 uses, obtained by applying the corollary to `t ↦ x(t)` and to
 `t ↦ x(-t)`.
 
@@ -73,7 +73,7 @@ use it, TeX 7008, 7539, 7572; gap G14). Let `x` be nonnegative and continuous on
 
 Proof: `corollaryA_1_3` applied to `x` on `[0, t₁]` and to `t ↦ x(-t)` on `[0, t₁]` (for
 `t ≤ 0`, `|∫₀ᵗ x| = ∫₀^{-t} x(-s) ds`), and `𝓝 0 = 𝓝[≤] 0 ⊔ 𝓝[≥] 0`. -/
-theorem l3st_corollaryA_1_3_two_sided {x : ℝ → ℝ} {t₁ C C₁ : ℝ} {n : ℕ} (ht₁ : 0 < t₁)
+theorem corollaryA_1_3_two_sided {x : ℝ → ℝ} {t₁ C C₁ : ℝ} {n : ℕ} (ht₁ : 0 < t₁)
     (hn : 0 < n) (hx : ContinuousOn x (Icc (-t₁) t₁)) (hx0 : ∀ t ∈ Icc (-t₁) t₁, 0 ≤ x t)
     (hC : 0 ≤ C) (hC₁ : 0 ≤ C₁)
     (h : ∀ t ∈ Icc (-t₁) t₁, x t ≤ C * |t| ^ n + C₁ * |∫ s in (0 : ℝ)..t, x s|) :

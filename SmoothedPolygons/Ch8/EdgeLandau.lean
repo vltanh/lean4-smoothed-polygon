@@ -14,7 +14,7 @@ edge problem where also `λ₂' = 0` (normalized as in (8.1.8)), `λ₂(t) = C t
 Notes on the statement:
 * The book's Landau notation is two-sided (TeX 6903–6907): `f₁ = O(f₂)` on some `(-t₁, t₁)`, i.e.
   `Asymptotics.IsBigO` at `𝓝 0`. The proof applies Corollary A.1.3 on both sides of `0`
-  (gap G14; `l3st_corollaryA_1_3_two_sided`).
+  (gap G14; `corollaryA_1_3_two_sided`).
 * The constant `C` printed for `x₀ ≠ 0`, `-x₀(1 + y₀)/y₀²` (TeX 6934, 6973), is wrong: the
   computation gives `C = -2x₀/y₀` (gap G5; the intermediate line TeX 6970 already gives
   `(x² - x₀²)/y² = 2x₀t/y₀ + O(t²)`). The statement only claims `C ≠ 0`, which holds with the
@@ -24,7 +24,7 @@ The proof follows the book's steps: the Taylor expansions of the comparison func
 (`l3c_taylor`, with the two-sided Landau calculus `l3c_O_mul`, `l3c_O_integral`), the bounds of
 the coefficients where the denominator of `f₂` stays away from `0` (`l3c_coef_bounds`), and the
 Gronwall step for the error `v` (`l3c_gronwall`, through Corollary A.1.3 in its two-sided form
-`l3st_corollaryA_1_3_two_sided`).
+`corollaryA_1_3_two_sided`).
 -/
 
 @[expose] public section
@@ -459,7 +459,7 @@ private lemma l3c_gronwall {x y ue l₁ l₂ : ℝ → ℝ} {x₀ τ A B C : ℝ
     have : w t = |l₁ t - l3c_cmp₁ x y t| + |l₂ t - l3c_cmp₂ x₀ x y t| := rfl
     rw [this, pow_succ]
     linarith
-  have hwO := l3st_corollaryA_1_3_two_sided hτ'0 (Nat.succ_pos n) hwc (fun s _ ↦ hw0 s)
+  have hwO := corollaryA_1_3_two_sided hτ'0 (Nat.succ_pos n) hwc (fun s _ ↦ hw0 s)
     (by positivity) (by positivity) hgron
   -- `λ₂ - C tⁿ = v₂ + (λ̃₂ - C tⁿ)`
   have hv2O : (fun t ↦ l₂ t - l3c_cmp₂ x₀ x y t) =O[𝓝 0] fun t ↦ t ^ (n + 1) := by
@@ -489,7 +489,7 @@ Proof (the book's, TeX 6932–7015):
    `A = [[0, f₂ₓ], [1, f₂ᵧ]]`, `b = (f₂ₓ, f₂ᵧ)` evaluated along the trajectory; `‖A‖ ≤ C₀` near
    `0` (the denominator `-1 + 2√3 x u_e` stays away from `0`), so `‖v‖' ≤ ‖v'‖ ≤ C₁|t|ⁿ + C₀‖v‖`
    (Cauchy–Schwarz) and `‖v‖ ≤ C₁|t|ⁿ⁺¹/(n + 1) + C₀|∫₀ᵗ ‖v‖|`.
-5. Gronwall (Corollary A.1.3, two-sided, `l3st_corollaryA_1_3_two_sided`): `‖v‖ = O(tⁿ⁺¹)`, so
+5. Gronwall (Corollary A.1.3, two-sided, `corollaryA_1_3_two_sided`): `‖v‖ = O(tⁿ⁺¹)`, so
    `|λ₂ - C tⁿ| ≤ ‖v‖ + |λ̃₂ - C tⁿ| = O(tⁿ⁺¹)`.
 6. `C ≠ 0` and `λ₂ = C tⁿ + O(tⁿ⁺¹)` give `λ₂(t) ≠ 0` for small `t ≠ 0`.
 

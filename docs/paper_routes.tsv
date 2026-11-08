@@ -148,13 +148,16 @@ lem:LambdaR	lemma	1	lem:control-convex,lem:control-face-lemma
 lem:Lambda1	lemma	1	
 thm:circle-singular	theorem	1	
 thm:circle-iff-singular	theorem	1	lem:Lambda1,lem:LambdaR,thm:circle-singular
-# thm:no-singular-arcs (Theorem 8.2.7) is formalized as printed (theorem8_2_7); the book's proof covers only the
-# singular subarcs on which H does not depend on the control (gap G8); the edge-singular subarcs of abnormal lifts are
-# not settled. Theorem 16.3.1 uses only the covered case (l3st_not_hamiltonian_const_of_isReinhardtMinimizer).
+# thm:no-singular-arcs (Theorem 8.2.7) is formalized in the authors' reading (the user's decision; gap G8):
+# theorem8_2_7. The book's proof covers the singular subarcs on which H does not depend on the control
+# (not_forall_hamiltonian_eq_of_isReinhardtMinimizer, the covered case, which is what Theorem 16.3.1 uses); the
+# edge-singular subarcs are excluded through the edge problem (Proposition 8.1.3, Theorem 8.1.4), for normal lifts by
+# the pullback of the costate to the edge (SmoothedPolygons/Ch8/EdgePullback.lean).
 thm:no-singular-arcs	theorem	1	
 # thm:avoid-singular (Theorem 8.3.1) is false as printed (at a zero of Λ_R off the singular locus all of U_T maximizes
-# H; gap G2, counterexamples in SmoothedPolygons/Ch8/FiniteBangBang.lean) and is not formalized, pending a decision on
-# its restatement. The control form that the proof of thm:finite-bang-bang quotes is l3st_exists_controlEdge_ae_nhds.
+# H; gap G2, counterexamples in SmoothedPolygons/Ch8/FiniteBangBang.lean). It is formalized in its one-sided maximizer
+# form (the user's decision): theorem8_3_1. The two-sided control form that the proof of thm:finite-bang-bang quotes is
+# its corollary IsExtremalOn.exists_ae_mem_controlEdge_of_isEdgeExtremalOn.
 thm:avoid-singular	theorem	1	lem:LambdaR,thm:Gronwall,thm:edge
 thm:finite-bang-bang	theorem	1	thm:edge
 # Unlabelled Remark 8.3.3 (line 7610): an extremal, edge-extremal trajectory that avoids the singular locus defines a

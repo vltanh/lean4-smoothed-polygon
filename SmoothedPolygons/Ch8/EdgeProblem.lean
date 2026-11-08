@@ -1,6 +1,8 @@
 module
 
 public import SmoothedPolygons.Ch8.Defs
+public import Basic.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
+public import Basic.MeasureTheory.SpecificCodomains.Pi
 public import Mathlib.MeasureTheory.SpecificCodomains.Pi
 
 /-!
@@ -22,10 +24,13 @@ a Reinhardt trajectory `(g, X)` whose control lies in an edge of `U_T` on a time
 * `eqn_costate_edge`: the costate equations (8.1.7) (`eqn:costate-edge`), derived in the proof of
   Theorem 8.1.4 from (8.1.6) as `λ' = -∂H/∂(x, y, s)`; `λ₃` is constant.
 
-Remark 8.1.6 is in `SmoothedPolygons/Ch8/EdgeAbnormal.lean`. Two facts about the rotation
-`edgeFrame j` proved on the way are public: `l3b_edgeFrame_controlMatrix`
-(`Rʲ Z_u R⁻ʲ = Z_{u'}`, `u'_m = u_{m+j}`) and `l3b_isStarState_edgeFrame` (it preserves star
-states).
+Remark 8.1.6 is in `SmoothedPolygons/Ch8/EdgeAbnormal.lean`. Facts used by the other files of
+the chapter are public: the edge controls lie in `U_T` and the edge parameter in `[-½, ½]`
+(`edgeControl_mem_controlSimplex`, `edgeParam_mem_edgeControlSet`), the denominator of `f₂` is
+negative (`edgeF₂_denom_neg`), a covector on `ℝ³` is determined by its components
+(`apply_eq_sum_edgeCostate`), the partial derivatives of the edge field and the edge cost
+(`fderiv_edgeField_apply`, `fderiv_edgeCost_apply`), and the calculus of integral curves
+(`IsIntegralCurve.ae_hasDerivAtEntrywise`, `IsIntegralCurve.absolutelyContinuousOnInterval`).
 -/
 
 @[expose] public section
@@ -55,7 +60,7 @@ private lemma l3b_R_conj_controlMatrix (u : Fin 3 → ℝ) :
 
 /-- `Rʲ Z_u R⁻ʲ = Z_{u'}` with `u'_m = u_{m+j}`: the rotation `edgeFrame j` takes the control
 matrix of `u` to that of the cyclically permuted control. -/
-theorem l3b_edgeFrame_controlMatrix (j : Fin 3) (u : Fin 3 → ℝ) :
+private theorem l3b_edgeFrame_controlMatrix (j : Fin 3) (u : Fin 3 → ℝ) :
     edgeFrame j (controlMatrix u) = controlMatrix (fun m ↦ u (m + j)) := by
   fin_cases j
   · simp [edgeFrame]
@@ -82,7 +87,7 @@ private lemma l3b_rot_eq_edgeControl {u : Fin 3 → ℝ} (hu : u ∈ controlSimp
     linarith
 
 /-- The edge control `(0, ½ + u_e, ½ - u_e)`, `u_e ∈ [-½, ½]`, lies in `U_T`. -/
-private lemma l3b_edgeControl_mem {ue : ℝ} (hue : ue ∈ edgeControlSet) :
+theorem edgeControl_mem_controlSimplex {ue : ℝ} (hue : ue ∈ edgeControlSet) :
     edgeControl ue ∈ controlSimplex := by
   obtain ⟨h1, h2⟩ := hue
   refine ⟨fun i ↦ ?_, ?_⟩
@@ -90,7 +95,7 @@ private lemma l3b_edgeControl_mem {ue : ℝ} (hue : ue ∈ edgeControlSet) :
   · simp [edgeControl]; ring
 
 /-- The edge parameter of a control in `U_T` lies in `[-½, ½]`. -/
-private lemma l3b_edgeParam_mem {u : Fin 3 → ℝ} (hu : u ∈ controlSimplex) (j : Fin 3) :
+theorem edgeParam_mem_edgeControlSet {j : Fin 3} {u : Fin 3 → ℝ} (hu : u ∈ controlSimplex) :
     edgeParam j u ∈ edgeControlSet := by
   have h1 := hu.1 (j + 1)
   have h2 := hu.1 (j + 2)
@@ -115,7 +120,7 @@ private lemma l3b_isStarState_Rpow_conj (i : ℕ) {S : Mat2} (hS : IsStarState S
     exact l3b_isStarState_R_conj ih
 
 /-- The rotation `X ↦ Rʲ X R⁻ʲ` (`edgeFrame j`) preserves the star states. -/
-theorem l3b_isStarState_edgeFrame (j : Fin 3) {S : Mat2} (hS : IsStarState S) :
+private theorem l3b_isStarState_edgeFrame (j : Fin 3) {S : Mat2} (hS : IsStarState S) :
     IsStarState (edgeFrame j S) :=
   l3b_isStarState_Rpow_conj j hS
 
@@ -169,8 +174,9 @@ private lemma l3b_halfPlaneF_edgeControl {x y ue : ℝ} (hD : -1 + 2 * √3 * x 
   ring_nf
   simp only [h3]
 
-/-- On the state space and the control set, `-1 + 2√3 x u_e < 0`. -/
-private lemma l3b_denom_neg {x : ℝ} (hx1 : -(1 / √3) < x) (hx2 : x < 1 / √3) {ue : ℝ}
+/-- On the state space and the control set of the edge problem, the denominator of `f₂` is negative:
+`-1 + 2√3 x u_e < 0`. -/
+theorem edgeF₂_denom_neg {x : ℝ} (hx1 : -(1 / √3) < x) (hx2 : x < 1 / √3) {ue : ℝ}
     (hue : ue ∈ edgeControlSet) : -1 + 2 * √3 * x * ue < 0 := by
   obtain ⟨hu1, hu2⟩ := hue
   have h3 : 0 < √3 := by positivity
@@ -188,58 +194,22 @@ private lemma l3b_denom_neg {x : ℝ} (hx1 : -(1 / √3) < x) (hx2 : x < 1 / √
 
 /-! ### Carathéodory calculus -/
 
-/-- **FTC for absolutely continuous functions**, in integral form on `[a, b]`: an absolutely
-continuous `f` with derivative `v` at almost every point of `(a, b)` is the indefinite integral
-of `v`. -/
-private lemma l3b_eq_add_integral_of_ac {f v : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
-    (hf : AbsolutelyContinuousOnInterval f a b) (hd : ∀ᵐ t, t ∈ Ioo a b → HasDerivAt f (v t) t) :
-    IntervalIntegrable v volume a b ∧ ∀ t ∈ Icc a b, f t = f a + ∫ s in a..t, v s := by
-  have hae : ∀ᵐ t, t ∈ Ioc a b → deriv f t = v t := by
-    have hb : ∀ᵐ t : ℝ, t ≠ b := by simp [ae_iff, measure_singleton]
-    filter_upwards [hd, hb] with t ht htb htI
-    exact (ht ⟨htI.1, lt_of_le_of_ne htI.2 htb⟩).deriv
-  have hint : IntervalIntegrable v volume a b := by
-    refine (hf.intervalIntegrable_deriv).congr_ae ?_
-    rw [uIoc_of_le hab]
-    exact (ae_restrict_iff' measurableSet_Ioc).2 hae
-  refine ⟨hint, fun t ht ↦ ?_⟩
-  have hsub : uIcc a t ⊆ uIcc a b := by
-    rw [uIcc_of_le ht.1, uIcc_of_le hab]; exact Icc_subset_Icc_right ht.2
-  have h := (hf.mono hsub).integral_deriv_eq_sub
-  have h' : ∫ s in a..t, v s = ∫ s in a..t, deriv f s := by
-    refine intervalIntegral.integral_congr_ae ?_
-    rw [uIoc_of_le ht.1]
-    filter_upwards [hae] with s hs hst
-    exact (hs ⟨hst.1, hst.2.trans ht.2⟩).symm
-  rw [h', h]
-  ring
-
 /-- A curve in integral form has its entrywise derivative at almost every time (Lebesgue's
 differentiation theorem). -/
-private lemma l3b_ae_hasDerivAtEntrywise {f v : ℝ → Mat2} {T : ℝ} (hI : IsIntegralCurve f v T) :
-    ∀ᵐ τ, τ ∈ Ioo 0 T → HasDerivAtEntrywise f (v τ) τ := by
-  have h : ∀ i k, ∀ᵐ τ, τ ∈ Ioo 0 T → HasDerivAt (fun s ↦ f s i k) (v τ i k) τ := by
-    intro i k
-    obtain ⟨hint, heq⟩ := hI i k
-    filter_upwards [hint.ae_hasDerivAt_integral] with τ hτ hτI
-    have hT : 0 ≤ T := (hτI.1.trans hτI.2).le
-    have hmem : τ ∈ uIcc 0 T := by rw [uIcc_of_le hT]; exact Ioo_subset_Icc_self hτI
-    exact ((hτ hmem 0 left_mem_uIcc).const_add (f 0 i k)).congr_of_eventuallyEq
-      (eventually_of_mem (Icc_mem_nhds hτI.1 hτI.2) fun s hs ↦ heq s hs)
+theorem IsIntegralCurve.ae_hasDerivAtEntrywise {f v : ℝ → Mat2} {T : ℝ}
+    (hI : IsIntegralCurve f v T) : ∀ᵐ τ, τ ∈ Ioo 0 T → HasDerivAtEntrywise f (v τ) τ := by
+  rcases lt_or_ge T 0 with hT | hT
+  · exact .of_forall fun τ hτ ↦ absurd (hτ.1.trans hτ.2) (not_lt.2 hT.le)
+  have h : ∀ i k, ∀ᵐ τ, τ ∈ Ioo 0 T → HasDerivAt (fun s ↦ f s i k) (v τ i k) τ := fun i k ↦
+    ae_hasDerivAt_of_eq_add_integral (hI i k).1 ⟨le_rfl, hT⟩ (hI i k).2
   have := ae_all_iff.2 fun i ↦ ae_all_iff.2 fun k ↦ h i k
   filter_upwards [this] with τ hτ hτI i k using hτ i k hτI
 
 /-- The entries of a curve in integral form are absolutely continuous. -/
-private lemma l3b_ac_of_isIntegralCurve {f v : ℝ → Mat2} {T : ℝ} (hT : 0 ≤ T)
+theorem IsIntegralCurve.absolutelyContinuousOnInterval {f v : ℝ → Mat2} {T : ℝ} (hT : 0 ≤ T)
     (hI : IsIntegralCurve f v T) (i k : Fin 2) :
-    AbsolutelyContinuousOnInterval (fun t ↦ f t i k) 0 T := by
-  obtain ⟨hint, heq⟩ := hI i k
-  have h1 := hint.absolutelyContinuousOnInterval_intervalIntegral (c := 0) left_mem_uIcc
-  have h0 : AbsolutelyContinuousOnInterval (fun _ : ℝ ↦ f 0 i k) 0 T :=
-    (contDiffOn_const (c := f 0 i k)).absolutelyContinuousOnInterval
-  refine (h0.fun_add h1).congr fun t ht ↦ ?_
-  rw [uIcc_of_le hT] at ht
-  exact (heq t ht).symm
+    AbsolutelyContinuousOnInterval (fun t ↦ f t i k) 0 T :=
+  absolutelyContinuousOnInterval_of_eq_add_integral hT (hI i k).1 (hI i k).2
 
 /-- The entries of `A f(t) B` are absolutely continuous when those of `f` are. -/
 private lemma l3b_ac_conj {f : ℝ → Mat2} {a b : ℝ} (A B : Mat2)
@@ -325,12 +295,12 @@ private lemma l3b_ae_hasDerivAt (h : IsStateTrajectory T u g X) (j : Fin 3) {c d
     (hc : 0 ≤ c) (hd : d ≤ T) (hu : ∀ᵐ t, t ∈ Ioo c d → u t j = 0) :
     ∀ᵐ τ, τ ∈ Ioo c d → HasDerivAt (l3b_x j X) (l3b_y j X τ) τ ∧
       HasDerivAt (l3b_y j X) (edgeF₂ (l3b_x j X τ) (l3b_y j X τ) (edgeParam j (u τ))) τ := by
-  filter_upwards [l3b_ae_hasDerivAtEntrywise h.2.2.2.2.2, hu] with τ hX hj hτ
+  filter_upwards [h.2.2.2.2.2.ae_hasDerivAtEntrywise, hu] with τ hX hj hτ
   have hτ0 : τ ∈ Ioo 0 T := ⟨hc.trans_lt hτ.1, hτ.2.trans_le hd⟩
   have hτI : τ ∈ Icc 0 T := Ioo_subset_Icc_self hτ0
   obtain ⟨hS, hpos, hΦ, hstar⟩ := l3b_star h j hτI
   have huS := h.2.2.1 τ hτI
-  have hue := l3b_edgeParam_mem huS j
+  have hue := edgeParam_mem_edgeControlSet (j := j) huS
   -- the rotated control is `(0, ½ + u_e, ½ - u_e)`
   have hZ : R ^ (j : ℕ) * controlMatrix (u τ) * R⁻¹ ^ (j : ℕ) =
       controlMatrix (edgeControl (edgeParam j (u τ))) := by
@@ -355,8 +325,8 @@ private lemma l3b_ae_hasDerivAt (h : IsStateTrajectory T u g X) (j : Fin 3) {c d
   rw [hΦ] at hΦd
   -- Lemma 4.5.2
   obtain ⟨hx', hy', -⟩ := lemma4_5_2 (l3b_x j X) (l3b_y j X) _ τ _ _ hstar
-    (l3b_edgeControl_mem hue) hx hy hΦd
-  have hD := (l3b_denom_neg hstar.2.1 hstar.2.2.1 hue).ne
+    (edgeControl_mem_controlSimplex hue) hx hy hΦd
+  have hD := (edgeF₂_denom_neg hstar.2.1 hstar.2.2.1 hue).ne
   obtain ⟨hf₁, hf₂⟩ := l3b_halfPlaneF_edgeControl (y := l3b_y j X τ) hD
   exact ⟨hx.congr_deriv (hx'.trans hf₁), hy.congr_deriv (hy'.trans hf₂)⟩
 
@@ -370,7 +340,7 @@ private lemma l3b_ac_xy (h : IsStateTrajectory T u g X) (j : Fin 3) {c d : ℝ} 
   have hsub : uIcc c d ⊆ uIcc 0 T := by
     rw [uIcc_of_le hcd, uIcc_of_le hT]; exact Icc_subset_Icc hc hd
   have hXac : ∀ i k, AbsolutelyContinuousOnInterval (fun t ↦ X t i k) c d := fun i k ↦
-    (l3b_ac_of_isIntegralCurve hT h.2.2.2.2.2 i k).mono hsub
+    (h.2.2.2.2.2.absolutelyContinuousOnInterval hT i k).mono hsub
   have hXtac := l3b_ac_conj (R ^ (j : ℕ)) (R⁻¹ ^ (j : ℕ)) hXac
   -- a positive lower bound for `X̃₁₀` on `[c, d]`
   have hcont := (continuousOn_iff_entrywise.1 (l3b_continuousOn h j) 1 0).mono
@@ -398,9 +368,10 @@ private lemma l3b_integral_xy (h : IsStateTrajectory T u g X) (j : Fin 3) {c d :
         ∫ σ in c..τ, edgeF₂ (l3b_x j X σ) (l3b_y j X σ) (edgeParam j (u σ))) := by
   obtain ⟨hxac, hyac⟩ := l3b_ac_xy h j hc hcd hd
   have hD := l3b_ae_hasDerivAt h j hc hd hu
-  exact ⟨l3b_eq_add_integral_of_ac hcd hxac (by filter_upwards [hD] with τ hτ hτI using
-      (hτ hτI).1),
-    l3b_eq_add_integral_of_ac hcd hyac (by filter_upwards [hD] with τ hτ hτI using (hτ hτI).2)⟩
+  exact ⟨hxac.eq_add_integral_of_ae_hasDerivAt hcd (by
+      filter_upwards [hD] with τ hτ hτI using (hτ hτI).1),
+    hyac.eq_add_integral_of_ae_hasDerivAt hcd (by
+      filter_upwards [hD] with τ hτ hτI using (hτ hτI).2)⟩
 
 /-- The shift `t ↦ c + t` of an integrable function on `[c, d]` is integrable on `[0, d - c]`. -/
 private lemma l3b_intervalIntegrable_shift {F : ℝ → ℝ} {c d : ℝ}
@@ -491,8 +462,8 @@ theorem eqn_xy_edge {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2} (
         add_zero, intervalIntegral.integral_same, zero_add]
       rw [intervalIntegral.integral_comp_add_left (fun τ ↦ edgeFrame j (X τ) 1 0), add_zero]
   have hdc : (0 : ℝ) ≤ d - c := by linarith
-  refine ⟨⟨⟨?_, fun t ht ↦ l3b_edgeParam_mem (h.2.2.1 _ (hmemT _ (hmem t ht))) j, ?_, hint, heq⟩,
-    fun t ht ↦ ?_⟩, fun t ht ↦ ?_, ?_⟩
+  refine ⟨⟨⟨?_, fun t ht ↦ edgeParam_mem_edgeControlSet (j := j) (h.2.2.1 _ (hmemT _ (hmem t ht))),
+    ?_, hint, heq⟩, fun t ht ↦ ?_⟩, fun t ht ↦ ?_, ?_⟩
   · -- measurability of the edge control
     have hm : Measurable fun t ↦ u (c + t) := h.2.1.comp (measurable_const_add c)
     exact (((measurable_pi_apply _).comp hm).sub ((measurable_pi_apply _).comp hm)).div_const 2
@@ -684,7 +655,7 @@ theorem edgeCost_identity {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → M
   ring
 
 /-- A covector on `ℝ³` in terms of its values `λ₁, λ₂, λ₃` on the basis vectors. -/
-private lemma l3b_apply_eq (p : StrongDual ℝ (Fin 3 → ℝ)) (w : Fin 3 → ℝ) :
+theorem apply_eq_sum_edgeCostate (p : StrongDual ℝ (Fin 3 → ℝ)) (w : Fin 3 → ℝ) :
     p w = w 0 * edgeCostate p 0 + w 1 * edgeCostate p 1 + w 2 * edgeCostate p 2 := by
   have hw : w = w 0 • Pi.single 0 1 + w 1 • Pi.single 1 1 + w 2 • Pi.single 2 1 := by
     ext i; fin_cases i <;> simp
@@ -693,7 +664,7 @@ private lemma l3b_apply_eq (p : StrongDual ℝ (Fin 3 → ℝ)) (w : Fin 3 → �
 
 /-- The partial derivatives of the state equations (8.1.3) of the edge problem, at a point where
 `y ≠ 0` and `-1 + 2√3 x u_e ≠ 0`. -/
-private lemma l3b_fderiv_edgeField {q : Fin 3 → ℝ} {ue : ℝ} (hy : q 1 ≠ 0)
+theorem fderiv_edgeField_apply {q : Fin 3 → ℝ} {ue : ℝ} (hy : q 1 ≠ 0)
     (hD : -1 + 2 * √3 * q 0 * ue ≠ 0) (v : Fin 3 → ℝ) :
     fderiv ℝ (fun q ↦ edgeField q ue) q v =
       ![v 1, -(12 * q 1 ^ 2 * ue ^ 2 / (-1 + 2 * √3 * q 0 * ue) ^ 2) * v 0 +
@@ -738,7 +709,7 @@ private lemma l3b_fderiv_edgeField {q : Fin 3 → ℝ} {ue : ℝ} (hy : q 1 ≠ 
     ring
 
 /-- The partial derivatives of the edge cost `φ_edge = x²/y`, at a point where `y ≠ 0`. -/
-private lemma l3b_fderiv_edgeCost {q : Fin 3 → ℝ} {ue : ℝ} (hy : q 1 ≠ 0) (v : Fin 3 → ℝ) :
+theorem fderiv_edgeCost_apply {q : Fin 3 → ℝ} {ue : ℝ} (hy : q 1 ≠ 0) (v : Fin 3 → ℝ) :
     fderiv ℝ (fun q ↦ edgeCost q ue) q v = 2 * q 0 / q 1 * v 0 - q 0 ^ 2 / q 1 ^ 2 * v 1 := by
   have hdiff : DifferentiableAt ℝ (fun q ↦ edgeCost q ue) q := by
     simp only [edgeCost]; fun_prop (disch := assumption)
@@ -774,7 +745,7 @@ the maximum principle for the edge control problem is
 theorem eqn_edge_ham (ν : ℝ) (q : Fin 3 → ℝ) (p : StrongDual ℝ (Fin 3 → ℝ)) (ue : ℝ) :
     Pontryagin.controlHamiltonian edgeField edgeCost ν q p ue =
       edgeHamiltonian ν (edgeCostate p 0) (edgeCostate p 1) (edgeCostate p 2) (q 0) (q 1) ue := by
-  rw [Pontryagin.controlHamiltonian, l3b_apply_eq, edgeHamiltonian, edgeCost]
+  rw [Pontryagin.controlHamiltonian, apply_eq_sum_edgeCostate, edgeHamiltonian, edgeCost]
   simp only [edgeField, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
     Matrix.tail_cons, Matrix.head_cons]
   ring
@@ -824,11 +795,12 @@ theorem eqn_costate_edge {T : ℝ} {ue : ℝ → ℝ} {q : ℝ → Fin 3 → ℝ
       F r (Pi.single 1 1) = -edgeCostateRHS₂ ν (edgeCostate (p r) 0) (edgeCostate (p r) 1)
         (edgeCostate (p r) 2) (q r 0) (q r 1) (ue r) ∧ F r (Pi.single 2 1) = 0 := by
     intro r hr
-    have hD := (l3b_denom_neg (hΩ r hr).2.1 (hΩ r hr).2.2 (hU r hr)).ne
+    have hD := (edgeF₂_denom_neg (hΩ r hr).2.1 (hΩ r hr).2.2 (hU r hr)).ne
     have hy := (hΩ r hr).1.ne'
     simp only [hFdef, _root_.add_apply, ContinuousLinearMap.comp_apply,
-      _root_.smul_apply, Pontryagin.linearization, l3b_fderiv_edgeField hy hD,
-      l3b_fderiv_edgeCost hy, smul_eq_mul, l3b_apply_eq (p r), edgeCostateRHS₁, edgeCostateRHS₂]
+      _root_.smul_apply, Pontryagin.linearization, fderiv_edgeField_apply hy hD,
+      fderiv_edgeCost_apply hy, smul_eq_mul, apply_eq_sum_edgeCostate (p r), edgeCostateRHS₁,
+      edgeCostateRHS₂]
     have hD2 : (1 - 2 * √3 * q r 0 * ue r) ^ 2 = (-1 + 2 * √3 * q r 0 * ue r) ^ 2 := by ring
     refine ⟨?_, ?_, ?_⟩ <;> simp [hD2] <;> ring
   -- evaluation at a vector is a continuous linear map on covectors

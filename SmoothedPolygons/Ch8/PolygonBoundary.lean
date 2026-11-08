@@ -195,7 +195,7 @@ state-dependent curvatures are zero"):
    direction of `w(c)`: `det(w(c), w)²/|w|²` has zero derivative (`l3k_det2_eq_zero_of_det2_deriv`);
    so `det(w(c), σ - σ(c))` has zero derivative and `σ` lies on the line through `σ(c)` with
    direction `w(c)` (`l3k_line_of_det2_deriv`). -/
-theorem l3st_straight_of_vertexControl {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
+private theorem l3st_straight_of_vertexControl {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
     (h : IsStateTrajectory T u g X) {c d : ℝ} (hc : 0 ≤ c) (hcd : c < d) (hd : d ≤ T)
     {i : Fin 3} (hu : ∀ᵐ t, t ∈ Ioo c d → u t = vertex i) {m : Fin 3} (hm : m ≠ i) :
     ∃ p v : Fin 2 → ℝ, v ≠ 0 ∧
@@ -377,77 +377,6 @@ private lemma l3k_image_eq_segment {γ : ℝ → Fin 2 → ℝ} {α β : ℝ} (h
 private def l3k_LocVertex (u : ℝ → Fin 3 → ℝ) (i : Fin 3) (t : ℝ) : Prop :=
   ∃ ε > 0, ∀ᵐ τ, τ ∈ Ioo (t - ε) (t + ε) → u τ = vertex i
 
-private lemma l3k_isOpen_locVertex (u : ℝ → Fin 3 → ℝ) (i : Fin 3) :
-    IsOpen {t | l3k_LocVertex u i t} := by
-  refine Metric.isOpen_iff.2 fun t ⟨ε, hε, h⟩ ↦
-    ⟨ε / 2, by positivity, fun t' ht' ↦ ⟨ε / 2, by positivity, ?_⟩⟩
-  rw [Metric.mem_ball, Real.dist_eq, abs_lt] at ht'
-  filter_upwards [h] with τ hτ hτ'
-  exact hτ ⟨by linarith [hτ'.1], by linarith [hτ'.2]⟩
-
-private lemma l3k_locVertex_unique {u : ℝ → Fin 3 → ℝ} {i i' : Fin 3} {t : ℝ}
-    (h : l3k_LocVertex u i t) (h' : l3k_LocVertex u i' t) : i = i' := by
-  obtain ⟨ε, hε, h⟩ := h
-  obtain ⟨ε', hε', h'⟩ := h'
-  by_contra hii
-  have hne : vertex i ≠ vertex i' := fun he ↦ by
-    have := congrFun he i
-    simp [vertex, hii] at this
-  have hδ : 0 < min ε ε' := lt_min hε hε'
-  have hnull : volume (Ioo (t - min ε ε') (t + min ε ε')) = 0 := by
-    rw [measure_eq_zero_iff_ae_notMem]
-    filter_upwards [h, h'] with τ hτ hτ' hmem
-    have h1 := min_le_left ε ε'
-    have h2 := min_le_right ε ε'
-    exact hne ((hτ ⟨by linarith [hmem.1], by linarith [hmem.2]⟩).symm.trans
-      (hτ' ⟨by linarith [hmem.1], by linarith [hmem.2]⟩))
-  rw [Real.volume_Ioo, ENNReal.ofReal_eq_zero] at hnull
-  linarith
-
-/-- On an interval each of whose points has a vertex `u` is near, `u` is almost everywhere one
-vertex (the interval is connected, and local almost-everywhere statements are global). -/
-private lemma l3k_ae_vertex_of_locVertex {u : ℝ → Fin 3 → ℝ} {α β : ℝ} (hαβ : α < β)
-    (h : ∀ t ∈ Ioo α β, ∃ i, l3k_LocVertex u i t) :
-    ∃ i, ∀ᵐ t, t ∈ Ioo α β → u t = vertex i := by
-  have hmid : (α + β) / 2 ∈ Ioo α β := ⟨by linarith, by linarith⟩
-  obtain ⟨i, hi⟩ := h _ hmid
-  refine ⟨i, ?_⟩
-  have hother : IsOpen {t | ∃ i', i' ≠ i ∧ l3k_LocVertex u i' t} := by
-    have e : {t | ∃ i', i' ≠ i ∧ l3k_LocVertex u i' t} =
-        ⋃ i' : {i' : Fin 3 // i' ≠ i}, {t | l3k_LocVertex u i' t} := by
-      ext t
-      simp only [mem_ofPred_eq, mem_iUnion, Subtype.exists, exists_prop]
-    rw [e]
-    exact isOpen_iUnion fun i' ↦ l3k_isOpen_locVertex u i'
-  have hcov : Ioo α β ⊆ {t | l3k_LocVertex u i t} ∪ {t | ∃ i', i' ≠ i ∧ l3k_LocVertex u i' t} := by
-    intro t ht
-    obtain ⟨i', hi'⟩ := h t ht
-    by_cases hii : i' = i
-    · exact Or.inl (hii ▸ hi')
-    · exact Or.inr ⟨i', hii, hi'⟩
-  have hdisj : Ioo α β ∩ ({t | l3k_LocVertex u i t} ∩
-      {t | ∃ i', i' ≠ i ∧ l3k_LocVertex u i' t}) = ∅ := by
-    ext t
-    simp only [mem_inter_iff, mem_ofPred_eq, mem_empty_iff_false, iff_false, not_and]
-    rintro - h1 ⟨i', hi', h2⟩
-    exact hi' (l3k_locVertex_unique h2 h1)
-  have hall : Ioo α β ⊆ {t | l3k_LocVertex u i t} := by
-    rcases isPreconnected_iff_subset_of_disjoint.1 isPreconnected_Ioo _ _
-      (l3k_isOpen_locVertex u i) hother hcov hdisj with h1 | h2
-    · exact h1
-    · obtain ⟨i', hi', h'⟩ := h2 hmid
-      exact absurd (l3k_locVertex_unique h' hi) hi'
-  rw [ae_iff]
-  refine measure_null_of_locally_null _ fun t ht ↦ ?_
-  simp only [mem_ofPred_eq, not_imp] at ht
-  obtain ⟨ε, hε, hae⟩ := hall ht.1
-  refine ⟨_, inter_mem_nhdsWithin _ (Ioo_mem_nhds (by linarith : t - ε < t)
-    (by linarith : t < t + ε)), ?_⟩
-  rw [ae_iff] at hae
-  refine measure_mono_null (fun τ hτ ↦ ?_) hae
-  simp only [mem_inter_iff, mem_ofPred_eq, not_imp] at hτ ⊢
-  exact ⟨hτ.2, hτ.1.2⟩
-
 /-- **The switching intervals of a finite bang-bang control.** If `u` is bang-bang with finitely
 many switches on `[0, T]`, there are times `0 = τ₀ < τ₁ < ⋯ < τ_N = T` (`τ` monotone, constant
 after `N`) and vertices `e_{v_l + 1}` with `u = e_{v_l + 1}` almost everywhere on `(τ_l, τ_{l+1})`
@@ -529,7 +458,7 @@ private lemma l3k_partition {T : ℝ} (hT : 0 < T) {u : ℝ → Fin 3 → ℝ}
   have hv : ∀ l, ∃ i : Fin 3, l + 1 < n → ∀ᵐ t, t ∈ Ioo (τ l) (τ (l + 1)) → u t = vertex i := by
     intro l
     by_cases hl : l + 1 < n
-    · obtain ⟨i, hi⟩ := l3k_ae_vertex_of_locVertex (hτlt l hl) (hloc l hl)
+    · obtain ⟨i, hi⟩ := exists_ae_eq_vertex_of_locally (hloc l hl)
       exact ⟨i, fun _ ↦ hi⟩
     · exact ⟨0, fun h ↦ absurd h hl⟩
   choose v hv using hv
@@ -671,7 +600,7 @@ Lemma 3.1.8, made precise):
    `σ_{j±1}'(t_f) ≠ 0`, `l3k_line_continue`), so Lemma 3.1.8 on `[0, τ₁]` applies with the same
    asymptotes, and its constant is the value at `t_f`.
 5. Collect the finitely many segments and arcs (`l3k_isSmoothedPolygonBoundary_of_finite`). -/
-theorem l3st_isSmoothedPolygonBoundary_of_isFiniteBangBang {T : ℝ} {u : ℝ → Fin 3 → ℝ}
+private theorem l3st_isSmoothedPolygonBoundary_of_isFiniteBangBang {T : ℝ} {u : ℝ → Fin 3 → ℝ}
     {g X : ℝ → Mat2} (h : IsReinhardtAdmissible T u g X) (hbb : IsFiniteBangBang 0 T u)
     {K : Set (Fin 2 → ℝ)} {σ : ZMod 6 → ℝ → Fin 2 → ℝ} (hKσ : IsBalancedPair K σ T)
     (hσ : ∀ j, ∀ t ∈ Icc 0 T, σ j t = g t *ᵥ sixthRoot j)
@@ -942,7 +871,7 @@ consisting of finitely many straight edges and hyperbolic arcs. The disk `K(g, X
 (the balanced pair with `σ_j = g s_j*`; see the module docstring for its existence).
 
 Proof: Theorem 8.3.2 (`theorem8_3_2`, on `[0, t_f]`, with
-`l3st_isExtremalOn_of_isPontryaginExtremal`) makes the control bang-bang with finitely many
+`IsPontryaginExtremal.isExtremalOn`) makes the control bang-bang with finitely many
 switches; then `l3st_isSmoothedPolygonBoundary_of_isFiniteBangBang` (the discussion of §7.2 with
 Lemma 3.1.8). -/
 theorem remark8_3_3 {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {lam : ℝ}
@@ -954,14 +883,14 @@ theorem remark8_3_3 {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ �
     IsSmoothedPolygonBoundary K := by
   have hT : 0 < T := h.1.1
   exact l3st_isSmoothedPolygonBoundary_of_isFiniteBangBang ⟨h.1, h.2.1, h.2.2.1, h.2.2.2.1⟩
-    (theorem8_3_2 (l3st_isExtremalOn_of_isPontryaginExtremal h le_rfl hT le_rfl) hedge hS) hKσ hσ
+    (theorem8_3_2 (IsPontryaginExtremal.isExtremalOn h le_rfl hT le_rfl) hedge hS) hKσ hσ
     hshift
 
 /-- Being the boundary of a smoothed polygon is invariant under invertible linear maps: lines go to
 lines, segments to segments, and `det(A⁻¹d, A⁻¹(x - p)) = det(A⁻¹) det(d, x - p)`, so hyperbolic
 arcs with asymptotes go to hyperbolic arcs with the image asymptotes (constant `c det(A⁻¹)²`); the
 frontier of the image is the image of the frontier (a linear homeomorphism). -/
-theorem l3st_isSmoothedPolygonBoundary_of_image {K : Set (Fin 2 → ℝ)} {A : Mat2} (hA : A.det ≠ 0)
+theorem IsSmoothedPolygonBoundary.of_mulVec_image {K : Set (Fin 2 → ℝ)} {A : Mat2} (hA : A.det ≠ 0)
     (h : IsSmoothedPolygonBoundary ((fun v ↦ A *ᵥ v) '' K)) : IsSmoothedPolygonBoundary K := by
   obtain ⟨m, n, a, b, γ, α, β, hab, hhyp, hα, hβ, hfr⟩ := h
   have hAu : IsUnit A.det := isUnit_iff_ne_zero.2 hA

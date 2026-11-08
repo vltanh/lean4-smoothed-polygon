@@ -10,14 +10,16 @@ closed interval, normal or abnormal, has a bang-bang control `u_e = ±½` with f
 switches. The switching function is `λ₂` (the costate dual to `y`), and the proof shows that its
 zeros are isolated: a zero with `λ₂' ≠ 0` is transversal; at a zero with `λ₂' = 0` the costate is
 given by (8.1.8) (`eqn_edge_zero`: the extremal is normal there and `x = ±√(-λ₃/λ_cost)`, which
-happens at most twice since `x' = y > 0`; the proof does not need this count), and such a zero is
-isolated by Lemma 8.1.5 (`lem:lambda2-Landau`: `λ₂(t) = C tⁿ + O(tⁿ⁺¹)` with `C ≠ 0`, by
-Gronwall, Corollary A.1.3).
+happens at most twice since `x' = y > 0`:
+`IsEdgeProblemExtremal.exists_tangentialZeros_subset_pair`), and such a zero is isolated by
+Lemma 8.1.5 (`lem:lambda2-Landau`: `λ₂(t) = C tⁿ + O(tⁿ⁺¹)` with `C ≠ 0`, by Gronwall,
+Corollary A.1.3).
 
 Lemma 8.1.5 is in `SmoothedPolygons/Ch8/EdgeLandau.lean`.
 
-The private helpers (prefix `l3d_`) are: the monotonicity of `f₂` in the control and the bounds
-on the control-dependent terms along a trajectory (the continuity arguments of TeX 6846–6852);
+The private helpers (prefixes `l3d_`, `l3n_`) are: the monotonicity of `f₂` in the control and of
+`x` in time, and the bounds on the control-dependent terms along a trajectory (the continuity
+arguments of TeX 6846–6852);
 the derivative of `λ₂` at its zeros; and the passage from Lemma 8.1.5, stated on a two-sided
 interval `(-t₁, t₁)`, to a zero at an endpoint of `[0, T]` (`l3d_landau_glue`: the state and
 the normalized costate are continued past the endpoint with the control `u_e = 0`, for which the
@@ -54,10 +56,8 @@ private lemma l3d_sqrt3_mul_lt {x : ℝ} (hx : |x| < 1 / √3) : √3 * |x| < 1 
 
 /-- On the state space, the denominator `-1 + 2√3 x u_e` of `f₂` is negative. -/
 private lemma l3d_den_neg {x u : ℝ} (hx : |x| < 1 / √3) (hu : u ∈ edgeControlSet) :
-    -1 + 2 * √3 * x * u < 0 := by
-  have := l3d_den_le (le_refl |x|) hu
-  have := l3d_sqrt3_mul_lt hx
-  linarith
+    -1 + 2 * √3 * x * u < 0 :=
+  edgeF₂_denom_neg (abs_lt.mp hx).1 (abs_lt.mp hx).2 hu
 
 /-- `f₂` is strictly decreasing in `u_e ∈ [-½, ½]` on the state space (TeX 6840–6841):
 `f₂(u) - f₂(v) = 2√3 y² (v - u)/((-1 + 2√3 x u)(-1 + 2√3 x v))`. -/
@@ -292,8 +292,9 @@ decreasing in `u_e` (`∂f₂/∂u_e = -2√3 y²/(-1 + 2√3 x u_e)² < 0` on t
 almost every time `λ₂ > 0` forces `u_e = -½` and `λ₂ < 0` forces `u_e = ½`: `λ₂` is the
 switching function. Proof: `Pontryagin.IsMaximal` with `eqn_edge_ham`, and the strict
 monotonicity of `f₂` in `u_e` (`l3d_edgeF₂_lt`). -/
-theorem l3st_edge_max_rule {T : ℝ} {ue : ℝ → ℝ} {q : ℝ → Fin 3 → ℝ} {ν : ℝ}
-    {p : ℝ → StrongDual ℝ (Fin 3 → ℝ)} (h : IsEdgeProblemExtremal T ue q ν p) :
+theorem IsEdgeProblemExtremal.ae_control_eq_of_switching {T : ℝ} {ue : ℝ → ℝ}
+    {q : ℝ → Fin 3 → ℝ} {ν : ℝ} {p : ℝ → StrongDual ℝ (Fin 3 → ℝ)}
+    (h : IsEdgeProblemExtremal T ue q ν p) :
     ∀ᵐ t, t ∈ Icc 0 T →
       (0 < edgeCostate (p t) 1 → ue t = -(1 / 2)) ∧ (edgeCostate (p t) 1 < 0 → ue t = 1 / 2) := by
   obtain ⟨-, ⟨⟨-, hU, -, -, -⟩, hdom⟩, -, -, -, hmax, -⟩ := h
@@ -372,6 +373,63 @@ theorem eqn_edge_zero {T : ℝ} {ue : ℝ → ℝ} {q : ℝ → Fin 3 → ℝ} {
     · simpa [hν] using hl₃
   rw [hν, hp]
   rfl
+
+/-! ### At most two zeros of the second kind -/
+
+/-- Along an edge extremal, `x` is strictly increasing on `[0, T]`: `x' = y > 0` (8.1.3). -/
+private lemma l3n_strictMonoOn_x {T : ℝ} {ue : ℝ → ℝ} {q : ℝ → Fin 3 → ℝ} {ν : ℝ}
+    {p : ℝ → StrongDual ℝ (Fin 3 → ℝ)} (h : IsEdgeProblemExtremal T ue q ν p) :
+    StrictMonoOn (fun t ↦ q t 0) (Icc 0 T) := by
+  obtain ⟨hyi, -, hxe, -⟩ := l3d_state h
+  have hT := h.1
+  have hsub : ∀ {b}, b ∈ Icc 0 T → IntervalIntegrable (fun s ↦ q s 1) volume 0 b := fun hb ↦
+    hyi.mono_set (by rw [uIcc_of_le hb.1, uIcc_of_le hT.le]; exact Icc_subset_Icc le_rfl hb.2)
+  intro s hs t ht hst
+  have hpos : 0 < ∫ r in s..t, q r 1 :=
+    intervalIntegral.intervalIntegral_pos_of_pos_on ((hsub hs).symm.trans (hsub ht))
+      (fun r hr ↦ (h.2.1.2 r ⟨by linarith [hs.1, hr.1], by linarith [ht.2, hr.2]⟩).1) hst
+  have e := intervalIntegral.integral_interval_sub_left (hsub ht) (hsub hs)
+  change q s 0 < q t 0
+  rw [hxe t ht, hxe s hs]
+  linarith
+
+/-- At a zero `t₂` of `λ₂` with `λ₂'(t₂) = 0`, `x(t₂) = ±√(-λ₃/λ_cost)` (TeX 6858–6859: (8.1.8),
+`eqn_edge_zero`, with `λ₃` constant, `eqn_costate_edge`). -/
+private lemma l3n_x_eq_of_tangential {T : ℝ} {ue : ℝ → ℝ} {q : ℝ → Fin 3 → ℝ} {ν : ℝ}
+    {p : ℝ → StrongDual ℝ (Fin 3 → ℝ)} (h : IsEdgeProblemExtremal T ue q ν p) {t₂ : ℝ}
+    (ht₂ : t₂ ∈ Icc 0 T) (hz : edgeCostate (p t₂) 1 = 0)
+    (hd : HasDerivWithinAt (fun t ↦ edgeCostate (p t) 1) 0 (Icc 0 T) t₂) :
+    q t₂ 0 = √(-edgeCostate (p 0) 2 / ν) ∨ q t₂ 0 = -√(-edgeCostate (p 0) 2 / ν) := by
+  obtain ⟨hl₃, -, hν⟩ := eqn_edge_zero h ht₂ hz hd
+  rw [(eqn_costate_edge h).1 t₂ ht₂] at hl₃
+  have hsq : q t₂ 0 ^ 2 = -edgeCostate (p 0) 2 / ν := by
+    rw [hl₃]
+    field_simp
+  rw [← abs_eq (Real.sqrt_nonneg _), ← hsq, Real.sqrt_sq_eq_abs]
+
+/-- **At most two zeros of the second kind** (proof of Theorem 8.1.4, TeX 6875–6879). Along an
+edge extremal there are at most two times `t₂ ∈ [0, T]` with `λ₂(t₂) = λ₂'(t₂) = 0`: at such a
+time `x(t₂) = ±√(-λ₃/λ_cost)` by (8.1.8) (`eqn_edge_zero`; `λ₃` is constant), and `x` is strictly
+increasing (`x' = y > 0`, (8.1.3)), so it takes each of these two values at most once. -/
+theorem IsEdgeProblemExtremal.exists_tangentialZeros_subset_pair {T : ℝ} {ue : ℝ → ℝ}
+    {q : ℝ → Fin 3 → ℝ} {ν : ℝ} {p : ℝ → StrongDual ℝ (Fin 3 → ℝ)}
+    (h : IsEdgeProblemExtremal T ue q ν p) :
+    ∃ a b : ℝ, {t ∈ Icc 0 T | edgeCostate (p t) 1 = 0 ∧
+      HasDerivWithinAt (fun t ↦ edgeCostate (p t) 1) 0 (Icc 0 T) t} ⊆ {a, b} := by
+  have hinj := (l3n_strictMonoOn_x h).injOn
+  have hsing : ∀ c : ℝ, ∃ a : ℝ, {t ∈ Icc 0 T | q t 0 = c} ⊆ {a} := by
+    intro c
+    have hs : {t ∈ Icc 0 T | q t 0 = c}.Subsingleton := fun s hs t ht ↦
+      hinj hs.1 ht.1 (hs.2.trans ht.2.symm)
+    rcases hs.eq_empty_or_singleton with he | ⟨a, ha⟩
+    · exact ⟨0, by rw [he]; exact empty_subset _⟩
+    · exact ⟨a, ha.subset⟩
+  obtain ⟨a, ha⟩ := hsing (√(-edgeCostate (p 0) 2 / ν))
+  obtain ⟨b, hb⟩ := hsing (-√(-edgeCostate (p 0) 2 / ν))
+  refine ⟨a, b, fun t ht ↦ ?_⟩
+  rcases l3n_x_eq_of_tangential h ht.1 ht.2.1 ht.2.2 with hx | hx
+  · exact Or.inl (ha ⟨ht.1, hx⟩)
+  · exact Or.inr (hb ⟨ht.1, hx⟩)
 
 /-! ### Lemma 8.1.5 at an endpoint -/
 
@@ -675,36 +733,58 @@ private lemma l3d_isolated_tangential {T : ℝ} {ue : ℝ → ℝ} {q : ℝ → 
   rw [add_sub_cancel, h0, zero_div] at this
   exact this rfl
 
-/-- **The zeros of the switching function are isolated** (proof of Theorem 8.1.4,
-TeX 6875–6890): a zero with `λ₂' ≠ 0` is transversal, hence isolated; at a zero with `λ₂' = 0`,
-(8.1.8) holds (`eqn_edge_zero`) and Lemma 8.1.5 applies (`l3d_isolated_tangential`). -/
-private lemma l3d_isolated {T : ℝ} {ue : ℝ → ℝ} {q : ℝ → Fin 3 → ℝ} {ν : ℝ}
-    {p : ℝ → StrongDual ℝ (Fin 3 → ℝ)} (h : IsEdgeProblemExtremal T ue q ν p) {t₂ : ℝ}
-    (ht₂ : t₂ ∈ Icc 0 T) (hz : edgeCostate (p t₂) 1 = 0) :
-    ∀ᶠ s in 𝓝 t₂, s ∈ Icc 0 T → s ≠ t₂ → edgeCostate (p s) 1 ≠ 0 := by
-  have hD := l3d_hasDerivWithinAt h ht₂ hz
-  by_cases hR : edgeCostate (p t₂) 2 / q t₂ 1 ^ 2 - edgeCostate (p t₂) 0 +
-      ν * q t₂ 0 ^ 2 / q t₂ 1 ^ 2 = 0
-  · rw [hR] at hD
-    obtain ⟨hl₃, hl₁, hν0⟩ := eqn_edge_zero h ht₂ hz hD
-    exact l3d_isolated_tangential h ht₂ hz hl₃ hl₁ hν0
-  · have := eventually_nhdsWithin_iff.mp (hD.eventually_ne hR (c := 0))
-    filter_upwards [this] with s hs hsI hst
-    exact hs ⟨hsI, hst⟩
-
-/-- The switching function `λ₂` has finitely many zeros on `[0, T]`: its zero set is compact
-(closed in `[0, T]`) and discrete (`l3d_isolated`). -/
+/-- **The switching function `λ₂` has finitely many zeros on `[0, T]`** (proof of Theorem 8.1.4,
+TeX 6875–6890). The zeros with `λ₂' = 0` are at most two
+(`IsEdgeProblemExtremal.exists_tangentialZeros_subset_pair`), and each of them is isolated by
+Lemma 8.1.5 (`l3d_isolated_tangential`, with (8.1.8), `eqn_edge_zero`): an open set `U` containing
+them meets the zero set only in them. Every other zero is transversal (`λ₂' ≠ 0`,
+`l3d_hasDerivWithinAt`), hence isolated; the zeros off `U` form a compact set (closed in
+`[0, T]`) of isolated points, so they are finitely many too. -/
 private lemma l3d_finite_zeros {T : ℝ} {ue : ℝ → ℝ} {q : ℝ → Fin 3 → ℝ} {ν : ℝ}
     {p : ℝ → StrongDual ℝ (Fin 3 → ℝ)} (h : IsEdgeProblemExtremal T ue q ν p) :
     {t ∈ Icc 0 T | edgeCostate (p t) 1 = 0}.Finite := by
   obtain ⟨-, hc1⟩ := l3d_costate h
-  have hK : IsCompact {t ∈ Icc 0 T | edgeCostate (p t) 1 = 0} :=
-    isCompact_Icc.of_isClosed_subset
-      (hc1.preimage_isClosed_of_isClosed isClosed_Icc isClosed_singleton) fun t ht ↦ ht.1
-  refine hK.finite (isDiscrete_iff_nhdsNE.mpr fun t ht ↦ ?_)
-  rw [inf_principal_eq_bot]
-  exact eventually_nhdsWithin_iff.mpr ((l3d_isolated h ht.1 ht.2).mono
-    fun s hs hst hmem ↦ hs hmem.1 hst hmem.2)
+  -- the zeros of the second kind: at most two (TeX 6875–6879) ...
+  obtain ⟨a, b, hab⟩ := h.exists_tangentialZeros_subset_pair
+  have hZ₂ : {t ∈ Icc 0 T | edgeCostate (p t) 1 = 0 ∧
+      HasDerivWithinAt (fun t ↦ edgeCostate (p t) 1) 0 (Icc 0 T) t}.Finite :=
+    ((finite_singleton b).insert a).subset hab
+  -- ... each isolated by Lemma 8.1.5 (TeX 6881–6886)
+  have hV : ∀ t ∈ {t ∈ Icc 0 T | edgeCostate (p t) 1 = 0 ∧
+      HasDerivWithinAt (fun t ↦ edgeCostate (p t) 1) 0 (Icc 0 T) t}, ∃ V : Set ℝ, IsOpen V ∧
+        t ∈ V ∧ ∀ s ∈ V, s ∈ Icc 0 T → s ≠ t → edgeCostate (p s) 1 ≠ 0 := by
+    intro t ht
+    obtain ⟨hl₃, hl₁, hν0⟩ := eqn_edge_zero h ht.1 ht.2.1 ht.2.2
+    obtain ⟨V, hVs, hVo, htV⟩ := eventually_nhds_iff.mp
+      (l3d_isolated_tangential h ht.1 ht.2.1 hl₃ hl₁ hν0)
+    exact ⟨V, hVo, htV, hVs⟩
+  choose! V hVo hVt hVz using hV
+  have hUo : IsOpen (⋃ t ∈ {t ∈ Icc 0 T | edgeCostate (p t) 1 = 0 ∧
+      HasDerivWithinAt (fun t ↦ edgeCostate (p t) 1) 0 (Icc 0 T) t}, V t) :=
+    isOpen_biUnion fun t ht ↦ hVo t ht
+  -- the other zeros are transversal, hence isolated; those off `U` form a compact set
+  have hZc : IsClosed {t ∈ Icc 0 T | edgeCostate (p t) 1 = 0} :=
+    hc1.preimage_isClosed_of_isClosed isClosed_Icc isClosed_singleton
+  have hK := isCompact_Icc.of_isClosed_subset (hZc.sdiff hUo) fun t ht ↦ ht.1.1
+  have hKfin := hK.finite (isDiscrete_iff_nhdsNE.mpr fun t ht ↦ by
+    have hD := l3d_hasDerivWithinAt h ht.1.1 ht.1.2
+    have hR : edgeCostate (p t) 2 / q t 1 ^ 2 - edgeCostate (p t) 0 +
+        ν * q t 0 ^ 2 / q t 1 ^ 2 ≠ 0 := fun hR ↦ by
+      rw [hR] at hD
+      exact ht.2 (mem_iUnion₂.mpr ⟨t, ⟨ht.1.1, ht.1.2, hD⟩, hVt t ⟨ht.1.1, ht.1.2, hD⟩⟩)
+    rw [inf_principal_eq_bot]
+    exact eventually_nhdsWithin_iff.mpr
+      ((eventually_nhdsWithin_iff.mp (hD.eventually_ne hR (c := 0))).mono
+        fun s hs hst hmem ↦ hs ⟨hmem.1.1, hst⟩ hmem.1.2))
+  refine (hZ₂.union hKfin).subset fun s hs ↦ ?_
+  by_cases hsU : s ∈ ⋃ t ∈ {t ∈ Icc 0 T | edgeCostate (p t) 1 = 0 ∧
+      HasDerivWithinAt (fun t ↦ edgeCostate (p t) 1) 0 (Icc 0 T) t}, V t
+  · -- a zero in `U` is one of the zeros of the second kind
+    obtain ⟨t, ht, hsV⟩ := mem_iUnion₂.mp hsU
+    by_cases hst : s = t
+    · exact Or.inl (hst ▸ ht)
+    · exact absurd hs.2 (hVz t ht s hsV hs.1 hst)
+  · exact Or.inr ⟨hs, hsU⟩
 
 /-! ### Theorem 8.1.4 -/
 
@@ -718,32 +798,31 @@ gap G13.)
 
 Proof (the book's, TeX 6820–6894):
 1. The costate equations (8.1.7) (`eqn_costate_edge`); `λ₃` is constant.
-2. `λ₂` is the switching function (`l3st_edge_max_rule`).
+2. `λ₂` is the switching function (`IsEdgeProblemExtremal.ae_control_eq_of_switching`).
 3. `λ₂` is differentiable within `[0, T]` at each of its zeros, with derivative the right-hand
    side of (8.1.7) at that time (`l3d_hasDerivWithinAt`: its control-dependent term
    `λ₂ · (bounded)` tends to `0` with `λ₂`; the book's "`λ₂'` is continuous", TeX 6846–6852).
-4. Every zero with `λ₂' ≠ 0` is transversal, hence isolated. At a zero with `λ₂' = 0`, (8.1.8)
-   holds (`eqn_edge_zero`): `λ_cost ≠ 0` and `x = ±√(-λ₃/λ_cost)`.
+4. At a zero with `λ₂' = 0`, (8.1.8) holds (`eqn_edge_zero`): `λ_cost ≠ 0` and
+   `x = ±√(-λ₃/λ_cost)`. Since `x` is strictly increasing (`x' = y > 0`), there are at most two
+   such zeros (`IsEdgeProblemExtremal.exists_tangentialZeros_subset_pair`, TeX 6875–6879). Every
+   other zero is transversal (`λ₂' ≠ 0`), hence isolated.
 5. After the time translation `t₂ = 0` and the normalization `λ_cost = -1` (the costate equations
    are linear in `(λ_cost, λ)`), Lemma 8.1.5 (`lemma8_1_5`) shows that the zeros of the second
    kind are isolated too (`l3d_isolated_tangential`). At an endpoint of `[0, T]` the state and
    costate are extended beyond it with the control `u_e = 0`, for which the solution is
    explicit (`l3d_landau_glue`); the lemma holds for every measurable control.
-6. Isolated zeros of the continuous `λ₂` on the compact `[0, T]` are finitely many
-   (`l3d_finite_zeros`); off them `λ₂` has a constant sign near each time of `(0, T)`, and the
+6. So the zeros of `λ₂` on `[0, T]` are finitely many (`l3d_finite_zeros`: the at most two zeros
+   of the second kind, and the transversal zeros away from them, which form a compact set of
+   isolated points); off them `λ₂` has a constant sign near each time of `(0, T)`, and the
    control is a.e. the constant `∓½` there (step 2). The book's "adjusting `u_e` on a set of
-   measure zero" is the almost-everywhere formulation.
-
-The book's count "at most two zeros with `λ₂' = 0`, since `x' = y > 0`" (TeX 6876–6879) is not
-needed once every such zero is isolated by Lemma 8.1.5 (TeX 6881–6886), and neither is the remark
-that `λ₂` vanishes on no interval: both follow from the isolation of every zero. -/
+   measure zero" is the almost-everywhere formulation. -/
 theorem theorem8_1_4 {T : ℝ} {ue : ℝ → ℝ} {q : ℝ → Fin 3 → ℝ} {ν : ℝ}
     {p : ℝ → StrongDual ℝ (Fin 3 → ℝ)} (h : IsEdgeProblemExtremal T ue q ν p) :
     ∃ S : Finset ℝ, ∀ t ∈ Ioo 0 T, t ∉ S → ∃ c ∈ ({-(1 / 2), 1 / 2} : Set ℝ), ∃ ε > 0,
       ∀ᵐ τ, τ ∈ Ioo (t - ε) (t + ε) → ue τ = c := by
   obtain ⟨-, hc1⟩ := l3d_costate h
   have hfin := l3d_finite_zeros h
-  have hrule := l3st_edge_max_rule h
+  have hrule := IsEdgeProblemExtremal.ae_control_eq_of_switching h
   refine ⟨hfin.toFinset, fun t ht htS ↦ ?_⟩
   have htI : t ∈ Icc 0 T := Ioo_subset_Icc_self ht
   have hne : edgeCostate (p t) 1 ≠ 0 := fun h0 ↦ htS (hfin.mem_toFinset.mpr ⟨htI, h0⟩)

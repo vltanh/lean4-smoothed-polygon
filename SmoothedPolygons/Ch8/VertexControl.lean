@@ -594,10 +594,10 @@ any time of `[a, b]`.
 
 Proof (the book's, TeX 7632–7670, with the sign of G6 corrected): suppose the lift is in `𝒮_sing`
 at `t₀ ∈ [a, b]`, with control `e_i`. Then `λ_cost ≠ 0`, `X(t₀) = J`,
-`Λ₁(t₀) = (3/2) λ_cost J`, `Λ_R(t₀) = 0` (`l3st_mem_singularLocus_iff`). With constant control,
-`P` is constant (Lemma 7.1.1, `lemma7_1_1`), and the state and costate have Taylor expansions
-with remainder at `t₀` (the book: "the solutions are analytic"; only first derivatives and the
-mean value inequality are used, `l3j_expansion`):
+`Λ₁(t₀) = (3/2) λ_cost J`, `Λ_R(t₀) = 0` (`IsExtremalOn.mem_singularLocus_iff`). With constant
+control, `P` is constant (Lemma 7.1.1, `lemma7_1_1`), and the state and costate have Taylor
+expansions with remainder at `t₀` (the book: "the solutions are analytic"; only first derivatives
+and the mean value inequality are used, `l3j_expansion`):
 `Λ_{1,cost}'(t₀) = 0`, `Λ_R'(t₀) = Λ_R''(t₀) = 0` and `Λ_R'''(t₀) = 6 λ_cost [J, P_i]`, so the
 control-dependent term at `e_j` is
 `-⟨Λ_R(t), P_j⟩ = -(t - t₀)³ λ_cost ⟨[J, P_i], P_j⟩ + O((t - t₀)⁴)`,
@@ -612,7 +612,7 @@ theorem lemma8_3_4 {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ 
     (hu : ∀ᵐ t, t ∈ Ioo a b → u t = vertex i) :
     ∀ t ∈ Icc a b, (g t, Λ₁ t, X t, ΛR t) ∉ singularLocus := by
   intro t ht hsing
-  obtain ⟨hl, h1, hX, hR⟩ := (l3st_mem_singularLocus_iff h ht).1 hsing
+  obtain ⟨hl, h1, hX, hR⟩ := (IsExtremalOn.mem_singularLocus_iff h ht).1 hsing
   have hu' : ∀ᵐ s, s ∈ Ioo 0 (b - a) → u (a + s) = vertex i := by
     filter_upwards [(measurePreserving_add_left volume a).quasiMeasurePreserving.ae hu]
       with s hs hs'

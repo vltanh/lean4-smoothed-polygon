@@ -2,6 +2,7 @@ module
 
 public import SmoothedPolygons.Ch8.EdgeProblem
 public import SmoothedPolygons.Ch6.MatrixExtremal
+import SmoothedPolygons.Ch7.SmoothedPolygon
 
 /-!
 # The global minimizer is extremal and edge extremal (Proposition 8.1.3)
@@ -40,8 +41,9 @@ spliced (strong local minimality, which is all the maximum principle needs). Thi
   `w = (0, ½ + u_e', ½ - u_e')` (Lemma 4.5.2 read backwards, `l3e_hasDerivAt_Φ`), and
   `h(q') = [[1, -x'], [s', 1 - s'x']]` has derivative `h Φ` (`l3e_hasDerivAt_edgeH`): the identity
   `h⁻¹h' = Φ` behind (8.1.1). `C¹` functions of `q'` are absolutely continuous
-  (`l3e_ac_comp`), so the fundamental theorem of calculus for absolutely continuous functions puts
-  `Φ(x', y')` and `h(q')` in the integral form of the state equations (`l3e_IF_Φ`, `l3e_IF_edgeH`);
+  (`absolutelyContinuousOnInterval_comp_of_eq_add_integral`), so the fundamental theorem of
+  calculus for absolutely continuous functions puts `Φ(x', y')` and `h(q')` in the integral form
+  of the state equations (`l3e_IF_Φ`, `l3e_IF_edgeH`);
   conjugation by `Rʲ` (`R⁻ʲ Z_w Rʲ = Z_{rot_j w}`, `l3e_conj_controlMatrix`) and the shift
   `t ↦ t - c` give the arc of the splice (`l3e_IF_XM`, `l3e_IF_gM`).
 * The splice (`l3e_splice_isReinhardtAdmissible`): the three pieces are glued in integral form
@@ -59,61 +61,26 @@ open Set MeasureTheory Filter Topology Matrix
 
 /-! ### Regularity of the edge control system -/
 
-/-- A family `f(·, u)` that is `C¹` jointly in `(q, u)` on an open set containing `Ω × U` is `C¹`
-in the sense of the maximum principle (as `mxa_isC1On_of_contDiffOn`, private to
-`Ch6/MatrixSystem`). -/
-private lemma l3e_isC1On_of_contDiffOn {E V F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [FiniteDimensional ℝ E] [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
-    [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
-    {f : E → V → F} {Ω : Set E} {U : Set V} {O : Set (E × V)} (hO : IsOpen O)
-    (hΩU : Ω ×ˢ U ⊆ O) (hf : ContDiffOn ℝ 1 (fun q : E × V ↦ f q.1 q.2) O) :
-    ControlSystem.IsC1On f Ω U where
-  continuousOn := hf.continuousOn.mono hΩU
-  differentiableAt x hx u hu := by
-    have hd : DifferentiableAt ℝ (fun q : E × V ↦ f q.1 q.2) (x, u) :=
-      (hf.contDiffAt (hO.mem_nhds (hΩU ⟨hx, hu⟩))).differentiableAt one_ne_zero
-    exact DifferentiableAt.comp (𝕜 := ℝ) x hd
-      (by fun_prop : DifferentiableAt ℝ (fun x : E ↦ (x, u)) x)
-  continuousOn_fderiv := by
-    have key : ∀ q ∈ O, fderiv ℝ (f · q.2) q.1 =
-        (fderiv ℝ (fun q : E × V ↦ f q.1 q.2) q).comp (ContinuousLinearMap.inl ℝ E V) := by
-      rintro ⟨x, u⟩ hq
-      have hd := (hf.contDiffAt (hO.mem_nhds hq)).differentiableAt one_ne_zero
-      exact (HasFDerivAt.comp (𝕜 := ℝ) x hd.hasFDerivAt (hasFDerivAt_prodMk_left x u)).fderiv
-    refine ContinuousOn.congr ?_ (fun q hq ↦ key q (hΩU hq))
-    exact ((hf.continuousOn_fderiv_of_isOpen hO le_rfl).clm_comp continuousOn_const).mono hΩU
-
 /-- The state space of the edge problem is open. -/
-lemma l3e_isOpen_edgeDomain : IsOpen edgeDomain :=
+private lemma l3e_isOpen_edgeDomain : IsOpen edgeDomain :=
   (isOpen_lt continuous_const (continuous_apply 1)).inter
     ((isOpen_lt continuous_const (continuous_apply 0)).inter
       (isOpen_lt (continuous_apply 0) continuous_const))
 
 /-- On the state space of the edge problem, with `u_e ∈ [-½, ½]`, the denominator
 `-1 + 2√3 x u_e` of `f₂` is negative: `|2√3 x u_e| ≤ √3 |x| < 1`. -/
-lemma l3e_edge_denom_neg {q : Fin 3 → ℝ} (hq : q ∈ edgeDomain) {ue : ℝ}
-    (hue : ue ∈ edgeControlSet) : -1 + 2 * √3 * q 0 * ue < 0 := by
-  obtain ⟨-, hx1, hx2⟩ := hq
-  obtain ⟨hu1, hu2⟩ := hue
-  have h3 : 0 < √3 := by positivity
-  have a1 : -1 < √3 * q 0 := by
-    have := mul_lt_mul_of_pos_left hx1 h3
-    rwa [mul_neg, mul_one_div_cancel h3.ne'] at this
-  have a2 : √3 * q 0 < 1 := by
-    have := mul_lt_mul_of_pos_left hx2 h3
-    rwa [mul_one_div_cancel h3.ne'] at this
-  nlinarith [mul_nonneg (sub_nonneg.2 hu2) (sub_pos.2 a2).le,
-    mul_nonneg (neg_le_iff_add_nonneg.1 hu1) (neg_lt_iff_pos_add.1 a1).le,
-    mul_nonneg (sub_nonneg.2 hu2) (neg_lt_iff_pos_add.1 a1).le,
-    mul_nonneg (neg_le_iff_add_nonneg.1 hu1) (sub_pos.2 a2).le]
+private lemma l3e_edge_denom_neg {q : Fin 3 → ℝ} (hq : q ∈ edgeDomain) {ue : ℝ}
+    (hue : ue ∈ edgeControlSet) : -1 + 2 * √3 * q 0 * ue < 0 :=
+  edgeF₂_denom_neg hq.2.1 hq.2.2 hue
 
 /-- The edge control system is `C¹` on its state space in the sense of the maximum principle
 (`ControlSystem.IsC1On`, conditions (10.2)–(10.4) of Agrachev–Sachkov): on
 `{y > 0, |x| < 1/√3} × [-½, ½]` we have `|2√3 x u_e| < 1`, so the denominator `-1 + 2√3 x u_e`
 of `f₂` is negative and `edgeField` is a rational function with nonvanishing denominators there.
 -/
-theorem l3st_isC1On_edgeField : ControlSystem.IsC1On edgeField edgeDomain edgeControlSet := by
-  refine l3e_isC1On_of_contDiffOn
+private theorem l3st_isC1On_edgeField :
+    ControlSystem.IsC1On edgeField edgeDomain edgeControlSet := by
+  refine isC1On_of_contDiffOn
     (O := {p : (Fin 3 → ℝ) × ℝ | p.1 1 ≠ 0 ∧ -1 + 2 * √3 * p.1 0 * p.2 ≠ 0}) ?_ ?_ ?_
   · exact (isOpen_ne_fun (by fun_prop) continuous_const).inter
       (isOpen_ne_fun (by fun_prop) continuous_const)
@@ -128,8 +95,8 @@ theorem l3st_isC1On_edgeField : ControlSystem.IsC1On edgeField edgeDomain edgeCo
       fun_prop (disch := assumption)
 
 /-- The edge cost `x²/y` is `C¹` on the state space of the edge problem. -/
-theorem l3st_isC1On_edgeCost : ControlSystem.IsC1On edgeCost edgeDomain edgeControlSet := by
-  refine l3e_isC1On_of_contDiffOn (O := {p : (Fin 3 → ℝ) × ℝ | p.1 1 ≠ 0}) ?_ ?_ ?_
+private theorem l3st_isC1On_edgeCost : ControlSystem.IsC1On edgeCost edgeDomain edgeControlSet := by
+  refine isC1On_of_contDiffOn (O := {p : (Fin 3 → ℝ) × ℝ | p.1 1 ≠ 0}) ?_ ?_ ?_
   · exact isOpen_ne_fun (by fun_prop) continuous_const
   · rintro ⟨q, ue⟩ ⟨hq, -⟩
     exact hq.1.ne'
@@ -232,83 +199,8 @@ private lemma l3e_IF_conj {f v : ℝ → Mat2} {a b : ℝ} (hab : a ≤ b)
 (the fundamental theorem of calculus for absolutely continuous functions). -/
 private lemma l3e_IF_of_ac {f v : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
     (hf : AbsolutelyContinuousOnInterval f a b)
-    (hd : ∀ᵐ t, t ∈ Ioo a b → HasDerivAt f (v t) t) : l3e_IF f v a b := by
-  have hae : ∀ᵐ t, t ∈ Ioc a b → deriv f t = v t := by
-    filter_upwards [hd, (countable_singleton b).ae_notMem volume] with t ht htb htI
-    exact (ht ⟨htI.1, lt_of_le_of_ne htI.2 htb⟩).deriv
-  refine ⟨hf.intervalIntegrable_deriv.congr_ae ?_, fun t ht ↦ ?_⟩
-  · rw [uIoc_of_le hab]
-    exact (ae_restrict_iff' measurableSet_Ioc).2 hae
-  · have hft := (hf.mono (by
-      rw [uIcc_of_le ht.1, uIcc_of_le hab]; exact Icc_subset_Icc_right ht.2)).integral_deriv_eq_sub
-    have e : ∫ s in a..t, deriv f s = ∫ s in a..t, v s := by
-      refine intervalIntegral.integral_congr_ae ?_
-      filter_upwards [hae] with s hs hsI
-      rw [uIoc_of_le ht.1] at hsI
-      exact hs ⟨hsI.1, hsI.2.trans ht.2⟩
-    rw [← e, hft]
-    ring
-
-/-! ### Absolute continuity of `C¹` functions of a curve in integral form -/
-
-section AC
-
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-
-/-- A curve in integral form `x(t) = x(0) + ∫₀ᵗ v` is continuous on `[0, T]`. -/
-private lemma l3e_continuousOn_of_eq_add_integral {T : ℝ} (hT : 0 ≤ T) {x v : ℝ → E}
-    (hv : IntervalIntegrable v volume 0 T)
-    (hx : ∀ t ∈ Icc 0 T, x t = x 0 + ∫ s in (0 : ℝ)..t, v s) : ContinuousOn x (Icc 0 T) := by
-  have hc := intervalIntegral.continuousOn_primitive_interval' hv left_mem_uIcc
-  rw [uIcc_of_le hT] at hc
-  exact (continuousOn_const.add hc).congr hx
-
-/-- Absolute continuity by comparison of increments. -/
-private lemma l3e_ac_of_dist_le {X : Type*} [PseudoMetricSpace X]
-    {f : ℝ → X} {g : ℝ → ℝ} {a b : ℝ} (hg : AbsolutelyContinuousOnInterval g a b)
-    (h : ∀ s ∈ uIcc a b, ∀ t ∈ uIcc a b, dist (f s) (f t) ≤ dist (g s) (g t)) :
-    AbsolutelyContinuousOnInterval f a b := by
-  apply squeeze_zero' ?_ ?_ hg
-  · exact .of_forall fun _ ↦ Finset.sum_nonneg fun _ _ ↦ dist_nonneg
-  rw [Filter.eventually_inf_principal]
-  filter_upwards with E hE
-  exact Finset.sum_le_sum fun i hi ↦ h _ (hE.left i hi).left _ (hE.left i hi).right
-
-/-- If `F` is `C¹` near every point of a curve in integral form `x(t) = x(0) + ∫₀ᵗ v` on
-`[0, T]`, then `F ∘ x` is absolutely continuous on `[0, T]`: `F` is Lipschitz on the compact set
-`x([0, T])`, and `‖x(t) - x(s)‖ ≤ |∫ₛᵗ ‖v‖|`. -/
-private lemma l3e_ac_comp {F : E → ℝ} {T : ℝ} (hT : 0 ≤ T) {x v : ℝ → E}
-    (hv : IntervalIntegrable v volume 0 T)
-    (hx : ∀ t ∈ Icc 0 T, x t = x 0 + ∫ s in (0 : ℝ)..t, v s)
-    (hF : ∀ t ∈ Icc 0 T, ContDiffAt ℝ 1 F (x t)) :
-    AbsolutelyContinuousOnInterval (fun t ↦ F (x t)) 0 T := by
-  have hxc := l3e_continuousOn_of_eq_add_integral hT hv hx
-  have hK : IsCompact (x '' Icc 0 T) := isCompact_Icc.image_of_continuousOn hxc
-  have hloc : LocallyLipschitzOn (x '' Icc 0 T) F := by
-    rintro _ ⟨t, ht, rfl⟩
-    obtain ⟨K, U, hU, hKU⟩ := (hF t ht).exists_lipschitzOnWith
-    exact ⟨K, U, nhdsWithin_le_nhds hU, hKU⟩
-  obtain ⟨L, hL⟩ := hloc.exists_lipschitzOnWith_of_compact hK
-  have hN := (hv.norm.absolutelyContinuousOnInterval_intervalIntegral
-    (c := 0) left_mem_uIcc).const_mul (L : ℝ)
-  refine l3e_ac_of_dist_le hN fun s hs t ht ↦ ?_
-  rw [uIcc_of_le hT] at hs ht
-  have hvs : IntervalIntegrable v volume 0 s := hv.mono_set (by
-    rw [uIcc_of_le hT, uIcc_of_le hs.1]; exact Icc_subset_Icc_right hs.2)
-  have hvt : IntervalIntegrable v volume 0 t := hv.mono_set (by
-    rw [uIcc_of_le hT, uIcc_of_le ht.1]; exact Icc_subset_Icc_right ht.2)
-  calc dist (F (x s)) (F (x t)) ≤ L * dist (x s) (x t) :=
-        hL.dist_le_mul _ ⟨s, hs, rfl⟩ _ ⟨t, ht, rfl⟩
-    _ = L * ‖∫ r in t..s, v r‖ := by
-        rw [dist_eq_norm, hx s hs, hx t ht, add_sub_add_left_eq_sub,
-          intervalIntegral.integral_interval_sub_left hvs hvt]
-    _ ≤ L * |∫ r in t..s, ‖v r‖| := by
-        gcongr; exact intervalIntegral.norm_integral_le_abs_integral_norm
-    _ = dist (L * ∫ r in (0 : ℝ)..s, ‖v r‖) (L * ∫ r in (0 : ℝ)..t, ‖v r‖) := by
-        rw [Real.dist_eq, ← mul_sub, abs_mul, NNReal.abs_eq,
-          intervalIntegral.integral_interval_sub_left hvs.norm hvt.norm]
-
-end AC
+    (hd : ∀ᵐ t, t ∈ Ioo a b → HasDerivAt f (v t) t) : l3e_IF f v a b :=
+  hf.eq_add_integral_of_ae_hasDerivAt hab hd
 
 /-! ### Rotating a control of the edge `{u₀ = 0}` to the edge `{u_j = 0}` -/
 
@@ -363,13 +255,6 @@ private lemma l3e_continuous_edgeControl : Continuous edgeControl := by
   fin_cases m <;>
     simp only [edgeControl, Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk, Fin.isValue] <;>
     fun_prop
-
-private lemma l3e_edgeControl_mem {ue : ℝ} (hue : ue ∈ edgeControlSet) :
-    edgeControl ue ∈ controlSimplex := by
-  obtain ⟨h1, h2⟩ := hue
-  refine ⟨fun i ↦ ?_, ?_⟩
-  · fin_cases i <;> simp [edgeControl] <;> constructor <;> linarith
-  · simp [edgeControl]; ring
 
 /-! ### Derivatives along an edge trajectory -/
 
@@ -485,8 +370,8 @@ private lemma l3e_IF_Φ (hT' : 0 ≤ T')
       (fun τ ↦ (controlP (edgeControl (u' τ)) (Φ (Q τ 0) (Q τ 1)) * Φ (Q τ 0) (Q τ 1) -
         Φ (Q τ 0) (Q τ 1) * controlP (edgeControl (u' τ)) (Φ (Q τ 0) (Q τ 1))) i j) 0 T' := by
   obtain ⟨⟨-, hU, -, hv, hx⟩, hΩ⟩ := hadm
-  refine l3e_IF_of_ac hT' (l3e_ac_comp (F := fun q : Fin 3 → ℝ ↦ Φ (q 0) (q 1) i j) hT' hv hx
-    fun t ht ↦ ?_) ?_
+  refine l3e_IF_of_ac hT' (absolutelyContinuousOnInterval_comp_of_eq_add_integral
+    (F := fun q : Fin 3 → ℝ ↦ Φ (q 0) (q 1) i j) hT' hv hx fun t ht ↦ ?_) ?_
   · have h1 : Q t 1 ≠ 0 := (hΩ t ht).1.ne'
     fin_cases i <;> fin_cases j <;>
       simp only [Φ, Fin.zero_eta, Fin.mk_one, Fin.isValue, Matrix.of_apply, Matrix.cons_val',
@@ -506,8 +391,8 @@ private lemma l3e_IF_edgeH (hT' : 0 ≤ T')
     (i j : Fin 2) :
     l3e_IF (fun τ ↦ edgeH (Q τ) i j) (fun τ ↦ (edgeH (Q τ) * Φ (Q τ 0) (Q τ 1)) i j) 0 T' := by
   obtain ⟨⟨-, -, -, hv, hx⟩, hΩ⟩ := hadm
-  refine l3e_IF_of_ac hT' (l3e_ac_comp (F := fun q : Fin 3 → ℝ ↦ edgeH q i j) hT' hv hx
-    fun t _ ↦ ?_) ?_
+  refine l3e_IF_of_ac hT' (absolutelyContinuousOnInterval_comp_of_eq_add_integral
+    (F := fun q : Fin 3 → ℝ ↦ edgeH q i j) hT' hv hx fun t _ ↦ ?_) ?_
   · fin_cases i <;> fin_cases j <;>
       simp only [edgeH, Fin.zero_eta, Fin.mk_one, Fin.isValue, Matrix.of_apply,
         Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.empty_val',
@@ -691,7 +576,8 @@ private lemma l3e_splice_isReinhardtAdmissible {T : ℝ} {u : ℝ → Fin 3 → 
     · rw [l3e_sp_of_lt h1]; exact hU t ⟨ht.1, by linarith⟩
     rcases lt_or_ge t (c + T') with h2 | h2
     · rw [l3e_sp_of_mem_Ico ⟨h1, h2⟩]
-      exact l3e_rot_mem (l3e_edgeControl_mem (hadm.1.2.1 (t - c) ⟨by linarith, by linarith⟩))
+      exact l3e_rot_mem
+        (edgeControl_mem_controlSimplex (hadm.1.2.1 (t - c) ⟨by linarith, by linarith⟩))
     · rw [l3e_sp_right hcc'.le h2]; exact hU _ ⟨by linarith, by linarith [ht.2]⟩
   · -- `g ∈ SL₂(ℝ)` and `X` is a star state
     intro t ht
@@ -748,13 +634,6 @@ private lemma l3e_traceForm_J_conj (j : ℕ) (M : Mat2) :
     traceForm J (R⁻¹ ^ j * M * R ^ j) = traceForm J M := by
   conv_lhs => rw [← poly_conj_pow_J j]
   exact poly_traceForm_conj (poly_Rpow_mul_Rinvpow j) J M
-
-/-- `⟨J, Φ(x + iy)⟩ = -(x² + y² + 1)/y`. -/
-private lemma l3e_traceForm_J_Φ (x y : ℝ) (hy : 0 < y) :
-    traceForm J (Φ x y) = -((x ^ 2 + y ^ 2 + 1) / y) := by
-  simp [traceForm, J, Φ, Matrix.trace_fin_two]
-  field_simp
-  ring
 
 /-- `⟨J, X⟩` along a curve continuous on `[a, b]` is integrable there. -/
 private lemma l3e_intervalIntegrable_traceForm_J {X : ℝ → Mat2} {a b : ℝ} (hab : a ≤ b)
@@ -849,7 +728,7 @@ private lemma l3e_splice_cost {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ �
       refine intervalIntegral.integral_congr fun τ hτ ↦ ?_
       rw [uIcc_of_le hT'.le] at hτ
       have hy0 := hy τ hτ
-      rw [l3e_traceForm_J_Φ _ _ hy0]
+      rw [poly_traceForm_J_Φ _ _ hy0]
       field_simp
       ring
     rw [step2, intervalIntegral.integral_neg, intervalIntegral.integral_add (iy.add iy') ix,
@@ -892,7 +771,7 @@ state equations because `x'`, `y'`, `s'` are absolutely continuous and `Φ`, `h`
 fundamental theorem of calculus for absolutely continuous functions) and its cost is
 `l3e_splice_cost`. The neighbourhood is a thickening of the compact arc `(x, y)([0, d - c])`
 inside the open star domain; `ε` is its radius (the condition on `T'` is not needed). -/
-theorem l3st_isStrongLocalMinimizer_edgeState {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
+private theorem l3st_isStrongLocalMinimizer_edgeState {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
     (hmin : IsReinhardtMinimizer T u g X) {j : Fin 3} {c d : ℝ} (hc : 0 ≤ c) (hcd : c < d)
     (hd : d ≤ T) (hu : ∀ᵐ t, t ∈ Ioo c d → u t j = 0) :
     Pontryagin.IsStrongLocalMinimizer edgeField edgeCost edgeDomain edgeControlSet

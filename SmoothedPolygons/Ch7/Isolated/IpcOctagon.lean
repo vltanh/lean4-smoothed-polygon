@@ -2,6 +2,7 @@ module
 
 public import SmoothedPolygons.Ch7.Isolated.IpcFlow
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+import SmoothedPolygons.Ch3.ControlProblem
 
 /-!
 # Theorem 7.7.1, step 4 (helper): the linearized flow at `q_fix(y₀)`
@@ -613,7 +614,6 @@ lemma ipc_conj_costateRHS (y : ℝ) (hy : 0 < y) (A B : Mat2) :
         ((-A + (3 / 2 * (-1 : ℝ)) • J) * Φ 0 y - Φ 0 y * (-A + (3 / 2 * (-1 : ℝ)) • J)) := by
   have h3 : (0 : ℝ) < √3 := by positivity
   have hRR : R * R⁻¹ = 1 := poly_R_mul_inv
-  have hRR' : R⁻¹ * R = 1 := poly_inv_mul_R
   have hPt : R⁻¹ * ipc_Pt y * R = ipc_Pm y := by
     rw [poly_R_inv]
     ext i j
@@ -629,8 +629,7 @@ lemma ipc_conj_costateRHS (y : ℝ) (hy : 0 < y) (A B : Mat2) :
     ext i j
     fin_cases i <;> fin_cases j <;>
       simp [controlMatrix, vertex, ipc_Pm] <;> field_simp <;> ipc_ring
-  have hJ : R⁻¹ * J * R = J := by
-    rw [Matrix.mul_assoc, poly_J_mul_R, ← Matrix.mul_assoc, hRR', Matrix.one_mul]
+  have hJ : R⁻¹ * J * R = J := R_inv_mul_J_mul_R
   have htf : traceForm (R⁻¹ * B * R) (ipc_Pm y) = traceForm B (ipc_Pt y) := by
     rw [← hPt, poly_traceForm_conj hRR]
   have hE : costateRHS (-1) (R⁻¹ * A * R) (R⁻¹ * B * R) (R⁻¹ * Φ 0 y * R) (vertex 2) =

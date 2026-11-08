@@ -1,6 +1,7 @@
 module
 
 public import SmoothedPolygons.Ch8.Defs
+public import Basic.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
 public import SmoothedPolygons.Ch7.Faces
 public import SmoothedPolygons.Ch6.HalfPlane
 public import SmoothedPolygons.Ch6.MatrixSystem
@@ -89,18 +90,6 @@ private lemma l3f_data {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : 
         hamiltonian lam (Λ₁ s) (ΛR s) (X s) v ≤ hamiltonian lam (Λ₁ s) (ΛR s) (X s) (u s)) hmax
     rwa [add_sub_cancel] at this
 
-/-- A curve in integral form on `[a, b]` has derivative `v(t)` at almost every `t ∈ (a, b)`
-(Lebesgue's differentiation theorem). -/
-private lemma l3f_ae_hasDerivAt {x v : ℝ → ℝ} {a b : ℝ} (hv : IntervalIntegrable v volume a b)
-    (hx : ∀ t ∈ Icc a b, x t = x a + ∫ s in a..t, v s) :
-    ∀ᵐ t, t ∈ Ioo a b → HasDerivAt x (v t) t := by
-  filter_upwards [IntervalIntegrable.ae_hasDerivAt_integral hv] with t ht htI
-  have hab : a ≤ b := (htI.1.trans htI.2).le
-  have hIcc : Icc a b ⊆ uIcc a b := Icc_subset_uIcc
-  have h := (ht (hIcc (Ioo_subset_Icc_self htI)) a (hIcc ⟨le_rfl, hab⟩)).const_add (x a)
-  exact h.congr_of_eventuallyEq (eventually_of_mem (Icc_mem_nhds htI.1 htI.2)
-    fun s hs ↦ hx s hs)
-
 /-- A real function tending to `L` at `t₀ ∈ [a, b]` within `[a, b]` and vanishing almost
 everywhere on `(a, b)` has `L = 0`: a nonempty open subset of `(a, b)` has positive measure. -/
 private lemma l3f_lim_eq_zero {F : ℝ → ℝ} {a b t₀ L : ℝ} (hab : a < b) (ht₀ : t₀ ∈ Icc a b)
@@ -126,7 +115,8 @@ private lemma l3f_eqOn_Icc {f : ℝ → Mat2} {c : Mat2} {t₁ t₂ : ℝ}
 private lemma l3f_traceForm_comm (A B : Mat2) : traceForm A B = traceForm B A :=
   Matrix.trace_mul_comm A B
 
-private lemma l3f_traceForm_smul_left (c : ℝ) (A B : Mat2) :
+/-- `⟨c A, B⟩ = c ⟨A, B⟩`. -/
+theorem traceForm_smul_left (c : ℝ) (A B : Mat2) :
     traceForm (c • A) B = c * traceForm A B := by
   simp [traceForm, Matrix.trace_smul]
 
@@ -135,7 +125,7 @@ private lemma l3f_traceForm_smul_right (c : ℝ) (A B : Mat2) :
   simp [traceForm, Matrix.trace_smul]
 
 /-- `U_T` is convex. -/
-private lemma l3f_convex_controlSimplex : Convex ℝ controlSimplex := by
+theorem convex_controlSimplex : Convex ℝ controlSimplex := by
   intro x hx y hy a b ha hb hab
   obtain ⟨hx1, hx2⟩ := hx
   obtain ⟨hy1, hy2⟩ := hy
@@ -143,6 +133,10 @@ private lemma l3f_convex_controlSimplex : Convex ℝ controlSimplex := by
   · nlinarith [(hx1 i).1, (hy1 i).1]
   · nlinarith [mul_le_mul_of_nonneg_left (hx1 i).2 ha, mul_le_mul_of_nonneg_left (hy1 i).2 hb]
   · linear_combination a * hx2 + b * hy2 + hab
+
+/-- A vertex of `U_T` lies in every edge `{u_k = 0}` with `k` different from its index. -/
+theorem vertex_mem_controlEdge {i k : Fin 3} (h : i ≠ k) : vertex i ∈ controlEdge k :=
+  ⟨poly_vertex_mem i, by simp [vertex, Ne.symm h]⟩
 
 /-- The centre of `U_T` lies in `U_T`. -/
 private lemma l3f_centre_mem : controlCentre ∈ controlSimplex := by
@@ -345,7 +339,7 @@ private lemma l3f_rescale {X : Mat2} (hX : X.trace = 0)
       controlMatrix, of_apply, cons_val', cons_val_zero, cons_val_one, empty_val',
       cons_val_fin_one]
     fun_prop
-  have hpc : IsPreconnected controlSimplex := l3f_convex_controlSimplex.isPreconnected
+  have hpc : IsPreconnected controlSimplex := convex_controlSimplex.isPreconnected
   have hc := l3f_centre_mem
   -- the sign of the denominator
   obtain ⟨σ, hσ, hneg⟩ : ∃ σ : ℝ, σ ≠ 0 ∧
@@ -358,7 +352,7 @@ private lemma l3f_rescale {X : Mat2} (hX : X.trace = 0)
       obtain ⟨w, hw, hw0⟩ := hpc.intermediate_value hc hu hcont ⟨hlt.le, hge⟩
       exact hden w hw hw0
     · refine ⟨-1, by norm_num, fun u hu ↦ ?_⟩
-      rw [l3f_traceForm_comm, l3f_traceForm_smul_left]
+      rw [l3f_traceForm_comm, traceForm_smul_left]
       by_contra hge
       push Not at hge
       obtain ⟨w, hw, hw0⟩ := hpc.intermediate_value hu hc hcont ⟨by linarith, hgt.le⟩
@@ -614,7 +608,7 @@ theorem lemma8_2_1 {X Λ : Mat2} (hX : X.trace = 0) (hden : ∀ u ∈ controlSim
       intro u hu
       have h := theorem6_8_2 0 0 Λ x y u hxy hu hΛΦ
       simp only [hamiltonian, planeHamiltonian] at h
-      rw [← hΦ, l3f_traceForm_smul_left] at h
+      rw [← hΦ, traceForm_smul_left] at h
       have e : traceForm Λ (controlMatrix u) / (κ * traceForm X (controlMatrix u)) =
           κ⁻¹ * (traceForm Λ (controlMatrix u) / traceForm X (controlMatrix u)) := by ring
       linarith
@@ -646,7 +640,7 @@ theorem lemma8_2_1 {X Λ : Mat2} (hX : X.trace = 0) (hden : ∀ u ∈ controlSim
   refine ⟨hpart1, fun hΛ0 lam Λ₁ ↦ ?_⟩
   -- the maximizers form a face of `U_T` (Lemma 7.3.1), not all of `U_T` since `Λ ≠ 0`
   obtain ⟨hne, hconv, hext⟩ := lemma7_3_1 controlSimplex isCompact_controlSimplex
-    l3f_convex_controlSimplex ⟨_, l3f_centre_mem⟩ lam Λ₁ Λ X hden
+    convex_controlSimplex ⟨_, l3f_centre_mem⟩ lam Λ₁ Λ X hden
   refine l3f_face_classify hne hconv hext fun hF ↦ hΛ0 (hpart1 fun u hu v hv ↦ ?_)
   have hu' : u ∈ hamiltonianArgmax lam Λ₁ Λ X := hF ▸ hu
   have hv' : v ∈ hamiltonianArgmax lam Λ₁ Λ X := hF ▸ hv
@@ -899,7 +893,7 @@ theorem lemma8_2_2 {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ 
     norm_num at this
   obtain ⟨k, hk⟩ := orb_centralizer (X t₀) W hst₀.1 hX0 hWtr hWX
   have hk0 : k = 0 := by
-    rw [hk, l3f_traceForm_smul_left, l3f_traceForm_self hst₀] at hW
+    rw [hk, traceForm_smul_left, l3f_traceForm_self hst₀] at hW
     linarith
   have hΛ₁ : Λ₁ t₀ = (3 / 2 * lam) • J := by
     rw [← sub_eq_zero, ← hWdef, hk, hk0, zero_smul]
@@ -974,7 +968,7 @@ theorem theorem8_2_3 {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : �
   have hu : ∀ᵐ t, t ∈ Ioo t₁ t₂ → u t = controlCentre ∧
       controlMatrix (u t) = (1 / 3 : ℝ) • J := by
     have hall := Filter.eventually_all.2 fun i ↦ Filter.eventually_all.2 fun j ↦
-      l3f_ae_hasDerivAt (hXI i j).1 (hXI i j).2
+      ae_hasDerivAt_of_eq_add_integral (hXI i j).1 ⟨le_rfl, hab.le⟩ (hXI i j).2
     filter_upwards [hall] with t ht htI
     have htab := hIoo t htI
     have hv0 : controlP (u t) (X t) * X t - X t * controlP (u t) (X t) = 0 := by
@@ -1014,7 +1008,7 @@ circular arcs (`g(t) = g₀ exp(J(t - t₁))`, `X ≡ J`, centre control) is an 
 subarc lying in the singular locus.
 
 The forward direction is stated for extremal lifted trajectories on an interval (every Pontryagin
-extremal restricts to one, `l3st_isExtremalOn_of_isPontryaginExtremal`); the converse produces a
+extremal restricts to one, `IsPontryaginExtremal.isExtremalOn`); the converse produces a
 lift on the interval of the arc (an arc has no boundary conditions of Problem 3.6.2).
 
 Proof (the book's, TeX 7271–7298, "a summary of results already obtained"): forward, the

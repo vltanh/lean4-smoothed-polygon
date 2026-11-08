@@ -40,45 +40,6 @@ noncomputable def abnormalEdgeΛR (X : Mat2) : Mat2 :=
 
 /-! ### Carathéodory solutions and almost-everywhere derivatives -/
 
-/-- If `φ = φ(0) + ∫₀ᵗ ψ` on `[0, T]` with `ψ` integrable, then `φ` is absolutely continuous on
-`[0, T]` and `φ' = ψ` almost everywhere on `(0, T)` (Lebesgue's differentiation theorem). -/
-private lemma l3c_ac_of_eq_add_integral {φ ψ : ℝ → ℝ} {T : ℝ} (hT : 0 ≤ T)
-    (hψ : IntervalIntegrable ψ volume 0 T)
-    (hφ : ∀ t ∈ Icc 0 T, φ t = φ 0 + ∫ s in (0 : ℝ)..t, ψ s) :
-    AbsolutelyContinuousOnInterval φ 0 T ∧ ∀ᵐ s, s ∈ Ioo 0 T → HasDerivAt φ (ψ s) s := by
-  constructor
-  · refine ((LipschitzWith.const (φ 0)).lipschitzOnWith.absolutelyContinuousOnInterval.fun_add
-      (hψ.absolutelyContinuousOnInterval_intervalIntegral left_mem_uIcc)).congr ?_
-    intro t ht
-    rw [uIcc_of_le hT] at ht
-    exact (hφ t ht).symm
-  · filter_upwards [hψ.ae_hasDerivAt_integral] with s hs hsI
-    have hsI' : s ∈ uIcc 0 T := by rw [uIcc_of_le hT]; exact Ioo_subset_Icc_self hsI
-    refine ((hs hsI' 0 left_mem_uIcc).const_add (φ 0)).congr_of_eventuallyEq ?_
-    filter_upwards [Ioo_mem_nhds hsI.1 hsI.2] with r hr
-    exact hφ r (Ioo_subset_Icc_self hr)
-
-/-- An absolutely continuous `φ` on `[0, T]` with `φ' = ψ` almost everywhere solves
-`φ = φ(0) + ∫₀ᵗ ψ` with `ψ` integrable (the fundamental theorem of calculus for absolutely
-continuous functions). -/
-private lemma l3c_eq_add_integral_of_ac {φ ψ : ℝ → ℝ} {T : ℝ} (hT : 0 ≤ T)
-    (hφ : AbsolutelyContinuousOnInterval φ 0 T)
-    (hd : ∀ᵐ s, s ∈ Ioo 0 T → HasDerivAt φ (ψ s) s) :
-    IntervalIntegrable ψ volume 0 T ∧ ∀ t ∈ Icc 0 T, φ t = φ 0 + ∫ s in (0 : ℝ)..t, ψ s := by
-  have hac : ∀ t ∈ Icc 0 T, AbsolutelyContinuousOnInterval φ 0 t := fun t ht ↦
-    hφ.mono (by rw [uIcc_of_le ht.1, uIcc_of_le hT]; exact Icc_subset_Icc_right ht.2)
-  have hae : ∀ t ∈ Icc 0 T, ∀ᵐ s, s ∈ Ι (0 : ℝ) t → deriv φ s = ψ s := by
-    intro t ht
-    filter_upwards [hd, (countable_singleton T).ae_notMem volume] with s hs hsT hst
-    rw [uIoc_of_le ht.1] at hst
-    exact (hs ⟨hst.1, lt_of_le_of_ne (hst.2.trans ht.2) hsT⟩).deriv
-  have hint : ∀ t ∈ Icc 0 T, IntervalIntegrable ψ volume 0 t := fun t ht ↦
-    (hac t ht).intervalIntegrable_deriv.congr_ae
-      ((ae_restrict_iff' measurableSet_uIoc).2 (hae t ht))
-  refine ⟨hint T ⟨hT, le_rfl⟩, fun t ht ↦ ?_⟩
-  rw [← intervalIntegral.integral_congr_ae (hae t ht), (hac t ht).integral_deriv_eq_sub]
-  ring
-
 /-- The entries of `t ↦ [[a, b], [c, d]](t)` are absolutely continuous when `a, b, c, d` are. -/
 private lemma l3c_ac_fin_two {a b c d : ℝ → ℝ} {T : ℝ} (ha : AbsolutelyContinuousOnInterval a 0 T)
     (hb : AbsolutelyContinuousOnInterval b 0 T) (hc : AbsolutelyContinuousOnInterval c 0 T)
@@ -91,7 +52,7 @@ derivative `V` almost everywhere, is an integral curve of `V`. -/
 private lemma l3c_isIntegralCurve_of_ae {F V : ℝ → Mat2} {T : ℝ} (hT : 0 ≤ T)
     (hac : ∀ i j, AbsolutelyContinuousOnInterval (fun t ↦ F t i j) 0 T)
     (hd : ∀ᵐ s, s ∈ Ioo 0 T → HasDerivAtEntrywise F (V s) s) : IsIntegralCurve F V T :=
-  fun i j ↦ l3c_eq_add_integral_of_ac hT (hac i j)
+  fun i j ↦ (hac i j).eq_add_integral_of_ae_hasDerivAt hT
     (by filter_upwards [hd] with s hs hsI using hs hsI i j)
 
 /-! ### Pointwise identities ("It can be checked", MCA:4647835) -/
@@ -278,8 +239,10 @@ theorem remark8_1_6 {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2} (
   obtain ⟨hyi, hxe⟩ := l3c_comp_eq hT.le hint heq 0
   obtain ⟨hfi, hye⟩ := l3c_comp_eq hT.le hint heq 1
   simp only [hF, hq0, hq1, Matrix.cons_val_zero, Matrix.cons_val_one] at hyi hxe hfi hye
-  obtain ⟨hxac, hxd⟩ := l3c_ac_of_eq_add_integral hT.le hyi hxe
-  obtain ⟨hyac, hyd⟩ := l3c_ac_of_eq_add_integral hT.le hfi hye
+  have hxac := absolutelyContinuousOnInterval_of_eq_add_integral hT.le hyi hxe
+  have hxd := ae_hasDerivAt_of_eq_add_integral hyi ⟨le_rfl, hT.le⟩ hxe
+  have hyac := absolutelyContinuousOnInterval_of_eq_add_integral hT.le hfi hye
+  have hyd := ae_hasDerivAt_of_eq_add_integral hfi ⟨le_rfl, hT.le⟩ hye
   have hconst : ∀ c : ℝ, AbsolutelyContinuousOnInterval (fun _ ↦ c) 0 T := fun c ↦
     (LipschitzWith.const c).lipschitzOnWith.absolutelyContinuousOnInterval
   -- the explicit costates in the coordinates `x, y` (sign reversed, gap G4)

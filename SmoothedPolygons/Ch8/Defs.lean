@@ -13,7 +13,7 @@ The objects of Chapter 8 (Singular Locus, TeX 6631–7674) and the vocabulary it
   of Problem 6.7.1 with the conditions of the maximum principle (§6.2) and no boundary
   conditions; `IsPontryaginExtremal` is such a trajectory on `[0, T]` with the transversality
   conditions (6.6.1), and restricts to every subinterval
-  (`l3st_isExtremalOn_of_isPontryaginExtremal`);
+  (`IsPontryaginExtremal.isExtremalOn`);
 * the edge control problem (Definition 8.1.1): its state `(x, y, s)`, control `u_e ∈ [-½, ½]`,
   dynamics (8.1.3), state space and cost (8.1.5), and its extremals (`IsEdgeProblemExtremal`), the
   lifted trajectories satisfying the conclusions of the maximum principle (§6.2: Hamilton's
@@ -172,8 +172,8 @@ It lies over the point `z = i` of the star domain (`Φ(i) = J`).
 
 The constant `λ_cost` is bound by the set-builder, as printed. Along an extremal with multiplier
 `λ_cost`, the lift meets `𝒮_sing` at `t` exactly when `λ_cost ≠ 0`, `Λ₁(t) = (3/2) λ_cost J`,
-`X(t) = J` and `Λ_R(t) = 0` with the extremal's own `λ_cost` (`l3st_mem_singularLocus_iff`, from
-`H = 0`). -/
+`X(t) = J` and `Λ_R(t) = 0` with the extremal's own `λ_cost`
+(`IsExtremalOn.mem_singularLocus_iff`, from `H = 0`). -/
 def singularLocus : Set (Mat2 × Mat2 × Mat2 × Mat2) :=
   {q | ∃ lam : ℝ, lam ≠ 0 ∧ q.1.det = 1 ∧ q.2.1 = (3 / 2 * lam) • J ∧ q.2.2.1 = J ∧
     q.2.2.2 = 0}
@@ -385,7 +385,7 @@ private lemma l3a_traceForm_eq_zero {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X �
 `[a, b]`. Proof: `isPontryaginExtremal_iff`, and the restriction of the integral equations and of
 the almost-everywhere conditions to `[a, b]` after the time shift `t ↦ a + t`
 (`l3a_isStateCostateSolution_shift`). -/
-theorem l3st_isExtremalOn_of_isPontryaginExtremal {T : ℝ} {u : ℝ → Fin 3 → ℝ}
+theorem IsPontryaginExtremal.isExtremalOn {T : ℝ} {u : ℝ → Fin 3 → ℝ}
     {g X Λ₁ ΛR : ℝ → Mat2} {lam : ℝ} (h : IsPontryaginExtremal T u g X Λ₁ ΛR lam) {a b : ℝ}
     (ha : 0 ≤ a) (hab : a < b) (hb : b ≤ T) : IsExtremalOn a b u g X Λ₁ ΛR lam :=
   l3a_isStateCostateSolution_shift (isPontryaginExtremal_iff.1 h).1 ha (by linarith)
@@ -393,7 +393,7 @@ theorem l3st_isExtremalOn_of_isPontryaginExtremal {T : ℝ} {u : ℝ → Fin 3 �
 
 /-- An extremal lifted trajectory on `[a, b]` is one on every subinterval `[c, d]` (the time shift
 `t ↦ (c - a) + t` of the system on `[0, b - a]`, `l3a_isStateCostateSolution_shift`). -/
-theorem l3st_isExtremalOn_mono {a b c d : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
+theorem IsExtremalOn.mono {a b c d : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
     {lam : ℝ} (h : IsExtremalOn a b u g X Λ₁ ΛR lam) (hac : a ≤ c) (hcd : c < d) (hdb : d ≤ b) :
     IsExtremalOn c d u g X Λ₁ ΛR lam := by
   have := l3a_isStateCostateSolution_shift h (s := c - a) (T' := d - c) (by linarith)
@@ -403,14 +403,14 @@ theorem l3st_isExtremalOn_mono {a b c d : ℝ} {u : ℝ → Fin 3 → ℝ} {g X 
   exact this
 
 /-- Edge extremality on `[a, b]` passes to subintervals (immediate from Definition 8.1.2). -/
-theorem l3st_isEdgeExtremalOn_mono {a b c d : ℝ} {u : ℝ → Fin 3 → ℝ} {X : ℝ → Mat2}
+theorem IsEdgeExtremalOn.mono {a b c d : ℝ} {u : ℝ → Fin 3 → ℝ} {X : ℝ → Mat2}
     (h : IsEdgeExtremalOn a b u X) (hac : a ≤ c) (hdb : d ≤ b) : IsEdgeExtremalOn c d u X :=
   fun j c' d' hc' hcd' hd' hu ↦ h j c' d' (hac.trans hc') hcd' (hd'.trans hdb) hu
 
 /-- Along an extremal lifted trajectory on `[a, b]`, the lift `(g, Λ₁, X, Λ_R)` is continuous on
 `[a, b]` (its entries are indefinite integrals of integrable functions). -/
-theorem l3st_continuousOn_lift {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {lam : ℝ}
-    (h : IsExtremalOn a b u g X Λ₁ ΛR lam) :
+theorem IsExtremalOn.continuousOn_lift {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
+    {lam : ℝ} (h : IsExtremalOn a b u g X Λ₁ ΛR lam) :
     ContinuousOn (fun t ↦ (g t, Λ₁ t, X t, ΛR t)) (Icc a b) := by
   obtain ⟨⟨-, -, -, -, hgI, hXI⟩, -, -, hI1, hIR, -⟩ := h
   have hc : ∀ {F V : ℝ → Mat2}, IsIntegralCurve (fun t ↦ F (a + t)) V (b - a) →
@@ -432,7 +432,7 @@ does not depend on the control, and `H = 0` almost everywhere extends to `t` by 
 (`l3a_traceForm_eq_zero`: the control-dependent term `⟨Λ_R, Z_u⟩/⟨X, Z_u⟩` is at most
 `3 Σ |Λ_R|ᵢⱼ` near `t`, uniformly in `u ∈ U_T`, because `⟨J, Z_u⟩ = -2/3` and `X` is near `J`);
 with `Λ₁(t) = (3/2) μ J` and `X(t) = J` this gives `-3(μ - λ_cost) = 0`. -/
-theorem l3st_mem_singularLocus_iff {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
+theorem IsExtremalOn.mem_singularLocus_iff {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
     {lam : ℝ} (h : IsExtremalOn a b u g X Λ₁ ΛR lam) {t : ℝ} (ht : t ∈ Icc a b) :
     (g t, Λ₁ t, X t, ΛR t) ∈ singularLocus ↔
       lam ≠ 0 ∧ Λ₁ t = (3 / 2 * lam) • J ∧ X t = J ∧ ΛR t = 0 := by

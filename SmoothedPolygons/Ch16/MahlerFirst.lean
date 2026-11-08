@@ -73,7 +73,7 @@ switching points has a subsequence tending to the singular locus", in finite tim
 excludes it as follows, and the later layers of this formalization prove the hypothesis along
 these lines:
 1. At the limit time `t` the lift is in `𝒮_sing`, so the extremal is normal (`λ_cost ≠ 0`,
-   `l3st_mem_singularLocus_iff`; Lemma 8.2.2), and the costate may be normalized to
+   `IsExtremalOn.mem_singularLocus_iff`; Lemma 8.2.2), and the costate may be normalized to
    `λ_cost = -1`, the normalization of Chapters 11–16.
 2. Passing to the blow-up of `𝒮_sing` (§13.4, §16.4.1; the exceptional divisor is compact), the
    switching points, which are not on `𝒮_sing`, have a cluster point on the exceptional divisor,
@@ -111,92 +111,11 @@ def NoChatteringIntoSingularLocus : Prop :=
 
 /-! ### Helpers: locally constant vertex controls -/
 
-/-- Two vertices that the control equals almost everywhere on the same nonempty open interval
-agree. -/
-private lemma l3m_eq_of_ae_vertex {u : ℝ → Fin 3 → ℝ} {a b : ℝ} (hab : a < b) {i j : Fin 3}
-    (hi : ∀ᵐ τ, τ ∈ Ioo a b → u τ = vertex i) (hj : ∀ᵐ τ, τ ∈ Ioo a b → u τ = vertex j) :
-    i = j := by
-  have hpos : volume (Ioo a b) ≠ 0 := by simp [Real.volume_Ioo, hab]
-  obtain ⟨τ, h1, h2⟩ : ∃ τ, u τ = vertex i ∧ u τ = vertex j := by
-    by_contra hcon
-    push Not at hcon
-    have hij := hi.and hj
-    rw [ae_iff] at hij
-    refine hpos (measure_mono_null (fun τ hτ ↦ ?_) hij)
-    rintro ⟨h1, h2⟩
-    exact hcon τ (h1 hτ) (h2 hτ)
-  by_contra hne
-  have := congrFun (h1.symm.trans h2) i
-  simp [vertex, hne] at this
-
-/-- The set of times near which the control is almost everywhere the vertex `e_{i+1}` is open. -/
-private lemma l3m_isOpen_locVertex (u : ℝ → Fin 3 → ℝ) (i : Fin 3) :
-    IsOpen {t : ℝ | ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (t - η) (t + η) → u τ = vertex i} := by
-  rw [Metric.isOpen_iff]
-  rintro t ⟨η, hη, h⟩
-  refine ⟨η, hη, fun s hs ↦ ?_⟩
-  rw [Metric.mem_ball, Real.dist_eq] at hs
-  have h1 := le_abs_self (s - t)
-  have h2 := neg_abs_le (s - t)
-  refine ⟨η - |s - t|, by linarith, ?_⟩
-  filter_upwards [h] with τ hτ hτs
-  exact hτ ⟨by linarith [hτs.1], by linarith [hτs.2]⟩
-
-/-- **A locally constant vertex control is constant on an interval.** If near every time of
-`(a, b)` the control is almost everywhere a vertex of `U_T`, then it is almost everywhere one
-vertex on `(a, b)`: the sets of times near which it is a given vertex are open and pairwise
-disjoint, `(a, b)` is connected, and a locally null set is null (`measure_null_of_locally_null`). -/
-private lemma l3m_ae_vertex_of_local {u : ℝ → Fin 3 → ℝ} {a b : ℝ} (hab : a < b)
-    (h : ∀ t ∈ Ioo a b, ∃ i : Fin 3, ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (t - η) (t + η) → u τ = vertex i) :
-    ∃ i : Fin 3, ∀ᵐ τ, τ ∈ Ioo a b → u τ = vertex i := by
-  set A : Fin 3 → Set ℝ :=
-    fun i ↦ {t | ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (t - η) (t + η) → u τ = vertex i} with hA
-  -- two vertices at one time agree
-  have hdisj : ∀ i j t, t ∈ A i → t ∈ A j → i = j := by
-    rintro i j t ⟨η, hη, hi⟩ ⟨η', hη', hj⟩
-    have hm := lt_min hη hη'
-    refine l3m_eq_of_ae_vertex (u := u) (a := t - min η η') (b := t + min η η') (by linarith) ?_ ?_
-    · filter_upwards [hi] with τ hτ hτ'
-      exact hτ ⟨by linarith [hτ'.1, min_le_left η η'], by linarith [hτ'.2, min_le_left η η']⟩
-    · filter_upwards [hj] with τ hτ hτ'
-      exact hτ ⟨by linarith [hτ'.1, min_le_right η η'], by linarith [hτ'.2, min_le_right η η']⟩
-  have hm : (a + b) / 2 ∈ Ioo a b := ⟨by linarith, by linarith⟩
-  obtain ⟨i₀, hi₀⟩ := h _ hm
-  -- by connectedness, every time of `(a, b)` has the vertex `i₀`
-  have hsub : Ioo a b ⊆ A i₀ := by
-    have hcover : Ioo a b ⊆ A i₀ ∪ ⋃ j ∈ {j | j ≠ i₀}, A j := by
-      intro t ht
-      obtain ⟨j, hj⟩ := h t ht
-      by_cases hji : j = i₀
-      · exact Or.inl (hji ▸ hj)
-      · exact Or.inr (mem_iUnion₂.2 ⟨j, hji, hj⟩)
-    have hd : Ioo a b ∩ (A i₀ ∩ ⋃ j ∈ {j | j ≠ i₀}, A j) = ∅ := by
-      refine eq_empty_iff_forall_notMem.2 fun t ⟨_, h1, h2⟩ ↦ ?_
-      obtain ⟨j, hj, h2⟩ := mem_iUnion₂.1 h2
-      exact hj (hdisj _ _ _ h2 h1)
-    rcases isPreconnected_iff_subset_of_disjoint.1 isPreconnected_Ioo _ _
-      (l3m_isOpen_locVertex u i₀) (isOpen_biUnion fun j _ ↦ l3m_isOpen_locVertex u j) hcover
-      hd with h1 | h1
-    · exact h1
-    · obtain ⟨j, hj, hjA⟩ := mem_iUnion₂.1 (h1 hm)
-      exact absurd (hdisj _ _ _ hjA hi₀) hj
-  refine ⟨i₀, ?_⟩
-  rw [ae_iff]
-  refine measure_null_of_locally_null _ fun x hx ↦ ?_
-  simp only [mem_ofPred_eq, Classical.not_imp] at hx
-  obtain ⟨η, hη, hx'⟩ := hsub hx.1
-  refine ⟨{τ | ¬(τ ∈ Ioo a b → u τ = vertex i₀)} ∩ Ioo (x - η) (x + η),
-    inter_mem_nhdsWithin _ (Ioo_mem_nhds (by linarith) (by linarith)), ?_⟩
-  rw [ae_iff] at hx'
-  refine measure_mono_null (fun τ hτ ↦ ?_) hx'
-  simp only [mem_inter_iff, mem_ofPred_eq, Classical.not_imp] at hτ ⊢
-  exact ⟨hτ.2, hτ.1.2⟩
-
 /-- **A time inside an interval of finite bang-bang control that is not a switching time has a
 neighbourhood on which the control is one vertex.** Off the finite exceptional set the control is
 locally a vertex; on each side of the time, next to it, it is therefore one vertex
-(`l3m_ae_vertex_of_local`), and the two vertices agree because the time is not a switching
-time. -/
+(`exists_ae_eq_vertex_of_locally`), and the two vertices agree because the time is not a
+switching time. -/
 private lemma l3m_local_vertex {u : ℝ → Fin 3 → ℝ} {α β t : ℝ} (hbb : IsFiniteBangBang α β u)
     (ht : t ∈ Ioo α β) (hsw : ¬ IsSwitchingTime u t) :
     ∃ i : Fin 3, ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (t - η) (t + η) → u τ = vertex i := by
@@ -218,9 +137,9 @@ private lemma l3m_local_vertex {u : ℝ → Fin 3 → ℝ} {α β t : ℝ} (hbb 
       rw [Metric.mem_ball, Real.dist_eq, abs_lt]
       constructor <;> linarith [hs.1, hs.2]
     exact hball hsb (by simp [hsS, hst])
-  obtain ⟨i, hi⟩ := l3m_ae_vertex_of_local (a := t - ρ) (b := t) (by linarith) fun s hs ↦
+  obtain ⟨i, hi⟩ := exists_ae_eq_vertex_of_locally (α := t - ρ) (β := t) fun s hs ↦
     hloc s ⟨hs.1, by linarith [hs.2]⟩ hs.2.ne
-  obtain ⟨j, hj⟩ := l3m_ae_vertex_of_local (a := t) (b := t + ρ) (by linarith) fun s hs ↦
+  obtain ⟨j, hj⟩ := exists_ae_eq_vertex_of_locally (α := t) (β := t + ρ) fun s hs ↦
     hloc s ⟨by linarith [hs.1], hs.2⟩ hs.1.ne'
   obtain rfl : i = j := by
     by_contra hij
@@ -234,14 +153,6 @@ private lemma l3m_local_vertex {u : ℝ → Fin 3 → ℝ} {α β t : ℝ} (hbb 
   · exact h1 ⟨hτ.1, h⟩
   · exact h2 ⟨h, hτ.2⟩
 
-/-- `R⁻¹ J R = J` (`R` is a rotation, so it commutes with `J`). -/
-private lemma l3m_Rinv_J_R : R⁻¹ * J * R = J := by
-  rw [mx_R_inv]
-  have h3 := Real.mul_self_sqrt (show (0 : ℝ) ≤ 3 by norm_num)
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [R, J, Matrix.mul_apply, Fin.sum_univ_two] <;> nlinarith
-
 /-- **The minimizer is bang-bang with finitely many switches away from the singular locus**
 (label of this formalization `thm:mahler:away`; the part of Theorem 16.3.1 that holds without the
 hypothesis, TeX 12811–12815). Let `(g, X)` be a global minimizer of the Reinhardt problem and
@@ -249,16 +160,16 @@ hypothesis, TeX 12811–12815). Let `(g, X)` be a global minimizer of the Reinha
 which the lift does not meet `𝒮_sing`, the control is bang-bang with finitely many switches.
 
 Proof: Proposition 8.1.3 (`proposition8_1_3`: the minimizer is edge extremal on `[0, T]`, so on
-`[a, b]`, `l3st_isEdgeExtremalOn_mono`), the restriction of the extremal to `[a, b]`
-(`l3st_isExtremalOn_of_isPontryaginExtremal`), and Theorem 8.3.2 (`theorem8_3_2`). -/
+`[a, b]`, `IsEdgeExtremalOn.mono`), the restriction of the extremal to `[a, b]`
+(`IsPontryaginExtremal.isExtremalOn`), and Theorem 8.3.2 (`theorem8_3_2`). -/
 theorem isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus {T : ℝ}
     {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2} (hmin : IsReinhardtMinimizer T u g X)
     {Λ₁ ΛR : ℝ → Mat2} {lam : ℝ} (hext : IsPontryaginExtremal T u g X Λ₁ ΛR lam) {a b : ℝ}
     (ha : 0 ≤ a) (hab : a < b) (hb : b ≤ T)
     (hS : ∀ t ∈ Icc a b, (g t, Λ₁ t, X t, ΛR t) ∉ singularLocus) :
     IsFiniteBangBang a b u :=
-  theorem8_3_2 (l3st_isExtremalOn_of_isPontryaginExtremal hext ha hab hb)
-    (l3st_isEdgeExtremalOn_mono (proposition8_1_3 hmin).2 ha hb) hS
+  theorem8_3_2 (IsPontryaginExtremal.isExtremalOn hext ha hab hb)
+    (IsEdgeExtremalOn.mono (proposition8_1_3 hmin).2 ha hb) hS
 
 /-- **Under the hypothesis, the lift of a global minimizer never meets the singular locus** (the
 core of the proof of Theorem 16.3.1, TeX 12811–12833, with gap G16.7 repaired: the set of meeting
@@ -266,8 +177,8 @@ times could a priori be infinite and nowhere dense, and the proof works on a com
 interval).
 
 Proof:
-1. `Z = {t ∈ [0, T] | lift(t) ∈ 𝒮_sing}` is closed (`l3st_mem_singularLocus_iff`,
-   `l3st_continuousOn_lift`). Suppose `Z ≠ ∅`.
+1. `Z = {t ∈ [0, T] | lift(t) ∈ 𝒮_sing}` is closed (`IsExtremalOn.mem_singularLocus_iff`,
+   `IsExtremalOn.continuousOn_lift`). Suppose `Z ≠ ∅`.
 2. `Z ∩ (0, T] ≠ ∅`: if `0 ∈ Z` then `T ∈ Z`, since `X(T) = R⁻¹X(0)R`, `Λ₁(T) = R⁻¹Λ₁(0)R`,
    `Λ_R(T) = R⁻¹Λ_R(0)R` and `R⁻¹JR = J`.
 3. `Z` has empty interior: on an open interval inside `Z`, `Λ_R ≡ 0`, the Hamiltonian is
@@ -283,27 +194,27 @@ Proof:
    switching time in `(d - ε, d)`; with step 5, the control is a.e. constant at one vertex on
    `(d - ε', d)` (the vertex cannot change across a point that is not a switching time, and
    `(d - ε', d)` is connected).
-7. Lemma 8.3.4 (`lemma8_3_4`) on `[d - ε', d]` (`l3st_isExtremalOn_of_isPontryaginExtremal`): the
+7. Lemma 8.3.4 (`lemma8_3_4`) on `[d - ε', d]` (`IsPontryaginExtremal.isExtremalOn`): the
    lift does not meet `𝒮_sing` at `d` ("A trajectory cannot reach the singular locus with finitely
    many switches"), against `d ∈ Z`.
 
-The step "with step 5, the control is a.e. constant at one vertex" is `l3m_local_vertex` (near
-each time of `(d - ε', d)`: on each side the control is one vertex, by connectedness, and the two
-agree since the time is not a switching time) and `l3m_ae_vertex_of_local` (a locally constant
+The step "with step 5, the control is a.e. constant at one vertex" is `l3m_local_vertex` (near each
+time of `(d - ε', d)`: on each side the control is one vertex, by connectedness, and the two agree
+since the time is not a switching time) and `exists_ae_eq_vertex_of_locally` (a locally constant
 vertex control is constant on an interval: connectedness, and a locally null set is null). -/
-theorem l3st_forall_not_mem_singularLocus (hNC : NoChatteringIntoSingularLocus) {T : ℝ}
+private theorem l3st_forall_not_mem_singularLocus (hNC : NoChatteringIntoSingularLocus) {T : ℝ}
     {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2} (hmin : IsReinhardtMinimizer T u g X)
     {Λ₁ ΛR : ℝ → Mat2} {lam : ℝ} (hext : IsPontryaginExtremal T u g X Λ₁ ΛR lam) :
     ∀ t ∈ Icc 0 T, (g t, Λ₁ t, X t, ΛR t) ∉ singularLocus := by
   have hT : 0 < T := hmin.1.1.1
   have hedge : IsEdgeExtremalOn 0 T u X := (proposition8_1_3 hmin).2
   have h0T : IsExtremalOn 0 T u g X Λ₁ ΛR lam :=
-    l3st_isExtremalOn_of_isPontryaginExtremal hext le_rfl hT le_rfl
+    IsPontryaginExtremal.isExtremalOn hext le_rfl hT le_rfl
   intro t₀ ht₀ hmem
-  have hlam : lam ≠ 0 := ((l3st_mem_singularLocus_iff h0T ht₀).1 hmem).1
+  have hlam : lam ≠ 0 := ((IsExtremalOn.mem_singularLocus_iff h0T ht₀).1 hmem).1
   have hZ : ∀ t ∈ Icc 0 T, (g t, Λ₁ t, X t, ΛR t) ∈ singularLocus ↔
       Λ₁ t = (3 / 2 * lam) • J ∧ X t = J ∧ ΛR t = 0 := fun t ht ↦ by
-    rw [l3st_mem_singularLocus_iff h0T ht]
+    rw [IsExtremalOn.mem_singularLocus_iff h0T ht]
     exact and_iff_right hlam
   -- Step 2: a meeting time in `(0, T]` (by the transversality conditions, `R⁻¹JR = J`)
   obtain ⟨z, hz, hzS⟩ : ∃ z ∈ Ioc 0 T, (g z, Λ₁ z, X z, ΛR z) ∈ singularLocus := by
@@ -314,8 +225,8 @@ theorem l3st_forall_not_mem_singularLocus (hNC : NoChatteringIntoSingularLocus) 
       have hext' := hext
       obtain ⟨-, -, -, hXT, h1T, hRT, -⟩ := hext'
       refine ⟨T, ⟨hT, le_rfl⟩, (hZ T ⟨hT.le, le_rfl⟩).2 ⟨?_, ?_, ?_⟩⟩
-      · rw [h1T, h1, Matrix.mul_smul, Matrix.smul_mul, l3m_Rinv_J_R]
-      · rw [hXT, hX, l3m_Rinv_J_R]
+      · rw [h1T, h1, Matrix.mul_smul, Matrix.smul_mul, R_inv_mul_J_mul_R]
+      · rw [hXT, hX, R_inv_mul_J_mul_R]
       · rw [hRT, hR, Matrix.mul_zero, Matrix.zero_mul]
   -- Step 3: the meeting times have empty interior (Theorem 8.2.7's covered case)
   obtain ⟨p, hp, hpS⟩ : ∃ p ∈ Ioo 0 z, (g p, Λ₁ p, X p, ΛR p) ∉ singularLocus := by
@@ -330,7 +241,7 @@ theorem l3st_forall_not_mem_singularLocus (hNC : NoChatteringIntoSingularLocus) 
     {q : Mat2 × Mat2 × Mat2 × Mat2 | q.2.1 = (3 / 2 * lam) • J ∧ q.2.2.1 = J ∧ q.2.2.2 = 0}
     with hZp
   have hZpc : IsClosed Zp := by
-    refine ((l3st_continuousOn_lift h0T).mono (Icc_subset_Icc_left hp.1.le)
+    refine ((IsExtremalOn.continuousOn_lift h0T).mono (Icc_subset_Icc_left hp.1.le)
       ).preimage_isClosed_of_isClosed isClosed_Icc ?_
     exact (isClosed_eq (continuous_fst.comp continuous_snd) continuous_const).inter
       ((isClosed_eq (continuous_fst.comp (continuous_snd.comp continuous_snd))
@@ -375,10 +286,10 @@ theorem l3st_forall_not_mem_singularLocus (hNC : NoChatteringIntoSingularLocus) 
     have h2 : d - ε < t := lt_of_le_of_lt (le_max_right _ _) ht.1
     exact l3m_local_vertex (hbb ((p + t) / 2) ((t + d) / 2) (by linarith) (by linarith [ht.2]))
       ⟨by linarith, by linarith [ht.2]⟩ (hsw t ⟨h2, ht.2⟩)
-  obtain ⟨i, hi⟩ := l3m_ae_vertex_of_local hcd hloc
+  obtain ⟨i, hi⟩ := exists_ae_eq_vertex_of_locally hloc
   -- Step 7: Lemma 8.3.4 on `[c, d]`
   have hc0 : 0 ≤ c := hp.1.le.trans (le_max_left _ _)
-  exact lemma8_3_4 (l3st_isExtremalOn_of_isPontryaginExtremal hext hc0 hcd hdT) hi d
+  exact lemma8_3_4 (IsPontryaginExtremal.isExtremalOn hext hc0 hcd hdT) hi d
     ⟨hcd.le, le_rfl⟩ hdS
 
 /-- **Theorem 16.3.1** (`thm:mahler`; Mahler's First conjecture), **conditional on the named
@@ -409,7 +320,7 @@ Proof (the book's, TeX 12806–12833, with the last step as the hypothesis):
    (`exists_isReinhardtMinimizer_of_isWorstDisk`, Layer 2's identification); by step 1 and
    Remark 8.3.3 (`remark8_3_3`: §7.2 and Lemma 7.2.1's discussion, Lemma 3.1.8) its boundary is
    that of a smoothed polygon, hence so is the boundary of `K_min`
-   (`l3st_isSmoothedPolygonBoundary_of_image`); `K_min` is a centrally symmetric convex disk
+   (`IsSmoothedPolygonBoundary.of_mulVec_image`); `K_min` is a centrally symmetric convex disk
    (`IsWorstDisk`) without corners (Lemma 2.2.5, `lemma2_2_5`, through
    `ch2_isWorstLatticeDisk_iff_isWorstDisk`). -/
 theorem theorem16_3_1 (hNC : NoChatteringIntoSingularLocus) :
@@ -431,6 +342,6 @@ theorem theorem16_3_1 (hNC : NoChatteringIntoSingularLocus) :
   have hpoly := remark8_3_3 hext hedge (l3st_forall_not_mem_singularLocus hNC hmin hext) hKσ
     (fun j t _ ↦ hσ j t) hshift
   exact ⟨hK.1, (lemma2_2_5.2 K (ch2_isWorstLatticeDisk_iff_isWorstDisk.2 hK)).1,
-    l3st_isSmoothedPolygonBoundary_of_image hA.ne' hpoly⟩
+    IsSmoothedPolygonBoundary.of_mulVec_image hA.ne' hpoly⟩
 
 end SmoothedPolygons

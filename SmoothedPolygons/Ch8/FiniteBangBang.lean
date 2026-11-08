@@ -146,21 +146,7 @@ private lemma l3h_tendsto_iff {α : Type*} {l : Filter α} {f : α → Mat2} {M 
     Tendsto f l (𝓝 M) ↔ ∀ i j, Tendsto (fun t ↦ f t i j) l (𝓝 (M i j)) :=
   tendsto_pi_nhds.trans <| forall_congr' fun _ ↦ tendsto_pi_nhds
 
-private lemma l3h_traceForm_smul_left (c : ℝ) (A B : Mat2) :
-    traceForm (c • A) B = c * traceForm A B := by
-  simp [traceForm, Matrix.trace_smul]
-
 /-! ### Helpers: the control simplex and its faces -/
-
-/-- `U_T` is convex. -/
-private lemma l3h_convex_controlSimplex : Convex ℝ controlSimplex := by
-  intro x hx y hy a b ha hb hab
-  obtain ⟨hx1, hx2⟩ := hx
-  obtain ⟨hy1, hy2⟩ := hy
-  refine ⟨fun i ↦ ⟨?_, ?_⟩, ?_⟩ <;> simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
-  · nlinarith [(hx1 i).1, (hy1 i).1]
-  · nlinarith [mul_le_mul_of_nonneg_left (hx1 i).2 ha, mul_le_mul_of_nonneg_left (hy1 i).2 hb]
-  · linear_combination a * hx2 + b * hy2 + hab
 
 /-- The denominators `⟨X, Z_u⟩` of the Hamiltonian do not vanish at a star state
 (Lemma 3.3.4). -/
@@ -178,7 +164,7 @@ private lemma l3h_argmax_subset_controlEdge {lam : ℝ} {Λ₁ ΛR X : Mat2}
   intro u hu
   refine ⟨hu.1, ?_⟩
   obtain ⟨-, -, hext⟩ := lemma7_3_1 controlSimplex isCompact_controlSimplex
-    l3h_convex_controlSimplex ⟨_, poly_vertex_mem 0⟩ lam Λ₁ ΛR X hden
+    convex_controlSimplex ⟨_, poly_vertex_mem 0⟩ lam Λ₁ ΛR X hden
   obtain ⟨hb, hs⟩ := hu.1
   by_contra hne
   have hpos : 0 < u j := lt_of_le_of_ne (hb j).1 (Ne.symm hne)
@@ -266,7 +252,7 @@ private lemma l3h_eventually_argmax_subset {α : Type*} {l : Filter α} {lam : �
   refine l3h_argmax_subset_controlEdge (l3h_den_ne hXt) fun hjt ↦ ?_
   have hmax := hjt.2 v hv
   simp only [hamiltonian] at hmax
-  simp only [l3h_traceForm_smul_left, mul_div_assoc] at ht
+  simp only [traceForm_smul_left, mul_div_assoc] at ht
   have := (mul_lt_mul_iff_of_pos_left (inv_pos.2 hσt)).1 ht
   linarith
 
@@ -315,7 +301,7 @@ with `y(t) ≤ C |t - t₀|ⁿ` and `x(t) ≤ C₁ |∫_{t₀}^t (x + y)|`. Then
 `t → t₀` in `[0, T]`.
 
 Proof: `|∫_{t₀}^t y| ≤ C |t - t₀|ⁿ⁺¹`, so `x(t) ≤ C₁ C |t - t₀|ⁿ⁺¹ + C₁ |∫_{t₀}^t x|`;
-Corollary A.1.3, two-sided (`l3st_corollaryA_1_3_two_sided`), applies to `τ ↦ x(t₀ + τ)`
+Corollary A.1.3, two-sided (`corollaryA_1_3_two_sided`), applies to `τ ↦ x(t₀ + τ)`
 extended past the ends of `[0, T]` by its values at the ends (the clamped extension keeps the
 integral inequality, as its right-hand side only grows when `|τ|` does); this covers `t₀ = 0` and
 `t₀ = T`. -/
@@ -386,7 +372,7 @@ private lemma l3h_gronwall {T t₀ C C₁ : ℝ} {n : ℕ} {x y : ℝ → ℝ} (
           exact add_le_add (mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (abs_nonneg _) hdist _)
             (mul_nonneg hC₁ hC))
             (mul_le_mul_of_nonneg_left (l3h_abs_integral_mono hxtc hxt0 hbetween) hC₁)
-  have hO := l3st_corollaryA_1_3_two_sided (x := fun τ ↦ xt (t₀ + τ)) one_pos (Nat.succ_pos n)
+  have hO := corollaryA_1_3_two_sided (x := fun τ ↦ xt (t₀ + τ)) one_pos (Nat.succ_pos n)
     (hxtc.comp (continuous_const.add continuous_id)).continuousOn (fun τ _ ↦ hxt0 _)
     (mul_nonneg hC₁ hC) hC₁ hξ
   have htend : Tendsto (fun t ↦ t - t₀) (𝓝[Icc 0 T] t₀) (𝓝 0) :=
@@ -1060,7 +1046,7 @@ private lemma l3h_core {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : �
         rw [Matrix.trace_smul, Matrix.trace_neg, hbtr, neg_zero, smul_zero]
       have hVX : traceForm ((1 / 2 : ℝ) • -((Λ₁ t₀ * X t₀ - X t₀ * Λ₁ t₀) * X t₀ -
           X t₀ * (Λ₁ t₀ * X t₀ - X t₀ * Λ₁ t₀))) (X t₀) = 0 := by
-        rw [l3h_traceForm_smul_left, traceForm, Matrix.neg_mul, Matrix.trace_neg, ← traceForm,
+        rw [traceForm_smul_left, traceForm, Matrix.neg_mul, Matrix.trace_neg, ← traceForm,
           hbX, neg_zero, mul_zero]
       have hpos : ∀ t ∈ Icc 0 T \ {t₀}, 0 < (t - t₀) ^ 2 := fun t ht ↦ by
         have := sub_ne_zero.2 ht.2
@@ -1105,9 +1091,6 @@ private lemma l3h_vertex_injective {i j : Fin 3} (h : vertex i = vertex j) : i =
   have := congrFun h i
   simp [vertex, hij] at this
 
-private lemma l3h_vertex_mem_controlEdge {i k : Fin 3} (hk : k ≠ i) : vertex i ∈ controlEdge k :=
-  ⟨poly_vertex_mem i, by simp [vertex, hk]⟩
-
 /-- A control in the edge `{u_k = 0}` with edge parameter `±½` is a vertex of that edge. -/
 private lemma l3h_eq_vertex_of_edgeParam {k : Fin 3} {v : Fin 3 → ℝ} (hv : v ∈ controlEdge k)
     {e : ℝ} (he : e ∈ ({-(1 / 2), 1 / 2} : Set ℝ)) (hpar : edgeParam k v = e) :
@@ -1151,7 +1134,7 @@ private lemma l3h_isFiniteBangBang_of_edge {a b c d : ℝ} {u : ℝ → Fin 3 �
 
 /-- **A control that is locally almost everywhere a vertex on an open interval is almost
 everywhere one vertex there**: the vertex is locally constant, and the interval is connected. -/
-private lemma l3h_ae_eq_vertex_of_locally {α β : ℝ} {u : ℝ → Fin 3 → ℝ}
+theorem exists_ae_eq_vertex_of_locally {α β : ℝ} {u : ℝ → Fin 3 → ℝ}
     (h : ∀ τ ∈ Ioo α β, ∃ i : Fin 3, ∃ ε > 0, ∀ᵐ σ, σ ∈ Ioo (τ - ε) (τ + ε) → u σ = vertex i) :
     ∃ i : Fin 3, ∀ᵐ σ, σ ∈ Ioo α β → u σ = vertex i := by
   rcases le_or_gt β α with hβα | hαβ
@@ -1210,7 +1193,7 @@ private lemma l3h_ae_vertex_near_right {c d : ℝ} {u : ℝ → Fin 3 → ℝ} (
     · rw [h']; exact hcd
     · exact (Finset.mem_filter.1 h').2
   have hcm := hmF c (Finset.mem_insert_self _ _)
-  refine ⟨_, hm_lt, hcm, l3h_ae_eq_vertex_of_locally fun τ hτ ↦
+  refine ⟨_, hm_lt, hcm, exists_ae_eq_vertex_of_locally fun τ hτ ↦
     hS τ ⟨hcm.trans_lt hτ.1, hτ.2⟩ fun hτS ↦ ?_⟩
   have := hmF τ (Finset.mem_insert_of_mem (Finset.mem_filter.2 ⟨hτS, hτ.2⟩))
   linarith [hτ.1]
@@ -1229,7 +1212,7 @@ private lemma l3h_ae_vertex_near_left {c d : ℝ} {u : ℝ → Fin 3 → ℝ} (h
     · rw [h']; exact hcd
     · exact (Finset.mem_filter.1 h').2
   have hdm := hmF d (Finset.mem_insert_self _ _)
-  refine ⟨_, hm_gt, hdm, l3h_ae_eq_vertex_of_locally fun τ hτ ↦
+  refine ⟨_, hm_gt, hdm, exists_ae_eq_vertex_of_locally fun τ hτ ↦
     hS τ ⟨hτ.1, hτ.2.trans_le hdm⟩ fun hτS ↦ ?_⟩
   have := hmF τ (Finset.mem_insert_of_mem (Finset.mem_filter.2 ⟨hτS, hτ.1⟩))
   linarith [hτ.2]
@@ -1273,7 +1256,7 @@ maximizers form a face of `U_T` (Lemma 7.3.1, `lemma7_3_1`), they lie in the edg
    with `A(Λ, t) = [P, Λ] - ⟨Λ, P⟩[P, X]` bounded on `[0, b - a]` (`P = Z_u/⟨Z_u, X⟩`,
    Lemma 3.3.4 and compactness), so `‖Λ‖ ≤ C₀ |∫_{t₀}^t (‖Λ‖ + ‖Y‖)|` (8.3.1,
    `eqn:Lambda-bellman`, in the entrywise `ℓ¹` norm), and Corollary A.1.3 two-sided
-   (`l3st_corollaryA_1_3_two_sided`, gap G14; at `t₀ = a` or `b` applied to the function extended
+   (`corollaryA_1_3_two_sided`, gap G14; at `t₀ = a` or `b` applied to the function extended
    past the end by its value there, `l3h_gronwall`) gives `‖Λ‖ = O(|t - t₀|ⁿ⁺¹)` when
    `‖Y‖ = O(|t - t₀|ⁿ)`; then `Λ_R/(t - t₀)ⁿ` has the limit of `Y/(t - t₀)ⁿ` (`l3h_expansion`).
 3. Claim (a): `W = [Λ_{1,cost}(t₀), X(t₀)] ≠ 0`. Then `Λ_R(t)/(t - t₀) → -W` (`l3h_claim_a`,
@@ -1357,7 +1340,7 @@ restatement):
    `[c, t₀]` (`l3h_isFiniteBangBang_of_edge`: `edgeParam = ±½` in the edge `kₗ` means
    `vertex (kₗ + 1)` or `vertex (kₗ + 2)`). After the last switch before `t₀` the control is
    almost everywhere one vertex (`l3h_ae_vertex_near_right`; the interval is connected,
-   `l3h_ae_eq_vertex_of_locally`). The right side likewise.
+   `exists_ae_eq_vertex_of_locally`). The right side likewise.
 3. Any two vertices lie in a common edge (`vertex i`, `vertex j` lie in `controlEdge k` for
    `k ∉ {i, j}`); shrink `ε`. The time `t₀` is a null set. -/
 theorem IsExtremalOn.exists_ae_mem_controlEdge_of_isEdgeExtremalOn {a b : ℝ}
@@ -1406,10 +1389,10 @@ theorem IsExtremalOn.exists_ae_mem_controlEdge_of_isEdgeExtremalOn {a b : ℝ}
   filter_upwards [hiₗ, hiᵣ, (Set.countable_singleton t₀).ae_notMem volume] with t h1 h2 h3 htI htab
   rcases lt_trichotomy t t₀ with hlt | heq | hgt
   · rw [h1 ⟨by linarith [htI.1], hlt⟩ htab]
-    exact l3h_vertex_mem_controlEdge hk1
+    exact vertex_mem_controlEdge (Ne.symm hk1)
   · exact absurd heq h3
   · rw [h2 ⟨hgt, by linarith [htI.2]⟩ htab]
-    exact l3h_vertex_mem_controlEdge hk2
+    exact vertex_mem_controlEdge (Ne.symm hk2)
 
 /-- **Theorem 8.3.2** (`thm:finite-bang-bang`). Consider an extremal lifted trajectory on a compact
 interval `[a, b]` that does not meet the singular locus `𝒮_sing`, and assume that the trajectory

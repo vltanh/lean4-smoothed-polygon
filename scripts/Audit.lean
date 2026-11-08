@@ -28,6 +28,8 @@ import all Basic.Analysis.Convex.PolygonAngle
 import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.StarCurveConvex
 import all Basic.Analysis.Convex.TietzeNakajima
+import all Basic.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
+import all Basic.MeasureTheory.SpecificCodomains.Pi
 import all External.EulerArnold
 import all External.FejesToth
 import all External.Filippov
@@ -288,6 +290,7 @@ meta def paperResults : List (String × Name) :=
    ("Thm 8.2.3", ``SmoothedPolygons.theorem8_2_3),
    ("Thm 8.2.6", ``SmoothedPolygons.theorem8_2_6),
    ("Thm 8.2.7", ``SmoothedPolygons.theorem8_2_7),
+   ("Thm 8.3.1", ``SmoothedPolygons.theorem8_3_1),
    ("Thm 8.3.2", ``SmoothedPolygons.theorem8_3_2),
    ("Remark 8.3.3", ``SmoothedPolygons.remark8_3_3),
    ("Lemma 8.3.4", ``SmoothedPolygons.lemma8_3_4),

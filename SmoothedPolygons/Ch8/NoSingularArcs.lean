@@ -19,8 +19,8 @@ then an edge of `U_T` or all of `U_T`.
 
 The book's proof (TeX 7320–7391) treats only the singular subarcs on which the Hamiltonian is
 independent of the control (all of `U_T` maximizes): by Theorem 8.2.6 they are circular arcs, and a
-circular arc is not a local minimizer (second variation, `l3st_exists_lt_cost_of_circleArc`). This
-covered case is `not_forall_hamiltonian_eq_of_isReinhardtMinimizer`, which is what the proof of
+circular arc is not a local minimizer (second variation, `l3st_exists_lt_cost_of_circleArc`).
+This covered case is `not_forall_hamiltonian_eq_of_isReinhardtMinimizer`, which is what the proof of
 Theorem 16.3.1 uses ("A trajectory cannot remain on the singular locus for any positive interval
 of time by Theorem 8.2.7", TeX 12816–12817).
 
@@ -115,10 +115,6 @@ private lemma l3i_continuousAt_hamiltonian {lam : ℝ} {Λ₁ ΛR X : ℝ → Ma
         continuous_const).matrix_trace.continuousAt
   exact ContinuousAt.comp (f := fun t ↦ (Λ₁ t, ΛR t, X t)) hF (h₁.prodMk (hR.prodMk hX))
 
-/-- A vertex of `U_T` lies in every edge `{u_k = 0}` with `k` different from its index. -/
-private lemma l3i_vertex_mem_controlEdge {i k : Fin 3} (h : i ≠ k) : vertex i ∈ controlEdge k :=
-  ⟨poly_vertex_mem i, by simp [vertex, Ne.symm h]⟩
-
 /-- **Localization on a singular subarc.** Along a Pontryagin extremal, on a singular subarc
 `(a, b)` near a time `t₀` with `Λ_R(t₀) ≠ 0`, the maximizers of the Hamiltonian are one edge
 `{u_k = 0}` of `U_T` at every time of an interval `(c, d) ∋ t₀`, and the control lies in that edge
@@ -165,7 +161,7 @@ private lemma l3i_exists_edge_of_isSingularSubarc {T : ℝ} {u : ℝ → Fin 3 �
   have hlt0 : hamiltonian lam (Λ₁ t₀) (ΛR t₀) (X t₀) (vertex k) <
       hamiltonian lam (Λ₁ t₀) (ΛR t₀) (X t₀) (vertex (k + 1)) := by
     have hf : vertex (k + 1) ∈ hamiltonianArgmax lam (Λ₁ t₀) (ΛR t₀) (X t₀) := by
-      rw [hk]; exact l3i_vertex_mem_controlEdge hkk
+      rw [hk]; exact vertex_mem_controlEdge hkk
     have he : vertex k ∉ hamiltonianArgmax lam (Λ₁ t₀) (ΛR t₀) (X t₀) := by
       rw [hk]; intro h; simpa [vertex] using h.2
     have : ¬ ∀ v ∈ controlSimplex, hamiltonian lam (Λ₁ t₀) (ΛR t₀) (X t₀) v ≤
@@ -200,7 +196,7 @@ private lemma l3i_exists_edge_of_isSingularSubarc {T : ℝ} {u : ℝ → Fin 3 �
     · rw [hkk']
     · exfalso
       have he : vertex k ∈ hamiltonianArgmax lam (Λ₁ t) (ΛR t) (X t) := by
-        rw [hk']; exact l3i_vertex_mem_controlEdge (Ne.symm hkk')
+        rw [hk']; exact vertex_mem_controlEdge (Ne.symm hkk')
       exact absurd (he.2 _ (poly_vertex_mem (k + 1))) (not_le.2 hlt)
   refine ⟨k, max c a, min d b, le_max_right _ _, hc0.trans hd0, min_le_right _ _, hargmax, ?_⟩
   filter_upwards [hae] with t ht htcd
@@ -228,12 +224,13 @@ def IsEdgeSingularSubarc (ν : ℝ) (q : ℝ → Fin 3 → ℝ) (p : ℝ → Str
 and 6 of the proof of Theorem 8.1.4, TeX 6846–6894).
 
 Proof: by (8.1.6) (`eqn_edge_ham`) only `λ₂ f₂(x, y, u_e)` depends on the control, and `f₂` is
-injective in `u_e` on `[-½, ½]` (strictly decreasing, `l3st_edge_max_rule`; here by
-cross-multiplication), so two distinct maximizers at `t` force `λ₂(t) = 0`. On an edge-singular
-subarc `(α, β)`, `λ₂ ≡ 0`, so `λ₂` has derivative `0` at every `t ∈ (α, β)` and (8.1.8)
-(`eqn_edge_zero`) gives `ν ≠ 0` and `x(t)² = -λ₃/ν`, a constant (`λ₃` is constant,
-`eqn_costate_edge`). But `x' = y > 0` (admissibility in `edgeDomain`) makes `x` strictly
-increasing, so it takes three distinct values on `(α, β)`, which cannot have the same square. -/
+injective in `u_e` on `[-½, ½]` (strictly decreasing,
+`IsEdgeProblemExtremal.ae_control_eq_of_switching`; here by cross-multiplication), so two distinct
+maximizers at `t` force `λ₂(t) = 0`. On an edge-singular subarc `(α, β)`, `λ₂ ≡ 0`, so `λ₂` has
+derivative `0` at every `t ∈ (α, β)` and (8.1.8) (`eqn_edge_zero`) gives `ν ≠ 0` and
+`x(t)² = -λ₃/ν`, a constant (`λ₃` is constant, `eqn_costate_edge`). But `x' = y > 0` (admissibility
+in `edgeDomain`) makes `x` strictly increasing, so it takes three distinct values on `(α, β)`, which
+cannot have the same square. -/
 theorem IsEdgeProblemExtremal.not_isEdgeSingularSubarc {T : ℝ} {ue : ℝ → ℝ}
     {q : ℝ → Fin 3 → ℝ} {ν : ℝ} {p : ℝ → StrongDual ℝ (Fin 3 → ℝ)}
     (h : IsEdgeProblemExtremal T ue q ν p) {α β : ℝ} (hα : 0 ≤ α) (hβ : β ≤ T) :
@@ -254,8 +251,8 @@ theorem IsEdgeProblemExtremal.not_isEdgeSingularSubarc {T : ℝ} {ue : ℝ → �
     by_contra hne
     have hf : edgeF₂ (q t 0) (q t 1) v = edgeF₂ (q t 0) (q t 1) w :=
       mul_left_cancel₀ hne (by linarith)
-    have hDv := (l3i_denom_neg hx1 hx2 hv).ne
-    have hDw := (l3i_denom_neg hx1 hx2 hw).ne
+    have hDv := (edgeF₂_denom_neg hx1 hx2 hv).ne
+    have hDw := (edgeF₂_denom_neg hx1 hx2 hw).ne
     simp only [edgeF₂] at hf
     rw [div_eq_div_iff hDv hDw] at hf
     apply hvw
@@ -281,7 +278,7 @@ theorem IsEdgeProblemExtremal.not_isEdgeSingularSubarc {T : ℝ} {ue : ℝ → �
     have h1 := congrFun (hq t ht) 0
     have hsub : IntervalIntegrable (fun s ↦ edgeField (q s) (ue s)) volume 0 t :=
       hint.mono_set (by rw [uIcc_of_le ht.1, uIcc_of_le hT.le]; exact Icc_subset_Icc le_rfl ht.2)
-    rw [Pi.add_apply, l3i_integral_apply hsub] at h1
+    rw [Pi.add_apply, intervalIntegral.eval_integral hsub] at h1
     simpa [edgeField] using h1
   have hycont : ContinuousOn (fun s ↦ q s 1) (Icc 0 T) :=
     (continuous_apply 1).comp_continuousOn hcont
@@ -316,7 +313,7 @@ lift does not stay in the singular locus on any open interval). This is the part
 Theorem 8.2.7 used by Theorem 16.3.1.
 
 Proof (the book's, TeX 7320–7391): by Theorem 8.2.6 (`theorem8_2_6`, applied to the restriction
-`l3st_isExtremalOn_of_isPontryaginExtremal`) the subarc is a circular arc, `X ≡ J` on `[a, b]`;
+`IsPontryaginExtremal.isExtremalOn`) the subarc is a circular arc, `X ≡ J` on `[a, b]`;
 by the second variation (`l3st_exists_lt_cost_of_circleArc`) some admissible trajectory has
 smaller cost, against minimality. -/
 theorem not_forall_hamiltonian_eq_of_isReinhardtMinimizer {T : ℝ} {u : ℝ → Fin 3 → ℝ}
@@ -326,7 +323,7 @@ theorem not_forall_hamiltonian_eq_of_isReinhardtMinimizer {T : ℝ} {u : ℝ →
     ¬ ∀ t ∈ Ioo a b, ∀ v ∈ controlSimplex, ∀ w ∈ controlSimplex,
       hamiltonian lam (Λ₁ t) (ΛR t) (X t) v = hamiltonian lam (Λ₁ t) (ΛR t) (X t) w := by
   intro hconst
-  have hE := l3st_isExtremalOn_of_isPontryaginExtremal hext ha hab hb
+  have hE := IsPontryaginExtremal.isExtremalOn hext ha hab hb
   have hv01 : vertex 0 ≠ vertex 1 := by
     intro h
     simpa [vertex] using congrFun h 0
@@ -409,7 +406,7 @@ Proof:
    `c < d`, on which the maximizers of the Reinhardt Hamiltonian are that edge at every time and
    the control lies in it almost everywhere.
 3. The pulled-back costate (`IsExtremalOn.isEdgeProblemExtremal_edgePullback`, on the restriction
-   `l3st_isExtremalOn_of_isPontryaginExtremal` to `[c, d]`, with `λ_cost ≠ 0`) is an edge costate
+   `IsPontryaginExtremal.isExtremalOn` to `[c, d]`, with `λ_cost ≠ 0`) is an edge costate
    of the edge arc, with `H_e(v) = H_R(edgeControlIn k v)`
    (`IsExtremalOn.controlHamiltonian_edgePullback`). Two distinct maximizers of `H_R` in the edge
    give two distinct maximizers of `H_e` in `[-½, ½]` (their edge parameters), at every time of
@@ -428,7 +425,7 @@ theorem not_isSingularSubarc_of_isReinhardtMinimizer_of_isNormalExtremal {T : �
   · obtain ⟨t₀, ht₀, hne⟩ := hR
     obtain ⟨k, c, d, hac, hcd, hdb, hmax, hu⟩ :=
       l3i_exists_edge_of_isSingularSubarc hext ha hb hsing ht₀ hne
-    have hE := l3st_isExtremalOn_of_isPontryaginExtremal hext (ha.trans hac) hcd (hdb.trans hb)
+    have hE := IsPontryaginExtremal.isExtremalOn hext (ha.trans hac) hcd (hdb.trans hb)
     have hpe := hE.isEdgeProblemExtremal_edgePullback hlam hu
     have hHe := hE.controlHamiltonian_edgePullback hu
     refine hpe.not_isEdgeSingularSubarc le_rfl le_rfl ⟨sub_pos.2 hcd, fun τ hτ ↦ ?_⟩
@@ -438,16 +435,19 @@ theorem not_isSingularSubarc_of_isReinhardtMinimizer_of_isNormalExtremal {T : �
     obtain ⟨v, hv, w, hw, hvw, hvmax, hwmax⟩ := hsing.2 (c + τ) htab
     have hvE : v ∈ controlEdge k := by rw [← hmax _ ht]; exact ⟨hv, hvmax⟩
     have hwE : w ∈ controlEdge k := by rw [← hmax _ ht]; exact ⟨hw, hwmax⟩
-    refine ⟨edgeParam k v, l3i_edgeParam_mem hv, edgeParam k w, l3i_edgeParam_mem hw, ?_, ?_, ?_⟩
+    refine ⟨edgeParam k v, edgeParam_mem_edgeControlSet hv, edgeParam k w,
+      edgeParam_mem_edgeControlSet hw, ?_, ?_, ?_⟩
     · intro h
       apply hvw
-      rw [← l3i_edgeControlIn_edgeParam hvE, ← l3i_edgeControlIn_edgeParam hwE, h]
+      rw [← edgeControlIn_edgeParam hvE, ← edgeControlIn_edgeParam hwE, h]
     · intro v' hv'
-      rw [hHe τ hτI v' hv', hHe τ hτI _ (l3i_edgeParam_mem hv), l3i_edgeControlIn_edgeParam hvE]
-      exact hvmax _ (l3i_edgeControlIn_mem hv')
+      rw [hHe τ hτI v' hv', hHe τ hτI _ (edgeParam_mem_edgeControlSet hv),
+        edgeControlIn_edgeParam hvE]
+      exact hvmax _ (edgeControlIn_mem_controlSimplex hv')
     · intro v' hv'
-      rw [hHe τ hτI v' hv', hHe τ hτI _ (l3i_edgeParam_mem hw), l3i_edgeControlIn_edgeParam hwE]
-      exact hwmax _ (l3i_edgeControlIn_mem hv')
+      rw [hHe τ hτI v' hv', hHe τ hτI _ (edgeParam_mem_edgeControlSet hw),
+        edgeControlIn_edgeParam hwE]
+      exact hwmax _ (edgeControlIn_mem_controlSimplex hv')
   · push Not at hR
     refine not_forall_hamiltonian_eq_of_isReinhardtMinimizer hmin hext ha hab hb ?_
     intro t ht v _ w _
