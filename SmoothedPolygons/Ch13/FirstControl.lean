@@ -152,7 +152,7 @@ private lemma l4c_ham_sub (w : Fin 3 → ℂ) (v v' : ℂ) : ham w v - ham w v' 
 
 /-- The switching polynomial: `H_F(z(t, z⁰, u), v) - H_F(z(t, z⁰, u), v')` as a cubic in `t`
 (TeX 10755–10784, up to the factor `√3`). -/
-private lemma l4c_ham_flow_sub (t : ℝ) (z : Fin 3 → ℂ) (u v v' : ℂ) :
+lemma l4c_ham_flow_sub (t : ℝ) (z : Fin 3 → ℂ) (u v v' : ℂ) :
     ham (flow t z u) v - ham (flow t z u) v' = RR (v - v') (z 2) + RR (v - v') (z 1) * t +
       RR (v - v') (z 0) * t ^ 2 / 2 + RR (v - v') (-I * u) * t ^ 3 / 6 := by
   rw [l4c_ham_sub, l4c_RR_flow]
@@ -182,7 +182,7 @@ private lemma l4c_pos_near_zero {q : ℝ → ℝ} (hq : Continuous q) (h0 : 0 < 
   linarith [ht.2]
 
 /-- The sign of a cubic for small `t > 0` is the sign of its first nonzero coefficient. -/
-private lemma l4c_cubic_pos {a b c d : ℝ}
+lemma l4c_cubic_pos {a b c d : ℝ}
     (h : 0 < a ∨ (a = 0 ∧ 0 < b) ∨ (a = 0 ∧ b = 0 ∧ 0 < c) ∨ (a = 0 ∧ b = 0 ∧ c = 0 ∧ 0 < d)) :
     ∃ ε > 0, ∀ t ∈ Ioc 0 ε, 0 < a + b * t + c * t ^ 2 + d * t ^ 3 := by
   rcases h with ha | ⟨rfl, hb⟩ | ⟨rfl, rfl, hc⟩ | ⟨rfl, rfl, rfl, hd⟩
