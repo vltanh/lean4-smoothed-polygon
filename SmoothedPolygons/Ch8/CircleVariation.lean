@@ -21,8 +21,10 @@ The deformation (TeX 7334–7342): with compactly supported smooth `ψ₁, ψ₂
 `cost(g₀) = π` holds only on `[0, π/3]`, on `(t₁, t₂)` the cost is `3(t₂ - t₁)`, gap G8).
 Choosing `ψ₁, ψ₂` with `∫ (ψ₁'ψ₂ - ψ₁ψ₂') > 0` makes the `s²` term negative. (The book's choice
 "`ψ₁' > 0` and `ψ₂' < 0` on their common support" is impossible at the ends of a support of a
-compactly supported function and is read on the interior of the overlap; e.g. `ψ₂(t) = ψ₁(t - δ)`
-for a bump `ψ₁` and small `δ > 0` gives `∫ (ψ₁'ψ₂ - ψ₁ψ₂') = 2 ∫ ψ₁'(τ) ψ₁(τ - δ) dτ > 0`.)
+compactly supported function and is read on the interior of the overlap; e.g. `ψ₂(t) = ψ₁(t + δ)`
+(so `ψ₂` lies to the left of `ψ₁`, as in the book's choice and Remark 8.2.8) for a bump `ψ₁` and
+small `δ > 0` gives `∫ (ψ₁'ψ₂ - ψ₁ψ₂') = 2 ∫ ψ₁'(τ) ψ₁(τ + δ) dτ ≈ 2δ ∫ ψ₁'² > 0`; the choice
+`ψ₂(t) = ψ₁(t - δ)` gives the opposite sign and raises the cost.)
 For small `s` the curvatures of `σ_i = g_s s_i*` stay positive, uniformly close to the circle's
 (TeX 7384–7390); the deformed curve, reparametrized to `det X = 1`, is the trajectory of an
 admissible control (§3.3–§3.4).

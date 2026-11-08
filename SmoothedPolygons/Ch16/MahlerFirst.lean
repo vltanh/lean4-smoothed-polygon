@@ -88,9 +88,13 @@ these lines:
    `(e, t + T)`, with `e` the last time before `t + T - δ` in `𝒮_sing`, the trajectory emanates from
    the divisor and then tends to `q_in`, against step 4 ("Thus, the trajectory is not periodic.
    This is contrary to the boundary conditions of the Reinhardt conjecture").
-The hypothesis is stated for every Pontryagin extremal, as Theorem 16.4.1 is; it concerns only
-extremals with their boundary conditions (locally, chattering into `𝒮_sing` does occur: the inward
-spirals along `W^s(q_in)` of Chapters 13–16).
+The hypothesis is stated for every Pontryagin extremal that is edge extremal on `[0, T]`
+(Definition 8.1.2): the book uses the argument only for the minimizer, which is edge extremal by
+Proposition 8.1.3 (`proposition8_1_3`), and the proof of Theorem 14.4.1 needs the excursion
+`(e, t + T)` to be bang-bang, which Chapter 8 gives only under edge extremality (Theorem 8.3.2).
+Restricting to edge extremals makes the hypothesis weaker, so it asks no more than the book
+proves. It concerns only extremals with their boundary conditions (locally, chattering into
+`𝒮_sing` does occur: the inward spirals along `W^s(q_in)` of Chapters 13–16).
 
 **Why it is not an axiom.** It is a `Prop`, a hypothesis of `theorem16_3_1`, visible in its
 statement; nothing in the library assumes it. `theorem16_3_1` reads "`NoChatteringIntoSingularLocus`
@@ -102,7 +106,7 @@ meeting of the minimizer's lift with `𝒮_sing`; the minimizer is then bang-ban
 switches by Theorem 8.3.2. -/
 def NoChatteringIntoSingularLocus : Prop :=
   ∀ (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X Λ₁ ΛR : ℝ → Mat2) (lam : ℝ),
-    IsPontryaginExtremal T u g X Λ₁ ΛR lam → ∀ t ∈ Ioc 0 T,
+    IsPontryaginExtremal T u g X Λ₁ ΛR lam → IsEdgeExtremalOn 0 T u X → ∀ t ∈ Ioc 0 T,
       (g t, Λ₁ t, X t, ΛR t) ∈ singularLocus → ¬ IsChatteringInto u g X Λ₁ ΛR t
 
 /-- **The minimizer is bang-bang with finitely many switches away from the singular locus**

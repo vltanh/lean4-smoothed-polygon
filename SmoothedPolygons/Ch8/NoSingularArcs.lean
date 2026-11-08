@@ -41,8 +41,10 @@ the control). Status (worked out for this layer, see the report):
   maximizing edge is locally constant by upper semicontinuity of the maximizers).
 * **Abnormal lifts** (`λ_cost = 0`) are not covered. Along every trajectory with control in an
   edge there is a two-parameter family of abnormal costates (the conormal bundle of the edge
-  submanifold, which contains Remark 8.1.6's, `remark8_1_6`) for which the edge maximizes the
-  Hamiltonian at every time: these are edge-singular subarcs, locally. Whether a global minimizer
+  submanifold, which contains Remark 8.1.6's, `remark8_1_6`) for which the Hamiltonian vanishes
+  on the edge; the edge is the set of maximizers where the Hamiltonian at the third vertex is
+  negative (with the printed signs of Remark 8.1.6 it is the set of minimizers). An abnormal lift
+  is edge-singular on an interval exactly when it is conormal there. Whether a global minimizer
   can carry a global abnormal lift (with the transversality conditions and the maximum condition
   on all of `[0, T]`) that is of this kind on some interval is not settled by the book or here.
   No counterexample is known (none can be exhibited without knowing the minimizer).
