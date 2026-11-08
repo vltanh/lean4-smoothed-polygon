@@ -82,6 +82,7 @@ public import SmoothedPolygons.Ch8.EdgeBangBang
 public import SmoothedPolygons.Ch8.EdgeExtremal
 public import SmoothedPolygons.Ch8.EdgeLandau
 public import SmoothedPolygons.Ch8.EdgeProblem
+public import SmoothedPolygons.Ch8.EdgePullback
 public import SmoothedPolygons.Ch8.FiniteBangBang
 public import SmoothedPolygons.Ch8.NoSingularArcs
 public import SmoothedPolygons.Ch8.PolygonBoundary

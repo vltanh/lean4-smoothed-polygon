@@ -139,7 +139,7 @@ Proof:
    `Λ_R(T) = R⁻¹Λ_R(0)R` and `R⁻¹JR = J`.
 3. `Z` has empty interior: on an open interval inside `Z`, `Λ_R ≡ 0`, the Hamiltonian is
    independent of the control, against Theorem 8.2.7 in the case its proof covers
-   (`l3st_not_hamiltonian_const_of_isReinhardtMinimizer`; "A trajectory cannot remain on the
+   (`not_forall_hamiltonian_eq_of_isReinhardtMinimizer`; "A trajectory cannot remain on the
    singular locus for any positive interval of time").
 4. Take `z ∈ Z ∩ (0, T]`, `p ∈ (0, z) ∖ Z` (step 3), and `d = inf (Z ∩ [p, T])`: `d ∈ Z`,
    `p < d ≤ z`, and `[p, d)` avoids `Z`.

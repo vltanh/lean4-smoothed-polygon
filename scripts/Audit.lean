@@ -115,6 +115,7 @@ import all SmoothedPolygons.Ch8.EdgeBangBang
 import all SmoothedPolygons.Ch8.EdgeExtremal
 import all SmoothedPolygons.Ch8.EdgeLandau
 import all SmoothedPolygons.Ch8.EdgeProblem
+import all SmoothedPolygons.Ch8.EdgePullback
 import all SmoothedPolygons.Ch8.FiniteBangBang
 import all SmoothedPolygons.Ch8.NoSingularArcs
 import all SmoothedPolygons.Ch8.PolygonBoundary
