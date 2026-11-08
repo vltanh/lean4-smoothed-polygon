@@ -198,21 +198,209 @@ def IsFiniteBangBang (a b : ℝ) (u : ℝ → Fin 3 → ℝ) : Prop :=
 
 /-! ### Basic facts about extremals on intervals -/
 
+/-- An integral curve on `[0, S]`, restarted at `s ≥ 0`, is an integral curve on `[0, T]` when
+`s + T ≤ S`. -/
+private lemma l3a_isIntegralCurve_shift {F V : ℝ → Mat2} {S s T : ℝ}
+    (hI : IsIntegralCurve F V S) (hs : 0 ≤ s) (hT : 0 ≤ T) (hsT : s + T ≤ S) :
+    IsIntegralCurve (fun t ↦ F (s + t)) (fun t ↦ V (s + t)) T := by
+  intro i j
+  obtain ⟨hint, heq⟩ := hI i j
+  have hS : 0 ≤ S := by linarith
+  have hsub : ∀ {a b : ℝ}, 0 ≤ a → a ≤ b → b ≤ S →
+      IntervalIntegrable (fun σ ↦ V σ i j) volume a b := fun ha hab hb ↦
+    hint.mono_set (by rw [uIcc_of_le hab, uIcc_of_le hS]; exact Icc_subset_Icc ha hb)
+  refine ⟨?_, fun t ht ↦ ?_⟩
+  · have := (hsub hs (by linarith) hsT).comp_add_left s
+    simpa only [sub_self, add_sub_cancel_left] using this
+  · have hcomp := intervalIntegral.integral_comp_add_left (fun σ ↦ V σ i j) s (a := 0) (b := t)
+    simp only [add_zero] at hcomp ⊢
+    rw [hcomp, heq (s + t) ⟨by linarith [ht.1], by linarith [ht.2]⟩, heq s ⟨hs, by linarith⟩,
+      ← intervalIntegral.integral_add_adjacent_intervals (hsub le_rfl hs (by linarith))
+        (hsub hs (by linarith [ht.1]) (by linarith [ht.2]))]
+    ring
+
+/-- The state–costate system on `[0, T]`, restarted at `s ≥ 0`, solves the system on `[0, T']`
+when `s + T' ≤ T`: the integral equations restrict (`l3a_isIntegralCurve_shift`), the pointwise
+conditions are those at the times `s + t ∈ [0, T]`, and the almost-everywhere conditions pass
+through the translation `t ↦ s + t`, which preserves Lebesgue measure. -/
+private lemma l3a_isStateCostateSolution_shift {T s T' : ℝ} {u : ℝ → Fin 3 → ℝ}
+    {g X Λ₁ ΛR : ℝ → Mat2} {lam : ℝ} (h : IsStateCostateSolution T u g X Λ₁ ΛR lam)
+    (hs : 0 ≤ s) (hT' : 0 < T') (hsT : s + T' ≤ T) :
+    IsStateCostateSolution T' (fun t ↦ u (s + t)) (fun t ↦ g (s + t)) (fun t ↦ X (s + t))
+      (fun t ↦ Λ₁ (s + t)) (fun t ↦ ΛR (s + t)) lam := by
+  obtain ⟨⟨-, hum, husim, hst, hgI, hXI⟩, hlam, hpt, hI1, hIR, hmax⟩ := h
+  have hmem : ∀ t ∈ Icc 0 T', s + t ∈ Icc 0 T := fun t ht ↦
+    ⟨by linarith [ht.1], by linarith [ht.2]⟩
+  refine ⟨⟨hT', hum.comp (measurable_const_add s), fun t ht ↦ husim _ (hmem t ht),
+    fun t ht ↦ hst _ (hmem t ht), l3a_isIntegralCurve_shift hgI hs hT'.le hsT,
+    l3a_isIntegralCurve_shift hXI hs hT'.le hsT⟩, hlam, fun t ht ↦ hpt _ (hmem t ht),
+    l3a_isIntegralCurve_shift hI1 hs hT'.le hsT, l3a_isIntegralCurve_shift hIR hs hT'.le hsT, ?_⟩
+  filter_upwards [(measurePreserving_add_left volume s).quasiMeasurePreserving.ae hmax]
+    with t ht ht'
+  exact ht ⟨by linarith [ht'.1], by linarith [ht'.2]⟩
+
+/-- `|⟨M, Z_u⟩| ≤ Σᵢⱼ |Mᵢⱼ|` for `u ∈ U_T`: the entries of `Z_u` are at most `1` in absolute
+value. -/
+private lemma l3a_abs_traceForm_controlMatrix_le (M : Mat2) {u : Fin 3 → ℝ}
+    (hu : u ∈ controlSimplex) :
+    |traceForm M (controlMatrix u)| ≤ |M 0 0| + |M 0 1| + |M 1 0| + |M 1 1| := by
+  obtain ⟨hu01, hsum⟩ := hu
+  obtain ⟨h00, h01⟩ := hu01 0
+  obtain ⟨h10, h11⟩ := hu01 1
+  obtain ⟨h20, h21⟩ := hu01 2
+  have h3 : 1 ≤ √3 := by
+    rw [show (1 : ℝ) = √1 by simp]
+    exact Real.sqrt_le_sqrt (by norm_num)
+  have hs3 : 0 < √3 := by positivity
+  have hZ : ∀ i j, |controlMatrix u i j| ≤ 1 := by
+    intro i j
+    fin_cases i <;> fin_cases j <;> simp only [controlMatrix, Fin.zero_eta, Fin.isValue,
+      Fin.mk_one, of_apply, cons_val', cons_val_zero, cons_val_one, empty_val',
+      cons_val_fin_one] <;> rw [abs_le]
+    · constructor
+      · rw [le_div_iff₀ hs3]; nlinarith
+      · rw [div_le_iff₀ hs3]; nlinarith
+    · constructor <;> linarith
+    · constructor <;> linarith
+    · constructor
+      · rw [le_div_iff₀ hs3]; nlinarith
+      · rw [div_le_iff₀ hs3]; nlinarith
+  have hterm : ∀ i j k l, |M i j * controlMatrix u k l| ≤ |M i j| := fun i j k l ↦ by
+    rw [abs_mul]
+    exact mul_le_of_le_one_right (abs_nonneg _) (hZ k l)
+  have htr : traceForm M (controlMatrix u) = M 0 0 * controlMatrix u 0 0 +
+      M 0 1 * controlMatrix u 1 0 + (M 1 0 * controlMatrix u 0 1 +
+        M 1 1 * controlMatrix u 1 1) := by
+    simp only [traceForm, Matrix.trace, Matrix.diag, Matrix.mul_apply, Fin.sum_univ_two]
+  rw [htr]
+  refine (abs_add_le _ _).trans ?_
+  have e1 := (abs_add_le (M 0 0 * controlMatrix u 0 0) (M 0 1 * controlMatrix u 1 0))
+  have e2 := (abs_add_le (M 1 0 * controlMatrix u 0 1) (M 1 1 * controlMatrix u 1 1))
+  linarith [hterm 0 0 0 0, hterm 0 1 1 0, hterm 1 0 0 1, hterm 1 1 1 1]
+
+/-- `⟨J, Z_u⟩ = -2/3` for `u ∈ U_T`. -/
+private lemma l3a_traceForm_J_controlMatrix {u : Fin 3 → ℝ} (hu : u ∈ controlSimplex) :
+    traceForm J (controlMatrix u) = -(2 / 3) := by
+  have hsum := hu.2
+  simp only [traceForm, Matrix.trace, Matrix.diag, Matrix.mul_apply, Fin.sum_univ_two, J,
+    controlMatrix, of_apply, cons_val', cons_val_zero, cons_val_one, empty_val',
+    cons_val_fin_one, Fin.isValue]
+  linarith
+
+/-- **`H = 0` at a time where `Λ_R = 0` and `X = J`.** Along a solution of the state–costate
+system, `H = 0` holds almost everywhere; at a time `t` with `Λ_R(t) = 0` and `X(t) = J` it holds
+at `t` itself, where `H` reduces to `⟨Λ₁ - (3/2) λ_cost J, X⟩`. Near `t`, the first term of `H` is
+close to its value at `t`, `|⟨X, Z_u⟩| ≥ 1/3` (since `⟨J, Z_u⟩ = -2/3`) and
+`|⟨Λ_R, Z_u⟩| ≤ Σ |Λ_R|ᵢⱼ` is small, uniformly in `u ∈ U_T`; if the first term did not vanish at
+`t`, `H` would not vanish on a nonempty open set of times, which has positive measure. -/
+private lemma l3a_traceForm_eq_zero {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
+    {lam : ℝ} (h : IsStateCostateSolution T u g X Λ₁ ΛR lam) {t : ℝ} (ht : t ∈ Icc 0 T)
+    (hR : ΛR t = 0) (hX : X t = J) :
+    traceForm (Λ₁ t - (3 / 2 * lam) • J) (X t) = 0 := by
+  obtain ⟨⟨hT, -, husim, -, -, hXI⟩, -, -, hI1, hIR, hmax⟩ := h
+  have hXc : ContinuousOn X (Icc 0 T) := Matrix.continuousOn_of_eq_add_integral hXI
+  have h1c : ContinuousOn Λ₁ (Icc 0 T) := Matrix.continuousOn_of_eq_add_integral hI1
+  have hRc : ContinuousOn ΛR (Icc 0 T) := Matrix.continuousOn_of_eq_add_integral hIR
+  -- the first term `f` of `H`, and the size `ent` of a matrix
+  obtain ⟨ent, hent⟩ : ∃ ent : Mat2 → ℝ,
+      ent = fun M ↦ |M 0 0| + |M 0 1| + |M 1 0| + |M 1 1| := ⟨_, rfl⟩
+  obtain ⟨f, hf⟩ : ∃ f : ℝ → ℝ,
+      f = fun τ ↦ traceForm (Λ₁ τ - (3 / 2 * lam) • J) (X τ) := ⟨_, rfl⟩
+  have hel : ∀ i j, Continuous fun M : Mat2 ↦ M i j := fun i j ↦ continuous_id.matrix_elem i j
+  have hentc : Continuous ent := by
+    rw [hent]
+    exact (((hel 0 0).abs.add (hel 0 1).abs).add (hel 1 0).abs).add (hel 1 1).abs
+  have htf : Continuous fun p : Mat2 × Mat2 ↦ traceForm p.1 p.2 := by
+    unfold traceForm
+    exact (continuous_fst.matrix_mul continuous_snd).matrix_trace
+  have hfc' := htf.continuousAt.comp_continuousWithinAt
+    (((h1c t ht).sub (continuousWithinAt_const (b := (3 / 2 * lam) • J))).prodMk (hXc t ht))
+  have hfc : ContinuousWithinAt f (Icc 0 T) t := by
+    rw [hf]
+    exact hfc'
+  have hRe := hentc.continuousAt.comp_continuousWithinAt (hRc t ht)
+  have hXe := hentc.continuousAt.comp_continuousWithinAt
+    ((hXc t ht).sub (continuousWithinAt_const (b := J)))
+  have hRt : (ent ∘ ΛR) t = 0 := by simp [hent, hR]
+  have hXt : (ent ∘ fun τ ↦ X τ - J) t = 0 := by simp [hent, hX]
+  rw [show traceForm (Λ₁ t - (3 / 2 * lam) • J) (X t) = f t by rw [hf]]
+  by_contra hc
+  have hcpos : 0 < |f t| := abs_pos.2 hc
+  -- near `t`: `f` is close to `f t`, `Λ_R` is small and `X` is close to `J`
+  have hev : ∀ᶠ τ in 𝓝[Ioo 0 T] t,
+      |f τ - f t| < |f t| / 2 ∧ ent (ΛR τ) < |f t| / 6 ∧ ent (X τ - J) < 1 / 3 := by
+    refine (Filter.Eventually.and ?_ (Filter.Eventually.and ?_ ?_)).filter_mono
+      (nhdsWithin_mono t Ioo_subset_Icc_self)
+    · have := Metric.tendsto_nhds.1 hfc.tendsto (|f t| / 2) (by positivity)
+      simpa only [Real.dist_eq] using this
+    · have := hRt ▸ hRe.tendsto
+      exact this.eventually (gt_mem_nhds (by positivity))
+    · have := hXt ▸ hXe.tendsto
+      exact this.eventually (gt_mem_nhds (by norm_num))
+  obtain ⟨V, hVo, htV, hVsub⟩ := mem_nhdsWithin.1 hev
+  have hne : (V ∩ Ioo 0 T).Nonempty :=
+    mem_closure_iff.1 (by rw [closure_Ioo hT.ne]; exact ht) V hVo htV
+  refine ((hVo.inter isOpen_Ioo).measure_pos volume hne).ne'
+    (measure_mono_null (fun τ hτ ↦ ?_) (ae_iff.1 hmax))
+  obtain ⟨hfτ, hRτ, hXτ⟩ := hVsub hτ
+  have hτI : τ ∈ Ioo 0 T := hτ.2
+  have hu := husim τ (Ioo_subset_Icc_self hτI)
+  simp only [mem_ofPred_eq, not_imp]
+  refine ⟨hτI, fun hH ↦ ?_⟩
+  have hH0 := hH.1
+  -- `⟨X, Z_u⟩ = -2/3 + ⟨X - J, Z_u⟩ ≤ -1/3`
+  have hXZ : traceForm (X τ) (controlMatrix (u τ)) ≤ -(1 / 3) := by
+    have e : traceForm (X τ) (controlMatrix (u τ)) =
+        traceForm J (controlMatrix (u τ)) + traceForm (X τ - J) (controlMatrix (u τ)) := by
+      simp only [traceForm, Matrix.sub_mul, Matrix.trace_sub]
+      ring
+    rw [e, l3a_traceForm_J_controlMatrix hu]
+    have h1 := (abs_le.1 (l3a_abs_traceForm_controlMatrix_le (X τ - J) hu)).2
+    have h2 : ent (X τ - J) = |(X τ - J) 0 0| + |(X τ - J) 0 1| + |(X τ - J) 1 0| +
+        |(X τ - J) 1 1| := by rw [hent]
+    linarith
+  -- `|⟨Λ_R, Z_u⟩ / ⟨X, Z_u⟩| ≤ 3 Σ |Λ_R|ᵢⱼ < |f t| / 2`
+  have hq : |traceForm (ΛR τ) (controlMatrix (u τ)) / traceForm (X τ) (controlMatrix (u τ))|
+      < |f t| / 2 := by
+    rw [abs_div, div_lt_iff₀ (by rw [abs_pos]; linarith)]
+    have h1 := l3a_abs_traceForm_controlMatrix_le (ΛR τ) hu
+    have h1' : ent (ΛR τ) = |ΛR τ 0 0| + |ΛR τ 0 1| + |ΛR τ 1 0| + |ΛR τ 1 1| := by rw [hent]
+    have h2 : 1 / 3 ≤ |traceForm (X τ) (controlMatrix (u τ))| := by
+      rw [abs_of_neg (by linarith)]; linarith
+    calc |traceForm (ΛR τ) (controlMatrix (u τ))| ≤ ent (ΛR τ) := h1' ▸ h1
+      _ < |f t| / 2 * (1 / 3) := by linarith
+      _ ≤ |f t| / 2 * |traceForm (X τ) (controlMatrix (u τ))| := by gcongr
+  have hHf : hamiltonian lam (Λ₁ τ) (ΛR τ) (X τ) (u τ) = f τ -
+      traceForm (ΛR τ) (controlMatrix (u τ)) / traceForm (X τ) (controlMatrix (u τ)) := by
+    rw [hf]; rfl
+  rw [hHf, sub_eq_zero] at hH0
+  have hfτ' : |f t| / 2 < |f τ| := by
+    have := abs_sub_abs_le_abs_sub (f t) (f τ)
+    rw [abs_sub_comm] at this
+    linarith
+  rw [hH0] at hfτ'
+  linarith
+
 /-- A Pontryagin extremal on `[0, T]` is an extremal lifted trajectory on every subinterval
 `[a, b]`. Proof: `isPontryaginExtremal_iff`, and the restriction of the integral equations and of
-the almost-everywhere conditions to `[a, b]` after the time shift (as
-`poly_integral_form_restrict`). Expected size: 60–120 lines. -/
+the almost-everywhere conditions to `[a, b]` after the time shift `t ↦ a + t`
+(`l3a_isStateCostateSolution_shift`). -/
 theorem l3st_isExtremalOn_of_isPontryaginExtremal {T : ℝ} {u : ℝ → Fin 3 → ℝ}
     {g X Λ₁ ΛR : ℝ → Mat2} {lam : ℝ} (h : IsPontryaginExtremal T u g X Λ₁ ΛR lam) {a b : ℝ}
-    (ha : 0 ≤ a) (hab : a < b) (hb : b ≤ T) : IsExtremalOn a b u g X Λ₁ ΛR lam := by
-  sorry
+    (ha : 0 ≤ a) (hab : a < b) (hb : b ≤ T) : IsExtremalOn a b u g X Λ₁ ΛR lam :=
+  l3a_isStateCostateSolution_shift (isPontryaginExtremal_iff.1 h).1 ha (by linarith)
+    (by linarith)
 
-/-- An extremal lifted trajectory on `[a, b]` is one on every subinterval `[c, d]`. Expected size:
-40–80 lines (shared with `l3st_isExtremalOn_of_isPontryaginExtremal`). -/
+/-- An extremal lifted trajectory on `[a, b]` is one on every subinterval `[c, d]` (the time shift
+`t ↦ (c - a) + t` of the system on `[0, b - a]`, `l3a_isStateCostateSolution_shift`). -/
 theorem l3st_isExtremalOn_mono {a b c d : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
     {lam : ℝ} (h : IsExtremalOn a b u g X Λ₁ ΛR lam) (hac : a ≤ c) (hcd : c < d) (hdb : d ≤ b) :
     IsExtremalOn c d u g X Λ₁ ΛR lam := by
-  sorry
+  have := l3a_isStateCostateSolution_shift h (s := c - a) (T' := d - c) (by linarith)
+    (by linarith) (by linarith)
+  have e : ∀ t, a + (c - a + t) = c + t := fun t ↦ by ring
+  simp only [e] at this
+  exact this
 
 /-- Edge extremality on `[a, b]` passes to subintervals (immediate from Definition 8.1.2). -/
 theorem l3st_isEdgeExtremalOn_mono {a b c d : ℝ} {u : ℝ → Fin 3 → ℝ} {X : ℝ → Mat2}
@@ -220,26 +408,52 @@ theorem l3st_isEdgeExtremalOn_mono {a b c d : ℝ} {u : ℝ → Fin 3 → ℝ} {
   fun j c' d' hc' hcd' hd' hu ↦ h j c' d' (hac.trans hc') hcd' (hd'.trans hdb) hu
 
 /-- Along an extremal lifted trajectory on `[a, b]`, the lift `(g, Λ₁, X, Λ_R)` is continuous on
-`[a, b]` (its entries are indefinite integrals of integrable functions). Expected size: 30–60
-lines. -/
+`[a, b]` (its entries are indefinite integrals of integrable functions). -/
 theorem l3st_continuousOn_lift {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {lam : ℝ}
     (h : IsExtremalOn a b u g X Λ₁ ΛR lam) :
     ContinuousOn (fun t ↦ (g t, Λ₁ t, X t, ΛR t)) (Icc a b) := by
-  sorry
+  obtain ⟨⟨-, -, -, -, hgI, hXI⟩, -, -, hI1, hIR, -⟩ := h
+  have hc : ∀ {F V : ℝ → Mat2}, IsIntegralCurve (fun t ↦ F (a + t)) V (b - a) →
+      ContinuousOn F (Icc a b) := fun {F V} hI ↦ by
+    have h1 := (Matrix.continuousOn_of_eq_add_integral hI).comp
+      (continuous_sub_right a).continuousOn
+      (fun t ht ↦ ⟨by linarith [ht.1], by linarith [ht.2]⟩ : MapsTo (fun t ↦ t - a) (Icc a b)
+        (Icc 0 (b - a)))
+    refine h1.congr fun t _ ↦ ?_
+    simp only [Function.comp_apply, add_sub_cancel]
+  exact (hc hgI).prodMk ((hc hI1).prodMk ((hc hXI).prodMk (hc hIR)))
 
 /-- **Meeting the singular locus along an extremal.** Along an extremal lifted trajectory with
 multiplier `λ_cost`, the lift is in `𝒮_sing` at `t ∈ [a, b]` if and only if `λ_cost ≠ 0`,
 `Λ₁(t) = (3/2) λ_cost J`, `X(t) = J` and `Λ_R(t) = 0`; so the set of such times is closed.
 
 Proof: at a time with `Λ_R(t) = 0` the Hamiltonian `H(Λ₁, Λ_R, X; Z_u) = ⟨Λ₁ - (3/2)λ_cost J, X⟩`
-does not depend on the control, and `H = 0` almost everywhere extends to `t` by continuity (the
-control-dependent term is a bounded multiple of `Λ_R`, as in the proof of Lemma 8.2.2); with
-`Λ₁(t) = (3/2) μ J` and `X(t) = J` this gives `-3(μ - λ_cost) = 0`. Expected size: 60–120
-lines. -/
+does not depend on the control, and `H = 0` almost everywhere extends to `t` by continuity
+(`l3a_traceForm_eq_zero`: the control-dependent term `⟨Λ_R, Z_u⟩/⟨X, Z_u⟩` is at most
+`3 Σ |Λ_R|ᵢⱼ` near `t`, uniformly in `u ∈ U_T`, because `⟨J, Z_u⟩ = -2/3` and `X` is near `J`);
+with `Λ₁(t) = (3/2) μ J` and `X(t) = J` this gives `-3(μ - λ_cost) = 0`. -/
 theorem l3st_mem_singularLocus_iff {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
     {lam : ℝ} (h : IsExtremalOn a b u g X Λ₁ ΛR lam) {t : ℝ} (ht : t ∈ Icc a b) :
     (g t, Λ₁ t, X t, ΛR t) ∈ singularLocus ↔
       lam ≠ 0 ∧ Λ₁ t = (3 / 2 * lam) • J ∧ X t = J ∧ ΛR t = 0 := by
-  sorry
+  have e : a + (t - a) = t := by ring
+  have ht' : t - a ∈ Icc 0 (b - a) := ⟨by linarith [ht.1], by linarith [ht.2]⟩
+  constructor
+  · rintro ⟨μ, hμ, -, h1, hX, hR⟩
+    dsimp only at h1 hX hR
+    -- `H = 0` at `t` gives `⟨(3/2)(μ - λ_cost) J, J⟩ = -3(μ - λ_cost) = 0`
+    have hH := l3a_traceForm_eq_zero h ht' (by simp only [e]; exact hR) (by simp only [e]; exact hX)
+    simp only [e, h1, hX] at hH
+    have hμl : μ = lam := by
+      simp only [traceForm, Matrix.trace, Matrix.diag, Matrix.mul_apply, Fin.sum_univ_two, J,
+        Matrix.sub_apply, Matrix.smul_apply, smul_eq_mul, of_apply, cons_val', cons_val_zero,
+        cons_val_one, empty_val', cons_val_fin_one, Fin.isValue] at hH
+      linarith
+    subst hμl
+    exact ⟨hμ, h1, hX, hR⟩
+  · rintro ⟨hl, h1, hX, hR⟩
+    have hdet := (h.1.2.2.2.1 (t - a) ht').1
+    simp only [e] at hdet
+    exact ⟨lam, hl, hdet, h1, hX, hR⟩
 
 end SmoothedPolygons
