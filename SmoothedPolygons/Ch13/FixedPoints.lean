@@ -107,14 +107,6 @@ private lemma l4g_smul_mk (cr ci a0 b0 a1 b1 a2 b2 : ℝ) :
   ext j
   fin_cases j <;> apply Complex.ext <;> simp
 
-private lemma l4g_ζ_mk : ζ = ⟨-1 / 2, √3 / 2⟩ := l4st_ζ_eq
-
-private lemma l4g_ζ_sq_mk : ζ ^ 2 = ⟨-1 / 2, -(√3 / 2)⟩ := by
-  have hs : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
-  rw [l4st_ζ_eq, Complex.ext_iff]
-  simp [pow_two]
-  constructor <;> nlinarith
-
 private lemma l4g_one_mk : (1 : ℂ) = ⟨1, 0⟩ := rfl
 
 private lemma l4g_RR_mk (a b c d : ℝ) : RR ⟨a, b⟩ ⟨c, d⟩ = a * c + b * d := by
@@ -129,19 +121,6 @@ private lemma l4g_ham_lt_iff (w : Fin 3 → ℂ) (u v : ℂ) :
     ham w u < ham w v ↔ RR u (w 2) < RR v (w 2) := by
   simp [ham]
 
-private lemma l4g_one_mem : (1 : ℂ) ∈ VT := Or.inl rfl
-
-private lemma l4g_ζ_mem : ζ ∈ VT := Or.inr (Or.inl rfl)
-
-private lemma l4g_ζ_sq_mem : ζ ^ 2 ∈ VT := Or.inr (Or.inr rfl)
-
-private lemma l4g_mem_VT {v : ℂ} (hv : v ∈ VT) : v = 1 ∨ v = ζ ∨ v = ζ ^ 2 := hv
-
-/-- `conj ζ² = ζ`. -/
-private lemma l4g_conj_ζ_sq : starRingEnd ℂ (ζ ^ 2) = ζ := by
-  rw [l4g_ζ_sq_mk, l4g_ζ_mk]
-  apply Complex.ext <;> simp
-
 /-- `τ(v · (c z₁, c² z₂, c³ z₃)) = v̄ · (c τ(z)₁, c² τ(z)₂, c³ τ(z)₃)` for real `c`. -/
 private lemma l4g_tau_smul_scale (v : ℂ) (c : ℝ) (z : Fin 3 → ℂ) :
     tau (v • scale c z) = starRingEnd ℂ v • scale c (tau z) := by
@@ -153,18 +132,6 @@ private lemma l4g_smul_scale_smul_scale (v w : ℂ) (c d : ℝ) (z : Fin 3 → �
     v • scale c (w • scale d z) = (v * w) • scale (c * d) z := by
   ext j
   fin_cases j <;> simp [scale] <;> ring
-
-private lemma l4g_scale_one (z : Fin 3 → ℂ) : scale 1 z = z := by
-  ext j
-  fin_cases j <;> simp [scale]
-
-/-- `τ` commutes with the angular projection (`φ(τ z) = φ(z)`). -/
-private lemma l4g_tau_ang (z : Fin 3 → ℂ) : tau (ang z) = ang (tau z) := by
-  have hφ : weightedNorm (tau z) = weightedNorm z := by
-    simp [weightedNorm, tau]
-  rw [ang, ang, hφ]
-  ext j
-  fin_cases j <;> simp [tau, scale]
 
 /-- A point whose first coordinate has nonzero real part is not `0`. -/
 private lemma l4g_ne_zero_of_re {z : Fin 3 → ℂ} (h : (z 0).re ≠ 0) : z ≠ 0 :=
@@ -346,8 +313,8 @@ private lemma l4g_rs_facts :
     6 < rScale ∧ 0 < √3 ∧ √3 ^ 2 = 3 ∧
       1 - 5 * rScale - 7 * rScale ^ 2 - 5 * rScale ^ 3 - 7 * rScale ^ 4 - 5 * rScale ^ 5 +
         rScale ^ 6 = 0 :=
-  ⟨by linarith [l4st_rScale_bounds.1], by positivity, Real.sq_sqrt (by norm_num),
-    l4st_rScale_spec.2⟩
+  ⟨by linarith [rScale_bounds.1], by positivity, Real.sq_sqrt (by norm_num),
+    rScale_spec.2⟩
 
 /-- `qOutCart` in real coordinates. -/
 private lemma l4g_qOutCart_mk :
@@ -359,10 +326,12 @@ private lemma l4g_qOutCart_mk :
       Complex.I_im, Complex.ofReal_re, Complex.ofReal_im, Complex.neg_re, Complex.neg_im,
       Complex.one_re, Complex.one_im, l4g_qb, l4g_qx, l4g_qy, l4g_qz] <;> ring
 
-private lemma l4g_qOutCart_ne_zero : qOutCart ≠ 0 :=
+/-- `q_out ≠ 0`. -/
+theorem qOutCart_ne_zero : qOutCart ≠ 0 :=
   l4g_ne_zero_of_re (by rw [l4g_qOutCart_mk]; norm_num)
 
-private lemma l4g_tau_qOutCart_ne_zero : tau qOutCart ≠ 0 :=
+/-- `τ(q_out) ≠ 0`. -/
+theorem tau_qOutCart_ne_zero : tau qOutCart ≠ 0 :=
   l4g_ne_zero_of_re (by rw [l4g_qOutCart_mk]; simp [tau])
 
 /-- **The fixed-point equation (13.5.2) at `q_out`** along the constant control `ζ`. -/
@@ -370,7 +339,7 @@ private lemma l4g_flow_T :
     flow (l4g_T rScale √3) qOutCart ζ = ζ ^ 2 • scale rScale qOutCart := by
   obtain ⟨hr6, hs0, hs, hP⟩ := l4g_rs_facts
   obtain ⟨E0, E1, E2, E3, E4, E5⟩ := l4g_fixed_eqs (by linarith) hs0 hs hP
-  rw [l4g_ζ_sq_mk, l4g_qOutCart_mk, l4g_ζ_mk, l4g_flow_mk, l4g_smul_scale_mk]
+  rw [ζ_sq_eq_mk, l4g_qOutCart_mk, ζ_eq_mk, l4g_flow_mk, l4g_smul_scale_mk]
   refine congrArg₂ Matrix.vecCons (congrArg₂ Complex.mk ?_ ?_)
     (congrArg₂ Matrix.vecCons (congrArg₂ Complex.mk ?_ ?_)
       (congrArg₂ Matrix.vecCons (congrArg₂ Complex.mk ?_ ?_) rfl))
@@ -386,7 +355,7 @@ private lemma l4g_flow_two (t : ℝ) :
     flow t qOutCart ζ 2 =
       ⟨l4g_qz rScale + l4g_qx rScale √3 * t + -1 * t ^ 2 / 2 + t ^ 3 * (√3 / 2) / 6,
         0 + l4g_qy rScale * t + l4g_qb rScale √3 * t ^ 2 / 2 - t ^ 3 * (-1 / 2) / 6⟩ := by
-  rw [l4g_qOutCart_mk, l4g_ζ_mk, l4g_flow_mk]
+  rw [l4g_qOutCart_mk, ζ_eq_mk, l4g_flow_mk]
   rfl
 
 /-- The two switching functions from `ζ` along `t ↦ z(t, qOutCart, ζ)`: to `1`, a cubic
@@ -398,7 +367,7 @@ private lemma l4g_switching (t : ℝ) :
         (3 / 4 + √3 / 4 * l4g_qb rScale √3) * t ^ 2 + -(√3 / 12) * t ^ 3 ∧
     RR ζ (flow t qOutCart ζ 2) - RR (ζ ^ 2) (flow t qOutCart ζ 2) =
       √3 * t * (l4g_qy rScale + l4g_qb rScale √3 * t / 2 + t ^ 2 / 12) := by
-  rw [l4g_flow_two, l4g_ζ_sq_mk, l4g_ζ_mk, l4g_one_mk, l4g_RR_mk, l4g_RR_mk, l4g_RR_mk]
+  rw [l4g_flow_two, ζ_sq_eq_mk, ζ_eq_mk, l4g_one_mk, l4g_RR_mk, l4g_RR_mk, l4g_RR_mk]
   constructor <;> ring
 
 /-- The coefficients of the switching function from `ζ` to `1` are positive, and it vanishes
@@ -427,7 +396,7 @@ private lemma l4g_max {t : ℝ} (ht0 : 0 ≤ t) (htT : t ≤ l4g_T rScale √3) 
   obtain ⟨h1, h2⟩ := l4g_switching t
   intro v hv
   rw [l4g_ham_le_iff]
-  rcases l4g_mem_VT hv with rfl | rfl | rfl
+  rcases mem_VT.1 hv with rfl | rfl | rfl
   · have := l4g_cubic_nonneg c0.le c1.le c2.le (l4g_T_pos (by linarith) hs0) hroot ht0 htT
     linarith
   · exact le_rfl
@@ -461,7 +430,7 @@ private lemma l4g_not_mostRecent : ¬ IsMostRecentControl qOutCart ζ := by
     have := min_le_right ε (l4g_qy rScale / l4g_qb rScale √3)
     rw [← hm_def, le_div_iff₀ hb] at this
     linarith
-  have hle := h (-m) ⟨by linarith, by linarith⟩ (ζ ^ 2) l4g_ζ_sq_mem
+  have hle := h (-m) ⟨by linarith, by linarith⟩ (ζ ^ 2) ζ_sq_mem_VT
   rw [l4g_ham_le_iff] at hle
   have hg := (l4g_switching (-m)).2
   have hin : 0 < l4g_qy rScale + l4g_qb rScale √3 * -m / 2 + (-m) ^ 2 / 12 := by nlinarith
@@ -471,17 +440,17 @@ private lemma l4g_not_mostRecent : ¬ IsMostRecentControl qOutCart ζ := by
 
 /-- The angular parts of `qOutCart` and `τ(qOutCart)` lie in `Ξ_𝒲` (their third coordinates are
 real and negative). -/
-theorem l4st_ang_qOutCart_mem : ang qOutCart ∈ XiW ∧ ang (tau qOutCart) ∈ XiW := by
-  have hz := l4g_qz_neg (by linarith [l4st_rScale_bounds.1] : (6 : ℝ) ≤ rScale)
+theorem ang_qOutCart_mem_XiW : ang qOutCart ∈ XiW ∧ ang (tau qOutCart) ∈ XiW := by
+  have hz := l4g_qz_neg (by linarith [rScale_bounds.1] : (6 : ℝ) ≤ rScale)
   have key : ∀ z : Fin 3 → ℂ, z ≠ 0 → z 2 = (l4g_qz rScale : ℂ) → ang z ∈ XiW := by
     intro z hz0 h2
     change ang z ∈ Xi ∧ ang z 2 ∈ walls
-    refine ⟨l4st_ang_mem_Xi hz0, Set.mem_union_left _ (Set.mem_union_left _ ?_)⟩
+    refine ⟨ang_mem_Xi hz0, Set.mem_union_left _ (Set.mem_union_left _ ?_)⟩
     refine ⟨(weightedNorm z)⁻¹ ^ 3 * l4g_qz rScale,
       mul_nonpos_of_nonneg_of_nonpos
-        (pow_nonneg (inv_nonneg.2 (l4st_weightedNorm_pos hz0).le) 3) hz.le, ?_⟩
+        (pow_nonneg (inv_nonneg.2 (weightedNorm_pos hz0).le) 3) hz.le, ?_⟩
     simp [ang, scale, h2]
-  refine ⟨key _ l4g_qOutCart_ne_zero ?_, key _ l4g_tau_qOutCart_ne_zero ?_⟩
+  refine ⟨key _ qOutCart_ne_zero ?_, key _ tau_qOutCart_ne_zero ?_⟩
   · rw [l4g_qOutCart_mk]
     rfl
   · rw [l4g_qOutCart_mk]
@@ -489,27 +458,27 @@ theorem l4st_ang_qOutCart_mem : ang qOutCart ∈ XiW ∧ ang (tau qOutCart) ∈ 
 
 /-- The fixed point `q_out ∈ Ξ_𝒲/V_T` (Lemma 13.5.2): the switching point of the outward
 triangular spiral. -/
-noncomputable def qOut : XiWQuot := Quotient.mk'' ⟨ang qOutCart, l4st_ang_qOutCart_mem.1⟩
+noncomputable def qOut : XiWQuot := Quotient.mk'' ⟨ang qOutCart, ang_qOutCart_mem_XiW.1⟩
 
 /-- The fixed point `q_in ∈ Ξ_𝒲/V_T` (Lemma 13.5.2): the switching point of the inward triangular
 spiral, represented by `τ(qOutCart)`. -/
-noncomputable def qIn : XiWQuot := Quotient.mk'' ⟨ang (tau qOutCart), l4st_ang_qOutCart_mem.2⟩
+noncomputable def qIn : XiWQuot := Quotient.mk'' ⟨ang (tau qOutCart), ang_qOutCart_mem_XiW.2⟩
 
 /-- The normalization of (13.5.1): `Re z₁ = -1`, and `z₃` is real and negative. -/
-theorem l4st_qOutCart_normalization :
+theorem qOutCart_normalization :
     (qOutCart 0).re = -1 ∧ (qOutCart 2).im = 0 ∧ (qOutCart 2).re < 0 := by
   rw [l4g_qOutCart_mk]
-  exact ⟨rfl, rfl, l4g_qz_neg (by linarith [l4st_rScale_bounds.1])⟩
+  exact ⟨rfl, rfl, l4g_qz_neg (by linarith [rScale_bounds.1])⟩
 
 /-- The first control of `qOutCart` is `ζ = ζ₁²` (TeX 11384–11386; the tie between `ζ` and `ζ²` on
 the wall `𝒲₀` is broken by `Im z₂ > 0`). Proof: the constant control `ζ` is optimal along its own
-trajectory on `[0, t_sw]` (the switching functions of `l4st_firstSwitchTime_qOutCart`; the one to
+trajectory on `[0, t_sw]` (the switching functions of `firstSwitchTime_qOutCart`; the one to
 `ζ²` is `√3 t (Im z₂⁰ + Im z₁⁰ t/2 + t²/12) ≥ 0`, which is where `Im z₂⁰ > 0` enters), and the
-first control is unique (`l4st_firstControl_eq_iff`). -/
-theorem l4st_firstControl_qOutCart : firstControl qOutCart = ζ := by
+first control is unique (`firstControl_eq_iff`). -/
+private theorem l4st_firstControl_qOutCart : firstControl qOutCart = ζ := by
   obtain ⟨hr6, hs0, -, -⟩ := l4g_rs_facts
-  exact (l4st_firstControl_eq_iff l4g_qOutCart_ne_zero).2
-    ⟨l4g_ζ_mem, l4g_T rScale √3, l4g_T_pos (by linarith) hs0,
+  exact (firstControl_eq_iff qOutCart_ne_zero).2
+    ⟨ζ_mem_VT, l4g_T rScale √3, l4g_T_pos (by linarith) hs0,
       fun t ht v hv ↦ l4g_max ht.1 ht.2 v hv⟩
 
 /-- **The first switching time of (13.5.1)** (TeX 11340–11344, and inventory gap 10(b)):
@@ -524,7 +493,7 @@ sign pattern `+ + + -` (`Re z₂⁰ < 0 < Im z₂⁰`, `z₃⁰ < 0`, `Im z₁�
 `t_sw` by the fixed-point equation (`z₃(t_sw) = ζ² r³ z₃⁰`, and `RR(ζ - 1, ζ²) = 0`); so it is
 `≥ 0` on `[0, t_sw]` and `< 0` after `t_sw` (see the module docstring). Hence `ζ` is optimal
 exactly up to `t_sw`, and the set of times at which `ζ` is beaten is `(t_sw, ∞)`. -/
-theorem l4st_firstSwitchTime_qOutCart :
+theorem firstSwitchTime_qOutCart :
     firstSwitchTime qOutCart = 2 * (1 + rScale + rScale ^ 2) / (√3 * (rScale + 1)) := by
   obtain ⟨hr6, hs0, -, -⟩ := l4g_rs_facts
   rw [firstSwitchTime, l4st_firstControl_qOutCart]
@@ -536,17 +505,17 @@ theorem l4st_firstSwitchTime_qOutCart :
       by_contra hle
       exact absurd (l4g_max ht0.le (not_lt.1 hle) v hv) (not_le.2 hlt)
     · intro ht
-      exact ⟨(l4g_T_pos (by linarith) hs0).trans ht, 1, l4g_one_mem, l4g_beaten ht⟩
+      exact ⟨(l4g_T_pos (by linarith) hs0).trans ht, 1, one_mem_VT, l4g_beaten ht⟩
   rw [hset, csInf_Ioi]
   rfl
 
 /-- **The fixed-point equation (13.5.2) at `q_out`** (TeX 11348–11358): `F(qOutCart) =
 ζ² · (r z₁, r² z₂, r³ z₃)` with `r = r_scale`, the outward triangular spiral (`r_scale > 1`).
-Proof: with `t_sw` from `l4st_firstSwitchTime_qOutCart`, both sides are explicit elements
+Proof: with `t_sw` from `firstSwitchTime_qOutCart`, both sides are explicit elements
 of `ℚ(√3)(r)`; the six real coordinates of the linear system (13.5.2) agree modulo `s² - 3` and
 `P(r)` (`l4g_fixed_eqs`). -/
-theorem l4st_poincare_qOutCart : poincare qOutCart = ζ ^ 2 • scale rScale qOutCart := by
-  rw [poincare, l4st_firstSwitchTime_qOutCart, l4st_firstControl_qOutCart]
+theorem poincare_qOutCart : poincare qOutCart = ζ ^ 2 • scale rScale qOutCart := by
+  rw [poincare, firstSwitchTime_qOutCart, l4st_firstControl_qOutCart]
   exact l4g_flow_T
 
 /-- **The Hamiltonian vanishes at `q_out`** (inventory, gap 10(c): the statement of Lemma 13.5.2
@@ -554,7 +523,7 @@ asserts it, the proof does not show it). Along (13.5.1) as a function of `r`, `z
 the controls `ζ` and `ζ²` tie and `H_F(z, ζ) = H_F(z, ζ²) = (r² + r + 1) P(r) /
 (9 (r + 1)² (1 + r³ + r⁶))`, which vanishes exactly at the roots of `P`; and
 `H_F(z, 1) = H_F(z, ζ) + (3/2) z₃ < 0`. -/
-theorem l4st_hamMax_qOutCart : hamMax qOutCart = 0 := by
+theorem hamMax_qOutCart : hamMax qOutCart = 0 := by
   obtain ⟨hr6, hs0, hs, hP⟩ := l4g_rs_facts
   have hH := l4g_ham_eq (by linarith) hs0 hs hP
   have hz := l4g_qz_neg hr6.le
@@ -569,7 +538,7 @@ theorem l4st_hamMax_qOutCart : hamMax qOutCart = 0 := by
       Matrix.head_cons, Matrix.tail_cons]
     rw [hI, l4g_RR_mk]
     ring
-  rw [hamMax, hv, hv, hv, l4g_ζ_sq_mk, l4g_ζ_mk, l4g_one_mk, l4g_RR_mk, l4g_RR_mk, l4g_RR_mk]
+  rw [hamMax, hv, hv, hv, ζ_sq_eq_mk, ζ_eq_mk, l4g_one_mk, l4g_RR_mk, l4g_RR_mk, l4g_RR_mk]
   have e2 : l4g_qy rScale + l4g_qb rScale √3 * l4g_qx rScale √3 +
       (-1 / 2 * l4g_qz rScale + √3 / 2 * 0) = 0 := by linear_combination hH
   have e3 : l4g_qy rScale + l4g_qb rScale √3 * l4g_qx rScale √3 +
@@ -580,64 +549,64 @@ theorem l4st_hamMax_qOutCart : hamMax qOutCart = 0 := by
 /-- **The inward spiral** (TeX 11381–11383): `F(τ qOutCart) = ζ² · (r⁻¹ z₁, r⁻² z₂, r⁻³ z₃)` with
 `r = r_scale`. Proof route: `qOutCart` is a genuine switching point (its most recent control is
 `ζ²`, the conjugate of the first control `ζ` of `τ(qOutCart)`, Lemma 13.2.5), so
-`F(τ F(qOutCart)) = τ(qOutCart)` (`l4st_poincare_tau_poincare`); with
+`F(τ F(qOutCart)) = τ(qOutCart)` (`poincare_tau_poincare`); with
 `τ F(qOutCart) = ζ · (r_s-scaling)(τ qOutCart)` and the equivariance of `F`
-(`l4st_poincare_smul`, `l4st_poincare_scale`). -/
-theorem l4st_poincare_tau_qOutCart :
+(`poincare_smul`, `poincare_scale`). -/
+theorem poincare_tau_qOutCart :
     poincare (tau qOutCart) = ζ ^ 2 • scale rScale⁻¹ (tau qOutCart) := by
-  have hr : 0 < rScale := by linarith [l4st_rScale_spec.1]
-  have hτ := l4g_tau_qOutCart_ne_zero
+  have hr : 0 < rScale := by linarith [rScale_spec.1]
+  have hτ := tau_qOutCart_ne_zero
   have hsτ : scale rScale (tau qOutCart) ≠ 0 :=
     l4g_ne_zero_of_re (by
       rw [l4g_qOutCart_mk]
       simpa [scale, tau] using hr.ne')
-  have h1 := l4st_poincare_tau_poincare l4g_qOutCart_ne_zero
+  have h1 := poincare_tau_poincare qOutCart_ne_zero
     (by rw [l4st_firstControl_qOutCart]; exact l4g_not_mostRecent)
-  rw [l4st_poincare_qOutCart, l4g_tau_smul_scale, l4g_conj_ζ_sq,
-    (l4st_poincare_smul l4g_ζ_mem hsτ).2.2, (l4st_poincare_scale hr hτ).2.2] at h1
+  rw [poincare_qOutCart, l4g_tau_smul_scale, conj_ζ_sq,
+    (poincare_smul ζ_mem_VT hsτ).2.2, (poincare_scale hr hτ).2.2] at h1
   calc poincare (tau qOutCart)
       = ζ ^ 2 • scale rScale⁻¹ (ζ • scale rScale (poincare (tau qOutCart))) := by
-        rw [l4g_smul_scale_smul_scale, ← pow_succ, l4st_ζ_pow_three, inv_mul_cancel₀ hr.ne',
-          one_smul, l4g_scale_one]
+        rw [l4g_smul_scale_smul_scale, ← pow_succ, ζ_pow_three, inv_mul_cancel₀ hr.ne',
+          one_smul, scale_one]
     _ = ζ ^ 2 • scale rScale⁻¹ (tau qOutCart) := by rw [h1]
 
 /-- `τ(q_out) = q_in` in `Ξ_𝒲/V_T` (TeX 11302–11303). -/
-theorem l4st_tauQuot_qOut : tauQuot qOut = qIn := by
+theorem tauQuot_qOut : tauQuot qOut = qIn := by
   unfold tauQuot qOut qIn
   rw [Quotient.map'_mk'']
   congr 1
-  exact Subtype.ext (l4g_tau_ang qOutCart)
+  exact Subtype.ext (tau_ang qOutCart)
 
 /-- `q_out` and `q_in` lie in `Ξ_{𝒲,0}/V_T`: the Hamiltonian vanishes there
-(`l4st_hamMax_qOutCart`, scaling and `H_F⁺(τ z) = H_F⁺(z)`). -/
-theorem l4st_hamMaxQuot_qOut_qIn : hamMaxQuot qOut = 0 ∧ hamMaxQuot qIn = 0 := by
+(`hamMax_qOutCart`, scaling and `H_F⁺(τ z) = H_F⁺(z)`). -/
+theorem hamMaxQuot_qOut_qIn : hamMaxQuot qOut = 0 ∧ hamMaxQuot qIn = 0 := by
   have hang : ∀ z : Fin 3 → ℂ, z ≠ 0 → hamMax (ang z) = (weightedNorm z)⁻¹ ^ 3 * hamMax z := by
     intro z hz
-    have := (l4st_hamMax_virial_tau l4g_one_mem (inv_pos.2 (l4st_weightedNorm_pos hz)) z).1
+    have := (hamMax_smul_scale_and_tau one_mem_VT (inv_pos.2 (weightedNorm_pos hz)) z).1
     rwa [one_smul] at this
   constructor
   · change hamMax (ang qOutCart) = 0
-    rw [hang _ l4g_qOutCart_ne_zero, l4st_hamMax_qOutCart, mul_zero]
+    rw [hang _ qOutCart_ne_zero, hamMax_qOutCart, mul_zero]
   · change hamMax (ang (tau qOutCart)) = 0
-    rw [hang _ l4g_tau_qOutCart_ne_zero, (l4st_hamMax_virial_tau l4g_one_mem one_pos qOutCart).2,
-      l4st_hamMax_qOutCart, mul_zero]
+    rw [hang _ tau_qOutCart_ne_zero, (hamMax_smul_scale_and_tau one_mem_VT one_pos qOutCart).2,
+      hamMax_qOutCart, mul_zero]
 
 /-- `q_out` as a point of `Ξ_{𝒲,0}/V_T`. -/
-noncomputable def qOut0 : XiW0Quot := ⟨qOut, l4st_hamMaxQuot_qOut_qIn.1⟩
+noncomputable def qOut0 : XiW0Quot := ⟨qOut, hamMaxQuot_qOut_qIn.1⟩
 
 /-- `q_in` as a point of `Ξ_{𝒲,0}/V_T`. -/
-noncomputable def qIn0 : XiW0Quot := ⟨qIn, l4st_hamMaxQuot_qOut_qIn.2⟩
+noncomputable def qIn0 : XiW0Quot := ⟨qIn, hamMaxQuot_qOut_qIn.2⟩
 
 /-- `7.4 < t_sw < 7.41` for (13.5.1) (the book's `t_sw ≈ 7.4`, TeX 11344). The coarse enclosure
 `6.27 < r_scale < 6.28` does not suffice (`t_sw(6.27) ≈ 7.3988`, `t_sw(6.28) ≈ 7.4101`); the proof
-uses `l4st_rScale_fine_bounds` and `1.732 < √3 < 1.7321`. -/
-theorem l4st_firstSwitchTime_qOutCart_bounds :
+uses `rScale_fine_bounds` and `1.732 < √3 < 1.7321`. -/
+theorem firstSwitchTime_qOutCart_bounds :
     7.4 < firstSwitchTime qOutCart ∧ firstSwitchTime qOutCart < 7.41 := by
-  obtain ⟨hlo, hhi⟩ := l4st_rScale_fine_bounds
+  obtain ⟨hlo, hhi⟩ := rScale_fine_bounds
   have hs1 : √3 < 1.7321 := (Real.sqrt_lt' (by norm_num)).2 (by norm_num)
   have hs2 : 1.732 < √3 := (Real.lt_sqrt (by norm_num)).2 (by norm_num)
   have hden : 0 < √3 * (rScale + 1) := by positivity
-  rw [l4st_firstSwitchTime_qOutCart, lt_div_iff₀ hden, div_lt_iff₀ hden]
+  rw [firstSwitchTime_qOutCart, lt_div_iff₀ hden, div_lt_iff₀ hden]
   constructor
   · have : √3 * (rScale + 1) < 1.7321 * (rScale + 1) :=
       mul_lt_mul_of_pos_right hs1 (by linarith)
@@ -662,7 +631,7 @@ private lemma l4g_qFix_switching (t : ℝ) :
     RR (ζ ^ 2) (flow t qFix (ζ ^ 2) 2) - RR ζ (flow t qFix (ζ ^ 2) 2) =
       √3 * t * (6 - t ^ 2) / 12 := by
   have hs : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
-  rw [l4g_qFix_mk, l4g_ζ_sq_mk, l4g_flow_mk, l4g_ζ_mk, l4g_one_mk]
+  rw [l4g_qFix_mk, ζ_sq_eq_mk, l4g_flow_mk, ζ_eq_mk, l4g_one_mk]
   simp only [Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons]
   rw [l4g_RR_mk, l4g_RR_mk, l4g_RR_mk]
   constructor
@@ -677,7 +646,7 @@ private lemma l4g_qFix_max {t : ℝ} (ht0 : 0 ≤ t) (hts : t ≤ √3) :
   obtain ⟨h1, h2⟩ := l4g_qFix_switching t
   intro v hv
   rw [l4g_ham_le_iff]
-  rcases l4g_mem_VT hv with rfl | rfl | rfl
+  rcases mem_VT.1 hv with rfl | rfl | rfl
   · have hq : t ^ 2 - 2 * √3 * t - 3 < 0 := by nlinarith
     have : 0 ≤ √3 / 12 * (t - √3) * (t ^ 2 - 2 * √3 * t - 3) :=
       mul_nonneg_of_nonpos_of_nonpos
@@ -703,14 +672,14 @@ private lemma l4g_qFix_beaten {t : ℝ} (ht1 : √3 < t) (ht2 : t < √3 + 1) :
   linarith
 
 private lemma l4g_firstControl_qFix : TriFuller.firstControl TriFuller.qFix = TriFuller.ζ ^ 2 :=
-  (l4st_firstControl_eq_iff (l4g_ne_zero_of_re (by rw [l4g_qFix_mk]; norm_num))).2
-    ⟨l4g_ζ_sq_mem, √3, by positivity, fun _ ht v hv ↦ l4g_qFix_max ht.1 ht.2 v hv⟩
+  (firstControl_eq_iff (l4g_ne_zero_of_re (by rw [l4g_qFix_mk]; norm_num))).2
+    ⟨ζ_sq_mem_VT, √3, by positivity, fun _ ht v hv ↦ l4g_qFix_max ht.1 ht.2 v hv⟩
 
 private lemma l4g_firstSwitchTime_qFix : TriFuller.firstSwitchTime TriFuller.qFix = √3 := by
   have hs0 : 0 < √3 := by positivity
   rw [firstSwitchTime, l4g_firstControl_qFix]
   apply csInf_eq_of_forall_ge_of_forall_gt_exists_lt
-  · exact ⟨√3 + 1 / 2, by positivity, 1, l4g_one_mem, l4g_qFix_beaten (by linarith) (by linarith)⟩
+  · exact ⟨√3 + 1 / 2, by positivity, 1, one_mem_VT, l4g_qFix_beaten (by linarith) (by linarith)⟩
   · rintro a ⟨ha0, v, hv, hlt⟩
     by_contra has
     exact absurd (l4g_qFix_max ha0.le (not_le.1 has).le v hv) (not_le.2 hlt)
@@ -718,13 +687,13 @@ private lemma l4g_firstSwitchTime_qFix : TriFuller.firstSwitchTime TriFuller.qFi
     have hm : 0 < min (w - √3) 1 := lt_min (by linarith) one_pos
     have hm1 : min (w - √3) 1 ≤ w - √3 := min_le_left _ _
     have hm2 : min (w - √3) 1 ≤ 1 := min_le_right _ _
-    exact ⟨√3 + min (w - √3) 1 / 2, ⟨by positivity, 1, l4g_one_mem,
+    exact ⟨√3 + min (w - √3) 1 / 2, ⟨by positivity, 1, one_mem_VT,
       l4g_qFix_beaten (by linarith) (by linarith)⟩, by linarith⟩
 
 private lemma l4g_poincare_qFix :
     TriFuller.poincare TriFuller.qFix = TriFuller.ζ • TriFuller.qFix := by
   have hs : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
-  rw [poincare, l4g_firstSwitchTime_qFix, l4g_firstControl_qFix, l4g_ζ_sq_mk, l4g_ζ_mk,
+  rw [poincare, l4g_firstSwitchTime_qFix, l4g_firstControl_qFix, ζ_sq_eq_mk, ζ_eq_mk,
     l4g_qFix_mk, l4g_flow_mk, l4g_smul_mk]
   refine congrArg₂ Matrix.vecCons (congrArg₂ Complex.mk ?_ ?_)
     (congrArg₂ Matrix.vecCons (congrArg₂ Complex.mk ?_ ?_)
@@ -746,16 +715,16 @@ private lemma l4g_hamMax_qFix : TriFuller.hamMax TriFuller.qFix = 3 / 4 := by
       Matrix.head_cons, Matrix.tail_cons]
     rw [hI, l4g_RR_mk]
     ring
-  rw [hamMax, hv, hv, hv, l4g_ζ_sq_mk, l4g_ζ_mk, l4g_one_mk, l4g_RR_mk, l4g_RR_mk, l4g_RR_mk]
+  rw [hamMax, hv, hv, hv, ζ_sq_eq_mk, ζ_eq_mk, l4g_one_mk, l4g_RR_mk, l4g_RR_mk, l4g_RR_mk]
   norm_num
 
 end TriFuller
 
-/-- **Remark 13.5.4** (unlabelled, TeX 11402–11427), its verifiable part. The fixed point `q_fix`
-corresponding to `(r, ζ₁) = (1, ζ)` in the proof of Lemma 13.5.2 has the form
-`q_fix = (1, -i/2, -1/2) mod 𝒢`: from `q_fix` the first control is `ζ²`, the first switching time
-is `√3`, and `F(q_fix) = ζ · q_fix`; and "the Fuller-system Hamiltonian is not zero at `q_fix`":
-`H_F⁺(q_fix) = 3/4`.
+/-- **Remark 13.5.4** (`rem:qfix`, label of this formalization; unlabelled, TeX 11402–11427), its
+verifiable part. The fixed point `q_fix` corresponding to `(r, ζ₁) = (1, ζ)` in the proof of Lemma
+13.5.2 has the form `q_fix = (1, -i/2, -1/2) mod 𝒢`: from `q_fix` the first control is `ζ²`, the
+first switching time is `√3`, and `F(q_fix) = ζ · q_fix`; and "the Fuller-system Hamiltonian is
+not zero at `q_fix`": `H_F⁺(q_fix) = 3/4`.
 
 Not formalized: the remark's interpretation of `q_fix` as the limit, after the procedure of §14.2,
 of the one-parameter family of Pontryagin extremals of §7.5 (the smoothed `6k+2`-gons) as

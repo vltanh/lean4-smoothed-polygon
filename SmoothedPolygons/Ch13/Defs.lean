@@ -56,9 +56,9 @@ without choosing roots of polynomials:
 
 * `IsFirstControl z⁰ u`: `u ∈ V_T` and the constant control `u` satisfies the maximum condition
   along its own trajectory `t ↦ flow t z⁰ u` on some `[0, ε]`, `ε > 0`. It is unique
-  (`l4st_isFirstControl_unique`, `SmoothedPolygons/Ch13/FirstControl.lean`), exists for
+  (`IsFirstControl.unique`, `SmoothedPolygons/Ch13/FirstControl.lean`), exists for
   `z⁰ ≠ 0` (Lemma 13.2.6), and every extremal from `z⁰` with a measurable control follows it up to
-  the first switching time (`l4st_eq_flow_of_maxCondition`, `SmoothedPolygons/Ch13/Extremals.lean`);
+  the first switching time (`eq_flow_of_maxCondition`, `SmoothedPolygons/Ch13/Extremals.lean`);
 * `firstControl z⁰`: the first control when it exists (junk value `1` otherwise, only at `z⁰ = 0`);
 * `firstSwitchTime z⁰ = inf {t > 0 | the control firstControl z⁰ is not maximizing at
   flow t z⁰ (firstControl z⁰)}`: the time at which the first control stops being optimal. It is
@@ -77,7 +77,7 @@ obtained by continuous extension from the interiors, and they are not restrictio
   (TeX 12413–12422), double roots included, although at a double root the control stays optimal
   (a tangency) and `poincare` does not switch there;
 * the identity `F⁻¹ = τ F τ` is used on closed cells (TeX 12324–12328); for `poincare` it fails
-  where the first control equals the most recent one (`l4st_poincare_tau_poincare` assumes a genuine
+  where the first control equals the most recent one (`poincare_tau_poincare` assumes a genuine
   switching point);
 * on parts of the faces of the big cells the switching time tends to `0` (TeX 12199–12202) and the
   cell maps take the limit there, whereas `firstSwitchTime` is positive at every `z⁰ ≠ 0`.
@@ -95,6 +95,42 @@ open Complex MeasureTheory Set
 /-- The sesquilinear form `RR(z₁, z₂) := Re(z̄₁ z₂)` of Chapter 10 (TeX 8456), the real inner
 product of `ℂ = ℝ²`. -/
 def RR (a b : ℂ) : ℝ := (starRingEnd ℂ a * b).re
+
+/-- `RR(a, b) = Re a Re b + Im a Im b`. -/
+theorem RR_eq_re_mul_add_im_mul (a b : ℂ) : RR a b = a.re * b.re + a.im * b.im := by
+  simp only [RR, Complex.mul_re, Complex.conj_re, Complex.conj_im]
+  ring
+
+/-- `RR` is symmetric. -/
+theorem RR_comm (a b : ℂ) : RR a b = RR b a := by
+  rw [RR_eq_re_mul_add_im_mul, RR_eq_re_mul_add_im_mul]; ring
+
+/-- `RR` is additive in its first argument. -/
+theorem RR_add_left (a b c : ℂ) : RR (a + b) c = RR a c + RR b c := by
+  simp only [RR_eq_re_mul_add_im_mul, Complex.add_re, Complex.add_im]; ring
+
+/-- `RR` is additive in its second argument. -/
+theorem RR_add_right (a b c : ℂ) : RR a (b + c) = RR a b + RR a c := by
+  simp only [RR_eq_re_mul_add_im_mul, Complex.add_re, Complex.add_im]; ring
+
+/-- `RR` is `ℝ`-homogeneous in its first argument. -/
+theorem RR_ofReal_mul_left (r : ℝ) (a c : ℂ) : RR (r * a) c = r * RR a c := by
+  simp only [RR_eq_re_mul_add_im_mul, Complex.re_ofReal_mul, Complex.im_ofReal_mul]; ring
+
+/-- `RR` is `ℝ`-homogeneous in its second argument. -/
+theorem RR_ofReal_mul_right (r : ℝ) (a c : ℂ) : RR a (r * c) = r * RR a c := by
+  simp only [RR_eq_re_mul_add_im_mul, Complex.re_ofReal_mul, Complex.im_ofReal_mul]; ring
+
+/-- The derivative of `RR(f, g)` along two curves in `ℂ`. -/
+theorem hasDerivAt_RR {f g : ℝ → ℂ} {f' g' : ℂ} {t : ℝ} (hf : HasDerivAt f f' t)
+    (hg : HasDerivAt g g' t) :
+    HasDerivAt (fun s ↦ RR (f s) (g s)) (RR f' (g t) + RR (f t) g') t := by
+  have h := Complex.reCLM.hasFDerivAt.comp_hasDerivAt t (hf.star.fun_mul hg)
+  have e : (fun s ↦ RR (f s) (g s)) = Complex.reCLM ∘ fun x ↦ star (f x) * g x := by
+    funext s; simp [RR]
+  rw [e]
+  convert h using 1
+  simp [RR]
 
 namespace TriFuller
 
@@ -116,7 +152,7 @@ noncomputable def flow (t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) : Fin 3 → ℂ :
     z 2 + z 1 * t + z 0 * t ^ 2 / 2 - I * t ^ 3 * u / 6]
 
 /-- The Hamiltonian of the Fuller system, `H_F(z, u) = RR(z₁, z₂ i) + RR(u, z₃)` (the first form
-of (13.2.3)–(13.2.4), TeX 10718–10721; the second form is `l4st_ham_eq_half_sum`). -/
+of (13.2.3)–(13.2.4), TeX 10718–10721; the second form is `ham_eq_half_sum`). -/
 noncomputable def ham (z : Fin 3 → ℂ) (u : ℂ) : ℝ := RR (z 0) (z 1 * I) + RR u (z 2)
 
 /-- The maximized Hamiltonian `H_F⁺(z) = max_{u ∈ V_T} H_F(z, u)` (TeX 10732–10737). -/
@@ -234,7 +270,7 @@ noncomputable def mostRecentSwitchTime (z : Fin 3 → ℂ) : ℝ :=
 /-! ### Basic facts -/
 
 /-- `ζ = -1/2 + (√3/2) i`. -/
-theorem l4st_ζ_eq : ζ = ⟨-1 / 2, √3 / 2⟩ := by
+theorem ζ_eq_mk : ζ = ⟨-1 / 2, √3 / 2⟩ := by
   have h : (2 * Real.pi * Complex.I / 3 : ℂ) = ((2 * Real.pi / 3 : ℝ) : ℂ) * I := by
     push_cast; ring
   have e : 2 * Real.pi / 3 = Real.pi - Real.pi / 3 := by ring
@@ -247,38 +283,73 @@ theorem l4st_ζ_eq : ζ = ⟨-1 / 2, √3 / 2⟩ := by
   · rw [ζ, h, Complex.exp_ofReal_mul_I_im, hs]
 
 /-- `ζ³ = 1`. -/
-theorem l4st_ζ_pow_three : ζ ^ 3 = 1 := by
+theorem ζ_pow_three : ζ ^ 3 = 1 := by
   rw [ζ, ← Complex.exp_nat_mul]
   convert Complex.exp_two_pi_mul_I using 2
   push_cast; ring
 
 private lemma l4b_sqrt3_mul : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
 
-private lemma l4b_norm_ζ : ‖ζ‖ = 1 := by
+theorem ζ_re : ζ.re = -1 / 2 := by rw [ζ_eq_mk]
+
+theorem ζ_im : ζ.im = √3 / 2 := by rw [ζ_eq_mk]
+
+theorem ζ_sq_re : (ζ ^ 2).re = -1 / 2 := by
+  rw [pow_two, Complex.mul_re, ζ_re, ζ_im]; nlinarith [l4b_sqrt3_mul]
+
+theorem ζ_sq_im : (ζ ^ 2).im = -(√3 / 2) := by
+  rw [pow_two, Complex.mul_im, ζ_re, ζ_im]; ring
+
+/-- `ζ² = -1/2 - (√3/2) i`. -/
+theorem ζ_sq_eq_mk : ζ ^ 2 = ⟨-1 / 2, -(√3 / 2)⟩ := Complex.ext ζ_sq_re ζ_sq_im
+
+theorem norm_ζ : ‖ζ‖ = 1 := by
   rw [ζ, show (2 * Real.pi * Complex.I / 3 : ℂ) = ((2 * Real.pi / 3 : ℝ) : ℂ) * I by
     push_cast; ring]
   exact Complex.norm_exp_ofReal_mul_I _
 
-private lemma l4b_conj_ζ : starRingEnd ℂ ζ = ζ ^ 2 := by
-  rw [l4st_ζ_eq]
-  apply Complex.ext <;> simp [sq] <;> nlinarith [l4b_sqrt3_mul]
+/-- `ζ̄ = ζ²`. -/
+theorem conj_ζ : starRingEnd ℂ ζ = ζ ^ 2 := by
+  rw [ζ_sq_eq_mk, ζ_eq_mk]
+  apply Complex.ext <;> simp
 
-private lemma l4b_ζ_pow_four : ζ ^ 4 = ζ := by
-  rw [pow_succ, l4st_ζ_pow_three, one_mul]
+/-- `conj ζ² = ζ`. -/
+theorem conj_ζ_sq : starRingEnd ℂ (ζ ^ 2) = ζ := by
+  rw [ζ_sq_eq_mk, ζ_eq_mk]
+  apply Complex.ext <;> simp
+
+theorem ζ_ne_one : ζ ≠ 1 := by
+  intro h
+  have := congrArg Complex.re h
+  rw [ζ_re, Complex.one_re] at this
+  norm_num at this
+
+theorem mem_VT {v : ℂ} : v ∈ VT ↔ v = 1 ∨ v = ζ ∨ v = ζ ^ 2 := by
+  simp only [VT, Set.mem_insert_iff, Set.mem_singleton_iff]
+
+theorem one_mem_VT : (1 : ℂ) ∈ VT := mem_VT.2 (Or.inl rfl)
+
+theorem ζ_mem_VT : ζ ∈ VT := mem_VT.2 (Or.inr (Or.inl rfl))
+
+theorem ζ_sq_mem_VT : ζ ^ 2 ∈ VT := mem_VT.2 (Or.inr (Or.inr rfl))
+
+theorem finite_VT : VT.Finite := ((Set.finite_singleton _).insert _).insert _
+
+theorem VT_subset_UT : VT ⊆ UT := subset_convexHull ℝ VT
 
 /-- The vertices of `U_T` lie on the unit circle, and `V_T` is closed under products and
 conjugation. -/
-theorem l4st_VT_props {u v : ℂ} (hu : u ∈ VT) (hv : v ∈ VT) :
+private lemma l4n_VT_props {u v : ℂ} (hu : u ∈ VT) (hv : v ∈ VT) :
     ‖u‖ = 1 ∧ u * v ∈ VT ∧ starRingEnd ℂ u ∈ VT ∧ u⁻¹ = starRingEnd ℂ u := by
   have hn : ∀ w ∈ VT, ‖w‖ = 1 := by
     intro w hw
     rcases hw with rfl | rfl | rfl
     · simp
-    · exact l4b_norm_ζ
-    · simp [l4b_norm_ζ]
+    · exact norm_ζ
+    · simp [norm_ζ]
   have hpow : ∀ n : ℕ, ζ ^ n ∈ VT := by
     intro n
-    rw [← Nat.mod_add_div n 3, pow_add, pow_mul, l4st_ζ_pow_three, one_pow, mul_one]
+    rw [← Nat.mod_add_div n 3, pow_add, pow_mul, ζ_pow_three, one_pow, mul_one]
     have : n % 3 < 3 := Nat.mod_lt _ (by norm_num)
     interval_cases n % 3 <;> simp [VT]
   have hex : ∀ w ∈ VT, ∃ n : ℕ, w = ζ ^ n := by
@@ -291,13 +362,57 @@ theorem l4st_VT_props {u v : ℂ} (hu : u ∈ VT) (hv : v ∈ VT) :
   obtain ⟨b, rfl⟩ := hex v hv
   refine ⟨hn _ hu, ?_, ?_, ?_⟩
   · rw [← pow_add]; exact hpow _
-  · rw [map_pow, l4b_conj_ζ, ← pow_mul]; exact hpow _
+  · rw [map_pow, conj_ζ, ← pow_mul]; exact hpow _
   · rw [Complex.inv_def, Complex.normSq_eq_norm_sq, hn _ hu]
     simp
 
+/-- The vertices of `U_T` lie on the unit circle. -/
+theorem norm_eq_one_of_mem_VT {u : ℂ} (hu : u ∈ VT) : ‖u‖ = 1 := (l4n_VT_props hu hu).1
+
+/-- `V_T` is closed under products. -/
+theorem mul_mem_VT {u v : ℂ} (hu : u ∈ VT) (hv : v ∈ VT) : u * v ∈ VT := (l4n_VT_props hu hv).2.1
+
+/-- `V_T` is closed under conjugation. -/
+theorem conj_mem_VT {u : ℂ} (hu : u ∈ VT) : starRingEnd ℂ u ∈ VT := (l4n_VT_props hu hu).2.2.1
+
+/-- `u⁻¹ = ū` on `V_T`. -/
+theorem inv_eq_conj_of_mem_VT {u : ℂ} (hu : u ∈ VT) : u⁻¹ = starRingEnd ℂ u :=
+  (l4n_VT_props hu hu).2.2.2
+
+/-- A point of the walls with negative real part lies on `𝒲₀ = ℝ_{≤0}`: it is real. -/
+theorem im_eq_zero_of_mem_walls {w : ℂ} (hw : w ∈ walls) (hre : w.re < 0) : w.im = 0 := by
+  rcases hw with (⟨s, hs, rfl⟩ | ⟨s, hs, rfl⟩) | ⟨s, hs, rfl⟩
+  · simp
+  · rw [pow_one, Complex.re_ofReal_mul, ζ_re] at hre
+    linarith
+  · rw [Complex.re_ofReal_mul, ζ_sq_re] at hre
+    linarith
+
+/-- `H_F(z, v) ≤ H_F⁺(z)` for `v ∈ V_T`. -/
+theorem ham_le_hamMax (w : Fin 3 → ℂ) {v : ℂ} (hv : v ∈ VT) : ham w v ≤ hamMax w := by
+  rcases hv with rfl | rfl | rfl
+  · exact le_max_left _ _
+  · exact (le_max_left _ _).trans (le_max_right _ _)
+  · exact (le_max_right _ _).trans (le_max_right _ _)
+
+/-- The maximized Hamiltonian is the Hamiltonian at a maximizing control of `V_T`. -/
+theorem hamMax_eq_of_forall_le {w : Fin 3 → ℂ} {v : ℂ} (hv : v ∈ VT)
+    (h : ∀ x ∈ VT, ham w x ≤ ham w v) : hamMax w = ham w v :=
+  le_antisymm (max_le (h 1 one_mem_VT) (max_le (h ζ ζ_mem_VT) (h _ ζ_sq_mem_VT)))
+    (ham_le_hamMax w hv)
+
+theorem scale_one (z : Fin 3 → ℂ) : scale 1 z = z := by
+  funext i; fin_cases i <;> simp [scale]
+
+theorem scale_scale (a b : ℝ) (z : Fin 3 → ℂ) : scale a (scale b z) = scale (a * b) z := by
+  funext i; fin_cases i <;> simp [scale] <;> ring
+
+theorem scale_smul (a : ℝ) (v : ℂ) (z : Fin 3 → ℂ) : scale a (v • z) = v • scale a z := by
+  funext i; fin_cases i <;> simp [scale] <;> ring
+
 /-- The two forms of the Fuller Hamiltonian (13.2.3)–(13.2.4) (TeX 10718–10721):
 `H_F(z, u) = ½ Σ_{j=0}^{3} (-1)^j RR(z_{3-j}, i z_j)` with `z₀ = -iu`. -/
-theorem l4st_ham_eq_half_sum (z : Fin 3 → ℂ) (u : ℂ) :
+theorem ham_eq_half_sum (z : Fin 3 → ℂ) (u : ℂ) :
     ham z u = (1 / 2) * ∑ j : Fin 4, (-1) ^ (j : ℕ) *
       RR (![-I * u, z 0, z 1, z 2] (Fin.rev j)) (I * ![-I * u, z 0, z 1, z 2] j) := by
   simp only [ham, RR, Fin.sum_univ_four]
@@ -305,12 +420,12 @@ theorem l4st_ham_eq_half_sum (z : Fin 3 → ℂ) (u : ℂ) :
   ring
 
 /-- `z(0, z⁰, u) = z⁰`. -/
-theorem l4st_flow_zero (z : Fin 3 → ℂ) (u : ℂ) : flow 0 z u = z := by
+theorem flow_zero (z : Fin 3 → ℂ) (u : ℂ) : flow 0 z u = z := by
   funext j
   fin_cases j <;> simp [flow]
 
 /-- The flow property `z(s + t, z⁰, u) = z(t, z(s, z⁰, u), u)`. -/
-theorem l4st_flow_add (s t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
+theorem flow_add (s t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
     flow (s + t) z u = flow t (flow s z u) u := by
   funext j
   fin_cases j <;> simp [flow] <;> ring
@@ -328,7 +443,7 @@ private lemma l4b_hasDerivAt_cubic (a b c d : ℂ) (t : ℝ) :
 
 /-- The polynomials (13.2.2) solve the Fuller system classically:
 `d/dt z(t, z⁰, u) = (-iu, z₁(t), z₂(t))`. -/
-theorem l4st_hasDerivAt_flow (t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
+theorem hasDerivAt_flow (t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
     HasDerivAt (fun s ↦ flow s z u) ![-I * u, flow t z u 0, flow t z u 1] t := by
   rw [hasDerivAt_pi]
   intro j
@@ -350,7 +465,7 @@ open TriFuller
 /-- The derivative of `t ↦ z(t - a, w, u)`. -/
 private lemma l4b_hasDerivAt_flow_sub (a s : ℝ) (w : Fin 3 → ℂ) (u : ℂ) :
     HasDerivAt (fun x ↦ flow (x - a) w u) ![-I * u, flow (s - a) w u 0, flow (s - a) w u 1] s :=
-  HasDerivAt.comp_sub_const s a (l4st_hasDerivAt_flow (s - a) w u)
+  HasDerivAt.comp_sub_const s a (hasDerivAt_flow (s - a) w u)
 
 /-- Integrating the Fuller system along `t ↦ z(t - a, w, u)` from `a` to `b`. -/
 private lemma l4b_integral_flow (a b : ℝ) (w : Fin 3 → ℂ) (u : ℂ) (j : Fin 3) :
@@ -367,13 +482,13 @@ private lemma l4b_integral_flow (a b : ℝ) (w : Fin 3 → ℂ) (u : ℂ) (j : F
     · exact (continuous_apply 0).comp hcont
     · exact (continuous_apply 1).comp hcont
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ ↦ hd s) (hc.intervalIntegrable _ _)]
-  simp [l4st_flow_zero]
+  simp [flow_zero]
 
 /-- **Equation `eqn:z1z2z3` (13.2.2)** (TeX 10696–10705): "When `u ∈ ℂ` is constant, we can solve
 the Fuller system ODEs, to obtain (13.2.2)". For a constant control `u ∈ U`, a curve is a
 trajectory (13.2.1) on `[t₁, t₂]` if and only if it is `t ↦ z(t - t₁, z(t₁), u)`.
 
-Proof: the polynomials satisfy the integral equations (`l4st_hasDerivAt_flow` and the fundamental
+Proof: the polynomials satisfy the integral equations (`hasDerivAt_flow` and the fundamental
 theorem of calculus); conversely, integrating `z₁' = -iu`, then `z₂' = z₁`, then `z₃' = z₂` from
 `t₁` gives the polynomials. -/
 theorem eqn_z1z2z3 {U : Set ℂ} {u : ℂ} (hu : u ∈ U) {t₁ t₂ : ℝ} (h : t₁ < t₂)
@@ -419,33 +534,22 @@ theorem eqn_z1z2z3 {U : Set ℂ} {u : ℂ} (hu : u ∈ U) {t₁ t₂ : ℝ} (h :
 
 namespace TriFuller
 
-/-- The derivative of `RR(f, g)` along two curves in `ℂ`. -/
-private lemma l4b_hasDerivAt_RR {f g : ℝ → ℂ} {f' g' : ℂ} {t : ℝ} (hf : HasDerivAt f f' t)
-    (hg : HasDerivAt g g' t) :
-    HasDerivAt (fun s ↦ RR (f s) (g s)) (RR f' (g t) + RR (f t) g') t := by
-  have h := Complex.reCLM.hasFDerivAt.comp_hasDerivAt t (hf.star.fun_mul hg)
-  have e : (fun s ↦ RR (f s) (g s)) = Complex.reCLM ∘ fun x ↦ star (f x) * g x := by
-    funext s; simp [RR]
-  rw [e]
-  convert h using 1
-  simp [RR]
-
 /-- "`H_F` is constant along every segment with constant control" (TeX 10740–10741):
 `H_F(z(t, z⁰, u), u) = H_F(z⁰, u)` for every `u ∈ ℂ`. Proof:
 `d/dt H_F = RR(-iu, i z₂) + RR(z₁, i z₁) + RR(u, z₂) = 0`. -/
-theorem l4st_ham_flow (t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) : ham (flow t z u) u = ham z u := by
+theorem ham_flow (t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) : ham (flow t z u) u = ham z u := by
   -- `d/dt H_F(z(t), u) = RR(-iu, i z₂) + RR(z₁, i z₁) + RR(u, z₂) = 0`
   have hd : ∀ s, HasDerivAt (fun s ↦ ham (flow s z u) u) 0 s := by
     intro s
-    have hF := hasDerivAt_pi.1 (l4st_hasDerivAt_flow s z u)
-    have h := (l4b_hasDerivAt_RR (hF 0) ((hF 1).mul_const I)).fun_add
-      (l4b_hasDerivAt_RR (hasDerivAt_const s u) (hF 2))
+    have hF := hasDerivAt_pi.1 (hasDerivAt_flow s z u)
+    have h := (hasDerivAt_RR (hF 0) ((hF 1).mul_const I)).fun_add
+      (hasDerivAt_RR (hasDerivAt_const s u) (hF 2))
     change HasDerivAt (fun s ↦ RR (flow s z u 0) (flow s z u 1 * I) + RR u (flow s z u 2)) 0 s
     convert h using 1
     simp [RR, Complex.mul_re, Complex.mul_im]
     ring
   have := is_const_of_deriv_eq_zero (fun s ↦ (hd s).differentiableAt) (fun s ↦ (hd s).deriv) t 0
-  simpa [l4st_flow_zero] using this
+  simpa [flow_zero] using this
 
 end TriFuller
 

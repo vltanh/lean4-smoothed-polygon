@@ -16,23 +16,23 @@ import Mathlib.Analysis.SpecialFunctions.Sqrt
 §13.4 of Hales–Vajjha, *Packings of Smoothed Polygons* ("Blowing up Fuller", TeX 11159–11229):
 
 * the weighted norm `φ(z) = (Σ_{j=1}^{3} |z_j|^{6/j})^{1/6}` (`weightedNorm`) with
-  `φ(r z₁, r² z₂, r³ z₃) = r φ(z)` for `r > 0` (`l4st_weightedNorm_scale`), the weighted sphere
+  `φ(r z₁, r² z₂, r³ z₃) = r φ(z)` for `r > 0` (`weightedNorm_scale`), the weighted sphere
   `Ξ = {φ = 1}` (`Xi`) and the angular projection `z ↦ (z₁/φ, z₂/φ², z₃/φ³)` (`ang`);
 * the identification `ℂ³ ∖ 0 ≅ ℝ_{>0} × Ξ`, `z ↦ (φ(z), ang z)`, with inverse
   `(r, ξ) ↦ (r ξ₁, r² ξ₂, r³ ξ₃)` (`blowup`; "weighted spherical coordinates"), equivariant for the
-  virial group (`l4st_virial_equivariant`);
+  virial group (`weightedNorm_ang_smul_scale`);
 * the Poincaré section `Ξ_𝒲 = {ξ ∈ Ξ | ξ₃ ∈ 𝒲}` with the diagonal action of `V_T` (`XiW`, a
   `SubMulAction` of the group `rootsOfUnity 3 ℂ`, whose elements are the points of `V_T`,
-  `l4st_mem_VT_iff`), and the quotient `Ξ_𝒲/V_T` (`XiWQuot`) with its quotient topology. Under
-  the action the three walls are identified (`l4st_exists_smul_mem_wall_zero`).
+  `mem_VT_iff_exists_rootsOfUnity`), and the quotient `Ξ_𝒲/V_T` (`XiWQuot`) with its quotient
+  topology. Under the action the three walls are identified (`exists_smul_mem_wall_zero`).
 
 **Regularity of the identification (a correction).** The book calls the identification a
 diffeomorphism (TeX 11169–11177). The function `φ⁶ = |z₁|⁶ + |z₂|³ + |z₃|²` is `C²` but not `C³`
 at points with `z₂ = 0` (the term `|z₂|³`), so `Ξ` is a `C²` hypersurface of `ℂ³` and the
 identification is a `C²` diffeomorphism, smooth away from `{z₂ = 0}` (inventory, gap 8). Only the
 one reading is possible, and it is recorded here: the identification is stated as a homeomorphism
-together with the regularity of `φ` (`l4st_contDiffOn_weightedNorm`,
-`l4st_contDiffOn_weightedNorm_of_ne`); the inverse map is polynomial. The book uses the
+together with the regularity of `φ` (`contDiffOn_weightedNorm`,
+`contDiffOn_weightedNorm_infty`); the inverse map is polynomial. The book uses the
 identification as coordinates, and smoothness only near the fixed point `q_out` (Lemma 13.5.5),
 where `z₂ ≠ 0`.
 
@@ -142,12 +142,8 @@ private theorem l4e_isPrimitiveRoot_ζ : IsPrimitiveRoot ζ 3 := by
   have h := Complex.isPrimitiveRoot_exp 3 (by norm_num)
   rwa [Nat.cast_ofNat] at h
 
-private theorem l4e_ζ_pow_three : ζ ^ 3 = 1 := l4e_isPrimitiveRoot_ζ.pow_eq_one
-
-private theorem l4e_norm_ζ : ‖ζ‖ = 1 := l4e_isPrimitiveRoot_ζ.norm'_eq_one (by norm_num)
-
 private theorem l4e_ζ_pow_mod (n : ℕ) : ζ ^ n = ζ ^ (n % 3) := by
-  conv_lhs => rw [← Nat.mod_add_div n 3, pow_add, pow_mul, l4e_ζ_pow_three, one_pow, mul_one]
+  conv_lhs => rw [← Nat.mod_add_div n 3, pow_add, pow_mul, ζ_pow_three, one_pow, mul_one]
 
 /-- `V_T = {ζⁿ | n ∈ ℕ}`. -/
 private theorem l4e_mem_VT_iff_pow {v : ℂ} : v ∈ VT ↔ ∃ n : ℕ, v = ζ ^ n := by
@@ -164,13 +160,9 @@ private theorem l4e_mem_VT_iff_pow {v : ℂ} : v ∈ VT ↔ ∃ n : ℕ, v = ζ 
     · simp [h]
     · simp [h]
 
-private theorem l4e_norm_of_mem_VT {v : ℂ} (hv : v ∈ VT) : ‖v‖ = 1 := by
-  obtain ⟨n, rfl⟩ := l4e_mem_VT_iff_pow.mp hv
-  rw [norm_pow, l4e_norm_ζ, one_pow]
-
 private theorem l4e_pow_three_of_mem_VT {v : ℂ} (hv : v ∈ VT) : v ^ 3 = 1 := by
   obtain ⟨n, rfl⟩ := l4e_mem_VT_iff_pow.mp hv
-  rw [← pow_mul, mul_comm, pow_mul, l4e_ζ_pow_three, one_pow]
+  rw [← pow_mul, mul_comm, pow_mul, ζ_pow_three, one_pow]
 
 /-- `𝒲 = {s ζⁿ | s ≤ 0, n ∈ ℕ}`. -/
 private theorem l4e_mem_walls_iff {w : ℂ} :
@@ -192,17 +184,6 @@ private theorem l4e_mul_mem_walls {v w : ℂ} (hv : v ∈ VT) (hw : w ∈ walls)
   exact l4e_mem_walls_iff.mpr ⟨s, hs, m + n, by ring⟩
 
 /-! ### The virial rescaling -/
-
-private theorem l4e_scale_scale (a b : ℝ) (z : Fin 3 → ℂ) :
-    scale a (scale b z) = scale (a * b) z := by
-  funext i; fin_cases i <;> simp [scale] <;> ring
-
-private theorem l4e_scale_one (z : Fin 3 → ℂ) : scale 1 z = z := by
-  funext i; fin_cases i <;> simp [scale]
-
-private theorem l4e_scale_smul (a : ℝ) (v : ℂ) (z : Fin 3 → ℂ) :
-    scale a (v • z) = v • scale a z := by
-  funext i; fin_cases i <;> simp [scale] <;> ring
 
 /-! ### The weighted norm -/
 
@@ -237,11 +218,12 @@ private theorem l4e_sum_pos {z : Fin 3 → ℂ} (hz : z ≠ 0) :
   funext i; fin_cases i
   exacts [h0, h1, h2]
 
-private theorem l4e_weightedNorm_zero : weightedNorm 0 = 0 := by
+/-- `φ(0) = 0`. -/
+theorem weightedNorm_zero : weightedNorm 0 = 0 := by
   simp [weightedNorm]
 
 /-- `φ(r z₁, r² z₂, r³ z₃) = r φ(z)` for `r > 0` (TeX 11165). -/
-theorem l4st_weightedNorm_scale {r : ℝ} (hr : 0 < r) (z : Fin 3 → ℂ) :
+theorem weightedNorm_scale {r : ℝ} (hr : 0 < r) (z : Fin 3 → ℂ) :
     weightedNorm (scale r z) = r * weightedNorm z := by
   have h : ‖scale r z 0‖ ^ 6 + ‖scale r z 1‖ ^ 3 + ‖scale r z 2‖ ^ 2 =
       r ^ 6 * (‖z 0‖ ^ 6 + ‖z 1‖ ^ 3 + ‖z 2‖ ^ 2) := by
@@ -253,71 +235,92 @@ theorem l4st_weightedNorm_scale {r : ℝ} (hr : 0 < r) (z : Fin 3 → ℂ) :
   rw [show (1 / 6 : ℝ) = ((6 : ℕ) : ℝ)⁻¹ by norm_num, Real.pow_rpow_inv_natCast hr.le (by norm_num)]
 
 /-- `φ` is positive off the singular locus. -/
-theorem l4st_weightedNorm_pos {z : Fin 3 → ℂ} (hz : z ≠ 0) : 0 < weightedNorm z :=
+theorem weightedNorm_pos {z : Fin 3 → ℂ} (hz : z ≠ 0) : 0 < weightedNorm z :=
   Real.rpow_pos_of_pos (l4e_sum_pos hz) _
 
 /-- `φ` is continuous. -/
-theorem l4st_continuous_weightedNorm : Continuous weightedNorm := by
+theorem continuous_weightedNorm : Continuous weightedNorm := by
   have h : Continuous fun z : Fin 3 → ℂ ↦ ‖z 0‖ ^ 6 + ‖z 1‖ ^ 3 + ‖z 2‖ ^ 2 := by fun_prop
   exact h.rpow_const fun _ ↦ Or.inr (by norm_num)
 
-private theorem l4e_continuous_scale : Continuous fun p : ℝ × (Fin 3 → ℂ) ↦ scale p.1 p.2 := by
+/-- The virial rescaling is jointly continuous. -/
+theorem continuous_scale : Continuous fun p : ℝ × (Fin 3 → ℂ) ↦ scale p.1 p.2 := by
   unfold scale
   fun_prop
 
 /-- The angular projection is continuous off the singular locus. -/
-theorem l4st_continuousOn_ang : ContinuousOn ang {z | z ≠ 0} :=
-  l4e_continuous_scale.comp_continuousOn
-    ((l4st_continuous_weightedNorm.continuousOn.inv₀ fun _ hz ↦
-      (l4st_weightedNorm_pos hz).ne').prodMk continuousOn_id)
-
-/-- The virial rescaling is jointly continuous. -/
-theorem l4st_continuous_scale : Continuous fun p : ℝ × (Fin 3 → ℂ) ↦ scale p.1 p.2 :=
-  l4e_continuous_scale
+theorem continuousOn_ang : ContinuousOn ang {z | z ≠ 0} :=
+  continuous_scale.comp_continuousOn
+    ((continuous_weightedNorm.continuousOn.inv₀ fun _ hz ↦
+      (weightedNorm_pos hz).ne').prodMk continuousOn_id)
 
 /-- The angular projection lands in `Ξ`. -/
-theorem l4st_ang_mem_Xi {z : Fin 3 → ℂ} (hz : z ≠ 0) : ang z ∈ Xi := by
-  have h := l4st_weightedNorm_pos hz
+theorem ang_mem_Xi {z : Fin 3 → ℂ} (hz : z ≠ 0) : ang z ∈ Xi := by
+  have h := weightedNorm_pos hz
   change weightedNorm (scale (weightedNorm z)⁻¹ z) = 1
-  rw [l4st_weightedNorm_scale (inv_pos.mpr h), inv_mul_cancel₀ h.ne']
+  rw [weightedNorm_scale (inv_pos.mpr h), inv_mul_cancel₀ h.ne']
 
 /-- `(r ξ₁, r² ξ₂, r³ ξ₃) ≠ 0` for `r > 0` and `ξ ∈ Ξ`. -/
-theorem l4st_scale_ne_zero {r : ℝ} (hr : 0 < r) {ξ : Fin 3 → ℂ} (hξ : ξ ∈ Xi) :
+theorem scale_ne_zero_of_mem_Xi {r : ℝ} (hr : 0 < r) {ξ : Fin 3 → ℂ} (hξ : ξ ∈ Xi) :
     scale r ξ ≠ 0 := by
   intro h
   have hξ' : weightedNorm ξ = 1 := hξ
-  have := l4st_weightedNorm_scale hr ξ
-  rw [h, hξ', mul_one, l4e_weightedNorm_zero] at this
+  have := weightedNorm_scale hr ξ
+  rw [h, hξ', mul_one, weightedNorm_zero] at this
   exact hr.ne this
 
 /-- `z = (r ξ₁, r² ξ₂, r³ ξ₃)` with `r = φ(z)` and `ξ = ang z`. -/
-theorem l4st_scale_weightedNorm_ang {z : Fin 3 → ℂ} (hz : z ≠ 0) :
+theorem scale_weightedNorm_ang {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     scale (weightedNorm z) (ang z) = z := by
-  rw [ang, l4e_scale_scale, mul_inv_cancel₀ (l4st_weightedNorm_pos hz).ne', l4e_scale_one]
+  rw [ang, scale_scale, mul_inv_cancel₀ (weightedNorm_pos hz).ne', scale_one]
 
 /-- `φ(r ξ₁, r² ξ₂, r³ ξ₃) = r` and `ang (r ξ₁, r² ξ₂, r³ ξ₃) = ξ` for `r > 0` and `ξ ∈ Ξ`. -/
-theorem l4st_weightedNorm_ang_scale {r : ℝ} (hr : 0 < r) {ξ : Fin 3 → ℂ} (hξ : ξ ∈ Xi) :
+theorem weightedNorm_ang_scale {r : ℝ} (hr : 0 < r) {ξ : Fin 3 → ℂ} (hξ : ξ ∈ Xi) :
     weightedNorm (scale r ξ) = r ∧ ang (scale r ξ) = ξ := by
   have hξ' : weightedNorm ξ = 1 := hξ
-  have h1 : weightedNorm (scale r ξ) = r := by rw [l4st_weightedNorm_scale hr, hξ', mul_one]
+  have h1 : weightedNorm (scale r ξ) = r := by rw [weightedNorm_scale hr, hξ', mul_one]
   refine ⟨h1, ?_⟩
-  rw [ang, h1, l4e_scale_scale, inv_mul_cancel₀ hr.ne', l4e_scale_one]
+  rw [ang, h1, scale_scale, inv_mul_cancel₀ hr.ne', scale_one]
+
+/-- The points of `Ξ` are not `0`. -/
+theorem ne_zero_of_mem_Xi {ξ : Fin 3 → ℂ} (hξ : ξ ∈ Xi) : ξ ≠ 0 := by
+  rintro rfl
+  have h : weightedNorm 0 = 1 := hξ
+  rw [weightedNorm_zero] at h
+  exact zero_ne_one h
+
+/-- `ang ξ = ξ` on the weighted sphere. -/
+theorem ang_of_mem_Xi {ξ : Fin 3 → ℂ} (hξ : ξ ∈ Xi) : ang ξ = ξ := by
+  have h1 : weightedNorm ξ = 1 := hξ
+  rw [ang, h1, inv_one, scale_one]
+
+/-- `φ(τ z) = φ(z)`. -/
+theorem weightedNorm_tau (z : Fin 3 → ℂ) : weightedNorm (tau z) = weightedNorm z := by
+  simp [weightedNorm, tau]
+
+/-- `τ` commutes with the virial rescalings. -/
+theorem tau_scale (r : ℝ) (z : Fin 3 → ℂ) : tau (scale r z) = scale r (tau z) := by
+  funext i; fin_cases i <;> simp [tau, scale]
+
+/-- `τ` commutes with the angular projection. -/
+theorem tau_ang (z : Fin 3 → ℂ) : tau (ang z) = ang (tau z) := by
+  rw [ang, ang, weightedNorm_tau, tau_scale]
 
 /-- **The weighted spherical coordinates** (TeX 11169–11180): the homeomorphism
 `ℂ³ ∖ 0 ≅ ℝ_{>0} × Ξ`, `z ↦ (φ(z), (z₁/r, z₂/r², z₃/r³))` with `r = φ(z)`, whose inverse is
 `(r, ξ) ↦ (r ξ₁, r² ξ₂, r³ ξ₃)`. (The book's "diffeomorphism": see the module docstring; the
-regularity is `l4st_contDiffOn_weightedNorm`.) -/
+regularity is `contDiffOn_weightedNorm`.) -/
 noncomputable def blowup : {z : Fin 3 → ℂ // z ≠ 0} ≃ₜ Ioi (0 : ℝ) × Xi where
-  toFun z := (⟨weightedNorm z, l4st_weightedNorm_pos z.2⟩, ⟨ang z, l4st_ang_mem_Xi z.2⟩)
-  invFun p := ⟨scale p.1 p.2, l4st_scale_ne_zero p.1.2 p.2.2⟩
-  left_inv z := Subtype.ext (l4st_scale_weightedNorm_ang z.2)
-  right_inv p := Prod.ext (Subtype.ext (l4st_weightedNorm_ang_scale p.1.2 p.2.2).1)
-    (Subtype.ext (l4st_weightedNorm_ang_scale p.1.2 p.2.2).2)
+  toFun z := (⟨weightedNorm z, weightedNorm_pos z.2⟩, ⟨ang z, ang_mem_Xi z.2⟩)
+  invFun p := ⟨scale p.1 p.2, scale_ne_zero_of_mem_Xi p.1.2 p.2.2⟩
+  left_inv z := Subtype.ext (scale_weightedNorm_ang z.2)
+  right_inv p := Prod.ext (Subtype.ext (weightedNorm_ang_scale p.1.2 p.2.2).1)
+    (Subtype.ext (weightedNorm_ang_scale p.1.2 p.2.2).2)
   continuous_toFun :=
-    (l4st_continuous_weightedNorm.comp continuous_subtype_val).subtype_mk _ |>.prodMk
-      ((l4st_continuousOn_ang.comp_continuous continuous_subtype_val fun z ↦ z.2).subtype_mk _)
+    (continuous_weightedNorm.comp continuous_subtype_val).subtype_mk _ |>.prodMk
+      ((continuousOn_ang.comp_continuous continuous_subtype_val fun z ↦ z.2).subtype_mk _)
   continuous_invFun :=
-    (l4st_continuous_scale.comp ((continuous_subtype_val.comp continuous_fst).prodMk
+    (continuous_scale.comp ((continuous_subtype_val.comp continuous_fst).prodMk
       (continuous_subtype_val.comp continuous_snd))).subtype_mk _
 
 private theorem l4e_contDiff_norm_pow_six {n : WithTop ℕ∞} :
@@ -334,7 +337,7 @@ private theorem l4e_contDiff_norm_sq_two {n : WithTop ℕ∞} :
 /-- **Regularity of the weighted norm** (the book's "diffeomorphism", TeX 11169, corrected): `φ`
 is `C²` on `ℂ³ ∖ 0` (`φ⁶ = |z₁|⁶ + |z₂|³ + |z₃|²` is `C²`, and `t ↦ t^{1/6}` is smooth on
 `t > 0`). It is not `C³` at the points with `z₂ = 0` (see the module docstring). -/
-theorem l4st_contDiffOn_weightedNorm : ContDiffOn ℝ 2 weightedNorm {z | z ≠ 0} := by
+theorem contDiffOn_weightedNorm : ContDiffOn ℝ 2 weightedNorm {z | z ≠ 0} := by
   intro z hz
   have h0 : ContDiff ℝ 2 (fun z : Fin 3 → ℂ ↦ ‖z 0‖ ^ 6) := l4e_contDiff_norm_pow_six
   have h1 : ContDiff ℝ 2 (fun z : Fin 3 → ℂ ↦ ‖z 1‖ ^ 3) :=
@@ -343,7 +346,7 @@ theorem l4st_contDiffOn_weightedNorm : ContDiffOn ℝ 2 weightedNorm {z | z ≠ 
   exact (((h0.add h1).add h2).contDiffAt.rpow_const_of_ne (l4e_sum_pos hz).ne').contDiffWithinAt
 
 /-- `φ` is smooth on `ℂ³ ∖ {z₂ = 0}` (in particular near `q_out`). -/
-theorem l4st_contDiffOn_weightedNorm_of_ne :
+theorem contDiffOn_weightedNorm_infty :
     ContDiffOn ℝ ∞ weightedNorm {z | z ≠ 0 ∧ z 1 ≠ 0} := by
   intro z hz
   have h0 : ContDiff ℝ ∞ (fun z : Fin 3 → ℂ ↦ ‖z 0‖ ^ 6) := l4e_contDiff_norm_pow_six
@@ -355,27 +358,35 @@ theorem l4st_contDiffOn_weightedNorm_of_ne :
     (l4e_sum_pos hz.1).ne').contDiffWithinAt
 
 /-- `φ` is invariant under the rotations by `V_T`. -/
-theorem l4st_weightedNorm_smul {v : ℂ} (hv : v ∈ VT) (z : Fin 3 → ℂ) :
+theorem weightedNorm_smul {v : ℂ} (hv : v ∈ VT) (z : Fin 3 → ℂ) :
     weightedNorm (v • z) = weightedNorm z := by
-  simp only [weightedNorm, Pi.smul_apply, smul_eq_mul, norm_mul, l4e_norm_of_mem_VT hv, one_mul]
+  simp only [weightedNorm, Pi.smul_apply, smul_eq_mul, norm_mul, norm_eq_one_of_mem_VT hv,
+    one_mul]
+
+/-- `ang (v w) = v ang w` for `v ∈ V_T`. -/
+theorem ang_smul {v : ℂ} (hv : v ∈ VT) (w : Fin 3 → ℂ) : ang (v • w) = v • ang w := by
+  rw [ang, ang, weightedNorm_smul hv]
+  funext i
+  fin_cases i <;> simp [scale] <;> ring
 
 /-- **The identification is equivariant for the virial group** (TeX 11216–11219): rescalings act
 by multiplication on the radial component and `V_T` acts by scalar multiplication on the angular
 component, `φ(v·(r z₁, r² z₂, r³ z₃)) = r φ(z)` and `ang (v·(r z₁, r² z₂, r³ z₃)) = v · ang z`. -/
-theorem l4st_virial_equivariant {z : Fin 3 → ℂ} (hz : z ≠ 0) {r : ℝ} (hr : 0 < r) {v : ℂ}
+theorem weightedNorm_ang_smul_scale {z : Fin 3 → ℂ} (hz : z ≠ 0) {r : ℝ} (hr : 0 < r) {v : ℂ}
     (hv : v ∈ VT) :
     weightedNorm (v • scale r z) = r * weightedNorm z ∧ ang (v • scale r z) = v • ang z := by
   have hφ : weightedNorm (v • scale r z) = r * weightedNorm z := by
-    rw [l4st_weightedNorm_smul hv, l4st_weightedNorm_scale hr]
+    rw [weightedNorm_smul hv, weightedNorm_scale hr]
   refine ⟨hφ, ?_⟩
   have hr0 : r ≠ 0 := hr.ne'
-  have hφ0 : weightedNorm z ≠ 0 := (l4st_weightedNorm_pos hz).ne'
-  simp only [ang, hφ, l4e_scale_smul, l4e_scale_scale]
+  have hφ0 : weightedNorm z ≠ 0 := (weightedNorm_pos hz).ne'
+  simp only [ang, hφ, scale_smul, scale_scale]
   congr 2
   field_simp
 
 /-- The elements of the group `rootsOfUnity 3 ℂ` are the points of `V_T`. -/
-theorem l4st_mem_VT_iff (v : ℂ) : v ∈ VT ↔ ∃ g : rootsOfUnity 3 ℂ, ((g : ℂˣ) : ℂ) = v := by
+theorem mem_VT_iff_exists_rootsOfUnity (v : ℂ) :
+    v ∈ VT ↔ ∃ g : rootsOfUnity 3 ℂ, ((g : ℂˣ) : ℂ) = v := by
   constructor
   · intro hv
     exact ⟨rootsOfUnity.mkOfPowEq v (l4e_pow_three_of_mem_VT hv), rootsOfUnity.coe_mkOfPowEq _⟩
@@ -387,15 +398,15 @@ theorem l4st_mem_VT_iff (v : ℂ) : v ∈ VT ↔ ∃ g : rootsOfUnity 3 ℂ, ((g
     exact l4e_mem_VT_iff_pow.mpr ⟨i, hi.symm⟩
 
 /-- `Ξ_𝒲` is invariant under the diagonal action of `V_T` (`|v| = 1`, `v𝒲 = 𝒲`). -/
-theorem l4st_smul_mem_XiW (g : rootsOfUnity 3 ℂ) {ξ : Fin 3 → ℂ}
+theorem smul_mem_XiW (g : rootsOfUnity 3 ℂ) {ξ : Fin 3 → ℂ}
     (h : ξ ∈ {ξ : Fin 3 → ℂ | ξ ∈ Xi ∧ ξ 2 ∈ walls}) :
     g • ξ ∈ {ξ : Fin 3 → ℂ | ξ ∈ Xi ∧ ξ 2 ∈ walls} := by
-  have hv : ((g : ℂˣ) : ℂ) ∈ VT := (l4st_mem_VT_iff _).mpr ⟨g, rfl⟩
+  have hv : ((g : ℂˣ) : ℂ) ∈ VT := (mem_VT_iff_exists_rootsOfUnity _).mpr ⟨g, rfl⟩
   have hg : g • ξ = ((g : ℂˣ) : ℂ) • ξ := rfl
   rw [hg]
   refine ⟨?_, ?_⟩
   · change weightedNorm _ = 1
-    rw [l4st_weightedNorm_smul hv]
+    rw [weightedNorm_smul hv]
     exact h.1
   · exact l4e_mul_mem_walls hv h.2
 
@@ -403,7 +414,7 @@ theorem l4st_smul_mem_XiW (g : rootsOfUnity 3 ℂ) {ξ : Fin 3 → ℂ}
 `V_T = rootsOfUnity 3 ℂ` by scalar multiplication (TeX 11225–11229). -/
 noncomputable def XiW : SubMulAction (rootsOfUnity 3 ℂ) (Fin 3 → ℂ) where
   carrier := {ξ | ξ ∈ Xi ∧ ξ 2 ∈ walls}
-  smul_mem' := l4st_smul_mem_XiW
+  smul_mem' := smul_mem_XiW
 
 /-- The quotient `Ξ_𝒲/V_T` of the Poincaré section by the cyclic group `V_T` acting diagonally
 (TeX 11225–11229), with the quotient topology. -/
@@ -412,12 +423,12 @@ abbrev XiWQuot : Type := MulAction.orbitRel.Quotient (rootsOfUnity 3 ℂ) XiW
 /-- "Under the group action, the three walls of `𝒲` are identified with one another"
 (TeX 11228–11229): every point with `ξ₃ ∈ 𝒲` has a rotation `v ξ`, `v ∈ V_T`, with
 `(v ξ)₃ ∈ 𝒲₀ = ℝ_{≤0}`. -/
-theorem l4st_exists_smul_mem_wall_zero {ξ : Fin 3 → ℂ} (h : ξ 2 ∈ walls) :
+theorem exists_smul_mem_wall_zero {ξ : Fin 3 → ℂ} (h : ξ 2 ∈ walls) :
     ∃ v ∈ VT, (v • ξ) 2 ∈ wall 0 := by
   obtain ⟨s, hs, n, hn⟩ := l4e_mem_walls_iff.mp h
   refine ⟨ζ ^ (2 * n), l4e_mem_VT_iff_pow.mpr ⟨2 * n, rfl⟩, s, hs, ?_⟩
   have h3 : ζ ^ (2 * n) * ζ ^ n = 1 := by
-    rw [← pow_add, show 2 * n + n = 3 * n by ring, pow_mul, l4e_ζ_pow_three, one_pow]
+    rw [← pow_add, show 2 * n + n = 3 * n by ring, pow_mul, ζ_pow_three, one_pow]
   simp only [Pi.smul_apply, smul_eq_mul, hn, pow_zero, mul_one]
   linear_combination (s : ℂ) * h3
 

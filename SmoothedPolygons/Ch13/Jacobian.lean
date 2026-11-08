@@ -24,7 +24,7 @@ exactly.
 the normalization of (13.5.1). Writing `z₁ = -1 + ip`, `z₂ = c + id`, the condition `H_F⁺ = 0`
 reads `pc + d - z₃/2 = 0` (the first control is `ζ` or `ζ²`, and `RR(ζ, z₃) = -z₃/2`), so
 `z₃ = 2(pc + d)` and `x = (p, c, d) ∈ ℝ³` are coordinates (`chartCart`; the chart is
-`l4st_exists_chart`). At `q_out`, `x_out = (Im z₁, Re z₂, Im z₂)` of (13.5.1) (`xOut`).
+`exists_chart`). At `q_out`, `x_out = (Im z₁, Re z₂, Im z₂)` of (13.5.1) (`xOut`).
 
 **The map in the chart** (`chartMap`). Near `x_out` the first control is `ζ` (`Im z₂ > 0`), and the
 first switching time is the simple root, near `t_sw(q_out)`, of the switching function
@@ -43,11 +43,12 @@ function of `x` by the implicit function theorem. With `w = F(z) = z(t_sw, z, ζ
 and the eigenvalues are `-0.0799655`, `-0.0080700`, `0.00064532` (the coordinator's independent
 finite-difference computation in another chart agrees; inventory §13.5).
 
-**The certificate** (`l4st_charpoly_jacobianOut_roots`). With `χ(λ) = λ³ - Tλ² + Mλ - D`:
-`χ(-1/10) < 0 < χ(-1/20)`, `χ(-1/1000) < 0 < χ(1/10)`, so `χ` has three real roots in
+**The certificate** (`norm_lt_of_aeval_charpoly_jacobianOut_eq_zero`). With
+`χ(λ) = λ³ - Tλ² + Mλ - D`: `χ(-1/10) < 0 < χ(-1/20)`, `χ(-1/1000) < 0 < χ(1/10)`, so `χ`
+has three real roots in
 `(-1/10, 1/10)`, which are all its complex roots (degree 3). Each `χ(λ₀)` is a polynomial of degree
 `≤ 5` in `r_scale` with rational coefficients (reduce modulo `P`); its sign follows from
-`l4st_rScale_fine_bounds` (the values are `≈ -1.85 × 10⁻⁴`, `6.4 × 10⁻⁵`, `-9.2 × 10⁻⁷`,
+`rScale_fine_bounds` (the values are `≈ -1.85 × 10⁻⁴`, `6.4 × 10⁻⁵`, `-9.2 × 10⁻⁷`,
 `1.9 × 10⁻³`, with derivative `≈ 6 × 10⁸` in `r`, so an enclosure of `r_scale` of width
 `10⁻¹⁹` is ample).
 
@@ -56,11 +57,11 @@ linearization of `F` at `q_out` on the exceptional divisor (three eigenvalues of
 not only the asymptotic stability of Lemma 13.5.5, and it must transfer it to its own
 coordinates `x̃` on the divisor. The map `chartOf : ℂ³ → ℝ³` (rotate so that `z₃ ∈ ℝ_{<0}`, rescale
 so that `Re z₁ = -1`, read off `(Im z₁, Re z₂, Im z₂)`) does this: `chartOf (chartCart x) = x` on
-the chart's domain (`l4f_chartOf_chartCart`), `chartMap = chartOf ∘ F ∘ chartCart` near `x_out`
-(`l4f_chartMap_eventuallyEq_chartOf`), and `chartOf` is smooth near `qOutCart`
-(`l4f_contDiffAt_chartOf`). With `l4st_hasFDerivAt_chartMap` and
-`l4st_charpoly_jacobianOut_roots`, the chain rule then gives the linearization in any smooth
-coordinates on the divisor near `q_out`.
+the chart's domain (`chartOf_chartCart`), `chartMap = chartOf ∘ F ∘ chartCart` near `x_out`
+(`chartMap_eventuallyEq_chartOf`), and `chartOf` is smooth near `qOutCart`
+(`eventually_contDiffAt_chartOf`). With `hasFDerivAt_chartMap` and
+`norm_lt_of_aeval_charpoly_jacobianOut_eq_zero`, the chain rule then gives the linearization in
+any smooth coordinates on the divisor near `q_out`.
 
 **The proofs.**
 * The local structure (`l4j_local`, `l4j_eventually_local`): with `x = (p, c, d)`, the switching
@@ -71,21 +72,21 @@ coordinates on the divisor near `q_out`.
   `√3 C = -(r² + r + 1)(r⁴ - 6r³ - 2r² + 3r + 1)/(3(r + 1)²(r² - r + 1)) < 0`. The root
   `ψ(x)` near `t₀` comes from the implicit function theorem (`g(x_out, t₀) = 0` and
   `∂g/∂t (x_out, t₀) = -√3 r² d ≠ 0` modulo `P`). This also reproves near `x_out` that `t₀` is the
-  first switching time of `q_out`; `l4st_firstSwitchTime_qOutCart` is not used.
+  first switching time of `q_out`; `firstSwitchTime_qOutCart` is not used.
 * The exact Jacobian: `chartMap = N(x, ψ(x))` near `x_out` with `N` explicit, and the chain rule;
   each of the nine entries is an identity in `ℚ(√3)[r]/(P)`, proved by `linear_combination` with
   `P(r_scale) = 0` and `√3² = 3` after reducing the coordinates of `x_out`, `t₀`,
   `(Re (ζ w)₁)⁻¹ = -1/r` and `(∂g/∂t)⁻¹` to representatives of degree `≤ 5` in `r` (certificates by
   exact polynomial division).
 * The eigenvalue certificate: `χ(λ₀)` is expanded at the convergent `3961388236/631380705` of
-  `r_scale` (within `10⁻¹⁸`, from `l4st_rScale_fine_bounds`); its Taylor coefficients of order
+  `r_scale` (within `10⁻¹⁸`, from `rScale_fine_bounds`); its Taylor coefficients of order
   `≥ 1` are positive, which bounds the error. The intermediate value theorem gives the three real
   roots, and a monic cubic with three distinct real roots has no other complex roots.
 
 **The normal direction (block-triangular structure; not formalized).** On the 4-dimensional chart
 `Re z₁ = -1`, `z₃ ∈ ℝ_{<0}` free, with coordinates `(p, c, d, z₃)`, let `G` be the normalized
 Poincaré map and `s(x)` its rescaling factor. With `h = H_F⁺`, `h(G(x)) = s(x)³ h(x)`
-(`l4st_hamMax_virial_tau`, `l4st_hamMax_poincare`), so the hypersurface `{h = 0}` (the chart
+(`hamMax_smul_scale_and_tau`, `hamMax_poincare`), so the hypersurface `{h = 0}` (the chart
 `chartCart`) is invariant under `G`, and at the fixed point, where `h = 0` and `s = 1/r_s`,
 `dh ∘ DG = r_s⁻³ dh`. The derivative of `G` at the fixed point is therefore block triangular: its
 eigenvalues are the three eigenvalues above, tangent to `{h = 0}`, and the normal eigenvalue
@@ -169,22 +170,6 @@ noncomputable def jacDet (r : ℝ) : ℝ :=
 
 private lemma l4j_sqrt3_sq : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
 
-private lemma l4j_ζ_re : ζ.re = -1 / 2 := by rw [l4st_ζ_eq]
-
-private lemma l4j_ζ_im : ζ.im = √3 / 2 := by rw [l4st_ζ_eq]
-
-private lemma l4j_ζ_sq_re : (ζ ^ 2).re = -1 / 2 := by
-  rw [sq, Complex.mul_re, l4j_ζ_re, l4j_ζ_im]; linear_combination (-1 / 4) * l4j_sqrt3_sq
-
-private lemma l4j_ζ_sq_im : (ζ ^ 2).im = -(√3 / 2) := by
-  rw [sq, Complex.mul_im, l4j_ζ_re, l4j_ζ_im]; ring
-
-private lemma l4j_RR (a b : ℂ) : RR a b = a.re * b.re + a.im * b.im := by
-  simp only [RR, Complex.mul_re, Complex.conj_re, Complex.conj_im]; ring
-
-private lemma l4j_mem_VT {v : ℂ} : v ∈ VT ↔ v = 1 ∨ v = ζ ∨ v = ζ ^ 2 := by
-  simp [VT]
-
 /-- The real part of the rotated first coordinate `(ζ z(t))₁` along the chart. -/
 private noncomputable def l4j_R0 (x : Fin 3 → ℝ) (t : ℝ) : ℝ := 1 / 2 - √3 * (x 0 + t) / 2
 
@@ -218,10 +203,10 @@ private lemma l4j_flow_chartCart (x : Fin 3 → ℝ) (t : ℝ) :
       RR (ζ - 1) (flow t (chartCart x) ζ 2) = l4j_g x t ∧
       RR (ζ - ζ ^ 2) (flow t (chartCart x) ζ 2) = √3 * t * (x 2 + x 0 * t / 2 + t ^ 2 / 12) := by
   have h3 := l4j_sqrt3_sq
-  simp only [flow, chartCart, l4j_RR, Matrix.cons_val, Complex.mul_re, Complex.mul_im,
-    Complex.add_re, Complex.add_im, Complex.sub_re, Complex.sub_im, Complex.div_re,
+  simp only [flow, chartCart, RR_eq_re_mul_add_im_mul, Matrix.cons_val, Complex.mul_re,
+    Complex.mul_im, Complex.add_re, Complex.add_im, Complex.sub_re, Complex.sub_im, Complex.div_re,
     Complex.div_im, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im,
-    Complex.one_re, Complex.one_im, l4j_ζ_re, l4j_ζ_im, l4j_ζ_sq_re, l4j_ζ_sq_im, l4j_R0, l4j_I0,
+    Complex.one_re, Complex.one_im, ζ_re, ζ_im, ζ_sq_re, ζ_sq_im, l4j_R0, l4j_I0,
     l4j_R1, l4j_I1, l4j_g, ← Complex.ofReal_pow]
   norm_num
   refine ⟨by ring, by linear_combination (t / 4) * h3, by ring,
@@ -243,7 +228,7 @@ private lemma l4j_chartMap_eq {x : Fin 3 → ℝ} (h : firstControl (chartCart x
 /-- `H_F(w, v) ≤ H_F(w, u)` if and only if `RR(u - v, w₃) ≥ 0`. -/
 private lemma l4j_ham_le_iff (w : Fin 3 → ℂ) (u v : ℂ) :
     ham w v ≤ ham w u ↔ 0 ≤ RR (u - v) (w 2) := by
-  simp only [ham, l4j_RR, Complex.sub_re, Complex.sub_im]
+  simp only [ham, RR_eq_re_mul_add_im_mul, Complex.sub_re, Complex.sub_im]
   constructor <;> intro h <;> linarith
 
 /-- **The first control and the first switching time in the chart.** If `p > 0`, `d > 0`, and
@@ -277,14 +262,14 @@ private lemma l4j_local {x : Fin 3 → ℝ} {T : ℝ} (hp : 0 < x 0) (hd : 0 < x
     intro t ht₀ htT v hv
     obtain ⟨-, -, -, -, h1, h2⟩ := l4j_flow_chartCart x t
     rw [l4j_ham_le_iff]
-    rcases l4j_mem_VT.mp hv with rfl | rfl | rfl
+    rcases mem_VT.mp hv with rfl | rfl | rfl
     · rw [h1]; exact hg_le t ht₀ htT
     · simp [RR]
     · rw [h2]; positivity
   have hfc : IsFirstControl (chartCart x) ζ :=
-    ⟨l4j_mem_VT.mpr (Or.inr (Or.inl rfl)), T, hT, fun t ht v hv ↦ hopt t ht.1 ht.2 v hv⟩
+    ⟨mem_VT.mpr (Or.inr (Or.inl rfl)), T, hT, fun t ht v hv ↦ hopt t ht.1 ht.2 v hv⟩
   have hζ : firstControl (chartCart x) = ζ :=
-    (l4st_firstControl_eq_iff (l4j_chartCart_ne_zero x)).mpr hfc
+    (firstControl_eq_iff (l4j_chartCart_ne_zero x)).mpr hfc
   refine ⟨hζ, ?_⟩
   have hS : {t : ℝ | 0 < t ∧ ∃ v ∈ VT,
       ham (flow t (chartCart x) (firstControl (chartCart x))) (firstControl (chartCart x)) <
@@ -297,7 +282,7 @@ private lemma l4j_local {x : Fin 3 → ℝ} {T : ℝ} (hp : 0 < x 0) (hd : 0 < x
       by_contra hle
       exact (hopt t ht.le (not_lt.mp hle) v hv).not_gt hlt
     · intro ht
-      refine ⟨hT.trans ht, 1, l4j_mem_VT.mpr (Or.inl rfl), ?_⟩
+      refine ⟨hT.trans ht, 1, mem_VT.mpr (Or.inl rfl), ?_⟩
       obtain ⟨-, -, -, -, h1, -⟩ := l4j_flow_chartCart x t
       have := hg_lt t ht
       rw [← h1, ← not_le, l4j_ham_le_iff] at *
@@ -310,17 +295,17 @@ private lemma l4j_local {x : Fin 3 → ℝ} {T : ℝ} (hp : 0 < x 0) (hd : 0 < x
 `H_F⁺(z) = H_F(z, ζ) = H_F(z, ζ²) = p c + d - z₃/2`. -/
 private lemma l4j_hamMax_normalized {z : Fin 3 → ℂ} (h0 : (z 0).re = -1) (h2 : (z 2).im = 0)
     (h2' : (z 2).re < 0) : hamMax z = (z 0).im * (z 1).re + (z 1).im - (z 2).re / 2 := by
-  simp only [hamMax, ham, l4j_RR, Complex.mul_re, Complex.mul_im, Complex.I_re, Complex.I_im,
-    Complex.one_re, Complex.one_im, l4j_ζ_re, l4j_ζ_im, l4j_ζ_sq_re, l4j_ζ_sq_im, h0, h2,
+  simp only [hamMax, ham, RR_eq_re_mul_add_im_mul, Complex.mul_re, Complex.mul_im, Complex.I_re,
+    Complex.I_im, Complex.one_re, Complex.one_im, ζ_re, ζ_im, ζ_sq_re, ζ_sq_im, h0, h2,
     mul_zero, mul_one, add_zero, zero_sub]
   rw [max_self, max_eq_right (by linarith)]
   ring
 
 /-- `chartCart x_out = qOutCart`: the third coordinate of `qOutCart` is `2(pc + d)` because
-`H_F⁺(qOutCart) = 0` (`l4st_hamMax_qOutCart`). -/
+`H_F⁺(qOutCart) = 0` (`hamMax_qOutCart`). -/
 private lemma l4j_chartCart_xOut : chartCart xOut = qOutCart := by
-  obtain ⟨h0, h2, h2'⟩ := l4st_qOutCart_normalization
-  have hH := l4st_hamMax_qOutCart
+  obtain ⟨h0, h2, h2'⟩ := qOutCart_normalization
+  have hH := hamMax_qOutCart
   rw [l4j_hamMax_normalized h0 h2 h2'] at hH
   funext i
   fin_cases i
@@ -356,11 +341,11 @@ private noncomputable def l4j_Pd (r : ℝ) : ℝ :=
 private noncomputable def l4j_Pt (r : ℝ) : ℝ :=
   -2 * r ^ 5 / 9 + 4 * r ^ 4 / 3 + 2 * r ^ 3 / 9 + 8 * r ^ 2 / 9 + 4 * r / 3 + 4 / 9
 
-private lemma l4j_rScale_pos : 0 < rScale := one_pos.trans l4st_rScale_spec.1
+private lemma l4j_rScale_pos : 0 < rScale := one_pos.trans rScale_spec.1
 
 private lemma l4j_hP :
     1 - 5 * rScale - 7 * rScale ^ 2 - 5 * rScale ^ 3 - 7 * rScale ^ 4 - 5 * rScale ^ 5 +
-      rScale ^ 6 = 0 := l4st_rScale_spec.2
+      rScale ^ 6 = 0 := rScale_spec.2
 
 private lemma l4j_xOut_rep :
     xOut 0 = √3 * l4j_Pp rScale ∧ xOut 1 = √3 * l4j_Pc rScale ∧ xOut 2 = l4j_Pd rScale := by
@@ -393,13 +378,14 @@ private lemma l4j_t0_pos : 0 < l4j_t0 := by
   have hr := l4j_rScale_pos
   unfold l4j_t0; positivity
 
-/-- `x_out` is a fixed point of the map in the chart. -/
-private lemma l4j_chartMap_xOut : chartMap xOut = xOut := by
+/-- `x_out` is a fixed point of the map in the chart (Lemma 13.5.2: `F(qOutCart) =
+ζ² (r_scale-scaling)(qOutCart)`, and `ζ · ζ² = 1`). -/
+theorem chartMap_xOut : chartMap xOut = xOut := by
   have hr := l4j_rScale_pos
   have hζ : ζ • ζ ^ 2 • scale rScale qOutCart = scale rScale qOutCart := by
-    rw [smul_smul, ← pow_succ', l4st_ζ_pow_three, one_smul]
-  have h0 := l4st_qOutCart_normalization.1
-  simp only [chartMap, l4j_chartCart_xOut, l4st_poincare_qOutCart, hζ]
+    rw [smul_smul, ← pow_succ', ζ_pow_three, one_smul]
+  have h0 := qOutCart_normalization.1
+  simp only [chartMap, l4j_chartCart_xOut, poincare_qOutCart, hζ]
   funext i
   fin_cases i <;> simp [scale, xOut, h0, ← Complex.ofReal_pow] <;> field_simp
 
@@ -411,7 +397,7 @@ private lemma l4j_signs :
       -√3 * l4j_t0 ^ 2 / 12 + (3 + √3 * xOut 0) * l4j_t0 / 4 + (√3 * xOut 2 - 3 * xOut 1) / 2 <
         0 := by
   obtain ⟨h0, h1, h2⟩ := l4j_xOut_rat
-  obtain ⟨hr1, hr2⟩ := l4st_rScale_bounds
+  obtain ⟨hr1, hr2⟩ := rScale_bounds
   have hr : 0 < rScale := l4j_rScale_pos
   have h3 : 0 < √3 := by positivity
   have hs := l4j_sqrt3_sq
@@ -1121,7 +1107,7 @@ private lemma l4j_flow_chartCart_two (x : Fin 3 → ℝ) (t : ℝ) :
   simp only [flow, chartCart, Matrix.cons_val, Complex.mul_re, Complex.mul_im,
     Complex.add_re, Complex.add_im, Complex.sub_re, Complex.sub_im, Complex.div_re,
     Complex.div_im, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im,
-    l4j_ζ_re, l4j_ζ_im, l4j_R2, l4j_g, ← Complex.ofReal_pow]
+    ζ_re, ζ_im, l4j_R2, l4j_g, ← Complex.ofReal_pow]
   norm_num
   constructor
   · ring
@@ -1138,12 +1124,12 @@ private lemma l4j_R2_u0 : l4j_R2 xOut (l4j_ψ xOut) < 0 := by
   have hP : poincare (chartCart xOut) = flow (l4j_ψ xOut) (chartCart xOut) ζ :=
     l4j_poincare_chartCart_eventually.self_of_nhds
   rw [← (l4j_flow_chartCart_two xOut (l4j_ψ xOut)).1, ← hP, l4j_chartCart_xOut,
-    l4st_poincare_qOutCart]
+    poincare_qOutCart]
   have h3 : ζ * (ζ ^ 2 * ((rScale : ℂ) ^ 3 * qOutCart 2)) = (rScale : ℂ) ^ 3 * qOutCart 2 := by
-    rw [← mul_assoc, ← pow_succ', l4st_ζ_pow_three, one_mul]
+    rw [← mul_assoc, ← pow_succ', ζ_pow_three, one_mul]
   simp only [scale, Pi.smul_apply, smul_eq_mul, Matrix.cons_val, h3]
   rw [← Complex.ofReal_pow, Complex.re_ofReal_mul]
-  exact mul_neg_of_pos_of_neg (pow_pos l4j_rScale_pos 3) l4st_qOutCart_normalization.2.2
+  exact mul_neg_of_pos_of_neg (pow_pos l4j_rScale_pos 3) qOutCart_normalization.2.2
 
 private lemma l4j_eventually_wall : ∀ᶠ x in 𝓝 xOut,
     poincare (chartCart x) = flow (l4j_ψ x) (chartCart x) ζ ∧ l4j_g x (l4j_ψ x) = 0 ∧
@@ -1155,26 +1141,16 @@ private lemma l4j_eventually_wall : ∀ᶠ x in 𝓝 xOut,
     hc.continuousAt.eventually (gt_mem_nhds l4j_R2_u0)] with x h1 h2 h3
   exact ⟨h1, h2, h3⟩
 
-private lemma l4j_conj_ζ_sq : starRingEnd ℂ (ζ ^ 2) = ζ := by
-  apply Complex.ext
-  · simp only [Complex.conj_re, l4j_ζ_sq_re, l4j_ζ_re]
-  · simp only [Complex.conj_im, l4j_ζ_sq_im, l4j_ζ_im]
-    ring
-
-private lemma l4j_norm_ζ : ‖ζ‖ = 1 := by
-  have hζ : ζ ∈ VT := l4j_mem_VT.mpr (Or.inr (Or.inl rfl))
-  exact (l4st_VT_props hζ hζ).1
-
 /-- If `ζ w₃ = a` is real and negative, the rotation factor `-w̄₃/|w₃|` of `chartOf` is `ζ`. -/
 private lemma l4j_rotation_eq {w : ℂ} {a : ℝ} (hw : ζ * w = a) (ha : a < 0) :
     -starRingEnd ℂ w / (‖w‖ : ℂ) = ζ := by
   have hw2 : w = ζ ^ 2 * a := by
-    rw [← hw, ← mul_assoc, ← pow_succ, l4st_ζ_pow_three, one_mul]
+    rw [← hw, ← mul_assoc, ← pow_succ, ζ_pow_three, one_mul]
   have hn : ‖w‖ = -a := by
-    rw [hw2, norm_mul, norm_pow, l4j_norm_ζ, one_pow, one_mul, Complex.norm_real,
+    rw [hw2, norm_mul, norm_pow, norm_ζ, one_pow, one_mul, Complex.norm_real,
       Real.norm_eq_abs, abs_of_neg ha]
   have hne : ((-a : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (neg_pos.mpr ha).ne'
-  rw [hn, div_eq_iff hne, hw2, map_mul, l4j_conj_ζ_sq, Complex.conj_ofReal]
+  rw [hn, div_eq_iff hne, hw2, map_mul, conj_ζ_sq, Complex.conj_ofReal]
   push_cast
   ring
 
@@ -1231,16 +1207,6 @@ private lemma l4j_contDiffAt_chartOf_of {z : Fin 3 → ℂ} (h2 : z 2 ≠ 0)
 
 /-! ### The chart of `Ξ_{𝒲,0}/V_T` near `q_out` -/
 
-/-- A point of the walls with negative real part lies on `𝒲₀ = ℝ_{≤0}`: it is real. -/
-private lemma l4j_im_eq_zero_of_mem_walls {w : ℂ} (hw : w ∈ walls) (hre : w.re < 0) :
-    w.im = 0 := by
-  rcases hw with (⟨s, hs, rfl⟩ | ⟨s, hs, rfl⟩) | ⟨s, hs, rfl⟩
-  · simp
-  · rw [pow_one, Complex.re_ofReal_mul, l4j_ζ_re] at hre
-    linarith
-  · rw [Complex.re_ofReal_mul, l4j_ζ_sq_re] at hre
-    linarith
-
 /-- `chartOf` is invariant under multiplication by a unit complex number. -/
 private lemma l4j_chartOf_smul {v : ℂ} (hv : ‖v‖ = 1) (z : Fin 3 → ℂ) :
     chartOf (v • z) = chartOf z := by
@@ -1283,7 +1249,7 @@ private lemma l4j_chartOf_scale {s : ℝ} (hs : 0 < s) (z : Fin 3 → ℂ) :
     fin_cases i <;> simp <;> field_simp
 
 private lemma l4j_chartOf_ang {z : Fin 3 → ℂ} (hz : z ≠ 0) : chartOf (ang z) = chartOf z :=
-  l4j_chartOf_scale (inv_pos.mpr (l4st_weightedNorm_pos hz)) z
+  l4j_chartOf_scale (inv_pos.mpr (weightedNorm_pos hz)) z
 
 /-- The rotation factor of a point with `z₃ ∈ ℝ_{<0}` is `1`. -/
 private lemma l4j_ω_eq_one {z : Fin 3 → ℂ} (h2 : (z 2).im = 0) (h2' : (z 2).re < 0) :
@@ -1315,7 +1281,7 @@ private lemma l4j_ang_chartCart {x : Fin 3 → ℝ} (hx : x 0 * x 1 + x 2 < 0) :
     ang (chartCart x) ∈ XiW ∧ hamMax (ang (chartCart x)) = 0 ∧
       (ang (chartCart x) 2).re < 0 ∧ (ang (chartCart x) 0).re < 0 := by
   have hz := l4j_chartCart_ne_zero x
-  have hφ := l4st_weightedNorm_pos hz
+  have hφ := weightedNorm_pos hz
   set φ := weightedNorm (chartCart x)
   have hang : ang (chartCart x) = scale φ⁻¹ (chartCart x) := rfl
   have hc0 : chartCart x 0 = -1 + (x 0 : ℂ) * I := rfl
@@ -1330,10 +1296,10 @@ private lemma l4j_ang_chartCart {x : Fin 3 → ℝ} (hx : x 0 * x 1 + x 2 < 0) :
     rw [l4j_hamMax_normalized (by simp [chartCart]) (by simp [chartCart])
       (by simp [chartCart]; linarith)]
     simp [chartCart]
-  refine ⟨⟨l4st_ang_mem_Xi hz, Or.inl (Or.inl ⟨_, hneg.le, by rw [h2, pow_zero, mul_one]⟩)⟩,
+  refine ⟨⟨ang_mem_Xi hz, Or.inl (Or.inl ⟨_, hneg.le, by rw [h2, pow_zero, mul_one]⟩)⟩,
     ?_, ?_, ?_⟩
-  · have hv : (1 : ℂ) ∈ VT := l4j_mem_VT.mpr (Or.inl rfl)
-    have := (l4st_hamMax_virial_tau hv (inv_pos.mpr hφ) (chartCart x)).1
+  · have hv : (1 : ℂ) ∈ VT := mem_VT.mpr (Or.inl rfl)
+    have := (hamMax_smul_scale_and_tau hv (inv_pos.mpr hφ) (chartCart x)).1
     rw [one_smul, hH, mul_zero] at this
     exact this
   · rw [h2, Complex.ofReal_re]; exact hneg
@@ -1350,8 +1316,8 @@ private lemma l4j_isOpen_A : IsOpen l4j_A := by
   exact h.preimage continuous_subtype_val
 
 private lemma l4j_norm_root (g : rootsOfUnity 3 ℂ) : ‖((g : ℂˣ) : ℂ)‖ = 1 := by
-  have h : ((g : ℂˣ) : ℂ) ∈ VT := (l4st_mem_VT_iff _).mpr ⟨g, rfl⟩
-  exact (l4st_VT_props h h).1
+  have h : ((g : ℂˣ) : ℂ) ∈ VT := (mem_VT_iff_exists_rootsOfUnity _).mpr ⟨g, rfl⟩
+  exact norm_eq_one_of_mem_VT h
 
 /-- The image in `Ξ_𝒲/V_T` of an open set of `Ξ_𝒲` is open (the quotient map by a group of
 homeomorphisms is open). -/
@@ -1365,11 +1331,6 @@ private lemma l4j_isOpen_image_mk {A : Set XiW} (hA : IsOpen A) :
       exact (continuous_const_smul ((g : ℂˣ) : ℂ)).comp continuous_subtype_val)⟩
   exact isOpenMap_quotient_mk'_mul A hA
 
-/-- `x_out` is a fixed point of the map in the chart (Lemma 13.5.2: `F(qOutCart) =
-ζ² (r_scale-scaling)(qOutCart)`, and `ζ · ζ² = 1`). -/
-theorem l4st_chartMap_xOut : chartMap xOut = xOut :=
-  l4j_chartMap_xOut
-
 /-- The map in the chart is `C¹` (indeed `C^∞`) near `x_out`: near `x_out` the first control is `ζ`
 and the first switching time is the simple root `ψ(x)` of `RR(ζ - 1, z₃(t))` near `t_sw(q_out)`,
 `C¹` in `x` by the implicit function theorem (Mathlib's `ContDiffAt.implicitFunction`).
@@ -1380,14 +1341,14 @@ Proof: along `t ↦ z(t, chartCart x, ζ)` the switching function from `ζ` to `
 it (`l4j_local`): `ζ` is optimal exactly on `[0, ψ(x)]` and `1` beats it right after. The explicit
 factorization replaces the compactness argument; then `chartMap x = N(x, ψ(x))` with `N` an
 explicit rational map whose denominator `Re (ζ z(t))₁ = -r_scale ≠ 0` at `(x_out, t₀)`. -/
-theorem l4st_contDiffAt_chartMap : ContDiffAt ℝ 1 chartMap xOut :=
+theorem contDiffAt_chartMap : ContDiffAt ℝ 1 chartMap xOut :=
   l4j_contDiffAt_N.congr_of_eventuallyEq l4j_chartMap_eventuallyEq
 
 /-- **The exact Jacobian at `q_out`**: the derivative of `chartMap` at `x_out` is the matrix
 `jacobianOut r_scale` (implicit differentiation: `dt_sw = -(∂χ/∂x)/(∂χ/∂t)` at the simple root,
 then the chain rule through the flow (13.2.2), the rotation and the rescaling; exact arithmetic in
 `ℚ(√3)[r]` modulo `P(r)`). -/
-theorem l4st_hasFDerivAt_chartMap :
+theorem hasFDerivAt_chartMap :
     HasFDerivAt chartMap (Matrix.toLin' (jacobianOut rScale)).toContinuousLinearMap xOut :=
   l4j_hasFDerivAt_N.congr_of_eventuallyEq l4j_chartMap_eventuallyEq
 
@@ -1399,7 +1360,7 @@ theorem l4st_hasFDerivAt_chartMap :
 Proof route: `chartCart x` has `z₃ = 2(pc + d) ∈ ℝ_{<0}`, so the rotation factor is
 `ω = -z₃/|z₃| = 1`; `Re z₁ = -1`, so the rescaling factor is `s = 1`; and
 `(Im z₁, Re z₂, Im z₂) = (p, c, d)`. -/
-theorem l4f_chartOf_chartCart {x : Fin 3 → ℝ} (hx : x 0 * x 1 + x 2 < 0) :
+theorem chartOf_chartCart {x : Fin 3 → ℝ} (hx : x 0 * x 1 + x 2 < 0) :
     chartOf (chartCart x) = x := by
   have hneg : 2 * (x 0 * x 1 + x 2) < 0 := by linarith
   have hn : ‖chartCart x 2‖ = -(2 * (x 0 * x 1 + x 2)) := by
@@ -1419,15 +1380,15 @@ theorem l4f_chartOf_chartCart {x : Fin 3 → ℝ} (hx : x 0 * x 1 + x 2 < 0) :
 near `x_out`.
 
 Proof: `chartCart x_out = qOutCart` (`z₃ = 2(pc + d)` there because `H_F⁺(qOutCart) = 0`,
-`l4st_hamMax_qOutCart`). Near `x_out` the first control of `chartCart x` is `ζ` and the trajectory
+`hamMax_qOutCart`). Near `x_out` the first control of `chartCart x` is `ζ` and the trajectory
 switches from `ζ` to `1` at the root `ψ(x)` of the switching function `RR(ζ - 1, z₃(t))` (the
-argument of `l4st_contDiffAt_chartMap`), so `w = F(chartCart x)` has `Im (ζ w₃) = 0`
+argument of `contDiffAt_chartMap`), so `w = F(chartCart x)` has `Im (ζ w₃) = 0`
 (`√3 Im (ζ z₃(t)) = -RR(ζ - 1, z₃(t))`): `w₃` lies on the line `ℝ ζ²`; and `Re (ζ w₃) < 0` by
-continuity, since `ζ F(qOutCart)₃ = r_s³ (qOutCart)₃ < 0` (`l4st_poincare_qOutCart`,
-`l4st_qOutCart_normalization`). For `w₃ = -aζ²` with `a > 0` the rotation factor of `chartOf` is
+continuity, since `ζ F(qOutCart)₃ = r_s³ (qOutCart)₃ < 0` (`poincare_qOutCart`,
+`qOutCart_normalization`). For `w₃ = -aζ²` with `a > 0` the rotation factor of `chartOf` is
 `-w̄₃/|w₃| = ζ`, the rotation of `chartMap`, and the rescalings and read-offs are the same
 expressions. -/
-theorem l4f_chartMap_eventuallyEq_chartOf :
+theorem chartMap_eventuallyEq_chartOf :
     chartMap =ᶠ[𝓝 xOut] chartOf ∘ poincare ∘ chartCart := by
   filter_upwards [l4j_eventually_wall] with x ⟨hP, hg, hR⟩
   have hw : ζ * poincare (chartCart x) 2 = ((l4j_R2 x (l4j_ψ x) : ℝ) : ℂ) := by
@@ -1443,13 +1404,13 @@ theorem l4f_chartMap_eventuallyEq_chartOf :
 /-- **`chartOf` is smooth near `qOutCart`**: it is `C^∞` at every point of a neighborhood of
 `qOutCart` in `ℂ³` (as a real manifold `ℝ⁶`).
 
-Proof route: `(qOutCart)₃ ∈ ℝ_{<0}` (`l4st_qOutCart_normalization`), so `z ↦ |z₃|` is smooth near
+Proof route: `(qOutCart)₃ ∈ ℝ_{<0}` (`qOutCart_normalization`), so `z ↦ |z₃|` is smooth near
 `qOutCart` (`z₃ ≠ 0`; `contDiffAt_norm` for the inner product space `ℂ`), hence so are
 `ω = -z̄₃/|z₃|` and `w = ω z` (complex conjugation is `ℝ`-linear); at `qOutCart`, `ω = 1` and
 `Re w₁ = -1 ≠ 0`, so `s = -1/Re w₁` and the three read-off coordinates are smooth near
 `qOutCart`. -/
-theorem l4f_contDiffAt_chartOf : ∀ᶠ z in 𝓝 qOutCart, ContDiffAt ℝ ∞ chartOf z := by
-  obtain ⟨h0, h2, h2'⟩ := l4st_qOutCart_normalization
+theorem eventually_contDiffAt_chartOf : ∀ᶠ z in 𝓝 qOutCart, ContDiffAt ℝ ∞ chartOf z := by
+  obtain ⟨h0, h2, h2'⟩ := qOutCart_normalization
   have hq2 : qOutCart 2 ≠ 0 := fun h ↦ by rw [h] at h2'; simp at h2'
   have hn : ‖qOutCart 2‖ ≠ 0 := norm_ne_zero_iff.mpr hq2
   have hω : l4j_ω qOutCart = 1 := by
@@ -1501,7 +1462,7 @@ private lemma l4j_chartInv_chartOf {ξ : XiW} (hξ : ξ ∈ l4j_A) (hH : hamMax 
       (l4j_chartInv (chartOf ξ)).1 = Quotient.mk'' ξ := by
   obtain ⟨h2', h0'⟩ := hξ
   have hmem : (ξ : Fin 3 → ℂ) ∈ Xi ∧ (ξ : Fin 3 → ℂ) 2 ∈ walls := ξ.2
-  have h2 : ((ξ : Fin 3 → ℂ) 2).im = 0 := l4j_im_eq_zero_of_mem_walls hmem.2 h2'
+  have h2 : ((ξ : Fin 3 → ℂ) 2).im = 0 := im_eq_zero_of_mem_walls hmem.2 h2'
   set s := -(((ξ : Fin 3 → ℂ) 0).re)⁻¹ with hs_def
   have hs : 0 < s := neg_pos.mpr (inv_lt_zero.mpr h0')
   have hz0 : (scale s (ξ : Fin 3 → ℂ) 0).re = -1 := by
@@ -1514,8 +1475,8 @@ private lemma l4j_chartInv_chartOf {ξ : XiW} (hξ : ξ ∈ l4j_A) (hH : hamMax 
     simp only [scale, Matrix.cons_val, ← Complex.ofReal_pow, Complex.re_ofReal_mul]
     exact mul_neg_of_pos_of_neg (pow_pos hs 3) h2'
   have hzH : hamMax (scale s (ξ : Fin 3 → ℂ)) = 0 := by
-    have hv : (1 : ℂ) ∈ VT := l4j_mem_VT.mpr (Or.inl rfl)
-    have := (l4st_hamMax_virial_tau hv hs (ξ : Fin 3 → ℂ)).1
+    have hv : (1 : ℂ) ∈ VT := mem_VT.mpr (Or.inl rfl)
+    have := (hamMax_smul_scale_and_tau hv hs (ξ : Fin 3 → ℂ)).1
     rw [one_smul, hH, mul_zero] at this
     exact this
   obtain ⟨hzc, hneg⟩ := l4j_eq_chartCart hz0 hz2 hz2' hzH
@@ -1523,7 +1484,7 @@ private lemma l4j_chartInv_chartOf {ξ : XiW} (hξ : ξ ∈ l4j_A) (hH : hamMax 
     (scale s (ξ : Fin 3 → ℂ) 1).im] with hx_def
   have hx : x 0 * x 1 + x 2 < 0 := hneg
   have hcx : chartOf ξ = x := by
-    rw [← l4j_chartOf_scale hs, hzc, l4f_chartOf_chartCart hx]
+    rw [← l4j_chartOf_scale hs, hzc, chartOf_chartCart hx]
   rw [hcx]
   refine ⟨hx, ?_⟩
   rw [l4j_chartInv_val hx]
@@ -1531,7 +1492,7 @@ private lemma l4j_chartInv_chartOf {ξ : XiW} (hξ : ξ ∈ l4j_A) (hH : hamMax 
   apply Subtype.ext
   change ang (chartCart x) = (ξ : Fin 3 → ℂ)
   rw [← hzc]
-  exact (l4st_weightedNorm_ang_scale hs hmem.1).2
+  exact (weightedNorm_ang_scale hs hmem.1).2
 
 /-- The domain of the chart in `Ξ_{𝒲,0}/V_T`: the classes with a representative in `l4j_A`. -/
 private noncomputable def l4j_source : Set XiW0Quot :=
@@ -1547,7 +1508,7 @@ private lemma l4j_continuousOn_chartOf_A : ContinuousOn (fun ξ : XiW ↦ chartO
   intro ξ hξ
   obtain ⟨h2', h0'⟩ := hξ
   have hmem : (ξ : Fin 3 → ℂ) ∈ Xi ∧ (ξ : Fin 3 → ℂ) 2 ∈ walls := ξ.2
-  have h2 : ((ξ : Fin 3 → ℂ) 2).im = 0 := l4j_im_eq_zero_of_mem_walls hmem.2 h2'
+  have h2 : ((ξ : Fin 3 → ℂ) 2).im = 0 := im_eq_zero_of_mem_walls hmem.2 h2'
   have hne : (ξ : Fin 3 → ℂ) 2 ≠ 0 := fun h ↦ by rw [h] at h2'; simp at h2'
   have h0 : (l4j_ω ξ * (ξ : Fin 3 → ℂ) 0).re ≠ 0 := by
     rw [l4j_ω_eq_one h2 h2', one_mul]; exact h0'.ne
@@ -1590,7 +1551,7 @@ private lemma l4j_continuousOn_chartInv :
     exact Subtype.ext (l4j_chartInv_val x.2)
   rw [hf]
   refine Continuous.subtype_mk (continuous_quotient_mk'.comp (Continuous.subtype_mk ?_ _)) _
-  exact l4st_continuousOn_ang.comp_continuous (l4j_continuous_chartCart.comp continuous_subtype_val)
+  exact continuousOn_ang.comp_continuous (l4j_continuous_chartCart.comp continuous_subtype_val)
     fun x ↦ l4j_chartCart_ne_zero x
 
 /-- **The chart** of `Ξ_{𝒲,0}/V_T` near `q_out`. -/
@@ -1617,7 +1578,7 @@ private noncomputable def l4j_chart : OpenPartialHomeomorph XiW0Quot (Fin 3 → 
     rw [l4j_chartInv_val hx]
     change chartOf (ang (chartCart x)) = x
     rw [l4j_chartOf_ang (l4j_chartCart_ne_zero x)]
-    exact l4f_chartOf_chartCart hx
+    exact chartOf_chartCart hx
   open_source := (l4j_isOpen_image_mk l4j_isOpen_A).preimage continuous_subtype_val
   open_target := isOpen_lt (by fun_prop) continuous_const
   continuousOn_toFun := l4j_continuousOn_chart
@@ -1626,7 +1587,7 @@ private noncomputable def l4j_chart : OpenPartialHomeomorph XiW0Quot (Fin 3 → 
 private lemma l4j_chart_apply (q : XiW0Quot) : l4j_chart q = l4j_chartQuot q.1 := rfl
 
 private lemma l4j_xOut_mem : xOut 0 * xOut 1 + xOut 2 < 0 := by
-  have h := l4st_qOutCart_normalization.2.2
+  have h := qOutCart_normalization.2.2
   rw [← l4j_chartCart_xOut] at h
   simp only [chartCart, Matrix.cons_val, Complex.ofReal_re] at h
   linarith
@@ -1634,13 +1595,13 @@ private lemma l4j_xOut_mem : xOut 0 * xOut 1 + xOut 2 < 0 := by
 private lemma l4j_qOut0_mem : qOut0 ∈ l4j_chart.source := by
   have h := l4j_ang_chartCart l4j_xOut_mem
   rw [l4j_chartCart_xOut] at h
-  exact ⟨⟨ang qOutCart, l4st_ang_qOutCart_mem.1⟩, ⟨h.2.2.1, h.2.2.2⟩, rfl⟩
+  exact ⟨⟨ang qOutCart, ang_qOutCart_mem_XiW.1⟩, ⟨h.2.2.1, h.2.2.2⟩, rfl⟩
 
 private lemma l4j_chart_qOut0 : l4j_chart qOut0 = xOut := by
   rw [l4j_chart_apply]
   change chartOf (ang qOutCart) = xOut
   rw [← l4j_chartCart_xOut, l4j_chartOf_ang (l4j_chartCart_ne_zero xOut),
-    l4f_chartOf_chartCart l4j_xOut_mem]
+    chartOf_chartCart l4j_xOut_mem]
 
 /-- The facts at `x = e(q)` used for the conjugacy, valid near `x_out`. -/
 private lemma l4j_eventually_conj : ∀ᶠ x in 𝓝 xOut,
@@ -1654,15 +1615,9 @@ private lemma l4j_eventually_conj : ∀ᶠ x in 𝓝 xOut,
     unfold l4j_R0; fun_prop
   have hR0 : l4j_R0 xOut (l4j_ψ xOut) < 0 := by
     rw [l4j_ψ_xOut, l4j_R0_u0]; exact neg_neg_of_pos l4j_rScale_pos
-  filter_upwards [ht, l4f_chartMap_eventuallyEq_chartOf, l4j_eventually_wall,
+  filter_upwards [ht, chartMap_eventuallyEq_chartOf, l4j_eventually_wall,
     hc.continuousAt.eventually (gt_mem_nhds hR0)] with x h1 h2 h3 h4
   exact ⟨h1, h2, h3.1, h3.2.2, h4⟩
-
-/-- `ang (v w) = v ang w` for `v ∈ V_T`. -/
-private lemma l4j_ang_smul {v : ℂ} (hv : v ∈ VT) (w : Fin 3 → ℂ) : ang (v • w) = v • ang w := by
-  rw [ang, ang, l4st_weightedNorm_smul hv]
-  funext i
-  fin_cases i <;> simp [scale] <;> ring
 
 
 /-- **The chart** (TeX 11446–11447: "An open neighborhood of `q_out` in `Ξ_{𝒲,0}/V_T` is
@@ -1677,10 +1632,10 @@ invariant under `V_T` and the rescalings), with source the classes having a repr
 the quotient map by `V_T` is open; there `chartOf` is continuous, and it rescales the representative
 to `Re z₁ = -1`, which is `chartCart` of its image (`H_F⁺ = 0` gives `z₃ = 2(pc + d)`). For the
 conjugacy, with `x = e(q)` near `x_out`, `[ang F(ang (chartCart x))] = [ang F(chartCart x)]`
-(`l4st_ang_poincare_ang`); its rotation by `ζ` has `Re ξ₃ < 0` and `Re ξ₁ < 0` (by continuity from
+(`ang_poincare_ang`); its rotation by `ζ` has `Re ξ₃ < 0` and `Re ξ₁ < 0` (by continuity from
 `x_out`), and its image is `chartOf (F (chartCart x)) = chartMap x`
-(`l4f_chartMap_eventuallyEq_chartOf`). -/
-theorem l4st_exists_chart :
+(`chartMap_eventuallyEq_chartOf`). -/
+theorem exists_chart :
     ∃ e : OpenPartialHomeomorph XiW0Quot (Fin 3 → ℝ), qOut0 ∈ e.source ∧ e qOut0 = xOut ∧
       ∀ᶠ x in 𝓝 qOut0, poincareAngZero x ∈ e.source ∧ e (poincareAngZero x) = chartMap (e x) := by
   refine ⟨l4j_chart, l4j_qOut0_mem, l4j_chart_qOut0, ?_⟩
@@ -1699,22 +1654,22 @@ theorem l4st_exists_chart :
     rw [← h]
     exact l4j_chartInv_val hx
   set w := poincare (chartCart x) with hwdef
-  have hw0 : w ≠ 0 := l4st_poincare_ne_zero hz
+  have hw0 : w ≠ 0 := poincare_ne_zero hz
   have hmemW : ang w ∈ XiW := by
-    have h := l4st_ang_poincare_mem_XiW (l4j_ang_chartCart hx).1
-    rwa [l4st_ang_poincare_ang hz] at h
+    have h := ang_poincare_mem_XiW (l4j_ang_chartCart hx).1
+    rwa [ang_poincare_ang hz] at h
   have hP1 : (poincareAngZero q).1 = Quotient.mk'' (⟨ang w, hmemW⟩ : XiW) := by
     change poincareAngQuot q.1 = _
     rw [hq1]
     change Quotient.mk'' (poincareAng ⟨ang (chartCart x), _⟩) = _
     congr 1
-    exact Subtype.ext (l4st_ang_poincare_ang hz)
+    exact Subtype.ext (ang_poincare_ang hz)
   refine ⟨?_, ?_⟩
-  · obtain ⟨g, hg⟩ := (l4st_mem_VT_iff ζ).mp (l4j_mem_VT.mpr (Or.inr (Or.inl rfl)))
+  · obtain ⟨g, hg⟩ := (mem_VT_iff_exists_rootsOfUnity ζ).mp (mem_VT.mpr (Or.inr (Or.inl rfl)))
     refine ⟨g • ⟨ang w, hmemW⟩, ?_, ?_⟩
     · have hval : ((g • (⟨ang w, hmemW⟩ : XiW) : XiW) : Fin 3 → ℂ) = ζ • ang w := by
         rw [← hg]; rfl
-      have hφ := l4st_weightedNorm_pos hw0
+      have hφ := weightedNorm_pos hw0
       have h0' := (l4j_flow_chartCart x (l4j_ψ x)).1
       have h2' := (l4j_flow_chartCart_two x (l4j_ψ x)).1
       rw [← hP] at h0' h2'
@@ -1798,12 +1753,12 @@ private lemma l4j_det {r : ℝ} (hr : rScalePoly r = 0) :
 
 /-- The characteristic polynomial of the Jacobian: `λ³ - T λ² + M λ - D` with
 `T = jacTrace r_scale`, `M = jacMinorSum r_scale`, `D = jacDet r_scale` (polynomial identities in
-`ℚ(√3)[r]` modulo `P(r)`, using `l4st_rScale_spec`). -/
-theorem l4st_charpoly_jacobianOut :
+`ℚ(√3)[r]` modulo `P(r)`, using `rScale_spec`). -/
+theorem charpoly_jacobianOut :
     (jacobianOut rScale).charpoly =
       X ^ 3 - C (jacTrace rScale) * X ^ 2 + C (jacMinorSum rScale) * X - C (jacDet rScale) := by
-  rw [l4j_charpoly_fin_three, l4j_trace, l4j_minorSum l4st_rScale_spec.2,
-    l4j_det l4st_rScale_spec.2]
+  rw [l4j_charpoly_fin_three, l4j_trace, l4j_minorSum rScale_spec.2,
+    l4j_det rScale_spec.2]
 
 /-- The characteristic polynomial `χ(λ) = λ³ - T λ² + M λ - D` of the Jacobian, as a real
 function. -/
@@ -1811,9 +1766,9 @@ private noncomputable def l4j_chi (l : ℝ) : ℝ :=
   l ^ 3 - jacTrace rScale * l ^ 2 + jacMinorSum rScale * l - jacDet rScale
 
 /-- `r_scale` is within `10⁻¹⁸` of the continued-fraction convergent `3961388236/631380705`
-(`l4st_rScale_fine_bounds`). -/
+(`rScale_fine_bounds`). -/
 private lemma l4j_rScale_near : |rScale - 3961388236 / 631380705| ≤ 1 / 10 ^ 18 := by
-  obtain ⟨h₁, h₂⟩ := l4st_rScale_fine_bounds
+  obtain ⟨h₁, h₂⟩ := rScale_fine_bounds
   rw [abs_le]
   constructor <;> norm_num at h₁ h₂ ⊢ <;> linarith
 
@@ -1960,11 +1915,11 @@ private lemma l4j_cubic_roots {T M D a b c : ℝ}
 less than `0.1`", TeX 11450–11452): every complex root of the characteristic polynomial of the
 Jacobian has modulus `< 1/10`. Certificate: `χ(-1/10) < 0 < χ(-1/20)` and
 `χ(-1/1000) < 0 < χ(1/10)` (the signs of degree-5 polynomials in `r_scale`, from
-`l4st_rScale_fine_bounds`), so the three roots are real and lie in `(-1/10, 1/10)`. -/
-theorem l4st_charpoly_jacobianOut_roots :
+`rScale_fine_bounds`), so the three roots are real and lie in `(-1/10, 1/10)`. -/
+theorem norm_lt_of_aeval_charpoly_jacobianOut_eq_zero :
     ∀ μ : ℂ, aeval μ (jacobianOut rScale).charpoly = 0 → ‖μ‖ < 1 / 10 := by
   intro μ hμ
-  rw [l4st_charpoly_jacobianOut] at hμ
+  rw [charpoly_jacobianOut] at hμ
   simp only [map_sub, map_add, map_mul, map_pow, aeval_X, aeval_C, Complex.coe_algebraMap] at hμ
   have hcont : ContinuousOn l4j_chi univ := by
     unfold l4j_chi; fun_prop

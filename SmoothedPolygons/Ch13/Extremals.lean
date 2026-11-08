@@ -14,16 +14,16 @@ condition (13.2.5), and that connect them with the constant-control objects (fir
 switching time, the Poincaré map):
 
 * "if `u` is chosen according to the maximum principle, then `H_F` is constant along trajectories"
-  (TeX 10741–10742; asserted; inventory, gap 1): `l4st_hamMax_eq_of_maxCondition`;
+  (TeX 10741–10742; asserted; inventory, gap 1): `hamMax_eq_of_maxCondition`;
 * "The first control is determined by the maximum principle for `t` small and nonnegative"
   (proof of Lemma 13.2.6, TeX 10978–10979): every such solution starting at `z⁰ ≠ 0` uses the
-  first control up to the first switching time, `l4st_eq_flow_of_maxCondition`. This is what makes
+  first control up to the first switching time, `eq_flow_of_maxCondition`. This is what makes
   the Poincaré map, defined with constant controls, the map along "the solution … with control
   defined by the maximum principle" of TeX 11243–11245.
 
 The proofs use the fundamental theorem of calculus for absolutely continuous functions
 (`AbsolutelyContinuousOnInterval.const_of_ae_hasDerivAt_zero`) and Lebesgue's differentiation
-theorem; the helpers are prefixed `l4d_`.
+theorem.
 -/
 
 @[expose] public section
@@ -65,15 +65,15 @@ private lemma l4d_ac_traj {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ
   have hle := h.1.le
   have hI : t₁ ∈ Icc t₁ t₂ := ⟨le_rfl, hle⟩
   have hII : t₂ ∈ Icc t₁ t₂ := ⟨hle, le_rfl⟩
-  have hc0 := l4d_continuousOn_traj l4d_VT_subset_UT h 0
-  have hc1 := l4d_continuousOn_traj l4d_VT_subset_UT h 1
+  have hc0 := IsTrajectory.continuousOn VT_subset_UT h 0
+  have hc1 := IsTrajectory.continuousOn VT_subset_UT h 1
   obtain ⟨C₀, hC₀⟩ := isCompact_Icc.exists_bound_of_continuousOn hc0
   obtain ⟨C₁, hC₁⟩ := isCompact_Icc.exists_bound_of_continuousOn hc1
-  have hb := l4d_norm_le_one_of_traj l4d_VT_subset_UT h
+  have hb := IsTrajectory.norm_control_le_one VT_subset_UT h
   have L : ∃ K, LipschitzOnWith K (fun t ↦ z t j) (Icc t₁ t₂) := by
     fin_cases j
     · exact ⟨_, l4d_lipschitzOnWith_of_eq_primitive
-        ((l4d_intervalIntegrable_control l4d_VT_subset_UT h hI hII).const_mul (-I))
+        ((IsTrajectory.intervalIntegrable_control VT_subset_UT h hI hII).const_mul (-I))
         (fun t ht ↦ by
           rw [norm_mul, norm_neg, Complex.norm_I, one_mul]; exact hb t ht)
         fun t ht ↦ (h.2.2.2 t ht).1⟩
@@ -120,32 +120,10 @@ private lemma l4d_ac_hamMax {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : �
     intro v
     refine ((((R 0).fun_mul (M 1).fun_neg).fun_add ((M 0).fun_mul (R 1))).fun_add
       (((R 2).const_mul v.re).fun_add ((M 2).const_mul v.im))).congr fun t _ ↦ ?_
-    simp only [ham, l4d_RR_eq, Complex.mul_re, Complex.mul_im, Complex.I_re, Complex.I_im]
+    simp only [ham, RR_eq_re_mul_add_im_mul, Complex.mul_re, Complex.mul_im, Complex.I_re,
+      Complex.I_im]
     ring
   exact (l4d_ac_max (hham 1) (l4d_ac_max (hham ζ) (hham (ζ ^ 2)))).congr fun t _ ↦ rfl
-
-/-- The derivative of `RR(f, g)`. -/
-private lemma l4d_hasDerivAt_RR {f g : ℝ → ℂ} {f' g' : ℂ} {t : ℝ} (hf : HasDerivAt f f' t)
-    (hg : HasDerivAt g g' t) :
-    HasDerivAt (fun s ↦ RR (f s) (g s)) (RR f' (g t) + RR (f t) g') t := by
-  have hs : HasDerivAt (fun s ↦ star (f s) * g s) (star f' * g t + star (f t) * g') t :=
-    (HasDerivAt.star hf).mul hg
-  have h := Complex.reCLM.hasFDerivAt.comp_hasDerivAt t hs
-  convert h using 1
-  · ext s; simp [RR]
-  · simp [RR]
-
-private lemma l4d_ham_le_hamMax (w : Fin 3 → ℂ) {v : ℂ} (hv : v ∈ VT) : ham w v ≤ hamMax w := by
-  unfold hamMax
-  rcases l4d_mem_VT.1 hv with rfl | rfl | rfl
-  · exact le_max_left _ _
-  · exact (le_max_left _ _).trans (le_max_right _ _)
-  · exact (le_max_right _ _).trans (le_max_right _ _)
-
-private lemma l4d_hamMax_eq_of_max {w : Fin 3 → ℂ} {v : ℂ}
-    (hmax : ∀ x ∈ VT, ham w x ≤ ham w v) (hv : v ∈ VT) : hamMax w = ham w v :=
-  le_antisymm (max_le (hmax 1 l4d_one_mem_VT) (max_le (hmax ζ l4d_ζ_mem_VT)
-    (hmax _ l4d_ζ_sq_mem_VT))) (l4d_ham_le_hamMax w hv)
 
 /-- **The Hamiltonian is constant along extremals** (TeX 10741–10742). Along a trajectory of the
 Fuller system with controls in `V_T` satisfying the maximum condition (13.2.5), the maximized
@@ -159,50 +137,53 @@ function `H_F⁺(z(·)) - H_F(z(·), u(t))` is `≥ 0` and vanishes at `t`, so i
 `0` (a maximum of differentiable functions has, where it is differentiable, the derivative of each
 active function). The derivative of `RR(z₁, z₂ i)` is `RR(-iu, i z₂) + RR(z₁, i z₁) = -RR(u, z₂)`.
 The derivative vanishes almost everywhere, so the absolutely continuous function is constant. -/
-theorem l4st_hamMax_eq_of_maxCondition {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ}
+theorem hamMax_eq_of_maxCondition {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ}
     (h : IsTrajectory VT t₁ t₂ z u) (hmax : MaxCondition VT t₁ t₂ z u) :
     (∀ t ∈ Icc t₁ t₂, hamMax (z t) = hamMax (z t₁)) ∧
       ∀ᵐ t, t ∈ Icc t₁ t₂ → ham (z t) (u t) = hamMax (z t₁) := by
   have hle := h.1.le
-  have hU := l4d_VT_subset_UT
+  have hU := VT_subset_UT
   have hI : t₁ ∈ Icc t₁ t₂ := ⟨le_rfl, hle⟩
   have hII : t₂ ∈ Icc t₁ t₂ := ⟨hle, le_rfl⟩
   have hac := l4d_ac_hamMax h
-  have hc0 := l4d_continuousOn_traj hU h 0
-  have hc1 := l4d_continuousOn_traj hU h 1
+  have hc0 := IsTrajectory.continuousOn hU h 0
+  have hc1 := IsTrajectory.continuousOn hU h 1
   have hd0 : ∀ᵐ t, t ∈ Ioo t₁ t₂ → HasDerivAt (fun s ↦ z s 0) (-I * u t) t :=
-    l4d_ae_hasDerivAt_of_eq_primitive (g := fun s ↦ -I * u s)
-      ((l4d_intervalIntegrable_control hU h hI hII).const_mul _) fun t ht ↦ (h.2.2.2 t ht).1
-  have hd1 : ∀ t ∈ Ioo t₁ t₂, HasDerivAt (fun s ↦ z s 1) (z t 0) t := fun t ht ↦
-    l4d_hasDerivAt_of_eq_primitive (g := fun s ↦ z s 0) hc0 (fun t ht ↦ (h.2.2.2 t ht).2.1) ht
-  have hd2 : ∀ t ∈ Ioo t₁ t₂, HasDerivAt (fun s ↦ z s 2) (z t 1) t := fun t ht ↦
-    l4d_hasDerivAt_of_eq_primitive (g := fun s ↦ z s 1) hc1 (fun t ht ↦ (h.2.2.2 t ht).2.2) ht
+    ae_hasDerivAt_of_eq_add_integral (w := fun s ↦ -I * u s)
+      ((IsTrajectory.intervalIntegrable_control hU h hI hII).const_mul _) hI
+      fun t ht ↦ (h.2.2.2 t ht).1
+  have hd1 : ∀ᵐ t, t ∈ Ioo t₁ t₂ → HasDerivAt (fun s ↦ z s 1) (z t 0) t :=
+    ae_hasDerivAt_of_eq_add_integral (w := fun s ↦ z s 0) (hc0.intervalIntegrable_of_Icc hle) hI
+      fun t ht ↦ (h.2.2.2 t ht).2.1
+  have hd2 : ∀ᵐ t, t ∈ Ioo t₁ t₂ → HasDerivAt (fun s ↦ z s 2) (z t 1) t :=
+    ae_hasDerivAt_of_eq_add_integral (w := fun s ↦ z s 1) (hc1.intervalIntegrable_of_Icc hle) hI
+      fun t ht ↦ (h.2.2.2 t ht).2.2
   have hzero : ∀ᵐ t, t ∈ uIcc t₁ t₂ → HasDerivAt (fun s ↦ hamMax (z s)) 0 t := by
-    filter_upwards [hd0, hac.ae_differentiableAt, hmax, l4d_ae_ne t₁, l4d_ae_ne t₂]
-      with t h0t hdt hmt hne1 hne2 ht
+    filter_upwards [hd0, hd1, hd2, hac.ae_differentiableAt, hmax, l4d_ae_ne t₁, l4d_ae_ne t₂]
+      with t h0t h1t h2t hdt hmt hne1 hne2 ht
     have htI : t ∈ Icc t₁ t₂ := by rwa [uIcc_of_le hle] at ht
     have htI' : t ∈ Ioo t₁ t₂ :=
       ⟨lt_of_le_of_ne htI.1 (Ne.symm hne1), lt_of_le_of_ne htI.2 hne2⟩
     have hv₀ : u t ∈ VT := h.2.2.1 t htI
     -- `F(s) = RR(z₁(s), z₂(s) i)`
     have hF : HasDerivAt (fun s ↦ RR (z s 0) (z s 1 * I)) (-RR (u t) (z t 1)) t := by
-      have := l4d_hasDerivAt_RR (h0t htI') ((hd1 t htI').mul_const I)
+      have := hasDerivAt_RR (h0t htI') ((h1t htI').mul_const I)
       convert this using 1
-      simp only [l4d_RR_eq, Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.neg_im,
-        Complex.I_re, Complex.I_im]
+      simp only [RR_eq_re_mul_add_im_mul, Complex.mul_re, Complex.mul_im, Complex.neg_re,
+        Complex.neg_im, Complex.I_re, Complex.I_im]
       ring
     -- `φ(s) = RR(u(t), z₃(s))`
     have hφ : HasDerivAt (fun s ↦ RR (u t) (z s 2)) (RR (u t) (z t 1)) t := by
-      have := l4d_hasDerivAt_RR (hasDerivAt_const t (u t)) (hd2 t htI')
+      have := hasDerivAt_RR (hasDerivAt_const t (u t)) (h2t htI')
       convert this using 1
-      simp [l4d_RR_eq]
+      simp [RR_eq_re_mul_add_im_mul]
     have hG := ((hdt ht).hasDerivAt.sub hF).sub hφ
     have hmin : IsLocalMin
         (fun s ↦ hamMax (z s) - RR (z s 0) (z s 1 * I) - RR (u t) (z s 2)) t := by
       refine Filter.Eventually.of_forall fun s ↦ ?_
       have h1 : hamMax (z t) = ham (z t) (u t) :=
-        l4d_hamMax_eq_of_max (fun w hw ↦ hmt htI w hw) hv₀
-      have h2 : ham (z s) (u t) ≤ hamMax (z s) := l4d_ham_le_hamMax (z s) hv₀
+        hamMax_eq_of_forall_le hv₀ (fun w hw ↦ hmt htI w hw)
+      have h2 : ham (z s) (u t) ≤ hamMax (z s) := ham_le_hamMax (z s) hv₀
       simp only [ham] at h1 h2
       dsimp only
       linarith
@@ -216,7 +197,7 @@ theorem l4st_hamMax_eq_of_maxCondition {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → 
     rw [hC t (by rwa [uIcc_of_le hle]), hC t₁ (by rw [uIcc_of_le hle]; exact hI)]
   refine ⟨hconst, ?_⟩
   filter_upwards [hmax] with t hmt ht
-  rw [← hconst t ht, l4d_hamMax_eq_of_max (fun w hw ↦ hmt ht w hw) (h.2.2.1 t ht)]
+  rw [← hconst t ht, hamMax_eq_of_forall_le (h.2.2.1 t ht) (fun w hw ↦ hmt ht w hw)]
 
 /-! ### Helpers: local uniqueness of extremals -/
 
@@ -225,14 +206,6 @@ private lemma l4d_abs_RR_le (x y : ℂ) : |RR x y| ≤ ‖x‖ * ‖y‖ := by
   rw [RR]
   calc |(starRingEnd ℂ x * y).re| ≤ ‖starRingEnd ℂ x * y‖ := Complex.abs_re_le_norm _
     _ = ‖x‖ * ‖y‖ := by rw [norm_mul, Complex.norm_conj]
-
-/-- The control vectors seen through `RR`. -/
-private lemma l4d_controlVector_sub (p : Fin 3 → ℂ) (v w : ℂ) :
-    (controlVector p v - controlVector p w) 0 = RR (v - w) (p 2) ∧
-      (controlVector p v - controlVector p w) 1 = RR (v - w) (p 1) ∧
-      (controlVector p v - controlVector p w) 2 = RR (v - w) (p 0) := by
-  simp only [controlVector, Pi.sub_apply, l4d_RR_eq, Complex.sub_re, Complex.sub_im]
-  refine ⟨?_, ?_, ?_⟩ <;> simp <;> ring
 
 /-- The lexicographic order is total: a nonzero vector or its opposite is positive. -/
 private lemma l4d_lexPos_or {x : Fin 3 → ℝ} (hx : x ≠ 0) : LexPos x ∨ LexPos (-x) := by
@@ -258,8 +231,8 @@ private lemma l4d_lexPos_or {x : Fin 3 → ℝ} (hx : x ≠ 0) : LexPos x ∨ Le
 /-- Three distinct vertices exhaust `V_T`. -/
 private lemma l4d_VT_cases {a b c y : ℂ} (ha : a ∈ VT) (hb : b ∈ VT) (hc : c ∈ VT) (hy : y ∈ VT)
     (hab : a ≠ b) (hac : a ≠ c) (hbc : b ≠ c) : y = a ∨ y = b ∨ y = c := by
-  rcases l4d_mem_VT.1 ha with rfl | rfl | rfl <;> rcases l4d_mem_VT.1 hb with rfl | rfl | rfl <;>
-    rcases l4d_mem_VT.1 hc with rfl | rfl | rfl <;> rcases l4d_mem_VT.1 hy with rfl | rfl | rfl <;>
+  rcases mem_VT.1 ha with rfl | rfl | rfl <;> rcases mem_VT.1 hb with rfl | rfl | rfl <;>
+    rcases mem_VT.1 hc with rfl | rfl | rfl <;> rcases mem_VT.1 hy with rfl | rfl | rfl <;>
     simp_all
 
 /-- **Local uniqueness** (proof of Lemma 13.2.6, TeX 10978–10995): an extremal from `z(a) ≠ 0`
@@ -267,8 +240,9 @@ uses the first control of `z(a)` almost everywhere on some `[a, a + ε]`.
 
 By (13.3.1)–(13.3.2), `RR(d, z₃(t)) = RR(d, z₃⁰) + RR(d, z₂⁰)(t - a) + RR(d, z₁⁰)(t - a)²/2 +
 RR(u₃(t), i d)` with `|u₃(t)| ≤ (t - a)³/6`. A control `v` with `v(z⁰, v) ≺ v(z⁰, u₀)` is beaten by
-`u₀` for small `t > a` (the first nonzero coefficient is positive, `l4c_cubic_pos`). If a control
-`v ≠ u₀` ties with `u₀`, the third control is beaten, so `u ∈ {u₀, v}` a.e. near `a`, and
+`u₀` for small `t > a` (the first nonzero coefficient is positive,
+`exists_forall_Ioc_cubic_pos`). If a control `v ≠ u₀` ties with `u₀`, the third control is
+beaten, so `u ∈ {u₀, v}` a.e. near `a`, and
 `RR(u₀ - v, z₃(t)) = RR(u₃(t), i(u₀ - v)) = κ(t - a)³/6` with `κ = RR(u₀ - v, -iu₀) =
 RR(u₀ - v, -iv) > 0` (the computation of Lemma 13.2.6: `κ ≥ 0` because `u₀` is the first control,
 and `κ = ±√3/2 ≠ 0`); so `v` is beaten too. -/
@@ -276,11 +250,11 @@ private lemma l4d_local_unique {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ 
     (h : IsTrajectory VT a b z u) (hmax : MaxCondition VT a b z u) (hp : z a ≠ 0) :
     ∃ ε > 0, ∀ᵐ t, t ∈ Ioo a (a + ε) → t ≤ b → u t = firstControl (z a) := by
   set u₀ := firstControl (z a) with hu₀def
-  have hfc : IsFirstControl (z a) u₀ := l4st_isFirstControl_firstControl hp
+  have hfc : IsFirstControl (z a) u₀ := isFirstControl_firstControl hp
   have hu₀ : u₀ ∈ VT := hfc.1
-  have hlex : u₀ ∈ lexMaxControls (z a) := l4st_firstControl_mem_lexMaxControls hp
+  have hlex : u₀ ∈ lexMaxControls (z a) := firstControl_mem_lexMaxControls hp
   have hVT : lexMaxControls (z a) ≠ VT := (lemma13_2_6 hp).2.2
-  have hb := l4d_norm_le_one_of_traj l4d_VT_subset_UT h
+  have hb := IsTrajectory.norm_control_le_one VT_subset_UT h
   have hI : a ∈ Icc a b := ⟨le_rfl, h.1.le⟩
   -- (13.3.2) seen through `RR(d, ·)`
   have hRRz : ∀ d : ℂ, ∀ t ∈ Icc a b, RR d (z t 2) = RR d (z a 2) + RR d (z a 1) * (t - a) +
@@ -288,14 +262,14 @@ private lemma l4d_local_unique {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ 
     intro d t ht
     have e : z t 2 = -I * u3 a u t + (((t - a) ^ 2 / 2 : ℝ) : ℂ) * z a 0 +
         ((t - a : ℝ) : ℂ) * z a 1 + z a 2 := by
-      rw [eqn_z3u3 l4d_VT_subset_UT h t ht]; push_cast; ring
+      rw [eqn_z3u3 VT_subset_UT h t ht]; push_cast; ring
     rw [e]
-    simp only [l4d_RR_eq, Complex.add_re, Complex.add_im, Complex.mul_re, Complex.mul_im,
-      Complex.neg_re, Complex.neg_im, Complex.I_re, Complex.I_im, Complex.ofReal_re,
+    simp only [RR_eq_re_mul_add_im_mul, Complex.add_re, Complex.add_im, Complex.mul_re,
+      Complex.mul_im, Complex.neg_re, Complex.neg_im, Complex.I_re, Complex.I_im, Complex.ofReal_re,
       Complex.ofReal_im]
     ring
   have hRRsub : ∀ v w x : ℂ, RR v x - RR w x = RR (v - w) x := fun v w x ↦ by
-    simp only [l4d_RR_eq, Complex.sub_re, Complex.sub_im]; ring
+    simp only [RR_eq_re_mul_add_im_mul, Complex.sub_re, Complex.sub_im]; ring
   have hmaxt : ∀ᵐ t, t ∈ Icc a b → ∀ v ∈ VT, RR v (z t 2) ≤ RR (u t) (z t 2) := by
     filter_upwards [hmax] with t ht htI v hv
     have := ht htI v hv
@@ -310,9 +284,9 @@ private lemma l4d_local_unique {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ 
       · exact h'
       · rw [neg_sub] at h'
         exact absurd h' (hlex.2 v hv)
-    obtain ⟨e0, e1, e2⟩ := l4d_controlVector_sub (z a) u₀ v
-    obtain ⟨ε, hε, hpos⟩ := l4c_cubic_pos (a := RR (u₀ - v) (z a 2)) (b := RR (u₀ - v) (z a 1))
-      (c := RR (u₀ - v) (z a 0) / 2) (d := -1 / 3) (by
+    obtain ⟨e0, e1, e2⟩ := controlVector_sub_apply (z a) u₀ v
+    obtain ⟨ε, hε, hpos⟩ := exists_forall_Ioc_cubic_pos (a := RR (u₀ - v) (z a 2))
+      (b := RR (u₀ - v) (z a 1)) (c := RR (u₀ - v) (z a 0) / 2) (d := -1 / 3) (by
         obtain ⟨k, hk, hk'⟩ := hlt
         fin_cases k
         · left; rw [← e0]; exact hk'
@@ -331,7 +305,7 @@ private lemma l4d_local_unique {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ 
       have h2 : ‖I * (u₀ - v)‖ ≤ 2 := by
         rw [norm_mul, Complex.norm_I, one_mul]
         calc ‖u₀ - v‖ ≤ ‖u₀‖ + ‖v‖ := norm_sub_le _ _
-          _ = 2 := by rw [l4d_norm_VT hu₀, l4d_norm_VT hv]; norm_num
+          _ = 2 := by rw [norm_eq_one_of_mem_VT hu₀, norm_eq_one_of_mem_VT hv]; norm_num
       have h3 := (eqn_u3 h.2.1 hb t htI).2
       have h4 : 0 ≤ (t - a) ^ 3 / 6 := by have := (sub_pos.2 ht.1).le; positivity
       have h5 : ‖u3 a u t‖ * ‖I * (u₀ - v)‖ ≤ (t - a) ^ 3 / 6 * 2 :=
@@ -360,7 +334,7 @@ private lemma l4d_local_unique {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ 
         exact hlex.2
       have hev : ∀ᶠ t in 𝓝[>] a, ∀ x ∈ VT, x ≠ u₀ → x ≠ v → t ≤ b →
           RR x (z t 2) < RR u₀ (z t 2) := by
-        refine (Filter.eventually_all_finite l4d_VT_finite).2 fun x hx ↦ ?_
+        refine (Filter.eventually_all_finite finite_VT).2 fun x hx ↦ ?_
         by_cases hxu : x = u₀
         · exact Filter.Eventually.of_forall fun t h1 ↦ absurd hxu h1
         by_cases hxv : x = v
@@ -377,21 +351,21 @@ private lemma l4d_local_unique {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ 
         have h2 := hms hsI u₀ hu₀
         linarith
       -- `κ = RR(u₀ - v, -iu₀) > 0`
-      obtain ⟨e0, e1, e2⟩ := l4d_controlVector_sub (z a) u₀ v
+      obtain ⟨e0, e1, e2⟩ := controlVector_sub_apply (z a) u₀ v
       rw [hcv, sub_self, Pi.zero_apply] at e0 e1 e2
       have hκ : 0 < RR (u₀ - v) (-I * u₀) := by
         obtain ⟨-, ε', hε', hε'max⟩ := hfc
         have h1 := hε'max ε' ⟨hε'.le, le_rfl⟩ v hv
-        have h2 := l4c_ham_flow_sub ε' (z a) u₀ u₀ v
+        have h2 := ham_flow_sub_ham_flow ε' (z a) u₀ u₀ v
         rw [← e0, ← e1, ← e2] at h2
         have h3 : 0 ≤ RR (u₀ - v) (-I * u₀) * ε' ^ 3 := by nlinarith
         have h4 : 0 ≤ RR (u₀ - v) (-I * u₀) :=
           nonneg_of_mul_nonneg_left h3 (by positivity)
-        exact lt_of_le_of_ne h4 (Ne.symm (l4d_RR_sub_neg_I_mul_ne_zero hu₀ hv (Ne.symm hvu)))
+        exact lt_of_le_of_ne h4 (Ne.symm (RR_sub_neg_I_mul_ne_zero hu₀ hv (Ne.symm hvu)))
       have hκv : ∀ w, w = u₀ ∨ w = v → RR w (I * (u₀ - v)) = RR (u₀ - v) (-I * u₀) := by
         rintro w (rfl | rfl) <;>
-          simp only [l4d_RR_eq, Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.neg_im,
-            Complex.I_re, Complex.I_im, Complex.sub_re, Complex.sub_im] <;> ring
+          simp only [RR_eq_re_mul_add_im_mul, Complex.mul_re, Complex.mul_im, Complex.neg_re,
+            Complex.neg_im, Complex.I_re, Complex.I_im, Complex.sub_re, Complex.sub_im] <;> ring
       -- so `v` is beaten near `a`
       have hbv : ∀ᶠ t in 𝓝[>] a, t ≤ b → RR v (z t 2) < RR u₀ (z t 2) := by
         filter_upwards [Ioo_mem_nhdsGT hc] with t ht htb
@@ -399,10 +373,11 @@ private lemma l4d_local_unique {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ 
         have hR := hRRz (u₀ - v) t htI
         rw [← e0, ← e1, ← e2] at hR
         have hU : RR (u3 a u t) (I * (u₀ - v)) = RR (u₀ - v) (-I * u₀) * (t - a) ^ 3 / 6 := by
-          rw [l4d_RR_u3 (l4d_intervalIntegrable_control l4d_VT_subset_UT h hI htI),
+          rw [RR_u3 (IsTrajectory.intervalIntegrable_control VT_subset_UT h hI htI),
             intervalIntegral.integral_congr_ae
               (g := fun s ↦ RR (u₀ - v) (-I * u₀) * (t - s) ^ 2) ?_,
-            intervalIntegral.integral_const_mul, l4d_integral_sq_sub]
+            intervalIntegral.integral_const_mul,
+            intervalIntegral.integral_comp_sub_left (fun x : ℝ ↦ x ^ 2) t, integral_pow]
           · ring
           · filter_upwards [hae] with s hs hsI
             rw [uIoc_of_le htI.1] at hsI
@@ -415,7 +390,7 @@ private lemma l4d_local_unique {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ 
       · rw [hxv]; exact h2 htb
       · exact h1 x hx hxu hxv htb
     · push Not at htie
-      refine (Filter.eventually_all_finite l4d_VT_finite).2 fun x hx ↦ ?_
+      refine (Filter.eventually_all_finite finite_VT).2 fun x hx ↦ ?_
       by_cases hxu : x = u₀
       · exact Filter.Eventually.of_forall fun t h1 ↦ absurd hxu h1
       · filter_upwards [hbeat x hx (htie x hx hxu)] with t ht _ htb using ht htb
@@ -442,17 +417,17 @@ outside `V_{T,max}` is beaten by a lower-order term of `Q` for small `t > 0`; if
 Lemma 13.2.6, valid for every control in the edge), so `u = ζ^i` almost everywhere near `0`.
 (Continuation) Let `S` be the supremum of the `s ≤ T` such that `u` is the first control almost
 everywhere on `[0, s]` (a countable union of null sets is null, so `S` is such an `s`); if
-`S < T`, then `z(S) = z(S, z⁰, u₀) ≠ 0` by `l4f_flow_firstControl_ne_zero` (`S ≤ T ≤ t_sw`;
+`S < T`, then `z(S) = z(S, z⁰, u₀) ≠ 0` by `flow_firstControl_ne_zero` (`S ≤ T ≤ t_sw`;
 Lemma 13.3.1 does not apply, as `z₃⁰` need not lie on a wall) and the first control of `z(S)` is
 still `u₀` (it is optimal on `[S, t_sw]`), so local uniqueness at `z(S)` contradicts the choice of
 `S`. -/
-theorem l4st_eq_flow_of_maxCondition {z₀ : Fin 3 → ℂ} (hz₀ : z₀ ≠ 0) {T : ℝ}
+theorem eq_flow_of_maxCondition {z₀ : Fin 3 → ℂ} (hz₀ : z₀ ≠ 0) {T : ℝ}
     (hT : T ≤ firstSwitchTime z₀) {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ} (h : IsTrajectory VT 0 T z u)
     (hmax : MaxCondition VT 0 T z u) (h0 : z 0 = z₀) :
     (∀ t ∈ Icc 0 T, z t = flow t z₀ (firstControl z₀)) ∧
       ∀ᵐ t, t ∈ Icc 0 T → u t = firstControl z₀ := by
   set u₀ := firstControl z₀ with hu₀def
-  have hu₀ : u₀ ∈ VT := (l4st_isFirstControl_firstControl hz₀).1
+  have hu₀ : u₀ ∈ VT := (isFirstControl_firstControl hz₀).1
   have hT0 : 0 < T := h.1
   -- the times up to which `u = u₀` almost everywhere
   set A : Set ℝ := {s | 0 ≤ s ∧ s ≤ T ∧ ∀ᵐ t, t ∈ Icc 0 s → u t = u₀} with hA
@@ -484,19 +459,19 @@ theorem l4st_eq_flow_of_maxCondition {z₀ : Fin 3 → ℂ} (hz₀ : z₀ ≠ 0)
     have hSlt : S < T := lt_of_le_of_ne hST hne
     have hzS : z S = flow S z₀ u₀ := by
       rcases hS0.eq_or_lt with hS | hS
-      · rw [← hS, h0, l4st_flow_zero]
-      · have h' := l4d_isTrajectory_mono l4d_VT_subset_UT h le_rfl hS hST
-        rw [l4d_eq_flow_of_ae_eq h' hu₀ hSA S ⟨hS0, le_rfl⟩, h0, sub_zero]
+      · rw [← hS, h0, flow_zero]
+      · have h' := IsTrajectory.mono VT_subset_UT h le_rfl hS hST
+        rw [IsTrajectory.eq_flow_of_ae_eq h' hu₀ hSA S ⟨hS0, le_rfl⟩, h0, sub_zero]
     have hSsw : S ∈ Icc 0 (firstSwitchTime z₀) := ⟨hS0, hST.trans hT⟩
-    have hpS : z S ≠ 0 := by rw [hzS]; exact l4f_flow_firstControl_ne_zero hz₀ hSsw
+    have hpS : z S ≠ 0 := by rw [hzS]; exact flow_firstControl_ne_zero hz₀ hSsw
     have hfcS : firstControl (z S) = u₀ := by
-      rw [l4st_firstControl_eq_iff hpS]
+      rw [firstControl_eq_iff hpS]
       refine ⟨hu₀, firstSwitchTime z₀ - S, by linarith, fun t ht v hv ↦ ?_⟩
-      rw [hzS, ← l4st_flow_add]
-      exact l4st_firstControl_maximizes hz₀ (S + t) ⟨by linarith [ht.1], by linarith [ht.2]⟩ v hv
+      rw [hzS, ← flow_add]
+      exact firstControl_maximizes hz₀ (S + t) ⟨by linarith [ht.1], by linarith [ht.2]⟩ v hv
     obtain ⟨ε, hε, hloc⟩ := l4d_local_unique
-      (l4d_isTrajectory_mono l4d_VT_subset_UT h hS0 hSlt le_rfl)
-      (l4d_maxCondition_mono hmax hS0 le_rfl) hpS
+      (IsTrajectory.mono VT_subset_UT h hS0 hSlt le_rfl)
+      (MaxCondition.mono hmax hS0 le_rfl) hpS
     have hcA : min T (S + ε / 2) ∈ A := by
       refine ⟨le_min hT0.le (by linarith), min_le_left _ _, ?_⟩
       filter_upwards [hSA, hloc] with t h1 h2 htI
@@ -511,7 +486,7 @@ theorem l4st_eq_flow_of_maxCondition {z₀ : Fin 3 → ℂ} (hz₀ : z₀ ≠ 0)
     linarith
   have hTA : ∀ᵐ t, t ∈ Icc 0 T → u t = u₀ := hSeq ▸ hSA
   refine ⟨fun t ht ↦ ?_, hTA⟩
-  rw [l4d_eq_flow_of_ae_eq h hu₀ hTA t ht, h0, sub_zero]
+  rw [IsTrajectory.eq_flow_of_ae_eq h hu₀ hTA t ht, h0, sub_zero]
 
 end TriFuller
 

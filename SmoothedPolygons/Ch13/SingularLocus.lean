@@ -5,6 +5,7 @@ public import Mathlib.Analysis.Convex.Extreme
 public import Mathlib.MeasureTheory.Integral.Prod
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferentiationThm
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+public import Basic.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
 
 /-!
 # Chapter 13: the singular locus of the Fuller system
@@ -19,10 +20,12 @@ the origin of `ℂ³` (TeX 11072).
 * Lemma 13.3.2 (`lemma:no-singular`): the only singular arc is `z ≡ 0`, `u = 0` almost everywhere.
 
 The file also proves the facts about trajectories with measurable controls that these results and
-`SmoothedPolygons/Ch13/Extremals.lean` use (names prefixed `l4d_`): the values of `RR` on the
-vertices `V_T`, the half-planes containing `U_T`, the maximizers of `RR(·, w)` on `U_T`, the
-integrability, continuity and restriction of trajectories, the derivative of a primitive, and
-Fubini's theorem on a triangle (Cauchy's formula for repeated integration).
+`SmoothedPolygons/Ch13/Extremals.lean` use: the integrability, continuity and restriction of
+trajectories (`IsTrajectory.intervalIntegrable_control`, `IsTrajectory.continuousOn`,
+`IsTrajectory.mono`, `MaxCondition.mono`, `IsTrajectory.eq_flow_of_ae_eq`) and `RR_u3`; and, as
+private helpers, the values of `RR` on the vertices `V_T`, the half-planes containing `U_T`, the
+maximizers of `RR(·, w)` on `U_T`, the derivative of a primitive, and Fubini's theorem on a
+triangle (Cauchy's formula for repeated integration).
 -/
 
 @[expose] public section
@@ -35,146 +38,102 @@ namespace TriFuller
 
 /-! ### Helpers: the form `RR` and the vertices `V_T` -/
 
-/-- `RR(a, b) = Re a Re b + Im a Im b`. -/
-theorem l4d_RR_eq (a b : ℂ) : RR a b = a.re * b.re + a.im * b.im := by
-  simp only [RR, Complex.mul_re, Complex.conj_re, Complex.conj_im]
-  ring
-
-/-- `RR` is symmetric. -/
-theorem l4d_RR_comm (a b : ℂ) : RR a b = RR b a := by
-  rw [l4d_RR_eq, l4d_RR_eq]; ring
-
-/-- `RR` is additive in its first argument. -/
-theorem l4d_RR_add_left (a b c : ℂ) : RR (a + b) c = RR a c + RR b c := by
-  simp only [l4d_RR_eq, Complex.add_re, Complex.add_im]; ring
-
-/-- `RR` is `ℝ`-homogeneous in its first argument. -/
-theorem l4d_RR_ofReal_mul_left (r : ℝ) (a c : ℂ) : RR (r * a) c = r * RR a c := by
-  simp only [l4d_RR_eq, Complex.re_ofReal_mul, Complex.im_ofReal_mul]; ring
-
-/-- `RR` is `ℝ`-homogeneous in its second argument. -/
-theorem l4d_RR_ofReal_mul_right (r : ℝ) (a c : ℂ) : RR a (r * c) = r * RR a c := by
-  simp only [l4d_RR_eq, Complex.re_ofReal_mul, Complex.im_ofReal_mul]; ring
-
 /-- `√3 · √3 = 3`. -/
-theorem l4d_sqrt3_mul_self : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
-
-theorem l4d_ζ_re : ζ.re = -1 / 2 := by rw [l4st_ζ_eq]
-
-theorem l4d_ζ_im : ζ.im = √3 / 2 := by rw [l4st_ζ_eq]
-
-theorem l4d_ζ_sq_re : (ζ ^ 2).re = -1 / 2 := by
-  rw [pow_two, Complex.mul_re, l4d_ζ_re, l4d_ζ_im]; nlinarith [l4d_sqrt3_mul_self]
-
-theorem l4d_ζ_sq_im : (ζ ^ 2).im = -(√3 / 2) := by
-  rw [pow_two, Complex.mul_im, l4d_ζ_re, l4d_ζ_im]; ring
-
-theorem l4d_mem_VT {v : ℂ} : v ∈ VT ↔ v = 1 ∨ v = ζ ∨ v = ζ ^ 2 := by
-  simp only [VT, Set.mem_insert_iff, Set.mem_singleton_iff]
-
-theorem l4d_one_mem_VT : (1 : ℂ) ∈ VT := l4d_mem_VT.2 (Or.inl rfl)
-
-theorem l4d_ζ_mem_VT : ζ ∈ VT := l4d_mem_VT.2 (Or.inr (Or.inl rfl))
-
-theorem l4d_ζ_sq_mem_VT : ζ ^ 2 ∈ VT := l4d_mem_VT.2 (Or.inr (Or.inr rfl))
-
-theorem l4d_VT_subset_UT : VT ⊆ UT := subset_convexHull ℝ VT
-
-theorem l4d_VT_finite : VT.Finite := ((Set.finite_singleton _).insert _).insert _
-
-theorem l4d_norm_VT {v : ℂ} (hv : v ∈ VT) : ‖v‖ = 1 := (l4st_VT_props hv hv).1
+private theorem l4d_sqrt3_mul_self : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
 
 /-- `RR(v, v) = 1` for `v ∈ V_T`. -/
-theorem l4d_RR_self_VT {v : ℂ} (hv : v ∈ VT) : RR v v = 1 := by
-  rcases l4d_mem_VT.1 hv with rfl | rfl | rfl <;>
-    simp only [l4d_RR_eq, Complex.one_re, Complex.one_im, l4d_ζ_re, l4d_ζ_im, l4d_ζ_sq_re,
-      l4d_ζ_sq_im] <;> nlinarith [l4d_sqrt3_mul_self]
+private theorem l4d_RR_self_VT {v : ℂ} (hv : v ∈ VT) : RR v v = 1 := by
+  rcases mem_VT.1 hv with rfl | rfl | rfl <;>
+    simp only [RR_eq_re_mul_add_im_mul, Complex.one_re, Complex.one_im, ζ_re, ζ_im, ζ_sq_re,
+      ζ_sq_im] <;> nlinarith [l4d_sqrt3_mul_self]
 
 /-- `RR(v, w) = -1/2` for distinct `v, w ∈ V_T`. -/
-theorem l4d_RR_ne_VT {v w : ℂ} (hv : v ∈ VT) (hw : w ∈ VT) (hne : v ≠ w) :
+private theorem l4d_RR_ne_VT {v w : ℂ} (hv : v ∈ VT) (hw : w ∈ VT) (hne : v ≠ w) :
     RR v w = -1 / 2 := by
-  rcases l4d_mem_VT.1 hv with rfl | rfl | rfl <;> rcases l4d_mem_VT.1 hw with rfl | rfl | rfl <;>
+  rcases mem_VT.1 hv with rfl | rfl | rfl <;> rcases mem_VT.1 hw with rfl | rfl | rfl <;>
     first
     | exact absurd rfl hne
-    | simp only [l4d_RR_eq, Complex.one_re, Complex.one_im, l4d_ζ_re, l4d_ζ_im, l4d_ζ_sq_re,
-        l4d_ζ_sq_im]; nlinarith [l4d_sqrt3_mul_self]
+    | simp only [RR_eq_re_mul_add_im_mul, Complex.one_re, Complex.one_im, ζ_re, ζ_im, ζ_sq_re,
+        ζ_sq_im]; nlinarith [l4d_sqrt3_mul_self]
 
 /-- Every vertex of `U_T` has another vertex. -/
-theorem l4d_exists_ne_VT (c : ℂ) : ∃ v ∈ VT, v ≠ c := by
+private theorem l4d_exists_ne_VT (c : ℂ) : ∃ v ∈ VT, v ≠ c := by
   by_cases h : c = 1
-  · refine ⟨ζ, l4d_ζ_mem_VT, fun h' ↦ ?_⟩
+  · refine ⟨ζ, ζ_mem_VT, fun h' ↦ ?_⟩
     have := congrArg Complex.re (h'.trans h)
-    rw [l4d_ζ_re, Complex.one_re] at this
+    rw [ζ_re, Complex.one_re] at this
     norm_num at this
-  · exact ⟨1, l4d_one_mem_VT, Ne.symm h⟩
+  · exact ⟨1, one_mem_VT, Ne.symm h⟩
 
 /-- For distinct `v, w ∈ V_T`, `RR(v - w, -iv) = ±√3/2 ≠ 0`. -/
-theorem l4d_RR_sub_neg_I_mul_ne_zero {v w : ℂ} (hv : v ∈ VT) (hw : w ∈ VT) (hne : v ≠ w) :
+theorem RR_sub_neg_I_mul_ne_zero {v w : ℂ} (hv : v ∈ VT) (hw : w ∈ VT) (hne : v ≠ w) :
     RR (v - w) (-I * v) ≠ 0 := by
   have h3 : 0 < √3 := by positivity
-  rcases l4d_mem_VT.1 hv with rfl | rfl | rfl <;> rcases l4d_mem_VT.1 hw with rfl | rfl | rfl <;>
+  rcases mem_VT.1 hv with rfl | rfl | rfl <;> rcases mem_VT.1 hw with rfl | rfl | rfl <;>
     first
     | exact absurd rfl hne
-    | simp only [l4d_RR_eq, Complex.sub_re, Complex.sub_im, Complex.mul_re, Complex.mul_im,
-        Complex.neg_re, Complex.neg_im, Complex.I_re, Complex.I_im, Complex.one_re,
-        Complex.one_im, l4d_ζ_re, l4d_ζ_im, l4d_ζ_sq_re, l4d_ζ_sq_im]
+    | simp only [RR_eq_re_mul_add_im_mul, Complex.sub_re, Complex.sub_im, Complex.mul_re,
+        Complex.mul_im, Complex.neg_re, Complex.neg_im, Complex.I_re, Complex.I_im, Complex.one_re,
+        Complex.one_im, ζ_re, ζ_im, ζ_sq_re, ζ_sq_im]
       intro h; nlinarith [l4d_sqrt3_mul_self]
 
 /-- `RR(·, w)` is `ℝ`-linear. -/
-theorem l4d_isLinearMap_RR (w : ℂ) : IsLinearMap ℝ (fun v : ℂ ↦ RR v w) :=
-  IsLinearMap.mk (fun x y ↦ l4d_RR_add_left x y w)
-    (fun c x ↦ by simp only [l4d_RR_eq, Complex.smul_re, Complex.smul_im, smul_eq_mul]; ring)
+private theorem l4d_isLinearMap_RR (w : ℂ) : IsLinearMap ℝ (fun v : ℂ ↦ RR v w) :=
+  IsLinearMap.mk (fun x y ↦ RR_add_left x y w)
+    (fun c x ↦ by
+      simp only [RR_eq_re_mul_add_im_mul, Complex.smul_re, Complex.smul_im, smul_eq_mul]; ring)
 
 /-- `RR(·, w) - α RR(·, m)` is `ℝ`-linear. -/
-theorem l4d_isLinearMap_RR_sub (w m : ℂ) (α : ℝ) :
+private theorem l4d_isLinearMap_RR_sub (w m : ℂ) (α : ℝ) :
     IsLinearMap ℝ (fun v : ℂ ↦ RR v w - α * RR v m) :=
-  IsLinearMap.mk (fun x y ↦ by simp only [l4d_RR_add_left]; ring)
-    (fun c x ↦ by simp only [l4d_RR_eq, Complex.smul_re, Complex.smul_im, smul_eq_mul]; ring)
+  IsLinearMap.mk (fun x y ↦ by simp only [RR_add_left]; ring)
+    (fun c x ↦ by
+      simp only [RR_eq_re_mul_add_im_mul, Complex.smul_re, Complex.smul_im, smul_eq_mul]; ring)
 
 /-- A nonzero real multiple of `i u`, `u ∈ V_T`, is not on a wall: the walls are the real
 multiples of the vertices, and no vertex is a real multiple of `i` times a vertex. -/
-theorem l4d_I_mul_not_mem_walls {c : ℝ} (hc : c ≠ 0) {u : ℂ} (hu : u ∈ VT) :
+private theorem l4d_I_mul_not_mem_walls {c : ℝ} (hc : c ≠ 0) {u : ℂ} (hu : u ∈ VT) :
     I * (c : ℂ) * u ∉ walls := by
   rintro ((⟨s, -, hs⟩ | ⟨s, -, hs⟩) | ⟨s, -, hs⟩) <;>
   · have hre := congrArg Complex.re hs
     have him := congrArg Complex.im hs
     apply hc
-    rcases l4d_mem_VT.1 hu with rfl | rfl | rfl <;>
+    rcases mem_VT.1 hu with rfl | rfl | rfl <;>
       simp only [Complex.mul_re, Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re,
-        Complex.ofReal_im, Complex.one_re, Complex.one_im, pow_zero, pow_one, l4d_ζ_re, l4d_ζ_im,
-        l4d_ζ_sq_re, l4d_ζ_sq_im] at hre him <;>
+        Complex.ofReal_im, Complex.one_re, Complex.one_im, pow_zero, pow_one, ζ_re, ζ_im,
+        ζ_sq_re, ζ_sq_im] at hre him <;>
       nlinarith [l4d_sqrt3_mul_self, Real.sqrt_nonneg 3]
 
 /-- A nonzero point of a wall has `RR(w, c) < 0` for the vertex `c` of its ray. -/
-theorem l4d_exists_RR_neg_of_mem_walls {w : ℂ} (hw : w ∈ walls) (hne : w ≠ 0) :
+private theorem l4d_exists_RR_neg_of_mem_walls {w : ℂ} (hw : w ∈ walls) (hne : w ≠ 0) :
     ∃ c ∈ VT, RR w c < 0 := by
   have key : ∀ k : ℕ, ζ ^ k ∈ VT → w ∈ wall k → ∃ c ∈ VT, RR w c < 0 := by
     rintro k hk ⟨s, hs, rfl⟩
     refine ⟨ζ ^ k, hk, ?_⟩
-    rw [l4d_RR_ofReal_mul_left, l4d_RR_self_VT hk, mul_one]
+    rw [RR_ofReal_mul_left, l4d_RR_self_VT hk, mul_one]
     refine lt_of_le_of_ne hs fun h ↦ hne ?_
     rw [h]; simp
   rcases hw with (h | h) | h
-  · exact key 0 (by rw [pow_zero]; exact l4d_one_mem_VT) h
-  · exact key 1 (by rw [pow_one]; exact l4d_ζ_mem_VT) h
-  · exact key 2 l4d_ζ_sq_mem_VT h
+  · exact key 0 (by rw [pow_zero]; exact one_mem_VT) h
+  · exact key 1 (by rw [pow_one]; exact ζ_mem_VT) h
+  · exact key 2 ζ_sq_mem_VT h
 
 /-- A point of `𝒲` with `RR(w, c) < 0`, `c ∈ V_T`, lies on the open ray `ℝ_{<0} c` (the other two
 rays have `RR(·, c) ≥ 0`). -/
-theorem l4d_eq_neg_mul_of_mem_walls {w c : ℂ} (hw : w ∈ walls) (hc : c ∈ VT)
+private theorem l4d_eq_neg_mul_of_mem_walls {w c : ℂ} (hw : w ∈ walls) (hc : c ∈ VT)
     (hneg : RR w c < 0) : ∃ s : ℝ, s < 0 ∧ w = s * c := by
   have key : ∀ k : ℕ, ζ ^ k ∈ VT → w ∈ wall k → ∃ s : ℝ, s < 0 ∧ w = s * c := by
     rintro k hk ⟨s, hs, rfl⟩
-    rw [l4d_RR_ofReal_mul_left] at hneg
+    rw [RR_ofReal_mul_left] at hneg
     by_cases hkc : ζ ^ k = c
     · rw [hkc, l4d_RR_self_VT hc] at hneg
       exact ⟨s, by linarith, by rw [hkc]⟩
     · rw [l4d_RR_ne_VT hk hc hkc] at hneg
       exact absurd hneg (by nlinarith)
   rcases hw with (h | h) | h
-  · exact key 0 (by rw [pow_zero]; exact l4d_one_mem_VT) h
-  · exact key 1 (by rw [pow_one]; exact l4d_ζ_mem_VT) h
-  · exact key 2 l4d_ζ_sq_mem_VT h
+  · exact key 0 (by rw [pow_zero]; exact one_mem_VT) h
+  · exact key 1 (by rw [pow_one]; exact ζ_mem_VT) h
+  · exact key 2 ζ_sq_mem_VT h
 
 end TriFuller
 
@@ -191,7 +150,7 @@ will do; inventory, gap 6). -/
 theorem lemma13_3_1 {z : Fin 3 → ℂ} (hz : z ≠ 0) (h₃ : z 2 ∈ walls) (t : ℝ) :
     flow t z (firstControl z) ≠ 0 := by
   intro h0
-  have hu : firstControl z ∈ VT := (l4st_isFirstControl_firstControl hz).1
+  have hu : firstControl z ∈ VT := firstControl_mem_VT z
   set u := firstControl z
   have e0 : z 0 - I * t * u = 0 := by simpa [flow] using congrFun h0 0
   have e1 : z 1 + z 0 * t - I * t ^ 2 * u / 2 = 0 := by simpa [flow] using congrFun h0 1
@@ -220,15 +179,15 @@ noncomputable def u3 (t₁ : ℝ) (u : ℝ → ℂ) (t : ℝ) : ℂ :=
   (1 / 2) * ∫ s in t₁..t, u s * ((t - s : ℝ) : ℂ) ^ 2
 
 /-- The triangle `U_T` lies in the closed unit disk. -/
-theorem l4st_norm_le_one_of_mem_UT {v : ℂ} (hv : v ∈ UT) : ‖v‖ ≤ 1 := by
+private theorem l4st_norm_le_one_of_mem_UT {v : ℂ} (hv : v ∈ UT) : ‖v‖ ≤ 1 := by
   have hsub : UT ⊆ Metric.closedBall (0 : ℂ) 1 :=
-    convexHull_min (fun x hx ↦ by simp [l4d_norm_VT hx]) (convex_closedBall 0 1)
+    convexHull_min (fun x hx ↦ by simp [norm_eq_one_of_mem_VT hx]) (convex_closedBall 0 1)
   simpa using hsub hv
 
 /-! ### Helpers: the maximizers of `RR(·, w)` on `U_T` -/
 
 /-- `U_T` lies in each half-plane `RR(·, c) ≥ -1/2`, `c ∈ V_T`. -/
-theorem l4d_neg_half_le_RR_of_mem_UT {v c : ℂ} (hv : v ∈ UT) (hc : c ∈ VT) :
+private theorem l4d_neg_half_le_RR_of_mem_UT {v c : ℂ} (hv : v ∈ UT) (hc : c ∈ VT) :
     -1 / 2 ≤ RR v c := by
   have hsub : UT ⊆ {v : ℂ | -1 / 2 ≤ RR v c} := by
     refine convexHull_min (fun x hx ↦ ?_) (convex_halfSpace_ge (l4d_isLinearMap_RR c) _)
@@ -239,30 +198,30 @@ theorem l4d_neg_half_le_RR_of_mem_UT {v c : ℂ} (hv : v ∈ UT) (hc : c ∈ VT)
   exact hsub hv
 
 /-- If two distinct points of `U_T` both maximize `RR(·, w)` on `U_T`, then `w ∈ 𝒲`: otherwise
-one vertex `m` is the only maximizer on `V_T` (`l4st_mem_walls_of_maximizers`), the affine
+one vertex `m` is the only maximizer on `V_T` (`mem_walls_of_maximizers`), the affine
 function `RR(·, w) + (2/3)δ(1 - RR(·, m))` (`δ` the gap to the other vertices) is at most `RR(m, w)`
 on `V_T`, hence on `U_T`, and a maximizer `v` then has `RR(v, m) ≥ 1`, so `v = m`
 (`|v| ≤ 1 = |m|`). -/
-theorem l4d_mem_walls_of_maximizers_UT {w v₁ v₂ : ℂ} (h₁ : v₁ ∈ UT) (h₂ : v₂ ∈ UT)
+private theorem l4d_mem_walls_of_maximizers_UT {w v₁ v₂ : ℂ} (h₁ : v₁ ∈ UT) (h₂ : v₂ ∈ UT)
     (hne : v₁ ≠ v₂) (hm₁ : ∀ v ∈ UT, RR v w ≤ RR v₁ w) (hm₂ : ∀ v ∈ UT, RR v w ≤ RR v₂ w) :
     w ∈ walls := by
   by_contra hw
   obtain ⟨m, hm, hmax⟩ : ∃ m ∈ VT, ∀ x ∈ VT, RR x w ≤ RR m w :=
-    Set.exists_max_image VT (fun x ↦ RR x w) l4d_VT_finite ⟨1, l4d_one_mem_VT⟩
+    Set.exists_max_image VT (fun x ↦ RR x w) finite_VT ⟨1, one_mem_VT⟩
   have hm' : ∀ y ∈ VT, RR w y ≤ RR w m := fun y hy ↦ by
-    rw [l4d_RR_comm w y, l4d_RR_comm w m]; exact hmax y hy
+    rw [RR_comm w y, RR_comm w m]; exact hmax y hy
   have hstrict : ∀ x ∈ VT, x ≠ m → RR x w < RR m w := by
     intro x hx hxm
     refine lt_of_le_of_ne (hmax x hx) fun heq ↦ hw ?_
-    refine l4st_mem_walls_of_maximizers hx hm hxm (fun y hy ↦ ?_) hm'
-    rw [l4d_RR_comm w x, heq, l4d_RR_comm m w]
+    refine mem_walls_of_maximizers hx hm hxm (fun y hy ↦ ?_) hm'
+    rw [RR_comm w x, heq, RR_comm m w]
     exact hm' y hy
   have hnonempty : (VT \ {m}).Nonempty := by
     obtain ⟨v, hv, hvm⟩ := l4d_exists_ne_VT m
     exact ⟨v, hv, hvm⟩
   obtain ⟨x₀, hx₀, hgap⟩ :=
     Set.exists_min_image (VT \ {m}) (fun x ↦ RR m w - RR x w)
-      (l4d_VT_finite.subset sdiff_subset) hnonempty
+      (finite_VT.subset sdiff_subset) hnonempty
   have hδ : 0 < RR m w - RR x₀ w := sub_pos.2 (hstrict x₀ hx₀.1 hx₀.2)
   set δ := RR m w - RR x₀ w with hδdef
   have hS : UT ⊆ {v : ℂ | RR v w - 2 / 3 * δ * RR v m ≤ RR m w - 2 / 3 * δ} := by
@@ -277,15 +236,15 @@ theorem l4d_mem_walls_of_maximizers_UT {w v₁ v₂ : ℂ} (h₁ : v₁ ∈ UT) 
   have key : ∀ v ∈ UT, (∀ v' ∈ UT, RR v' w ≤ RR v w) → v = m := by
     intro v hv hvmax
     have h1 : RR v w - 2 / 3 * δ * RR v m ≤ RR m w - 2 / 3 * δ := hS hv
-    have h2 : RR m w ≤ RR v w := hvmax m (l4d_VT_subset_UT hm)
+    have h2 : RR m w ≤ RR v w := hvmax m (VT_subset_UT hm)
     have h3 : 1 ≤ RR v m := by nlinarith
     have hnv : v.re * v.re + v.im * v.im ≤ 1 := by
       have h := l4st_norm_le_one_of_mem_UT hv
       have h' : ‖v‖ ^ 2 ≤ 1 := by nlinarith [norm_nonneg v]
       rwa [Complex.sq_norm, Complex.normSq_apply] at h'
     have hnm : m.re * m.re + m.im * m.im = 1 := by
-      have := l4d_RR_self_VT hm; rwa [l4d_RR_eq] at this
-    rw [l4d_RR_eq] at h3
+      have := l4d_RR_self_VT hm; rwa [RR_eq_re_mul_add_im_mul] at this
+    rw [RR_eq_re_mul_add_im_mul] at h3
     have hsq : (v.re - m.re) ^ 2 + (v.im - m.im) ^ 2 ≤ 0 := by nlinarith
     apply Complex.ext <;> nlinarith [sq_nonneg (v.re - m.re), sq_nonneg (v.im - m.im)]
   exact hne ((key v₁ h₁ hm₁).trans (key v₂ h₂ hm₂).symm)
@@ -293,7 +252,7 @@ theorem l4d_mem_walls_of_maximizers_UT {w v₁ v₂ : ℂ} (h₁ : v₁ ∈ UT) 
 /-! ### Helpers: integrability, continuity and restriction of trajectories -/
 
 /-- A measurable function bounded on `[a, b]` is integrable on every subinterval. -/
-theorem l4d_intervalIntegrable_of_bound {u : ℝ → ℂ} (hu : Measurable u) {a b C : ℝ}
+private theorem l4d_intervalIntegrable_of_bound {u : ℝ → ℂ} (hu : Measurable u) {a b C : ℝ}
     (hb : ∀ t ∈ Icc a b, ‖u t‖ ≤ C) {c d : ℝ} (hc : c ∈ Icc a b) (hd : d ∈ Icc a b) :
     IntervalIntegrable u volume c d := by
   have hab : a ≤ b := hc.1.trans hc.2
@@ -304,40 +263,32 @@ theorem l4d_intervalIntegrable_of_bound {u : ℝ → ℂ} (hu : Measurable u) {a
   exact h.mono_set (by rw [uIcc_of_le hab]; exact uIcc_subset_Icc hc hd)
 
 /-- The controls of a trajectory with controls in `U_T` have norm at most `1`. -/
-theorem l4d_norm_le_one_of_traj {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ}
+theorem IsTrajectory.norm_control_le_one {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ}
     {u : ℝ → ℂ} (h : IsTrajectory U t₁ t₂ z u) : ∀ t ∈ Icc t₁ t₂, ‖u t‖ ≤ 1 :=
   fun t ht ↦ l4st_norm_le_one_of_mem_UT (hU (h.2.2.1 t ht))
 
 /-- The control of a trajectory with controls in `U_T` is integrable on every subinterval. -/
-theorem l4d_intervalIntegrable_control {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ}
+theorem IsTrajectory.intervalIntegrable_control {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ}
     {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ} (h : IsTrajectory U t₁ t₂ z u) {c d : ℝ}
     (hc : c ∈ Icc t₁ t₂) (hd : d ∈ Icc t₁ t₂) : IntervalIntegrable u volume c d :=
-  l4d_intervalIntegrable_of_bound h.2.1 (l4d_norm_le_one_of_traj hU h) hc hd
-
-/-- A function that is a primitive on `[a, b]` is continuous there. -/
-theorem l4d_continuousOn_of_eq_primitive {f g : ℝ → ℂ} {a b : ℝ} (hab : a ≤ b)
-    (hg : IntervalIntegrable g volume a b) (hf : ∀ t ∈ Icc a b, f t = f a + ∫ s in a..t, g s) :
-    ContinuousOn f (Icc a b) := by
-  have h := (continuousOn_const (c := f a)).add
-    (intervalIntegral.continuousOn_primitive_interval' hg left_mem_uIcc)
-  rw [uIcc_of_le hab] at h
-  exact h.congr fun t ht ↦ hf t ht
+  l4d_intervalIntegrable_of_bound h.2.1 (IsTrajectory.norm_control_le_one hU h) hc hd
 
 /-- The coordinates of a trajectory with controls in `U_T` are continuous on `[t₁, t₂]`. -/
-theorem l4d_continuousOn_traj {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ}
+theorem IsTrajectory.continuousOn {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ}
     {u : ℝ → ℂ} (h : IsTrajectory U t₁ t₂ z u) (j : Fin 3) :
     ContinuousOn (fun t ↦ z t j) (Icc t₁ t₂) := by
   have hle := h.1.le
   have hI : t₁ ∈ Icc t₁ t₂ := ⟨le_rfl, hle⟩
   have hII : t₂ ∈ Icc t₁ t₂ := ⟨hle, le_rfl⟩
   have h0 : ContinuousOn (fun t ↦ z t 0) (Icc t₁ t₂) :=
-    l4d_continuousOn_of_eq_primitive hle
-      ((l4d_intervalIntegrable_control hU h hI hII).const_mul _) fun t ht ↦ (h.2.2.2 t ht).1
+    continuousOn_Icc_of_eq_add_integral hle
+      ((IsTrajectory.intervalIntegrable_control hU h hI hII).const_mul _)
+      fun t ht ↦ (h.2.2.2 t ht).1
   have h1 : ContinuousOn (fun t ↦ z t 1) (Icc t₁ t₂) :=
-    l4d_continuousOn_of_eq_primitive hle (h0.intervalIntegrable_of_Icc hle)
+    continuousOn_Icc_of_eq_add_integral hle (h0.intervalIntegrable_of_Icc hle)
       fun t ht ↦ (h.2.2.2 t ht).2.1
   have h2 : ContinuousOn (fun t ↦ z t 2) (Icc t₁ t₂) :=
-    l4d_continuousOn_of_eq_primitive hle (h1.intervalIntegrable_of_Icc hle)
+    continuousOn_Icc_of_eq_add_integral hle (h1.intervalIntegrable_of_Icc hle)
       fun t ht ↦ (h.2.2.2 t ht).2.2
   fin_cases j
   · exact h0
@@ -345,7 +296,7 @@ theorem l4d_continuousOn_traj {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ} {z
   · exact h2
 
 /-- The restriction of a trajectory to a subinterval `[a, b] ⊆ [t₁, t₂]` is a trajectory. -/
-theorem l4d_isTrajectory_mono {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ}
+theorem IsTrajectory.mono {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ}
     {u : ℝ → ℂ} (h : IsTrajectory U t₁ t₂ z u) {a b : ℝ} (ha : t₁ ≤ a) (hab : a < b)
     (hb : b ≤ t₂) : IsTrajectory U a b z u := by
   have hsub : Icc a b ⊆ Icc t₁ t₂ := Icc_subset_Icc ha hb
@@ -353,11 +304,11 @@ theorem l4d_isTrajectory_mono {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ} {z
   have hI : t₁ ∈ Icc t₁ t₂ := ⟨le_rfl, h.1.le⟩
   have hint0 : ∀ c ∈ Icc t₁ t₂, ∀ d ∈ Icc t₁ t₂,
       IntervalIntegrable (fun s ↦ -I * u s) volume c d :=
-    fun c hc d hd ↦ (l4d_intervalIntegrable_control hU h hc hd).const_mul _
+    fun c hc d hd ↦ (IsTrajectory.intervalIntegrable_control hU h hc hd).const_mul _
   have hint : ∀ j : Fin 3, ∀ c ∈ Icc t₁ t₂, ∀ d ∈ Icc t₁ t₂,
       IntervalIntegrable (fun s ↦ z s j) volume c d :=
     fun j c hc d hd ↦
-      ((l4d_continuousOn_traj hU h j).mono (uIcc_subset_Icc hc hd)).intervalIntegrable
+      ((IsTrajectory.continuousOn hU h j).mono (uIcc_subset_Icc hc hd)).intervalIntegrable
   refine ⟨hab, h.2.1, fun t ht ↦ h.2.2.1 t (hsub ht), fun t ht ↦ ?_⟩
   have htI := hsub ht
   obtain ⟨e0, e1, e2⟩ := h.2.2.2 t htI
@@ -371,14 +322,14 @@ theorem l4d_isTrajectory_mono {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ} {z
       intervalIntegral.integral_add_adjacent_intervals (hint 1 _ hI _ haI) (hint 1 _ haI _ htI)]
 
 /-- The maximum condition restricts to subintervals. -/
-theorem l4d_maxCondition_mono {U : Set ℂ} {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ}
+theorem MaxCondition.mono {U : Set ℂ} {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ}
     (h : MaxCondition U t₁ t₂ z u) {a b : ℝ} (ha : t₁ ≤ a) (hb : b ≤ t₂) :
     MaxCondition U a b z u := by
   filter_upwards [h] with t ht htI using ht (Icc_subset_Icc ha hb htI)
 
 /-- A trajectory whose control is almost everywhere a constant `v ∈ U` is the constant-control
 solution (13.2.2) (`eqn_z1z2z3`). -/
-theorem l4d_eq_flow_of_ae_eq {U : Set ℂ} {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ}
+theorem IsTrajectory.eq_flow_of_ae_eq {U : Set ℂ} {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ}
     (h : IsTrajectory U a b z u) {v : ℂ} (hv : v ∈ U) (hae : ∀ᵐ t, t ∈ Icc a b → u t = v) :
     ∀ t ∈ Icc a b, z t = flow (t - a) (z a) v := by
   have h' : IsTrajectory U a b z (fun _ ↦ v) := by
@@ -395,8 +346,9 @@ theorem l4d_eq_flow_of_ae_eq {U : Set ℂ} {a b : ℝ} {z : ℝ → Fin 3 → �
 
 /-- A primitive of a function continuous on `[a, b]` has the derivative `g(t)` at interior
 points. -/
-theorem l4d_hasDerivAt_of_eq_primitive {f g : ℝ → ℂ} {a b : ℝ} (hg : ContinuousOn g (Icc a b))
-    (hf : ∀ t ∈ Icc a b, f t = f a + ∫ s in a..t, g s) {t : ℝ} (ht : t ∈ Ioo a b) :
+private theorem l4d_hasDerivAt_of_eq_primitive {f g : ℝ → ℂ} {a b : ℝ}
+    (hg : ContinuousOn g (Icc a b)) (hf : ∀ t ∈ Icc a b, f t = f a + ∫ s in a..t, g s) {t : ℝ}
+    (ht : t ∈ Ioo a b) :
     HasDerivAt f (g t) t := by
   have hint : IntervalIntegrable g volume a t :=
     (hg.mono (Icc_subset_Icc le_rfl ht.2.le)).intervalIntegrable_of_Icc ht.1.le
@@ -407,20 +359,8 @@ theorem l4d_hasDerivAt_of_eq_primitive {f g : ℝ → ℂ} {a b : ℝ} (hg : Con
   exact hd.congr_of_eventuallyEq
     (Filter.eventually_of_mem (Ioo_mem_nhds ht.1 ht.2) fun x hx ↦ hf x (Ioo_subset_Icc_self hx))
 
-/-- A primitive of an integrable function has the derivative `g(t)` at almost every interior point
-(Lebesgue's differentiation theorem). -/
-theorem l4d_ae_hasDerivAt_of_eq_primitive {f g : ℝ → ℂ} {a b : ℝ}
-    (hg : IntervalIntegrable g volume a b) (hf : ∀ t ∈ Icc a b, f t = f a + ∫ s in a..t, g s) :
-    ∀ᵐ t, t ∈ Ioo a b → HasDerivAt f (g t) t := by
-  filter_upwards [hg.ae_hasDerivAt_integral] with t htd ht
-  have hab : a ≤ b := ht.1.le.trans ht.2.le
-  have hd := (htd (by rw [uIcc_of_le hab]; exact Ioo_subset_Icc_self ht) a left_mem_uIcc).const_add
-    (f a)
-  exact hd.congr_of_eventuallyEq
-    (Filter.eventually_of_mem (Ioo_mem_nhds ht.1 ht.2) fun x hx ↦ hf x (Ioo_subset_Icc_self hx))
-
 /-- If the primitive of a function continuous on `[a, b]` vanishes there, so does the function. -/
-theorem l4d_eq_zero_of_primitive_eq_zero {g : ℝ → ℂ} {a b : ℝ} (hab : a < b)
+private theorem l4d_eq_zero_of_primitive_eq_zero {g : ℝ → ℂ} {a b : ℝ} (hab : a < b)
     (hg : ContinuousOn g (Icc a b)) (h0 : ∀ t ∈ Icc a b, ∫ s in a..t, g s = 0) :
     ∀ t ∈ Icc a b, g t = 0 := by
   have hf : ∀ t ∈ Icc a b, (∫ s in a..t, g s) = (∫ s in a..a, g s) + ∫ s in a..t, g s := by
@@ -439,15 +379,17 @@ theorem l4d_eq_zero_of_primitive_eq_zero {g : ℝ → ℂ} {a b : ℝ} (hab : a 
 
 /-- If the primitive of an integrable function vanishes on `[a, b]`, the function vanishes almost
 everywhere there. -/
-theorem l4d_ae_eq_zero_of_primitive_eq_zero {g : ℝ → ℂ} {a b : ℝ}
+private theorem l4d_ae_eq_zero_of_primitive_eq_zero {g : ℝ → ℂ} {a b : ℝ}
     (hg : IntervalIntegrable g volume a b) (h0 : ∀ t ∈ Icc a b, ∫ s in a..t, g s = 0) :
     ∀ᵐ t, t ∈ Icc a b → g t = 0 := by
-  have hf : ∀ t ∈ Icc a b, (∫ s in a..t, g s) = (∫ s in a..a, g s) + ∫ s in a..t, g s := by
-    intro t _; simp
+  rcases lt_or_ge b a with hba | hab
+  · exact ae_of_all _ fun t ht ↦ absurd (ht.1.trans ht.2) (not_le.2 hba)
+  have hf : ∀ t ∈ Icc a b, (∫ s in a..t, g s) = 0 + ∫ s in a..t, g s := fun t _ ↦
+    (zero_add _).symm
   have hna : ∀ᵐ t ∂volume, t ≠ a := by simp [ae_iff, measure_singleton]
   have hnb : ∀ᵐ t ∂volume, t ≠ b := by simp [ae_iff, measure_singleton]
-  filter_upwards [l4d_ae_hasDerivAt_of_eq_primitive (f := fun t ↦ ∫ s in a..t, g s) hg hf, hna,
-    hnb] with t h1 hta htb ht
+  filter_upwards [ae_hasDerivAt_of_eq_add_integral (x := fun t ↦ ∫ s in a..t, g s) hg
+    ⟨le_rfl, hab⟩ hf, hna, hnb] with t h1 hta htb ht
   have ht' : t ∈ Ioo a b := ⟨lt_of_le_of_ne ht.1 (Ne.symm hta), lt_of_le_of_ne ht.2 htb⟩
   have h2 : HasDerivAt (fun t ↦ ∫ s in a..t, g s) 0 t :=
     (hasDerivAt_const t (0 : ℂ)).congr_of_eventuallyEq
@@ -459,8 +401,8 @@ theorem l4d_ae_eq_zero_of_primitive_eq_zero {g : ℝ → ℂ} {a b : ℝ}
 
 /-- Fubini on the triangle `a < ρ ≤ s ≤ t`: for a bounded measurable `g`,
 `∫_a^t ∫_a^s g(ρ)(s - ρ)ⁿ dρ ds = ∫_a^t g(ρ)(t - ρ)ⁿ⁺¹/(n + 1) dρ`. -/
-theorem l4d_integral_integral_mul_pow {g : ℝ → ℂ} (hg : Measurable g) {a t M : ℝ} (hat : a ≤ t)
-    (hgM : ∀ ρ ∈ Ioc a t, ‖g ρ‖ ≤ M) (n : ℕ) :
+private theorem l4d_integral_integral_mul_pow {g : ℝ → ℂ} (hg : Measurable g) {a t M : ℝ}
+    (hat : a ≤ t) (hgM : ∀ ρ ∈ Ioc a t, ‖g ρ‖ ≤ M) (n : ℕ) :
     ∫ s in a..t, ∫ ρ in a..s, g ρ * ((s - ρ : ℝ) : ℂ) ^ n =
       ∫ ρ in a..t, g ρ * (((t - ρ) ^ (n + 1) / (n + 1) : ℝ) : ℂ) := by
   rcases hat.eq_or_lt with rfl | hat'
@@ -522,14 +464,14 @@ theorem l4d_integral_integral_mul_pow {g : ℝ → ℂ} (hg : Measurable g) {a t
   exact integral_integral_swap hint
 
 /-- `∫_a^t ((s - a : ℝ) : ℂ) ds = (t - a)²/2`. -/
-theorem l4d_integral_sub_ofReal (a t : ℝ) :
+private theorem l4d_integral_sub_ofReal (a t : ℝ) :
     ∫ s in a..t, ((s - a : ℝ) : ℂ) = (((t - a) ^ 2 / 2 : ℝ) : ℂ) := by
   have hsub := intervalIntegral.integral_comp_sub_right (fun x : ℝ ↦ x) a (a := a) (b := t)
   rw [intervalIntegral.integral_ofReal, hsub, integral_id]
   simp
 
 /-- `∫_a^t (t - s)² ds = (t - a)³/3`. -/
-theorem l4d_integral_sq_sub (a t : ℝ) : ∫ s in a..t, (t - s) ^ 2 = (t - a) ^ 3 / 3 := by
+private theorem l4d_integral_sq_sub (a t : ℝ) : ∫ s in a..t, (t - s) ^ 2 = (t - a) ^ 3 / 3 := by
   have hsub := intervalIntegral.integral_comp_sub_left (fun x : ℝ ↦ x ^ 2) t (a := a) (b := t)
   rw [hsub, integral_pow]
   norm_num
@@ -587,12 +529,13 @@ theorem eqn_z3u3 {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ} {z : ℝ → Fi
     (h : IsTrajectory U t₁ t₂ z u) :
     ∀ t ∈ Icc t₁ t₂, z t 2 = -I * u3 t₁ u t + z t₁ 0 * ((t - t₁ : ℝ) : ℂ) ^ 2 / 2 +
       z t₁ 1 * ((t - t₁ : ℝ) : ℂ) + z t₁ 2 := by
-  have hb := l4d_norm_le_one_of_traj hU h
+  have hb := IsTrajectory.norm_control_le_one hU h
   have hlt := h.1
   have heq := h.2.2.2
   have hI : t₁ ∈ Icc t₁ t₂ := ⟨le_rfl, hlt.le⟩
   have hII : t₂ ∈ Icc t₁ t₂ := ⟨hlt.le, le_rfl⟩
-  have huint : IntervalIntegrable u volume t₁ t₂ := l4d_intervalIntegrable_control hU h hI hII
+  have huint : IntervalIntegrable u volume t₁ t₂ :=
+    IsTrajectory.intervalIntegrable_control hU h hI hII
   -- the primitives `I₁ = ∫ u` and `I₂ = ∫ I₁`
   have hI₁c : ContinuousOn (fun s ↦ ∫ ρ in t₁..s, u ρ) (Icc t₁ t₂) := by
     have := intervalIntegral.continuousOn_primitive_interval' huint left_mem_uIcc
@@ -632,11 +575,11 @@ theorem eqn_z3u3 {U : Set ℂ} (hU : U ⊆ UT) {t₁ t₂ : ℝ} {z : ℝ → Fi
 namespace TriFuller
 
 /-- `RR(u₃(t), d) = ½ ∫_a^t RR(u(s), d)(t - s)² ds`: `RR(·, d)` is a continuous `ℝ`-linear map. -/
-theorem l4d_RR_u3 {a t : ℝ} {u : ℝ → ℂ} (hu : IntervalIntegrable u volume a t) (d : ℂ) :
+theorem RR_u3 {a t : ℝ} {u : ℝ → ℂ} (hu : IntervalIntegrable u volume a t) (d : ℂ) :
     RR (u3 a u t) d = 1 / 2 * ∫ s in a..t, RR (u s) d * (t - s) ^ 2 := by
   have hRR : ∀ x : ℂ, RR x d = Complex.reCLM (x * starRingEnd ℂ d) := by
     intro x
-    simp only [Complex.reCLM_apply, l4d_RR_eq, Complex.mul_re, Complex.conj_re,
+    simp only [Complex.reCLM_apply, RR_eq_re_mul_add_im_mul, Complex.mul_re, Complex.conj_re,
       Complex.conj_im]
     ring
   have hint : IntervalIntegrable (fun s ↦ u s * ((t - s : ℝ) : ℂ) ^ 2 * starRingEnd ℂ d)
@@ -661,8 +604,9 @@ satisfying the maximum principle cannot keep `z₃` on an open ray `ℝ_{<0} c`,
 There the maximizing face is the edge opposite `c`, so `RR(u, c) = -1/2` almost everywhere
 (the book's `Re u = -1/2` for `c = 1`), `RR(u₃(t), c) = -(t - t₁)³/12`, and by (13.3.2)
 `0 = RR(z₃(t), ic) = (t - t₁)³/12 + (quadratic in t)` on `[t₁, t₂]`, which is absurd (the third
-finite difference of the right side is `(t₂ - t₁)³/54 ≠ 0`). -/
-theorem l4d_false_of_mem_ray {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ}
+finite difference of the right side is `(t₂ - t₁)³/54 ≠ 0`). For `c = 1`, `RR(z₃, i) =
+RR(z₃, ζ - ζ²)/√3` (`ζ - ζ² = i√3`): the book's quantity, rescaled. -/
+private theorem l4d_false_of_mem_ray {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ}
     (h : IsTrajectory UT t₁ t₂ z u) (hmax : MaxCondition UT t₁ t₂ z u) {c : ℂ} (hc : c ∈ VT)
     (hray : ∀ t ∈ Icc t₁ t₂, ∃ s : ℝ, s < 0 ∧ z t 2 = s * c) : False := by
   -- the control lies on the edge opposite `c`: `RR(u, c) = -1/2`
@@ -670,8 +614,8 @@ theorem l4d_false_of_mem_ray {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : 
   have hA : ∀ᵐ t, t ∈ Icc t₁ t₂ → RR (u t) c = -1 / 2 := by
     filter_upwards [hmax] with t hmt ht
     obtain ⟨s, hs, hzs⟩ := hray t ht
-    have h1 := hmt ht v (l4d_VT_subset_UT hv)
-    simp only [ham, hzs, add_le_add_iff_left, l4d_RR_ofReal_mul_right] at h1
+    have h1 := hmt ht v (VT_subset_UT hv)
+    simp only [ham, hzs, add_le_add_iff_left, RR_ofReal_mul_right] at h1
     rw [l4d_RR_ne_VT hv hc hvc] at h1
     have h2 := l4d_neg_half_le_RR_of_mem_UT (h.2.2.1 t ht) hc
     nlinarith
@@ -680,14 +624,14 @@ theorem l4d_false_of_mem_ray {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : 
     intro t ht
     obtain ⟨s, -, hzs⟩ := hray t ht
     rw [hzs]
-    simp only [l4d_RR_eq, Complex.mul_re, Complex.mul_im, Complex.I_re, Complex.I_im,
+    simp only [RR_eq_re_mul_add_im_mul, Complex.mul_re, Complex.mul_im, Complex.I_re, Complex.I_im,
       Complex.ofReal_re, Complex.ofReal_im]
     ring
   have hI : t₁ ∈ Icc t₁ t₂ := ⟨le_rfl, h.1.le⟩
   -- `RR(u₃(t), c) = -(t - t₁)³/12`
   have hu3 : ∀ t ∈ Icc t₁ t₂, RR (u3 t₁ u t) c = -(t - t₁) ^ 3 / 12 := by
     intro t ht
-    rw [l4d_RR_u3 (l4d_intervalIntegrable_control subset_rfl h hI ht) c,
+    rw [RR_u3 (IsTrajectory.intervalIntegrable_control subset_rfl h hI ht) c,
       intervalIntegral.integral_congr_ae (g := fun s ↦ -1 / 2 * (t - s) ^ 2) ?_,
       intervalIntegral.integral_const_mul, l4d_integral_sq_sub]
     · ring
@@ -702,11 +646,11 @@ theorem l4d_false_of_mem_ray {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : 
     have hz := eqn_z3u3 subset_rfl h t ht
     have h2 : z t₁ 0 * ((t - t₁ : ℝ) : ℂ) ^ 2 / 2 = (((t - t₁) ^ 2 / 2 : ℝ) : ℂ) * z t₁ 0 := by
       push_cast; ring
-    rw [hz, h2, mul_comm (z t₁ 1), l4d_RR_add_left, l4d_RR_add_left, l4d_RR_add_left,
-      l4d_RR_ofReal_mul_left, l4d_RR_ofReal_mul_left] at e
+    rw [hz, h2, mul_comm (z t₁ 1), RR_add_left, RR_add_left, RR_add_left,
+      RR_ofReal_mul_left, RR_ofReal_mul_left] at e
     have e2 : RR (-I * u3 t₁ u t) (I * c) = -RR (u3 t₁ u t) c := by
-      simp only [l4d_RR_eq, Complex.mul_re, Complex.mul_im, Complex.neg_re, Complex.neg_im,
-        Complex.I_re, Complex.I_im]
+      simp only [RR_eq_re_mul_add_im_mul, Complex.mul_re, Complex.mul_im, Complex.neg_re,
+        Complex.neg_im, Complex.I_re, Complex.I_im]
       ring
     rw [e2, hu3 t ht] at e
     linear_combination e
@@ -757,7 +701,8 @@ RR(v, z₃(t))` on `U_T` is all of `U_T` if `z₃(t) = 0`, an edge if `z₃(t)` 
    face is the edge opposite `c` there. The book's argument (written for `c = 1`, the edge
    `[ζ, ζ²]`) then applies on `[a, b]` (`l4d_false_of_mem_ray`): `RR(u(t), c) = -½` a.e.,
    `RR(u₃(t), c) = -(t - a)³/12` (from `a`), and `0 = RR(z₃(t), ic) = (t - a)³/12 +
-   (quadratic in t)` on `[a, b]`, which is absurd. Hence `z₃ ≡ 0` on `[t₁, t₂]`.
+   (quadratic in t)` on `[a, b]`, which is absurd. (For `c = 1`, `RR(z₃, i) = RR(z₃, ζ - ζ²)/√3`,
+   since `ζ - ζ² = i√3`: the book's quantity, rescaled.) Hence `z₃ ≡ 0` on `[t₁, t₂]`.
 2. (Book's first case.) `z₃ ≡ 0` and `|u₃| ≤ (t - t₁)³/6` give `z₁⁰ = z₂⁰ = z₃⁰ = 0`, then
    `u₃ ≡ 0` by (13.3.2). By (13.3.1) `u₃ = ∫∫∫ u`, and `u = u₃'''` almost everywhere: the
    primitives `∫∫ u` (continuous) and `∫ u` vanish, and so does `u` almost everywhere (Lebesgue's
@@ -787,8 +732,8 @@ theorem lemma13_3_2 {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → �
     obtain ⟨t₀, ht₀, hne⟩ := hcon
     obtain ⟨c, hc, hneg⟩ := l4d_exists_RR_neg_of_mem_walls (hwall t₀ ht₀) hne
     have hcont : ContinuousOn (fun t ↦ RR (z t 2) c) (Icc t₁ t₂) := by
-      have h2 := l4d_continuousOn_traj subset_rfl h 2
-      simp only [l4d_RR_eq]
+      have h2 := IsTrajectory.continuousOn subset_rfl h 2
+      simp only [RR_eq_re_mul_add_im_mul]
       exact ((Complex.continuous_re.comp_continuousOn h2).mul continuousOn_const).add
         ((Complex.continuous_im.comp_continuousOn h2).mul continuousOn_const)
     obtain ⟨δ, hδ, hδprop⟩ :=
@@ -800,8 +745,8 @@ theorem lemma13_3_2 {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → �
     have hab : a < b := by
       rw [max_lt_iff, lt_min_iff, lt_min_iff]
       exact ⟨⟨hlt, by linarith [ht₀.1]⟩, by linarith [ht₀.2], by linarith⟩
-    refine l4d_false_of_mem_ray (l4d_isTrajectory_mono subset_rfl h ha hab hb)
-      (l4d_maxCondition_mono hmax ha hb) hc fun t ht ↦ ?_
+    refine l4d_false_of_mem_ray (IsTrajectory.mono subset_rfl h ha hab hb)
+      (MaxCondition.mono hmax ha hb) hc fun t ht ↦ ?_
     have htI : t ∈ Icc t₁ t₂ := ⟨ha.trans ht.1, ht.2.trans hb⟩
     have hdist : dist t t₀ < δ := by
       rw [Real.dist_eq, abs_lt]
@@ -811,7 +756,7 @@ theorem lemma13_3_2 {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → �
     rw [Real.dist_eq, abs_lt] at hval
     exact l4d_eq_neg_mul_of_mem_walls (hwall t htI) hc (by linarith [hval.2])
   -- Step 2 (the book's first case): `z⁰ = 0`
-  have hb1 := l4d_norm_le_one_of_traj subset_rfl h
+  have hb1 := IsTrajectory.norm_control_le_one subset_rfl h
   have hz := eqn_z3u3 subset_rfl h
   have hu3b : ∀ t ∈ Icc t₁ t₂, ‖u3 t₁ u t‖ ≤ (t - t₁) ^ 3 / 6 :=
     fun t ht ↦ (eqn_u3 h.2.1 hb1 t ht).2
@@ -859,7 +804,7 @@ theorem lemma13_3_2 {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → �
     have : I * (I * u3 t₁ u t) = 0 := by linear_combination I * e
     simpa using this
   have huint : IntervalIntegrable u volume t₁ t₂ :=
-    l4d_intervalIntegrable_control subset_rfl h hI hII
+    IsTrajectory.intervalIntegrable_control subset_rfl h hI hII
   have hI₁c : ContinuousOn (fun s ↦ ∫ ρ in t₁..s, u ρ) (Icc t₁ t₂) := by
     have := intervalIntegral.continuousOn_primitive_interval' huint left_mem_uIcc
     rwa [uIcc_of_le hlt.le] at this

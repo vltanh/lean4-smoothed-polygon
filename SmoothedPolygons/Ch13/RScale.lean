@@ -9,9 +9,9 @@ public import Mathlib.Order.ConditionallyCompleteLattice.Basic
 The scaling factor `r_scale ≈ 6.27` of the triangular spirals of Hales–Vajjha, *Packings of
 Smoothed Polygons*, Lemma 13.5.2 (TeX 11331–11335, 11374–11380): the unique real root greater than
 `1` of the palindromic polynomial `P(r) = 1 - 5r - 7r² - 5r³ - 7r⁴ - 5r⁵ + r⁶`. The book's
-"`r_s` and `1/r_s` are the only two real roots" is `l4st_rScalePoly_eq_zero_iff`.
+"`r_s` and `1/r_s` are the only two real roots" is `rScalePoly_eq_zero_iff`.
 
-Certified bounds replace the book's numerical values (`≈ 6.27`): `l4st_rScale_bounds` (the
+Certified bounds replace the book's numerical values (`≈ 6.27`): `rScale_bounds` (the
 statement of Lemma 13.5.2 uses `6.27 < r_scale < 6.28`) and a fine enclosure for the certified
 eigenvalue computation of Lemma 13.5.5.
 
@@ -43,11 +43,11 @@ def rScalePoly (r : ℝ) : ℝ := 1 - 5 * r - 7 * r ^ 2 - 5 * r ^ 3 - 7 * r ^ 4 
 
 /-- The scaling factor `r_scale` (TeX 11331–11335): the unique real root greater than `1` of the
 palindromic polynomial (defined as the supremum of the real roots greater than `1`;
-`l4st_rScale_spec`, `l4st_rScale_unique`). -/
+`rScale_spec`, `eq_rScale_of_rScalePoly_eq_zero`). -/
 noncomputable def rScale : ℝ := sSup {r : ℝ | 1 < r ∧ rScalePoly r = 0}
 
 /-- `P(r) = r³ Q(r + 1/r)` with `Q(y) = y³ - 5y² - 10y + 5`. -/
-theorem l4st_rScalePoly_eq {r : ℝ} (hr : r ≠ 0) :
+private theorem l4st_rScalePoly_eq {r : ℝ} (hr : r ≠ 0) :
     rScalePoly r = r ^ 3 * ((r + r⁻¹) ^ 3 - 5 * (r + r⁻¹) ^ 2 - 10 * (r + r⁻¹) + 5) := by
   unfold rScalePoly
   field_simp
@@ -132,7 +132,7 @@ private lemma l4g_rScale_mem {a b : ℝ} (ha1 : 1 ≤ a) (hab : a ≤ b) (ha : r
   exact hc
 
 /-- `r_scale > 1` is a root of `P`. -/
-theorem l4st_rScale_spec : 1 < rScale ∧ rScalePoly rScale = 0 := by
+theorem rScale_spec : 1 < rScale ∧ rScalePoly rScale = 0 := by
   obtain ⟨c, hc, hPc⟩ := l4g_exists_root (a := 6.27) (b := 6.28) (by norm_num)
     (by unfold rScalePoly; norm_num) (by unfold rScalePoly; norm_num)
   have hc1 : 1 < c := by linarith [hc.1]
@@ -140,12 +140,12 @@ theorem l4st_rScale_spec : 1 < rScale ∧ rScalePoly rScale = 0 := by
   exact ⟨hc1, hPc⟩
 
 /-- `r_scale` is the only real root of `P` greater than `1`. -/
-theorem l4st_rScale_unique {r : ℝ} (hr : 1 < r) (h : rScalePoly r = 0) : r = rScale :=
+theorem eq_rScale_of_rScalePoly_eq_zero {r : ℝ} (hr : 1 < r) (h : rScalePoly r = 0) : r = rScale :=
   (l4g_rScale_eq hr h).symm
 
 /-- The real roots of `P` are exactly `r_scale` and `1/r_scale` (TeX 11378–11380). -/
-theorem l4st_rScalePoly_eq_zero_iff (r : ℝ) : rScalePoly r = 0 ↔ r = rScale ∨ r = rScale⁻¹ := by
-  obtain ⟨hs1, hsP⟩ := l4st_rScale_spec
+theorem rScalePoly_eq_zero_iff (r : ℝ) : rScalePoly r = 0 ↔ r = rScale ∨ r = rScale⁻¹ := by
+  obtain ⟨hs1, hsP⟩ := rScale_spec
   have hs0 : rScale ≠ 0 := by positivity
   constructor
   · intro h
@@ -170,7 +170,7 @@ theorem l4st_rScalePoly_eq_zero_iff (r : ℝ) : rScalePoly r = 0 ↔ r = rScale 
         rw [l4g_rScale_eq (one_lt_inv₀ hpos |>.2 hlt) hinv, inv_inv]
       · subst heq
         norm_num [rScalePoly] at h
-      · exact Or.inl (l4st_rScale_unique hgt h)
+      · exact Or.inl (eq_rScale_of_rScalePoly_eq_zero hgt h)
   · rintro (rfl | rfl)
     · exact hsP
     · have := l4g_rScalePoly_inv (inv_ne_zero hs0)
@@ -178,14 +178,14 @@ theorem l4st_rScalePoly_eq_zero_iff (r : ℝ) : rScalePoly r = 0 ↔ r = rScale 
       exact this.symm
 
 /-- `6.27 < r_scale < 6.28` (the book's `r_scale ≈ 6.27`). -/
-theorem l4st_rScale_bounds : 6.27 < rScale ∧ rScale < 6.28 :=
+theorem rScale_bounds : 6.27 < rScale ∧ rScale < 6.28 :=
   l4g_rScale_mem (by norm_num) (by norm_num) (by unfold rScalePoly; norm_num)
     (by unfold rScalePoly; norm_num)
 
 /-- A fine enclosure of `r_scale = 6.274167399524823932993…`, as needed for the certified
 eigenvalue bound of Lemma 13.5.5 (whose characteristic polynomial has coefficients in `ℚ(r_scale)`
 with large cancellations; see `SmoothedPolygons/Ch13/Jacobian.lean`). -/
-theorem l4st_rScale_fine_bounds :
+theorem rScale_fine_bounds :
     (6.2741673995248239329 : ℝ) < rScale ∧ rScale < 6.2741673995248239330 :=
   l4g_rScale_mem (by norm_num) (by norm_num) (by unfold rScalePoly; norm_num)
     (by unfold rScalePoly; norm_num)

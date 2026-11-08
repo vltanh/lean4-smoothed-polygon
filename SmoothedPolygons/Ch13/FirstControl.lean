@@ -1,6 +1,7 @@
 module
 
 public import SmoothedPolygons.Ch13.Symmetry
+public import Basic.Analysis.Polynomial.SignNearZero
 
 /-!
 # Chapter 13: walls, the first control and the switching times
@@ -10,11 +11,11 @@ TeX 10910–11068, and the most recent control, TeX 10880–10906):
 
 * the walls (TeX 10910–10926): at a switch between `ζ` and `ζ²` the maximum condition reads
   `RR(z₃, ζ) = RR(z₃, ζ²) ≥ RR(z₃, 1)`, whose solution set is `ℝ_{≤0}`
-  (`l4st_wall_zero_iff`), and switching can only occur when `z₃ ∈ 𝒲`
-  (`l4st_mem_walls_of_maximizers`);
+  (`RR_eq_and_le_iff_mem_wall_zero`), and switching can only occur when `z₃ ∈ 𝒲`
+  (`mem_walls_of_maximizers`);
 * Lemma 13.2.6 (`lem:first-control`): the first control is the lexicographic maximum of the
   control vectors, with the tie rule `{ζ^i, ζ^{i+1}} ↦ ζ^i`; with it, the first control exists and
-  is unique (`l4st_exists_isFirstControl`, `l4st_isFirstControl_unique`);
+  is unique (`l4st_exists_isFirstControl`, `IsFirstControl.unique`);
 * Corollary 13.2.7 (`cor:10`): `t_sw < 10 r` when `|z_i| ≤ r^i`;
 * Lemma 13.2.8 (unlabelled): `χ_{ζ,ζ²} + χ_{ζ²,ζ} = 0`;
 * Lemma 13.2.5 (`lem:first-negative-control`): the most recent control and switching time by
@@ -23,7 +24,7 @@ TeX 10910–11068, and the most recent control, TeX 10880–10906):
   "`t = 0` is an isolated zero of the relevant switching function"), the first control is optimal
   on `[0, t_sw]`, and it is beaten at times arbitrarily close to `t_sw` from the right;
 * the first-control trajectory of `z⁰ ≠ 0` does not reach `0` on `[0, t_sw]`
-  (`l4f_flow_firstControl_ne_zero`; Lemma 13.3.1 covers only `z₃⁰ ∈ 𝒲`).
+  (`flow_firstControl_ne_zero`; Lemma 13.3.1 covers only `z₃⁰ ∈ 𝒲`).
 
 The informal corollary after Lemma 13.2.8 (TeX 11063–11067: switching back and forth between `ζ`
 and `ζ²` happens at consecutive roots of one cubic, and after its largest root the control switches
@@ -42,84 +43,48 @@ namespace TriFuller
 
 private lemma l4c_sqrt3_mul_self : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
 
-private lemma l4c_ζ_re : ζ.re = -1 / 2 := by rw [l4st_ζ_eq]
-
-private lemma l4c_ζ_im : ζ.im = √3 / 2 := by rw [l4st_ζ_eq]
-
-private lemma l4c_ζ_sq_re : (ζ ^ 2).re = -1 / 2 := by
-  rw [sq, Complex.mul_re, l4c_ζ_re, l4c_ζ_im]
-  linear_combination (-1 / 4 : ℝ) * l4c_sqrt3_mul_self
-
-private lemma l4c_ζ_sq_im : (ζ ^ 2).im = -(√3 / 2) := by
-  rw [sq, Complex.mul_im, l4c_ζ_re, l4c_ζ_im]
-  ring
-
-/-- `RR` in coordinates. -/
-private lemma l4c_RR_eq (a b : ℂ) : RR a b = a.re * b.re + a.im * b.im := by
-  simp [RR, Complex.mul_re]
-
-private lemma l4c_RR_comm (a b : ℂ) : RR a b = RR b a := by
-  rw [l4c_RR_eq, l4c_RR_eq]; ring
-
 /-- `RR(ua, ub) = RR(a, b)` for `|u| = 1` (the invariance behind the rotation (13.2.7)). -/
 private lemma l4c_RR_mul_mul {u : ℂ} (hu : ‖u‖ = 1) (a b : ℂ) : RR (u * a) (u * b) = RR a b := by
   have h : u.re * u.re + u.im * u.im = 1 := by
     rw [← Complex.normSq_apply, Complex.normSq_eq_norm_sq, hu]; norm_num
-  rw [l4c_RR_eq, l4c_RR_eq]
+  rw [RR_eq_re_mul_add_im_mul, RR_eq_re_mul_add_im_mul]
   simp only [Complex.mul_re, Complex.mul_im]
   linear_combination (a.re * b.re + a.im * b.im) * h
-
-private lemma l4c_mem_VT {u : ℂ} : u ∈ VT ↔ u = 1 ∨ u = ζ ∨ u = ζ ^ 2 := by
-  simp [VT]
-
-private lemma l4c_one_mem_VT : (1 : ℂ) ∈ VT := l4c_mem_VT.2 (Or.inl rfl)
-
-private lemma l4c_ζ_mem_VT : ζ ∈ VT := l4c_mem_VT.2 (Or.inr (Or.inl rfl))
-
-private lemma l4c_ζ_sq_mem_VT : ζ ^ 2 ∈ VT := l4c_mem_VT.2 (Or.inr (Or.inr rfl))
 
 /-- `V_T = {u, uζ, uζ²}` for every `u ∈ V_T`. -/
 private lemma l4c_mem_VT_iff {u : ℂ} (hu : u ∈ VT) {v : ℂ} :
     v ∈ VT ↔ v = u ∨ v = u * ζ ∨ v = u * ζ ^ 2 := by
   constructor
   · intro hv
-    obtain ⟨hn, -, hc, -⟩ := l4st_VT_props hu hv
-    have hw : starRingEnd ℂ u * v ∈ VT := (l4st_VT_props hc hv).2.1
+    have hn := norm_eq_one_of_mem_VT hu
+    have hc := conj_mem_VT hu
+    have hw : starRingEnd ℂ u * v ∈ VT := mul_mem_VT hc hv
     have huu : u * starRingEnd ℂ u = 1 := by
       rw [Complex.mul_conj, Complex.normSq_eq_norm_sq, hn]; norm_num
     have hv' : v = u * (starRingEnd ℂ u * v) := by rw [← mul_assoc, huu, one_mul]
-    rcases l4c_mem_VT.1 hw with h | h | h <;> rw [h] at hv' <;> simp_all
+    rcases mem_VT.1 hw with h | h | h <;> rw [h] at hv' <;> simp_all
   · rintro (rfl | rfl | rfl)
     · exact hu
-    · exact (l4st_VT_props hu l4c_ζ_mem_VT).2.1
-    · exact (l4st_VT_props hu l4c_ζ_sq_mem_VT).2.1
-
-private lemma l4c_norm_of_mem_VT {u : ℂ} (hu : u ∈ VT) : ‖u‖ = 1 :=
-  (l4st_VT_props hu hu).1
+    · exact mul_mem_VT hu ζ_mem_VT
+    · exact mul_mem_VT hu ζ_sq_mem_VT
 
 private lemma l4c_exists_pow_of_mem_VT {u : ℂ} (hu : u ∈ VT) : ∃ i : ℕ, u = ζ ^ i := by
-  rcases l4c_mem_VT.1 hu with rfl | rfl | rfl
+  rcases mem_VT.1 hu with rfl | rfl | rfl
   exacts [⟨0, (pow_zero _).symm⟩, ⟨1, (pow_one _).symm⟩, ⟨2, rfl⟩]
-
-private lemma l4c_ζ_ne_one : ζ ≠ 1 := by
-  intro h
-  have := congrArg Complex.re h
-  rw [l4c_ζ_re, Complex.one_re] at this
-  norm_num at this
 
 private lemma l4c_ζ_ne_zero : ζ ≠ 0 := by
   intro h
   have := congrArg Complex.re h
-  rw [l4c_ζ_re, Complex.zero_re] at this
+  rw [ζ_re, Complex.zero_re] at this
   norm_num at this
 
 /-- `RR(ζ - 1, -i) = -√3/2`. -/
 private lemma l4c_RR_ζ_sub_one : RR (ζ - 1) (-I) = -(√3 / 2) := by
-  rw [l4c_RR_eq]; simp [l4c_ζ_re, l4c_ζ_im]
+  rw [RR_eq_re_mul_add_im_mul]; simp [ζ_re, ζ_im]
 
 /-- `RR(ζ² - 1, -i) = √3/2`. -/
 private lemma l4c_RR_ζ_sq_sub_one : RR (ζ ^ 2 - 1) (-I) = √3 / 2 := by
-  rw [l4c_RR_eq]; simp [l4c_ζ_sq_re, l4c_ζ_sq_im]
+  rw [RR_eq_re_mul_add_im_mul]; simp [ζ_sq_re, ζ_sq_im]
 
 /-- The cubic coefficient of the switching function from `u` to `uζ` propagated with `u`:
 `RR(uζ - u, -iu) = -√3/2`. -/
@@ -136,68 +101,42 @@ private lemma l4c_RR_mul_ζ_sq_sub {u : ℂ} (hu : ‖u‖ = 1) :
 
 /-- `RR(d, i d) = 0`. -/
 private lemma l4c_RR_I_mul_self (d : ℂ) (c : ℝ) : RR d (I * c * d) = 0 := by
-  rw [l4c_RR_eq]; simp [Complex.mul_re, Complex.mul_im]; ring
+  rw [RR_eq_re_mul_add_im_mul]; simp [Complex.mul_re, Complex.mul_im]; ring
 
 /-- The third coordinate of (13.2.2) seen through `RR(d, ·)`: a cubic polynomial in `t`. -/
 private lemma l4c_RR_flow (d : ℂ) (t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
     RR d (flow t z u 2) = RR d (z 2) + RR d (z 1) * t + RR d (z 0) * t ^ 2 / 2 +
       RR d (-I * u) * t ^ 3 / 6 := by
-  simp only [l4c_RR_eq]
+  simp only [RR_eq_re_mul_add_im_mul]
   simp [flow, Complex.mul_re, Complex.mul_im, pow_succ]
   ring
 
 /-- The part of `H_F` that depends on the control: `H_F(w, v) - H_F(w, v') = RR(v - v', w₃)`. -/
 private lemma l4c_ham_sub (w : Fin 3 → ℂ) (v v' : ℂ) : ham w v - ham w v' = RR (v - v') (w 2) := by
-  simp only [ham, l4c_RR_eq, Complex.sub_re, Complex.sub_im]; ring
+  simp only [ham, RR_eq_re_mul_add_im_mul, Complex.sub_re, Complex.sub_im]; ring
 
 /-- The switching polynomial: `H_F(z(t, z⁰, u), v) - H_F(z(t, z⁰, u), v')` as a cubic in `t`
 (TeX 10755–10784, up to the factor `√3`). -/
-lemma l4c_ham_flow_sub (t : ℝ) (z : Fin 3 → ℂ) (u v v' : ℂ) :
+theorem ham_flow_sub_ham_flow (t : ℝ) (z : Fin 3 → ℂ) (u v v' : ℂ) :
     ham (flow t z u) v - ham (flow t z u) v' = RR (v - v') (z 2) + RR (v - v') (z 1) * t +
       RR (v - v') (z 0) * t ^ 2 / 2 + RR (v - v') (-I * u) * t ^ 3 / 6 := by
   rw [l4c_ham_sub, l4c_RR_flow]
 
 private lemma l4c_continuous_ham_flow_sub (z : Fin 3 → ℂ) (u v v' : ℂ) :
     Continuous fun t : ℝ ↦ ham (flow t z u) v - ham (flow t z u) v' := by
-  simp_rw [l4c_ham_flow_sub]
+  simp_rw [ham_flow_sub_ham_flow]
   fun_prop
 
 /-- The control vectors seen through `RR`: `v(z, v) - v(z, v') = (RR(v - v', z₃), RR(v - v', z₂),
 RR(v - v', z₁))`. -/
-private lemma l4c_controlVector_sub (z : Fin 3 → ℂ) (v v' : ℂ) :
+theorem controlVector_sub_apply (z : Fin 3 → ℂ) (v v' : ℂ) :
     (controlVector z v - controlVector z v') 0 = RR (v - v') (z 2) ∧
       (controlVector z v - controlVector z v') 1 = RR (v - v') (z 1) ∧
       (controlVector z v - controlVector z v') 2 = RR (v - v') (z 0) := by
-  simp only [controlVector, Pi.sub_apply, l4c_RR_eq, Complex.sub_re, Complex.sub_im]
+  simp only [controlVector, Pi.sub_apply, RR_eq_re_mul_add_im_mul, Complex.sub_re, Complex.sub_im]
   refine ⟨?_, ?_, ?_⟩ <;> simp <;> ring
 
 /-! ### Helpers: the sign of a cubic near `0⁺` and the lexicographic order -/
-
-/-- A continuous function positive at `0` is positive on some `(0, ε]`. -/
-private lemma l4c_pos_near_zero {q : ℝ → ℝ} (hq : Continuous q) (h0 : 0 < q 0) :
-    ∃ ε > 0, ∀ t ∈ Ioc 0 ε, 0 < q t := by
-  obtain ⟨ε, hε, h⟩ := Metric.eventually_nhds_iff.1 (hq.continuousAt.eventually (lt_mem_nhds h0))
-  refine ⟨ε / 2, by positivity, fun t ht ↦ h ?_⟩
-  rw [Real.dist_eq, sub_zero, abs_of_pos ht.1]
-  linarith [ht.2]
-
-/-- The sign of a cubic for small `t > 0` is the sign of its first nonzero coefficient. -/
-lemma l4c_cubic_pos {a b c d : ℝ}
-    (h : 0 < a ∨ (a = 0 ∧ 0 < b) ∨ (a = 0 ∧ b = 0 ∧ 0 < c) ∨ (a = 0 ∧ b = 0 ∧ c = 0 ∧ 0 < d)) :
-    ∃ ε > 0, ∀ t ∈ Ioc 0 ε, 0 < a + b * t + c * t ^ 2 + d * t ^ 3 := by
-  rcases h with ha | ⟨rfl, hb⟩ | ⟨rfl, rfl, hc⟩ | ⟨rfl, rfl, rfl, hd⟩
-  · exact l4c_pos_near_zero (by fun_prop) (by simpa using ha)
-  · obtain ⟨ε, hε, h⟩ := l4c_pos_near_zero (q := fun t ↦ b + c * t + d * t ^ 2) (by fun_prop)
-      (by simpa using hb)
-    refine ⟨ε, hε, fun t ht ↦ ?_⟩
-    have := mul_pos ht.1 (h t ht)
-    linear_combination this
-  · obtain ⟨ε, hε, h⟩ := l4c_pos_near_zero (q := fun t ↦ c + d * t) (by fun_prop)
-      (by simpa using hc)
-    refine ⟨ε, hε, fun t ht ↦ ?_⟩
-    have := mul_pos (pow_pos ht.1 2) (h t ht)
-    linear_combination this
-  · exact ⟨1, one_pos, fun t ht ↦ by have := pow_pos ht.1 3; nlinarith⟩
 
 /-- A cubic with a nonzero leading coefficient does not vanish identically on any `(0, δ]`. -/
 private lemma l4c_cubic_ne_zero {a b c d : ℝ} (hd : d ≠ 0) {δ : ℝ} (hδ : 0 < δ) :
@@ -205,7 +144,7 @@ private lemma l4c_cubic_ne_zero {a b c d : ℝ} (hd : d ≠ 0) {δ : ℝ} (hδ :
   have key : ∀ {a b c d : ℝ}, (0 < a ∨ (a = 0 ∧ 0 < b) ∨ (a = 0 ∧ b = 0 ∧ 0 < c) ∨
       (a = 0 ∧ b = 0 ∧ c = 0 ∧ 0 < d)) → ∃ t ∈ Ioc 0 δ, a + b * t + c * t ^ 2 + d * t ^ 3 ≠ 0 := by
     intro a b c d h
-    obtain ⟨ε, hε, h⟩ := l4c_cubic_pos h
+    obtain ⟨ε, hε, h⟩ := exists_forall_Ioc_cubic_pos h
     exact ⟨min δ ε, ⟨lt_min hδ hε, min_le_left _ _⟩,
       (h _ ⟨lt_min hδ hε, min_le_right _ _⟩).ne'⟩
   rcases lt_trichotomy a 0 with ha | rfl | ha
@@ -285,11 +224,11 @@ private lemma l4c_eventually_of_lexLt {z : Fin 3 → ℂ} {v w : ℂ}
     (h : LexLt (controlVector z v) (controlVector z w)) (u : ℂ) :
     ∃ ε > 0, (∀ t ∈ Icc 0 ε, ham (flow t z u) v ≤ ham (flow t z u) w) ∧
       ∀ t ∈ Ioc 0 ε, ham (flow t z u) v < ham (flow t z u) w := by
-  obtain ⟨h0, h1, h2⟩ := l4c_controlVector_sub z w v
+  obtain ⟨h0, h1, h2⟩ := controlVector_sub_apply z w v
   have hl := (l4c_lexPos_iff _).1 h
   rw [h0, h1, h2] at hl
-  obtain ⟨ε, hε, hpos⟩ := l4c_cubic_pos (a := RR (w - v) (z 2)) (b := RR (w - v) (z 1))
-    (c := RR (w - v) (z 0) / 2) (d := RR (w - v) (-I * u) / 6) (by
+  obtain ⟨ε, hε, hpos⟩ := exists_forall_Ioc_cubic_pos (a := RR (w - v) (z 2))
+    (b := RR (w - v) (z 1)) (c := RR (w - v) (z 0) / 2) (d := RR (w - v) (-I * u) / 6) (by
       rcases hl with hl | ⟨ha, hb⟩ | ⟨ha, hb, hc⟩
       · exact Or.inl hl
       · exact Or.inr (Or.inl ⟨ha, hb⟩)
@@ -297,11 +236,11 @@ private lemma l4c_eventually_of_lexLt {z : Fin 3 → ℂ} {v w : ℂ}
   have hlt : ∀ t ∈ Ioc 0 ε, ham (flow t z u) v < ham (flow t z u) w := by
     intro t ht
     have := hpos t ht
-    have hf := l4c_ham_flow_sub t z u w v
+    have hf := ham_flow_sub_ham_flow t z u w v
     linarith
   refine ⟨ε, hε, fun t ht ↦ ?_, hlt⟩
   rcases ht.1.eq_or_lt with rfl | ht0
-  · rw [l4st_flow_zero]
+  · rw [flow_zero]
     have := l4c_ham_sub z w v
     rcases hl with hl | ⟨ha, -⟩ | ⟨ha, -⟩ <;> linarith
   · exact (hlt t ⟨ht0, ht.2⟩).le
@@ -309,11 +248,11 @@ private lemma l4c_eventually_of_lexLt {z : Fin 3 → ℂ} {v w : ℂ}
 /-- A property of controls holding for small `ε` holds for all three controls at once. -/
 private lemma l4c_exists_eps_VT {P : ℂ → ℝ → Prop} (hmono : ∀ v ε ε', ε' ≤ ε → P v ε → P v ε')
     (h : ∀ v ∈ VT, ∃ ε > 0, P v ε) : ∃ ε > 0, ∀ v ∈ VT, P v ε := by
-  obtain ⟨ε₁, h₁, p₁⟩ := h 1 l4c_one_mem_VT
-  obtain ⟨ε₂, h₂, p₂⟩ := h ζ l4c_ζ_mem_VT
-  obtain ⟨ε₃, h₃, p₃⟩ := h (ζ ^ 2) l4c_ζ_sq_mem_VT
+  obtain ⟨ε₁, h₁, p₁⟩ := h 1 one_mem_VT
+  obtain ⟨ε₂, h₂, p₂⟩ := h ζ ζ_mem_VT
+  obtain ⟨ε₃, h₃, p₃⟩ := h (ζ ^ 2) ζ_sq_mem_VT
   refine ⟨min ε₁ (min ε₂ ε₃), lt_min h₁ (lt_min h₂ h₃), fun v hv ↦ ?_⟩
-  rcases l4c_mem_VT.1 hv with rfl | rfl | rfl
+  rcases mem_VT.1 hv with rfl | rfl | rfl
   · exact hmono _ _ _ (min_le_left _ _) p₁
   · exact hmono _ _ _ ((min_le_right _ _).trans (min_le_left _ _)) p₂
   · exact hmono _ _ _ ((min_le_right _ _).trans (min_le_right _ _)) p₃
@@ -322,10 +261,10 @@ private lemma l4c_exists_eps_VT {P : ℂ → ℝ → Prop} (hmono : ∀ v ε ε'
 
 /-- The wall between `ζ` and `ζ²` (TeX 10912–10918): `RR(w, ζ) = RR(w, ζ²) ≥ RR(w, 1)` if and only
 if `w ∈ ℝ_{≤0} = 𝒲₀`. -/
-theorem l4st_wall_zero_iff (w : ℂ) :
+theorem RR_eq_and_le_iff_mem_wall_zero (w : ℂ) :
     (RR w ζ = RR w (ζ ^ 2) ∧ RR w 1 ≤ RR w ζ) ↔ w ∈ wall 0 := by
   have h3 : 0 < √3 := by positivity
-  simp only [l4c_RR_eq, l4c_ζ_re, l4c_ζ_im, l4c_ζ_sq_re, l4c_ζ_sq_im, Complex.one_re,
+  simp only [RR_eq_re_mul_add_im_mul, ζ_re, ζ_im, ζ_sq_re, ζ_sq_im, Complex.one_re,
     Complex.one_im, wall, pow_zero, mul_one, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨h1, h2⟩
@@ -340,36 +279,36 @@ theorem l4st_wall_zero_iff (w : ℂ) :
 
 /-- "Switching of controls can only occur when `z₃ ∈ 𝒲`" (TeX 10925–10926): if two distinct
 controls of `V_T` both maximize `RR(w, ·)` over `V_T`, then `w ∈ 𝒲`. (The rotation by `ζ^k` takes
-the wall `𝒲₀` to `𝒲_k`; `l4st_wall_zero_iff`.) -/
-theorem l4st_mem_walls_of_maximizers {w u v : ℂ} (hu : u ∈ VT) (hv : v ∈ VT) (huv : u ≠ v)
+the wall `𝒲₀` to `𝒲_k`; `RR_eq_and_le_iff_mem_wall_zero`.) -/
+theorem mem_walls_of_maximizers {w u v : ℂ} (hu : u ∈ VT) (hv : v ∈ VT) (huv : u ≠ v)
     (hmu : ∀ x ∈ VT, RR w x ≤ RR w u) (hmv : ∀ x ∈ VT, RR w x ≤ RR w v) : w ∈ walls := by
   have h3 := l4c_sqrt3_mul_self
   -- the wall between `1` and `ζ` is `𝒲₂`, the wall between `1` and `ζ²` is `𝒲₁`
   have hA : RR w 1 = RR w ζ → RR w (ζ ^ 2) ≤ RR w 1 → w ∈ wall 2 := by
-    simp only [l4c_RR_eq, l4c_ζ_re, l4c_ζ_im, l4c_ζ_sq_re, l4c_ζ_sq_im, Complex.one_re,
+    simp only [RR_eq_re_mul_add_im_mul, ζ_re, ζ_im, ζ_sq_re, ζ_sq_im, Complex.one_re,
       Complex.one_im]
     intro e f
     have hy : w.im = √3 * w.re := by linear_combination (-2 * √3 / 3) * e - (w.im / 3) * h3
     refine ⟨-2 * w.re, by nlinarith, ?_⟩
     apply Complex.ext <;>
-      simp only [Complex.re_ofReal_mul, Complex.im_ofReal_mul, l4c_ζ_sq_re, l4c_ζ_sq_im] <;>
+      simp only [Complex.re_ofReal_mul, Complex.im_ofReal_mul, ζ_sq_re, ζ_sq_im] <;>
       linarith
   have hB : RR w 1 = RR w (ζ ^ 2) → RR w ζ ≤ RR w 1 → w ∈ wall 1 := by
-    simp only [l4c_RR_eq, l4c_ζ_re, l4c_ζ_im, l4c_ζ_sq_re, l4c_ζ_sq_im, Complex.one_re,
+    simp only [RR_eq_re_mul_add_im_mul, ζ_re, ζ_im, ζ_sq_re, ζ_sq_im, Complex.one_re,
       Complex.one_im]
     intro e f
     have hy : w.im = -(√3 * w.re) := by linear_combination (2 * √3 / 3) * e - (w.im / 3) * h3
     refine ⟨-2 * w.re, by nlinarith, ?_⟩
     apply Complex.ext <;>
-      simp only [pow_one, Complex.re_ofReal_mul, Complex.im_ofReal_mul, l4c_ζ_re, l4c_ζ_im] <;>
+      simp only [pow_one, Complex.re_ofReal_mul, Complex.im_ofReal_mul, ζ_re, ζ_im] <;>
       linarith
   have hC : RR w ζ = RR w (ζ ^ 2) → RR w 1 ≤ RR w ζ → w ∈ wall 0 := fun e f ↦
-    (l4st_wall_zero_iff w).1 ⟨e, f⟩
-  have m1 := l4c_one_mem_VT
-  have m2 := l4c_ζ_mem_VT
-  have m3 := l4c_ζ_sq_mem_VT
+    (RR_eq_and_le_iff_mem_wall_zero w).1 ⟨e, f⟩
+  have m1 := one_mem_VT
+  have m2 := ζ_mem_VT
+  have m3 := ζ_sq_mem_VT
   simp only [walls, Set.mem_union]
-  rcases l4c_mem_VT.1 hu with rfl | rfl | rfl <;> rcases l4c_mem_VT.1 hv with rfl | rfl | rfl
+  rcases mem_VT.1 hu with rfl | rfl | rfl <;> rcases mem_VT.1 hv with rfl | rfl | rfl
   · exact absurd rfl huv
   · exact Or.inr (hA (le_antisymm (hmv 1 m1) (hmu ζ m2)) (hmu _ m3))
   · exact Or.inl (Or.inr (hB (le_antisymm (hmv 1 m1) (hmu _ m3)) (hmu ζ m2)))
@@ -388,7 +327,7 @@ Proof: if `u ≠ u'` were both first controls, comparing the maximum conditions 
 trajectories (`RR(u - u', z₃(t, z⁰, u)) ≥ 0 ≥ RR(u - u', z₃(t, z⁰, u'))` for small `t ≥ 0`) and
 using `RR(u - u', -i(u - u')) = 0` forces all four Taylor coefficients of `RR(u - u', z₃(t, z⁰, u))`
 to vanish, while its cubic coefficient is `RR(u - u', -iu)/6 = ±√3/12 ≠ 0`. -/
-theorem l4st_isFirstControl_unique {z : Fin 3 → ℂ} {u u' : ℂ} (hu : IsFirstControl z u)
+theorem IsFirstControl.unique {z : Fin 3 → ℂ} {u u' : ℂ} (hu : IsFirstControl z u)
     (hu' : IsFirstControl z u') : u = u' := by
   by_contra hne
   obtain ⟨huV, ε, hε, hmax⟩ := hu
@@ -406,13 +345,13 @@ theorem l4st_isFirstControl_unique {z : Fin 3 → ℂ} {u u' : ℂ} (hu : IsFirs
     have key : RR (u' - u) (flow t z u 2) = -RR (u - u') (flow t z u' 2) := by
       have := l4c_RR_I_mul_self (u' - u) (t ^ 3 / 6)
       rw [hf]
-      simp only [l4c_RR_eq, Complex.add_re, Complex.add_im, Complex.sub_re,
+      simp only [RR_eq_re_mul_add_im_mul, Complex.add_re, Complex.add_im, Complex.sub_re,
         Complex.sub_im] at this ⊢
       linarith
     linarith
   -- its cubic coefficient `RR(u' - u, -iu)` is `±√3/2`
   have hcub : RR (u' - u) (-I * u) ≠ 0 := by
-    have hn := l4c_norm_of_mem_VT huV
+    have hn := norm_eq_one_of_mem_VT huV
     have h3 : 0 < √3 := by positivity
     rcases (l4c_mem_VT_iff huV).1 hu'V with rfl | rfl | rfl
     · exact absurd rfl hne
@@ -427,13 +366,13 @@ theorem l4st_isFirstControl_unique {z : Fin 3 → ℂ} {u u' : ℂ} (hu : IsFirs
   linear_combination this
 
 private lemma l4c_conj_mem_VT {u : ℂ} : starRingEnd ℂ u ∈ VT ↔ u ∈ VT :=
-  ⟨fun h ↦ by simpa using (l4st_VT_props h h).2.2.1, fun h ↦ (l4st_VT_props h h).2.2.1⟩
+  ⟨fun h ↦ by simpa using conj_mem_VT h, fun h ↦ conj_mem_VT h⟩
 
 /-- Time reversal of the Hamiltonian along constant-control trajectories:
-`H_F(z(s, τ(z⁰), ū), v̄) = H_F(z(-s, z⁰, u), v)` (`l4st_tau_flow_neg`, `l4st_ham_tau`). -/
+`H_F(z(s, τ(z⁰), ū), v̄) = H_F(z(-s, z⁰, u), v)` (`tau_flow_neg`, `ham_tau`). -/
 private lemma l4c_ham_flow_tau (s : ℝ) (z : Fin 3 → ℂ) (u v : ℂ) :
     ham (flow s (tau z) (starRingEnd ℂ u)) (starRingEnd ℂ v) = ham (flow (-s) z u) v := by
-  rw [← l4st_tau_flow_neg, l4st_ham_tau, Complex.conj_conj]
+  rw [← tau_flow_neg, ham_tau, Complex.conj_conj]
 
 /-- `u` is the most recent control of `z⁰` if and only if `ū` is the first control of `τ(z⁰)`
 (the time reversal, TeX 10891–10906). -/
@@ -451,10 +390,10 @@ private lemma l4c_isMostRecentControl_iff {z : Fin 3 → ℂ} {u : ℂ} :
       (l4c_conj_mem_VT.2 hv)
     rwa [l4c_ham_flow_tau, l4c_ham_flow_tau, neg_neg] at this
 
-/-- The most recent control is unique (the time reversal of `l4st_isFirstControl_unique`). -/
-theorem l4st_isMostRecentControl_unique {z : Fin 3 → ℂ} {u u' : ℂ}
+/-- The most recent control is unique (the time reversal of `IsFirstControl.unique`). -/
+private theorem l4st_isMostRecentControl_unique {z : Fin 3 → ℂ} {u u' : ℂ}
     (hu : IsMostRecentControl z u) (hu' : IsMostRecentControl z u') : u = u' := by
-  have := l4st_isFirstControl_unique (l4c_isMostRecentControl_iff.1 hu)
+  have := IsFirstControl.unique (l4c_isMostRecentControl_iff.1 hu)
     (l4c_isMostRecentControl_iff.1 hu')
   simpa using congrArg (starRingEnd ℂ) this
 
@@ -503,7 +442,7 @@ rotation to `u = 1`). -/
 private lemma l4c_isFirstControl_of_mem {z : Fin 3 → ℂ} {u : ℂ} (hu : u ∈ lexMaxControls z)
     (hnext : ∀ v ∈ lexMaxControls z, v ≠ u → v = u * ζ) : IsFirstControl z u := by
   have huV : u ∈ VT := hu.1
-  have hn := l4c_norm_of_mem_VT huV
+  have hn := norm_eq_one_of_mem_VT huV
   have hall : ∀ v ∈ VT, ∃ ε > 0, ∀ t ∈ Icc 0 ε, ham (flow t z u) v ≤ ham (flow t z u) u := by
     intro v hv
     by_cases hvm : v ∈ lexMaxControls z
@@ -511,10 +450,10 @@ private lemma l4c_isFirstControl_of_mem {z : Fin 3 → ℂ} {u : ℂ} (hu : u �
       · exact ⟨1, one_pos, fun t _ ↦ hvu ▸ le_rfl⟩
       · have hv' := hnext v hvm hvu
         have hcv := l4c_controlVector_eq hvm hu
-        obtain ⟨h0, h1, h2⟩ := l4c_controlVector_sub z v u
+        obtain ⟨h0, h1, h2⟩ := controlVector_sub_apply z v u
         rw [hcv, sub_self, Pi.zero_apply] at h0 h1 h2
         refine ⟨1, one_pos, fun t ht ↦ ?_⟩
-        have e := l4c_ham_flow_sub t z u v u
+        have e := ham_flow_sub_ham_flow t z u v u
         rw [← h0, ← h1, ← h2, hv', l4c_RR_mul_ζ_sub hn] at e
         have : 0 ≤ t ^ 3 := pow_nonneg ht.1 3
         have h3 : 0 < √3 := by positivity
@@ -528,11 +467,11 @@ private lemma l4c_isFirstControl_of_mem {z : Fin 3 → ℂ} {u : ℂ} (hu : u �
   exact ⟨huV, ε, hε, fun t ht v hv ↦ h v hv t ht⟩
 
 /-- The first control lies in `V_T` (the junk value `1` too). -/
-private lemma l4c_firstControl_mem_VT (z : Fin 3 → ℂ) : firstControl z ∈ VT := by
+theorem firstControl_mem_VT (z : Fin 3 → ℂ) : firstControl z ∈ VT := by
   unfold firstControl
   split_ifs with h
   · exact h.choose_spec.1
-  · exact l4c_one_mem_VT
+  · exact one_mem_VT
 
 /-- `u ζ²` eventually beats `u` along `t ↦ z(t, z⁰, u)`: the cubic coefficient of the switching
 function from `u` to `u/ζ = uζ²` is `RR(uζ² - u, -iu)/6 = √3/12 > 0`. So the set defining the
@@ -542,9 +481,9 @@ private lemma l4c_switch_exists (z : Fin 3 → ℂ) {u : ℂ} (hu : u ∈ VT) :
   obtain ⟨T, hT, h⟩ := l4c_cubic_pos_somewhere (a := RR (u * ζ ^ 2 - u) (z 2))
     (b := RR (u * ζ ^ 2 - u) (z 1)) (c := RR (u * ζ ^ 2 - u) (z 0) / 2)
     (d := RR (u * ζ ^ 2 - u) (-I * u) / 6)
-    (by rw [l4c_RR_mul_ζ_sq_sub (l4c_norm_of_mem_VT hu)]; positivity)
+    (by rw [l4c_RR_mul_ζ_sq_sub (norm_eq_one_of_mem_VT hu)]; positivity)
   refine ⟨T, hT, ?_⟩
-  have := l4c_ham_flow_sub T z u (u * ζ ^ 2) u
+  have := ham_flow_sub_ham_flow T z u (u * ζ ^ 2) u
   linarith
 
 /-- The set defining the first switching time is nonempty and bounded below by `0`. -/
@@ -554,9 +493,9 @@ private lemma l4c_switchSet (z : Fin 3 → ℂ) :
     {t : ℝ | 0 < t ∧ ∃ v ∈ VT,
       ham (flow t z (firstControl z)) (firstControl z) <
         ham (flow t z (firstControl z)) v}.Nonempty := by
-  have hu := l4c_firstControl_mem_VT z
+  have hu := firstControl_mem_VT z
   obtain ⟨T, hT, h⟩ := l4c_switch_exists z hu
-  exact ⟨⟨0, fun t ht ↦ ht.1.le⟩, T, hT, _, (l4st_VT_props hu l4c_ζ_sq_mem_VT).2.1, h⟩
+  exact ⟨⟨0, fun t ht ↦ ht.1.le⟩, T, hT, _, mul_mem_VT hu ζ_sq_mem_VT, h⟩
 
 end TriFuller
 
@@ -567,26 +506,36 @@ lexicographic order. Then
 * if `V_{T,max} = {ζ^i, ζ^{i+1}}` has two elements, then the first control is `ζ^i`;
 * `V_{T,max} ≠ V_T`.
 
-Proof (the book's):
+Proof. Step 1 is the book's:
 1. Two vectors that are equal in the lexicographic order are equal; if `V_{T,max} = V_T`, the
    three control vectors are equal, `RR(z_j⁰, 1) = RR(z_j⁰, ζ) = RR(z_j⁰, ζ²)`, and
    `1 + ζ + ζ² = 0` (the three vertices span `ℂ` over `ℝ`) forces `z⁰ = 0`.
-2. The first control maximizes `RR(z₃(t), ·)` for small `t ≥ 0`, and
-   `z₃(t) = z₃⁰ + z₂⁰ t + z₁⁰ t²/2 - iut³/6` (13.2.2): the switching function
-   `RR(u - v, z₃(t, z⁰, u))` has the Taylor coefficients `RR(z₃⁰, u - v)`, `RR(z₂⁰, u - v)`,
-   `RR(z₁⁰, u - v)/2`, `RR(-iu, u - v)/6`, and its sign for small `t > 0` is the sign of the first
-   nonzero one. If `V_{T,max} = {u}`, for each `v ≠ u` the first nonzero coefficient among the
-   first three is positive (`v(z⁰, v) ≺ v(z⁰, u)`), so `u` maximizes on some `[0, ε]`.
-3. If `V_{T,max} = {ζ^i, ζ^{i+1}}`, the first three coefficients for the pair vanish and the
-   cubic one decides: by rotation (Lemma 13.2.2, (13.2.7)) take `i = 0`; with the control `ζ`,
-   `RR(-iζt³/3!, ζ - 1) = -t³/(4√3) < 0`, so `ζ` is not maximizing, while with the control `1`,
-   `RR(-it³/3!, 1 - ζ) = t³/(4√3) > 0`, so `1 = ζ⁰` maximizes on some `[0, ε]` (the third control
-   is beaten as in step 2).
+   (In coordinates: `RR(w, 1) = RR(w, ζ) = RR(w, ζ²)` forces `w = 0`.)
 
-In the formalization, steps 2–3 are the private lemma `l4c_isFirstControl_of_mem`; the rotation
-to `i = 0` is done inside the computation, by `RR(ua, ub) = RR(a, b)` for `|u| = 1` (the
-invariance behind (13.2.7)): `RR(-iζ^i, ζ^i - ζ^{i+1}) = RR(-i, 1 - ζ)`. Step 1 is the
-coordinate form of `1 + ζ + ζ² = 0`: `RR(w, 1) = RR(w, ζ) = RR(w, ζ²)` forces `w = 0`. -/
+Departure from the paper (the direction of steps 2–3). The book's argument (TeX 10978–10995)
+proves the *necessary* direction: the first control, if it exists, maximizes the lexicographic
+order ("In this way, the first control must maximize the lexicographical order"), and in the tie
+case `V_{T,max} = {ζ^i, ζ^{i+1}}` it cannot be `ζ^{i+1}` (by contradiction, from the sign of the
+cubic term). The statement asserts the *sufficient* direction, that the lexicographic maximizer
+`u` is the first control, which in the semantic sense of `IsFirstControl` means that the constant
+control `u` is optimal along its own trajectory on some `[0, ε]`; the book never shows this. The
+formalization proves it from the same Taylor expansion:
+2. The switching function `RR(u - v, z₃(t, z⁰, u))`, with
+   `z₃(t) = z₃⁰ + z₂⁰ t + z₁⁰ t²/2 - iut³/6` (13.2.2), has the Taylor coefficients
+   `RR(z₃⁰, u - v)`, `RR(z₂⁰, u - v)`, `RR(z₁⁰, u - v)/2`, `RR(-iu, u - v)/6`, and its sign for
+   small `t > 0` is the sign of the first nonzero one. If `V_{T,max} = {u}`, for each `v ≠ u` the
+   first nonzero coefficient among the first three is positive (`v(z⁰, v) ≺ v(z⁰, u)`), so `u`
+   maximizes on some `[0, ε]`.
+3. If `V_{T,max} = {ζ^i, ζ^{i+1}}`, the first three coefficients for the pair vanish and the cubic
+   one decides: with the control `ζ^i`, `RR(-iζ^i t³/3!, ζ^i - ζ^{i+1}) = t³/(4√3) > 0`, so `ζ^i`
+   maximizes on some `[0, ε]` (the third control is beaten as in step 2). The book's rotation to
+   `i = 0` (Lemma 13.2.2, (13.2.7)) is done inside the computation, by `RR(ua, ub) = RR(a, b)` for
+   `|u| = 1`: `RR(-iζ^i, ζ^i - ζ^{i+1}) = RR(-i, 1 - ζ)`.
+
+Steps 2–3 are the private lemma `l4c_isFirstControl_of_mem`. The book's necessary direction is
+`firstControl_mem_lexMaxControls` (and the local uniqueness of extremals, `l4d_local_unique` in
+`SmoothedPolygons/Ch13/Extremals.lean`), and the uniqueness of the first control is proved
+generically (`IsFirstControl.unique`). -/
 theorem lemma13_2_6 {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     (∀ u : ℂ, lexMaxControls z = {u} → IsFirstControl z u) ∧
       (∀ i : ℕ, lexMaxControls z = {ζ ^ i, ζ ^ (i + 1)} → IsFirstControl z (ζ ^ i)) ∧
@@ -605,11 +554,11 @@ theorem lemma13_2_6 {z : Fin 3 → ℂ} (hz : z ≠ 0) :
   · -- step 1: if the three control vectors are equal, then `z⁰ = 0`
     apply hz
     have hmem : ∀ v ∈ VT, v ∈ lexMaxControls z := fun v hv ↦ h ▸ hv
-    have e1 := l4c_controlVector_eq (hmem 1 l4c_one_mem_VT) (hmem ζ l4c_ζ_mem_VT)
-    have e2 := l4c_controlVector_eq (hmem 1 l4c_one_mem_VT) (hmem _ l4c_ζ_sq_mem_VT)
+    have e1 := l4c_controlVector_eq (hmem 1 one_mem_VT) (hmem ζ ζ_mem_VT)
+    have e2 := l4c_controlVector_eq (hmem 1 one_mem_VT) (hmem _ ζ_sq_mem_VT)
     have key : ∀ w : ℂ, RR w 1 = RR w ζ → RR w 1 = RR w (ζ ^ 2) → w = 0 := by
       intro w f g
-      simp only [l4c_RR_eq, l4c_ζ_re, l4c_ζ_im, l4c_ζ_sq_re, l4c_ζ_sq_im, Complex.one_re,
+      simp only [RR_eq_re_mul_add_im_mul, ζ_re, ζ_im, ζ_sq_re, ζ_sq_im, Complex.one_re,
         Complex.one_im] at f g
       have h3 : 0 < √3 := by positivity
       have hy : w.im = 0 := by
@@ -631,13 +580,14 @@ namespace TriFuller
 
 /-- Every `z⁰ ≠ 0` has a first control (Lemma 13.2.6: `V_{T,max}` is nonempty, and it is a
 singleton or a pair `{ζ^i, ζ^{i+1}}` since it is not `V_T`). -/
-theorem l4st_exists_isFirstControl {z : Fin 3 → ℂ} (hz : z ≠ 0) : ∃ u, IsFirstControl z u := by
+private theorem l4st_exists_isFirstControl {z : Fin 3 → ℂ} (hz : z ≠ 0) :
+    ∃ u, IsFirstControl z u := by
   obtain ⟨ha, hb, hc⟩ := lemma13_2_6 hz
   obtain ⟨u, hu⟩ := l4c_lexMaxControls_nonempty z
   have hVT := fun v ↦ l4c_mem_VT_iff hu.1 (v := v)
   obtain ⟨i, rfl⟩ := l4c_exists_pow_of_mem_VT hu.1
   have h3 : ζ ^ i * ζ ^ 2 * ζ = ζ ^ i := by
-    rw [mul_assoc, ← pow_succ, l4st_ζ_pow_three, mul_one]
+    rw [mul_assoc, ← pow_succ, ζ_pow_three, mul_one]
   by_cases h1 : ζ ^ i * ζ ∈ lexMaxControls z <;> by_cases h2 : ζ ^ i * ζ ^ 2 ∈ lexMaxControls z
   · -- `V_{T,max} = V_T`, excluded
     refine absurd (Set.Subset.antisymm l4c_lexMaxControls_subset fun v hv ↦ ?_) hc
@@ -669,23 +619,23 @@ theorem l4st_exists_isFirstControl {z : Fin 3 → ℂ} (hz : z ≠ 0) : ∃ u, I
     · rintro rfl; exact hu
 
 /-- For `z⁰ ≠ 0`, `firstControl z⁰` is the first control of `z⁰`. -/
-theorem l4st_isFirstControl_firstControl {z : Fin 3 → ℂ} (hz : z ≠ 0) :
+theorem isFirstControl_firstControl {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     IsFirstControl z (firstControl z) := by
   have h := l4st_exists_isFirstControl hz
   rw [firstControl, dite_eq_left h]
   exact h.choose_spec
 
 /-- For `z⁰ ≠ 0`, `firstControl z⁰ = u` if and only if `u` is the first control of `z⁰`. -/
-theorem l4st_firstControl_eq_iff {z : Fin 3 → ℂ} (hz : z ≠ 0) {u : ℂ} :
+theorem firstControl_eq_iff {z : Fin 3 → ℂ} (hz : z ≠ 0) {u : ℂ} :
     firstControl z = u ↔ IsFirstControl z u :=
-  ⟨fun h ↦ h ▸ l4st_isFirstControl_firstControl hz,
-    fun h ↦ l4st_isFirstControl_unique (l4st_isFirstControl_firstControl hz) h⟩
+  ⟨fun h ↦ h ▸ isFirstControl_firstControl hz,
+    fun h ↦ IsFirstControl.unique (isFirstControl_firstControl hz) h⟩
 
 /-- "In this way, the first control must maximize the lexicographical order" (TeX 10990–10991):
 the first control of `z⁰ ≠ 0` lies in `V_{T,max}`. -/
-theorem l4st_firstControl_mem_lexMaxControls {z : Fin 3 → ℂ} (hz : z ≠ 0) :
+theorem firstControl_mem_lexMaxControls {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     firstControl z ∈ lexMaxControls z := by
-  obtain ⟨huV, ε, hε, hmax⟩ := l4st_isFirstControl_firstControl hz
+  obtain ⟨huV, ε, hε, hmax⟩ := isFirstControl_firstControl hz
   refine ⟨huV, fun v hv hlt ↦ ?_⟩
   -- a control with a larger control vector would beat the first control for small `t > 0`
   obtain ⟨ε', hε', -, hlt'⟩ := l4c_eventually_of_lexLt hlt (firstControl z)
@@ -693,19 +643,19 @@ theorem l4st_firstControl_mem_lexMaxControls {z : Fin 3 → ℂ} (hz : z ≠ 0) 
     (not_le.2 (hlt' _ ⟨lt_min hε hε', min_le_right _ _⟩))
 
 /-- For `z⁰ ≠ 0`, `t = 0` is not a limit of switching times: `t_sw > 0` (TeX 10750–10753). -/
-theorem l4st_firstSwitchTime_pos {z : Fin 3 → ℂ} (hz : z ≠ 0) : 0 < firstSwitchTime z := by
-  obtain ⟨-, ε, hε, hmax⟩ := l4st_isFirstControl_firstControl hz
+theorem firstSwitchTime_pos {z : Fin 3 → ℂ} (hz : z ≠ 0) : 0 < firstSwitchTime z := by
+  obtain ⟨-, ε, hε, hmax⟩ := isFirstControl_firstControl hz
   refine hε.trans_le (le_csInf (l4c_switchSet z).2 ?_)
   rintro t ⟨ht, v, hv, hlt⟩
   by_contra! hle
   exact absurd (hmax t ⟨ht.le, hle.le⟩ v hv) (not_le.2 hlt)
 
 /-- The first control is optimal along its trajectory on the closed interval `[0, t_sw]`. -/
-theorem l4st_firstControl_maximizes {z : Fin 3 → ℂ} (hz : z ≠ 0) :
+theorem firstControl_maximizes {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     ∀ t ∈ Icc 0 (firstSwitchTime z), ∀ v ∈ VT,
       ham (flow t z (firstControl z)) v ≤ ham (flow t z (firstControl z)) (firstControl z) := by
-  obtain ⟨-, ε, hε, hmax⟩ := l4st_isFirstControl_firstControl hz
-  have hpos := l4st_firstSwitchTime_pos hz
+  obtain ⟨-, ε, hε, hmax⟩ := isFirstControl_firstControl hz
+  have hpos := firstSwitchTime_pos hz
   intro t ht v hv
   -- on `[0, t_sw)` by the definition of `t_sw`, then at `t_sw` by continuity
   have hIco : Ico 0 (firstSwitchTime z) ⊆ {s | ham (flow s z (firstControl z)) v -
@@ -724,7 +674,7 @@ theorem l4st_firstControl_maximizes {z : Fin 3 → ℂ} (hz : z ≠ 0) :
 /-- The trajectory switches at `t_sw`: the first control is beaten at times arbitrarily close to
 `t_sw` from the right (in fact on a whole interval `(t_sw, t_sw + ε)`, the switching functions
 being polynomials). -/
-theorem l4st_firstControl_beaten {z : Fin 3 → ℂ} (hz : z ≠ 0) {ε : ℝ} (hε : 0 < ε) :
+theorem firstControl_beaten {z : Fin 3 → ℂ} (hz : z ≠ 0) {ε : ℝ} (hε : 0 < ε) :
     ∃ t ∈ Ioo (firstSwitchTime z) (firstSwitchTime z + ε), ∃ v ∈ VT,
       ham (flow t z (firstControl z)) (firstControl z) < ham (flow t z (firstControl z)) v := by
   obtain ⟨hbdd, hne⟩ := l4c_switchSet z
@@ -733,7 +683,7 @@ theorem l4st_firstControl_beaten {z : Fin 3 → ℂ} (hz : z ≠ 0) {ε : ℝ} (
   rcases hle.eq_or_lt with heq | hlt
   · -- at `t_sw` itself the first control is still optimal
     obtain ⟨-, v, hv, hlt'⟩ := hs
-    have := l4st_firstControl_maximizes hz s ⟨(l4st_firstSwitchTime_pos hz).le.trans hle,
+    have := firstControl_maximizes hz s ⟨(firstSwitchTime_pos hz).le.trans hle,
       heq ▸ le_rfl⟩ v hv
     exact absurd hlt' (not_lt.2 this)
   · exact ⟨s, ⟨hlt, hslt⟩, hs.2⟩
@@ -742,30 +692,31 @@ theorem l4st_firstControl_beaten {z : Fin 3 → ℂ} (hz : z ≠ 0) {ε : ℝ} (
 `z⁰ ≠ 0` with first control `u₀` and `t ∈ [0, t_sw]`, `z(t, z⁰, u₀) ≠ 0`. (Lemma 13.3.1,
 `lemma13_3_1`, gives `z(t) ≠ 0` for every `t`, but only when `z₃⁰ ∈ 𝒲`; here `z₃⁰` is arbitrary.)
 
-Proof route: `z(0, z⁰, u₀) = z⁰ ≠ 0` (`l4st_flow_zero`). Suppose `z(S, z⁰, u₀) = 0` with
-`0 < S ≤ t_sw`. By the flow property (`l4st_flow_add`), `z(t, z⁰, u₀) = z(t - S, 0, u₀)`, whose
+Proof route: `z(0, z⁰, u₀) = z⁰ ≠ 0` (`flow_zero`). Suppose `z(S, z⁰, u₀) = 0` with
+`0 < S ≤ t_sw`. By the flow property (`flow_add`), `z(t, z⁰, u₀) = z(t - S, 0, u₀)`, whose
 third coordinate is `-iu₀(t - S)³/6` by (13.2.2). The control `u₀ζ` lies in `V_T`
-(`l4st_isFirstControl_firstControl`, `l4st_VT_props`), and
+(`isFirstControl_firstControl`, `mul_mem_VT`), and
 `H_F(z(t), u₀ζ) - H_F(z(t), u₀) = RR(u₀ζ - u₀, -iu₀(t - S)³/6) = -(√3/12)(t - S)³`
 (`|u₀| = 1` and `RR(ζ - 1, -i) = -√3/2`), which is `> 0` for `t < S`: `u₀ζ` strictly beats `u₀` at
-every `t ∈ (0, S) ⊆ [0, t_sw]`, against `l4st_firstControl_maximizes`. -/
-theorem l4f_flow_firstControl_ne_zero {z : Fin 3 → ℂ} (hz : z ≠ 0) {t : ℝ}
+every `t ∈ (0, S) ⊆ [0, t_sw]`, against `firstControl_maximizes`. -/
+theorem flow_firstControl_ne_zero {z : Fin 3 → ℂ} (hz : z ≠ 0) {t : ℝ}
     (ht : t ∈ Icc 0 (firstSwitchTime z)) : flow t z (firstControl z) ≠ 0 := by
   intro h0
   rcases ht.1.eq_or_lt with rfl | hS
-  · exact hz (by rw [← l4st_flow_zero z (firstControl z)]; exact h0)
+  · exact hz (by rw [← flow_zero z (firstControl z)]; exact h0)
   · -- at `t/2 ∈ (0, S)`, `z(t/2) = z(-t/2, 0, u₀)` and `u₀ζ` strictly beats `u₀`
-    have huV := l4c_firstControl_mem_VT z
-    have hn := l4c_norm_of_mem_VT huV
+    have huV := firstControl_mem_VT z
+    have hn := norm_eq_one_of_mem_VT huV
     have hflow : flow (t / 2) z (firstControl z) = flow (-(t / 2)) 0 (firstControl z) := by
-      have := l4st_flow_add t (-(t / 2)) z (firstControl z)
+      have := flow_add t (-(t / 2)) z (firstControl z)
       rwa [h0, show t + -(t / 2) = t / 2 by ring] at this
-    have hmax := l4st_firstControl_maximizes hz (t / 2) ⟨by linarith, by linarith [ht.2]⟩
-      (firstControl z * ζ) ((l4st_VT_props huV l4c_ζ_mem_VT).2.1)
+    have hmax := firstControl_maximizes hz (t / 2) ⟨by linarith, by linarith [ht.2]⟩
+      (firstControl z * ζ) (mul_mem_VT huV ζ_mem_VT)
     rw [hflow] at hmax
-    have e := l4c_ham_flow_sub (-(t / 2)) 0 (firstControl z) (firstControl z * ζ) (firstControl z)
+    have e := ham_flow_sub_ham_flow (-(t / 2)) 0 (firstControl z) (firstControl z * ζ)
+      (firstControl z)
     rw [l4c_RR_mul_ζ_sub hn] at e
-    simp only [Pi.zero_apply, l4c_RR_eq, Complex.zero_re, Complex.zero_im, mul_zero,
+    simp only [Pi.zero_apply, RR_eq_re_mul_add_im_mul, Complex.zero_re, Complex.zero_im, mul_zero,
       add_zero, zero_mul, zero_add] at e
     have h3 : 0 < √3 := by positivity
     have : 0 < (t / 2) ^ 3 := by positivity
@@ -780,9 +731,9 @@ has a positive root less than `10r`. In particular, the first switching time `t_
 
 Proof (the book's): by rotation (Lemma 13.2.2) take `u = ζ`.
 1. Claim: `v(z, ζ) ≻ v(z, 1)` strictly. It is `⪰` because `ζ` is the first control
-   (`l4st_firstControl_mem_lexMaxControls`); if the vectors were equal, `V_{T,max} = {1, ζ}` by
+   (`firstControl_mem_lexMaxControls`); if the vectors were equal, `V_{T,max} = {1, ζ}` by
    Lemma 13.2.6 (c), and Lemma 13.2.6 (b) would make `1` the first control
-   (`l4st_isFirstControl_unique`).
+   (`IsFirstControl.unique`).
 2. `√3 χ(t) = RR(ζ - 1, z₃(t)) = -t³/(4√3) + Σ_{k=0}^{2} RR(ζ - 1, z_{3-k}) t^k/k!`: the leading
    coefficient is negative and, by the claim, the lowest nonzero coefficient is positive, so there
    is a positive root (intermediate value theorem).
@@ -795,19 +746,19 @@ In the formalization, the reduction to `u = ζ` is done inside the computations 
 `RR(ua, ub) = RR(a, b)` for `|u| = 1`); the bound of step 3 is used at `t = 10r`, where it gives
 `χ(10r) < 0`; the root is found in `(t₀, 10r)` by the intermediate value theorem, `t₀` a small
 time with `χ(t₀) > 0`; and `t_sw < 10r` because `u/ζ` beats `u` at `10r` (so `t_sw ≤ 10r`) while
-`u` is still optimal at `t_sw` (`l4st_firstControl_maximizes`). -/
+`u` is still optimal at `t_sw` (`firstControl_maximizes`). -/
 theorem corollary13_2_7 {z : Fin 3 → ℂ} (hz : z ≠ 0) {r : ℝ} (h₁ : ‖z 0‖ ≤ r)
     (h₂ : ‖z 1‖ ≤ r ^ 2) (h₃ : ‖z 2‖ ≤ r ^ 3) {u : ℂ} (hu : IsFirstControl z u) :
     (∃ t, 0 < t ∧ t < 10 * r ∧ switchingFunction u (u - u / ζ) t z = 0) ∧
       firstSwitchTime z < 10 * r := by
   have huV := hu.1
-  have hn := l4c_norm_of_mem_VT huV
+  have hn := norm_eq_one_of_mem_VT huV
   have hu0 : u ≠ 0 := by rintro rfl; simp at hn
-  have hfc : firstControl z = u := (l4st_firstControl_eq_iff hz).2 hu
+  have hfc : firstControl z = u := (firstControl_eq_iff hz).2 hu
   have hdiv : u / ζ = u * ζ ^ 2 := by
-    rw [div_eq_iff l4c_ζ_ne_zero, mul_assoc, ← pow_succ, l4st_ζ_pow_three, mul_one]
-  have hwV : u / ζ ∈ VT := hdiv ▸ (l4st_VT_props huV l4c_ζ_sq_mem_VT).2.1
-  have hmaxu : u ∈ lexMaxControls z := hfc ▸ l4st_firstControl_mem_lexMaxControls hz
+    rw [div_eq_iff l4c_ζ_ne_zero, mul_assoc, ← pow_succ, ζ_pow_three, mul_one]
+  have hwV : u / ζ ∈ VT := hdiv ▸ mul_mem_VT huV ζ_sq_mem_VT
+  have hmaxu : u ∈ lexMaxControls z := hfc ▸ firstControl_mem_lexMaxControls hz
   -- the claim: `v(z, u/ζ) ≺ v(z, u)` strictly
   have hclaim : LexLt (controlVector z (u / ζ)) (controlVector z u) := by
     have hle := hmaxu.2 (u / ζ) hwV
@@ -836,9 +787,9 @@ theorem corollary13_2_7 {z : Fin 3 → ℂ} (hz : z ≠ 0) {r : ℝ} (h₁ : ‖
         · rintro (rfl | hv)
           · rw [← hi]; exact hwmax
           · rw [Set.mem_singleton_iff.1 hv, hi1]; exact hmaxu
-      have := l4st_isFirstControl_unique (hb i hset) hu
+      have := IsFirstControl.unique (hb i hset) hu
       rw [← hi, div_eq_iff l4c_ζ_ne_zero] at this
-      exact l4c_ζ_ne_one (mul_left_cancel₀ hu0 (this.symm.trans (mul_one u).symm))
+      exact ζ_ne_one (mul_left_cancel₀ hu0 (this.symm.trans (mul_one u).symm))
   -- `r > 0`
   have hr : 0 < r := by
     rcases ((norm_nonneg (z 0)).trans h₁).eq_or_lt with h | h
@@ -861,7 +812,7 @@ theorem corollary13_2_7 {z : Fin 3 → ℂ} (hz : z ≠ 0) {r : ℝ} (h₁ : ‖
       have hnorm : ‖ζ ^ 2 - 1‖ = √3 := by
         rw [Complex.norm_def, Complex.normSq_apply]
         congr 1
-        simp only [Complex.sub_re, Complex.sub_im, l4c_ζ_sq_re, l4c_ζ_sq_im, Complex.one_re,
+        simp only [Complex.sub_re, Complex.sub_im, ζ_sq_re, ζ_sq_im, Complex.one_re,
           Complex.one_im]
         linear_combination (1 / 4 : ℝ) * l4c_sqrt3_mul_self
       rw [hdiv, show u * ζ ^ 2 - u = u * (ζ ^ 2 - 1) by ring, norm_mul, hn, one_mul, hnorm]
@@ -875,7 +826,7 @@ theorem corollary13_2_7 {z : Fin 3 → ℂ} (hz : z ≠ 0) {r : ℝ} (h₁ : ‖
       rw [hd] at h1
       linarith [neg_abs_le (RR (u / ζ - u) w)]
     have hcub : RR (u / ζ - u) (-I * u) = √3 / 2 := by rw [hdiv, l4c_RR_mul_ζ_sq_sub hn]
-    have e := l4c_ham_flow_sub (10 * r) z u (u / ζ) u
+    have e := ham_flow_sub_ham_flow (10 * r) z u (u / ζ) u
     rw [hcub] at e
     have h3 : 0 ≤ √3 := Real.sqrt_nonneg 3
     have hA : -(√3 * r ^ 3) ≤ RR (u / ζ - u) (z 2) :=
@@ -916,13 +867,14 @@ theorem corollary13_2_7 {z : Fin 3 → ℂ} (hz : z ≠ 0) {r : ℝ} (h₁ : ‖
           ham (flow t z (firstControl z)) v} := ⟨by positivity, u / ζ, hwV, by rw [hfc]; exact hneg⟩
     have hle : firstSwitchTime z ≤ 10 * r := csInf_le (l4c_switchSet z).1 hS
     refine lt_of_le_of_ne hle fun heq ↦ ?_
-    have := l4st_firstControl_maximizes hz (10 * r) ⟨by positivity, heq.ge⟩ (u / ζ) hwV
+    have := firstControl_maximizes hz (10 * r) ⟨by positivity, heq.ge⟩ (u / ζ) hwV
     rw [hfc] at this
     exact absurd hneg (not_lt.2 this)
 
 set_option linter.unusedVariables false in
-/-- **Lemma 13.2.8** (unlabelled, TeX 11047–11061). Fix `z⁰ ∈ ℂ³ ∖ 0` with `z₃⁰ ∈ ℝ_{≤0}`, the wall
-between the control modes `ζ` and `ζ²`. Then the switching functions with initial condition `z⁰`
+/-- **Lemma 13.2.8** (`lem:switching-antisymmetry`, label of this formalization; unlabelled, TeX
+11047–11061). Fix `z⁰ ∈ ℂ³ ∖ 0` with `z₃⁰ ∈ ℝ_{≤0}`, the wall between the control modes `ζ` and
+`ζ²`. Then the switching functions with initial condition `z⁰`
 at `t = 0` satisfy `χ_{ζ,ζ²}(t) + χ_{ζ²,ζ}(t) = 0` for all `t`, where `χ_{ij} = χ^i_{ij}` is
 computed with its own control.
 
@@ -935,7 +887,7 @@ theorem lemma13_2_8 {z : Fin 3 → ℂ} (hz : z ≠ 0) (h₃ : z 2 ∈ wall 0) (
   have key : ∀ a b : ℂ, RR (a - b) (flow t z a 2) + RR (b - a) (flow t z b 2) = 0 := by
     intro a b
     have := l4c_RR_I_mul_self (a - b) (-(t ^ 3 / 6))
-    simp only [l4c_RR_eq] at this ⊢
+    simp only [RR_eq_re_mul_add_im_mul] at this ⊢
     simp only [flow, Matrix.cons_val, Complex.add_re, Complex.add_im, Complex.sub_re,
       Complex.sub_im, Complex.mul_re, Complex.mul_im, Complex.I_re, Complex.I_im,
       Complex.ofReal_re, Complex.ofReal_im] at this ⊢
@@ -950,30 +902,30 @@ first control of `τ(z⁰)`. Moreover, the most recent switching time for the in
 `z⁰ ∈ ℂ³ ∖ 0` is `-t_sw`, where `t_sw` is the first positive switching time of `τ(z⁰)`.
 
 Proof (book: "follows from the time-reversal symmetry (Lemma 13.2.3)"): the first identity is
-`l4st_tau_flow_neg` (a polynomial identity). With `H_F(τ w, v) = H_F(w, v̄)` (`l4st_ham_tau`) and
+`tau_flow_neg` (a polynomial identity). With `H_F(τ w, v) = H_F(w, v̄)` (`ham_tau`) and
 `conj V_T = V_T`, the maximum condition for `ū` along `s ↦ z(s, τ(z⁰), ū)` on `[0, ε]` is the
 maximum condition for `u` along `t ↦ z(t, z⁰, u)` on `[-ε, 0]`, which gives the second assertion;
 with the uniqueness of the first and most recent controls
-(`l4st_isFirstControl_unique`, `l4st_isMostRecentControl_unique`) and the existence of the first
+(`IsFirstControl.unique`, `l4st_isMostRecentControl_unique`) and the existence of the first
 control of `τ(z⁰) ≠ 0` (Lemma 13.2.6), the sets defining `mostRecentSwitchTime z⁰` and
 `firstSwitchTime (τ z⁰)` are opposite, which gives the third.
 
 Departure from the paper (route): Lemma 13.2.3 (`lemma13_2_3`) is about solutions with
 `H_F = 0` (13.2.6), and Lemma 13.2.5 concerns every `z⁰` (the Hamiltonian need not vanish), so the
-proof uses the substitution behind Lemma 13.2.3 (`l4st_tau_flow_neg`, `l4st_ham_tau`) for
+proof uses the substitution behind Lemma 13.2.3 (`tau_flow_neg`, `ham_tau`) for
 constant controls instead of the lemma itself. -/
 theorem lemma13_2_5 :
     (∀ (t : ℝ) (z : Fin 3 → ℂ) (u : ℂ), tau (flow (-t) z u) = flow t (tau z) (starRingEnd ℂ u)) ∧
       (∀ (z : Fin 3 → ℂ) (u : ℂ), IsFirstControl (tau z) (starRingEnd ℂ u) →
         IsMostRecentControl z u) ∧
       ∀ z : Fin 3 → ℂ, z ≠ 0 → mostRecentSwitchTime z = -firstSwitchTime (tau z) := by
-  refine ⟨l4st_tau_flow_neg, fun z u h ↦ l4c_isMostRecentControl_iff.2 h, fun z hz ↦ ?_⟩
+  refine ⟨tau_flow_neg, fun z u h ↦ l4c_isMostRecentControl_iff.2 h, fun z hz ↦ ?_⟩
   have hτ : tau z ≠ 0 := fun h ↦ hz (by
-    rw [← l4st_tau_tau z, h]; funext j; fin_cases j <;> simp [tau])
+    rw [← tau_tau z, h]; funext j; fin_cases j <;> simp [tau])
   -- the most recent control `u` of `z⁰` is the conjugate of the first control of `τ(z⁰)`
   have hmr : IsMostRecentControl z (starRingEnd ℂ (firstControl (tau z))) := by
     rw [l4c_isMostRecentControl_iff, Complex.conj_conj]
-    exact l4st_isFirstControl_firstControl hτ
+    exact isFirstControl_firstControl hτ
   have hex : ∃ u, IsMostRecentControl z u := ⟨_, hmr⟩
   have hmrc : mostRecentControl z = starRingEnd ℂ (firstControl (tau z)) := by
     rw [mostRecentControl, dite_eq_left hex]

@@ -11,16 +11,16 @@ import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 §13.2 of Hales–Vajjha, *Packings of Smoothed Polygons* (TeX 10745–10906):
 
 * the polar form of the switching functions (TeX 10755–10784): the angles `θ_{ij}` with
-  `u_i - u_j = √3 e^{iθ_{ij}}` (`l4st_sub_eq_sqrt_three_mul_exp`) and
+  `u_i - u_j = √3 e^{iθ_{ij}}` (`ζ_pow_sub_eq_sqrt_three_mul_exp`) and
   `χ^k_{ij}(t) = Σ_{m=0}^{3} (t^m/m!) r_{3-m} cos(θ_{3-m} - θ_{ij})`
-  (`l4st_switchingFunction_polar`);
+  (`switchingFunction_polar`);
 * Lemma 13.2.1 (`lem:rescale`): the virial rescaling of solutions;
 * Lemma 13.2.2 (`lem:discrete`): the rotation by `ζ`;
 * Lemma 13.2.3 (`lem:reversal`): the time reversal `τ`;
 * Lemma 13.2.4 (`lem:switch-reversal`): the switching functions under time reversal;
 * equation (13.2.7): the switching functions under the rotation by `ζ`;
 * the identity `τ(z(-t, z⁰, u)) = z(t, τ(z⁰), ū)`, the first assertion of Lemma 13.2.5
-  (`l4st_tau_flow_neg`; Lemma 13.2.5 itself is in `SmoothedPolygons/Ch13/FirstControl.lean`).
+  (`tau_flow_neg`; Lemma 13.2.5 itself is in `SmoothedPolygons/Ch13/FirstControl.lean`).
 
 The book proves all of them "by direct substitution". For Lemmas 13.2.1–13.2.3, whose solutions
 have measurable controls, the substitution is a change of variables `s = t/r` or `s = -t` in the
@@ -42,12 +42,10 @@ namespace TriFuller
 
 private lemma l4b_sqrt3_mul : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
 
-private lemma l4b_ζ_mem : ζ ∈ VT := by simp [VT]
-
 private lemma l4b_conj_ζ_mul_ζ : starRingEnd ℂ ζ * ζ = 1 := by
-  rw [← (l4st_VT_props l4b_ζ_mem l4b_ζ_mem).2.2.2, inv_mul_cancel₀]
+  rw [← inv_eq_conj_of_mem_VT ζ_mem_VT, inv_mul_cancel₀]
   rintro h
-  simpa [h] using (l4st_VT_props l4b_ζ_mem l4b_ζ_mem).1
+  simpa [h] using norm_eq_one_of_mem_VT ζ_mem_VT
 
 private lemma l4b_ζ_pow_eq_exp (i : ℕ) :
     ζ ^ i = Complex.exp ((2 * Real.pi * i / 3 : ℝ) * I) := by
@@ -57,7 +55,7 @@ private lemma l4b_ζ_pow_eq_exp (i : ℕ) :
   ring
 
 private lemma l4b_one_sub_ζ : 1 - ζ = √3 * Complex.exp ((-(Real.pi / 6) : ℝ) * I) := by
-  rw [l4st_ζ_eq]
+  rw [ζ_eq_mk]
   apply Complex.ext
   · rw [Complex.sub_re, Complex.re_ofReal_mul, Complex.exp_ofReal_mul_I_re, Real.cos_neg,
       Real.cos_pi_div_six]
@@ -69,7 +67,7 @@ private lemma l4b_one_sub_ζ : 1 - ζ = √3 * Complex.exp ((-(Real.pi / 6) : �
     ring
 
 private lemma l4b_one_sub_ζ_sq : 1 - ζ ^ 2 = √3 * Complex.exp ((Real.pi / 6 : ℝ) * I) := by
-  rw [l4st_ζ_eq]
+  rw [ζ_eq_mk]
   apply Complex.ext
   · rw [Complex.re_ofReal_mul, Complex.exp_ofReal_mul_I_re, Real.cos_pi_div_six]
     simp [sq]
@@ -77,15 +75,6 @@ private lemma l4b_one_sub_ζ_sq : 1 - ζ ^ 2 = √3 * Complex.exp ((Real.pi / 6 
   · rw [Complex.im_ofReal_mul, Complex.exp_ofReal_mul_I_im, Real.sin_pi_div_six]
     simp [sq]
     ring
-
-/-- `RR` is additive in its second argument. -/
-private lemma l4b_RR_add (a b c : ℂ) : RR a (b + c) = RR a b + RR a c := by
-  simp [RR, mul_add]
-
-/-- `RR` is real-homogeneous in its second argument. -/
-private lemma l4b_RR_ofReal_mul (a b : ℂ) (s : ℝ) : RR a (s * b) = s * RR a b := by
-  simp only [RR]
-  rw [mul_left_comm, Complex.re_ofReal_mul]
 
 /-- `RR(e^{iα}, e^{iθ}) = cos(θ - α)`. -/
 private lemma l4b_RR_exp (α θ : ℝ) :
@@ -114,7 +103,7 @@ private lemma l4b_RR_mul_left {v : ℂ} (hv : starRingEnd ℂ v * v = 1) (a b : 
 /-- The angles `θ_{ij}` of TeX 10771–10778: `u_i - u_j = √3 e^{iθ_{ij}}` with
 `θ_{i,i+1} = -π/6 + 2πi/3`, `θ_{i+1,i} = 5π/6 + 2πi/3` and `θ_{i,i-1} = π/6 + 2πi/3`, for the
 controls `u_i = ζ^i` (`u_{i-1} = ζ^{i+2}`). -/
-theorem l4st_sub_eq_sqrt_three_mul_exp (i : ℕ) :
+theorem ζ_pow_sub_eq_sqrt_three_mul_exp (i : ℕ) :
     ζ ^ i - ζ ^ (i + 1) = √3 * Complex.exp ((-(Real.pi / 6) + 2 * Real.pi * i / 3) * I) ∧
       ζ ^ (i + 1) - ζ ^ i = √3 * Complex.exp ((5 * Real.pi / 6 + 2 * Real.pi * i / 3) * I) ∧
       ζ ^ i - ζ ^ (i + 2) = √3 * Complex.exp ((Real.pi / 6 + 2 * Real.pi * i / 3) * I) := by
@@ -142,7 +131,7 @@ that `z₀⁰ = -iu = r₀ e^{iθ₀}` for the control `u = ζ^k`, and let `d = 
 `d = u_i - u_j`, `α = θ_{ij}`). Then `χ^u_d(t) = RR(e^{iα}, z₃(t, z⁰, u))` and
 `χ^u_d(t) = Σ_{m=0}^{3} (t^m/m!) r_{3-m} cos(θ_{3-m} - α)`. Here `r` and `θ` are indexed by
 `Fin 4`, with `r 0 = 1` and `θ 0 = 2πk/3 - π/2`. -/
-theorem l4st_switchingFunction_polar (k : ℕ) (α : ℝ) (r θ : Fin 4 → ℝ) (hr₀ : r 0 = 1)
+theorem switchingFunction_polar (k : ℕ) (α : ℝ) (r θ : Fin 4 → ℝ) (hr₀ : r 0 = 1)
     (hθ₀ : θ 0 = 2 * Real.pi * k / 3 - Real.pi / 2) (z : Fin 3 → ℂ)
     (hz : ∀ j : Fin 3, z j = r j.succ * Complex.exp (θ j.succ * I)) (t : ℝ) :
     switchingFunction (ζ ^ k) (√3 * Complex.exp (α * I)) t z =
@@ -169,7 +158,7 @@ theorem l4st_switchingFunction_polar (k : ℕ) (α : ℝ) (r θ : Fin 4 → ℝ)
   have hz1 : z 1 = (r 2 : ℂ) * Complex.exp (θ 2 * I) := hz 1
   have hz2 : z 2 = (r 3 : ℂ) * Complex.exp (θ 3 * I) := hz 2
   rw [hsw, hflow, hu, hz0, hz1, hz2]
-  simp only [l4b_RR_add, l4b_RR_ofReal_mul, l4b_RR_exp, Fin.sum_univ_four]
+  simp only [RR_add_right, RR_ofReal_mul_right, l4b_RR_exp, Fin.sum_univ_four]
   have e0 : Fin.rev (0 : Fin 4) = 3 := rfl
   have e1 : Fin.rev (1 : Fin 4) = 2 := rfl
   have e2 : Fin.rev (2 : Fin 4) = 1 := rfl
@@ -180,26 +169,33 @@ theorem l4st_switchingFunction_polar (k : ℕ) (α : ℝ) (r θ : Fin 4 → ℝ)
 
 /-- `τ(z(-t, z⁰, u)) = z(t, τ(z⁰), ū)` for all `t`, `z⁰` and `u ∈ ℂ` (the first assertion of
 Lemma 13.2.5, TeX 10893–10895; a polynomial identity, by direct substitution in (13.2.2)). -/
-theorem l4st_tau_flow_neg (t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
+theorem tau_flow_neg (t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
     tau (flow (-t) z u) = flow t (tau z) (starRingEnd ℂ u) := by
   funext j
   fin_cases j <;>
     simp [tau, flow, map_sub, map_add, map_mul, map_neg, map_div₀, map_ofNat] <;> ring
 
 /-- `τ` is an involution. -/
-theorem l4st_tau_tau (z : Fin 3 → ℂ) : tau (tau z) = z := by
+theorem tau_tau (z : Fin 3 → ℂ) : tau (tau z) = z := by
   funext j
   fin_cases j <;> simp [tau]
 
+/-- `τ` does not vanish off the singular locus. -/
+theorem tau_ne_zero {z : Fin 3 → ℂ} (hz : z ≠ 0) : tau z ≠ 0 := by
+  intro h
+  apply hz
+  rw [← tau_tau z, h]
+  funext i; fin_cases i <;> simp [tau]
+
 /-- The Hamiltonian under time reversal: `H_F(τ z, v) = H_F(z, v̄)` (from
 `RR(z̄₁, -i z̄₂) = RR(z₁, i z₂)`, TeX 10846–10860). -/
-theorem l4st_ham_tau (z : Fin 3 → ℂ) (v : ℂ) : ham (tau z) v = ham z (starRingEnd ℂ v) := by
+theorem ham_tau (z : Fin 3 → ℂ) (v : ℂ) : ham (tau z) v = ham z (starRingEnd ℂ v) := by
   simp [ham, RR, tau, Complex.mul_re, Complex.mul_im]
   ring
 
 /-- The Hamiltonian under the virial group: `H_F(v·(r z₁, r² z₂, r³ z₃), v u) = r³ H_F(z, u)` for
 `|v| = 1`. -/
-theorem l4st_ham_smul_scale {v : ℂ} (hv : ‖v‖ = 1) (r : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
+theorem ham_smul_scale {v : ℂ} (hv : ‖v‖ = 1) (r : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
     ham (v • scale r z) (v * u) = r ^ 3 * ham z u := by
   have hv' : starRingEnd ℂ v * v = 1 := by
     rw [Complex.conj_mul', hv]; simp
@@ -207,8 +203,8 @@ theorem l4st_ham_smul_scale {v : ℂ} (hv : ‖v‖ = 1) (r : ℝ) (z : Fin 3 �
     Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons]
   rw [show v * (r ^ 2 * z 1) * I = v * (r ^ 2 * z 1 * I) by ring, l4b_RR_mul_left hv',
     l4b_RR_mul_left hv', show ((r : ℂ) ^ 3 * z 2) = ((r ^ 3 : ℝ) : ℂ) * z 2 by push_cast; ring,
-    l4b_RR_ofReal_mul, show ((r : ℂ) ^ 2 * z 1 * I) = ((r ^ 2 : ℝ) : ℂ) * (z 1 * I) by
-      push_cast; ring, l4b_RR_ofReal_mul]
+    RR_ofReal_mul_right, show ((r : ℂ) ^ 2 * z 1 * I) = ((r ^ 2 : ℝ) : ℂ) * (z 1 * I) by
+      push_cast; ring, RR_ofReal_mul_right]
   simp only [RR, map_mul, Complex.conj_ofReal]
   rw [mul_assoc, Complex.re_ofReal_mul]
   ring
@@ -224,16 +220,13 @@ private lemma l4b_tau_zero (w : Fin 3 → ℂ) : tau w 0 = starRingEnd ℂ (w 0)
 private lemma l4b_tau_one (w : Fin 3 → ℂ) : tau w 1 = -starRingEnd ℂ (w 1) := rfl
 private lemma l4b_tau_two (w : Fin 3 → ℂ) : tau w 2 = starRingEnd ℂ (w 2) := rfl
 
-private lemma l4b_scale_one_eq (w : Fin 3 → ℂ) : scale 1 w = w := by
-  funext j; fin_cases j <;> simp [scale]
-
 private lemma l4b_norm_le_of_mem_VT {v : ℂ} (hv : v ∈ VT) : ‖v‖ ≤ 1 :=
-  (l4st_VT_props hv hv).1.le
+  (norm_eq_one_of_mem_VT hv).le
 
 /-- Along a trajectory of the Fuller system whose controls are bounded by `C`, the right-hand
 sides `-iu`, `z₁`, `z₂` are integrable on `[t₁, t₂]` (the control is measurable and bounded; then
 `z₁` and `z₂` are continuous there, as indefinite integrals). -/
-theorem l4b_integrableOn_of_isTrajectory {U : Set ℂ} {C : ℝ} (hUb : ∀ v ∈ U, ‖v‖ ≤ C)
+private theorem l4b_integrableOn_of_isTrajectory {U : Set ℂ} {C : ℝ} (hUb : ∀ v ∈ U, ‖v‖ ≤ C)
     {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ} (h : IsTrajectory U t₁ t₂ z u) :
     IntegrableOn (fun s ↦ -I * u s) (Icc t₁ t₂) ∧ IntegrableOn (fun s ↦ z s 0) (Icc t₁ t₂) ∧
       IntegrableOn (fun s ↦ z s 1) (Icc t₁ t₂) := by
@@ -258,7 +251,7 @@ theorem l4b_integrableOn_of_isTrajectory {U : Set ℂ} {C : ℝ} (hUb : ∀ v �
 
 /-- The integral equations of a trajectory of the Fuller system (with controls bounded by `C`)
 hold between any two times `a, b ∈ [t₁, t₂]`, not only from `t₁`. -/
-theorem l4b_isTrajectory_integral_eq {U : Set ℂ} {C : ℝ} (hUb : ∀ v ∈ U, ‖v‖ ≤ C)
+private theorem l4b_isTrajectory_integral_eq {U : Set ℂ} {C : ℝ} (hUb : ∀ v ∈ U, ‖v‖ ≤ C)
     {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ} (h : IsTrajectory U t₁ t₂ z u) {a b : ℝ}
     (ha : a ∈ Icc t₁ t₂) (hb : b ∈ Icc t₁ t₂) :
     z b 0 = z a 0 + ∫ s in a..b, -I * u s ∧ z b 1 = z a 1 + ∫ s in a..b, z s 0 ∧
@@ -287,7 +280,7 @@ Fuller system on `[t₁, t₂]` satisfying (13.2.5) and (13.2.6), then so is
 Proof (book: "direct substitution into the Fuller system and into the Hamiltonian"): the change
 of variables `s = σ/r` in the integral equations gives `z̃₁' = -iũ`, `z̃₂' = z̃₁`, `z̃₃' = z̃₂`
 (`r^j · (1/r) · z_{j-1}(t/r) = z̃_{j-1}(t)`); `H_F(z̃(t), v) = r³ H_F(z(t/r), v)` for every `v`
-(`l4st_ham_smul_scale` with `v = 1`), and `r³ > 0`, so (13.2.5) and (13.2.6) are preserved; the
+(`ham_smul_scale` with `v = 1`), and `r³ > 0`, so (13.2.5) and (13.2.6) are preserved; the
 exceptional null set is dilated by `r`. -/
 theorem lemma13_2_1 {t₁ t₂ r : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ} (h : IsExtremal t₁ t₂ z u)
     (hr : 0 < r) :
@@ -299,7 +292,7 @@ theorem lemma13_2_1 {t₁ t₂ r : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ →
   have hrt : r * t₁ / r = t₁ := by field_simp
   -- `H_F(z̃(t), v) = r³ H_F(z(t/r), v)`
   have hham : ∀ w v, ham (scale r w) v = r ^ 3 * ham w v := fun w v ↦ by
-    simpa using l4st_ham_smul_scale (v := 1) (by simp) r w v
+    simpa using ham_smul_scale (v := 1) (by simp) r w v
   -- the exceptional null set is dilated by `r`
   have hq : QuasiMeasurePreserving (fun t : ℝ ↦ t / r) volume volume := by
     have := Measure.quasiMeasurePreserving_smul (volume : Measure ℝ) (inv_ne_zero hr0)
@@ -330,16 +323,16 @@ Fuller system satisfying (13.2.5) and (13.2.6) with initial value `z⁰`, then
 (the initial value of `t ↦ ζ • z t` at `t₁` is `ζ • z t₁` by definition).
 
 Proof (book: "direct substitution"): the integral equations are `ℂ`-linear; `ζ V_T = V_T`; and
-`H_F(ζ z, ζ v) = H_F(z, v)` because `|ζ| = 1` (`l4st_ham_smul_scale` with `r = 1`). -/
+`H_F(ζ z, ζ v) = H_F(z, v)` because `|ζ| = 1` (`ham_smul_scale` with `r = 1`). -/
 theorem lemma13_2_2 {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ} (h : IsExtremal t₁ t₂ z u) :
     IsExtremal t₁ t₂ (fun t ↦ ζ • z t) (fun t ↦ ζ * u t) := by
   obtain ⟨⟨h12, hmeas, hU, hint⟩, hmax, hH⟩ := h
   -- `H_F(ζ w, ζ v) = H_F(w, v)`
   have hham : ∀ w v, ham (ζ • w) (ζ * v) = ham w v := fun w v ↦ by
-    simpa [l4b_scale_one_eq] using
-      l4st_ham_smul_scale (l4st_VT_props l4b_ζ_mem l4b_ζ_mem).1 1 w v
-  have hconj : starRingEnd ℂ ζ ∈ VT := (l4st_VT_props l4b_ζ_mem l4b_ζ_mem).2.2.1
-  refine ⟨⟨h12, hmeas.const_mul ζ, fun t ht ↦ (l4st_VT_props l4b_ζ_mem (hU t ht)).2.1,
+    simpa [scale_one] using
+      ham_smul_scale (norm_eq_one_of_mem_VT ζ_mem_VT) 1 w v
+  have hconj : starRingEnd ℂ ζ ∈ VT := conj_mem_VT ζ_mem_VT
+  refine ⟨⟨h12, hmeas.const_mul ζ, fun t ht ↦ (mul_mem_VT ζ_mem_VT (hU t ht)),
     fun t ht ↦ ?_⟩, ?_, ?_⟩
   · obtain ⟨e0, e1, e2⟩ := hint t ht
     simp only [Pi.smul_apply, smul_eq_mul]
@@ -353,7 +346,7 @@ theorem lemma13_2_2 {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → �
     have hv' : v = ζ * (starRingEnd ℂ ζ * v) := by
       rw [← mul_assoc, mul_comm ζ, l4b_conj_ζ_mul_ζ, one_mul]
     rw [hv', hham, hham]
-    exact ht hmem _ (l4st_VT_props hconj hv).2.1
+    exact ht hmem _ (mul_mem_VT hconj hv)
   · filter_upwards [hH] with t ht hmem
     rw [hham]
     exact ht hmem
@@ -366,7 +359,7 @@ at `-t₁` is `τ(z(t₁))` by definition).
 
 Proof (book: "direct substitution"): the change of variables `s ↦ -s` in the integral equations,
 written between the endpoints `t₂` and `-t`; `conj V_T = V_T`; and
-`H_F(τ w, v̄) = H_F(w, v)` (`l4st_ham_tau`). -/
+`H_F(τ w, v̄) = H_F(w, v)` (`ham_tau`). -/
 theorem lemma13_2_3 {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ} (h : IsExtremal t₁ t₂ z u) :
     IsExtremal (-t₂) (-t₁) (fun t ↦ tau (z (-t))) (fun t ↦ starRingEnd ℂ (u (-t))) := by
   have htraj := h.1
@@ -381,7 +374,7 @@ theorem lemma13_2_3 {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → �
     funext t
     simp
   refine ⟨⟨by linarith, Complex.continuous_conj.measurable.comp (hmeas.comp measurable_neg),
-    fun t ht ↦ (l4st_VT_props (hU _ (hneg t ht)) (hU _ (hneg t ht))).2.2.1, fun t ht ↦ ?_⟩, ?_, ?_⟩
+    fun t ht ↦ (conj_mem_VT (hU _ (hneg t ht))), fun t ht ↦ ?_⟩, ?_, ?_⟩
   · -- the integral equations written between the endpoints `-t` and `t₂`
     obtain ⟨e0, e1, e2⟩ := l4b_isTrajectory_integral_eq (fun _ hv ↦ l4b_norm_le_of_mem_VT hv)
       htraj (hneg t ht) ht₂
@@ -397,10 +390,10 @@ theorem lemma13_2_3 {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → �
     rw [intervalIntegral.integral_neg, intervalIntegral.intervalIntegral_conj, e0, e1, e2]
     refine ⟨?_, ?_, ?_⟩ <;> simp only [map_add] <;> ring
   · filter_upwards [hq.ae hmax] with t ht hmem v hv
-    rw [l4st_ham_tau, l4st_ham_tau, Complex.conj_conj]
-    exact ht (hneg t hmem) _ (l4st_VT_props hv hv).2.2.1
+    rw [ham_tau, ham_tau, Complex.conj_conj]
+    exact ht (hneg t hmem) _ (conj_mem_VT hv)
   · filter_upwards [hq.ae hH] with t ht hmem
-    rw [l4st_ham_tau, Complex.conj_conj]
+    rw [ham_tau, Complex.conj_conj]
     exact ht (hneg t hmem)
 
 /-- **Lemma 13.2.4** (`lem:switch-reversal`, TeX 10862–10871). Let `t₀ ∈ ℝ`, `z⁰ ∈ ℂ³` and
@@ -409,18 +402,19 @@ theorem lemma13_2_3 {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ → �
 `χ^u_{v₁-v₂}(t₀ - t, z⁰) = χ^{ū}_{v̄₁-v̄₂}(t, τ(z*))`.
 
 Proof (book: "direct substitution"; an identity of cubic polynomials in `t`): by the flow property
-(`l4st_flow_add`) and `l4st_tau_flow_neg`, `z₃(t, τ(z*), ū) = conj z₃(t₀ - t, z⁰, u)`, and
+(`flow_add`) and `tau_flow_neg`, `z₃(t, τ(z*), ū) = conj z₃(t₀ - t, z⁰, u)`, and
 `RR(d̄, w̄) = RR(d, w)`. -/
 theorem lemma13_2_4 (t₀ : ℝ) (z : Fin 3 → ℂ) (u v₁ v₂ : ℂ) (t : ℝ) :
     switchingFunction u (v₁ - v₂) (t₀ - t) z =
       switchingFunction (starRingEnd ℂ u) (starRingEnd ℂ v₁ - starRingEnd ℂ v₂) t
         (tau (flow t₀ z u)) := by
   simp only [switchingFunction]
-  rw [← l4st_tau_flow_neg, ← l4st_flow_add, ← sub_eq_add_neg, l4b_tau_two, ← map_sub,
+  rw [← tau_flow_neg, ← flow_add, ← sub_eq_add_neg, l4b_tau_two, ← map_sub,
     l4b_RR_conj]
 
-/-- **Equation (13.2.7)** (TeX 10874–10877): invariance of the switching functions under the
-rotation by `ζ`, `χ^{ζu}_{ζ(v₁-v₂)}(t, ζz⁰) = χ^u_{v₁-v₂}(t, z⁰)` (here with `d = v₁ - v₂`).
+/-- **Equation (13.2.7)** (`eqn:switching-rotation`, label of this formalization; unlabelled, TeX
+10874–10877): invariance of the switching functions under the rotation by `ζ`,
+`χ^{ζu}_{ζ(v₁-v₂)}(t, ζz⁰) = χ^u_{v₁-v₂}(t, z⁰)` (here with `d = v₁ - v₂`).
 Proof: `z₃(t, ζz⁰, ζu) = ζ z₃(t, z⁰, u)` and `RR(ζa, ζb) = RR(a, b)`. -/
 theorem eqn13_2_7 (u d : ℂ) (t : ℝ) (z : Fin 3 → ℂ) :
     switchingFunction (ζ * u) (ζ * d) t (ζ • z) = switchingFunction u d t z := by

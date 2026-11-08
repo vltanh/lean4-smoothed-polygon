@@ -183,16 +183,35 @@ eqn:fuller-symplectic-form	proposition	1
 lem:fiber	lemma	1	
 thm:global	theorem	0	
 lem:00	lemma	1	
+# Equation (13.2.2) (line 10698): the explicit solution of the Fuller system with constant control ("we can solve the
+# Fuller system ODEs, to obtain"; no proof).
+eqn:z1z2z3	proposition	0	
 lem:rescale	lemma	1	
 lem:discrete	lemma	1	
 lem:reversal	lemma	1	
 lem:switch-reversal	lemma	1	
+# Unlabelled equation (13.2.7) (line 10876): invariance of the switching functions under the rotation by zeta (stated
+# without proof). Label of this formalization.
+eqn:switching-rotation	proposition	0	
 lem:first-negative-control	lemma	1	lem:reversal
 lem:first-control	lemma	1	
 cor:10	corollary	1	
+# Unlabelled Lemma 13.2.8 (line 11049): chi_{zeta,zeta^2} + chi_{zeta^2,zeta} = 0 on the wall z_3 in R_{<=0} ("an easy
+# computation"). Label of this formalization.
+lem:switching-antisymmetry	lemma	1	
 lem:nonzero	lemma	1	
 lemma:no-singular	lemma	1	
+# Equations (13.3.1) and (13.3.2) (lines 11125, 11133), inside the proof of Lemma 13.3.2.
+eqn:u3	proposition	1	
+eqn:z3u3	proposition	1	eqn:u3
 lem:qout	lemma	1	
+# Unlabelled Remark 13.5.3 (line 11389): F^k(q_out) = (r_scale, zeta^2)^k q_out, and likewise for q_in (from
+# eqn:fixed-point, the fixed-point condition in the proof of lem:qout). Label of this formalization.
+rem:spirals	remark	1	lem:qout
+# Unlabelled Remark 13.5.4 (line 11402): the fixed point q_fix = (1, -i/2, -1/2) for (r, zeta_1) = (1, zeta), with nonzero
+# Hamiltonian (no proof; its asymptotic interpretation via sec:6k+2-gons and sec:asymptotic, MCA:zfix1, is not
+# formalized). Label of this formalization.
+rem:qfix	remark	0	
 lem:eigenvalues	lemma	1	
 lem:Lie-Fuller	lemma	1	
 lem:chi-asymptotic	lemma	1	
