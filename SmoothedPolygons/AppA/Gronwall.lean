@@ -16,7 +16,7 @@ the corollary that Chapter 8 uses (Corollary A.1.3, `thm:Gronwall`, TeX 13134):
 
 The corollary is stated on `[0, t₁]` but Chapter 8 applies it on two-sided intervals `(-t₁, t₁)`
 (Lemma 8.1.5, TeX 7008; Theorem 8.3.1, TeX 7539, 7572), with the time reversal left implicit
-(inventory, gap G14). `corollaryA_1_3` is the book's statement; `corollaryA_1_3_two_sided`
+(REPORT.md, E61). `corollaryA_1_3` is the book's statement; `corollaryA_1_3_two_sided`
 is the two-sided form that Chapter 8 uses, obtained by applying the corollary to `t ↦ x(t)` and to
 `t ↦ x(-t)`.
 
@@ -67,7 +67,7 @@ theorem corollaryA_1_3 {x : ℝ → ℝ} {t₁ C C₁ : ℝ} {n : ℕ} (ht₁ : 
   exact hbound τ hτ
 
 /-- **Corollary A.1.3, two-sided** (the form in which Lemma 8.1.5 and the proof of Theorem 8.3.1
-use it, TeX 7008, 7539, 7572; gap G14). Let `x` be nonnegative and continuous on `[-t₁, t₁]`,
+use it, TeX 7008, 7539, 7572; E61). Let `x` be nonnegative and continuous on `[-t₁, t₁]`,
 `n` a positive integer, `C, C₁ ≥ 0`, and `x(t) ≤ C |t|ⁿ + C₁ |∫₀ᵗ x|` for `t ∈ [-t₁, t₁]`. Then
 `x(t) = O(|t|ⁿ)` near `0`.
 

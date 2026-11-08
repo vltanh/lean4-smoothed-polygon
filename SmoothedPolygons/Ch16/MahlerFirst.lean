@@ -172,7 +172,7 @@ theorem isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus {T : �
     (IsEdgeExtremalOn.mono (proposition8_1_3 hmin).2 ha hb) hS
 
 /-- **Under the hypothesis, the lift of a global minimizer never meets the singular locus** (the
-core of the proof of Theorem 16.3.1, TeX 12811–12833, with gap G16.7 repaired: the set of meeting
+core of the proof of Theorem 16.3.1, TeX 12811–12833, with E60's gap repaired: the set of meeting
 times could a priori be infinite and nowhere dense, and the proof works on a complementary
 interval).
 

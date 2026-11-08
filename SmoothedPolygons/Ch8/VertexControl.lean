@@ -14,7 +14,7 @@ subject of Part "Mahler" and of the hypothesis `NoChatteringIntoSingularLocus` o
 Theorem 16.3.1.)
 
 The book's proof expands the switching functions at a point of `𝒮_sing` to third order. Two slips
-(gap G6, checked with sympy): `Λ_R'''(0) = +6 λ_cost [J, P₃]`, not `-6 λ_cost [J, P₃]` (TeX 7648),
+(E59, checked with sympy): `Λ_R'''(0) = +6 λ_cost [J, P₃]`, not `-6 λ_cost [J, P₃]` (TeX 7648),
 and the display TeX 7657–7660 lacks an `=` and the factor `λ_cost`. With
 `P_i = Z_{e_i}/⟨J, Z_{e_i}⟩`, the book's algebra is used as printed: `[J, P₃] ⊥ J, P₃` and
 `P₁ + P₂ + P₃ = -(3/2) J ∈ ℝJ` give `⟨[J, P₃], P₁⟩ = -⟨[J, P₃], P₂⟩`, which is `-2√3 ≠ 0`; the
@@ -22,7 +22,7 @@ control term `-⟨Λ_R(t), P_i⟩` has leading coefficients `(2√3 λ_cost, -2�
 `i = 1, 2, 3`. The conclusion is unaffected, and the argument works on either side of the meeting
 time separately, which covers a meeting time at an end of the interval (the form in which
 Theorem 16.3.1 uses the lemma: "A trajectory cannot reach the singular locus with finitely many
-switches", TeX 12818–12819).
+switches", TeX 12817–12819).
 
 ## The proof
 
@@ -38,7 +38,7 @@ The book's argument, step by step (`lemma8_3_4`, `l3j_core`):
    `X = J + s [P, J] + O(s²)`, `Λ₁ - (3/2) λ_cost J = (3/4) λ_cost s² [J, [P, J]] + O(s³)`
    (so `Λ_{1,cost}(t₀) = Λ_{1,cost}'(t₀) = 0`), and
    `Λ_R = λ_cost s³ [J, P] + O(s⁴)` (so `Λ_R(t₀) = Λ_R'(t₀) = Λ_R''(t₀) = 0` and
-   `Λ_R'''(t₀) = 6 λ_cost [J, P]`, gap G6); the cancellation uses
+   `Λ_R'''(t₀) = 6 λ_cost [J, P]`, E59); the cancellation uses
    `[[J, [P, J]], J] = 4 [P, J]` (`J² = -1`).
 3. *The algebra*, the book's derivation (TeX 7650–7653; `l3j_pairing`): `[J, P_i]` is orthogonal
    to `J` and to `P_i` (`l3q_traceForm_bracket_J`, `l3j_traceForm_bracket_self`), and
@@ -163,7 +163,7 @@ open scoped Matrix.Norms.Operator in
 `(X, Λ₁, Λ_R)` solve the state and costate equations on `[0, T]` with a constant `P`, and meet
 `𝒮_sing` at `t₀`: `X(t₀) = J`, `Λ₁(t₀) = (3/2) λ_cost J`, `Λ_R(t₀) = 0`. Then
 `Λ_R(t) = λ_cost (t - t₀)³ [J, P] + O((t - t₀)⁴)`, i.e. `Λ_R'(t₀) = Λ_R''(t₀) = 0` and
-`Λ_R'''(t₀) = 6 λ_cost [J, P]` (gap G6: the book prints `-6`).
+`Λ_R'''(t₀) = 6 λ_cost [J, P]` (E59: the book prints `-6`).
 
 The bootstrap (`l3j_norm_sub_le`), with `s = t - t₀`, `Λ_c = Λ₁ - (3/2) λ_cost J`:
 `X - J = O(s)`, `X - J - s[P, J] = O(s²)`; `Λ_c = O(s)`, `O(s²)` (from
@@ -643,7 +643,7 @@ private lemma l3j_core {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : �
 control is constant (almost everywhere) at a vertex of `U_T` does not meet the singular locus at
 any time of `[a, b]`.
 
-Proof (the book's, TeX 7632–7670, with the sign of G6 corrected): suppose the lift is in `𝒮_sing`
+Proof (the book's, TeX 7632–7670, with the sign of E59 corrected): suppose the lift is in `𝒮_sing`
 at `t₀ ∈ [a, b]`, with control `e_i`. Then `λ_cost ≠ 0`, `X(t₀) = J`,
 `Λ₁(t₀) = (3/2) λ_cost J`, `Λ_R(t₀) = 0` (`IsExtremalOn.mem_singularLocus_iff`). With constant
 control, `P` is constant (Lemma 7.1.1, `lemma7_1_1`), and the state and costate have Taylor

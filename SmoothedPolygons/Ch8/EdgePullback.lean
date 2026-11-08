@@ -32,7 +32,7 @@ and with `ν = (3/2) λ_cost` it is a costate of the edge control problem (Defin
   extremal is edge extremal (Definition 8.1.2).
 
 This is the repair, along the book's lines, of the edge case of Theorem 8.2.7 for normal lifts
-(`SmoothedPolygons/Ch8/NoSingularArcs.lean`, gap G8): the book connects the two problems through
+(`SmoothedPolygons/Ch8/NoSingularArcs.lean`, E55): the book connects the two problems through
 (8.1.1) and the cost identity (TeX 6704–6754) and says that edges are handled by the edge problem
 (TeX 7253–7258, 806–821), without relating the costates. For abnormal lifts (`λ_cost = 0`) the
 pulled-back covector can vanish identically: exactly when the Reinhardt costate is conormal to the

@@ -541,8 +541,8 @@ private lemma wn_rot_two_pi : wn_rot (2 * Real.pi) = wn_rot 0 := by
 
 end Circle
 
-/-- **Admissible trajectories of higher winding exist** (the winding-number question of the
-inventory, Part I §3.5, item 6). The unit circle traversed seven times, `X ≡ J`,
+/-- **Admissible trajectories of higher winding exist** (REPORT.md,
+E15). The unit circle traversed seven times, `X ≡ J`,
 `u ≡ (1/3, 1/3, 1/3)`, `g(t) = exp(tJ)` on `[0, 7π/3]`, is admissible for Problem 3.6.2, does not
 have winding number one, costs `7π`, and is not the boundary trajectory of any balanced pair with
 period parameter `t_f = 7π/3` and `σ_j = g s_j*` on `[0, t_f]`: so the converse of Problem 3.6.2
