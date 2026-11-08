@@ -19,7 +19,7 @@ then an edge of `U_T` or all of `U_T`.
 
 The book's proof (TeX 7320–7391) treats only the singular subarcs on which the Hamiltonian is
 independent of the control (all of `U_T` maximizes): by Theorem 8.2.6 they are circular arcs, and a
-circular arc is not a local minimizer (second variation, `l3st_exists_lt_cost_of_circleArc`).
+circular arc is not a local minimizer (second variation, `exists_lt_reinhardtCost_of_circleArc`).
 This covered case is `not_forall_hamiltonian_eq_of_isReinhardtMinimizer`. The proof of
 Theorem 16.3.1 ("A trajectory cannot remain on the singular locus for any positive interval of
 time by Theorem 8.2.7", TeX 12816–12817) uses `theorem8_2_7` itself: on an interval of `𝒮_sing`
@@ -316,7 +316,7 @@ lift does not stay in the singular locus on any open interval). It gives part 2 
 
 Proof (the book's, TeX 7320–7391): by Theorem 8.2.6 (`theorem8_2_6`, applied to the restriction
 `IsPontryaginExtremal.isExtremalOn`) the subarc is a circular arc, `X ≡ J` on `[a, b]`;
-by the second variation (`l3st_exists_lt_cost_of_circleArc`) some admissible trajectory has
+by the second variation (`exists_lt_reinhardtCost_of_circleArc`) some admissible trajectory has
 smaller cost, against minimality. -/
 theorem not_forall_hamiltonian_eq_of_isReinhardtMinimizer {T : ℝ} {u : ℝ → Fin 3 → ℝ}
     {g X : ℝ → Mat2} (hmin : IsReinhardtMinimizer T u g X) {Λ₁ ΛR : ℝ → Mat2} {lam : ℝ}
@@ -337,7 +337,7 @@ theorem not_forall_hamiltonian_eq_of_isReinhardtMinimizer {T : ℝ} {u : ℝ →
   have hX : ∀ t ∈ Icc a b, X t = J := fun t ht ↦ by
     obtain ⟨μ, -, -, -, hXJ, -⟩ := hS t ht
     exact hXJ
-  obtain ⟨T', u', g', X', hadm, hlt⟩ := l3st_exists_lt_cost_of_circleArc hmin.1 ha hab hb hX
+  obtain ⟨T', u', g', X', hadm, hlt⟩ := exists_lt_reinhardtCost_of_circleArc hmin.1 ha hab hb hX
   exact absurd (hmin.2 T' u' g' X' hadm) (not_le.2 hlt)
 
 /-- **Theorem 8.2.7** (`thm:no-singular-arcs`), in the authors' reading: the global minimizer of

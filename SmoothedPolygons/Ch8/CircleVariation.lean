@@ -17,7 +17,7 @@ minimizer (`mahler1947area`) as background and gives its own computation (MCA:10
 
 ## The proof
 
-`l3st_exists_lt_cost_of_circleArc` follows the book's route (TeX 7327–7391).
+`exists_lt_reinhardtCost_of_circleArc` follows the book's route (TeX 7327–7391).
 
 1. On the arc, `g(t) = g(t₁) exp(J(t - t₁))` (`arc_eq`, uniqueness for `g' = gJ`). After the
    time shift `t ↦ t - t₁` and the left translation by `g(t₁)` (the book takes `g₀ = I`; both
@@ -1206,7 +1206,7 @@ Proof (the book's; the steps and lemmas are in the module docstring):
    costs less.
 
 Steps 4 and 5 carry out what the book asserts in two sentences (TeX 7384–7390). -/
-theorem l3st_exists_lt_cost_of_circleArc {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
+theorem exists_lt_reinhardtCost_of_circleArc {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X : ℝ → Mat2}
     (h : IsReinhardtAdmissible T u g X) {t₁ t₂ : ℝ} (h₁ : 0 ≤ t₁) (h₁₂ : t₁ < t₂) (h₂ : t₂ ≤ T)
     (hX : ∀ t ∈ Icc t₁ t₂, X t = J) :
     ∃ (T' : ℝ) (u' : ℝ → Fin 3 → ℝ) (g' X' : ℝ → Mat2),
