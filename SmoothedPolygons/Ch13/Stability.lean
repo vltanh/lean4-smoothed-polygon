@@ -8,8 +8,14 @@ public import Basic.Dynamics.LinearizedStability
 
 Lemma 13.5.5 of Hales–Vajjha, *Packings of Smoothed Polygons* (`lem:eigenvalues`,
 TeX 11433–11453): on `Ξ_{𝒲,0}/V_T`, `q_out` is an asymptotically stable fixed point of `F_ang`
-and `q_in` is unstable. Chapters 14 and 16 rely on it (Theorem 14.3.3, TeX 11911–11917;
-Theorem 16.1.1, TeX 12596–12598; the bound `0.1` is quoted at TeX 11961).
+and `q_in` is unstable. Chapter 16 relies on it (Theorem 16.1.1, TeX 12596–12598). Chapter 14
+(Theorem 14.3.3, TeX 11911–11917) needs more than this lemma: the linearization of `F` at `q_out`
+on the exceptional divisor (three eigenvalues of modulus `< 1`; the bound `0.1` is quoted at
+TeX 11961), transferred to its own coordinates. It relies on the Jacobian lemmas of
+`SmoothedPolygons/Ch13/Jacobian.lean` (`l4st_hasFDerivAt_chartMap`,
+`l4st_charpoly_jacobianOut_roots`) with the normalization map `chartOf`
+(`l4f_chartOf_chartCart`, `l4f_chartMap_eventuallyEq_chartOf`, `l4f_contDiffAt_chartOf`), not on
+`lemma13_5_5`.
 
 The book's proof, and its formalization:
 1. "It suffices to show that `q_out` is asymptotically stable. … An open neighborhood of `q_out`
@@ -49,7 +55,13 @@ its first control is `ζ` and its most recent control is `ζ²`, the conjugate o
 `ζ` of its image by `τ` (Lemma 13.2.5), both by open lexicographic conditions (on the wall `𝒲₀`
 the ties are broken by the sign of `Im z₂`). There `F(τ F(z)) = τ(z)`
 (`l4st_poincare_tau_poincare`), which passes to the angular map on the quotient
-(`l4st_ang_poincare_ang`, `τ (v ξ) = v̄ τ ξ`, `τ` commutes with the rescaling). -/
+(`l4st_ang_poincare_ang`, `τ (v ξ) = v̄ τ ξ`, `τ` commutes with the rescaling).
+
+The same argument gives the identity on all of the big open cells of Chapter 15
+(Definition `def:big:open`, TeX 12104–12110: the points with a representative `z₃ ∈ ℝ_{<0}`,
+`Im z₂ ≠ 0`, where the first control is `ζ` and the most recent `ζ²` if `Im z₂ > 0`, and
+conversely if `Im z₂ < 0`); it is stated here in the neighborhood form that Lemma 13.5.5 uses, and
+the cell form belongs with the cells of Chapter 15. -/
 theorem l4st_tauZero_poincareAngZero_involutive :
     (∀ᶠ x in 𝓝 qOut0, tauZero (poincareAngZero (tauZero (poincareAngZero x))) = x) ∧
       ∀ᶠ x in 𝓝 qIn0, tauZero (poincareAngZero (tauZero (poincareAngZero x))) = x := by

@@ -43,9 +43,9 @@ for almost every `t`: a trajectory does not see a change of the control on a nul
 
 The book defines the first control of `z⁰ ∈ ℂ³ ∖ 0` as "the optimal control starting at switching
 time `t = 0` until the first positive switching time `t_sw > 0`" (TeX 10747–10753), and the
-Fuller–Poincaré map as the value at `t_sw` (TeX 11236–11251). Chapters 15 and 16 study the map on
-cells where `t_sw` degenerates (multiple roots of the switching functions, `t_sw → 0` on faces), so
-these notions are defined semantically, for every `z⁰`, without choosing roots of polynomials:
+Fuller–Poincaré map as the value at `t_sw` (TeX 11236–11251). These notions are defined
+semantically, for every `z⁰`, by the maximum condition along the constant-control trajectory,
+without choosing roots of polynomials:
 
 * `IsFirstControl z⁰ u`: `u ∈ V_T` and the constant control `u` satisfies the maximum condition
   along its own trajectory `t ↦ flow t z⁰ u` on some `[0, ε]`, `ε > 0`. It is unique
@@ -58,9 +58,25 @@ these notions are defined semantically, for every `z⁰`, without choosing roots
   positive and finite for `z⁰ ≠ 0` (Lemma 13.2.6, Corollary 13.2.7). A double root of a switching
   function at which the control stays optimal (a tangency) is not a switch.
 
-The Poincaré map `F(z⁰) = flow (firstSwitchTime z⁰) z⁰ (firstControl z⁰)` is then defined at every
-point (`SmoothedPolygons/Ch13/PoincareMap.lean`); its discontinuities are those of
-`firstControl` and `firstSwitchTime`, which Chapter 15 analyses.
+This is the honest Pontryagin dynamics, faithful to TeX 10747–10753 and to Lemma 13.2.6: the first
+control is the control that the maximum principle selects at `t = 0`, and the trajectory switches
+when that control stops being optimal. The Poincaré map
+`F(z⁰) = flow (firstSwitchTime z⁰) z⁰ (firstControl z⁰)` is then defined at every point
+(`SmoothedPolygons/Ch13/PoincareMap.lean`).
+
+**Chapter 15's cell maps differ from `poincare`.** Chapter 15 works with maps on closed cells
+obtained by continuous extension from the interiors, and they are not restrictions of `poincare`:
+* on the closed 2-cell `𝒞₂^A` the first switching time is taken to be a root of `χ_{A,0}`
+  (TeX 12413–12422), double roots included, although at a double root the control stays optimal
+  (a tangency) and `poincare` does not switch there;
+* the identity `F⁻¹ = τ F τ` is used on closed cells (TeX 12324–12328); for `poincare` it fails
+  where the first control equals the most recent one (`l4st_poincare_tau_poincare` assumes a genuine
+  switching point);
+* on parts of the faces of the big cells the switching time tends to `0` (TeX 12199–12202) and the
+  cell maps take the limit there, whereas `firstSwitchTime` is positive at every `z⁰ ≠ 0`.
+
+Chapter 15 will need root-based cell maps, and lemmas that they agree with `poincare` on the open
+cells.
 -/
 
 @[expose] public section
@@ -75,10 +91,10 @@ def RR (a b : ℂ) : ℝ := (starRingEnd ℂ a * b).re
 
 namespace TriFuller
 
-/-- The primitive cube root of unity `ζ = exp(2πi/3)` (TeX 10690). -/
+/-- The primitive cube root of unity `ζ = exp(2πi/3)` (TeX 10692). -/
 noncomputable def ζ : ℂ := Complex.exp (2 * Real.pi * Complex.I / 3)
 
-/-- The vertices of the triangular control set, `V_T = {1, ζ, ζ²}` (TeX 10688). -/
+/-- The vertices of the triangular control set, `V_T = {1, ζ, ζ²}` (TeX 10690). -/
 noncomputable def VT : Set ℂ := {1, ζ, ζ ^ 2}
 
 /-- The triangular control set `U_T`, the convex hull of `V_T` (TeX 11100). -/

@@ -13,7 +13,8 @@ Points", TeX 11234–11290, 11429–11431):
   maximum principle, up to the first switching time (`poincare`, TeX 11236–11251). It is defined
   at every point (see `SmoothedPolygons/Ch13/Defs.lean` on robustness); on the section
   `(ℂ³ ∖ 0)_𝒲` it is well defined in the book's sense: `0 < t_sw < 10 φ(z⁰)` (Lemma 13.2.6,
-  Corollary 13.2.7), `F(z⁰) ≠ 0` (Lemma 13.3.1) and `F(z⁰)₃ ∈ 𝒲`; these uses are silent in the book
+  Corollary 13.2.7), `F(z⁰) ≠ 0` (Lemma 13.3.1; in fact for every `z⁰ ≠ 0`,
+  `l4f_flow_firstControl_ne_zero`) and `F(z⁰)₃ ∈ 𝒲`; these uses are silent in the book
   (inventory, gap 9);
 * the equivariance of `F` under `V_T` (Lemma 13.2.2, (13.2.7)) and under rescaling (Lemma 13.2.1),
   so that `F` descends to `(ℝ_{>0} × Ξ)_𝒲/V_T` and induces `F_ang` on `Ξ_𝒲` (`poincareAng`) and on
@@ -50,9 +51,11 @@ theorem l4st_firstSwitchTime_lt {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     firstSwitchTime z < 10 * weightedNorm z := by
   sorry
 
-/-- `F` maps the section `(ℂ³ ∖ 0)_𝒲` into `ℂ³ ∖ 0` (Lemma 13.3.1 at `t = t_sw`). -/
-theorem l4st_poincare_ne_zero {z : Fin 3 → ℂ} (hz : z ≠ 0) (h₃ : z 2 ∈ walls) :
-    poincare z ≠ 0 := by
+/-- `F` maps `ℂ³ ∖ 0` into `ℂ³ ∖ 0`: `l4f_flow_firstControl_ne_zero` at `t = t_sw`
+(`0 < t_sw`, `l4st_firstSwitchTime_pos`). On the section `(ℂ³ ∖ 0)_𝒲` this is also Lemma 13.3.1 at
+`t = t_sw`, the book's silent justification (inventory, gap 9); off the walls Lemma 13.3.1 does not
+apply, and `l4st_poincare_tau_poincare` needs `τ F(z⁰) ≠ 0` for every `z⁰ ≠ 0`. -/
+theorem l4st_poincare_ne_zero {z : Fin 3 → ℂ} (hz : z ≠ 0) : poincare z ≠ 0 := by
   sorry
 
 /-- `F` lands on the walls: at `t_sw` the first control and the control that beats it right after
@@ -61,9 +64,13 @@ and continuity), so `z₃(t_sw) ∈ 𝒲` (`l4st_mem_walls_of_maximizers`). -/
 theorem l4st_poincare_mem_walls {z : Fin 3 → ℂ} (hz : z ≠ 0) : poincare z 2 ∈ walls := by
   sorry
 
-/-- The control switches at `t_sw`: the first control of `F(z⁰)` differs from that of `z⁰` (it
-cannot be optimal on `[t_sw, t_sw + ε)`, by `l4st_firstControl_beaten`). -/
-theorem l4st_firstControl_poincare_ne {z : Fin 3 → ℂ} (hz : z ≠ 0) (h₃ : z 2 ∈ walls) :
+/-- The control switches at `t_sw`: the first control of `F(z⁰)` differs from that of `z⁰`.
+
+Proof route: `F(z⁰) ≠ 0` (`l4st_poincare_ne_zero`), so `firstControl (F z⁰)` is the first control
+of `F(z⁰)` (`l4st_isFirstControl_firstControl`). If it were the first control `u` of `z⁰`, then `u`
+would be optimal along `t ↦ z(t, F(z⁰), u) = z(t_sw + t, z⁰, u)` (`l4st_flow_add`) for
+`t ∈ [0, ε]`, `ε > 0`, against `l4st_firstControl_beaten`. -/
+theorem l4st_firstControl_poincare_ne {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     firstControl (poincare z) ≠ firstControl z := by
   sorry
 
@@ -112,11 +119,12 @@ Chapter 15, TeX 12324–12328, and for the instability of `q_in` in Lemma 13.5.5
 the first control `u` of `z⁰` is not also its most recent control (so that `z⁰` is a switching
 point of the extremal through it), then `F(τ(F(z⁰))) = τ(z⁰)`.
 
-Proof route: with `z* = F(z⁰)`, `τ(z⁰) = z(t_sw, τ(z*), ū)` by Lemma 13.2.5; `ū` is optimal along
-this segment (the maximum condition reverses, `l4st_ham_tau`), so it is the first control of
-`τ(z*)` and `t_sw(τ z*) ≥ t_sw(z⁰)`; equality holds because `u` is not optimal at small negative
-times along `t ↦ z(t, z⁰, u)`, that is, `ū` is beaten right after `t_sw` along the reversed
-segment. -/
+Proof route: with `z* = F(z⁰)`, `τ(z⁰) = z(t_sw, τ(z*), ū)` by Lemma 13.2.5; `τ(z*) ≠ 0`
+(`l4st_poincare_ne_zero`, `l4st_tau_tau`), and `ū` is optimal along this segment (the maximum
+condition reverses, `l4st_ham_tau`), so it is the first control of `τ(z*)`
+(`l4st_isFirstControl_unique`) and `t_sw(τ z*) ≥ t_sw(z⁰)`; equality holds because `u` is not
+optimal at small negative times along `t ↦ z(t, z⁰, u)`, that is, `ū` is beaten right after
+`t_sw` along the reversed segment. -/
 theorem l4st_poincare_tau_poincare {z : Fin 3 → ℂ} (hz : z ≠ 0)
     (h : ¬ IsMostRecentControl z (firstControl z)) : poincare (tau (poincare z)) = tau z := by
   sorry

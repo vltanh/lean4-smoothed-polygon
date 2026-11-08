@@ -48,6 +48,26 @@ finite-difference computation in another chart agrees; inventory §13.5).
 `l4st_rScale_fine_bounds` (the values are `≈ -1.85 × 10⁻⁴`, `6.4 × 10⁻⁵`, `-9.2 × 10⁻⁷`,
 `1.9 × 10⁻³`, with derivative `≈ 6 × 10⁸` in `r`, so an enclosure of `r_scale` of width
 `10⁻¹⁹` is ample).
+
+**For Chapter 14: the normalization map** (`chartOf`). Theorem 14.3.3 (TeX 11911–11917) needs the
+linearization of `F` at `q_out` on the exceptional divisor (three eigenvalues of modulus `< 1`),
+not only the asymptotic stability of Lemma 13.5.5, and it must transfer it to its own
+coordinates `x̃` on the divisor. The map `chartOf : ℂ³ → ℝ³` (rotate so that `z₃ ∈ ℝ_{<0}`, rescale
+so that `Re z₁ = -1`, read off `(Im z₁, Re z₂, Im z₂)`) does this: `chartOf (chartCart x) = x` on
+the chart's domain (`l4f_chartOf_chartCart`), `chartMap = chartOf ∘ F ∘ chartCart` near `x_out`
+(`l4f_chartMap_eventuallyEq_chartOf`), and `chartOf` is smooth near `qOutCart`
+(`l4f_contDiffAt_chartOf`). With `l4st_hasFDerivAt_chartMap` and
+`l4st_charpoly_jacobianOut_roots`, the chain rule then gives the linearization in any smooth
+coordinates on the divisor near `q_out`.
+
+**The normal direction (block-triangular structure; not formalized).** On the 4-dimensional chart
+`Re z₁ = -1`, `z₃ ∈ ℝ_{<0}` free, with coordinates `(p, c, d, z₃)`, let `G` be the normalized
+Poincaré map and `s(x)` its rescaling factor. With `h = H_F⁺`, `h(G(x)) = s(x)³ h(x)`
+(`l4st_hamMax_virial_tau`, `l4st_hamMax_poincare`), so the hypersurface `{h = 0}` (the chart
+`chartCart`) is invariant under `G`, and at the fixed point, where `h = 0` and `s = 1/r_s`,
+`dh ∘ DG = r_s⁻³ dh`. The derivative of `G` at the fixed point is therefore block triangular: its
+eigenvalues are the three eigenvalues above, tangent to `{h = 0}`, and the normal eigenvalue
+`r_s⁻³ ≈ 0.0040489`.
 -/
 
 @[expose] public section
@@ -55,6 +75,8 @@ finite-difference computation in another chart agrees; inventory §13.5).
 namespace SmoothedPolygons
 
 open Complex Set Filter Topology Polynomial
+
+open scoped ContDiff
 
 namespace TriFuller
 
@@ -70,6 +92,19 @@ noncomputable def xOut : Fin 3 → ℝ := ![(qOutCart 0).im, (qOutCart 1).re, (q
 wall `𝒲₀`), rescaled by `s = -1/Re w₁` to `Re z₁ = -1`, in the coordinates `(Im, Re, Im)`. -/
 noncomputable def chartMap (x : Fin 3 → ℝ) : Fin 3 → ℝ :=
   let w := ζ • poincare (chartCart x)
+  let s := -((w 0).re)⁻¹
+  ![s * (w 0).im, s ^ 2 * (w 1).re, s ^ 2 * (w 1).im]
+
+/-- **The normalization map** `ℂ³ → ℝ³` of the chart, defined on all of `ℂ³` (for Chapter 14,
+which works in its own coordinates): rotate `z` by the unit complex number
+`ω = -z̄₃/|z₃|`, so that `(ω z)₃ = -|z₃| ∈ ℝ_{<0}` (when `z₃ ≠ 0`), rescale the result by
+`s = -1/Re (ω z)₁ > 0` so that `Re z₁ = -1` (when `Re (ω z)₁ < 0`), and read off
+`(Im z₁, Re z₂, Im z₂)`. On the walls the rotation is by an element of `V_T` (for `z₃ ∈ ℝ_{<0} ζ²`
+it is `ζ`, as in `chartMap`); off them it is not, which makes `chartOf` smooth near `qOutCart`.
+It is invariant under the virial rescalings `(r z₁, r² z₂, r³ z₃)`, `r > 0`, and under
+multiplication by unit complex numbers. -/
+noncomputable def chartOf (z : Fin 3 → ℂ) : Fin 3 → ℝ :=
+  let w := (-starRingEnd ℂ (z 2) / (‖z 2‖ : ℂ)) • z
   let s := -((w 0).re)⁻¹
   ![s * (w 0).im, s ^ 2 * (w 1).re, s ^ 2 * (w 1).im]
 
@@ -142,6 +177,44 @@ then the chain rule through the flow (13.2.2), the rotation and the rescaling; e
 `ℚ(√3)[r]` modulo `P(r)`). -/
 theorem l4st_hasFDerivAt_chartMap :
     HasFDerivAt chartMap (Matrix.toLin' (jacobianOut rScale)).toContinuousLinearMap xOut := by
+  sorry
+
+/-! ### The normalization map, for Chapter 14 -/
+
+/-- `chartOf` inverts `chartCart` on the chart's domain `{pc + d < 0}` (where the third coordinate
+`2(pc + d)` of `chartCart x` is negative): `chartOf (chartCart x) = x`.
+
+Proof route: `chartCart x` has `z₃ = 2(pc + d) ∈ ℝ_{<0}`, so the rotation factor is
+`ω = -z₃/|z₃| = 1`; `Re z₁ = -1`, so the rescaling factor is `s = 1`; and
+`(Im z₁, Re z₂, Im z₂) = (p, c, d)`. -/
+theorem l4f_chartOf_chartCart {x : Fin 3 → ℝ} (hx : x 0 * x 1 + x 2 < 0) :
+    chartOf (chartCart x) = x := by
+  sorry
+
+/-- **The map in the chart is the normalized Poincaré map**: `chartMap = chartOf ∘ F ∘ chartCart`
+near `x_out`.
+
+Proof route: `chartCart x_out = qOutCart` (`z₃ = 2(pc + d)` there because `H_F⁺(qOutCart) = 0`,
+`l4st_hamMax_qOutCart`). Near `x_out`, `chartCart x ≠ 0`, its first control is `ζ` and the
+trajectory switches from `ζ` to `1` at a time depending continuously on `x` (the argument of
+`l4st_contDiffAt_chartMap`), so `F(chartCart x)₃` lies on the wall `𝒲₂ = ℝ_{≤0} ζ²` between `ζ`
+and `1`, and it is nonzero by continuity, since `F(qOutCart)₃ = ζ² r_s³ (qOutCart)₃ ≠ 0`
+(`l4st_poincare_qOutCart`, `l4st_qOutCart_normalization`). For `w₃ = -aζ²` with `a > 0` the
+rotation factor of `chartOf` is `-w̄₃/|w₃| = ζ`, the rotation of `chartMap`, and the rescalings and
+read-offs are the same expressions. -/
+theorem l4f_chartMap_eventuallyEq_chartOf :
+    chartMap =ᶠ[𝓝 xOut] chartOf ∘ poincare ∘ chartCart := by
+  sorry
+
+/-- **`chartOf` is smooth near `qOutCart`**: it is `C^∞` at every point of a neighborhood of
+`qOutCart` in `ℂ³` (as a real manifold `ℝ⁶`).
+
+Proof route: `(qOutCart)₃ ∈ ℝ_{<0}` (`l4st_qOutCart_normalization`), so `z ↦ |z₃|` is smooth near
+`qOutCart` (`z₃ ≠ 0`; `contDiffAt_norm` for the inner product space `ℂ`), hence so are
+`ω = -z̄₃/|z₃|` and `w = ω z` (complex conjugation is `ℝ`-linear); at `qOutCart`, `ω = 1` and
+`Re w₁ = -1 ≠ 0`, so `s = -1/Re w₁` and the three read-off coordinates are smooth near
+`qOutCart`. -/
+theorem l4f_contDiffAt_chartOf : ∀ᶠ z in 𝓝 qOutCart, ContDiffAt ℝ ∞ chartOf z := by
   sorry
 
 /-- The characteristic polynomial of the Jacobian: `λ³ - T λ² + M λ - D` with

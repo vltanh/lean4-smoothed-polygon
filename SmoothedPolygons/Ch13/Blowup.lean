@@ -51,7 +51,7 @@ namespace TriFuller
 noncomputable def weightedNorm (z : Fin 3 → ℂ) : ℝ :=
   (‖z 0‖ ^ 6 + ‖z 1‖ ^ 3 + ‖z 2‖ ^ 2) ^ (1 / 6 : ℝ)
 
-/-- The weighted sphere `Ξ = {ξ ∈ ℂ³ | φ(ξ) = 1}` (TeX 11166–11167). -/
+/-- The weighted sphere `Ξ = {ξ ∈ ℂ³ | φ(ξ) = 1}` (TeX 11170). -/
 def Xi : Set (Fin 3 → ℂ) := {ξ | weightedNorm ξ = 1}
 
 /-- The angular projection `z ↦ (z₁/r, z₂/r², z₃/r³)`, `r = φ(z)` (TeX 11169–11177; the book's

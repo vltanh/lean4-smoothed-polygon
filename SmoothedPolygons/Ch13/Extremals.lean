@@ -58,8 +58,9 @@ outside `V_{T,max}` is beaten by a lower-order term of `Q` for small `t > 0`; if
 Lemma 13.2.6, valid for every control in the edge: `RR(1 - ζ, -iw) = √3/2` for `w ∈ [1, ζ]`), so
 `u = ζ^i` almost everywhere near `0`. (Continuation) Let `S` be the supremum of the `s ≤ T` such
 that `u` is the first control almost everywhere on `[0, s]`; if `S < T`, then `z(S) =
-z(S, z⁰, u) ≠ 0` (the argument of Lemma 13.3.1) and the first control of `z(S)` is still `u`
-(it is optimal on `[S, t_sw]`), so local uniqueness at `z(S)` contradicts the choice of `S`. -/
+z(S, z⁰, u) ≠ 0` by `l4f_flow_firstControl_ne_zero` (`S ≤ T ≤ t_sw`; Lemma 13.3.1 does not apply,
+as `z₃⁰` need not lie on a wall) and the first control of `z(S)` is still `u` (it is optimal on
+`[S, t_sw]`), so local uniqueness at `z(S)` contradicts the choice of `S`. -/
 theorem l4st_eq_flow_of_maxCondition {z₀ : Fin 3 → ℂ} (hz₀ : z₀ ≠ 0) {T : ℝ}
     (hT : T ≤ firstSwitchTime z₀) {z : ℝ → Fin 3 → ℂ} {u : ℝ → ℂ} (h : IsTrajectory VT 0 T z u)
     (hmax : MaxCondition VT 0 T z u) (h0 : z 0 = z₀) :

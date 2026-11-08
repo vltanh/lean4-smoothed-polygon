@@ -21,7 +21,9 @@ TeX 10910–11068, and the most recent control, TeX 10880–10906):
   time reversal;
 * the basic properties of the first switching time: `0 < t_sw` for `z⁰ ≠ 0` (TeX 10750–10753:
   "`t = 0` is an isolated zero of the relevant switching function"), the first control is optimal
-  on `[0, t_sw]`, and it is beaten at times arbitrarily close to `t_sw` from the right.
+  on `[0, t_sw]`, and it is beaten at times arbitrarily close to `t_sw` from the right;
+* the first-control trajectory of `z⁰ ≠ 0` does not reach `0` on `[0, t_sw]`
+  (`l4f_flow_firstControl_ne_zero`; Lemma 13.3.1 covers only `z₃⁰ ∈ 𝒲`).
 
 The informal corollary after Lemma 13.2.8 (TeX 11063–11067: switching back and forth between `ζ`
 and `ζ²` happens at consecutive roots of one cubic, and after its largest root the control switches
@@ -137,6 +139,21 @@ being polynomials). -/
 theorem l4st_firstControl_beaten {z : Fin 3 → ℂ} (hz : z ≠ 0) {ε : ℝ} (hε : 0 < ε) :
     ∃ t ∈ Ioo (firstSwitchTime z) (firstSwitchTime z + ε), ∃ v ∈ VT,
       ham (flow t z (firstControl z)) (firstControl z) < ham (flow t z (firstControl z)) v := by
+  sorry
+
+/-- **The first-control trajectory does not reach the singular locus up to `t_sw`**: for
+`z⁰ ≠ 0` with first control `u₀` and `t ∈ [0, t_sw]`, `z(t, z⁰, u₀) ≠ 0`. (Lemma 13.3.1,
+`lemma13_3_1`, gives `z(t) ≠ 0` for every `t`, but only when `z₃⁰ ∈ 𝒲`; here `z₃⁰` is arbitrary.)
+
+Proof route: `z(0, z⁰, u₀) = z⁰ ≠ 0` (`l4st_flow_zero`). Suppose `z(S, z⁰, u₀) = 0` with
+`0 < S ≤ t_sw`. By the flow property (`l4st_flow_add`), `z(t, z⁰, u₀) = z(t - S, 0, u₀)`, whose
+third coordinate is `-iu₀(t - S)³/6` by (13.2.2). The control `u₀ζ` lies in `V_T`
+(`l4st_isFirstControl_firstControl`, `l4st_VT_props`), and
+`H_F(z(t), u₀ζ) - H_F(z(t), u₀) = RR(u₀ζ - u₀, -iu₀(t - S)³/6) = -(√3/12)(t - S)³`
+(`|u₀| = 1` and `RR(ζ - 1, -i) = -√3/2`), which is `> 0` for `t < S`: `u₀ζ` strictly beats `u₀` at
+every `t ∈ (0, S) ⊆ [0, t_sw]`, against `l4st_firstControl_maximizes`. -/
+theorem l4f_flow_firstControl_ne_zero {z : Fin 3 → ℂ} (hz : z ≠ 0) {t : ℝ}
+    (ht : t ∈ Icc 0 (firstSwitchTime z)) : flow t z (firstControl z) ≠ 0 := by
   sorry
 
 end TriFuller
