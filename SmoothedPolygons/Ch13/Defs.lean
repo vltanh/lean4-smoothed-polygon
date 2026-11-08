@@ -4,6 +4,13 @@ public import Mathlib.Analysis.Convex.Hull
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.Analysis.Calculus.Deriv.Prod
+import Mathlib.Analysis.Calculus.Deriv.Shift
+import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Calculus.MeanValue
+import Mathlib.Analysis.Complex.RealDeriv
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
 # Chapter 13: the Fuller system for triangular control — definitions
@@ -228,43 +235,139 @@ noncomputable def mostRecentSwitchTime (z : Fin 3 → ℂ) : ℝ :=
 
 /-- `ζ = -1/2 + (√3/2) i`. -/
 theorem l4st_ζ_eq : ζ = ⟨-1 / 2, √3 / 2⟩ := by
-  sorry
+  have h : (2 * Real.pi * Complex.I / 3 : ℂ) = ((2 * Real.pi / 3 : ℝ) : ℂ) * I := by
+    push_cast; ring
+  have e : 2 * Real.pi / 3 = Real.pi - Real.pi / 3 := by ring
+  have hc : Real.cos (2 * Real.pi / 3) = -1 / 2 := by
+    rw [e, Real.cos_pi_sub, Real.cos_pi_div_three]; norm_num
+  have hs : Real.sin (2 * Real.pi / 3) = √3 / 2 := by
+    rw [e, Real.sin_pi_sub, Real.sin_pi_div_three]
+  apply Complex.ext
+  · rw [ζ, h, Complex.exp_ofReal_mul_I_re, hc]
+  · rw [ζ, h, Complex.exp_ofReal_mul_I_im, hs]
 
 /-- `ζ³ = 1`. -/
 theorem l4st_ζ_pow_three : ζ ^ 3 = 1 := by
-  sorry
+  rw [ζ, ← Complex.exp_nat_mul]
+  convert Complex.exp_two_pi_mul_I using 2
+  push_cast; ring
+
+private lemma l4b_sqrt3_mul : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
+
+private lemma l4b_norm_ζ : ‖ζ‖ = 1 := by
+  rw [ζ, show (2 * Real.pi * Complex.I / 3 : ℂ) = ((2 * Real.pi / 3 : ℝ) : ℂ) * I by
+    push_cast; ring]
+  exact Complex.norm_exp_ofReal_mul_I _
+
+private lemma l4b_conj_ζ : starRingEnd ℂ ζ = ζ ^ 2 := by
+  rw [l4st_ζ_eq]
+  apply Complex.ext <;> simp [sq] <;> nlinarith [l4b_sqrt3_mul]
+
+private lemma l4b_ζ_pow_four : ζ ^ 4 = ζ := by
+  rw [pow_succ, l4st_ζ_pow_three, one_mul]
 
 /-- The vertices of `U_T` lie on the unit circle, and `V_T` is closed under products and
 conjugation. -/
 theorem l4st_VT_props {u v : ℂ} (hu : u ∈ VT) (hv : v ∈ VT) :
     ‖u‖ = 1 ∧ u * v ∈ VT ∧ starRingEnd ℂ u ∈ VT ∧ u⁻¹ = starRingEnd ℂ u := by
-  sorry
+  have hn : ∀ w ∈ VT, ‖w‖ = 1 := by
+    intro w hw
+    rcases hw with rfl | rfl | rfl
+    · simp
+    · exact l4b_norm_ζ
+    · simp [l4b_norm_ζ]
+  have hpow : ∀ n : ℕ, ζ ^ n ∈ VT := by
+    intro n
+    rw [← Nat.mod_add_div n 3, pow_add, pow_mul, l4st_ζ_pow_three, one_pow, mul_one]
+    have : n % 3 < 3 := Nat.mod_lt _ (by norm_num)
+    interval_cases n % 3 <;> simp [VT]
+  have hex : ∀ w ∈ VT, ∃ n : ℕ, w = ζ ^ n := by
+    intro w hw
+    rcases hw with rfl | rfl | rfl
+    · exact ⟨0, by simp⟩
+    · exact ⟨1, by simp⟩
+    · exact ⟨2, rfl⟩
+  obtain ⟨a, rfl⟩ := hex u hu
+  obtain ⟨b, rfl⟩ := hex v hv
+  refine ⟨hn _ hu, ?_, ?_, ?_⟩
+  · rw [← pow_add]; exact hpow _
+  · rw [map_pow, l4b_conj_ζ, ← pow_mul]; exact hpow _
+  · rw [Complex.inv_def, Complex.normSq_eq_norm_sq, hn _ hu]
+    simp
 
 /-- The two forms of the Fuller Hamiltonian (13.2.3)–(13.2.4) (TeX 10718–10721):
 `H_F(z, u) = ½ Σ_{j=0}^{3} (-1)^j RR(z_{3-j}, i z_j)` with `z₀ = -iu`. -/
 theorem l4st_ham_eq_half_sum (z : Fin 3 → ℂ) (u : ℂ) :
     ham z u = (1 / 2) * ∑ j : Fin 4, (-1) ^ (j : ℕ) *
       RR (![-I * u, z 0, z 1, z 2] (Fin.rev j)) (I * ![-I * u, z 0, z 1, z 2] j) := by
-  sorry
+  simp only [ham, RR, Fin.sum_univ_four]
+  simp [Fin.rev, Complex.mul_re, Complex.mul_im]
+  ring
 
 /-- `z(0, z⁰, u) = z⁰`. -/
 theorem l4st_flow_zero (z : Fin 3 → ℂ) (u : ℂ) : flow 0 z u = z := by
-  sorry
+  funext j
+  fin_cases j <;> simp [flow]
 
 /-- The flow property `z(s + t, z⁰, u) = z(t, z(s, z⁰, u), u)`. -/
 theorem l4st_flow_add (s t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
     flow (s + t) z u = flow t (flow s z u) u := by
-  sorry
+  funext j
+  fin_cases j <;> simp [flow] <;> ring
+
+/-- A complex cubic in a real variable has the expected derivative. -/
+private lemma l4b_hasDerivAt_cubic (a b c d : ℂ) (t : ℝ) :
+    HasDerivAt (fun s : ℝ ↦ a + b * s + c * s ^ 2 + d * s ^ 3)
+      (b + 2 * c * t + 3 * d * t ^ 2) t := by
+  have h1 : HasDerivAt (fun s : ℝ ↦ (s : ℂ)) 1 t := by
+    simpa using (hasDerivAt_id t).ofReal_comp
+  have := (((h1.const_mul b).const_add a).add ((h1.fun_pow 2).const_mul c)).add
+    ((h1.fun_pow 3).const_mul d)
+  convert this using 1
+  push_cast; ring
 
 /-- The polynomials (13.2.2) solve the Fuller system classically:
 `d/dt z(t, z⁰, u) = (-iu, z₁(t), z₂(t))`. -/
 theorem l4st_hasDerivAt_flow (t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
     HasDerivAt (fun s ↦ flow s z u) ![-I * u, flow t z u 0, flow t z u 1] t := by
-  sorry
+  rw [hasDerivAt_pi]
+  intro j
+  fin_cases j
+  · convert l4b_hasDerivAt_cubic (z 0) (-I * u) 0 0 t using 1
+    · funext s; simp [flow]; ring
+    · simp
+  · convert l4b_hasDerivAt_cubic (z 1) (z 0) (-I * u / 2) 0 t using 1
+    · funext s; simp [flow]; ring
+    · simp [flow]; ring
+  · convert l4b_hasDerivAt_cubic (z 2) (z 1) (z 0 / 2) (-I * u / 6) t using 1
+    · funext s; simp [flow]; ring
+    · simp [flow]; ring
 
 end TriFuller
 
 open TriFuller
+
+/-- The derivative of `t ↦ z(t - a, w, u)`. -/
+private lemma l4b_hasDerivAt_flow_sub (a s : ℝ) (w : Fin 3 → ℂ) (u : ℂ) :
+    HasDerivAt (fun x ↦ flow (x - a) w u) ![-I * u, flow (s - a) w u 0, flow (s - a) w u 1] s :=
+  HasDerivAt.comp_sub_const s a (l4st_hasDerivAt_flow (s - a) w u)
+
+/-- Integrating the Fuller system along `t ↦ z(t - a, w, u)` from `a` to `b`. -/
+private lemma l4b_integral_flow (a b : ℝ) (w : Fin 3 → ℂ) (u : ℂ) (j : Fin 3) :
+    ∫ s in a..b, ![-I * u, flow (s - a) w u 0, flow (s - a) w u 1] j =
+      flow (b - a) w u j - w j := by
+  have hd : ∀ s, HasDerivAt (fun x ↦ flow (x - a) w u j)
+      (![-I * u, flow (s - a) w u 0, flow (s - a) w u 1] j) s :=
+    fun s ↦ hasDerivAt_pi.1 (l4b_hasDerivAt_flow_sub a s w u) j
+  have hcont : Continuous fun s ↦ flow (s - a) w u :=
+    continuous_iff_continuousAt.2 fun s ↦ (l4b_hasDerivAt_flow_sub a s w u).continuousAt
+  have hc : Continuous fun s ↦ ![-I * u, flow (s - a) w u 0, flow (s - a) w u 1] j := by
+    fin_cases j
+    · exact continuous_const
+    · exact (continuous_apply 0).comp hcont
+    · exact (continuous_apply 1).comp hcont
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ ↦ hd s) (hc.intervalIntegrable _ _)]
+  simp [l4st_flow_zero]
 
 /-- **Equation `eqn:z1z2z3` (13.2.2)** (TeX 10696–10705): "When `u ∈ ℂ` is constant, we can solve
 the Fuller system ODEs, to obtain (13.2.2)". For a constant control `u ∈ U`, a curve is a
@@ -276,15 +379,73 @@ theorem of calculus); conversely, integrating `z₁' = -iu`, then `z₂' = z₁`
 theorem eqn_z1z2z3 {U : Set ℂ} {u : ℂ} (hu : u ∈ U) {t₁ t₂ : ℝ} (h : t₁ < t₂)
     (z : ℝ → Fin 3 → ℂ) :
     IsTrajectory U t₁ t₂ z (fun _ ↦ u) ↔ ∀ t ∈ Icc t₁ t₂, z t = flow (t - t₁) (z t₁) u := by
-  sorry
+  have I0 : ∀ (a b : ℝ) (w : Fin 3 → ℂ), ∫ _ in a..b, -I * u = flow (b - a) w u 0 - w 0 := by
+    intro a b w; simpa using l4b_integral_flow a b w u 0
+  have I1 : ∀ (a b : ℝ) (w : Fin 3 → ℂ),
+      ∫ s in a..b, flow (s - a) w u 0 = flow (b - a) w u 1 - w 1 := by
+    intro a b w; simpa using l4b_integral_flow a b w u 1
+  have I2 : ∀ (a b : ℝ) (w : Fin 3 → ℂ),
+      ∫ s in a..b, flow (s - a) w u 1 = flow (b - a) w u 2 - w 2 := by
+    intro a b w; simpa using l4b_integral_flow a b w u 2
+  have sub : ∀ t ∈ Icc t₁ t₂, uIcc t₁ t ⊆ Icc t₁ t₂ := fun t ht ↦ by
+    rw [uIcc_of_le ht.1]; exact Icc_subset_Icc_right ht.2
+  constructor
+  · rintro ⟨-, -, -, hint⟩
+    have h0 : ∀ t ∈ Icc t₁ t₂, z t 0 = flow (t - t₁) (z t₁) u 0 := by
+      intro t ht; rw [(hint t ht).1, I0 t₁ t (z t₁)]; ring
+    have h1 : ∀ t ∈ Icc t₁ t₂, z t 1 = flow (t - t₁) (z t₁) u 1 := by
+      intro t ht
+      rw [(hint t ht).2.1, intervalIntegral.integral_congr (fun s hs ↦ h0 s (sub t ht hs)), I1]
+      ring
+    have h2 : ∀ t ∈ Icc t₁ t₂, z t 2 = flow (t - t₁) (z t₁) u 2 := by
+      intro t ht
+      rw [(hint t ht).2.2, intervalIntegral.integral_congr (fun s hs ↦ h1 s (sub t ht hs)), I2]
+      ring
+    intro t ht
+    funext j
+    fin_cases j
+    · exact h0 t ht
+    · exact h1 t ht
+    · exact h2 t ht
+  · intro hz
+    refine ⟨h, measurable_const, fun _ _ ↦ hu, fun t ht ↦ ⟨?_, ?_, ?_⟩⟩
+    · rw [I0 t₁ t (z t₁), hz t ht]; ring
+    · rw [intervalIntegral.integral_congr (fun s hs ↦ congrFun (hz s (sub t ht hs)) 0), I1,
+        hz t ht]
+      ring
+    · rw [intervalIntegral.integral_congr (fun s hs ↦ congrFun (hz s (sub t ht hs)) 1), I2,
+        hz t ht]
+      ring
 
 namespace TriFuller
+
+/-- The derivative of `RR(f, g)` along two curves in `ℂ`. -/
+private lemma l4b_hasDerivAt_RR {f g : ℝ → ℂ} {f' g' : ℂ} {t : ℝ} (hf : HasDerivAt f f' t)
+    (hg : HasDerivAt g g' t) :
+    HasDerivAt (fun s ↦ RR (f s) (g s)) (RR f' (g t) + RR (f t) g') t := by
+  have h := Complex.reCLM.hasFDerivAt.comp_hasDerivAt t (hf.star.fun_mul hg)
+  have e : (fun s ↦ RR (f s) (g s)) = Complex.reCLM ∘ fun x ↦ star (f x) * g x := by
+    funext s; simp [RR]
+  rw [e]
+  convert h using 1
+  simp [RR]
 
 /-- "`H_F` is constant along every segment with constant control" (TeX 10740–10741):
 `H_F(z(t, z⁰, u), u) = H_F(z⁰, u)` for every `u ∈ ℂ`. Proof:
 `d/dt H_F = RR(-iu, i z₂) + RR(z₁, i z₁) + RR(u, z₂) = 0`. -/
 theorem l4st_ham_flow (t : ℝ) (z : Fin 3 → ℂ) (u : ℂ) : ham (flow t z u) u = ham z u := by
-  sorry
+  -- `d/dt H_F(z(t), u) = RR(-iu, i z₂) + RR(z₁, i z₁) + RR(u, z₂) = 0`
+  have hd : ∀ s, HasDerivAt (fun s ↦ ham (flow s z u) u) 0 s := by
+    intro s
+    have hF := hasDerivAt_pi.1 (l4st_hasDerivAt_flow s z u)
+    have h := (l4b_hasDerivAt_RR (hF 0) ((hF 1).mul_const I)).fun_add
+      (l4b_hasDerivAt_RR (hasDerivAt_const s u) (hF 2))
+    change HasDerivAt (fun s ↦ RR (flow s z u 0) (flow s z u 1 * I) + RR u (flow s z u 2)) 0 s
+    convert h using 1
+    simp [RR, Complex.mul_re, Complex.mul_im]
+    ring
+  have := is_const_of_deriv_eq_zero (fun s ↦ (hd s).differentiableAt) (fun s ↦ (hd s).deriv) t 0
+  simpa [l4st_flow_zero] using this
 
 end TriFuller
 
