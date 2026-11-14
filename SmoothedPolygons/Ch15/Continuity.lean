@@ -9,7 +9,7 @@ public import Basic.Analysis.Polynomial.LeastPositiveRoot
 The continuity claims of Hales–Vajjha, *Packings of Smoothed Polygons*, §15.1–§15.2:
 
 * on a big open cell the first switching time, hence the Poincaré map, is continuous off the loci
-  `Δ_{A,0} = 0`, `Δ_{B,1} = 0`, `res_AB = 0` (TeX 12139–12143; gap G15.8);
+  `Δ_{A,0} = 0`, `Δ_{B,1} = 0`, `res_AB = 0` (TeX 12139–12143; REPORT.md, E70);
 * the dynamics extends continuously from the interior of the first big cell to its top face
   `𝒞₂(ζ, 0, 2)` (TeX 12233–12235) and to the closed 2-cell `𝒞₂(ζ, 1, 1)` on the front and back faces
   (TeX 12268–12276, at its nondegenerate points), and from the interior of the second big cell to
@@ -410,8 +410,9 @@ Proof route: off the loci the positive roots of `χ_{A,0}` and `χ_{B,1}` are si
 none is `0`, so each is a sign change and the least of them is `t_sw`; simple real roots depend
 continuously on the coefficients, which are continuous in `p`, and no root can enter `(0, ∞)`
 through `0` (`χ_{A,0}(0) ≠ 0 ≠ χ_{B,1}(0)`) or through a complex pair (`Δ ≠ 0`); finally
-`F = z(t_sw)` and `classOf` is continuous (`continuousOn_classOf`). (Gap G15.8: on the faces of
-the cells the switching time may tend to `0`; see Proposition 15.2.2.)
+`F = z(t_sw)` and `classOf` is continuous (`continuousOn_classOf`). (On the faces of the cells,
+which the book's claim leaves out, the switching time may tend to `0`; see Proposition 15.2.2 and
+REPORT.md, E70.)
 
 Proved along this route (`l5c_openBox`, `l5c_scheme`). The hypothesis `res_AB ≠ 0` is the book's
 (the locus `res_AB = 0` of TeX 12141–12142) and is not used: `t_sw` is the least time at which

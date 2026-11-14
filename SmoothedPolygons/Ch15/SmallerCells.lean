@@ -39,8 +39,8 @@ switch. The book's maps on closed cells are continuous extensions from the inter
 at a tangency. On `𝒞₂(ζ², 0, 2)` the book's `F_A` uses the least positive root of `χ_{A,0}` on
 all of `𝒞₂^A = {Δ_{A,0} ≥ 0}` (TeX 12413–12422), a double root on `{Δ_{A,0} = 0}`, where `poincare`
 does not switch and agrees with `F_B` instead (`firstSwitchTime_topFaceTwo`; for example `r₂ = 1/2`,
-`ψ = 1.0548151712321…`: double root `t = 1.30848`, switch at `6 r₁ sin ψ = 2.60943`; checklist,
-line "L5 (Chapter 15)"). Both maps are stated here, with the agreement on `{Δ_{A,0} > 0}` and on
+`ψ = 1.0548151712321…`: double root `t = 1.30848`, switch at `6 r₁ sin ψ = 2.60943`; REPORT.md,
+E74). Both maps are stated here, with the agreement on `{Δ_{A,0} > 0}` and on
 `{Δ_{A,0} ≤ 0}` respectively.
 
 ## Proofs
@@ -434,9 +434,9 @@ def topFaceTwo : Set (Fin 3 → ℝ) := {p | p 0 ∈ Ioo 0 1 ∧ p 1 ∈ Ioo 0 �
 
 /-- The closed 2-cell `𝒞₂(ζ) = 𝒞₂(ζ, 1, 1)` (TeX 12254–12276): `z₃ = 0`, in coordinates
 `ψ ∈ {0, π}`, `r₂ ∈ [0, 1]`, `θ₂ ∈ [π/3, π]`. The book's coordinates are `r̃₁ = r₁ e^{iψ} = ±r₁`
-(TeX 12265 writes "`r₁ = r̃₁ e^{iψ}`", reversed; gap G15.3) and `θ₂`; on `r̃₁ = 0` (`r₂ = 1`) the
-two values of `ψ` give the same point. It is attached to the front and back faces `ψ ∈ {0, π}` of
-the first big cell. -/
+(TeX 12265 writes "`r₁ = r̃₁ e^{iψ}`", reversed; REPORT.md, E71) and `θ₂`; on `r̃₁ = 0`
+(`r₂ = 1`) the two values of `ψ` give the same point. It is attached to the front and back faces
+`ψ ∈ {0, π}` of the first big cell. -/
 def frontBackOne : Set (Fin 3 → ℝ) :=
   {p | p 0 ∈ Icc 0 1 ∧ (p 1 = 0 ∨ p 1 = π) ∧ p 2 ∈ Icc (π / 3) π}
 

@@ -7,7 +7,8 @@ public import SmoothedPolygons.Ch15.Continuity
 
 §15.3 of Hales–Vajjha, *Packings of Smoothed Polygons* ("Involution", TeX 12316–12493):
 
-* `F⁻¹ = τ F τ` and the involution `𝔦 := τ ∘ F` (TeX 12324–12328), made precise (gap G15.6):
+* `F⁻¹ = τ F τ` and the involution `𝔦 := τ ∘ F` (TeX 12324–12328), made precise
+  (REPORT.md, E73):
   - for the Poincaré map `poincare`, `F(τ F(z)) = τ(z)` holds exactly at the **switching points**,
     the points whose first control is not also their most recent control
     (`poincare_tau_poincare_eq_tau_iff`); every image `F(z)` is a switching point, and the points of
@@ -24,7 +25,7 @@ public import SmoothedPolygons.Ch15.Continuity
   and discriminants along them (from Lemma 13.2.4, TeX 12336–12345, 12425–12427, 12441–12443);
 * the parts `𝒟₀, …, 𝒟₄` (TeX 12347–12443), the notion of geometric partition, and Proposition
   15.3.2 as the named proposition `Proposition15_3_2`;
-* Remark 15.3.1 (with `q_in` and `q_out` corrected, gap G15.1) is in
+* Remark 15.3.1 (with `q_in` and `q_out` corrected, REPORT.md, E75) is in
   `SmoothedPolygons/Ch15/FixedPointCells.lean`.
 
 ## The parts
@@ -40,7 +41,7 @@ open first box minus `∂_A ∪ ∂_res` whose closures meet the top face; `𝒟
 these coincide with the book's construction (`𝔦(𝒟₃) = 𝒟₄`), form geometric partitions, and carry
 continuous extensions `F_i` of `F` is the content of Proposition 15.3.2, which the book supports
 only by Figures 15.2–15.3 ("The proof is contained in the discussion leading up to the
-proposition"; gap G15.2). It is stated here as the named proposition `Proposition15_3_2`, to be
+proposition"; REPORT.md, E72). It is stated here as the named proposition `Proposition15_3_2`, to be
 certified (layer 5b) or kept as a hypothesis; **Theorem 16.1.1 does not use it**
 (`SmoothedPolygons/Ch16/GlobalBasin.lean` works with boxes and the switch of `poincare` directly).
 
@@ -229,8 +230,8 @@ theorem isSwitchingPoint_smul_scale_iff {v : ℂ} (hv : v ∈ VT) {r : ℝ} (hr 
     l5d_firstControl_smul_scale hv hr hz, map_mul, Complex.conj_conj]
   exact not_congr (mul_right_inj' hv0)
 
-/-- **`F⁻¹ = τ F τ` for the Poincaré map, exactly at switching points** (TeX 12324–12328; gap
-G15.6). For `z ≠ 0`, `F(τ F(z)) = τ(z)` if and only if `z` is a switching point: "if" is
+/-- **`F⁻¹ = τ F τ` for the Poincaré map, exactly at switching points** (TeX 12324–12328;
+REPORT.md, E73). For `z ≠ 0`, `F(τ F(z)) = τ(z)` if and only if `z` is a switching point: "if" is
 `poincare_tau_poincare`; "only if" because `F(τ F z)` is a switching point
 (`isSwitchingPoint_poincare`) and `τ(z)` is one only if `z` is (`isSwitchingPoint_tau_iff`). -/
 theorem poincare_tau_poincare_eq_tau_iff {z : Fin 3 → ℂ} (hz : z ≠ 0) :
@@ -242,7 +243,7 @@ theorem poincare_tau_poincare_eq_tau_iff {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     exact (isSwitchingPoint_tau_iff hz).1 this
   · exact poincare_tau_poincare hz
 
-/-- **`F⁻¹ = τ F τ` branch-wise** (TeX 12324–12328; gap G15.6): for any switching time `T` and
+/-- **`F⁻¹ = τ F τ` branch-wise** (TeX 12324–12328; E73): for any switching time `T` and
 control `u` (in particular for the book's root-based maps on closed cells, which switch at a root
 `T` of a switching function, double roots included), `τ(z(T, τ(z(T, z⁰, u)), ū)) = z⁰` (Lemma
 13.2.5, `tau_flow_neg`, and the flow property `flow_add`). -/
@@ -250,7 +251,7 @@ theorem tau_flow_tau_flow (T : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
     tau (flow T (tau (flow T z u)) (starRingEnd ℂ u)) = z := by
   rw [← tau_flow_neg, ← flow_add, add_neg_cancel, flow_zero, tau_tau]
 
-/-- **The top faces consist of non-switching points** (gap G15.6): at a point of `𝒞₂(ζ, 0, 2)`
+/-- **The top faces consist of non-switching points** (E73): at a point of `𝒞₂(ζ, 0, 2)`
 (resp. `𝒞₂(ζ², 0, 2)`) the switching function `χ_B` has a double root at `t = 0` with
 `χ_{B,2}(0) = ±y₁/2 > 0` and `χ_A(0) > 0`, so the first control `ζ` (resp. `ζ²`) is optimal on both
 sides of `t = 0` and is also the most recent control. By `poincare_tau_poincare_eq_tau_iff`, the
@@ -400,7 +401,7 @@ theorem poincareAngZero_tauZero_poincareAngZero {x : XiW0Quot} (hx : IsSwitching
 /-- The involution `𝔦 := τ ∘ F` (TeX 12324–12328). -/
 noncomputable def involution (x : XiW0Quot) : XiW0Quot := tauZero (poincareAngZero x)
 
-/-- "`𝔦 := τ ∘ F` is an involution: `𝔦 = 𝔦⁻¹`" (TeX 12326–12328), on switching points (gap G15.6):
+/-- "`𝔦 := τ ∘ F` is an involution: `𝔦 = 𝔦⁻¹`" (TeX 12326–12328), on switching points (E73):
 `𝔦(𝔦(x)) = τ F τ F x = τ τ x = x`, and `𝔦(x)` is again a switching point. -/
 theorem involution_involution {x : XiW0Quot} (hx : IsSwitchingPointQ x) :
     IsSwitchingPointQ (involution x) ∧ involution (involution x) = x := by
@@ -443,8 +444,8 @@ top face `θ₂ = π` of the first big cell (where `poincare` is the book's map,
 `continuousWithinAt_topFaceOne`). The book adds "By construction `∂_A` and `𝒞₂(ζ)` are in
 involution" (TeX 12344), a slip for `𝒞₂(ζ, 0, 2)`; even so it fails for the involution `𝔦 = τ F` of
 the Fuller–Poincaré map: `𝔦(𝔦(x)) = x` needs `x` to be a switching point (`involution_involution`),
-and the points of the top face are not (`not_isSwitchingPoint_of_mem_topFace`; gap G15.6). Only the
-definition `∂_A = 𝔦(𝒞₂(ζ, 0, 2))` is used. -/
+and the points of the top face are not (`not_isSwitchingPoint_of_mem_topFace`; REPORT.md, E73).
+Only the definition `∂_A = 𝔦(𝒞₂(ζ, 0, 2))` is used. -/
 noncomputable def bdA : Set XiW0Quot := involution '' (cellClass '' topFaceOne)
 
 /-- `∂_{A,ζ²} := 𝔦(𝒞₂^A)` (TeX 12424–12426), with the book's root-based map `F_A` on `𝒞₂^A`. -/
@@ -605,7 +606,7 @@ private lemma l5d_involution_cellClass {p : Fin 3 → ℝ} (hp : p ∈ cellDomai
     tauZero_classOf (poincare_mem_sectionZero hw)]
 
 /-- **The resultant and the discriminants vanish along the `∂`-loci** (Lemma 13.2.4, TeX
-12336–12345, 12425–12427 (gap G15.4: "`Δ_{A,0}` vanishes along `∂_A`" there means `∂_{A,ζ²}`),
+12336–12345, 12425–12427 (where "`Δ_{A,0}` vanishes along `∂_A`" means `∂_{A,ζ²}`, REPORT.md, E71),
 12441–12443), at their points in the open big cells:
 * along `∂_res`, `res_AB = 0`: the trajectory reaches `z₃ = 0` at the switching time `T`, a common
   root of `χ_{A,0}` and `χ_{B,1}`;
@@ -864,7 +865,7 @@ def IsGeometricPartition {α : Type*} [TopologicalSpace α] (S : Set α) (P : Li
     P.Pairwise fun D D' ↦ Disjoint (interior D) (interior D')
 
 /-- **Proposition 15.3.2** (`prop:partition`, label of this formalization; unlabelled, TeX
-12467–12491), as a named proposition (it rests on Figures 15.2–15.3; gap G15.2). "Let `𝒟_i`,
+12467–12491), as a named proposition (it rests on Figures 15.2–15.3; REPORT.md, E72). "Let `𝒟_i`,
 `i = 0, 1, 2, 3, 4` be the geometric partition of the two big cells defined as above. The
 Fuller–Poincaré map extends continuously from the interiors of `𝒟_i` to functions `F_i` on the
 closures `𝒟_i`, for `i = 0, 1, 2, 3, 4`. The involution acts on the parts

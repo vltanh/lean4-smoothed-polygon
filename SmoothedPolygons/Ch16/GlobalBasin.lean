@@ -25,14 +25,15 @@ order until `𝒟_{1,00} = 𝒟_out`, and (d) "once in the small rectangle `𝒟
 the iterates rapidly converge to the fixed point `q_out`".
 
 This proof follows the same steps with the box regions of `BasinHypotheses.lean`:
-1. **Convergence in `𝒟_out`** (step (d); gap G16.3): from `DOutContracts`, `F^N(𝒟₀₀) ⊆ B` and `F`
-   is a contraction `g` of the box `B` in coordinates; the contraction mapping theorem gives
+1. **Convergence in `𝒟_out`** (step (d); REPORT.md, E78): from `DOutContracts`, `F^N(𝒟₀₀) ⊆ B`
+   and `F` is a contraction `g` of the box `B` in coordinates; the contraction mapping theorem gives
    `F^k(x) → q_out` for `x ∈ 𝒟₀₀` (`l5st_tendsto_qOut0_of_mem_boxSet`), and a backward orbit inside
    `𝒟₀₀` is constant at `q_out` (`l5st_eq_qOut0_of_backward_orbit`).
 2. **`𝒟₂₂` is never re-entered** (the analogue of step (b), the column `𝒟_in` of Table 16.1, proved
-   by the time reversal of step (a); gap G16.5): for a switching point `x` (every `F(y)` is one),
-   `F(x) ∈ 𝒟₂₂` implies `x ∈ 𝒟₂₂`, because `τ(𝒟₂₂) = 𝒟₀₀`, `F(τ F(x)) = τ(x)` (`F⁻¹ = τ F τ` at
-   switching points) and `F(𝒟₀₀) ⊆ 𝒟₀₀` (`l5st_mem_boxSet_22_of_poincareAngZero_mem`).
+   by the time reversal of step (a); REPORT.md, E79): for a switching point `x` (every `F(y)` is
+   one), `F(x) ∈ 𝒟₂₂` implies `x ∈ 𝒟₂₂`, because `τ(𝒟₂₂) = 𝒟₀₀`, `F(τ F(x)) = τ(x)`
+   (`F⁻¹ = τ F τ` at switching points) and `F(𝒟₀₀) ⊆ 𝒟₀₀`
+   (`l5st_mem_boxSet_22_of_poincareAngZero_mem`).
 3. **Leaving `𝒟₂₂`** (step (a)): if `F^n(q) ∈ 𝒟₂₂` for all `n ≥ 1`, then `w_j := τ F^{j+1}(q)` is a
    backward orbit in `𝒟₀₀` (`F(w_{j+1}) = w_j` by `F⁻¹ = τ F τ`), so `w₀ = q_out` by step 1 and
    `F(q) = q_in`; and `F⁻¹(q_in) = {q_in}` (`poincareAngZero_eq_qIn0_iff`), so `q = q_in`.
@@ -42,13 +43,13 @@ This proof follows the same steps with the box regions of `BasinHypotheses.lean`
    lexicographic order the orbit reaches `𝒟₀₀` (`l5st_exists_iterate_mem_boxSet_00`).
 
 Departures from the paper (all forced by gaps of the book's argument, and recorded in
-`BasinHypotheses.lean`): the boundary method (gap G16.2) is replaced by containments to be
+`BasinHypotheses.lean`): the boundary method (REPORT.md, E77) is replaced by containments to be
 certified by direct enclosure; the convergence in `𝒟_out` uses a contraction hypothesis
-(gap G16.3); `𝒟_in` is the whole box `𝒟₂₂`; the exclusion argument for the last row (`𝒟₀ ⊂ 𝒟_in`,
-`𝒟₄ ⊂ F(𝒟₂₂)` and the injectivity of the multi-valued `F`, gap G16.5) is replaced by the form of
+(E78); `𝒟_in` is the whole box `𝒟₂₂`; the exclusion argument for the last row (`𝒟₀ ⊂ 𝒟_in`,
+`𝒟₄ ⊂ F(𝒟₂₂)` and the injectivity of the multi-valued `F`, E79) is replaced by the form of
 `BoxSubclaims` (whole boxes, with target "the second cell or a smaller box"), and the book's step
 (b) by step 2, which uses the time reversal as the book's step (a) does; the map is the Poincaré
-map of `Ξ_{𝒲,0}/V_T`, at whose non-switching points `F⁻¹ = τ F τ` fails (gap G15.6), which steps
+map of `Ξ_{𝒲,0}/V_T`, at whose non-switching points `F⁻¹ = τ F τ` fails (E73), which steps
 2–3 handle (every image is a switching point; `F⁻¹(q_in) = {q_in}`).
 -/
 
@@ -394,11 +395,11 @@ private lemma l5f_contraction_data (h : DOutContracts) :
   refine definition15_1_2.2.2.2.1 (hB (hg hp₀)) (hB hp₀) ?_
   rw [← hF p₀ hp₀, hcl, hfix]
 
-/-- **Convergence in `𝒟_out`** (TeX 12594–12598, 12742–12743; gap G16.3): under `DOutContracts`,
-every orbit starting in `𝒟₀₀` tends to `q_out`. Proof route: `F^N(x) = cellClass p` with `p ∈ B`,
-`F^{N+k}(x) = cellClass (g^k p)`; `g` is a contraction of the complete box `B`, so `g^k p → p*`
-(`ContractingWith`, Banach's fixed point theorem); `cellClass` is continuous
-(`continuousOn_cellClass`); and `cellClass p* = q_out`: `q_out ∈ 𝒟₀₀`
+/-- **Convergence in `𝒟_out`** (TeX 12594–12598, 12742–12743; REPORT.md, E78): under
+`DOutContracts`, every orbit starting in `𝒟₀₀` tends to `q_out`. Proof route:
+`F^N(x) = cellClass p` with `p ∈ B`, `F^{N+k}(x) = cellClass (g^k p)`; `g` is a contraction of
+the complete box `B`, so `g^k p → p*` (`ContractingWith`, Banach's fixed point theorem);
+`cellClass` is continuous (`continuousOn_cellClass`); and `cellClass p* = q_out`: `q_out ∈ 𝒟₀₀`
 (`pOut_mem_cellBox_pIn_mem_cellBox`) is fixed, so `q_out = cellClass p₀` with `p₀ ∈ B`, `g p₀ = p₀`
 by the injectivity of `cellClass` on the open first box (`definition15_1_2`). -/
 private theorem l5st_tendsto_qOut0_of_mem_boxSet (h : DOutContracts) {x : XiW0Quot}
@@ -428,7 +429,7 @@ private theorem l5st_tendsto_qOut0_of_mem_boxSet (h : DOutContracts) {x : XiW0Qu
   exact hlim'
 
 /-- **A backward orbit inside `𝒟_out` is `q_out`** (the book's "the iterates `F^{-k}(τ q)` exit
-`𝒟_out`", TeX 12729–12732; gap G16.3): if `w_j ∈ 𝒟₀₀` and `F(w_{j+1}) = w_j` for all `j`, then
+`𝒟_out`", TeX 12729–12732; REPORT.md, E78): if `w_j ∈ 𝒟₀₀` and `F(w_{j+1}) = w_j` for all `j`, then
 `w₀ = q_out`. Proof route: `w_j = F^N(w_{j+N}) ∈ cellClass '' B`, say `w_j = cellClass p_j`; by the
 injectivity of `cellClass` on `B`, `g(p_{j+1}) = p_j`; so `p₀ = g^k(p_k)` and
 `dist(p₀, p*) ≤ κ^k diam B → 0`. -/
@@ -583,7 +584,7 @@ open TriFuller
 
 Here `F` is the Poincaré map `poincareAngZero` of `Ξ_{𝒲,0}/V_T` (Lemma 13.5.5), and the numerical
 facts the book takes from Mathematica (Table 16.1, Figures 16.1–16.4) and the contraction on
-`𝒟_out` that it does not prove (gap G16.3) are the explicit hypotheses `DOutContracts`,
+`𝒟_out` that it does not prove (REPORT.md, E78) are the explicit hypotheses `DOutContracts`,
 `CellTwoEntersDOut`, `BoxSubclaims` (`SmoothedPolygons/Ch16/BasinHypotheses.lean`, each with its
 TeX source and a certification plan).
 
@@ -594,7 +595,7 @@ and converges to `q_out` (`l5st_tendsto_qOut0_of_mem_boxSet`); otherwise `F(q) =
 (`l5st_eq_qIn0_of_forall_iterate_mem_boxSet_22`), so `q = q_in` (`poincareAngZero_eq_qIn0_iff`),
 excluded.
 
-Departures from the paper: see the module docstring (gaps G16.2, G16.3, G16.5, G15.6). -/
+Departures from the paper: see the module docstring (REPORT.md, E73 and E77–E79). -/
 theorem theorem16_1_1 (h₁ : DOutContracts) (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims)
     (q : XiW0Quot) (hq : q ≠ qIn0) :
     Tendsto (fun k : ℕ ↦ poincareAngZero^[k] q) atTop (𝓝 qOut0) := by

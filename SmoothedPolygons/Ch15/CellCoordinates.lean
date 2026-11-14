@@ -656,7 +656,7 @@ theorem cellClass_cellCoords {z : Fin 3 → ℂ} (hz : z ∈ sectionZero) (h₃ 
 
 /-- The cell coordinates `(r₂, ψ, θ₂)` of the fixed point `q_out` (13.5.1): numerically
 `(0.267949…, 0.1705935…, 2.91574…)`, which Remark 15.3.1 prints as the coordinates of `q_in`
-(gap G15.1; `remark15_3_1`). -/
+(REPORT.md, E75; `remark15_3_1`). -/
 noncomputable def pOut : Fin 3 → ℝ := cellCoords qOutCart
 
 /-- The cell coordinates of the fixed point `q_in = τ(q_out)`:

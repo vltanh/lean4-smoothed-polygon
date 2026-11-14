@@ -232,12 +232,12 @@ rem:two-cells	remark	0
 # and 15.2), which uses (15.1.1) by \eqref, the rescaling of Lemma 15.1.1 ("We may assume r_2 = 1 - r_1", line
 # 12214) and the first controls on the big cells stated after Definition 15.1.2. Label of this formalization.
 prop:closed-cells	proposition	1	def:big:open,eqn:x3,lem:cell-rescale
-# Unlabelled Remark 15.3.1 (line 12445), with q_in and q_out corrected (G15.1): numerical, no proof. Label of this
-# formalization.
+# Unlabelled Remark 15.3.1 (line 12445), with q_in and q_out corrected (REPORT.md, E75): numerical, no proof.
+# Label of this formalization.
 rem:qin-juncture	remark	0	
 # Unlabelled Proposition 15.3.2 (line 12467): "The proof is contained in the discussion leading up to the
-# proposition", whose summary cites Lemma 13.2.4; read off Figures 15.2-15.3 (G15.2). Stated as the named
-# proposition Proposition15_3_2, not proved. Label of this formalization.
+# proposition", whose summary cites Lemma 13.2.4; read off Figures 15.2-15.3 (REPORT.md, E72). Stated as the
+# named proposition Proposition15_3_2, not proved. Label of this formalization.
 prop:partition	proposition	1	lem:switch-reversal
 thm:basin	theorem	1	
 thm:outward-fuller	theorem	1	

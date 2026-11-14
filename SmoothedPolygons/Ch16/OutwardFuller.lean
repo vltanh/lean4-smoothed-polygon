@@ -18,7 +18,7 @@ orbit `F(z_{k+1}) = z_k` (outward), and "in `ℝ_{>0} × {q}` modulo `V_T`" bein
 angular part is `q`" (`classOf`). The radial factor `ρ(x) = φ(F ξ)` (`radialFactor`) is the factor
 by which one step multiplies the weighted norm `φ`, by homogeneity (Lemma 13.2.1).
 
-## The book's proof (TeX 12763–12778), and gap G16.6
+## The book's proof (TeX 12763–12778), and what it leaves implicit
 
 "By time reversal symmetry, it is enough to prove the second statement … Let `q ∈ Ξ_𝒲/V_T` be any
 switching point of any trajectory. If `q = q_in`, then it is the inward spiral. Otherwise … by the
@@ -27,7 +27,7 @@ Fuller basin theorem and by the stability calculation near `q_in`, for large `j`
 (because of the scaling factor `r_scale > 1`), and the Fuller trajectory must then also move away
 from the singular locus."
 
-The details the book leaves implicit (gap G16.6), supplied here:
+The details the book leaves implicit (REPORT.md, E80), supplied here:
 * the basin theorem is about `Ξ_{𝒲,0}`; a trajectory tending to `0` has `H_F⁺ = 0`, because
   `H_F⁺` is constant along it (`hamMax_poincare`) and continuous with `H_F⁺(0) = 0`
   (`hamMax_eq_zero_of_tendsto_zero`); so the theorem holds on all of `(ℂ³ ∖ 0)/V_T` as stated;
@@ -465,8 +465,8 @@ private lemma l5g_hamMax_iterate {z : Fin 3 → ℂ} (hz : z ≠ 0) (k : ℕ) :
   | succ k ih =>
     rw [Function.iterate_succ_apply', hamMax_poincare (l5g_iterate_ne_zero hz k), ih]
 
-/-- **A trajectory tending to the singular locus has vanishing Hamiltonian** (gap G16.6: the
-basin theorem is about `Ξ_{𝒲,0}`). `H_F⁺(F^k z) = H_F⁺(z)` (`hamMax_poincare`), and `H_F⁺` is
+/-- **A trajectory tending to the singular locus has vanishing Hamiltonian** (REPORT.md, E80:
+the basin theorem is about `Ξ_{𝒲,0}`). `H_F⁺(F^k z) = H_F⁺(z)` (`hamMax_poincare`), and `H_F⁺` is
 continuous with `H_F⁺(0) = 0`, so `H_F⁺(z) = lim H_F⁺(F^k z) = 0`. (This is the scaling argument
 `H_F⁺(w) = φ(w)³ H_F⁺(ang w)` with `H_F⁺` bounded on the compact `Ξ`, in its simplest form.) -/
 theorem hamMax_eq_zero_of_tendsto_zero {z : Fin 3 → ℂ} (hz : z ≠ 0)

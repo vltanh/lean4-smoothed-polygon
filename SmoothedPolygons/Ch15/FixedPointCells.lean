@@ -8,7 +8,7 @@ import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
 # Chapter 15: Remark 15.3.1, the fixed points in cell coordinates
 
 Remark 15.3.1 of Hales–Vajjha, *Packings of Smoothed Polygons* (TeX 12445–12461), with `q_in` and
-`q_out` corrected (gap G15.1): the cell coordinates of the fixed points of Lemma 13.5.2,
+`q_out` corrected (REPORT.md, E75): the cell coordinates of the fixed points of Lemma 13.5.2,
 `pOut ≈ (0.267949, 0.1705935, 2.91574)` with `r₂ = 2 - √3` exactly, and `pIn = τ(pOut) ≈ (0.267949,
 2.9709992, 0.2258527)` (`remark15_3_1`), and the closeness of `q_in` to the triple juncture of
 `𝒟₀, 𝒟₁, 𝒟₄` along the segment `r₂ ↦ (r₂, ψ_in, θ_{2in})` (`remark15_3_1_segment`).
@@ -259,9 +259,9 @@ private lemma l5e_pOut_args :
   constructor <;> linarith
 
 /-- **Remark 15.3.1** (`rem:qin-juncture`, label of this formalization; unlabelled, TeX
-12445–12461), **with `q_in` and `q_out` corrected** (gap G15.1). The book prints "The fixed point
-`q_in ∈ 𝒟₁` is given by coordinates `(r_{2in}, ψ_in, θ_{2in}) ≈ (0.267949, 0.1705935, 2.91574)`"
-and "The fixed point `q_out ∈ 𝒟₁` with coordinates
+12445–12461), **with `q_in` and `q_out` corrected** (REPORT.md, E75). The book prints "The
+fixed point `q_in ∈ 𝒟₁` is given by coordinates `(r_{2in}, ψ_in, θ_{2in}) ≈ (0.267949, 0.1705935,
+2.91574)`" and "The fixed point `q_out ∈ 𝒟₁` with coordinates
 `(r₂, π - ψ_in, π - θ_{2in})`". The labels are swapped: the printed point is `q_out`, the cell
 coordinates of (13.5.1) (Lemma 13.5.2, labelled `q_out` there; Chapter 16 places `q_out` in
 `𝒟_out = 𝒟₀₀`, which contains the printed point, and `q_in` in `𝒟_in = 𝒟_{1,22}`, which contains
@@ -759,7 +759,7 @@ private lemma l5e_scale_iv {a a1 a2 k : ℝ} (h : a1 < a ∧ a < a2) (hk : 0 < k
   ⟨mul_lt_mul_of_pos_left h.1 hk, mul_lt_mul_of_pos_left h.2 hk⟩
 
 /-- **Remark 15.3.1, the segment through `q_in`** (`rem:qin-juncture`, TeX 12452–12458), corrected
-(gap G15.1): "The fixed point is remarkably close to the triple juncture of `𝒟₀, 𝒟₁`, and `𝒟₄`.
+(E75): "The fixed point is remarkably close to the triple juncture of `𝒟₀, 𝒟₁`, and `𝒟₄`.
 In fact, the line segment `r₂ ↦ (r₂, ψ_in, θ_{2in})`, `r₂ ∈ [0, 1]` meets the boundary `∂_B`
 (separating `𝒟₄` from `𝒟₀`) at `r₂ ≈ 0.2677`, then meets the boundary `∂_A` (separating `𝒟₀` from
 `𝒟₁`) at `r₂ ≈ 0.267905`, then reaches the fixed point at `r₂ ≈ 0.267949`." With the true angles

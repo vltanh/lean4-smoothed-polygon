@@ -16,7 +16,7 @@ to be certified later (layer 5b):
 
 * `DOutContracts`: `F(𝒟_out) ⊆ 𝒟_out` (the row `𝒟_out` of Table 16.1, Figure 16.1, TeX 12592–12607)
   and a contraction to `q_out` inside `𝒟_out` (the book: "The forward iterates `F₁^k(𝒟_out)` quickly
-  shrink toward `q_out`", unproved; gap G16.3);
+  shrink toward `q_out`", unproved; REPORT.md, E78);
 * `CellTwoEntersDOut`: every point of the second big cell enters `𝒟_out` within three steps (the
   rows `𝒟₂` and `𝒟₃`, TeX 12616–12620, 12629–12638, and `F²𝒟₃ ⊂ 𝒟₀₀`, Figure 16.2, TeX
   12640–12665);
@@ -28,10 +28,10 @@ to be certified later (layer 5b):
 
 The boxes `𝒟_{ij} = {r₂ ∈ [0, 1], ψ ∈ [a_i, a_{i+1}], θ₂ ∈ [b_{j+1}, b_j]}` of the first big cell
 (TeX 12526–12534), with `(a₀, …, a₃) = (0, π/3, 2π/3, π)` and `(b₀, …, b₃) = (π, π - 1.1, 1.1, 0)`
-(`cellBox`; the book prints `θ₂ ∈ [b_{i+1}, b_i]`, an index slip with one reading, gap G16.1), as
-sets of `Ξ_{𝒲,0}/V_T` (`boxSet i j`); `𝒟_out = 𝒟₀₀` and `𝒟_in ⊆ 𝒟₂₂` (gap G16.13: TeX 12680 swaps
-the two). The second big cell is `cellTwoSet` (first control `ζ²`, `x₃ < 0`, including its top
-face `θ₂ = 0`). These are the regions of Table 16.1 that are boxes; the curved parts `𝒟₀, 𝒟₁, 𝒟₄`
+(`cellBox`; the book prints `θ₂ ∈ [b_{i+1}, b_i]`, an index slip with one reading), as sets of
+`Ξ_{𝒲,0}/V_T` (`boxSet i j`); `𝒟_out = 𝒟₀₀` and `𝒟_in ⊆ 𝒟₂₂` (TeX 12680 swaps the two; REPORT.md,
+E76). The second big cell is `cellTwoSet` (first control `ζ²`, `x₃ < 0`, including its top face
+`θ₂ = 0`). These are the regions of Table 16.1 that are boxes; the curved parts `𝒟₀, 𝒟₁, 𝒟₄`
 and the split `𝒟₂ | 𝒟₃` (`SmoothedPolygons/Ch15/Involution.lean`) are not needed:
 * the book's `𝒟_in = 𝒟₁ ∩ 𝒟₂₂` is replaced by the whole box `𝒟₂₂`; its row ("can be anything") is
   unchanged, and `𝒟₀ ⊂ 𝒟₂₂` (the book's "`𝒟₀ ⊂ 𝒟_in`") is no longer used;
@@ -39,8 +39,8 @@ and the split `𝒟₂ | 𝒟₃` (`SmoothedPolygons/Ch15/Involution.lean`) are 
   second cell (it lies in `𝒟₄`) or to a smaller box (the book's `subclaim_{ij}` on `𝒟_{1,ij}`). This
   form of `BoxSubclaims` (whole boxes, with target "the second cell or a smaller box") replaces the
   book's argument by exclusion for the last row (`𝒟₀ ⊂ 𝒟_in`, `𝒟₄ ⊂ F(𝒟₂₂)` and the injectivity of
-  `F`, gap G16.5). That no orbit re-enters `𝒟₂₂` (the column `𝒟_in` of Table 16.1, the book's step
-  (b)) is proved from `DOutContracts` by the time reversal of the book's step (a)
+  `F`, REPORT.md, E79). That no orbit re-enters `𝒟₂₂` (the column `𝒟_in` of Table 16.1, the
+  book's step (b)) is proved from `DOutContracts` by the time reversal of the book's step (a)
   (`theorem16_1_1`);
 * the rows `𝒟₂ → 𝒟₃ → 𝒟₁ ∖ 𝒟_in` and `F²𝒟₃ ⊂ 𝒟₀₀` give: from the second cell, `𝒟₀₀` within three
   steps.
@@ -54,13 +54,13 @@ face point where the cell's control is not the first control (the red regions of
 representative), and the fact is about the point's actual first switch. All three were checked by
 sampling, with the first control chosen by the lexicographic rule of Lemma 13.2.6 and the first
 switching time as the least positive sign change of the switching cubics, including points on and
-within `10⁻⁹` of every face (the coordinator's earlier sampling, inventory C16.1–C16.3, and new
-runs for this formulation; no violation).
+within `10⁻⁹` of every face (an earlier sampling of the book's regions and new runs for this
+formulation; no violation).
 
 ## Certification (layer 5b): direct enclosure instead of the boundary method
 
 The book's "boundary method" (TeX 12577–12587: `F_i(∂𝒟) ⊂ 𝒟̃` convex suffices when `𝒟` is a closed
-ball) needs `F_i` injective on `𝒟` and invariance of domain (gap G16.2), and the images of the
+ball) needs `F_i` injective on `𝒟` and invariance of domain (REPORT.md, E77), and the images of the
 curved faces. The facts here are stated so that they can be certified by **direct enclosure**:
 subdivide the domain box into small boxes; on each, decide the first control by the signs of `y₂`,
 `y₁`; enclose the switching time as a root of the explicit switching cubics (`chiA_chiB_eq`;
@@ -89,7 +89,7 @@ noncomputable def basinA : Fin 4 → ℝ := ![0, π / 3, 2 * π / 3, π]
 noncomputable def basinB : Fin 4 → ℝ := ![π, π - 1.1, 1.1, 0]
 
 /-- The box `𝒟_{ij}` of the first big cell (TeX 12526–12531): `r₂ ∈ [0, 1]`, `ψ ∈ [a_i, a_{i+1}]`,
-`θ₂ ∈ [b_{j+1}, b_j]` (corrected index; the book prints `θ₂ ∈ [b_{i+1}, b_i]`, gap G16.1). -/
+`θ₂ ∈ [b_{j+1}, b_j]` (corrected index; the book prints `θ₂ ∈ [b_{i+1}, b_i]`, REPORT.md, E76). -/
 def cellBox (i j : Fin 3) : Set (Fin 3 → ℝ) :=
   {p | p 0 ∈ Icc 0 1 ∧ p 1 ∈ Icc (basinA i.castSucc) (basinA i.succ) ∧
     p 2 ∈ Icc (basinB j.succ) (basinB j.castSucc)}
@@ -213,7 +213,7 @@ theorem tauZero_image_boxSet :
 16.1, TeX 12592–12607: "We compute the interval containment `F₁(𝒟_out) ⊂ 𝒟_out` by the boundary
 method. … The forward iterates `F₁^k(𝒟_out)` quickly shrink toward `q_out`"). The book proves only
 the containment and the local stability of `q_out` (Lemma 13.5.5), which do not give convergence of
-every point of `𝒟_out` (gap G16.3); the contraction is the repair proposed in the inventory (C16.1):
+every point of `𝒟_out` (REPORT.md, E78); the contraction repairs this:
 * `F(𝒟₀₀) ⊆ 𝒟₀₀`;
 * there are a box `B = [lo, hi]` in the open first cell, `N` and `κ < 1` with `F^N(𝒟₀₀) ⊆ B`, and a
   map `g` of `B` into itself, `κ`-Lipschitz (sup norm of the coordinates `(r₂, ψ, θ₂)`), which is
@@ -223,13 +223,13 @@ Recommended witnesses: `lo = (0.25, 0.15, 2.85)`, `hi = (0.29, 0.19, 2.98)`, `N 
 Sampling (20,000 points of `𝒟₀₀`, a fifth of them within `10⁻⁸` of the faces, and the exact faces):
 the sampled hull of `F(𝒟₀₀)` is `[0.0245, 0.2737] × [0.0064, 0.1939] × [2.7329, 3.1389]`, but the
 true image comes arbitrarily close to `r₂ = 0`, `ψ = 0`, `θ₂ = π`: `𝒟₀₀` contains the edge
-`r₂ = 0`, `θ₂ ∈ [0.9944, π/3)`, where the first control is `1`, and at interior points near it the
-switching time tends to `0` and the image has `r₂` near `0`. So `F(𝒟₀₀)` lies in no compact box of
-the open cell, and `N ≥ 2` is forced. The second step is the delicate one near the corner
-`r₂ = 0`, `θ₂ = π/3`: there `F(q)` tends to the class of `(-1, 0, 0)`, where `F_ang` is
+`r₂ = 0`, `θ₁ = θ₂ - ψ ∈ [0.9944, π/3)`, where the first control is `1`, and at interior points near
+it the switching time tends to `0` and the image has `r₂` near `0`. So `F(𝒟₀₀)` lies in no compact
+box of the open cell, and `N ≥ 2` is forced. The second step is the delicate one near the corner
+`r₂ = 0`, `θ₁ = π/3`: there `F(q)` tends to the class of `(-1, 0, 0)`, where `F_ang` is
 discontinuous (from the second cell's side the switching time tends to `0`), and `F²(q) ∈ B`
-holds because `F(q)` approaches from `θ₂ < π` (to first order `θ₂ ≈ π - 2δ`); a certificate must
-treat this corner separately. Then
+holds because `F(q)` approaches from `θ₂ < π` (to first order `θ₂ ≈ π - 2δ`; the image has
+`ψ → 0`, so `θ₁ ≈ θ₂` there); a certificate must treat this corner separately. Then
 `F²(𝒟₀₀) ⊆ [0.2654, 0.2697] × [0.1652, 0.1742] × [2.8964, 2.9296]` (margin `0.0152` in `B`),
 `F(B) ⊆ [0.26668, 0.26897] × [0.16801, 0.17253] × [2.90549, 2.92458]` (margin `0.0167`), and the
 Jacobian of `g` on `B` has sup-operator norm `≤ 0.32` (eigenvalues at `q_out`: `-0.0800, -0.0081,
@@ -282,7 +282,7 @@ is mapped into the second big cell (it lies in `𝒟₄`) or into a box `𝒟_{k
 here the box is the whole `𝒟_{ij}`, so that the curved part `𝒟₁` is not needed.
 
 Sampling (8,000 points per box, a third of them on or within `10⁻⁹` of a face): no violation
-(inventory C16.3: 4,000 points per box of `𝒟_{1,ij}`).
+(an earlier sampling: 4,000 points per box of `𝒟_{1,ij}`).
 
 Certification: direct enclosure of `F` on a subdivision of each box. Near the surfaces where the
 switch changes (`∂_res`, `∂_B`, where the target changes from a smaller box to the second cell) both
