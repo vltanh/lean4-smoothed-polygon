@@ -188,38 +188,6 @@ private lemma l5g_xOut_facts :
     simp only [chartCart, Matrix.cons_val, Complex.ofReal_re] at h
     linarith
 
-/-- **The first control at a point with `z₃ ∈ ℝ_{<0}` and `Im z₂ > 0` is `ζ`** (Lemma 13.2.6: the
-first control maximizes the control vector lexicographically; `1` loses on `RR(z₃, ·)`, and the
-tie between `ζ` and `ζ²` is broken by `RR(z₂, ζ) - RR(z₂, ζ²) = √3 Im z₂ > 0`). -/
-private lemma l5g_firstControl_eq_ζ {z : Fin 3 → ℂ} (hz : z ≠ 0) (h2 : (z 2).im = 0)
-    (h2' : (z 2).re < 0) (h1 : 0 < (z 1).im) : firstControl z = ζ := by
-  have h3 : 0 < √3 := by positivity
-  obtain ⟨huV, hmax⟩ := firstControl_mem_lexMaxControls hz
-  rcases mem_VT.1 huV with h | h | h
-  · exfalso
-    apply hmax ζ ζ_mem_VT
-    rw [h]
-    refine ⟨0, fun j hj ↦ absurd hj (Fin.not_lt_zero j), ?_⟩
-    simp only [controlVector, Pi.sub_apply, Matrix.cons_val, RR_eq_re_mul_add_im_mul, ζ_re,
-      ζ_im, Complex.one_re, Complex.one_im, h2]
-    linarith
-  · exact h
-  · exfalso
-    apply hmax ζ ζ_mem_VT
-    rw [h]
-    refine ⟨1, fun j hj ↦ ?_, ?_⟩
-    · have hj0 : j = 0 := by
-        rcases j with ⟨j, hj'⟩
-        simp only [Fin.lt_def, Fin.val_one] at hj
-        ext; simp only [Fin.val_zero]; omega
-      subst hj0
-      simp only [controlVector, Pi.sub_apply, Matrix.cons_val, RR_eq_re_mul_add_im_mul, ζ_re,
-        ζ_im, ζ_sq_re, ζ_sq_im, h2]
-      ring
-    · simp only [controlVector, Pi.sub_apply, Matrix.cons_val, RR_eq_re_mul_add_im_mul, ζ_re,
-        ζ_im, ζ_sq_re, ζ_sq_im]
-      nlinarith
-
 /-- The first coordinate of `ζ z(t, chartCart x, ζ)`: real part `1/2 - √3(p + t)/2`, imaginary part
 `(t - p - √3)/2`. -/
 private lemma l5g_flow_chartCart_zero (x : Fin 3 → ℝ) (t : ℝ) :
@@ -265,7 +233,7 @@ private lemma l5g_firstSwitchTime_eq {x : Fin 3 → ℝ} (h : firstControl (char
   linear_combination 2 * hm'
 
 /-- **`x ↦ F(chartCart x)` is continuous at `x_out`**: near `x_out` the first control is `ζ`
-(`l5g_firstControl_eq_ζ`) and the first switching time is the continuous function
+(`firstControl_eq_of_ofReal_neg`) and the first switching time is the continuous function
 `(p + √3 - m + √3 p m)/(1 - √3 m)` of `p = x 0` and `m = chartMap x 0` (`l5g_firstSwitchTime_eq`),
 `chartMap` being `C¹` at `x_out` (`contDiffAt_chartMap`: there the switching time is the simple
 root of the switching function from `ζ` to `1`, by the implicit function theorem, Chapter 13). -/
@@ -300,7 +268,8 @@ private lemma l5g_continuousAt_poincare_chartCart :
   have e4 : ∀ᶠ x in 𝓝 xOut, 0 < 1 - √3 * chartMap x 0 := hden.eventually (lt_mem_nhds hden0)
   filter_upwards [e1, e2, e3, e4] with x h1 h2 h3 h4
   have hfc : firstControl (chartCart x) = ζ := by
-    refine l5g_firstControl_eq_ζ (l5g_chartCart_ne_zero x) (by simp [chartCart]) ?_ ?_
+    refine (firstControl_eq_of_ofReal_neg (x₃ := (chartCart x 2).re) ?_ ?_).1 (Or.inl ?_)
+    · apply Complex.ext <;> simp [chartCart]
     · simp only [chartCart, Matrix.cons_val, Complex.ofReal_re]; linarith
     · simpa [chartCart] using h2
   rw [poincare, hfc, l5g_firstSwitchTime_eq hfc h3.ne' h4.ne']
@@ -369,14 +338,6 @@ private lemma l5g_tendsto_ratio_qOutCart :
     with z hz2 hz0 hz
   exact (l5g_ratio_eq hz hz2 hz0).symm
 
-/-- The walls are cones. -/
-private lemma l5g_ofReal_mul_mem_walls {c : ℝ} (hc : 0 ≤ c) {w : ℂ} (hw : w ∈ walls) :
-    (c : ℂ) * w ∈ walls := by
-  rcases hw with (⟨s, hs, rfl⟩ | ⟨s, hs, rfl⟩) | ⟨s, hs, rfl⟩
-  · exact Or.inl (Or.inl ⟨c * s, mul_nonpos_of_nonneg_of_nonpos hc hs, by push_cast; ring⟩)
-  · exact Or.inl (Or.inr ⟨c * s, mul_nonpos_of_nonneg_of_nonpos hc hs, by push_cast; ring⟩)
-  · exact Or.inr ⟨c * s, mul_nonpos_of_nonneg_of_nonpos hc hs, by push_cast; ring⟩
-
 /-- The rescalings map the section to itself. -/
 private lemma l5g_scale_mem_sectionZero {c : ℝ} (hc : 0 < c) {z : Fin 3 → ℂ}
     (hz : z ∈ sectionZero) : scale c z ∈ sectionZero := by
@@ -387,7 +348,7 @@ private lemma l5g_scale_mem_sectionZero {c : ℝ} (hc : 0 < c) {z : Fin 3 → �
     exact (mul_pos hc (weightedNorm_pos hz.1)).ne' this.symm
   · have e : scale c z 2 = ((c ^ 3 : ℝ) : ℂ) * z 2 := by simp [scale]
     rw [e]
-    exact l5g_ofReal_mul_mem_walls (by positivity) hz.2.1
+    exact ofReal_mul_mem_walls (by positivity) hz.2.1
   · have := (hamMax_smul_scale_and_tau one_mem_VT hc z).1
     rw [one_smul, hz.2.2, mul_zero] at this
     exact this
@@ -517,52 +478,6 @@ theorem hamMax_eq_zero_of_tendsto_zero {z : Fin 3 → ℂ} (hz : z ≠ 0)
 
 /-! ### Facts for Theorem 16.2.1 -/
 
-private lemma l5g_ham_le_iff (w : Fin 3 → ℂ) (u v : ℂ) :
-    ham w v ≤ ham w u ↔ RR (w 2) v ≤ RR (w 2) u := by
-  simp only [ham, RR_comm _ (w 2), add_le_add_iff_left]
-
-private lemma l5g_continuous_ham_flow (z : Fin 3 → ℂ) (u v : ℂ) :
-    Continuous fun t : ℝ ↦ ham (flow t z u) v :=
-  (l5g_continuous_ham v).comp
-    (continuous_iff_continuousAt.2 fun t ↦ (hasDerivAt_flow t z u).continuousAt)
-
-/-- **`F` lands on the walls** (for every `z ≠ 0`): at `t_sw` the first control and the control
-that beats it right after `t_sw` both maximize `RR(z₃(t_sw), ·)` (`firstControl_maximizes`,
-`firstControl_beaten` and continuity), so `z₃(t_sw) ∈ 𝒲` (`mem_walls_of_maximizers`). (The same
-argument as the private lemma of `SmoothedPolygons/Ch13/PoincareMap.lean`.) -/
-private lemma l5g_poincare_mem_walls {z : Fin 3 → ℂ} (hz : z ≠ 0) : poincare z 2 ∈ walls := by
-  have hfc := isFirstControl_firstControl hz
-  have hmax := firstControl_maximizes hz
-  have hT : firstSwitchTime z ∈ Icc 0 (firstSwitchTime z) :=
-    ⟨(firstSwitchTime_pos hz).le, le_rfl⟩
-  have hbeat := fun {ε : ℝ} (hε : 0 < ε) ↦ firstControl_beaten hz hε
-  have hP : poincare z = flow (firstSwitchTime z) z (firstControl z) := rfl
-  set u := firstControl z
-  set T := firstSwitchTime z
-  have huV : u ∈ VT := hfc.1
-  have hmT : ∀ v ∈ VT, ham (poincare z) v ≤ ham (poincare z) u := hmax T hT
-  by_contra hW
-  have hlt : ∀ v ∈ VT, v ≠ u → ham (poincare z) v < ham (poincare z) u := by
-    intro v hv hne
-    by_contra hle
-    push Not at hle
-    refine hW (mem_walls_of_maximizers huV hv (Ne.symm hne) (fun x hx ↦ ?_) fun x hx ↦ ?_)
-    · exact (l5g_ham_le_iff _ _ _).1 (hmT x hx)
-    · exact (l5g_ham_le_iff _ _ _).1 ((hmT x hx).trans hle)
-  have hev : ∀ v ∈ VT, ∀ᶠ t in 𝓝 T, ham (flow t z u) v ≤ ham (flow t z u) u := by
-    intro v hv
-    by_cases hne : v = u
-    · rw [hne]; exact Filter.Eventually.of_forall fun _ ↦ le_rfl
-    · have h := hlt v hv hne
-      rw [hP] at h
-      exact ((l5g_continuous_ham_flow z u v).continuousAt.eventually_lt
-        (l5g_continuous_ham_flow z u u).continuousAt h).mono fun _ h ↦ h.le
-  obtain ⟨ε, hε, hεT⟩ := Metric.eventually_nhds_iff.1 (finite_VT.eventually_all.2 hev)
-  obtain ⟨t, ht, v, hv, hlt'⟩ := hbeat hε
-  have hd : dist t T < ε := by
-    rw [Real.dist_eq, abs_lt]; constructor <;> linarith [ht.1, ht.2]
-  exact absurd (hεT hd v hv) (not_le.2 hlt')
-
 private lemma l5g_continuous_tau : Continuous tau := by
   refine continuous_pi fun i ↦ ?_
   fin_cases i <;> simp only [tau, Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk,
@@ -658,7 +573,7 @@ theorem theorem16_2_1 (h₁ : DOutContracts) (h₂ : CellTwoEntersDOut) (h₃ : 
   refine ⟨fun z hz hF ht ↦ ?_, fun z₀ hz hw ht ↦ l5g_inward h₁ h₂ h₃ hz hw ht⟩
   -- the `z_k = F(z_{k+1})` lie on the walls, and `H_F⁺` is constant along the sequence
   have hwall : ∀ k, z k 2 ∈ walls := fun k ↦ by
-    rw [← hF k]; exact l5g_poincare_mem_walls (hz (k + 1))
+    rw [← hF k]; exact poincare_mem_walls (hz (k + 1))
   have hconst : ∀ k j, hamMax (z k) = hamMax (z (j + k)) := by
     intro k j
     induction j with

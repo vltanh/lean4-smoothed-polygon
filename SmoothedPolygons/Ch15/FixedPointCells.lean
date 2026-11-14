@@ -233,13 +233,6 @@ private lemma l5e_X_pos : 0 < (-1 + rScale ^ 3) / (√3 * (1 + rScale ^ 3)) := b
   have : 1 < rScale ^ 3 := one_lt_pow₀ (by linarith) (by norm_num)
   exact div_pos (by linarith) (by positivity)
 
-/-- `Im z₂ > 0` at `qOutCart`: the quotient `Im z₂ / (-Re z₂)` is positive and `-Re z₂ > 0`. -/
-private lemma l5e_im1_pos : 0 < (qOutCart 1).im := by
-  rw [l5e_qOutCart_parts.2.2.2]
-  by_contra hn
-  have := div_nonpos_of_nonpos_of_nonneg (not_lt.1 hn) l5e_X_pos.le
-  linarith [l5e_t2_bounds.1]
-
 /-- The arguments of `z₁ = -1 + i b` and `z₂ = -X + i Y` at `qOutCart`. -/
 private lemma l5e_args :
     arg (qOutCart 0) = π - Real.arctan ((-1 + rScale) / (√3 * (1 + rScale))) ∧
@@ -251,7 +244,7 @@ private lemma l5e_args :
   refine ⟨?_, ?_⟩
   · rw [l5e_arg_eq (by rw [a0]; norm_num) (by rw [a1]; linarith [l5e_im0_bounds.1]), a0, a1,
       neg_neg, div_one]
-  · rw [l5e_arg_eq (by rw [a2]; linarith [l5e_X_pos]) l5e_im1_pos, a2, a3, neg_neg]
+  · rw [l5e_arg_eq (by rw [a2]; linarith [l5e_X_pos]) qOutCart_signs.2.2, a2, a3, neg_neg]
 
 /-- The angles of `pOut`: `ψ = arg z₂ - arg z₁` (already in `[0, 2π)`) and `θ₂ = arg z₂`. -/
 private lemma l5e_pOut_args :
@@ -265,9 +258,10 @@ private lemma l5e_pOut_args :
   rw [toIcoMod_eq_self, harg0, harg1, zero_add]
   constructor <;> linarith
 
-/-- **Remark 15.3.1** (TeX 12445–12461), **with `q_in` and `q_out` corrected** (gap G15.1). The book
-prints "The fixed point `q_in ∈ 𝒟₁` is given by coordinates `(r_{2in}, ψ_in, θ_{2in}) ≈ (0.267949,
-0.1705935, 2.91574)`" and "The fixed point `q_out ∈ 𝒟₁` with coordinates
+/-- **Remark 15.3.1** (`rem:qin-juncture`, label of this formalization; unlabelled, TeX
+12445–12461), **with `q_in` and `q_out` corrected** (gap G15.1). The book prints "The fixed point
+`q_in ∈ 𝒟₁` is given by coordinates `(r_{2in}, ψ_in, θ_{2in}) ≈ (0.267949, 0.1705935, 2.91574)`"
+and "The fixed point `q_out ∈ 𝒟₁` with coordinates
 `(r₂, π - ψ_in, π - θ_{2in})`". The labels are swapped: the printed point is `q_out`, the cell
 coordinates of (13.5.1) (Lemma 13.5.2, labelled `q_out` there; Chapter 16 places `q_out` in
 `𝒟_out = 𝒟₀₀`, which contains the printed point, and `q_in` in `𝒟_in = 𝒟_{1,22}`, which contains
@@ -305,7 +299,7 @@ theorem remark15_3_1 :
   have hpi2 := Real.pi_lt_d20
   have hr := rScale_fine_bounds.1
   obtain ⟨harg0, harg1⟩ := l5e_args
-  have hY := l5e_im1_pos
+  have hY := qOutCart_signs.2.2
   -- the three coordinates of `pOut`
   have hb0 : ‖qOutCart 1‖ ≠ 0 := by
     rw [norm_ne_zero_iff]
@@ -382,7 +376,7 @@ private lemma l5e_qOutCart_ne_zero : qOutCart 0 ≠ 0 ∧ qOutCart 1 ≠ 0 := by
   · have := l5e_qOutCart_parts.1
     rw [h] at this
     norm_num at this
-  · have := l5e_im1_pos
+  · have := qOutCart_signs.2.2
     rw [h] at this
     simp at this
 
@@ -764,12 +758,12 @@ private lemma l5e_scale_iv {a a1 a2 k : ℝ} (h : a1 < a ∧ a < a2) (hk : 0 < k
     k * a1 < k * a ∧ k * a < k * a2 :=
   ⟨mul_lt_mul_of_pos_left h.1 hk, mul_lt_mul_of_pos_left h.2 hk⟩
 
-/-- **Remark 15.3.1, the segment through `q_in`** (TeX 12452–12458), corrected (gap G15.1): "The
-fixed point is remarkably close to the triple juncture of `𝒟₀, 𝒟₁`, and `𝒟₄`. In fact, the line
-segment `r₂ ↦ (r₂, ψ_in, θ_{2in})`, `r₂ ∈ [0, 1]` meets the boundary `∂_B` (separating `𝒟₄` from
-`𝒟₀`) at `r₂ ≈ 0.2677`, then meets the boundary `∂_A` (separating `𝒟₀` from `𝒟₁`) at
-`r₂ ≈ 0.267905`, then reaches the fixed point at `r₂ ≈ 0.267949`." With the true angles of `q_in`
-(`pIn`), the crossings are checked through what characterizes them:
+/-- **Remark 15.3.1, the segment through `q_in`** (`rem:qin-juncture`, TeX 12452–12458), corrected
+(gap G15.1): "The fixed point is remarkably close to the triple juncture of `𝒟₀, 𝒟₁`, and `𝒟₄`.
+In fact, the line segment `r₂ ↦ (r₂, ψ_in, θ_{2in})`, `r₂ ∈ [0, 1]` meets the boundary `∂_B`
+(separating `𝒟₄` from `𝒟₀`) at `r₂ ≈ 0.2677`, then meets the boundary `∂_A` (separating `𝒟₀` from
+`𝒟₁`) at `r₂ ≈ 0.267905`, then reaches the fixed point at `r₂ ≈ 0.267949`." With the true angles
+of `q_in` (`pIn`), the crossings are checked through what characterizes them:
 * `∂_B` between `r₂ = 0.26775` and `0.26777`: `Δ_{B,1}` changes sign from `+` to `-` and the switch
   changes from `ζ²` (`χ_B` active, `𝒟₄`) to `1` (`χ_A` active, `𝒟₀`);
 * `∂_A` between `r₂ = 0.26790` and `0.26791`: `Δ_{A,0}` changes sign from `-` to `+` and the first

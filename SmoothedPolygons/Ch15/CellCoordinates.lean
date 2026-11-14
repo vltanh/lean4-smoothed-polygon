@@ -67,51 +67,9 @@ namespace TriFuller
 
 /-! ### The class of a point of the section -/
 
-/-- The walls are cones: `c 𝒲 ⊆ 𝒲` for `c ≥ 0`. -/
-private lemma l5a_ofReal_mul_mem_walls {c : ℝ} (hc : 0 ≤ c) {w : ℂ} (hw : w ∈ walls) :
-    (c : ℂ) * w ∈ walls := by
-  rcases hw with (⟨s, hs, rfl⟩ | ⟨s, hs, rfl⟩) | ⟨s, hs, rfl⟩
-  · exact Or.inl (Or.inl ⟨c * s, mul_nonpos_of_nonneg_of_nonpos hc hs, by push_cast; ring⟩)
-  · exact Or.inl (Or.inr ⟨c * s, mul_nonpos_of_nonneg_of_nonpos hc hs, by push_cast; ring⟩)
-  · exact Or.inr ⟨c * s, mul_nonpos_of_nonneg_of_nonpos hc hs, by push_cast; ring⟩
-
-/-- `V_T 𝒲 = 𝒲`: the rotation by `ζ` permutes the walls. -/
-private lemma l5a_mul_mem_walls {v w : ℂ} (hv : v ∈ VT) (hw : w ∈ walls) : v * w ∈ walls := by
-  have h3 := ζ_pow_three
-  rcases mem_VT.1 hv with rfl | rfl | rfl
-  · rwa [one_mul]
-  · rcases hw with (⟨s, hs, rfl⟩ | ⟨s, hs, rfl⟩) | ⟨s, hs, rfl⟩
-    · exact Or.inl (Or.inr ⟨s, hs, by ring⟩)
-    · exact Or.inr ⟨s, hs, by ring⟩
-    · exact Or.inl (Or.inl ⟨s, hs, by linear_combination (s : ℂ) * h3⟩)
-  · rcases hw with (⟨s, hs, rfl⟩ | ⟨s, hs, rfl⟩) | ⟨s, hs, rfl⟩
-    · exact Or.inr ⟨s, hs, by ring⟩
-    · exact Or.inl (Or.inl ⟨s, hs, by linear_combination (s : ℂ) * h3⟩)
-    · exact Or.inl (Or.inr ⟨s, hs, by linear_combination (s * ζ : ℂ) * h3⟩)
-
-/-- `conj 𝒲 = 𝒲` (`conj ζ = ζ²` exchanges `𝒲₁` and `𝒲₂`). -/
-private lemma l5a_conj_mem_walls {w : ℂ} (hw : w ∈ walls) : starRingEnd ℂ w ∈ walls := by
-  rcases hw with (⟨s, hs, rfl⟩ | ⟨s, hs, rfl⟩) | ⟨s, hs, rfl⟩
-  · exact Or.inl (Or.inl ⟨s, hs, by simp⟩)
-  · exact Or.inr ⟨s, hs, by rw [map_mul, Complex.conj_ofReal, pow_one, conj_ζ]⟩
-  · exact Or.inl (Or.inr ⟨s, hs, by rw [map_mul, Complex.conj_ofReal, conj_ζ_sq, pow_one]⟩)
-
 /-- A real number `x ≤ 0` lies on the wall `𝒲₀`. -/
 private lemma l5a_mem_walls_of_real {w : ℂ} (him : w.im = 0) (hre : w.re ≤ 0) : w ∈ walls :=
   Or.inl (Or.inl ⟨w.re, hre, by apply Complex.ext <;> simp [him]⟩)
-
-/-- Two points of `Ξ_𝒲` have the same class in `Ξ_𝒲/V_T` if and only if they differ by a rotation
-in `V_T`. -/
-private lemma l5a_mk_eq_iff {ξ η : XiW} :
-    (Quotient.mk'' ξ : XiWQuot) = Quotient.mk'' η ↔
-      ∃ v ∈ VT, (ξ : Fin 3 → ℂ) = v • (η : Fin 3 → ℂ) := by
-  rw [Quotient.eq'', MulAction.orbitRel_apply, MulAction.mem_orbit_iff]
-  constructor
-  · rintro ⟨g, hg⟩
-    exact ⟨((g : ℂˣ) : ℂ), (mem_VT_iff_exists_rootsOfUnity _).2 ⟨g, rfl⟩, by rw [← hg]; rfl⟩
-  · rintro ⟨v, hv, h⟩
-    obtain ⟨g, rfl⟩ := (mem_VT_iff_exists_rootsOfUnity v).1 hv
-    exact ⟨g, Subtype.ext h.symm⟩
 
 /-- The zero-Hamiltonian Poincaré section in Cartesian coordinates: `z ≠ 0`, `z₃ ∈ 𝒲` and
 `H_F⁺(z) = 0` (the points whose angular part lies in `Ξ_{𝒲,0}`, TeX 11429–11436). -/
@@ -124,7 +82,7 @@ theorem ang_mem_XiW {z : Fin 3 → ℂ} (hz : z ≠ 0) (h : z 2 ∈ walls) : ang
   refine ⟨ang_mem_Xi hz, ?_⟩
   have e : ang z 2 = (((weightedNorm z)⁻¹ ^ 3 : ℝ) : ℂ) * z 2 := by simp [ang, scale]
   rw [e]
-  exact l5a_ofReal_mul_mem_walls (pow_nonneg (inv_nonneg.2 (weightedNorm_pos hz).le) 3) h
+  exact ofReal_mul_mem_walls (pow_nonneg (inv_nonneg.2 (weightedNorm_pos hz).le) 3) h
 
 /-- `H_F⁺(ang z) = φ(z)⁻³ H_F⁺(z)` vanishes when `H_F⁺(z)` does (`hamMax_smul_scale_and_tau`). -/
 theorem hamMax_ang_eq_zero {z : Fin 3 → ℂ} (hz : z ≠ 0) (h : hamMax z = 0) :
@@ -153,7 +111,7 @@ private lemma l5a_classOf_eq_of_ang {z w : Fin 3 → ℂ} (hz : z ∈ sectionZer
     (hw : w ∈ sectionZero) {v : ℂ} (hv : v ∈ VT) (h : ang z = v • ang w) :
     classOf z = classOf w := by
   rw [l5a_classOf_eq hz, l5a_classOf_eq hw]
-  exact Subtype.ext (l5a_mk_eq_iff.2 ⟨v, hv, h⟩)
+  exact Subtype.ext (mk_eq_mk_iff_exists_mem_VT.2 ⟨v, hv, h⟩)
 
 /-- The virial group maps the section to itself. -/
 private lemma l5a_smul_scale_mem {v : ℂ} (hv : v ∈ VT) {r : ℝ} (hr : 0 < r) {z : Fin 3 → ℂ}
@@ -164,7 +122,7 @@ private lemma l5a_smul_scale_mem {v : ℂ} (hv : v ∈ VT) {r : ℝ} (hr : 0 < r
     exact (mul_pos hr (weightedNorm_pos hz.1)).ne' e.symm
   · have e : (v • scale r z) 2 = v * (((r ^ 3 : ℝ) : ℂ) * z 2) := by simp [scale]
     rw [e]
-    exact l5a_mul_mem_walls hv (l5a_ofReal_mul_mem_walls (by positivity) hz.2.1)
+    exact mul_mem_walls hv (ofReal_mul_mem_walls (by positivity) hz.2.1)
   · rw [(hamMax_smul_scale_and_tau hv hr z).1, hz.2.2, mul_zero]
 
 /-- Every point of `Ξ_{𝒲,0}/V_T` is the class of a point of the section (of any representative
@@ -194,7 +152,7 @@ theorem classOf_eq_classOf_iff {z w : Fin 3 → ℂ} (hz : z ∈ sectionZero)
   constructor
   · intro h
     rw [l5a_classOf_eq hz, l5a_classOf_eq hw] at h
-    obtain ⟨v, hv, e⟩ := l5a_mk_eq_iff.1 (congrArg Subtype.val h.symm)
+    obtain ⟨v, hv, e⟩ := mk_eq_mk_iff_exists_mem_VT.1 (congrArg Subtype.val h.symm)
     change ang w = v • ang z at e
     refine ⟨v, hv, weightedNorm w / weightedNorm z,
       div_pos (weightedNorm_pos hw.1) (weightedNorm_pos hz.1), ?_⟩
@@ -216,7 +174,7 @@ theorem poincare_mem_sectionZero {z : Fin 3 → ℂ} (hz : z ∈ sectionZero) :
   have e' : poincare z 2 = ((weightedNorm (poincare z) ^ 3 : ℝ) : ℂ) * ang (poincare z) 2 := by
     rw [← e]; simp [scale]
   rw [e']
-  exact l5a_ofReal_mul_mem_walls (pow_nonneg (weightedNorm_pos hF).le 3) h2
+  exact ofReal_mul_mem_walls (pow_nonneg (weightedNorm_pos hF).le 3) h2
 
 /-- `F_ang` on classes is `F` on representatives: `F(classOf z) = classOf (F z)`
 (`ang_poincare_ang`, TeX 11256–11265). -/
@@ -227,7 +185,7 @@ theorem poincareAngZero_classOf {z : Fin 3 → ℂ} (hz : z ∈ sectionZero) :
 
 /-- `τ` maps the section to itself (`tau_ne_zero`, `conj 𝒲 = 𝒲`, `H_F⁺(τ z) = H_F⁺(z)`). -/
 theorem tau_mem_sectionZero {z : Fin 3 → ℂ} (hz : z ∈ sectionZero) : tau z ∈ sectionZero :=
-  ⟨tau_ne_zero hz.1, l5a_conj_mem_walls hz.2.1,
+  ⟨tau_ne_zero hz.1, conj_mem_walls hz.2.1,
     (hamMax_smul_scale_and_tau one_mem_VT one_pos z).2.trans hz.2.2⟩
 
 /-- `τ` on classes is `τ` on representatives (`tau_ang`). -/
@@ -761,7 +719,7 @@ private lemma l5a_firstControl_of_lexLt {z : Fin 3 → ℂ} (hz : z ≠ 0) {u : 
 /-- **The first control on `𝒲₀`** (TeX 12111–12121, Lemma 13.2.6): if `z₃ = x₃ < 0`, the controls
 `ζ`, `ζ²` tie at `z₃` and beat `1` (`RR(z₃, ζ) - RR(z₃, 1) = -3x₃/2 > 0`); the tie is broken by
 `RR(z₂, ζ) - RR(z₂, ζ²) = √3 y₂`, then by `RR(z₁, ζ) - RR(z₁, ζ²) = √3 y₁`. -/
-private lemma l5a_firstControl_wall {z : Fin 3 → ℂ} {x₃ : ℝ} (h2 : z 2 = x₃) (hx : x₃ < 0) :
+theorem firstControl_eq_of_ofReal_neg {z : Fin 3 → ℂ} {x₃ : ℝ} (h2 : z 2 = x₃) (hx : x₃ < 0) :
     ((0 < (z 1).im ∨ ((z 1).im = 0 ∧ 0 < (z 0).im)) → firstControl z = ζ) ∧
       (((z 1).im < 0 ∨ ((z 1).im = 0 ∧ (z 0).im < 0)) → firstControl z = ζ ^ 2) := by
   have hz : z ≠ 0 := by
@@ -907,7 +865,7 @@ theorem mem_cellTwoSet_iff (x : XiW0Quot) :
     refine ⟨cellPoint p,
       cellPoint_mem_sectionZero ⟨⟨h0.1.le, h0.2.le⟩, ⟨h1.1.le, h1.2.le⟩, ⟨h2.1.le, by
         linarith [h2.2, Real.pi_pos]⟩⟩, rfl, h3, h3' ▸ hx, ?_⟩
-    refine (l5a_firstControl_wall (l5a_cellPoint_two p) hx).2 ?_
+    refine (firstControl_eq_of_ofReal_neg (l5a_cellPoint_two p) hx).2 ?_
     rw [hy1, hy2]
     rcases h2.2.lt_or_eq with h | h
     · left
@@ -936,7 +894,7 @@ theorem mem_cellTwoSet_iff (x : XiW0Quot) :
         have hH := hz.2.2
         rw [l5a_hamMax_wall hz2 h3'.le, l5a_RR_mul_I, ← h, mul_zero, sub_zero] at hH
         nlinarith
-    exact l5a_ζ_ne_ζ_sq (((l5a_firstControl_wall hz2 h3').1 hy).symm.trans hfc)
+    exact l5a_ζ_ne_ζ_sq (((firstControl_eq_of_ofReal_neg hz2 h3').1 hy).symm.trans hfc)
 
 end TriFuller
 
@@ -978,9 +936,9 @@ theorem eqn15_1_1 {r₁ r₂ θ₁ θ₂ x₃ : ℝ} (hx₃ : x₃ ≤ 0) :
   rw [show θ₂ - θ₁ = -(θ₁ - θ₂) by ring, Real.sin_neg]
   linarith
 
-/-- **Lemma 15.1.1** (TeX 12060–12071). "For each `z = (z₁, z₂, z₃) ≠ 0` satisfying (15.1.1),
-there is a unique rescaling by a positive scalar in the virial group so that `r₁ + r₂ = 1` (and
-`r₁, r₂ ≥ 0`)."
+/-- **Lemma 15.1.1** (`lem:cell-rescale`, label of this formalization; unlabelled, TeX
+12060–12071). "For each `z = (z₁, z₂, z₃) ≠ 0` satisfying (15.1.1), there is a unique rescaling by a
+positive scalar in the virial group so that `r₁ + r₂ = 1` (and `r₁, r₂ ≥ 0`)."
 
 The book's proof: if `r₁ = r₂ = 0`, then `z = 0` by (15.1.1), contrary to assumption; hence
 `r₁ + r₂ > 0`, and the quadratic equation `r₁/s + r₂/s² = 1` has a unique positive root `s`; scale
@@ -1048,14 +1006,14 @@ theorem definition15_1_2 :
   have hfc1 : ∀ p ∈ openBoxOne, firstControl (cellPoint p) = ζ := by
     rintro p ⟨h0, h1, h2⟩
     obtain ⟨-, hy2, -, -⟩ := l5a_cellPoint_im p
-    refine (l5a_firstControl_wall (l5a_cellPoint_two p) (l5a_cellPoint_two_neg h0 h1)).1
+    refine (firstControl_eq_of_ofReal_neg (l5a_cellPoint_two p) (l5a_cellPoint_two_neg h0 h1)).1
       (Or.inl ?_)
     rw [hy2]
     exact mul_pos h0.1 (Real.sin_pos_of_pos_of_lt_pi h2.1 h2.2)
   have hfc2 : ∀ p ∈ openBoxTwo, firstControl (cellPoint p) = ζ ^ 2 := by
     rintro p ⟨h0, h1, h2⟩
     obtain ⟨-, hy2, -, -⟩ := l5a_cellPoint_im p
-    refine (l5a_firstControl_wall (l5a_cellPoint_two p) (l5a_cellPoint_two_neg h0 h1)).2
+    refine (firstControl_eq_of_ofReal_neg (l5a_cellPoint_two p) (l5a_cellPoint_two_neg h0 h1)).2
       (Or.inl ?_)
     rw [hy2]
     exact mul_neg_of_pos_of_neg h0.1 (Real.sin_neg_of_neg_of_neg_pi_lt h2.2 h2.1)

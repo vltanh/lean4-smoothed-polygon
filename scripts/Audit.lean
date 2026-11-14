@@ -28,6 +28,8 @@ import all Basic.Analysis.Convex.PolygonAngle
 import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.StarCurveConvex
 import all Basic.Analysis.Convex.TietzeNakajima
+import all Basic.Analysis.Polynomial.CubicRoots
+import all Basic.Analysis.Polynomial.LeastPositiveRoot
 import all Basic.Analysis.Polynomial.SignNearZero
 import all Basic.Dynamics.LinearizedStability
 import all Basic.Dynamics.Stability
@@ -60,7 +62,15 @@ import all SmoothedPolygons.Ch13.RScale
 import all SmoothedPolygons.Ch13.SingularLocus
 import all SmoothedPolygons.Ch13.Stability
 import all SmoothedPolygons.Ch13.Symmetry
+import all SmoothedPolygons.Ch15.CellCoordinates
+import all SmoothedPolygons.Ch15.Continuity
+import all SmoothedPolygons.Ch15.FixedPointCells
+import all SmoothedPolygons.Ch15.Involution
+import all SmoothedPolygons.Ch15.SmallerCells
+import all SmoothedPolygons.Ch16.BasinHypotheses
+import all SmoothedPolygons.Ch16.GlobalBasin
 import all SmoothedPolygons.Ch16.MahlerFirst
+import all SmoothedPolygons.Ch16.OutwardFuller
 import all SmoothedPolygons.Ch2.BalancedCircle
 import all SmoothedPolygons.Ch2.BalancedDensity
 import all SmoothedPolygons.Ch2.Boundary
@@ -195,7 +205,13 @@ meta def externalResults : List (String × Name) :=
    ("Pontryagin maximum principle (Agrachev–Sachkov, Ch. 12)",
      ``External.pontryagin_maximum_principle),
    ("Hypothesis: Thms 16.4.1 and 14.4.1 (no chattering into 𝒮_sing)",
-     ``SmoothedPolygons.NoChatteringIntoSingularLocus)]
+     ``SmoothedPolygons.NoChatteringIntoSingularLocus),
+   ("Hypothesis: Table 16.1 row 𝒟_out and the contraction on 𝒟_out (G16.3)",
+     ``SmoothedPolygons.TriFuller.DOutContracts),
+   ("Hypothesis: Table 16.1 rows 𝒟₂, 𝒟₃ and F²𝒟₃ ⊂ 𝒟₀₀ (Fig. 16.2)",
+     ``SmoothedPolygons.TriFuller.CellTwoEntersDOut),
+   ("Hypothesis: Table 16.1 subclaims_ij with the row 𝒟₄ (Figs. 16.3–16.4)",
+     ``SmoothedPolygons.TriFuller.BoxSubclaims)]
 
 /-- The numbered results of the paper, in the order of the paper. -/
 meta def paperResults : List (String × Name) :=
@@ -327,6 +343,18 @@ meta def paperResults : List (String × Name) :=
    ("Remark 13.5.3", ``SmoothedPolygons.remark13_5_3),
    ("Remark 13.5.4 (q_fix; asymptotic claim not formalized)", ``SmoothedPolygons.remark13_5_4),
    ("Lemma 13.5.5", ``SmoothedPolygons.lemma13_5_5),
+   ("eqn:x3 (15.1.1)", ``SmoothedPolygons.eqn15_1_1),
+   ("Lemma 15.1.1", ``SmoothedPolygons.lemma15_1_1),
+   ("Def 15.1.2 (big open cells) and the facts after it", ``SmoothedPolygons.definition15_1_2),
+   ("Remark 15.2.1", ``SmoothedPolygons.remark15_2_1),
+   ("Prop 15.2.2", ``SmoothedPolygons.proposition15_2_2),
+   ("Remark 15.3.1 (q_in/q_out corrected, G15.1)", ``SmoothedPolygons.remark15_3_1),
+   ("Remark 15.3.1, the segment through q_in (corrected)",
+     ``SmoothedPolygons.remark15_3_1_segment),
+   ("Thm 16.1.1 (conditional on DOutContracts, CellTwoEntersDOut, BoxSubclaims)",
+     ``SmoothedPolygons.theorem16_1_1),
+   ("Thm 16.2.1 (conditional on the hypotheses of Thm 16.1.1)",
+     ``SmoothedPolygons.theorem16_2_1),
    ("Thm 16.3.1 away from 𝒮_sing (unconditional)",
      ``SmoothedPolygons.isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus),
    ("Thm 16.3.1 (conditional on NoChatteringIntoSingularLocus)",

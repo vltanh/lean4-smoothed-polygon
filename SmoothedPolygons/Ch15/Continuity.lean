@@ -1,7 +1,7 @@
 module
 
 public import SmoothedPolygons.Ch15.SmallerCells
-public import Basic.Analysis.Polynomial.l5c_RootContinuity
+public import Basic.Analysis.Polynomial.LeastPositiveRoot
 
 /-!
 # Chapter 15: continuity of the first switching time and of the cell maps (§15.1–§15.2)
@@ -19,7 +19,7 @@ The continuity claims of Hales–Vajjha, *Packings of Smoothed Polygons*, §15.1
 
 ## Proofs
 
-All five rest on one fact, proved in `Basic/Analysis/Polynomial/l5c_RootContinuity.lean`: the least
+All five rest on one fact, proved in `Basic/Analysis/Polynomial/LeastPositiveRoot.lean`: the least
 positive sign change of a family of real functions depends continuously on the parameter
 (`tendsto_sInf_pos_zeros_of_signChange`; the intermediate value theorem gives zeros just after it,
 compactness of `[0, T - ε]` keeps the functions positive before it). Its polynomial form is
@@ -49,7 +49,7 @@ second case `χ_A'(t₀) = 0` and `χ_A'(t₀ + ε/2) > 0`, also at nearby point
 positive roots all lay beyond `t₀ + ε` would be positive on `[0, t₀ + ε/2]` and nondecreasing after
 it (`χ_A' ≥ 0` propagates to the right because `χ_A'(0) < 0`, `l5c_cubic_mono`), so it would have no
 positive root, against `Δ_{A,0} ≥ 0`. `F_A` lands on a wall because `ζ²` and `1` tie at `t₀` and
-`t₀ ≤ t_B` (`l5c_leastPosRoot_le_tB`, the computation in the module docstring of
+`t₀ ≤ t_B` (`leastPosRoot_chiA_le_of_mem_topFaceTwo`, the computation in the module docstring of
 `SmoothedPolygons/Ch15/SmallerCells.lean`).
 -/
 
@@ -413,9 +413,10 @@ through `0` (`χ_{A,0}(0) ≠ 0 ≠ χ_{B,1}(0)`) or through a complex pair (`Δ
 `F = z(t_sw)` and `classOf` is continuous (`continuousOn_classOf`). (Gap G15.8: on the faces of
 the cells the switching time may tend to `0`; see Proposition 15.2.2.)
 
-Proved along this route (`l5c_openBox`, `l5c_scheme`). The hypothesis `res_AB ≠ 0` is not used:
-`t_sw` is the least time at which `χ_A < 0` or `χ_B < 0`, and a common simple root of `χ_{A,0}` and
-`χ_{B,1}` is still a sign change of one of them. -/
+Proved along this route (`l5c_openBox`, `l5c_scheme`). The hypothesis `res_AB ≠ 0` is the book's
+(the locus `res_AB = 0` of TeX 12141–12142) and is not used: `t_sw` is the least time at which
+`χ_A < 0` or `χ_B < 0`, and a common simple root of `χ_{A,0}` and `χ_{B,1}` is still a sign change
+of one of them. The statement is kept as printed (REPORT.md, Section 5). -/
 theorem continuousAt_firstSwitchTime_of_ne_zero :
     (∀ p ∈ openBoxOne, discrA ζ (cellPoint p) ≠ 0 → discrB ζ (cellPoint p) ≠ 0 →
       resAB ζ (cellPoint p) ≠ 0 →
@@ -534,7 +535,7 @@ theorem continuousWithinAt_topFaceOne {p : Fin 3 → ℝ} (hp : p ∈ topFaceOne
 faces `ψ ∈ {0, π}` of the first 3-cell with the same coordinates `(r₂, ψ, θ₂)`, then the dynamical
 system on the interior of the 3-cell extends continuously to the front and back faces, in agreement
 with the dynamics on the 2-cell `𝒞₂(ζ)`" (TeX 12268–12276), at the points of the relative interior
-where the reduced polynomials `χ_{A,1}`, `χ_{B,1}` have simple roots and no common root. Some
+where the reduced polynomials `χ_{A,1}`, `χ_{B,1}` have simple roots (`Δ_{A,1}, Δ_{B,1} ≠ 0`). Some
 restriction is forced: the book claims continuity on the whole 2-cell, which fails where the map of
 the 2-cell itself is discontinuous. These hypotheses are sufficient, not minimal; the book's
 "continuous extension" elsewhere on the 2-cell is the subject of Proposition 15.3.2.
@@ -544,13 +545,13 @@ Proof route: near such a face point, in the open cell, `χ_A` has a root near `0
 near the face's `χ_{B,1}`; the least positive sign change varies continuously.
 
 Proved along this route (`l5c_scheme`): `χ_A = -(√3/2) x₃ + t g_A` with `x₃ ≤ 0` and `g_A` the
-face's `χ_{A,1}` at the face point, `χ_B = t g_B` with `g_B` the face's `χ_{B,1}`; the hypothesis
-`res_AB ≠ 0` is not used. -/
+face's `χ_{A,1}` at the face point, `χ_B = t g_B` with `g_B` the face's `χ_{B,1}`. A common root of
+`χ_{A,1}` and `χ_{B,1}` (`res_AB = 0`) does not matter: a common simple root is still a sign change
+of one of them. -/
 theorem continuousWithinAt_frontBackOne {p : Fin 3 → ℝ} (hp : p ∈ frontBackOne) (hr : 0 < p 0)
     (hθ : p 2 ∈ Ioo (π / 3) π) (hA : discrA ζ (cellPoint p) ≠ 0)
-    (hB : discrB ζ (cellPoint p) ≠ 0) (hres : resAB ζ (cellPoint p) ≠ 0) :
+    (hB : discrB ζ (cellPoint p) ≠ 0) :
     ContinuousWithinAt (fun q ↦ poincareAngZero (cellClass q)) (openBoxOne ∪ frontBackOne) p := by
-  have _ := hres
   obtain ⟨hfcp, hmA, hmB⟩ := frontBackOne_cover_and_switching.2 p hp hr hθ
   have hz := l5c_cellPoint_ne_zero p
   have hs : openBoxOne ∪ frontBackOne ⊆ cellDomain :=
@@ -731,62 +732,6 @@ private lemma l5c_cubic_mono {b c d s t : ℝ} (hc : c < 0) (hs : 0 < s)
   have := mul_nonneg (sub_nonneg.2 hst) (add_nonneg hd (mul_nonneg (sub_nonneg.2 hst) h1))
   linarith
 
-/-- The inequalities of the book's computation (`SmoothedPolygons/Ch15/SmallerCells.lean`, module
-docstring) are incompatible: `χ_A(t_B) > 0` and `χ_A'(t_B) < 0` force `3.5 √3 S < 1.5 C`, while
-the first forces `√3 S > C`. -/
-private lemma l5c_book_ineq {r₁ r₂ S C : ℝ} (h1 : 0 < r₁) (h2 : 0 < r₂) (hS : 0 < S)
-    (hP : 0 < 27 * r₁ ^ 3 * S ^ 3 - 9 * √3 * r₁ ^ 3 * S ^ 2 * C - 2 * √3 * r₁ * r₂ * S)
-    (hP' : 12 * r₁ ^ 2 * S ^ 2 - 3 * √3 * r₁ ^ 2 * S * C - √3 * r₂ / 2 < 0) : False := by
-  have hk : 0 < r₁ ^ 2 * S := by positivity
-  have hA : 0 < 27 * r₁ ^ 2 * S ^ 2 - 9 * √3 * r₁ ^ 2 * S * C - 2 * √3 * r₂ := by
-    have e : 27 * r₁ ^ 3 * S ^ 3 - 9 * √3 * r₁ ^ 3 * S ^ 2 * C - 2 * √3 * r₁ * r₂ * S =
-        (r₁ * S) * (27 * r₁ ^ 2 * S ^ 2 - 9 * √3 * r₁ ^ 2 * S * C - 2 * √3 * r₂) := by ring
-    rw [e] at hP
-    exact pos_of_mul_pos_right hP (mul_pos h1 hS).le
-  have h3 : 0 < √3 * r₂ := mul_pos l5c_sqrt3_pos h2
-  have hX : r₁ ^ 2 * S * (21 * S - 3 * √3 * C) < 0 := by linarith
-  have hY : 0 < r₁ ^ 2 * S * (9 * S - 3 * √3 * C) := by linarith
-  have hX' : 21 * S - 3 * √3 * C < 0 := by
-    by_contra h
-    rw [not_lt] at h
-    linarith [mul_nonneg hk.le h]
-  have hY' : 0 < 9 * S - 3 * √3 * C := pos_of_mul_pos_right hY hk.le
-  linarith
-
-/-- **The least positive root of `χ_{A,0}` on `𝒞₂(ζ², 0, 2)` is at most `t_B = -6 y₁`** (the
-computation of `SmoothedPolygons/Ch15/SmallerCells.lean`, module docstring): otherwise
-`χ_A(t_B) > 0`, and `χ_A'(t_B) < 0` (else `χ_A` would increase from `t_B` on and have no root
-after it), which `l5c_book_ineq` excludes. -/
-private lemma l5c_leastPosRoot_le_tB {p : Fin 3 → ℝ} (hp : p ∈ topFaceTwo)
-    (hne : ∃ t, 0 < t ∧ (chiA (ζ ^ 2) (cellPoint p)).toPoly.eval t = 0) :
-    leastPosRoot (chiA (ζ ^ 2) (cellPoint p)).toPoly ≤ -6 * (cellPoint p 0).im := by
-  obtain ⟨hc, -⟩ := l5c_face_cd hp
-  have h0 := l5c_face_eval0 hp
-  have hP : (chiA (ζ ^ 2) (cellPoint p)).toPoly ≠ 0 := by
-    intro h; rw [h, eval_zero] at h0; exact lt_irrefl 0 h0
-  obtain ⟨ht₀, hroot⟩ := l5c_leastPosRoot_mem _ hP hne
-  obtain ⟨h0re, h0im, h1re, h1im, h2re, h2im⟩ := l5c_cellPoint_apply p
-  rw [hp.2.2, zero_sub, Real.cos_neg] at h0re
-  rw [hp.2.2, zero_sub, Real.sin_neg, mul_neg] at h0im
-  rw [hp.2.2, Real.cos_zero, mul_one] at h1re
-  rw [hp.2.2, Real.sin_zero, mul_zero] at h1im
-  have hS : 0 < Real.sin (p 1) := Real.sin_pos_of_pos_of_lt_pi hp.2.1.1 hp.2.1.2
-  have hr₁ : 0 < 1 - p 0 := sub_pos.2 hp.1.2
-  by_contra hlt
-  rw [not_le] at hlt
-  have htB : 0 < -6 * (cellPoint p 0).im := by rw [h0im]; nlinarith [mul_pos hr₁ hS]
-  have hPtB := l5c_pos_below _ h0 _ ⟨htB.le, hlt⟩
-  have hP'tB : (-6 * (cellPoint p 0).im) ^ 2 / 4 + 2 * l5c_b p * (-6 * (cellPoint p 0).im) +
-      l5c_c p < 0 := by
-    by_contra hge
-    rw [not_lt] at hge
-    have := l5c_cubic_mono (d := l5c_d p) hc htB hge hlt.le
-    rw [← l5c_evalA2, ← l5c_evalA2, hroot] at this
-    linarith
-  rw [l5c_evalA2] at hPtB
-  simp only [l5c_b, l5c_c, l5c_d, h0re, h0im, h1re, h1im, h2re, h2im] at hPtB hP'tB
-  exact l5c_book_ineq (C := Real.cos (p 1)) hr₁ hp.1.1 hS (by linarith) (by linarith)
-
 /-- **`F_A` lands on a wall** (TeX 12413–12422): at the least positive root `t₀ ≤ t_B` of `χ_{A,0}`
 the controls `ζ²` and `1` tie and maximize (`ζ` does not beat `ζ²` before `t_B`), so `z₃(t₀) ∈ 𝒲`;
 `H_F⁺` is conserved along the first control, and `t₀ ≤ t_sw`, so `z(t₀) ≠ 0`. -/
@@ -799,7 +744,7 @@ private lemma l5c_cellMapA_mem {p : Fin 3 → ℝ} (hp : p ∈ topFaceTwoA) :
     intro h; rw [h, eval_zero] at h0; exact lt_irrefl 0 h0
   have hne := l5c_exists_posRoot hp
   obtain ⟨ht₀, hroot⟩ := l5c_leastPosRoot_mem _ hP hne
-  have htB := l5c_leastPosRoot_le_tB hp.1 hne
+  have htB := leastPosRoot_chiA_le_of_mem_topFaceTwo hp.1 hne
   have hy2 : (cellPoint p 1).im = 0 := by
     rw [(l5c_cellPoint_apply p).2.2.2.1, hp.1.2.2, Real.sin_zero, mul_zero]
   -- the control `ζ²` is not beaten on `[0, t₀]`
@@ -932,18 +877,17 @@ continuous on the closed part `𝒞₂^A = {Δ_{A,0} ≥ 0}` (the least positive
 root at `Δ_{A,0} = 0`) and `F_B` on the closure `{Δ_{A,0} ≤ 0}` of `𝒞₂^B` in the face, both with
 values in the section.
 
-Proof route: `t_B = -6 y₁` is continuous; on `{Δ_{A,0} > 0}` the least positive root is simple, and
-at `Δ_{A,0} = 0` both positive roots tend to the double root (continuity of the roots of a cubic as
-a multiset); at the double root `t₀ ≤ t_B` the controls `ζ²` and `1` tie and maximize, so `F_A`
-lands on a wall.
-
-Proved along this route (`l5c_cellMapA_mem`, `l5c_tendsto_leastPosRoot`); `F_B` lands in the
-section because it is the Poincaré map on `{Δ_{A,0} ≤ 0}` (`firstSwitchTime_topFaceTwo`).
-
-Departure from the paper: at the double root, the continuity of the least positive root does not
-come from the continuity of the roots of a cubic as a multiset (not in Mathlib) but from the shape
-of `χ_{A,0}` on the face: `χ_A'(0) < 0`, so `χ_A` decreases and then increases, and a nearby
-`χ_{A,0}` with `Δ_{A,0} ≥ 0` has a root near the double root (`l5c_tendsto_leastPosRoot`). -/
+The book asserts this without argument. Proof: `t_B = -6 y₁` is continuous; on `{Δ_{A,0} > 0}` the
+least positive root of `χ_{A,0}` is a sign change, which depends continuously on the coefficients
+(`tendsto_sInf_pos_zeros_of_signChange`); at a double root (`Δ_{A,0} = 0`) the proof uses the
+shape of `χ_{A,0}` on the face: `χ_A'(0) < 0`, so `χ_A` decreases and then increases, and a nearby
+`χ_{A,0}` with `Δ_{A,0} ≥ 0` has a root near the double root (`l5c_tendsto_leastPosRoot`). (A
+standard alternative is the continuity of the roots of a polynomial, in Mathlib's one-sided form
+`Polynomial.exists_roots_norm_sub_lt_of_norm_coeff_sub_lt`, since a nearby `χ_{A,0}` with
+`Δ_{A,0} ≥ 0` splits over `ℝ`.) At the least positive root `t₀ ≤ t_B`
+(`leastPosRoot_chiA_le_of_mem_topFaceTwo`) the controls `ζ²` and `1` tie and maximize, so `F_A`
+lands on a wall (`l5c_cellMapA_mem`); `F_B` lands in the section because it is the Poincaré map on
+`{Δ_{A,0} ≤ 0}` (`firstSwitchTime_topFaceTwo`). -/
 theorem continuousOn_cellMapA_cellMapB :
     (∀ p ∈ topFaceTwoA, cellMapA (cellPoint p) ∈ sectionZero) ∧
       ContinuousOn (fun p ↦ classOf (cellMapA (cellPoint p))) topFaceTwoA ∧

@@ -126,6 +126,20 @@ rem:spirals	+lem:first-control	iterating the fixed-point equation uses the equiv
 lem:eigenvalues	+lem:first-control	the map F_ang and its chart near q_out are built from the first control and the first switching time, which exist for z⁰ ≠ 0 by Lemma 13.2.6; the book uses this without naming the lemma
 lem:eigenvalues	+lem:first-negative-control	"q_in is obtained by time reversal from q_out" (TeX 11441–11442): the time reversal F(τ F(ξ)) = τ(ξ) near q_out and q_in (poincare_tau_poincare), from the first assertion of Lemma 13.2.5, used without naming it
 #
+# Chapters 15–16
+lem:cell-rescale	-eqn:x3	"z = 0 by (15.1.1)" (TeX 12066) uses (15.1.1) as the lemma's hypothesis ("z satisfying (15.1.1)"), which the formal statement carries as h₃; the result eqn15_1_1, which derives (15.1.1) from H_F⁺ = 0, is not needed
+prop:closed-cells	+lem:first-control	the first controls on the faces and 2-cells ("The first control is ζ", TeX 12229, "is ζ²", 12242, and on z₃ = 0, 12254–12266) come from the lexicographic rule of Lemma 13.2.6, which the discussion leading up to the proposition uses without naming it
+thm:basin	+def:big:open	"We work with the representation of Ξ_{𝒲,0}/V_T as the union of two closed big cells" (TeX 12519): the cell coordinates are injective on the open first box (Definition 15.1.2 and the facts after it), used without naming it, here to identify q_out with the fixed point of the contraction on 𝒟_out (G16.3)
+thm:basin	+lem:first-control	the Fuller–Poincaré map is defined by the first control (Lemma 13.2.6), and the first controls ζ of q_out and τ(q_out) give the arc of the inward spiral (flow_tau_qOutCart_not_mem_walls, for F⁻¹(q_in) = {q_in}); the book uses the lemma without naming it
+thm:basin	+lem:first-negative-control	"By time reversal symmetry … the iterates F^{-k}(τ q) exit 𝒟_out" (TeX 12729–12732): F⁻¹ = τ F τ at switching points (poincare_tau_poincare) and the trajectory reversal (tau_flow_neg), from the first assertion of Lemma 13.2.5, used without naming it
+thm:basin	+lem:qout	the fixed points q_out, q_in and τ(q_out) = q_in (Lemma 13.5.2), which the statement and the proof use without citing the lemma (TeX 12505–12509, 12535–12537, 12728–12743)
+thm:basin	+prop:closed-cells	"the representation of Ξ_{𝒲,0}/V_T as the union of two closed big cells 𝒞₃(ζ^{±1})" (TeX 12519–12520) is Proposition 15.2.2 (unlabelled; label of this formalization), cited without reference: every point lies in the second cell or in a box 𝒟_{ij} of the first
+thm:basin	+rem:qin-juncture	"We have q_in ∈ 𝒟_in := 𝒟_{1,22} and q_out ∈ 𝒟_out := 𝒟_{1,00}" (TeX 12535–12537) rests on the coordinates of the fixed points in Remark 15.3.1 (unlabelled; label of this formalization; corrected, G15.1), which the book does not cite
+thm:outward-fuller	+thm:basin	"by the Fuller basin theorem" (TeX 12768): Theorem 16.1.1, cited in words without \ref
+thm:outward-fuller	+lem:qout	the fixed points q_out, q_in, τ(q_out) = q_in and the scaling factor r_scale > 1 of the outward spiral (TeX 12765–12775) are Lemma 13.5.2, used without naming it
+thm:outward-fuller	+lem:first-negative-control	"By time reversal symmetry, it is enough to prove the second statement" (TeX 12764): F⁻¹ = τ F τ at switching points (poincare_tau_poincare), from the first assertion of Lemma 13.2.5, used without naming it
+thm:outward-fuller	+lem:first-control	the Fuller–Poincaré map and its first switching time near q_out (in the chart of Lemma 13.5.5, for the continuity of the radial factor, G16.6) are built from the first control of Lemma 13.2.6, which the book uses without naming it
+#
 # Chapter 16
 thm:mahler	-thm:no-chatter	forced: Theorem 16.3.1 is formalized conditional on the named hypothesis NoChatteringIntoSingularLocus, which replaces the last step of the proof (Theorems 16.4.1 and 14.4.1, TeX 12820–12833), proved in later layers
 thm:mahler	-thm:no-return	forced: Theorem 16.3.1 is formalized conditional on the named hypothesis NoChatteringIntoSingularLocus, which replaces the last step of the proof (Theorems 16.4.1 and 14.4.1, TeX 12820–12833), proved in later layers

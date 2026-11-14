@@ -29,10 +29,10 @@ This proof follows the same steps with the box regions of `BasinHypotheses.lean`
    is a contraction `g` of the box `B` in coordinates; the contraction mapping theorem gives
    `F^k(x) → q_out` for `x ∈ 𝒟₀₀` (`l5st_tendsto_qOut0_of_mem_boxSet`), and a backward orbit inside
    `𝒟₀₀` is constant at `q_out` (`l5st_eq_qOut0_of_backward_orbit`).
-2. **`𝒟₂₂` is never re-entered** (replacing (b) and the last row's exclusion argument, gap G16.5):
-   for a switching point `x` (every `F(y)` is one), `F(x) ∈ 𝒟₂₂` implies `x ∈ 𝒟₂₂`, because
-   `τ(𝒟₂₂) = 𝒟₀₀`, `F(τ F(x)) = τ(x)` (`F⁻¹ = τ F τ` at switching points) and `F(𝒟₀₀) ⊆ 𝒟₀₀`
-   (`l5st_mem_boxSet_22_of_poincareAngZero_mem`).
+2. **`𝒟₂₂` is never re-entered** (the analogue of step (b), the column `𝒟_in` of Table 16.1, proved
+   by the time reversal of step (a); gap G16.5): for a switching point `x` (every `F(y)` is one),
+   `F(x) ∈ 𝒟₂₂` implies `x ∈ 𝒟₂₂`, because `τ(𝒟₂₂) = 𝒟₀₀`, `F(τ F(x)) = τ(x)` (`F⁻¹ = τ F τ` at
+   switching points) and `F(𝒟₀₀) ⊆ 𝒟₀₀` (`l5st_mem_boxSet_22_of_poincareAngZero_mem`).
 3. **Leaving `𝒟₂₂`** (step (a)): if `F^n(q) ∈ 𝒟₂₂` for all `n ≥ 1`, then `w_j := τ F^{j+1}(q)` is a
    backward orbit in `𝒟₀₀` (`F(w_{j+1}) = w_j` by `F⁻¹ = τ F τ`), so `w₀ = q_out` by step 1 and
    `F(q) = q_in`; and `F⁻¹(q_in) = {q_in}` (`poincareAngZero_eq_qIn0_iff`), so `q = q_in`.
@@ -44,11 +44,12 @@ This proof follows the same steps with the box regions of `BasinHypotheses.lean`
 Departures from the paper (all forced by gaps of the book's argument, and recorded in
 `BasinHypotheses.lean`): the boundary method (gap G16.2) is replaced by containments to be
 certified by direct enclosure; the convergence in `𝒟_out` uses a contraction hypothesis
-(gap G16.3); `𝒟_in` is the whole box `𝒟₂₂` and the exclusion argument for the last row
-(`𝒟₀ ⊂ 𝒟_in`, `𝒟₄ ⊂ F(𝒟₂₂)` and the injectivity of the multi-valued `F`, gap G16.5) is replaced by
-step 2, which uses the time reversal as the book's step (a) does; the map is the Poincaré map of
-`Ξ_{𝒲,0}/V_T`, at whose non-switching points `F⁻¹ = τ F τ` fails (gap G15.6), which steps 2–3
-handle (every image is a switching point; `F⁻¹(q_in) = {q_in}`).
+(gap G16.3); `𝒟_in` is the whole box `𝒟₂₂`; the exclusion argument for the last row (`𝒟₀ ⊂ 𝒟_in`,
+`𝒟₄ ⊂ F(𝒟₂₂)` and the injectivity of the multi-valued `F`, gap G16.5) is replaced by the form of
+`BoxSubclaims` (whole boxes, with target "the second cell or a smaller box"), and the book's step
+(b) by step 2, which uses the time reversal as the book's step (a) does; the map is the Poincaré
+map of `Ξ_{𝒲,0}/V_T`, at whose non-switching points `F⁻¹ = τ F τ` fails (gap G15.6), which steps
+2–3 handle (every image is a switching point; `F⁻¹(q_in) = {q_in}`).
 -/
 
 @[expose] public section
@@ -122,64 +123,6 @@ private lemma l5f_flow_two_ζ (t : ℝ) (z : Fin 3 → ℂ) :
     Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im, ζ_re, ζ_im]
   constructor <;> ring
 
-/-- The signs of the coordinates of (13.5.1): `qOutCart = (-1 + ib, x + iy, z₃)` with `b > 0` and
-`x < 0 < y` (`r_scale > 6.27`). -/
-private lemma l5f_qOutCart_signs :
-    0 < (qOutCart 0).im ∧ (qOutCart 1).re < 0 ∧ 0 < (qOutCart 1).im := by
-  have hr : 6.27 < rScale := rScale_bounds.1
-  have hs : 0 < √3 := by positivity
-  have e0 : (qOutCart 0).im = (-1 + rScale) / (√3 * (1 + rScale)) := by
-    simp only [qOutCart, equilExact, Matrix.cons_val_zero, Complex.add_im, Complex.neg_im,
-      Complex.one_im, Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re,
-      Complex.ofReal_im]
-    ring
-  have e1 : (qOutCart 1).re = -((-1 + rScale ^ 3) / (√3 * (1 + rScale ^ 3))) := by
-    simp only [qOutCart, equilExact, Matrix.cons_val_one, Matrix.cons_val_zero, Complex.add_re,
-      Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
-    ring
-  have e2 : (qOutCart 1).im = (1 - 3 * rScale - 2 * rScale ^ 2 - 3 * rScale ^ 3 + rScale ^ 4) /
-      (3 * (1 + rScale + rScale ^ 3 + rScale ^ 4)) := by
-    simp only [qOutCart, equilExact, Matrix.cons_val_one, Matrix.cons_val_zero, Complex.add_im,
-      Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
-    ring
-  have hr0 : 0 < rScale := by linarith
-  refine ⟨?_, ?_, ?_⟩
-  · rw [e0]
-    exact div_pos (by linarith) (by positivity)
-  · rw [e1, neg_lt_zero]
-    have : 1 < rScale ^ 3 := one_lt_pow₀ (by linarith) (by norm_num)
-    exact div_pos (by linarith) (by positivity)
-  · rw [e2]
-    refine div_pos ?_ (by positivity)
-    have h3 : 0 < rScale ^ 3 := by positivity
-    nlinarith [mul_pos h3 (by linarith : (0 : ℝ) < rScale - 6), mul_pos hr0 hr0]
-
-/-- The first control at a point with `z₃ ∈ ℝ_{<0}` and `y₂ > 0` is `ζ` (the lexicographic rule of
-Lemma 13.2.6: `RR(z₃, ζ) = RR(z₃, ζ²) > RR(z₃, 1)`, and the tie is broken by
-`RR(z₂, ζ) - RR(z₂, ζ²) = √3 y₂ > 0`). -/
-private lemma l5f_firstControl_eq_ζ {z : Fin 3 → ℂ} (hz : z ≠ 0) (h2 : (z 2).im = 0)
-    (h2' : (z 2).re < 0) (h1 : 0 < (z 1).im) : firstControl z = ζ := by
-  have hs : 0 < √3 := by positivity
-  obtain ⟨hV, hmax⟩ := firstControl_mem_lexMaxControls hz
-  rcases mem_VT.1 hV with h | h | h
-  · exfalso
-    rw [h] at hmax
-    refine hmax ζ ζ_mem_VT ⟨0, fun j hj ↦ absurd hj (Fin.not_lt_zero j), ?_⟩
-    simp only [controlVector, Pi.sub_apply, Matrix.cons_val_zero, RR_eq_re_mul_add_im_mul, ζ_re,
-      ζ_im, Complex.one_re, Complex.one_im, h2]
-    linarith
-  · exact h
-  · exfalso
-    rw [h] at hmax
-    refine hmax ζ ζ_mem_VT ⟨1, fun j hj ↦ ?_, ?_⟩
-    · obtain rfl : j = 0 := (Fin.lt_one_iff j).1 hj
-      simp only [controlVector, Pi.sub_apply, Matrix.cons_val_zero, RR_eq_re_mul_add_im_mul,
-        ζ_re, ζ_im, ζ_sq_re, ζ_sq_im, h2]
-      ring
-    · simp only [controlVector, Pi.sub_apply, Matrix.cons_val_one, Matrix.cons_val_zero,
-        RR_eq_re_mul_add_im_mul, ζ_re, ζ_im, ζ_sq_re, ζ_sq_im]
-      nlinarith
-
 /-- The flow under the virial group: `z(t, v (ρ z₁, ρ² z₂, ρ³ z₃), v u) = v (ρ-scaling)z(t/ρ, z, u)`
 (Lemmas 13.2.1 and 13.2.2 for constant controls). -/
 private lemma l5f_flow_smul_scale {ρ : ℝ} (hρ : ρ ≠ 0) (t : ℝ) (v u : ℂ) (z : Fin 3 → ℂ) :
@@ -187,18 +130,6 @@ private lemma l5f_flow_smul_scale {ρ : ℝ} (hρ : ρ ≠ 0) (t : ℝ) (v u : �
   have hρ' : (ρ : ℂ) ≠ 0 := by exact_mod_cast hρ
   funext j
   fin_cases j <;> simp [flow, scale] <;> field_simp
-
-/-- `τ(v · (c z₁, c² z₂, c³ z₃)) = v̄ · (c-scaling)(τ z)` for real `c`. -/
-private lemma l5f_tau_smul_scale (v : ℂ) (c : ℝ) (z : Fin 3 → ℂ) :
-    tau (v • scale c z) = starRingEnd ℂ v • scale c (tau z) := by
-  funext j
-  fin_cases j <;> simp [tau, scale]
-
-/-- Composition of virial actions. -/
-private lemma l5f_smul_scale_smul_scale (v w : ℂ) (c d : ℝ) (z : Fin 3 → ℂ) :
-    v • scale c (w • scale d z) = (v * w) • scale (c * d) z := by
-  funext j
-  fin_cases j <;> simp [scale] <;> ring
 
 /-- A constant-control trajectory passes through each point at most once (`z₁(t) = z₁ - itu`). -/
 private lemma l5f_eq_of_flow_eq {t t' : ℝ} {z : Fin 3 → ℂ} {u : ℂ} (hu : u ≠ 0)
@@ -228,64 +159,42 @@ private lemma l5f_not_mem_walls {w : ℂ} (him : 0 < w.im) (hRR : 0 < RR (ζ - 1
       linear_combination (-s / 4) * h3
     linarith
 
-/-- A cubic `c₀ + c₁t + c₂t² + c₃t³` with `c₀ > 0`, `c₁, c₂ ≥ 0` and a root `T` is positive on
-`[0, T)`: `T³ f(t) = c₀(T³ - t³) + c₁tT(T² - t²) + c₂t²T²(T - t)` there (the argument of
-`firstSwitchTime_qOutCart`). -/
-private lemma l5f_cubic_pos {c₀ c₁ c₂ c₃ T t : ℝ} (h₀ : 0 < c₀) (h₁ : 0 ≤ c₁) (h₂ : 0 ≤ c₂)
-    (hT : c₀ + c₁ * T + c₂ * T ^ 2 + c₃ * T ^ 3 = 0) (ht : 0 ≤ t) (htT : t < T) :
-    0 < c₀ + c₁ * t + c₂ * t ^ 2 + c₃ * t ^ 3 := by
-  have hT0 : 0 < T := ht.trans_lt htT
-  have key : T ^ 3 * (c₀ + c₁ * t + c₂ * t ^ 2 + c₃ * t ^ 3) =
-      c₀ * (T ^ 3 - t ^ 3) + c₁ * t * T * (T ^ 2 - t ^ 2) + c₂ * t ^ 2 * T ^ 2 * (T - t) := by
-    linear_combination t ^ 3 * hT
-  have e1 : 0 < T ^ 3 - t ^ 3 := by
-    have := pow_lt_pow_left₀ htT ht (by norm_num : (3 : ℕ) ≠ 0)
-    linarith
-  have e2 : 0 ≤ T ^ 2 - t ^ 2 := by
-    have := pow_le_pow_left₀ ht htT.le 2
-    linarith
-  have e3 : 0 < c₀ * (T ^ 3 - t ^ 3) := mul_pos h₀ e1
-  have e4 : 0 ≤ c₁ * t * T * (T ^ 2 - t ^ 2) :=
-    mul_nonneg (mul_nonneg (mul_nonneg h₁ ht) hT0.le) e2
-  have e5 : 0 ≤ c₂ * t ^ 2 * T ^ 2 * (T - t) :=
-    mul_nonneg (mul_nonneg (mul_nonneg h₂ (sq_nonneg t)) (sq_nonneg T)) (by linarith)
-  have hpos : 0 < T ^ 3 * (c₀ + c₁ * t + c₂ * t ^ 2 + c₃ * t ^ 3) := by
-    rw [key]
-    linarith
-  exact pos_of_mul_pos_right hpos (by positivity)
-
 /-- **The arc of the inward spiral does not meet the walls in its interior**: along
 `t ↦ z(t, τ(qOutCart), u)` with `u` the first control of `τ(qOutCart)`, `z₃(t) ∉ 𝒲` for
-`0 < t < t_sw`. By Lemma 13.2.4 the switching functions along this arc are those along the arc of
-`qOutCart` reversed in time, and along that arc `χ_{ζ→ζ²}(t) = √3 t (y + bt/2 + t²/12) > 0` and
-`χ_{ζ→1} > 0` on `(0, t_sw)` (the computation of `firstSwitchTime_qOutCart`, TeX 11340–11344;
-`SmoothedPolygons/Ch13/FixedPoints.lean`), so `z₃(t)` stays in the open sector where `ζ` is the
-only maximizer, which contains no point of `𝒲`. The reduction is to `τ` of the rotated and
-rescaled copy `ζ · scale(1/r_scale)` of the arc of `qOutCart`. Prove it by this symmetry, not by a
-direct numerical bound: along the arc of `τ(qOutCart)` the polynomial `χ_{ζ→ζ²}/t` has
-discriminant about `-5.45·10⁻⁵` and minimum about `2.8·10⁻⁴` at `t ≈ 1.256`, just after the
-switch at `t_sw ≈ 1.180`. -/
+`0 < t < t_sw`. The book has no counterpart; this is what `F⁻¹(q_in) = {q_in}`
+(`poincareAngZero_eq_qIn0_iff`) needs. The arc of `τ(qOutCart)` is the arc of `qOutCart` reversed
+in time: by the trajectory reversal of Lemma 13.2.5 (`tau_flow_neg`) and the fixed-point equation
+of Lemma 13.5.2 (`poincare_qOutCart`: `F(qOutCart) = ζ² · scale(r_scale)(qOutCart)`),
+`z(s, τ q, ζ) = ζ² · scale(1/r_scale)(τ z(t_sw - r_scale s, q, ζ))`, and
+`t_sw(τ q) = t_sw(q)/r_scale` (`poincare_tau_qOutCart`). Along the arc of `qOutCart`,
+`χ_{ζ→ζ²}(t) = √3 t (y + bt/2 + t²/12) > 0` and `χ_{ζ→1} > 0` on `(0, t_sw)` (the computation of
+`firstSwitchTime_qOutCart`, TeX 11340–11344; `SmoothedPolygons/Ch13/FixedPoints.lean`), and the
+reversal exchanges the two conditions, so `z₃(t)` stays in the open sector where `ζ` is the only
+maximizer, which contains no point of `𝒲`. The symmetry avoids a direct numerical bound: along the
+arc of `τ(qOutCart)` the polynomial `χ_{ζ→ζ²}/t` has discriminant about `-5.45·10⁻⁵` and minimum
+about `2.8·10⁻⁴` at `t ≈ 1.256`, just after the switch at `t_sw ≈ 1.180`. -/
 theorem flow_tau_qOutCart_not_mem_walls :
     ∀ t ∈ Ioo 0 (firstSwitchTime (tau qOutCart)),
       flow t (tau qOutCart) (firstControl (tau qOutCart)) 2 ∉ walls := by
-  obtain ⟨hb, hx, hy⟩ := l5f_qOutCart_signs
+  obtain ⟨hb, hx, hy⟩ := qOutCart_signs
   obtain ⟨h0re, h2im, h2re⟩ := qOutCart_normalization
   have hr0 : 0 < rScale := by linarith [rScale_spec.1]
-  have hq0 := qOutCart_ne_zero
-  have hτ0 := tau_qOutCart_ne_zero
   have hs3 : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
   have hs : 0 < √3 := by positivity
   have hζ0 : ζ ≠ 0 := fun h ↦ by simpa [h] using norm_ζ
   have hζ3 : ζ * ζ * ζ = 1 := by rw [← ζ_pow_three]; ring
   -- the first controls of `qOutCart` and `τ(qOutCart)` are `ζ` (Lemma 13.2.6)
-  have hfc : firstControl qOutCart = ζ := l5f_firstControl_eq_ζ hq0 h2im h2re hy
+  have hfc : firstControl qOutCart = ζ := firstControl_qOutCart
   have hfcτ : firstControl (tau qOutCart) = ζ := by
-    refine l5f_firstControl_eq_ζ hτ0 ?_ ?_ ?_ <;> simp [tau, h2im, h2re, hy]
+    refine (firstControl_eq_of_ofReal_neg (x₃ := (qOutCart 2).re) ?_ h2re).1 (Or.inl ?_)
+    · apply Complex.ext <;> simp [tau, h2im]
+    · simpa [tau] using hy
   -- the arc of `qOutCart` ends at `F(qOutCart) = ζ² (r_scale-scaling)(qOutCart)` (Lemma 13.5.2)
   have hF := poincare_qOutCart
   rw [poincare, hfc] at hF
-  -- Lemma 13.2.4/13.2.5: the arc of `τ(qOutCart)` with control `ζ` is the arc of `qOutCart`
-  -- reversed in time about `t_sw`, conjugated by `τ`, rotated by `ζ²` and rescaled by `1/r_scale`
+  -- Lemma 13.2.5 (`tau_flow_neg`): the arc of `τ(qOutCart)` with control `ζ` is the arc of
+  -- `qOutCart` reversed in time about `t_sw`, conjugated by `τ`, rotated by `ζ²` and rescaled
+  -- by `1/r_scale`
   have harc : ∀ s : ℝ, flow s (tau qOutCart) ζ = ζ ^ 2 • scale rScale⁻¹
       (tau (flow (firstSwitchTime qOutCart - rScale * s) qOutCart ζ)) := by
     intro s
@@ -295,8 +204,8 @@ theorem flow_tau_qOutCart_not_mem_walls :
     have e2 : flow (rScale * s) (ζ • scale rScale (tau qOutCart)) (ζ * ζ) =
         ζ • scale rScale (flow s (tau qOutCart) ζ) := by
       rw [l5f_flow_smul_scale hr0.ne', mul_div_cancel_left₀ s hr0.ne']
-    rw [e1, tau_flow_neg, conj_ζ, l5f_tau_smul_scale, conj_ζ_sq, pow_two ζ, e2,
-      l5f_smul_scale_smul_scale, hζ3, inv_mul_cancel₀ hr0.ne', one_smul, scale_one]
+    rw [e1, tau_flow_neg, conj_ζ, tau_smul_scale, conj_ζ_sq, pow_two ζ, e2,
+      smul_scale_smul_scale, hζ3, inv_mul_cancel₀ hr0.ne', one_smul, scale_one]
   -- hence `t_sw(τ qOutCart) = t_sw(qOutCart)/r_scale` (`F(τ qOutCart)`, Lemma 13.5.2)
   have hT' : firstSwitchTime (tau qOutCart) = firstSwitchTime qOutCart / rScale := by
     have h1 := poincare_tau_qOutCart
@@ -345,7 +254,7 @@ theorem flow_tau_qOutCart_not_mem_walls :
     positivity
   have hWRR : 0 < RR (ζ - 1) (flow (firstSwitchTime qOutCart - rScale * t) qOutCart ζ 2) := by
     rw [hRR]
-    exact l5f_cubic_pos hc0 hc1 hc2 hfT hs0.le hs1
+    exact cubic_pos_of_lt_root hc0 hc1 hc2 hfT hs0.le hs1
   -- and the reversal exchanges them: `Im` of the image is `RR(ζ - 1, w)/√3`, up to `r_scale⁻³`,
   -- and `RR(ζ - 1, ·)` of the image is `√3 Im w`
   generalize flow (firstSwitchTime qOutCart - rScale * t) qOutCart ζ = Z at hWim hWRR ⊢
@@ -371,47 +280,11 @@ theorem flow_tau_qOutCart_not_mem_walls :
       Complex.one_re, Complex.one_im]
     nlinarith [mul_pos hs hWim]
 
-/-- The rescaling of a nonzero point is nonzero. -/
-private lemma l5f_scale_ne_zero {ρ : ℝ} (hρ : 0 < ρ) {z : Fin 3 → ℂ} (hz : z ≠ 0) :
-    scale ρ z ≠ 0 := by
-  intro h
-  apply hz
-  have hρ' : (ρ : ℂ) ≠ 0 := by exact_mod_cast hρ.ne'
-  funext j
-  have := congrFun h j
-  fin_cases j <;> simpa [scale, hρ'] using this
-
-/-- `s ζⁿ ∈ 𝒲` for `s ≤ 0` (`ζ³ = 1`). -/
-private lemma l5f_ofReal_mul_ζ_pow_mem_walls {s : ℝ} (hs : s ≤ 0) (n : ℕ) :
-    (s : ℂ) * ζ ^ n ∈ walls := by
-  have e : ζ ^ n = ζ ^ (n % 3) := by
-    conv_lhs => rw [← Nat.div_add_mod n 3, pow_add, pow_mul, ζ_pow_three, one_pow, one_mul]
-  rw [e]
-  rcases (by omega : n % 3 = 0 ∨ n % 3 = 1 ∨ n % 3 = 2) with h | h | h <;> rw [h]
-  · exact Or.inl (Or.inl ⟨s, hs, rfl⟩)
-  · exact Or.inl (Or.inr ⟨s, hs, rfl⟩)
-  · exact Or.inr ⟨s, hs, rfl⟩
-
-/-- The walls are invariant under `V_T` and positive real scalings. -/
-private lemma l5f_mul_mem_walls {v : ℂ} (hv : v ∈ VT) {c : ℝ} (hc : 0 ≤ c) {w : ℂ}
-    (hw : w ∈ walls) : v * ((c : ℂ) * w) ∈ walls := by
-  obtain ⟨j, hj⟩ : ∃ j : ℕ, v = ζ ^ j := by
-    rcases mem_VT.1 hv with rfl | rfl | rfl
-    exacts [⟨0, by simp⟩, ⟨1, by simp⟩, ⟨2, rfl⟩]
-  have key : ∀ k : ℕ, w ∈ wall k → v * ((c : ℂ) * w) ∈ walls := by
-    rintro k ⟨s, hs, rfl⟩
-    have := l5f_ofReal_mul_ζ_pow_mem_walls (by nlinarith : c * s ≤ 0) (j + k)
-    convert this using 1
-    rw [hj, pow_add]
-    push_cast
-    ring
-  rcases hw with (hw | hw) | hw
-  exacts [key 0 hw, key 1 hw, key 2 hw]
-
-/-- The converse: `v (c w) ∈ 𝒲` with `v ∈ V_T`, `c > 0` implies `w ∈ 𝒲`. -/
+/-- The walls are invariant under `V_T` and positive real scalings (`mul_mem_walls`,
+`ofReal_mul_mem_walls`), so `v (c w) ∈ 𝒲` with `v ∈ V_T`, `c > 0` implies `w ∈ 𝒲`. -/
 private lemma l5f_mem_walls_of_mul {v : ℂ} (hv : v ∈ VT) {c : ℝ} (hc : 0 < c) {w : ℂ}
     (hw : v * ((c : ℂ) * w) ∈ walls) : w ∈ walls := by
-  have h := l5f_mul_mem_walls (conj_mem_VT hv) (inv_nonneg.2 hc.le) hw
+  have h := mul_mem_walls (conj_mem_VT hv) (ofReal_mul_mem_walls (inv_nonneg.2 hc.le) hw)
   have hv1 : starRingEnd ℂ v * v = 1 := by
     rw [Complex.conj_mul', norm_eq_one_of_mem_VT hv]
     simp
@@ -458,7 +331,7 @@ theorem poincareAngZero_eq_qIn0_iff (x : XiW0Quot) : poincareAngZero x = qIn0 �
   obtain ⟨v, hv, ρ, hρ, rfl⟩ := (classOf_eq_classOf_iff hτsec hwsec).1 (hτcl.trans hcw.symm)
   -- so `z` is an interior point of the arc of `τ(qOutCart)`, up to the virial group
   have hτ0 := tau_qOutCart_ne_zero
-  have hsc0 : scale ρ (tau qOutCart) ≠ 0 := l5f_scale_ne_zero hρ hτ0
+  have hsc0 : scale ρ (tau qOutCart) ≠ 0 := scale_ne_zero hρ hτ0
   rw [(poincare_smul hv hsc0).2.1, (poincare_scale hρ hτ0).2.1] at hs
   rw [(poincare_smul hv hsc0).1, (poincare_scale hρ hτ0).1, l5f_flow_smul_scale hρ.ne'] at hzw
   have hmem : s / ρ ∈ Ioo 0 (firstSwitchTime (tau qOutCart)) :=
@@ -528,7 +401,7 @@ every orbit starting in `𝒟₀₀` tends to `q_out`. Proof route: `F^N(x) = ce
 (`continuousOn_cellClass`); and `cellClass p* = q_out`: `q_out ∈ 𝒟₀₀`
 (`pOut_mem_cellBox_pIn_mem_cellBox`) is fixed, so `q_out = cellClass p₀` with `p₀ ∈ B`, `g p₀ = p₀`
 by the injectivity of `cellClass` on the open first box (`definition15_1_2`). -/
-theorem l5st_tendsto_qOut0_of_mem_boxSet (h : DOutContracts) {x : XiW0Quot}
+private theorem l5st_tendsto_qOut0_of_mem_boxSet (h : DOutContracts) {x : XiW0Quot}
     (hx : x ∈ boxSet 0 0) : Tendsto (fun k : ℕ ↦ poincareAngZero^[k] x) atTop (𝓝 qOut0) := by
   obtain ⟨B, N, κ, g, p₀, hκ, hBc, -, hB, hN, hg, hL, hFg, hp₀, hgp₀, hcl⟩ :=
     l5f_contraction_data h
@@ -559,7 +432,7 @@ theorem l5st_tendsto_qOut0_of_mem_boxSet (h : DOutContracts) {x : XiW0Quot}
 `w₀ = q_out`. Proof route: `w_j = F^N(w_{j+N}) ∈ cellClass '' B`, say `w_j = cellClass p_j`; by the
 injectivity of `cellClass` on `B`, `g(p_{j+1}) = p_j`; so `p₀ = g^k(p_k)` and
 `dist(p₀, p*) ≤ κ^k diam B → 0`. -/
-theorem l5st_eq_qOut0_of_backward_orbit (h : DOutContracts) (w : ℕ → XiW0Quot)
+private theorem l5st_eq_qOut0_of_backward_orbit (h : DOutContracts) (w : ℕ → XiW0Quot)
     (hw : ∀ j, w j ∈ boxSet 0 0) (hF : ∀ j, poincareAngZero (w (j + 1)) = w j) : w 0 = qOut0 := by
   obtain ⟨B, N, κ, g, p₀, hκ, -, hBb, hB, hN, hg, hL, hFg, hp₀, hgp₀, hcl⟩ :=
     l5f_contraction_data h
@@ -607,7 +480,7 @@ theorem l5st_eq_qOut0_of_backward_orbit (h : DOutContracts) (w : ℕ → XiW0Quo
 `F(x) ∈ 𝒟₂₂`, then `x ∈ 𝒟₂₂`. Proof route: `τ F(x) ∈ τ(𝒟₂₂) = 𝒟₀₀` (`tauZero_image_boxSet`),
 `F(τ F(x)) = τ(x)` (`poincareAngZero_tauZero_poincareAngZero`), so `τ(x) ∈ F(𝒟₀₀) ⊆ 𝒟₀₀`
 (`DOutContracts`) and `x = τ τ x ∈ 𝒟₂₂`. -/
-theorem l5st_mem_boxSet_22_of_poincareAngZero_mem (h : DOutContracts) {x : XiW0Quot}
+private theorem l5st_mem_boxSet_22_of_poincareAngZero_mem (h : DOutContracts) {x : XiW0Quot}
     (hx : IsSwitchingPointQ x) (hFx : poincareAngZero x ∈ boxSet 2 2) : x ∈ boxSet 2 2 := by
   have hinv := continuous_involutive_tauZero.2
   -- `τ F(x) ∈ τ(𝒟₂₂) = 𝒟₀₀`, so `τ(x) = F(τ F(x)) ∈ F(𝒟₀₀) ⊆ 𝒟₀₀`
@@ -624,7 +497,7 @@ theorem l5st_mem_boxSet_22_of_poincareAngZero_mem (h : DOutContracts) {x : XiW0Q
 is a switching point and `F^n(x) ∈ 𝒟₂₂` for every `n`, then `x = q_in`. Proof route:
 `w_j := τ F^j(x) ∈ 𝒟₀₀` and `F(w_{j+1}) = F(τ F(F^j x)) = τ F^j(x) = w_j` (`F^j(x)` is a switching
 point), so `τ(x) = w₀ = q_out` (`l5st_eq_qOut0_of_backward_orbit`). -/
-theorem l5st_eq_qIn0_of_forall_iterate_mem_boxSet_22 (h : DOutContracts) {x : XiW0Quot}
+private theorem l5st_eq_qIn0_of_forall_iterate_mem_boxSet_22 (h : DOutContracts) {x : XiW0Quot}
     (hx : IsSwitchingPointQ x) (hin : ∀ n, poincareAngZero^[n] x ∈ boxSet 2 2) : x = qIn0 := by
   have hinv := continuous_involutive_tauZero.2
   -- every `F^j(x)` is a switching point
@@ -653,7 +526,7 @@ of the second cell reaches `𝒟₀₀` within three steps (`CellTwoEntersDOut`)
 `(i, j) ≠ (0, 0)` (and `≠ (2, 2)`, the orbit avoiding `𝒟₂₂`) goes to the second cell or to a
 smaller box (`BoxSubclaims`); every point is in one of these regions
 (`mem_cellTwoSet_or_exists_mem_boxSet`). -/
-theorem l5st_exists_iterate_mem_boxSet_00 (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims)
+private theorem l5st_exists_iterate_mem_boxSet_00 (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims)
     {x : XiW0Quot} (hin : ∀ n, poincareAngZero^[n] x ∉ boxSet 2 2) :
     ∃ n, poincareAngZero^[n] x ∈ boxSet 0 0 := by
   -- from the second cell, `𝒟₀₀` within three steps

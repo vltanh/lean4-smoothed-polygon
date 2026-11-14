@@ -3,6 +3,7 @@ module
 public import SmoothedPolygons.Ch15.CellCoordinates
 public import Mathlib.Algebra.CubicDiscriminant
 public import Mathlib.RingTheory.Polynomial.Resultant.Basic
+public import Basic.Analysis.Polynomial.CubicRoots
 
 /-!
 # Chapter 15: switching polynomials, the smaller cells and Proposition 15.2.2 (§15.1–§15.2)
@@ -51,7 +52,9 @@ the signs of the elementary symmetric functions) gives the root counts. On `𝒞
 `t_B = -6 y₁ = 6 r₁ sin ψ`, and
 `√3 χ_A = 3 r₁ r₂ S - (3/2) r₂ t - (r₁/4)(3C - √3 S) t² + (√3/12) t³` (`S = sin ψ`, `C = cos ψ`)
 decreases on `(0, t_m)` and increases after its local minimum `t_m`. If `χ_{A,0}` has positive
-roots, the least one is `≤ t_B`: otherwise `χ_A(t_B) > 0` and `χ_A'(t_B) < 0`, that is
+roots, the least one is `≤ t_B` (the book asserts that "the first switching time is a root of
+`χ_{A,0}`", TeX 12413–12415, and gives no argument for this estimate; the argument is this
+formalization's): otherwise `χ_A(t_B) > 0` and `χ_A'(t_B) < 0`, that is
 `r₁² S (√3 S - C) > (2/9) r₂` and `r₁² S (8√3 S - 6C) < r₂`, which together force
 `3.5 √3 S < 1.5 C`, while the first forces `√3 S > C`: a contradiction. Continuity of the switching
 times (`SmoothedPolygons/Ch15/Continuity.lean`) is continuity of simple roots. The limits at faces
@@ -65,8 +68,10 @@ Descartes's rule are proved for the two sign patterns that occur: with `a < 0 < 
 `t² P(s) - s² P(t) > 0` for `0 ≤ s < t`, so `P` has one positive root and changes sign there; with
 `a, d > 0 > c`, a negative root `r₀` (intermediate value theorem) splits off, `P = (t - r₀) q`, and
 `Δ(P) = Δ(q) q(r₀)²` with `q(r₀) > 0`, so `Δ(P)` decides whether `q` has two positive roots
-(product `> 0`, sum `> 0`) or none. The sign `χ_A'(t_B) < 0` in the estimate above is obtained from
-this factorization (`1/(t - r₀) < 1/(r₁ - t) + 1/(r₂ - t)` on `[0, r₁)`).
+(product `> 0`, sum `> 0`) or none (these general facts about real cubics are in
+`Basic/Analysis/Polynomial/CubicRoots.lean`). The sign `χ_A'(t_B) < 0` in the estimate above is
+obtained from this factorization (`1/(t - r₀) < 1/(r₁ - t) + 1/(r₂ - t)` on `[0, r₁)`); the estimate
+is `leastPosRoot_chiA_le_of_mem_topFaceTwo`.
 -/
 
 @[expose] public section
@@ -372,181 +377,6 @@ private lemma l5b_chi_cellPoint (p : Fin 3 → ℝ) :
   rw [h1, h2, h3, h4, e1, e2, e3, e4, e5, e6]
   refine ⟨?_, ?_, ?_, ?_⟩ <;> refine Cubic.ext ?_ ?_ ?_ ?_ <;> dsimp only <;> ring
 
-/-- The cubic `a t³ + b t² + c t + d` with `a < 0 < c, d` (one sign change) has a unique positive
-root `T`, positive on `[0, T)` and negative on `(T, ∞)`: `t² P(s) - s² P(t) =
-(t - s)(d (t + s) + c t s - a s² t²) > 0` for `0 ≤ s < t`. -/
-private lemma l5b_unique_pos_root {a b c d : ℝ} (ha : a < 0) (hc : 0 < c) (hd : 0 < d) :
-    ∃ T > 0, a * T ^ 3 + b * T ^ 2 + c * T + d = 0 ∧
-      (∀ t, 0 ≤ t → t < T → 0 < a * t ^ 3 + b * t ^ 2 + c * t + d) ∧
-      ∀ t, T < t → a * t ^ 3 + b * t ^ 2 + c * t + d < 0 := by
-  set f : ℝ → ℝ := fun t ↦ a * t ^ 3 + b * t ^ 2 + c * t + d with hf
-  have key : ∀ s t, 0 ≤ s → s < t → s ^ 2 * f t < t ^ 2 * f s := by
-    intro s t hs hst
-    have e : t ^ 2 * f s - s ^ 2 * f t =
-        (t - s) * (d * (t + s) + c * t * s - a * s ^ 2 * t ^ 2) := by
-      simp only [hf]; ring
-    have h1 : 0 < d * (t + s) := mul_pos hd (by linarith)
-    have h2 : 0 ≤ c * t * s := mul_nonneg (mul_nonneg hc.le (by linarith)) hs
-    have h3 : 0 ≤ -a * s ^ 2 * t ^ 2 := by
-      have : 0 ≤ -a := by linarith
-      positivity
-    have : 0 < (t - s) * (d * (t + s) + c * t * s - a * s ^ 2 * t ^ 2) :=
-      mul_pos (by linarith) (by linarith)
-    linarith
-  set M := 1 + (|b| + c + d) / (-a) with hM
-  have hM0 : 0 ≤ (|b| + c + d) / (-a) := div_nonneg (by positivity) (by linarith)
-  have hM1 : 1 ≤ M := by linarith
-  have haM : a * M = a - (|b| + c + d) := by
-    rw [hM, mul_add, mul_one, mul_div_assoc', div_neg, mul_comm a, mul_div_assoc,
-      div_self ha.ne, mul_one]
-    ring
-  have hfM : f M < 0 := by
-    simp only [hf]
-    have h1 : b * M ^ 2 ≤ |b| * M ^ 2 := mul_le_mul_of_nonneg_right (le_abs_self b) (sq_nonneg M)
-    have hM2 : 1 ≤ M ^ 2 := by nlinarith
-    have h2 : c * M ≤ c * M ^ 2 := mul_le_mul_of_nonneg_left (by nlinarith) hc.le
-    have h3 : d ≤ d * M ^ 2 := le_mul_of_one_le_right hd.le hM2
-    have h4 : a * M ^ 3 + |b| * M ^ 2 + c * M ^ 2 + d * M ^ 2 = a * M ^ 2 := by
-      have : a * M ^ 3 = (a * M) * M ^ 2 := by ring
-      rw [this, haM]; ring
-    have h5 : a * M ^ 2 < 0 := mul_neg_of_neg_of_pos ha (by positivity)
-    linarith
-  obtain ⟨T, hT, hfT⟩ : ∃ T ∈ Icc 0 M, f T = 0 :=
-    intermediate_value_Icc' (show (0 : ℝ) ≤ M by linarith)
-      (by fun_prop : Continuous f).continuousOn ⟨hfM.le, by simp only [hf]; linarith⟩
-  have hf0 : f 0 = d := by simp only [hf]; ring
-  have hT0 : 0 < T := by
-    rcases hT.1.eq_or_lt with h | h
-    · rw [← h, hf0] at hfT; linarith
-    · exact h
-  refine ⟨T, hT0, hfT, fun t ht htT ↦ ?_, fun t ht ↦ ?_⟩
-  · have := key t T ht htT
-    rw [hfT, mul_zero] at this
-    exact pos_of_mul_pos_right this (by positivity)
-  · have := key T t hT0.le ht
-    rw [hfT, mul_zero] at this
-    exact neg_of_mul_neg_right this (by positivity)
-
-/-- The discriminant of a real cubic (Mathlib's normalization). -/
-private lemma l5b_discr_toPoly (P : Cubic ℝ) (ha : P.a ≠ 0) :
-    P.toPoly.discr = P.b ^ 2 * P.c ^ 2 - 4 * P.a * P.c ^ 3 - 4 * P.b ^ 3 * P.d -
-      27 * P.a ^ 2 * P.d ^ 2 + 18 * P.a * P.b * P.c * P.d := by
-  rw [discr_of_degree_eq_three (Cubic.degree_of_a_ne_zero ha), Cubic.coeff_eq_a,
-    Cubic.coeff_eq_b, Cubic.coeff_eq_c, Cubic.coeff_eq_d]
-
-/-- The cubic `a t³ + b t² + c t + d` with `a > 0 > c` and `d > 0` (the signs of `χ_{A,0}` on
-`𝒞₂(ζ², 0, 2)`): it has a negative root `r₀` (intermediate value theorem), and
-`P = (t - r₀) q` with `q = a t² + β t + γ`, `β < 0 < γ`, `q(r₀) > 0`, and the discriminant is
-`Δ(P) = Δ(q) q(r₀)²`. -/
-private lemma l5b_cubic_factor {a b c d : ℝ} (ha : 0 < a) (hc : c < 0) (hd : 0 < d) :
-    ∃ r₀ β γ : ℝ, r₀ < 0 ∧ β < 0 ∧ 0 < γ ∧ 0 < a * r₀ ^ 2 + β * r₀ + γ ∧
-      b = β - a * r₀ ∧ c = γ - β * r₀ ∧ d = -(γ * r₀) ∧
-      b ^ 2 * c ^ 2 - 4 * a * c ^ 3 - 4 * b ^ 3 * d - 27 * a ^ 2 * d ^ 2 + 18 * a * b * c * d =
-        (β ^ 2 - 4 * a * γ) * (a * r₀ ^ 2 + β * r₀ + γ) ^ 2 := by
-  set f : ℝ → ℝ := fun t ↦ a * t ^ 3 + b * t ^ 2 + c * t + d with hf
-  set M := 1 + (|b| + |c| + d) / a with hM
-  have hM0 : 0 ≤ (|b| + |c| + d) / a := by positivity
-  have hM1 : 1 ≤ M := by linarith
-  have haM : a * M = a + (|b| + |c| + d) := by
-    rw [hM, mul_add, mul_one, mul_div_assoc', mul_comm a, mul_div_assoc, div_self ha.ne',
-      mul_one]
-  have hfM : f (-M) < 0 := by
-    simp only [hf]
-    have h1 : b * M ^ 2 ≤ |b| * M ^ 2 := mul_le_mul_of_nonneg_right (le_abs_self b) (sq_nonneg M)
-    have h2 : -c * M ≤ |c| * M ^ 2 :=
-      (mul_le_mul_of_nonneg_right (neg_le_abs c) (by linarith)).trans
-        (mul_le_mul_of_nonneg_left (by nlinarith) (abs_nonneg c))
-    have hM2 : 1 ≤ M ^ 2 := by nlinarith
-    have h3 : d ≤ d * M ^ 2 := le_mul_of_one_le_right hd.le hM2
-    have h4 : -(a * M ^ 3) + |b| * M ^ 2 + |c| * M ^ 2 + d * M ^ 2 = -(a * M ^ 2) := by
-      have : a * M ^ 3 = (a * M) * M ^ 2 := by ring
-      rw [this, haM]; ring
-    have h5 : 0 < a * M ^ 2 := mul_pos ha (by positivity)
-    linarith
-  obtain ⟨r₀, hr₀, hfr₀⟩ : ∃ r₀ ∈ Icc (-M) 0, f r₀ = 0 :=
-    intermediate_value_Icc (show -M ≤ 0 by linarith) (by fun_prop : Continuous f).continuousOn
-      ⟨hfM.le, by simp only [hf]; linarith⟩
-  have hf0 : f 0 = d := by simp only [hf]; ring
-  have hr₀0 : r₀ < 0 := by
-    rcases hr₀.2.lt_or_eq with h | h
-    · exact h
-    · rw [h, hf0] at hfr₀; linarith
-  obtain ⟨β, hβ⟩ : ∃ β, b = β - a * r₀ := ⟨b + a * r₀, by ring⟩
-  obtain ⟨γ, hγ⟩ : ∃ γ, c = γ - β * r₀ := ⟨c + β * r₀, by ring⟩
-  have hdγ : d = -(γ * r₀) := by
-    simp only [hf] at hfr₀
-    rw [hβ, hγ] at hfr₀
-    linear_combination hfr₀
-  have hγ0 : 0 < γ := by nlinarith
-  have hβ0 : β < 0 := by nlinarith
-  refine ⟨r₀, β, γ, hr₀0, hβ0, hγ0, ?_, hβ, hγ, hdγ, ?_⟩
-  · nlinarith [mul_pos_of_neg_of_neg hβ0 hr₀0, sq_pos_of_neg hr₀0]
-  · subst hβ hγ hdγ
-    ring
-
-/-- With the signs of `l5b_cubic_factor`: if `Δ ≤ 0`, the cubic is `≥ 0` on `[0, ∞)`, and `> 0` if
-`Δ < 0` (`q` has no real root, or a double one; `t - r₀ > 0`). -/
-private lemma l5b_cubic_nonneg {a b c d : ℝ} (ha : 0 < a) (hc : c < 0) (hd : 0 < d)
-    (hD : b ^ 2 * c ^ 2 - 4 * a * c ^ 3 - 4 * b ^ 3 * d - 27 * a ^ 2 * d ^ 2 +
-      18 * a * b * c * d ≤ 0) {t : ℝ} (ht : 0 ≤ t) :
-    0 ≤ a * t ^ 3 + b * t ^ 2 + c * t + d ∧
-      (b ^ 2 * c ^ 2 - 4 * a * c ^ 3 - 4 * b ^ 3 * d - 27 * a ^ 2 * d ^ 2 + 18 * a * b * c * d < 0 →
-        0 < a * t ^ 3 + b * t ^ 2 + c * t + d) := by
-  obtain ⟨r₀, β, γ, hr₀, -, -, hq₀, hβ, hγ, hdγ, hΔ⟩ := l5b_cubic_factor (b := b) ha hc hd
-  have hfac : a * t ^ 3 + b * t ^ 2 + c * t + d = (t - r₀) * (a * t ^ 2 + β * t + γ) := by
-    rw [hβ, hγ, hdγ]; ring
-  have hq4 : 4 * a * (a * t ^ 2 + β * t + γ) = (2 * a * t + β) ^ 2 - (β ^ 2 - 4 * a * γ) := by
-    ring
-  have hsq : 0 < (a * r₀ ^ 2 + β * r₀ + γ) ^ 2 := by positivity
-  have hδ : β ^ 2 - 4 * a * γ ≤ 0 := by
-    by_contra h
-    push Not at h
-    nlinarith [mul_pos h hsq]
-  rw [hfac, hΔ]
-  constructor
-  · have : 0 ≤ a * t ^ 2 + β * t + γ := by nlinarith [sq_nonneg (2 * a * t + β)]
-    exact mul_nonneg (by linarith) this
-  · intro hneg
-    have hδ' : β ^ 2 - 4 * a * γ < 0 := by
-      by_contra h
-      push Not at h
-      nlinarith [mul_nonneg h hsq.le]
-    have : 0 < a * t ^ 2 + β * t + γ := by nlinarith [sq_nonneg (2 * a * t + β)]
-    exact mul_pos (by linarith) this
-
-/-- With the signs of `l5b_cubic_factor`: if `Δ ≥ 0`, the cubic is `a (t - r₀)(t - r₁)(t - r₂)` with
-`r₀ < 0 < r₁ ≤ r₂` (Descartes's rule of signs for this sign pattern), and `r₁ < r₂` if `Δ > 0`. -/
-private lemma l5b_cubic_roots {a b c d : ℝ} (ha : 0 < a) (hc : c < 0) (hd : 0 < d)
-    (hD : 0 ≤ b ^ 2 * c ^ 2 - 4 * a * c ^ 3 - 4 * b ^ 3 * d - 27 * a ^ 2 * d ^ 2 +
-      18 * a * b * c * d) :
-    ∃ r₀ r₁ r₂ : ℝ, r₀ < 0 ∧ 0 < r₁ ∧ r₁ ≤ r₂ ∧
-      (0 < b ^ 2 * c ^ 2 - 4 * a * c ^ 3 - 4 * b ^ 3 * d - 27 * a ^ 2 * d ^ 2 +
-        18 * a * b * c * d → r₁ < r₂) ∧
-      b = a * -(r₀ + r₁ + r₂) ∧ c = a * (r₀ * r₁ + r₀ * r₂ + r₁ * r₂) ∧
-      d = a * -(r₀ * r₁ * r₂) := by
-  obtain ⟨r₀, β, γ, hr₀, hβ0, hγ0, hq₀, hβ, hγ, hdγ, hΔ⟩ := l5b_cubic_factor (b := b) ha hc hd
-  have hsq : 0 < (a * r₀ ^ 2 + β * r₀ + γ) ^ 2 := by positivity
-  have hδ : 0 ≤ β ^ 2 - 4 * a * γ := by
-    by_contra h
-    push Not at h
-    nlinarith [mul_neg_of_neg_of_pos h hsq]
-  set s := √(β ^ 2 - 4 * a * γ) with hs
-  have hs0 : 0 ≤ s := Real.sqrt_nonneg _
-  have hss : s ^ 2 = β ^ 2 - 4 * a * γ := Real.sq_sqrt hδ
-  have hsβ : s < -β := by nlinarith [mul_pos ha hγ0]
-  refine ⟨r₀, (-β - s) / (2 * a), (-β + s) / (2 * a), hr₀, by apply div_pos <;> linarith,
-    by apply div_le_div_of_nonneg_right <;> linarith, fun hpos ↦ ?_, ?_, ?_, ?_⟩
-  · have hδ' : 0 < β ^ 2 - 4 * a * γ := by
-      by_contra h
-      push Not at h
-      nlinarith [mul_le_mul_of_nonneg_right h hsq.le]
-    have : 0 < s := Real.sqrt_pos.2 hδ'
-    apply div_lt_div_of_pos_right _ (by linarith)
-    linarith
-  · rw [hβ]; field_simp; ring
-  · rw [hγ]; field_simp; linear_combination hss
-  · rw [hdγ]; field_simp; linear_combination (-r₀) * hss
-
 /-- The signs on the first big open cell: `-(√3/2) x₃ = √3 r₁ r₂ sin ψ > 0`, `0 < r₁` and
 `y₂ = r₂ sin θ₂ > 0`. -/
 private lemma l5b_openBoxOne_signs {p : Fin 3 → ℝ} (hp : p ∈ openBoxOne) :
@@ -581,30 +411,16 @@ theorem multA_multB_of_mem_openBox :
       (l5b_mult_cubic _ (by rw [hB]; norm_num)).2.1 (by rw [hB])
         (by rw [hB]; dsimp only; linarith)⟩
 
-/-- The first control on the first big open cell is `ζ`: `χ_A(0) = -(√3/2) x₃ > 0` and
-`χ_B = t (y₂ + …)` with `y₂ > 0`. -/
+/-- The first control on the first big open cell is `ζ` (Definition 15.1.2, `definition15_1_2`). -/
 private lemma l5b_isFirstControl_openBoxOne {p : Fin 3 → ℝ} (hp : p ∈ openBoxOne) :
-    IsFirstControl (cellPoint p) ζ := by
-  obtain ⟨hA, hB, -, -⟩ := l5b_chi_cellPoint p
-  obtain ⟨hd, -, hy₂⟩ := l5b_openBoxOne_signs hp
-  obtain ⟨ε₁, hε₁, hA'⟩ := l5b_nonneg_near_zero (chiA ζ (cellPoint p))
-    (Or.inl (by rw [hA]; exact hd))
-  obtain ⟨ε₂, hε₂, hB'⟩ := l5b_nonneg_near_zero (chiB ζ (cellPoint p))
-    (Or.inr (Or.inl ⟨by rw [hB], by rw [hB]; exact hy₂⟩))
-  exact l5b_isFirstControl_of (Or.inl rfl) (lt_min hε₁ hε₂) fun t ht ↦
-    ⟨hA' t ⟨ht.1, ht.2.trans (min_le_left _ _)⟩, hB' t ⟨ht.1, ht.2.trans (min_le_right _ _)⟩⟩
+    IsFirstControl (cellPoint p) ζ :=
+  (firstControl_eq_iff (l5b_cellPoint_ne_zero p)).1 (definition15_1_2.2.2.2.2.2.1 p hp)
 
-/-- The first control on the second big open cell is `ζ²`. -/
+/-- The first control on the second big open cell is `ζ²` (Definition 15.1.2,
+`definition15_1_2`). -/
 private lemma l5b_isFirstControl_openBoxTwo {p : Fin 3 → ℝ} (hp : p ∈ openBoxTwo) :
-    IsFirstControl (cellPoint p) (ζ ^ 2) := by
-  obtain ⟨-, -, hA, hB⟩ := l5b_chi_cellPoint p
-  obtain ⟨hd, -, hy₂⟩ := l5b_openBoxTwo_signs hp
-  obtain ⟨ε₁, hε₁, hA'⟩ := l5b_nonneg_near_zero (chiA (ζ ^ 2) (cellPoint p))
-    (Or.inl (by rw [hA]; exact hd))
-  obtain ⟨ε₂, hε₂, hB'⟩ := l5b_nonneg_near_zero (chiB (ζ ^ 2) (cellPoint p))
-    (Or.inr (Or.inl ⟨by rw [hB], by rw [hB]; dsimp only; linarith⟩))
-  exact l5b_isFirstControl_of (Or.inr rfl) (lt_min hε₁ hε₂) fun t ht ↦
-    ⟨hA' t ⟨ht.1, ht.2.trans (min_le_left _ _)⟩, hB' t ⟨ht.1, ht.2.trans (min_le_right _ _)⟩⟩
+    IsFirstControl (cellPoint p) (ζ ^ 2) :=
+  (firstControl_eq_iff (l5b_cellPoint_ne_zero p)).1 (definition15_1_2.2.2.2.2.2.2.1 p hp)
 
 /-! ### The smaller cells -/
 
@@ -626,7 +442,10 @@ def frontBackOne : Set (Fin 3 → ℝ) :=
 
 /-- The closed 2-cell `𝒞₂(ζ², 1, 1)` (TeX 12278–12285): `z₃ = 0`, `ψ ∈ {0, π}`, `r₂ ∈ [0, 1]`,
 `θ₂ ∈ [-π, -π/3]` (the book: "brought into the interval `(-π, -π/3]`"), attached to the front and
-back faces of the second big cell. -/
+back faces of the second big cell. Only the set is formalized: the book's claims about it (the
+first control is `ζ²`, and the cell "can be attached in a similar way to the front and back faces
+of the second 3-cell in a way that agrees with the dynamics", TeX 12278–12285) are not, since
+`proposition15_2_2` covers `z₃ = 0` by `𝒞₂(ζ, 1, 1)` and no later proof uses `𝒞₂(ζ², 1, 1)`. -/
 def frontBackTwo : Set (Fin 3 → ℝ) :=
   {p | p 0 ∈ Icc 0 1 ∧ (p 1 = 0 ∨ p 1 = π) ∧ p 2 ∈ Icc (-π) (-(π / 3))}
 
@@ -679,8 +498,9 @@ theorem topFaceOne_switching {p : Fin 3 → ℝ} (hp : p ∈ topFaceOne) :
   have hc : 0 < p 0 * (0 - √3 * -1) / 2 := by
     have : 0 < p 0 * √3 := mul_pos h0 h3
     linarith
-  obtain ⟨T, hT, hT0, hTpos, hTneg⟩ := l5b_unique_pos_root (a := -1 / 12)
-    (b := (1 - p 0) * (S - √3 * -Real.cos (p 1)) / 4) (by norm_num) hc hd
+  obtain ⟨T, hT, hT0, hTpos, hTneg⟩ :=
+    exists_pos_root_cubic_of_neg_of_pos_of_pos (a := -1 / 12)
+      (b := (1 - p 0) * (S - √3 * -Real.cos (p 1)) / 4) (by norm_num) hc hd
   have hevalA : ∀ t, (chiA ζ z).toPoly.eval t = -1 / 12 * t ^ 3 +
       (1 - p 0) * (S - √3 * -Real.cos (p 1)) / 4 * t ^ 2 + p 0 * (0 - √3 * -1) / 2 * t +
         √3 * (1 - p 0) * p 0 * S := fun t ↦ by rw [l5b_eval, hA]
@@ -737,12 +557,17 @@ theorem topFaceOne_switching {p : Fin 3 → ℝ} (hp : p ∈ topFaceOne) :
         exact ⟨hT.trans ht, Or.inl (by rw [hevalA]; exact hTneg t ht)⟩
     rw [this, csInf_Ioi]
 
+set_option linter.unusedVariables false in
 /-- **`(m_A, m_B) = (0, 3)` is impossible** (TeX 12249–12252): "if `m_B = 3`, then `y₁ = y₂ = 0`.
 This implies that `r₁ = 0`, `r₂ = 0` or `θ₁, θ₂ ∈ πℤ`. Then `x₃ = -2 r₁ r₂ sin ψ = 0` by (15.1.1),
-and `m_A > 0`." (From `chiA_chiB_eq`: `m_B = 3` means `y₃ = y₂ = y₁ = 0`.) -/
+and `m_A > 0`." (From `chiA_chiB_eq`: `m_B = 3` means `y₃ = y₂ = y₁ = 0`.)
+
+The hypothesis `p ∈ cellDomain` is the book's standing assumption of §15.2 (TeX 12214–12216: the
+point is written in the cell coordinates, `r₂ ∈ [0, 1]`, `ψ ∈ [0, π]`); the argument does not use
+it (the implications hold for every `p`), and the statement is kept as printed (REPORT.md,
+Section 5). -/
 theorem multB_eq_three {p : Fin 3 → ℝ} (hp : p ∈ cellDomain) {u : ℂ} (hu : u = ζ ∨ u = ζ ^ 2)
     (h : multB u (cellPoint p) = 3) : cellPoint p 2 = 0 ∧ 0 < multA u (cellPoint p) := by
-  have _ := hp
   obtain ⟨hA1, hB1, hA2, hB2⟩ := l5b_chi_cellPoint p
   have hBa : (chiB u (cellPoint p)).a ≠ 0 := by
     rcases hu with rfl | rfl
@@ -1100,20 +925,8 @@ private lemma l5b_topFaceTwo_data {p : Fin 3 → ℝ} (hp : p ∈ topFaceTwo) :
     (l5b_mult_cubic _ (by rw [hB']; norm_num)).2.2.1 (by rw [hB']) (by rw [hB'])
       (by rw [hB']; dsimp only; exact (div_pos (mul_pos hr hS) two_pos).ne')
   refine ⟨hr, h0, hS, by rw [him]; ring, hA', hB', hmA, hmB, ?_⟩
-  rw [discrA, chiARed, hmA, pow_zero, divByMonic_one, l5b_discr_toPoly _ (by rw [hA']; norm_num),
-    hA']
-
-/-- The positive roots of `a (t - r₀)(t - r₁)(t - r₂)` with `r₀ < 0 < r₁ ≤ r₂`, with
-multiplicity: two. -/
-private lemma l5b_card_pos_roots {a r₀ r₁ r₂ : ℝ} (ha : a ≠ 0) (h₀ : r₀ < 0) (h₁ : 0 < r₁)
-    (h₁₂ : r₁ ≤ r₂) :
-    ((C a * (X - C r₀) * (X - C r₁) * (X - C r₂)).roots.filter (fun t ↦ 0 < t)).card = 2 := by
-  have h12 : (X - C r₁) * (X - C r₂) ≠ 0 := mul_ne_zero (X_sub_C_ne_zero _) (X_sub_C_ne_zero _)
-  rw [mul_assoc, mul_assoc, roots_C_mul _ ha, roots_mul (mul_ne_zero (X_sub_C_ne_zero _) h12),
-    roots_mul h12, roots_X_sub_C, roots_X_sub_C, roots_X_sub_C, Multiset.filter_add,
-    Multiset.filter_add, Multiset.filter_singleton, Multiset.filter_singleton,
-    Multiset.filter_singleton]
-  simp [not_lt.2 h₀.le, h₁, h₁.trans_le h₁₂]
+  rw [discrA, chiARed, hmA, pow_zero, divByMonic_one,
+    Cubic.discr_toPoly _ (by rw [hA']; norm_num), hA', Cubic.discr]
 
 /-- The bracket of `P'(t) = a [(t - r₁)(t - r₂) + (t - r₀)(t - r₂) + (t - r₀)(t - r₁)]` is negative
 on `[0, r₁)` when `r₀ < 0 < r₁ ≤ r₂` and `r₀ r₁ + r₀ r₂ + r₁ r₂ < 0` (that is, `P'(0) < 0`):
@@ -1190,17 +1003,19 @@ theorem topFaceTwo_switching {p : Fin 3 → ℝ} (hp : p ∈ topFaceTwo) :
   · -- `Δ_{A,0} ≥ 0`: roots `r₀ < 0 < r₁ ≤ r₂`
     rw [hdisc] at hD
     obtain ⟨ρ₀, ρ₁, ρ₂, h₀, h₁, h₁₂, -, hb, hc', hd'⟩ :=
-      l5b_cubic_roots (b := (1 - p 0) * (Real.sin (p 1) - √3 * Real.cos (p 1)) / 4)
+      exists_roots_cubic_of_discr_nonneg
+        (b := (1 - p 0) * (Real.sin (p 1) - √3 * Real.cos (p 1)) / 4)
         (by norm_num) hc hd hD
     have hpoly : (chiA (ζ ^ 2) (cellPoint p)).toPoly =
         C (1 / 12 : ℝ) * (X - C ρ₀) * (X - C ρ₁) * (X - C ρ₂) := by
       rw [Cubic.C_mul_prod_X_sub_C_eq, hA, hb, hc', hd']
     rw [hpoly]
-    exact l5b_card_pos_roots (by norm_num) h₀ h₁ h₁₂
+    exact Polynomial.card_roots_filter_pos_eq_two (by norm_num) h₀ h₁ h₁₂
   · -- `Δ_{A,0} < 0`: `χ_A > 0` on `[0, ∞)`
     rw [hdisc] at hD
     rw [l5b_eval, hA]
-    exact (l5b_cubic_nonneg (b := (1 - p 0) * (Real.sin (p 1) - √3 * Real.cos (p 1)) / 4)
+    exact (cubic_nonneg_of_discr_nonpos
+      (b := (1 - p 0) * (Real.sin (p 1) - √3 * Real.cos (p 1)) / 4)
       (by norm_num) hc hd hD.le ht).2 hD
 
 /-- The signs of `(1/12)(t - r₀)(t - r₁)(t - r₂)` for `r₀ < 0`, `r₁ ≤ r₂` and `t ≥ 0`: positive on
@@ -1214,7 +1029,8 @@ private lemma l5b_sign3 {r₀ r₁ r₂ t : ℝ} (h₀ : r₀ < 0) (h₁₂ : r�
   · exact mul_neg_of_pos_of_neg (by norm_num)
       (mul_neg_of_pos_of_neg h' (mul_neg_of_pos_of_neg (by linarith) (by linarith)))
 
-/-- **The book's estimate on `𝒞₂^A`** (module docstring): if
+/-- **The estimate `t₁ ≤ t_B` on `𝒞₂^A`** (module docstring; the book asserts that the first
+switching time is a root of `χ_{A,0}`, TeX 12413–12415, without it): if
 `χ_{A,0} = (1/12)(t - ρ₀)(t - ρ₁)(t - ρ₂)` with `ρ₀ < 0 < ρ₁ ≤ ρ₂`, then the least positive root
 satisfies `ρ₁ ≤ t_B = 6 r₁ S` (`r₁ = 1 - r₂`, `S = sin ψ`, `C = cos ψ`). Otherwise
 `χ_A(t_B) > 0` and `χ_A'(t_B) < 0` (`l5b_deriv_neg`); with `K = r₁² S` these read
@@ -1322,7 +1138,7 @@ theorem firstSwitchTime_topFaceTwo {p : Fin 3 → ℝ} (hp : p ∈ topFaceTwo) :
     intro hD
     rw [hdisc] at hD
     have hAnn : ∀ t, 0 ≤ t → 0 ≤ (chiA (ζ ^ 2) z).toPoly.eval t := fun t ht ↦ by
-      rw [hevalA]; exact (l5b_cubic_nonneg (b := b) (by norm_num) hc hd hD ht).1
+      rw [hevalA]; exact (cubic_nonneg_of_discr_nonpos (b := b) (by norm_num) hc hd hD ht).1
     have hset : {t | 0 < t ∧ ((chiA (ζ ^ 2) z).toPoly.eval t < 0 ∨
         (chiB (ζ ^ 2) z).toPoly.eval t < 0)} = Ioi tB := by
       ext t
@@ -1339,7 +1155,7 @@ theorem firstSwitchTime_topFaceTwo {p : Fin 3 → ℝ} (hp : p ∈ topFaceTwo) :
     intro hD
     rw [hdisc] at hD
     obtain ⟨ρ₀, ρ₁, ρ₂, h₀, h₁, h₁₂, hlt, hb, hc', hd'⟩ :=
-      l5b_cubic_roots (b := b) (by norm_num) hc hd hD.le
+      exists_roots_cubic_of_discr_nonneg (b := b) (by norm_num) hc hd hD.le
     have hρ : ρ₁ < ρ₂ := hlt hD
     have hfac : ∀ t, (chiA (ζ ^ 2) z).toPoly.eval t =
         1 / 12 * ((t - ρ₀) * ((t - ρ₁) * (t - ρ₂))) := by
@@ -1377,6 +1193,45 @@ theorem firstSwitchTime_topFaceTwo {p : Fin 3 → ℝ} (hp : p ∈ topFaceTwo) :
     refine ⟨h1.trans hroot.symm, ?_⟩
     rw [poincare, h1, hfc0, cellMapA, hroot]
 
+/-- **The least positive root of `χ_{A,0}` on `𝒞₂(ζ², 0, 2)` is at most `t_B = -6 y₁`** (the
+computation in the module docstring): if `χ_{A,0}` has a positive root, then `Δ_{A,0} ≥ 0`
+(`topFaceTwo_switching`), so `χ_{A,0} = (1/12)(t - ρ₀)(t - ρ₁)(t - ρ₂)` with `ρ₀ < 0 < ρ₁ ≤ ρ₂`,
+the least positive root is `ρ₁`, and `ρ₁ ≤ t_B` (`l5b_topFaceTwo_root_le`: otherwise
+`χ_A(t_B) > 0` and `χ_A'(t_B) < 0`, which are incompatible). -/
+theorem leastPosRoot_chiA_le_of_mem_topFaceTwo {p : Fin 3 → ℝ} (hp : p ∈ topFaceTwo)
+    (hne : ∃ t, 0 < t ∧ (chiA (ζ ^ 2) (cellPoint p)).toPoly.eval t = 0) :
+    leastPosRoot (chiA (ζ ^ 2) (cellPoint p)).toPoly ≤ -6 * (cellPoint p 0).im := by
+  obtain ⟨hr, h0, hS, him, hA, -, -, -, hdisc⟩ := l5b_topFaceTwo_data hp
+  set b := (1 - p 0) * (Real.sin (p 1) - √3 * Real.cos (p 1)) / 4
+  have hd : 0 < √3 * (1 - p 0) * p 0 * Real.sin (p 1) :=
+    mul_pos (mul_pos (mul_pos l5b_sqrt3_pos hr) h0) hS
+  have hc : -(√3 * p 0) / 2 < 0 := by have := mul_pos l5b_sqrt3_pos h0; linarith
+  -- a positive root forces `Δ_{A,0} ≥ 0`
+  have hD : 0 ≤ discrA (ζ ^ 2) (cellPoint p) := by
+    by_contra hD
+    obtain ⟨t, ht, hroot⟩ := hne
+    exact ((topFaceTwo_switching hp).2.2.2.2.2.2 (not_le.1 hD) t ht.le).ne' hroot
+  rw [hdisc] at hD
+  obtain ⟨ρ₀, ρ₁, ρ₂, h₀, h₁, h₁₂, -, hb, hc', hd'⟩ :=
+    exists_roots_cubic_of_discr_nonneg (b := b) (by norm_num) hc hd hD
+  have hevalA : ∀ t, (chiA (ζ ^ 2) (cellPoint p)).toPoly.eval t =
+      1 / 12 * t ^ 3 + b * t ^ 2 + -(√3 * p 0) / 2 * t + √3 * (1 - p 0) * p 0 * Real.sin (p 1) :=
+    fun t ↦ by rw [l5b_eval, hA]
+  have hfac : ∀ t, (chiA (ζ ^ 2) (cellPoint p)).toPoly.eval t =
+      1 / 12 * ((t - ρ₀) * ((t - ρ₁) * (t - ρ₂))) := by
+    intro t; rw [hevalA, hb, hc', hd']; ring
+  -- the least positive root is `ρ₁`
+  have hroot : leastPosRoot (chiA (ζ ^ 2) (cellPoint p)).toPoly = ρ₁ := by
+    apply IsLeast.csInf_eq
+    refine ⟨⟨h₁, by rw [hfac]; ring⟩, fun t ⟨ht, hft⟩ ↦ ?_⟩
+    rw [hfac] at hft
+    by_contra hlt'
+    push Not at hlt'
+    linarith [(l5b_sign3 h₀ h₁₂ ht.le).1 hlt']
+  have := l5b_topFaceTwo_root_le hr h0 hS h₀ h₁ h₁₂ hb hc' hd'
+  rw [hroot, him]
+  linarith
+
 /-! ### Helpers for Proposition 15.2.2 and the boundary maps -/
 
 /-- Changing `θ₂` by `2π` does not change the cell point. -/
@@ -1402,26 +1257,6 @@ private lemma l5b_hamMax_of_z3_zero {w : Fin 3 → ℂ} (h2 : w 2 = 0) :
   have : ∀ u, ham w u = RR (w 0) (w 1 * I) := fun u ↦ by
     rw [ham, h2, RR_eq_re_mul_add_im_mul u 0]; simp
   simp only [hamMax, this, max_self]
-
-/-- The virial rescaling of Lemma 15.1.1 on `z₃ = 0`: some `r > 0` has `a r + b r² = 1`. -/
-private lemma l5b_exists_scale {a b : ℝ} (hb : 0 ≤ b) (hab : 0 < a + b) :
-    ∃ r > 0, a * r + b * r ^ 2 = 1 := by
-  set M := 1 + 1 / (a + b)
-  have hM : 1 ≤ M := by
-    have : 0 < 1 / (a + b) := by positivity
-    linarith
-  have hgM : 1 ≤ a * M + b * M ^ 2 := by
-    have h1 : M ≤ M ^ 2 := by nlinarith
-    have h2 : (a + b) * M = a + b + 1 := by
-      simp only [M]; field_simp
-    nlinarith [mul_le_mul_of_nonneg_left h1 hb]
-  obtain ⟨r, hr, hgr⟩ : ∃ r ∈ Icc 0 M, a * r + b * r ^ 2 = 1 :=
-    intermediate_value_Icc (show (0 : ℝ) ≤ M by linarith) (by fun_prop)
-      ⟨by simp, hgM⟩
-  refine ⟨r, ?_, hgr⟩
-  rcases hr.1.eq_or_lt with h | h
-  · rw [← h] at hgr; simp at hgr
-  · exact h
 
 /-- **Semicontinuity at a face point where the cell's control is not the first control**
 (the proof route of `proposition15_2_2`, part 3): the control `u` is beaten at times
@@ -1485,8 +1320,9 @@ end TriFuller
 
 open TriFuller
 
-/-- **Remark 15.2.1** (TeX 12287–12296): "A symmetry of `V_T` carries the closed cell `𝒞₂(ζ, 1, 1)`
-to `𝒞₂(ζ², 1, 1)`, but we refrain from identifying these two closed cells with each other." The
+/-- **Remark 15.2.1** (`rem:two-cells`, label of this formalization; unlabelled, TeX 12287–12296):
+"A symmetry of `V_T` carries the closed cell `𝒞₂(ζ, 1, 1)` to `𝒞₂(ζ², 1, 1)`, but we refrain from
+identifying these two closed cells with each other." The
 rotation by `ζ` maps `𝒞₂(ζ, 1, 1)` onto `𝒞₂(ζ², 1, 1)` (`θ₂ ↦ θ₂ + 2π/3 - 2π`, `ψ` and `z₃ = 0`
 fixed), so corresponding points have the same class in `Ξ_{𝒲,0}/V_T`. (The rest of the remark,
 "`F⁻¹(𝒞₂(ζ))` and `F⁻¹(𝒞₂(ζ²))` are the two sides of a hypersurface `∂_res` in the first big cell,
@@ -1512,19 +1348,22 @@ theorem remark15_2_1 :
   rw [scale_one, ← hrot] at this
   exact this
 
-/-- **Proposition 15.2.2** (TeX 12300–12314), in `Ξ_{𝒲,0}/V_T`. "Every point in the domain of
-`Ξ_{𝒲,0}/V_T` is equivalent to a point in the union of the closures `𝒞₃(ζ^{±1})` of the first and
-second big cells (with identifications on the boundaries of each cell as given above). The first
-control `u` is `ζ` on the first big cell and `ζ²` on the second big cell. The dynamics on the faces
-of the cells is given as the continuous extension from the dynamics on the interior of the cells.
-Every point on every face of the cells that is not identified with a point in the domain
-`Ξ_{𝒲,0}/V_T` is a point with vanishing (limiting) first switching time `t_sw = 0`."
+/-- **Proposition 15.2.2** (`prop:closed-cells`, label of this formalization; unlabelled, TeX
+12300–12314), in `Ξ_{𝒲,0}/V_T`. "Every point in the domain of `Ξ_{𝒲,0}/V_T` is equivalent to a
+point in the union of the closures `𝒞₃(ζ^{±1})` of the first and second big cells (with
+identifications on the boundaries of each cell as given above). The first control `u` is `ζ` on
+the first big cell and `ζ²` on the second big cell. The dynamics on the faces of the cells is given
+as the continuous extension from the dynamics on the interior of the cells. Every point on every
+face of the cells that is not identified with a point in the domain `Ξ_{𝒲,0}/V_T` is a point with
+vanishing (limiting) first switching time `t_sw = 0`."
 
 Formalized (the book's proof: "See the discussion leading up to the statement"):
 1. every point is in the second big cell with its top face (`cellTwoSet`), or has a representative
-   in the closed first big cell at which the first control is `ζ` (from Lemma 15.1.1, (15.1.1),
+   in the closed first big cell at which the first control is `ζ` (from Lemma 15.1.1 and (15.1.1),
+   through `cellClass_cellCoords` where `x₃ < 0` and `lemma15_1_1`, `eqn15_1_1` where `z₃ = 0`;
    Lemma 13.2.6 and `frontBackOne_cover_and_switching`);
-2. the first control is `ζ` on the open first cell and `ζ²` on the second cell with its top face;
+2. the first control is `ζ` on the open first cell and `ζ²` on the second cell with its top face
+   (the facts after Definition 15.1.2, `definition15_1_2`, and `topFaceTwo_switching`);
 3. at a point `p` of the closed first (second) cell at which `ζ` (`ζ²`) is not the first control
    of `cellPoint p` — a face point whose cell dynamics does not represent the dynamics of its class
    ("not identified with a point in the domain") — the first switching time tends to `0` from the
@@ -1604,21 +1443,18 @@ theorem proposition15_2_2 :
             (topFaceOne_switching ⟨h0, h1, hπ⟩).1
     · -- `z₃ = 0`: rescale to `|z₁| + |z₂| = 1` and use the closed 2-cell `𝒞₂(ζ, 1, 1)`
       have hw2' : w 2 = 0 := by rw [hw2, hσ, Complex.ofReal_zero]
-      have hab : 0 < ‖w 0‖ + ‖w 1‖ := by
-        by_contra h
-        push Not at h
-        have h0 : w 0 = 0 := norm_eq_zero.1 (le_antisymm (by linarith [norm_nonneg (w 1)])
-          (norm_nonneg _))
-        have h1 : w 1 = 0 := norm_eq_zero.1 (le_antisymm (by linarith [norm_nonneg (w 0)])
-          (norm_nonneg _))
-        exact hwS.1 (by funext j; fin_cases j <;> simp [h0, h1, hw2'])
-      obtain ⟨r, hr, hr1⟩ := l5b_exists_scale (norm_nonneg (w 1)) hab
+      -- (15.1.1) at `x₃ = 0` (`r₁ r₂ sin(θ₁ - θ₂) = 0`), and the rescaling of Lemma 15.1.1
+      have h₃ : w 2 = ((2 * ‖w 0‖ * ‖w 1‖ * Real.sin (arg (w 0) - arg (w 1)) : ℝ) : ℂ) := by
+        have hpolar : w = ![(‖w 0‖ : ℂ) * exp ((arg (w 0) : ℂ) * I),
+            (‖w 1‖ : ℂ) * exp ((arg (w 1) : ℂ) * I), ((0 : ℝ) : ℂ)] := by
+          funext j
+          fin_cases j <;> simp [Complex.norm_mul_exp_arg_mul_I, hw2']
+        have e := (eqn15_1_1 (r₁ := ‖w 0‖) (r₂ := ‖w 1‖) (θ₁ := arg (w 0)) (θ₂ := arg (w 1))
+          (x₃ := 0) le_rfl).1.1 (by rw [← hpolar]; exact hwH)
+        rw [hw2', ← e, Complex.ofReal_zero]
+      obtain ⟨r, ⟨hr, hn'⟩, -⟩ := lemma15_1_1 hwS.1 h₃
       set w' := scale r w
       have hw'2 : w' 2 = 0 := by simp [w', scale, hw2']
-      have hn' : ‖w' 0‖ + ‖w' 1‖ = 1 := by
-        simp only [w', scale, Matrix.cons_val_zero, Matrix.cons_val_one, norm_mul, norm_pow,
-          Complex.norm_real, Real.norm_eq_abs, abs_of_pos hr]
-        linarith
       have hRR : RR (w' 0) (w' 1 * I) = 0 := by
         rw [← l5b_hamMax_of_z3_zero hw'2]
         have := (hamMax_smul_scale_and_tau one_mem_VT hr w).1
@@ -1649,7 +1485,9 @@ On each of these faces the cell's control is not the first control (so, by `prop
 point has the same class as the point it is said to map to. The bottom face of the first cell is in
 the second cell (`cellTwoSet`). At `θ₂ = -π/3` (an endpoint of the book's closed interval) the tie
 rule of Lemma 13.2.6 makes `ζ²` the first control, so that endpoint is excluded; at `θ₂ = π/3` the
-same rule gives the control `1`, and the endpoint is included.
+same rule gives the control `1`, and the endpoint is included. The front and back clauses are stated
+for `r₂ ∈ (0, 1]`: on the right face `r₂ = 0` (collapsed to edges, TeX 12192–12195) they can fail,
+e.g. at `(r₂, ψ, θ₂) = (0, π, 0)` the point is `(-1, 0, 0)`, whose first control is `ζ`.
 
 Proof route: the first controls from the lexicographic rule of Lemma 13.2.6 (`lemma13_2_6`): on
 `θ₂ = 0` the tie between `ζ` and `ζ²` is broken by `y₁ = -r₁ sin ψ < 0`, on `θ₂ = -π` by

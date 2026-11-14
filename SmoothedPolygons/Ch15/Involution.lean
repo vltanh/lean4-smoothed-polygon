@@ -53,7 +53,9 @@ vanishing along the `∂`-loci: by Lemma 13.2.4 (`lemma13_2_4`) the switching fu
 `τ(z(T, z⁰, u))` with control `ū` are those at `z⁰` reversed in time about `T`, so a root of order
 `m` at `t = 0` at `z⁰` becomes a root of order `m` at `t = T`; the rotation (13.2.7)
 (`eqn13_2_7`) and the rescaling (Lemma 13.2.1) bring the point to cell coordinates, multiplying the
-switching functions by positive constants and rescaling time.
+switching functions by positive constants and rescaling time. Along `∂_res` the common root comes
+directly from the trajectory reversal of Lemma 13.2.5 (`tau_flow_tau_flow`), which returns to
+`z₃ = 0` at the switching time.
 -/
 
 @[expose] public section
@@ -79,54 +81,21 @@ private lemma l5d_ham_flow_tau (s : ℝ) (z : Fin 3 → ℂ) (u x : ℂ) :
     ham (flow s (tau z) (starRingEnd ℂ u)) x = ham (flow (-s) z u) (starRingEnd ℂ x) := by
   rw [← tau_flow_neg, ham_tau]
 
-/-- `u` is the most recent control of `z` if and only if `ū` is the first control of `τ z`
-(Lemma 13.2.5, both directions). -/
-private lemma l5d_isMostRecentControl_iff {z : Fin 3 → ℂ} {u : ℂ} :
-    IsMostRecentControl z u ↔ IsFirstControl (tau z) (starRingEnd ℂ u) := by
-  constructor
-  · rintro ⟨hu, ε, hε, h⟩
-    refine ⟨conj_mem_VT hu, ε, hε, fun s hs v hv ↦ ?_⟩
-    rw [l5d_ham_flow_tau, l5d_ham_flow_tau, Complex.conj_conj]
-    exact h (-s) ⟨by linarith [hs.2], by linarith [hs.1]⟩ _ (conj_mem_VT hv)
-  · rintro ⟨hu, ε, hε, h⟩
-    refine ⟨by simpa using conj_mem_VT hu, ε, hε, fun t ht v hv ↦ ?_⟩
-    have := h (-t) ⟨by linarith [ht.2], by linarith [ht.1]⟩ _ (conj_mem_VT hv)
-    rwa [l5d_ham_flow_tau, l5d_ham_flow_tau, neg_neg, Complex.conj_conj,
-      Complex.conj_conj] at this
-
-private lemma l5d_ne_zero_of_mem_VT {v : ℂ} (hv : v ∈ VT) : v ≠ 0 := by
-  intro h
-  have := norm_eq_one_of_mem_VT hv
-  rw [h, norm_zero] at this
-  exact zero_ne_one this
-
-private lemma l5d_scale_ne_zero {r : ℝ} (hr : 0 < r) {z : Fin 3 → ℂ} (hz : z ≠ 0) :
-    scale r z ≠ 0 := by
-  intro h
-  apply hz
-  have hr' : (r : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
-  funext j
-  have := congrFun h j
-  fin_cases j <;> simpa [scale, hr'] using this
-
 private lemma l5d_smul_scale_ne_zero {v : ℂ} (hv : v ∈ VT) {r : ℝ} (hr : 0 < r)
     {z : Fin 3 → ℂ} (hz : z ≠ 0) : v • scale r z ≠ 0 :=
-  smul_ne_zero (l5d_ne_zero_of_mem_VT hv) (l5d_scale_ne_zero hr hz)
-
-private lemma l5d_tau_smul (c : ℂ) (z : Fin 3 → ℂ) : tau (c • z) = starRingEnd ℂ c • tau z := by
-  funext j; fin_cases j <;> simp [tau]
+  smul_ne_zero (ne_zero_of_mem_VT hv) (scale_ne_zero hr hz)
 
 /-- The first control under the virial group (`poincare_smul`, `poincare_scale`). -/
 private lemma l5d_firstControl_smul_scale {v : ℂ} (hv : v ∈ VT) {r : ℝ} (hr : 0 < r)
     {z : Fin 3 → ℂ} (hz : z ≠ 0) : firstControl (v • scale r z) = v * firstControl z := by
-  rw [(poincare_smul hv (l5d_scale_ne_zero hr hz)).1, (poincare_scale hr hz).1]
+  rw [(poincare_smul hv (scale_ne_zero hr hz)).1, (poincare_scale hr hz).1]
 
 /-- A point `z ≠ 0` is a switching point exactly when its first control is not the conjugate of
 the first control of `τ z` (the most recent control of `z`, Lemma 13.2.5). -/
 private lemma l5d_isSwitchingPoint_iff {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     IsSwitchingPoint z ↔ starRingEnd ℂ (firstControl (tau z)) ≠ firstControl z := by
   unfold IsSwitchingPoint
-  rw [l5d_isMostRecentControl_iff, ← firstControl_eq_iff (tau_ne_zero hz)]
+  rw [isMostRecentControl_iff_isFirstControl_tau, ← firstControl_eq_iff (tau_ne_zero hz)]
   constructor
   · intro h e
     exact h (by rw [← e, Complex.conj_conj])
@@ -147,7 +116,7 @@ private lemma l5d_isMostRecentControl_poincare {z : Fin 3 → ℂ} (hz : z ≠ 0
 private lemma l5d_firstControl_tau_poincare {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     firstControl (tau (poincare z)) = starRingEnd ℂ (firstControl z) :=
   (firstControl_eq_iff (tau_ne_zero (poincare_ne_zero hz))).2
-    (l5d_isMostRecentControl_iff.1 (l5d_isMostRecentControl_poincare hz))
+    (isMostRecentControl_iff_isFirstControl_tau.1 (l5d_isMostRecentControl_poincare hz))
 
 /-- A switching point is not a point at which one control is optimal on a neighbourhood of
 `t = 0`. -/
@@ -228,56 +197,6 @@ private lemma l5d_eventually_topFace {z : Fin 3 → ℂ} (h1 : (z 1).im = 0) (h2
   filter_upwards [this] with t ht v hv
   linarith [ht v hv]
 
-/-- `F(z)₃` lies on the walls for every `z ≠ 0`: at `t_sw` the first control and the control that
-beats it right after `t_sw` both maximize `RR(z₃(t_sw), ·)` (the argument of
-`SmoothedPolygons/Ch13/PoincareMap.lean`). -/
-private lemma l5d_poincare_mem_walls {z : Fin 3 → ℂ} (hz : z ≠ 0) : poincare z 2 ∈ walls := by
-  have hle : ∀ (w : Fin 3 → ℂ) (x y : ℂ), ham w x ≤ ham w y ↔ RR (w 2) x ≤ RR (w 2) y := by
-    intro w x y
-    unfold ham
-    rw [RR_comm x (w 2), RR_comm y (w 2), add_le_add_iff_left]
-  have hcont : ∀ v : ℂ, Continuous fun t ↦ ham (flow t z (firstControl z)) v := by
-    intro v
-    simp only [ham, flow, RR]
-    fun_prop
-  have hT : firstSwitchTime z ∈ Icc 0 (firstSwitchTime z) :=
-    ⟨(firstSwitchTime_pos hz).le, le_rfl⟩
-  have hP : poincare z = flow (firstSwitchTime z) z (firstControl z) := rfl
-  set u := firstControl z
-  set T := firstSwitchTime z
-  have huV : u ∈ VT := firstControl_mem_VT z
-  have hmT : ∀ v ∈ VT, ham (poincare z) v ≤ ham (poincare z) u := firstControl_maximizes hz T hT
-  by_contra hW
-  have hlt : ∀ v ∈ VT, v ≠ u → ham (poincare z) v < ham (poincare z) u := by
-    intro v hv hne
-    by_contra hle'
-    push Not at hle'
-    refine hW (mem_walls_of_maximizers huV hv (Ne.symm hne) (fun x hx ↦ ?_) fun x hx ↦ ?_)
-    · exact (hle _ _ _).1 (hmT x hx)
-    · exact (hle _ _ _).1 ((hmT x hx).trans hle')
-  have hev : ∀ v ∈ VT, ∀ᶠ t in 𝓝 T, ham (flow t z u) v ≤ ham (flow t z u) u := by
-    intro v hv
-    by_cases hne : v = u
-    · rw [hne]; exact Filter.Eventually.of_forall fun _ ↦ le_rfl
-    · have h := hlt v hv hne
-      rw [hP] at h
-      exact ((hcont v).continuousAt.eventually_lt (hcont u).continuousAt h).mono
-        fun _ h ↦ h.le
-  obtain ⟨ε, hε, hεT⟩ := Metric.eventually_nhds_iff.1 (finite_VT.eventually_all.2 hev)
-  obtain ⟨t, ht, v, hv, hlt'⟩ := firstControl_beaten hz hε
-  have hd : dist t T < ε := by
-    rw [Real.dist_eq, abs_lt]; constructor <;> linarith [ht.1, ht.2]
-  exact absurd (hεT hd v hv) (not_le.2 hlt')
-
-/-- `conj 𝒲 = 𝒲`. -/
-private lemma l5d_conj_mem_walls {w : ℂ} (hw : w ∈ walls) : starRingEnd ℂ w ∈ walls := by
-  rcases hw with (⟨s, hs, rfl⟩ | ⟨s, hs, rfl⟩) | ⟨s, hs, rfl⟩
-  · exact Or.inl (Or.inl ⟨s, hs, by simp⟩)
-  · exact Or.inr ⟨s, hs, by simp [conj_ζ]⟩
-  · refine Or.inl (Or.inr ⟨s, hs, ?_⟩)
-    simp only [map_mul, Complex.conj_ofReal, map_pow, conj_ζ]
-    linear_combination ((s : ℂ) * ζ) * ζ_pow_three
-
 /-- Every image `F(z)`, `z ≠ 0`, is a switching point: its most recent control is the first control
 of `z` (the control used on `[0, t_sw]`), and its first control differs from it
 (`firstControl_poincare_ne`). -/
@@ -302,9 +221,9 @@ theorem isSwitchingPoint_tau_iff {z : Fin 3 → ℂ} (hz : z ≠ 0) :
 /-- The virial group preserves switching points (Lemmas 13.2.1, 13.2.2). -/
 theorem isSwitchingPoint_smul_scale_iff {v : ℂ} (hv : v ∈ VT) {r : ℝ} (hr : 0 < r)
     {z : Fin 3 → ℂ} (hz : z ≠ 0) : IsSwitchingPoint (v • scale r z) ↔ IsSwitchingPoint z := by
-  have hv0 := l5d_ne_zero_of_mem_VT hv
+  have hv0 := ne_zero_of_mem_VT hv
   have hτ : tau (v • scale r z) = starRingEnd ℂ v • scale r (tau z) := by
-    rw [l5d_tau_smul, tau_scale]
+    rw [tau_smul, tau_scale]
   rw [l5d_isSwitchingPoint_iff (l5d_smul_scale_ne_zero hv hr hz), l5d_isSwitchingPoint_iff hz,
     hτ, l5d_firstControl_smul_scale (conj_mem_VT hv) hr (tau_ne_zero hz),
     l5d_firstControl_smul_scale hv hr hz, map_mul, Complex.conj_conj]
@@ -374,7 +293,7 @@ theorem exists_isSwitchingPoint_of_not {z : Fin 3 → ℂ} (hz : z ≠ 0)
   have hτ : tau z ≠ 0 := tau_ne_zero hz
   -- `u` is also the most recent control, so `ū` is the first control of `τ z` (Lemma 13.2.5)
   have hfτ : firstControl (tau z) = starRingEnd ℂ u :=
-    (firstControl_eq_iff hτ).2 (l5d_isMostRecentControl_iff.1 (not_not.1 h))
+    (firstControl_eq_iff hτ).2 (isMostRecentControl_iff_isFirstControl_tau.1 (not_not.1 h))
   -- `S = t_sw(τ z) = -t_rec(z)`, the most recent switching time of `z` (Lemma 13.2.5,
   -- `lemma13_2_5`)
   set S := firstSwitchTime (tau z)
@@ -423,7 +342,7 @@ theorem exists_isSwitchingPoint_of_not {z : Fin 3 → ℂ} (hz : z ≠ 0)
       rwa [hflow, add_sub_cancel_left]
   refine ⟨w, hw0, ?_, ?_, S, ⟨hS, by rw [hTw]; linarith⟩, ?_, ?_⟩
   · rw [hwF]
-    exact l5d_conj_mem_walls (l5d_poincare_mem_walls hτ)
+    exact conj_mem_walls (poincare_mem_walls hτ)
   · rw [hwF]
     exact (isSwitchingPoint_tau_iff (poincare_ne_zero hτ)).2 (isSwitchingPoint_poincare hτ)
   · rw [hfw, hflow, sub_self, flow_zero]
@@ -521,7 +440,11 @@ noncomputable def bdRes : Set XiW0Quot := involution '' (cellClass '' frontBackO
 
 /-- The discriminant locus `∂_A := 𝔦(𝒞₂(ζ, 0, 2))` (TeX 12339–12343), `𝒞₂(ζ, 0, 2)` viewed as the
 top face `θ₂ = π` of the first big cell (where `poincare` is the book's map,
-`continuousWithinAt_topFaceOne`). -/
+`continuousWithinAt_topFaceOne`). The book adds "By construction `∂_A` and `𝒞₂(ζ)` are in
+involution" (TeX 12344), a slip for `𝒞₂(ζ, 0, 2)`; even so it fails for the involution `𝔦 = τ F` of
+the Fuller–Poincaré map: `𝔦(𝔦(x)) = x` needs `x` to be a switching point (`involution_involution`),
+and the points of the top face are not (`not_isSwitchingPoint_of_mem_topFace`; gap G15.6). Only the
+definition `∂_A = 𝔦(𝒞₂(ζ, 0, 2))` is used. -/
 noncomputable def bdA : Set XiW0Quot := involution '' (cellClass '' topFaceOne)
 
 /-- `∂_{A,ζ²} := 𝔦(𝒞₂^A)` (TeX 12424–12426), with the book's root-based map `F_A` on `𝒞₂^A`. -/
@@ -536,7 +459,7 @@ noncomputable def bdB : Set XiW0Quot :=
 /-! ### Helpers for the `∂`-loci -/
 
 /-- A real polynomial of positive degree with a double root has vanishing discriminant
-(`Polynomial.resultant_deriv`, `Polynomial.resultant_eq_zero_iff`). -/
+(`Polynomial.discr_eq_zero_of_isRoot_of_isRoot_derivative`). -/
 private lemma l5d_discr_eq_zero_of_sq_dvd {P : ℝ[X]} (hP : 0 < P.natDegree) {b : ℝ}
     (h : (X - C b) ^ 2 ∣ P) : P.discr = 0 := by
   obtain ⟨S, hS⟩ := h
@@ -546,16 +469,8 @@ private lemma l5d_discr_eq_zero_of_sq_dvd {P : ℝ[X]} (hP : 0 < P.natDegree) {b
     rw [hS, derivative_mul, derivative_pow]
     refine dvd_add (Dvd.dvd.mul_right ?_ _) (Dvd.dvd.mul_right (dvd_pow_self _ two_ne_zero) _)
     exact Dvd.dvd.mul_right (Dvd.dvd.mul_left (by simp) _) _
-  have hres : resultant P (derivative P) = 0 := by
-    rw [resultant_eq_zero_iff]
-    exact ⟨Or.inl hP0, fun hc ↦ not_isUnit_X_sub_C b (hc.isUnit_of_dvd' h1 h2)⟩
-  have hd := resultant_deriv (f := P) (natDegree_pos_iff_degree_pos.1 hP)
-  rw [← natDegree_derivative, hres] at hd
-  have hlc : P.leadingCoeff ≠ 0 := leadingCoeff_ne_zero.2 hP0
-  have := hd.symm
-  simp only [mul_eq_zero, pow_eq_zero_iff', neg_eq_zero, one_ne_zero, false_and, hlc,
-    false_or] at this
-  exact this
+  exact discr_eq_zero_of_isRoot_of_isRoot_derivative hP0 (dvd_iff_isRoot.1 h1)
+    (dvd_iff_isRoot.1 h2)
 
 /-- `X^m (P /ₘ X^m) = P` for the multiplicity `m` of the root `0`. -/
 private lemma l5d_X_pow_mul_divByMonic (P : ℝ[X]) :
@@ -689,28 +604,6 @@ private lemma l5d_involution_cellClass {p : Fin 3 → ℝ} (hp : p ∈ cellDomai
   rw [involution, cellClass, poincareAngZero_classOf hw,
     tauZero_classOf (poincare_mem_sectionZero hw)]
 
-/-- `q_out` is not in the second big open cell: it lies in the first (`Im z₂ > 0` at (13.5.1)),
-and the open cells are disjoint (Definition 15.1.2). -/
-private lemma l5d_cellClass_ne_qOut0 {q : Fin 3 → ℝ} (hq : q ∈ openBoxTwo) :
-    cellClass q ≠ qOut0 := by
-  intro h
-  obtain ⟨-, hTwo, hdisj, -⟩ := definition15_1_2
-  have h2 : cellClass q ∈ openCellTwo := hTwo ▸ ⟨q, hq, rfl⟩
-  have him : 0 < (qOutCart 1).im := by
-    obtain ⟨hr1, hr2⟩ := rScale_bounds
-    simp only [qOutCart, equilExact, Matrix.cons_val_one, Matrix.cons_val_zero, Complex.add_im,
-      Complex.ofReal_im, Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re, zero_mul,
-      one_mul, zero_add]
-    have hr0 : (0 : ℝ) < rScale := by linarith
-    have hq : 18 < rScale ^ 2 - 3 * rScale - 2 := by nlinarith
-    apply div_pos
-    · nlinarith [mul_lt_mul_of_pos_left hq (pow_pos hr0 2)]
-    · positivity
-  have h1 : qOut0 ∈ openCellOne :=
-    ⟨qOutCart, classOf_qOutCart.1, classOf_qOutCart.2.1, qOutCart_normalization.2.1,
-      qOutCart_normalization.2.2, him⟩
-  exact Set.disjoint_left.1 hdisj h1 (h ▸ h2)
-
 /-- **The resultant and the discriminants vanish along the `∂`-loci** (Lemma 13.2.4, TeX
 12336–12345, 12425–12427 (gap G15.4: "`Δ_{A,0}` vanishes along `∂_A`" there means `∂_{A,ζ²}`),
 12441–12443), at their points in the open big cells:
@@ -722,15 +615,19 @@ private lemma l5d_cellClass_ne_qOut0 {q : Fin 3 → ℝ} (hq : q ∈ openBoxTwo)
 * along `∂_{A,ζ²}`, `Δ_{A,0} = 0` for the control `ζ²` (`χ_B` on `𝒞₂(ζ², 0, 2)` becomes `χ_A`);
 * along `∂_B`, `Δ_{B,1} = 0` (`χ_B` on `𝒞₂(ζ², 0, 2)` becomes `χ_B` of the control `ζ`).
 
-Proof route: Lemma 13.2.4 (`lemma13_2_4`), (13.2.7) (`eqn13_2_7`), Lemma 13.2.1, and
-`Polynomial.resultant_eq_zero_iff`, `Polynomial.resultant_deriv` (a double root makes the
-discriminant vanish). A point `q` of the open cell with `cellClass q = 𝔦(cellClass p)` is
+Proof route: a point `q` of the open cell with `cellClass q = 𝔦(cellClass p)` is
 `cellPoint q = v · (r y₁, r² y₂, r³ y₃)` with `y = τ F(cellPoint p)`, `v ∈ V_T`, `r > 0`; the
-rotation `v` is read off the first controls (`ζ` on the first open cell, `ū₀` at `y`). On
-`∂_{A,ζ²}` the book's map `F_A` is not `poincare` where `Δ_{A,0} = 0` (a tangency), so `v = ζ`
-is read off the third coordinates instead: `z₃(T)` is orthogonal to `ζ² - 1` (`χ_A(T) = 0`)
-and `cellPoint q` has `z₃ < 0`; and if `τ F_A(cellPoint p)` were off the section, its class
-would be the junk value `q_out`, which lies in the first open cell, not the second. -/
+rotation `v` is read off the first controls (`ζ` on the first open cell, `ū₀` at `y`). On `∂_A`,
+`∂_{A,ζ²}` and `∂_B` the book's argument: Lemma 13.2.4 (`lemma13_2_4`) with (13.2.7)
+(`eqn13_2_7`) and the rescaling (Lemma 13.2.1) carry the double root of `χ_B` at `0` to a double
+root at `r T` (`l5d_cubic_transfer`), and a double root makes the discriminant vanish
+(`Polynomial.discr_eq_zero_of_isRoot_of_isRoot_derivative`). On `∂_res` the proof uses the
+trajectory reversal of Lemma 13.2.5 instead (`tau_flow_tau_flow`: `z(T, τ F(w), ū₀) = τ w`, whose
+third coordinate is `0`), which makes every switching function of `cellPoint q` vanish at `r T` at
+once, so `χ_{A,0}` and `χ_{B,1}` have the common root `r T`. On `∂_{A,ζ²}` the book's map `F_A` is
+not `poincare` where `Δ_{A,0} = 0` (a tangency), so `v = ζ` is read off the third coordinates
+instead: `z₃(T)` is orthogonal to `ζ² - 1` (`χ_A(T) = 0`) and `cellPoint q` has `z₃ < 0`; and
+`τ F_A(cellPoint p)` lies in the section because `F_A` does (`continuousOn_cellMapA_cellMapB`). -/
 theorem discr_resAB_eq_zero_of_mem_bd :
     (∀ q ∈ openBoxOne, cellClass q ∈ bdRes → resAB ζ (cellPoint q) = 0) ∧
       (∀ q ∈ openBoxOne, cellClass q ∈ bdA → discrA ζ (cellPoint q) = 0) ∧
@@ -738,7 +635,7 @@ theorem discr_resAB_eq_zero_of_mem_bd :
       ∀ q ∈ openBoxOne, cellClass q ∈ bdB → discrB ζ (cellPoint q) = 0 := by
   obtain ⟨-, -, -, -, -, hfc1, -⟩ := definition15_1_2
   have hvv : ∀ v ∈ VT, v * starRingEnd ℂ v = 1 := fun v hv ↦ by
-    rw [← inv_eq_conj_of_mem_VT hv, mul_inv_cancel₀ (l5d_ne_zero_of_mem_VT hv)]
+    rw [← inv_eq_conj_of_mem_VT hv, mul_inv_cancel₀ (ne_zero_of_mem_VT hv)]
   refine ⟨?_, ?_, ?_, ?_⟩
   · -- `∂_res`: the trajectory reaches `z₃ = 0` at the switching time, a common root
     rintro q hq ⟨x, ⟨p, hp, rfl⟩, hx⟩
@@ -828,14 +725,9 @@ theorem discr_resAB_eq_zero_of_mem_bd :
           simpa [Multiset.mem_toFinset, mem_roots hP0] using ht.2
     set T := leastPosRoot P with hTdef
     have hcm : cellMapA w = flow T w (ζ ^ 2) := rfl
-    -- `τ F_A(w)` is a point of the section (or `cellClass q` would be the junk `q_out`)
-    by_cases hy : tau (cellMapA w) ∈ sectionZero
-    swap
-    · exfalso
-      apply l5d_cellClass_ne_qOut0 hq
-      rw [← hx]
-      unfold classOf
-      exact dite_eq_right hy
+    -- `τ F_A(w)` is a point of the section (`F_A` lands in the section)
+    have hy : tau (cellMapA w) ∈ sectionZero :=
+      tau_mem_sectionZero (continuousOn_cellMapA_cellMapB.1 p hp)
     obtain ⟨v, hv, r, hr, hqy⟩ := (classOf_eq_classOf_iff hy
       (cellPoint_mem_sectionZero (l5d_openBoxTwo_sub hq))).1 hx
     -- `v = ζ`: `z₃(T)` is orthogonal to `ζ² - 1` (`χ_A(T) = 0`) and `cellPoint q` has `z₃ < 0`
@@ -905,7 +797,7 @@ theorem discr_resAB_eq_zero_of_mem_bd :
       rwa [hqy, l5d_firstControl_smul_scale hv hr (tau_ne_zero (poincare_ne_zero hw0.1)),
         l5d_firstControl_tau_poincare hw0.1, hfcw, conj_ζ_sq] at h
     have hv1 : v = 1 := by
-      have hζ0 : ζ ≠ 0 := l5d_ne_zero_of_mem_VT ζ_mem_VT
+      have hζ0 : ζ ≠ 0 := ne_zero_of_mem_VT ζ_mem_VT
       exact (mul_left_inj' hζ0).1 (by rw [hu, one_mul])
     have hT := firstSwitchTime_pos hw0.1
     have htr := l5d_cubic_transfer one_mem_VT hr.ne' (firstSwitchTime w) w (ζ ^ 2) (ζ ^ 2) ζ
@@ -971,10 +863,11 @@ def IsGeometricPartition {α : Type*} [TopologicalSpace α] (S : Set α) (P : Li
   (∀ D ∈ P, closure (interior D) = D) ∧ (∀ x, x ∈ S ↔ ∃ D ∈ P, x ∈ D) ∧
     P.Pairwise fun D D' ↦ Disjoint (interior D) (interior D')
 
-/-- **Proposition 15.3.2** (TeX 12467–12491), as a named proposition (it rests on Figures
-15.2–15.3; gap G15.2). "Let `𝒟_i`, `i = 0, 1, 2, 3, 4` be the geometric partition of the two big
-cells defined as above. The Fuller–Poincaré map extends continuously from the interiors of `𝒟_i`
-to functions `F_i` on the closures `𝒟_i`, for `i = 0, 1, 2, 3, 4`. The involution acts on the parts
+/-- **Proposition 15.3.2** (`prop:partition`, label of this formalization; unlabelled, TeX
+12467–12491), as a named proposition (it rests on Figures 15.2–15.3; gap G15.2). "Let `𝒟_i`,
+`i = 0, 1, 2, 3, 4` be the geometric partition of the two big cells defined as above. The
+Fuller–Poincaré map extends continuously from the interiors of `𝒟_i` to functions `F_i` on the
+closures `𝒟_i`, for `i = 0, 1, 2, 3, 4`. The involution acts on the parts
 by `𝒟₃ ↔ 𝒟₄`. Moreover, `𝒟₁, 𝒟₂, 𝒟₀` are each in self involution."
 
 Precisely: `𝒟₀, 𝒟₁, 𝒟₄` and `𝒟₂, 𝒟₃` are geometric partitions of the closed first and second big

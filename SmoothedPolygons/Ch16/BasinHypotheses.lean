@@ -36,10 +36,12 @@ and the split `𝒟₂ | 𝒟₃` (`SmoothedPolygons/Ch15/Involution.lean`) are 
 * the book's `𝒟_in = 𝒟₁ ∩ 𝒟₂₂` is replaced by the whole box `𝒟₂₂`; its row ("can be anything") is
   unchanged, and `𝒟₀ ⊂ 𝒟₂₂` (the book's "`𝒟₀ ⊂ 𝒟_in`") is no longer used;
 * the rows `𝒟₄` and `𝒟₁ ∖ 𝒟_in`: a point of a box `𝒟_{ij}` of the first cell goes either to the
-  second cell (it lies in `𝒟₄`) or to a smaller box (the book's `subclaim_{ij}` on `𝒟_{1,ij}`), and
-  no orbit re-enters `𝒟₂₂` (proved from `DOutContracts` by time reversal, `theorem16_1_1`), which
-  replaces the book's argument by exclusion (`𝒟₀ ⊂ 𝒟_in`, `𝒟₄ ⊂ F(𝒟₂₂)` and the injectivity of `F`,
-  gap G16.5);
+  second cell (it lies in `𝒟₄`) or to a smaller box (the book's `subclaim_{ij}` on `𝒟_{1,ij}`). This
+  form of `BoxSubclaims` (whole boxes, with target "the second cell or a smaller box") replaces the
+  book's argument by exclusion for the last row (`𝒟₀ ⊂ 𝒟_in`, `𝒟₄ ⊂ F(𝒟₂₂)` and the injectivity of
+  `F`, gap G16.5). That no orbit re-enters `𝒟₂₂` (the column `𝒟_in` of Table 16.1, the book's step
+  (b)) is proved from `DOutContracts` by the time reversal of the book's step (a)
+  (`theorem16_1_1`);
 * the rows `𝒟₂ → 𝒟₃ → 𝒟₁ ∖ 𝒟_in` and `F²𝒟₃ ⊂ 𝒟₀₀` give: from the second cell, `𝒟₀₀` within three
   steps.
 
