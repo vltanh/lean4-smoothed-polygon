@@ -1,6 +1,6 @@
 module
 
-public import Basic.Dynamics.StableManifold
+public import StableManifold
 public import Mathlib.Topology.OpenPartialHomeomorph.Defs
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Comp

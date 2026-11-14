@@ -2,6 +2,7 @@ module
 
 public import SmoothedPolygons.Ch14.AnalyticExtension
 public import SmoothedPolygons.AppA.StableManifold
+public import Basic.Dynamics.LinearizedStability
 import SmoothedPolygons.Ch7.Isolated.VertexFlow
 import SmoothedPolygons.Ch7.Isolated.Return
 

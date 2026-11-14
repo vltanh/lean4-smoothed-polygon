@@ -21,6 +21,10 @@ rev = "v4.36.0-rc2"
 name = "OptimalControl"
 path = "../lean4-optimal-control"
 
+[[require]]
+name = "StableManifold"
+path = "../lean4-stable-manifold"
+
 [[lean_lib]]
 name = "Basic"
 globs = ["Basic.+"]
