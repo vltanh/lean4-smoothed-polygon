@@ -156,9 +156,9 @@ thm:mahler	+rem:periodic-extension	"Thus, the trajectory is not periodic. This i
 #
 thm:no-chatter	+eqn:LambdaR-linear	the book's proof works in the Lie algebra chart of section 14.1 ("in the coordinates of Chapter 14", TeX 12852-12886), whose Λ_R is the solution of (14.1.3), used without naming it
 thm:no-chatter	+eqn:Xtilde	the book's proof works in the Lie algebra chart (14.1.1) near the divisor (TeX 12852-12886), used without naming it
-thm:no-chatter	+eqn:u3	the solution formula (13.3.1) for a measurable control, u₃ = ½∫u(s)(t-s)²ds, is how the formal proof handles the relaxed (U_T-valued) limit controls of the rescaled arcs (the repair of §16.4.2, E90); the book's argument has no such limit
+thm:no-chatter	+eqn:u3	the formula (13.3.1) enters through Chapter 13's uniqueness of extremals near a nonzero point (eq_flow_of_maxCondition: an extremal follows its first control), which the proof uses for the switching points near the divisor and for the relaxed limits of the repair of §16.4.2 (E90); the book uses that switching points follow the Fuller map without naming it
 thm:no-chatter	+eqn:z1z2z3	the blow-up coordinates z = (z₁, z₂, z₃) of Chapter 13, in which the cluster set lives (TeX 12852-12886), used without naming them
-thm:no-chatter	+eqn:z3u3	equation (13.3.2), z₃ in terms of u₃ and the initial point, used with (13.3.1) for the relaxed limit controls in the repair of §16.4.2 (E90)
+thm:no-chatter	+eqn:z3u3	equation (13.3.2) enters with (13.3.1) through Chapter 13's uniqueness of extremals (eq_flow_of_maxCondition), as for eqn:u3
 thm:no-chatter	+lem:Lie-Fuller	the leading-order agreement of the Reinhardt and Fuller flows (Lemma 14.2.3) underlies the statement that switching points near the divisor follow the Fuller map (TeX 12887-12902), without naming it
 thm:no-chatter	+lem:analytic-extension	the extended Reinhardt-Poincaré map near (0, x_out) (Lemma 14.3.1) is what the book means by "the stable manifold" and the dynamics at q_out (TeX 13001-13026), used without naming it
 thm:no-chatter	+lem:chi-asymptotic	the switching functions near the divisor are those of the Fuller system to leading order (Lemma 14.2.4), the book's §16.4.2 premise (TeX 12887-12902), used without naming it
