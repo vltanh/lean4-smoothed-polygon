@@ -1,6 +1,7 @@
 module
 
 public import Basic.Dynamics.Stability
+public import StableManifold.Linear.Spectral
 public import Mathlib.Analysis.Calculus.FDeriv.Comp
 public import Mathlib.Analysis.Complex.Basic
 public import Mathlib.LinearAlgebra.Charpoly.Basic
@@ -28,89 +29,15 @@ Mathlib has Gelfand's formula (`spectrum.pow_nnnorm_pow_one_div_tendsto_nhds_spe
 the form `spectrum.spectralRadius_eq_gelfandRadius`) for complex Banach algebras and the chain rule
 for iterates (`HasFDerivAt.iterate`), but no stability theorem for maps.
 
-* `ContinuousLinearMap.exists_norm_pow_lt_one`: if every complex root of the characteristic
-  polynomial of `A` has modulus `< 1`, then `‖A ^ N‖ < 1` for some `N ≥ 1`.
+* `ContinuousLinearMap.exists_norm_pow_lt_one` (from the stable manifold package,
+  `StableManifold.Linear.Spectral`): if every complex root of the characteristic polynomial of `A`
+  has modulus `< 1`, then `‖A ^ N‖ < 1` for some `N ≥ 1`.
 * `Function.isAsymptoticallyStable_of_hasFDerivAt`: linearized stability.
 -/
 
 @[expose] public section
 
 open Filter Topology
-
-namespace ContinuousLinearMap
-
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-
-open scoped Matrix.Norms.Operator in
-/-- Gelfand's formula for a complex matrix whose eigenvalues lie in the open unit disk: its powers
-decay geometrically, entry by entry. (The matrix is normed by the `L∞`-operator norm, a Banach
-algebra norm; the spectrum is the set of roots of the characteristic polynomial.) -/
-private lemma l4a_exists_entry_bound {d : ℕ} (M : Matrix (Fin d) (Fin d) ℂ)
-    (hM : ∀ z : ℂ, M.charpoly.IsRoot z → ‖z‖ < 1) :
-    ∃ C r : ℝ, 0 ≤ r ∧ r < 1 ∧ ∀ (n : ℕ) (i j : Fin d), ‖(M ^ n) i j‖ ≤ C * r ^ n := by
-  have : CompleteSpace (Matrix (Fin d) (Fin d) ℂ) := FiniteDimensional.complete ℂ _
-  have hrad : spectralRadius ℂ M < 1 := by
-    rcases (spectrum ℂ M).eq_empty_or_nonempty with h | h
-    · simp [spectralRadius_eq_of_unital, h]
-    · obtain ⟨z, hz, hzr⟩ := spectrum.exists_nnnorm_eq_spectralRadius_of_nonempty h
-      rw [← hzr]
-      have hz1 : ‖z‖ < 1 := hM z (Matrix.mem_spectrum_iff_isRoot_charpoly.1 hz)
-      exact_mod_cast hz1
-  have hg : gelfandRadius M < 1 := by
-    rw [spectrum.spectralRadius_eq_gelfandRadius] at hrad
-    exact ENNReal.ofReal_lt_one.1 hrad
-  obtain ⟨C, -, hC⟩ :=
-    norm_pow_le_mul_pow_of_gelfandRadius_lt M (r := (gelfandRadius M + 1) / 2) (by linarith)
-  refine ⟨C, (gelfandRadius M + 1) / 2, by positivity, by linarith, fun n i j ↦ ?_⟩
-  exact (Matrix.norm_apply_le_linfty_opNorm _ i j).trans (hC n)
-
-/-- If every complex eigenvalue of a linear operator `A` of a finite-dimensional real normed space
-(every root in `ℂ` of its characteristic polynomial) has modulus `< 1`, then some power `A ^ N`,
-`N ≥ 1`, has operator norm `< 1`.
-
-Proof: complexify. Choose a basis (`Module.finBasis`), so that `A` is a real matrix `M`, and view
-`M` as a complex matrix, normed by the `L∞`-operator norm (a complex Banach algebra). The spectrum
-of the complex matrix is the set of roots of its characteristic polynomial
-(`Matrix.mem_spectrum_iff_isRoot_charpoly`), which are the complex roots of the characteristic
-polynomial of `A` (`Matrix.charpoly_map`, `LinearMap.charpoly_toMatrix`), so its spectral radius
-is `< 1`. By Gelfand's formula (`spectrum.spectralRadius_eq_gelfandRadius`,
-`norm_pow_le_mul_pow_of_gelfandRadius_lt`), `‖Mⁿ‖ ≤ C rⁿ` with `r < 1`, so the entries of `Mⁿ`
-tend to `0`. The linear map from matrices to `E →L[ℝ] E` is continuous (finite dimension), so
-`Aⁿ → 0`, and `‖Aⁿ‖ < 1` for large `n`. -/
-theorem exists_norm_pow_lt_one (A : E →L[ℝ] E)
-    (hA : ∀ μ : ℂ, Polynomial.aeval μ (LinearMap.charpoly (A : E →ₗ[ℝ] E)) = 0 → ‖μ‖ < 1) :
-    ∃ N : ℕ, 0 < N ∧ ‖A ^ N‖ < 1 := by
-  classical
-  let b := Module.finBasis ℝ E
-  let M := LinearMap.toMatrix b b (A : E →ₗ[ℝ] E)
-  -- The complexified matrix: its eigenvalues are the complex roots of the charpoly of `A`.
-  obtain ⟨C, r, hr0, hr1, hC⟩ := l4a_exists_entry_bound (M.map (algebraMap ℝ ℂ)) fun z hz ↦
-    hA z (by rwa [Polynomial.IsRoot.def, Matrix.charpoly_map, LinearMap.charpoly_toMatrix,
-      Polynomial.eval_map_algebraMap] at hz)
-  -- Hence the real matrices `M ^ n` tend to `0`, entry by entry.
-  have hM : Tendsto (fun n : ℕ ↦ M ^ n) atTop (𝓝 0) := by
-    refine tendsto_pi_nhds.2 fun i ↦ tendsto_pi_nhds.2 fun j ↦ ?_
-    have hlim : Tendsto (fun n : ℕ ↦ C * r ^ n) atTop (𝓝 0) := by
-      simpa using (tendsto_pow_atTop_nhds_zero_of_lt_one hr0 hr1).const_mul C
-    refine squeeze_zero_norm (fun n ↦ ?_) hlim
-    have h := hC n i j
-    rwa [← Matrix.map_pow, Matrix.map_apply, Complex.coe_algebraMap, Complex.norm_real] at h
-  -- Transfer to `E →L[ℝ] E` through the linear map `Matrix → (E →L[ℝ] E)`, which is continuous
-  -- since the space of matrices is finite-dimensional.
-  let Ψ : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ →ₗ[ℝ] (E →L[ℝ] E) :=
-    (LinearMap.toContinuousLinearMap : (E →ₗ[ℝ] E) ≃ₗ[ℝ] (E →L[ℝ] E)).toLinearMap ∘ₗ
-      (Matrix.toLin b b).toLinearMap
-  have hΨ : ∀ n : ℕ, Ψ (M ^ n) = A ^ n := by
-    intro n
-    ext x
-    simp [Ψ, M, LinearMap.toMatrix_pow, ← ContinuousLinearMap.toLinearMap_pow]
-  have hT : Tendsto (fun n : ℕ ↦ A ^ n) atTop (𝓝 0) := by
-    have h := (Ψ.continuous_of_finiteDimensional.tendsto 0).comp hM
-    simpa [Function.comp_def, hΨ] using h
-  obtain ⟨N, hN⟩ := eventually_atTop.1 (hT.norm.eventually (gt_mem_nhds (a := (1 : ℝ)) (by simp)))
-  exact ⟨N + 1, N.succ_pos, hN (N + 1) (by omega)⟩
-
-end ContinuousLinearMap
 
 namespace Function
 

@@ -183,26 +183,12 @@ private lemma l4h_isClosed_wall (k : ℕ) : IsClosed (wall k) := by
   rw [e]
   exact hiso.isClosedEmbedding.isClosedMap _ isClosed_Iic
 
-/-- `Ξ_𝒲` is compact: closed (`φ` is continuous, the walls are closed) and bounded
-(`|ξ_j| ≤ 1`). -/
+/-- `Ξ_𝒲` is compact: a closed subset (the walls are closed) of the compact `Ξ`
+(`isCompact_Xi`). -/
 private lemma l4h_isCompact_XiW : IsCompact (XiW : Set (Fin 3 → ℂ)) := by
-  have hXi : IsClosed Xi := isClosed_eq continuous_weightedNorm continuous_const
   have hW : IsClosed walls :=
     ((l4h_isClosed_wall 0).union (l4h_isClosed_wall 1)).union (l4h_isClosed_wall 2)
-  have hC' : IsClosed (Xi ∩ (fun ξ : Fin 3 → ℂ ↦ ξ 2) ⁻¹' walls) :=
-    hXi.inter (hW.preimage (continuous_apply 2))
-  have hC : IsClosed (XiW : Set (Fin 3 → ℂ)) := hC'
-  refine Metric.isCompact_of_isClosed_isBounded hC
-    ((Metric.isBounded_closedBall (x := (0 : Fin 3 → ℂ)) (r := 1)).subset ?_)
-  intro ξ hξ
-  have h1 : weightedNorm ξ = 1 := (l4h_mem_XiW.1 hξ).1
-  obtain ⟨a, b, c⟩ := l4h_norm_le_weightedNorm ξ
-  rw [h1, one_pow] at *
-  rw [Metric.mem_closedBall, dist_zero_right, pi_norm_le_iff_of_nonneg zero_le_one]
-  intro j
-  fin_cases j
-  exacts [a, b, c]
-
+  exact isCompact_Xi.inter_right (hW.preimage (continuous_apply 2))
 
 /-- **The Poincaré map** `F` of the Fuller system (TeX 11236–11251), in Cartesian coordinates:
 `F(z⁰) = z(t_sw, z⁰, u)`, the value at the first switching time `t_sw` of the solution with initial

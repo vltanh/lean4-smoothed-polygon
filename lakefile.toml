@@ -22,6 +22,12 @@ name = "OptimalControl"
 git = "https://github.com/vltanh/lean4-optimal-control"
 rev = "88689a80ebc400f2e7b3656ee0b9d95a7bf42820"
 
+# The stable manifold theorem, from the published package at a pinned commit.
+[[require]]
+name = "StableManifold"
+git = "https://github.com/vltanh/lean4-stable-manifold"
+rev = "4909ed2eb6bdc504f86ccb455e544315f11d3860"
+
 [[lean_lib]]
 name = "Basic"
 globs = ["Basic.+"]

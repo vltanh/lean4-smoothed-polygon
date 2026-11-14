@@ -260,6 +260,34 @@ theorem ang_mem_Xi {z : Fin 3 → ℂ} (hz : z ≠ 0) : ang z ∈ Xi := by
   change weightedNorm (scale (weightedNorm z)⁻¹ z) = 1
   rw [weightedNorm_scale (inv_pos.mpr h), inv_mul_cancel₀ h.ne']
 
+/-- `Ξ` is closed. -/
+theorem isClosed_Xi : IsClosed Xi := isClosed_eq continuous_weightedNorm continuous_const
+
+/-- `Ξ` is compact: closed and bounded (`|ξ_j| ≤ 1`, since `|ξ₁|⁶ + |ξ₂|³ + |ξ₃|² = 1`). -/
+theorem isCompact_Xi : IsCompact Xi := by
+  refine Metric.isCompact_of_isClosed_isBounded isClosed_Xi
+    ((Metric.isBounded_closedBall (x := (0 : Fin 3 → ℂ)) (r := 1)).subset fun ξ hξ ↦ ?_)
+  have h1 : weightedNorm ξ = 1 := hξ
+  have h6 : ‖ξ 0‖ ^ 6 + ‖ξ 1‖ ^ 3 + ‖ξ 2‖ ^ 2 = 1 := by
+    have : weightedNorm ξ ^ 6 = ‖ξ 0‖ ^ 6 + ‖ξ 1‖ ^ 3 + ‖ξ 2‖ ^ 2 := by
+      unfold weightedNorm
+      rw [show (1 / 6 : ℝ) = ((6 : ℕ) : ℝ)⁻¹ by norm_num]
+      exact Real.rpow_inv_natCast_pow (by positivity) (by norm_num)
+    rw [← this, h1, one_pow]
+  have a0 := pow_nonneg (norm_nonneg (ξ 0)) 6
+  have a1 := pow_nonneg (norm_nonneg (ξ 1)) 3
+  have a2 := pow_nonneg (norm_nonneg (ξ 2)) 2
+  rw [Metric.mem_closedBall, dist_zero_right, pi_norm_le_iff_of_nonneg zero_le_one]
+  have b0 : ‖ξ 0‖ ≤ 1 :=
+    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 6 ≠ 0)).1 (by linarith)
+  have b1 : ‖ξ 1‖ ≤ 1 :=
+    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 3 ≠ 0)).1 (by linarith)
+  have b2 : ‖ξ 2‖ ≤ 1 :=
+    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 2 ≠ 0)).1 (by linarith)
+  intro j
+  fin_cases j
+  exacts [b0, b1, b2]
+
 /-- `(r ξ₁, r² ξ₂, r³ ξ₃) ≠ 0` for `r > 0` and `ξ ∈ Ξ`. -/
 theorem scale_ne_zero_of_mem_Xi {r : ℝ} (hr : 0 < r) {ξ : Fin 3 → ℂ} (hξ : ξ ∈ Xi) :
     scale r ξ ≠ 0 := by

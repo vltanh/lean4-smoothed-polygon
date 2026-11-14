@@ -202,7 +202,7 @@ theorem hamMax_eq_of_maxCondition {t₁ t₂ : ℝ} {z : ℝ → Fin 3 → ℂ} 
 /-! ### Helpers: local uniqueness of extremals -/
 
 /-- `|RR(x, y)| ≤ |x||y|`. -/
-private lemma l4d_abs_RR_le (x y : ℂ) : |RR x y| ≤ ‖x‖ * ‖y‖ := by
+lemma abs_RR_le (x y : ℂ) : |RR x y| ≤ ‖x‖ * ‖y‖ := by
   rw [RR]
   calc |(starRingEnd ℂ x * y).re| ≤ ‖starRingEnd ℂ x * y‖ := Complex.abs_re_le_norm _
     _ = ‖x‖ * ‖y‖ := by rw [norm_mul, Complex.norm_conj]
@@ -301,7 +301,7 @@ private lemma l4d_local_unique {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ 
     have hP := hpos (t - a) ⟨sub_pos.2 ht.1, by linarith [ht.2]⟩
     have hR := hRRz (u₀ - v) t htI
     have herr : -((t - a) ^ 3 / 3) ≤ RR (u3 a u t) (I * (u₀ - v)) := by
-      have h1 := l4d_abs_RR_le (u3 a u t) (I * (u₀ - v))
+      have h1 := abs_RR_le (u3 a u t) (I * (u₀ - v))
       have h2 : ‖I * (u₀ - v)‖ ≤ 2 := by
         rw [norm_mul, Complex.norm_I, one_mul]
         calc ‖u₀ - v‖ ≤ ‖u₀‖ + ‖v‖ := norm_sub_le _ _

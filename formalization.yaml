@@ -8,14 +8,14 @@ project:
     Packings of Smoothed Polygons (arXiv:2405.04331v1, 2024), with its geometric foundations. The
     book reformulates the Reinhardt problem, which asks for the centrally symmetric convex disk
     whose densest packing is least dense, as an optimal control problem on SL2(R), and studies its
-    Pontryagin extremals. Three theorems are conditional: the book's main theorem, Mahler's First
-    conjecture (Theorem 16.3.1), is proved only under one named hypothesis,
-    NoChatteringIntoSingularLocus, which stands for the book's Theorems 16.4.1 and 14.4.1, not yet
-    formalized (they rest on Chapters 13-16, of which Chapters 13 and 15 and Sections 16.1-16.2 are
-    formalized); and the global basin theorem (Theorem 16.1.1) and Theorem 16.2.1 are proved only
-    under three named numerical facts, DOutContracts, CellTwoEntersDOut and BoxSubclaims, which
-    state the containments that the book reads off Mathematica plots and a contraction that its
-    argument lacks. Every other result below is proved unconditionally.
+    Pontryagin extremals. Four theorems are conditional: the book's main theorem, Mahler's First
+    conjecture (Theorem 16.3.1), is proved only under the book's Theorem 14.4.1 (no return), stated
+    as the named proposition Theorem14_4_1 and not proved (the book proves it from an uncertified
+    numerical computation of an unstable curve), and three named numerical facts, DOutContracts,
+    CellTwoEntersDOut and BoxSubclaims, which state the containments that the book reads off
+    Mathematica plots and a contraction that its argument lacks; and the global basin theorem
+    (Theorem 16.1.1), Theorem 16.2.1 and the cluster point theorem (Theorem 16.4.1) are proved only
+    under the three facts. Every other result below is proved unconditionally.
 
 
     The formalization covers Chapters 2, 3, 4, 6 and 7 of the book with Appendices A.6 and A.11:
@@ -119,6 +119,30 @@ project:
     point theorem) and the last row of its table (by whole-box subclaims and a time-reversal step).
     Proposition 15.3.2, whose topology the book reads off figures, is stated as a named proposition
     and not proved; no result uses it.
+
+
+    A ninth round, the sixth layer, formalizes Chapter 14 up to Section 14.3 and Appendix A.3: the
+    Lie algebra chart near the singular locus and its mirror image at q_in, with Lemma 10.1.1; the
+    asymptotics of the Reinhardt system near the singular locus (Lemmas 14.2.3-14.2.4, which the
+    book proves by a Mathematica series expansion, proved by a comparison of differential
+    equations); Lemma 14.3.1, that the Reinhardt-Poincare map, written in the chart, extends to an
+    analytic diffeomorphism across the exceptional divisor near the fixed point over q_out, where it
+    is the Fuller-Poincare map, along the book's route; Theorem 14.3.3 and Remark 14.3.4, the
+    hyperbolic fixed points over q_out and q_in, with a C-infinity unstable, respectively stable,
+    curve and the divisor as the other local manifold; and Theorem A.3.1, the stable manifold
+    theorem that the book cites from Irwin, in its local part, proved in the package
+    StableManifold. It also formalizes Section 16.4: Theorem 16.4.1, the cluster point theorem (if
+    the switching points of a Pontryagin extremal accumulate on the singular locus in finite time,
+    they converge to q_in and lie on its stable curve), with its time reversal, under the three
+    numerical facts. The book's Section 16.4.2, which asserts Reinhardt cells and branch maps near
+    the divisor, is repaired by the forward invariance of the cluster set of the switching points
+    under the Fuller-Poincare map, and the passage from a cluster point to a limit by a hyperbolic
+    box at q_out. With Theorem 14.4.1, stated as a named proposition, these give the hypothesis
+    NoChatteringIntoSingularLocus along the book's last step, so that Mahler's First conjecture is
+    proved conditionally on Theorem 14.4.1 and the three numerical facts
+    (SmoothedPolygons.theorem16_3_1_of_theorem14_4_1); it is not proved here. A pilot of the
+    certification of the three facts certifies the contraction part of DOutContracts by
+    kernel-checked interval arithmetic (decide +kernel, no native_decide).
   authors:
     - "The-Anh Vu-Le"
   license: "Apache-2.0"
@@ -270,6 +294,18 @@ sources:
       collected works, CARMA archive, item 088), with its errors and gaps repaired: the function G
       in the proof of Theorem C is not even, so it does not define a star body (proved in Lean),
       and two steps of Section 4 are asserted without argument.
+  - title: "Smooth Dynamical Systems"
+    authors:
+      - "M. C. Irwin"
+    type: "book"
+    location: "Academic Press, 1980, Chapter 6"
+    relationship: "background"
+    note: >-
+      Cited in Section 14.3 and recalled in Appendix A.3 as Theorem A.3.1, the stable manifold
+      theorem. The theorem is proved in the package StableManifold by the standard Lyapunov-Perron
+      argument, not compared with Irwin's text line by line, and Theorem A.3.1 is stated in its
+      local part (SmoothedPolygons.theoremA_3_1); the book's local stable set omits that the orbit
+      stays in the neighbourhood (REPORT.md, E92).
 
 related_formalizations:
   - id: "https://github.com/sunfishho/reinhardt-density-bound"
@@ -294,6 +330,22 @@ related_formalizations:
       The package FixedPoint, by the same maintainer, required by OptimalControl: Brouwer's
       fixed-point theorem, by Milnor and Rogers' analytic argument, used in the proof of the
       maximum principle.
+  - id: "https://github.com/vltanh/lean4-stable-manifold"
+    relationship: "builds-on"
+    note: >-
+      The package StableManifold, by the same maintainer, required at the commit pinned in
+      lake-manifest.json: the stable manifold theorem for a C^n map (1 <= n <= infinity) near a
+      hyperbolic fixed point of a finite-dimensional real normed space, with the local stable and
+      unstable sets as graphs over the stable and unstable subspaces, by the Lyapunov-Perron
+      method. SmoothedPolygons/AppA/StableManifold.lean states Theorem A.3.1 in the book's terms
+      and proves it from the package; Theorem 14.3.3, Remark 14.3.4 and Theorem 16.4.1 use it, and
+      the conditional proof of Theorem 16.3.1 does not.
+  - id: "https://github.com/TauCetiProject/TauCeti"
+    relationship: "independent"
+    note: >-
+      A Lean 4 development that proves, concurrently (first committed on 6 November 2026), the
+      stable and unstable manifold theorem for an equilibrium of a C^n vector field, that is, for
+      flows rather than maps. This work does not use it.
   - id: "https://github.com/willcforte/pontryagin-lean"
     relationship: "independent"
     note: >-
@@ -303,21 +355,28 @@ related_formalizations:
 status:
   scope: >-
     Conditional: Theorem 16.3.1 (Mahler's First conjecture, the book's main theorem) is proved only
-    under one named hypothesis, NoChatteringIntoSingularLocus (an explicit hypothesis of
-    SmoothedPolygons.theorem16_3_1, not an axiom; the axiom audit lists it among the results the
-    theorem uses), which stands for Theorems 16.4.1 and 14.4.1, not yet formalized (they rest on
-    Chapters 13-16, of which Chapters 13 and 15 and Sections 16.1-16.2 are formalized): the
-    switching times of an edge-extremal
+    under Theorem 14.4.1 (no return), stated as the named proposition
+    SmoothedPolygons.Theorem14_4_1 and not proved, and the three named numerical facts below
+    (SmoothedPolygons.theorem16_3_1_of_theorem14_4_1; explicit hypotheses, not axioms; the axiom
+    audit lists them among the results the theorem uses). The book proves Theorem 14.4.1 from a
+    numerical computation of an unstable curve that it does not certify (REPORT.md, E88); a later
+    layer is to prove it. The third layer's form, SmoothedPolygons.theorem16_3_1, conditional on the
+    named hypothesis NoChatteringIntoSingularLocus (the switching times of an edge-extremal
     Pontryagin extremal with the boundary conditions of Problem 3.6.2 do not accumulate at a time
-    where its lift meets the singular locus. Also conditional: Theorems 16.1.1 (the global basin of
-    the Fuller-Poincare map) and 16.2.1 (outward Fuller trajectories), SmoothedPolygons.theorem16_1_1
-    and SmoothedPolygons.theorem16_2_1, are proved only under three named numerical facts,
+    where its lift meets the singular locus), remains; the hypothesis is now derived from Theorems
+    16.4.1 and 14.4.1 along the book's last step
+    (SmoothedPolygons.noChatteringIntoSingularLocus_of_theorem14_4_1, E89). Also conditional:
+    Theorems 16.1.1 (the global basin of the Fuller-Poincare map), 16.2.1 (outward Fuller
+    trajectories) and 16.4.1 (the cluster point theorem), SmoothedPolygons.theorem16_1_1,
+    theorem16_2_1 and theorem16_4_1, are proved only under three named numerical facts,
     SmoothedPolygons.TriFuller.DOutContracts, CellTwoEntersDOut and BoxSubclaims (explicit
-    hypotheses of the two theorems, not axioms; the axiom audit lists them among the results the
+    hypotheses of the theorems, not axioms; the axiom audit lists them among the results the
     theorems use), which stand for the containments of Table 16.1 that the book reads off
     Mathematica plots, with a contraction near q_out that the book's convergence argument lacks;
-    they hold numerically and are to be certified by interval enclosures in a later layer.
-    Everything else listed here is proved unconditionally.
+    they hold numerically and are to be certified by interval enclosures in a later layer, whose
+    pilot certifies the contraction part of DOutContracts by kernel-checked interval arithmetic
+    (SmoothedPolygons.TriFuller.ContractionBox.contraction_on_B). Everything else listed here is
+    proved unconditionally.
     Formalized: every numbered result of Chapters 2, 3, 4, 5, 6, 7, 8 and 13 of the book, of
     Chapter 15 except Proposition 15.3.2, and of Appendices A.6 and A.11, and Corollary A.1.3,
     including Theorem 6.1.1 (Filippov, cited without a source),
@@ -368,16 +427,30 @@ status:
     and the vanishing limiting switching times on their faces), the involution tau o F at
     switching points (E73), and Remark 15.3.1 with q_in and q_out swapped back
     (SmoothedPolygons.remark15_3_1, remark15_3_1_segment; r2 = 2 - sqrt 3 exactly, E75); and,
-    conditionally, Theorems 16.1.1 and 16.2.1 (above). Not formalized: Chapter 1; Chapters 9-12 and
-    14 and Section 16.4, apart from Theorem 16.3.1, proved conditionally; Appendix A.1 apart from
-    Corollary A.1.3, Appendices A.2-A.5, A.7-A.10 and B; within the formalized chapters, the
+    conditionally, Theorems 16.1.1 and 16.2.1 (above). Also proved (ninth round, the sixth layer):
+    Lemma 10.1.1; Chapter 14 up to Section 14.3, with the chart of Section 14.1 and its mirror image
+    at q_in (E81, E87), the asymptotics of Section 14.2 (Lemmas 14.2.3-14.2.4 by a comparison of
+    differential equations, E84), Lemma 14.3.1 (SmoothedPolygons.lemma14_3_1: the
+    Reinhardt-Poincare map extends to an analytic diffeomorphism across the exceptional divisor,
+    where it is the Fuller-Poincare map; by the book's route, with the steps it omits supplied,
+    E85), Theorem 14.3.3 (SmoothedPolygons.theorem14_3_3: the fixed point over q_out is hyperbolic,
+    with a C-infinity unstable curve and the divisor as its local stable manifold, E86) and Remark
+    14.3.4 (in a mirrored chart, E87); Theorem A.3.1, the stable manifold theorem, in its local part
+    (SmoothedPolygons.theoremA_3_1, E92); and, conditionally on the three facts, Theorem 16.4.1 and
+    its time reversal (SmoothedPolygons.theorem16_4_1, theorem16_4_1_reverse; Section 16.4.2 and the
+    passage from a cluster point to a limit repaired, E90, E91). Not formalized: Chapter 1; Chapters
+    9-12 apart from Lemma 10.1.1; Theorem 14.4.1, stated as a named proposition and not proved
+    (E88); Appendix A.1 apart from Corollary A.1.3, Appendices A.2, A.4, A.5, A.7-A.10 and B, and
+    the global part of Theorem A.3.1, which no proof uses; within the formalized chapters, the
     conjectural Remarks 7.6.1 and 7.6.3, the printed Theorem 8.2.7 for abnormal lifts, which is
     open, the interpretation in Remark 13.5.4 of a fixed point as a limit of the extremals of
     Section 7.5 (Mathematica and a forward reference to Section 14.2), the informal corollary after
     Lemma 13.2.8, which is not used later, Proposition 15.3.2 (stated as a named proposition,
     SmoothedPolygons.TriFuller.Proposition15_3_2, and not used), the two-sides claim of Remark
-    15.2.1, the attachment of the 2-cell C2(zeta^2, 1, 1), and the claims of Chapters 15-16 read
-    off figures that the proofs do not use (REPORT.md, Section 9). Pontryagin
+    15.2.1, the attachment of the 2-cell C2(zeta^2, 1, 1), the claims of Chapters 15-16 read off
+    figures that the proofs do not use, Remarks 14.2.2 and 14.3.2, which make no precise claim, and
+    the claims of Section 16.4.2 that the repaired proof of Theorem 16.4.1 does not use
+    (Weierstrass polynomials, Reinhardt cells and branch maps) (REPORT.md, Section 9). Pontryagin
     extremals are defined by the conditions of the maximum principle (IsPontryaginExtremal), and
     the maximum principle shows that minimizers are extremals. No cited theorem is assumed: Fejes
     Toth's theorem, Gruber's density formula, the theorems of Minkowski and Mahler on critical
@@ -387,7 +460,9 @@ status:
     and proved in the OptimalControl package (github.com/vltanh/lean4-optimal-control, at a pinned
     commit), which takes Brouwer's fixed-point theorem from the FixedPoint package
     (github.com/vltanh/lean4-fixed-point); the form of Filippov's theorem with a state constraint
-    that Section 6.1 applies is proved in OptimalControl too.
+    that Section 6.1 applies is proved in OptimalControl too; and Irwin's stable manifold theorem,
+    which Appendix A.3 recalls as Theorem A.3.1, is proved in the StableManifold package
+    (github.com/vltanh/lean4-stable-manifold, at a pinned commit).
     Statements and definitions corrected (REPORT.md, Section 3): E1 (false lemma), E6, E13 (a
     hypothesis approved by the user), E15 (the converse of Problem 3.6.2, for winding number one),
     E16, E17, E20, E21, E26, E32 (Theorem 7.7.1's reading), E34 and E35 (hypotheses approved by
@@ -397,7 +472,10 @@ status:
     hypothesis), E65 (the type of z_j in Lemma 13.3.2), E66 (the identification of Section 13.4,
     which the book calls a diffeomorphism, as a homeomorphism with phi of class C2), E73 (F^-1 =
     tau F tau at switching points only), E75 (the labels q_in and q_out of Remark 15.3.1), E76 (the
-    index of the boxes of Section 16.1).
+    index of the boxes of Section 16.1), E81 (the matrix printed as X-tilde in Section 14.1 is X),
+    E82 (the claim that xi(x) lies in the zero set of the Hamiltonian holds on one side of a
+    hyperplane), E87 (Remark 14.3.4, stated at a point outside the book's chart, in a mirrored
+    chart), E92 (the local stable set of Appendix A.3, with its orbit in the neighbourhood).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -410,7 +488,7 @@ automation:
       tool_setup: >-
         The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, local copy
         dated 2026-10-17, versions 3.0.1 to 3.2.5 of its repository in the fourth round, and 3.3.0
-        and 3.4.0 in the seventh) in one Claude Code session, in eight rounds, with 161 sub-agents
+        and 3.4.0 in the seventh) in one Claude Code session, in nine rounds, with 194 sub-agents
         of the same model on the formalization and its two packages (at most 13 sub-agents at once): statement reviews against the TeX
         source and the cited sources, parallel proofs by chapter and by part, proof reviews,
         verification of the audit and of its literature section, and an exploration of follow-up
@@ -419,11 +497,11 @@ automation:
         Comparator were run locally.
       cost:
         wall_time: >-
-          213.6 hours elapsed from the start to the completed audit report of the eighth round
+          219.8 hours elapsed from the start to the completed audit report of the ninth round
           (5-14 November 2026), including two nights, about 15 hours stopped by a usage limit and
           154 hours stopped by a reboot (7-14 November); the rounds took 3.2, 15.5, 21.5, 5.6, 2.4,
-          3.4, 2.0 and 2.9 hours of work; 73.8 hours of sub-agent working time in all (1.5 of them
-          evaluating the skill)
+          3.4, 2.0, 2.9 and 6.2 hours of work; 90.3 hours of sub-agent working time in all (1.5 of
+          them evaluating the skill, 3.2 on the StableManifold package)
         spend_usd: "not tracked"
         hardware: "local machine (Linux) for Lean builds; models via API"
       prompting_notes: >-
@@ -445,17 +523,22 @@ automation:
         Theorem 8.3.1, false as printed, in its one-sided maximizer form, with the control form
         that Theorem 8.3.2 quotes as a corollary, and Theorem 8.2.7 in the authors' reading, in
         which singular subarcs on edge intervals refer to the edge control problem; in the seventh
-        round, the fourth layer (Chapter 13) and short READMEs, with the details in REPORT.md.
+        round, the fourth layer (Chapter 13) and short READMEs, with the details in REPORT.md; in the
+        ninth round, a certification pilot before the full certification of the numerical facts,
+        the stable manifold theorem in full C^n form as a separate public package, a repair of
+        the gap of section 16.4.2 rather than an assumption, and Step 10 of Lemma 14.3.1 by the
+        book's route (one construction used forward and backward; the shorter argument documented).
   spend_usd: "not tracked"
   notes: >-
-    The-Anh Vu-Le requested the formalization, chose its scope in eight rounds (first the
+    The-Anh Vu-Le requested the formalization, chose its scope in nine rounds (first the
     control-theoretic core, then Chapter 2 with every cited theorem proved, then the rest of the
     formalized chapters, then the first layer of a plan for Chapters 5 and 8-16: the maximum
     principle and the lift of every minimizer to an extremal, then the second layer: Chapter 5, the
     existence of a minimizer and its identification with K_min, then the third layer: Chapter 8
     and Theorem 16.3.1 conditional on one named hypothesis, then the fourth layer: Chapter 13, then the fifth
-    layer: Chapter 15 and Theorems 16.1.1 and 16.2.1, conditional on three named numerical facts)
-    and made the decisions it needed
+    layer: Chapter 15 and Theorems 16.1.1 and 16.2.1, conditional on three named numerical facts,
+    then the sixth layer: Chapter 14 to section 14.3, Appendix A.3 and Theorem 16.4.1, with Theorem
+    16.3.1 conditional on Theorem 14.4.1 and those facts) and made the decisions it needed
     (the proof of Jacobi's formula, the hypothesis of Theorem 3.1.4(3), the routes for Lemmas
     2.2.1 and 2.2.5 and for Mahler's Lemma 3 (along Mahler's 1946 paper), the corrected form of
     the false Lemma 2.2.1, the hypothesis of Lemma 3.1.8, the statement of Filippov's theorem, the
@@ -530,15 +613,22 @@ fidelity:
     that a discriminant locus and a top face are in involution fails; E75, Remark 15.3.1 gives the
     coordinates of the attracting fixed point q_out as those of q_in, and is proved with the labels
     corrected; E76, the boxes D_ij of the proof of Theorem 16.1.1 have theta2 in [b_{j+1}, b_j]
-    (the book prints the index i, so that its boxes do not depend on j); and Theorems 16.1.1 and
+    (the book prints the index i, so that its boxes do not depend on j); Theorems 16.1.1 and
     16.2.1 are proved conditionally on three named numerical facts, which stand for the book's
-    Mathematica containments (E77). Slips corrected where they occur: E8, E14, E24, E44 (a region in
-    the proof of Lemma 5.0.7 (3)), E50 (the constant of Lemma 8.1.5), E59 (a sign in the proof of
+    Mathematica containments (E77); E81, the matrix that Section 14.1 prints as X-tilde is X; E82,
+    "xi(x) lies in the zero set of the Hamiltonian on the walls" holds only when
+    l11 + l21 x21 <= 0; E87, Remark 14.3.4 places q_in at a point (0, x_in) of a chart that does not
+    contain it, and is proved in a mirrored chart; E92, the local stable set of Appendix A.3 omits
+    that the orbit stays in the neighbourhood U; Theorem 16.4.1 is proved conditionally on the
+    three numerical facts, and Theorem 16.3.1 conditionally on Theorem 14.4.1, a named
+    proposition, and the three facts (E89). Slips corrected where they occur: E8, E14, E24, E44 (a
+    region in the proof of Lemma 5.0.7 (3)), E50 (the constant of Lemma 8.1.5), E59 (a sign in the proof of
     Lemma 8.3.4), E64 (a strict inequality that should be weak in the proof of Corollary 13.2.7),
     E65 (the initial conditions of u3 in the proof of Lemma 13.3.2), E67 (a garbled display of the
     maximum principle in the proof of Lemma 13.5.2), E71 (two ranges, a region, a reversed
     substitution, a wrong locus and typos in Sections 15.1-15.3), E80 (two slips in the proof of
-    Theorem 16.2.1).
+    Theorem 16.2.1), E82 (the order of the arguments of H_F, a truncated value, and a citation
+    commented out in Section 14.2), E85 (ad for Ad in the proof of Lemma 14.3.1).
 
 
     Redundant hypotheses omitted from the Lean statements (REPORT.md, Section 5): Theorem 3.1.4
@@ -661,12 +751,39 @@ fidelity:
     D_22; Theorem 16.1.1 is stated as printed for the Poincare map of the quotient; and in Theorem
     16.2.1 an outward trajectory is a backward orbit and an inward one a forward orbit from a point
     on a wall, of the Poincare map on C^3 minus 0, tending to 0, with the vanishing of the
-    Hamiltonian derived rather than assumed.
+    Hamiltonian derived rather than assumed. In Chapter 14, Section 16.4 and Appendix A.3, in the
+    normalization lambda_cost = -1, d1 = 3/2, rho = 2 of Chapters 11-16: Lemma 10.1.1 gives the
+    Cayley coordinate z = (b + c)/2 + i a of a traceless matrix, and the rotation Ad_R is
+    multiplication by zeta^2 in Fuller coordinates for traceless phase points (stated first for all
+    phase points, which was false, with a counterexample in Lean); the chart of Section 14.1 has
+    coordinates (r, x21, l11, l21), normalized by x11 = 1, with Lambda_R the solution of (14.1.3),
+    and the chart at q_in is its mirror image under the time reversal; z(x) is defined by its
+    explicit value, its being the book's limit a theorem; Lemma 14.2.3 is stated for each s as
+    r0 -> 0+, without "for each s such that r(s) < 1" (for fixed s the condition holds for small
+    r0), along the trajectory read in Fuller coordinates; Remark 14.2.1 is an enclosure within
+    0.01 with an exact identity; the extension of Lemma 14.3.1 is an open partial homeomorphism,
+    analytic with analytic inverse, equal to the Reinhardt-Poincare map in the chart for r > 0 and
+    to the Fuller-Poincare map at r = 0, and Theorem 14.3.3 and Remark 14.3.4 are stated for every
+    such extension; local stable and unstable manifolds are the local stable and unstable sets of
+    the StableManifold package (orbits that stay in U and tend to the fixed point), with stable and
+    unstable summands defined by the dynamics of the derivative, which agree with the book's
+    generalized eigenspaces at a hyperbolic point, and the C-infinity curve is a graph over the
+    r-axis; Theorem 14.4.1 is the named proposition Theorem14_4_1, with "a trajectory" read as an
+    extremal that is bang-bang with finitely many switches on compact subintervals away from the
+    singular locus (the safe direction for a hypothesis, and what Theorem 8.3.2 supplies), a
+    reading built into the chattering arcs of Theorem 16.4.1 too; Theorem 16.4.1 is stated for
+    extremals on an interval normalized by lambda_cost = -1, a cluster point reached in finite time
+    being a meeting with the singular locus at the end of the interval, its conclusions being the
+    convergence of the angular components of the switching points to q_in modulo the virial group
+    and, for every extension of Lemma 14.3.1, their eventual membership, rotated onto the section,
+    in the local stable curve at q_in; and Theorem A.3.1 is stated in its local part, for an open
+    partial homeomorphism of a finite-dimensional space, with the submanifolds as graphs over the
+    summands.
 
 
     Departures from the book's proofs (REPORT.md, Section 7), each forced by an error or gap of the
-    book or by mathematics Mathlib lacks, or, for the last step of Theorem 16.3.1, by the chapters
-    not yet formalized: Lemma 2.2.1 (its printed form is false; the corrected
+    book or by mathematics Mathlib lacks, or, for the last step of Theorem 16.3.1, by Theorem
+    14.4.1, not yet proved: Lemma 2.2.1 (its printed form is false; the corrected
     form is proved through maximal lattice-packed symmetric bodies); Lemma 2.2.5
     (the book's shaving argument cannot rule out corners at endpoints of flat boundary segments;
     closed by Mahler's lattice route, chosen by the user); one step each of Lemma 2.4.2 (the
@@ -710,9 +827,12 @@ fidelity:
     its last step, Theorems 16.4.1 and 14.4.1, replaced by the named hypothesis, and the set of
     times at which the lift meets the singular locus, which the book does not handle, handled
     through Theorem 8.2.3, the transversality conditions and Lemma 8.3.4 at the end of an
-    interval). In Chapter 13: Lemma 13.2.5 and the descent of the Poincare map (E63: Lemmas
-    13.2.1-13.2.3 assume H_F = 0, which need not hold at z0, so their substitutions are redone for
-    constant controls); Lemma 13.2.6 (E62: the book argues the necessary direction, that a first
+    interval; in the ninth round its last step is derived from Theorems 16.4.1 and 14.4.1, the
+    latter a named proposition, by the book's argument made precise, E89: the costate normalized,
+    the extremal extended periodically, the last meeting time before the next one, and the finite
+    bang-bang structure glued at the period). In Chapter 13: Lemma 13.2.5 and the descent of the
+    Poincare map (E63: Lemmas 13.2.1-13.2.3 assume H_F = 0, which need not hold at z0, so their
+    substitutions are redone for constant controls); Lemma 13.2.6 (E62: the book argues the necessary direction, that a first
     control, if it exists, is the lexicographic maximizer; the statement asserts, and the
     formalization proves by the same Taylor expansion, the sufficient direction, that the
     maximizer is optimal on some [0, eps]); Lemma 13.3.2 (E65: the book's two cases assume the
@@ -748,6 +868,28 @@ fidelity:
     smaller box", a descent on the box indices, and a re-entry step by time reversal); and Theorem
     16.2.1 (E80: the continuity of the radial factor at q_out proved in the chart of Lemma 13.5.5,
     and the vanishing of the Hamiltonian along a trajectory tending to the singular locus derived).
+    In Chapter 14, Section 16.4 and Appendix A.3: the first control near the singular locus (E83:
+    asserted in the book, and used for every extremal through the chart; proved from the two signs
+    that the book names, uniformly near the fixed point); Lemmas 14.2.3-14.2.4 (E84: the book's
+    Mathematica series expansion replaced by a comparison of the Reinhardt equations with their
+    leading part, the Fuller flow in Cayley coordinates, by three Gronwall steps); Step 2 of Lemma
+    14.3.1 (the analyticity of the flow, through a linear equation in a rotating frame, since the
+    closed form of Chapter 7 has quadratures and Mathlib has no analyticity of parametric
+    integrals); Theorem 14.3.3 (E86: the local stable manifold proved to be the divisor directly,
+    by |F1(r, x)| >= |r| near the fixed point and a forward invariant attracted neighbourhood in the
+    divisor); Theorem 16.4.1 (E90: the Reinhardt cells, parts and continuous branch maps of Section
+    16.4.2, asserted in the book, replaced by the forward invariance of the cluster set under the
+    Fuller-Poincare map, from relaxed limits of the rescaled controls, after which Theorem 16.1.1
+    and the closedness of the cluster set conclude as in the book; E91: the passage from a cluster
+    point to a limit, which the book's epsilon/r_scale argument does not show, replaced by a
+    hyperbolic box at q_out that uses only the derivative of the extended map); and Theorem A.3.1
+    (E92: the package's theorem applied to the map cut off outside its source, to get a
+    neighbourhood inside the source; the package's later form for every small neighbourhood makes
+    this unnecessary). Lemma 14.3.1 follows the book step by step, its last step included (the
+    backward map built by the same construction at the reflected point, the two maps inverse by the
+    time reversal of trajectories and, on a neighbourhood, by analytic continuation), with the
+    steps the book leaves out supplied (E85: the check of the second switching function, the
+    divisibility of the state at the switch, the zero structure of the switching time).
     Every other proof follows the book's argument; the remaining
     gaps are filled along the book's lines (among them those of Lemma 3.1.8, of the sketch of
     Theorem 7.7.1, whose "direct calculation" of hyperbolicity is supplied in closed form, and of
@@ -824,7 +966,14 @@ review:
     checked the three numerical facts of Theorem 16.1.1 in its own multiple-precision
     implementation (about 1.1 million evaluations, no violation), and another compared the
     formalization with the book's Chapter 15 and Sections 16.1-16.2 and checked the gaps and errors
-    reported. No person has reviewed the proofs.
+    reported. In the ninth round an independent agent reviewed the statements of Chapter 14,
+    Section 16.4 and Appendix A.3 before the proofs, with its own numerical checks (it found a
+    general lemma on the division of analytic functions false without a complete space of values,
+    and a lemma of the repair unusable as first stated, both corrected before the proofs), the
+    statements and proofs of the StableManifold package were reviewed by further agents, and
+    another agent compared the formalization with the book's Chapter 14, Sections 16.3-16.4 and
+    Appendix A.3, checked the gaps and errors reported, and found the switching structure after a
+    switch to be a gap of the book. No person has reviewed the proofs.
 
 alignment:
   namespace: "SmoothedPolygonsChallenge"
