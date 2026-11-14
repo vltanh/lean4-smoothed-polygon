@@ -15,11 +15,11 @@ point, rotated by `Ad_{R⁻ᵏ}`, is a phase point `q₀` at which
   `e₁` at times arbitrarily close after `t_sw(q₀)` (`eventually_isSwitch_reinSwitchTime`),
 
 then the next switching time is `τ_n + t_sw(q₀)` and the next switching point, rotated by
-`Ad_{R^{-(k+1)}}`, is `reinPoincare q₀` (`l6h_next_switch`). This is the claim "These functions
-give the value of the Reinhardt–Poincaré map" (TeX 11838) in the form the proof of Theorem 16.4.1
-needs: the extremal follows the vertex flow of its control between two switches
-(`iso_arc_eq_vertexFlow`, here `l6h_arc` for `IsExtremalOn`), and the maximum condition decides the
-control after `τ_n` and the time of the next switch.
+`Ad_{R^{-(k+1)}}`, is `reinPoincare q₀` (`IsChatteringArcInto.next_switchPoint_eq_reinPoincare`).
+This is the claim "These functions give the value of the Reinhardt–Poincaré map" (TeX 11838) in the
+form the proof of Theorem 16.4.1 needs: the extremal follows the vertex flow of its control between
+two switches (`iso_arc_eq_vertexFlow`, here `l6h_arc` for `IsExtremalOn`), and the maximum condition
+decides the control after `τ_n` and the time of the next switch.
 
 The rotation of a solution by `R⁻ᵏ` (with the controls relabelled, `iso_rotControl`) is
 `l6h_isExtremalOn_conj`, the analogue of `irt_conj` of Chapter 7 for solutions without boundary
@@ -81,7 +81,7 @@ private lemma l6h_conj {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : �
 
 /-- **An extremal on `[a, b]`, rotated by `R⁻ᵏ`, is an extremal** with the controls relabelled
 (`iso_rotControl k`); its phase points are `iso_adRinvPow k (phaseAt X Λ₁ Λ_R t)`. -/
-theorem l6h_isExtremalOn_conj {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {lam : ℝ}
+private theorem l6h_isExtremalOn_conj {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {lam : ℝ}
     (h : IsExtremalOn a b u g X Λ₁ ΛR lam) (k : ℕ) :
     IsExtremalOn a b (fun t ↦ iso_rotControl k (u t)) (fun t ↦ R⁻¹ ^ k * g t * R ^ k)
       (fun t ↦ R⁻¹ ^ k * X t * R ^ k) (fun t ↦ R⁻¹ ^ k * Λ₁ t * R ^ k)
@@ -89,7 +89,7 @@ theorem l6h_isExtremalOn_conj {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁
   l6h_conj h k
 
 /-- The relabelled vertex: `iso_rotControl k e_j = e_{j + k}`. -/
-theorem l6h_rotControl_vertex (k : ℕ) (j : Fin 3) :
+theorem iso_rotControl_vertex (k : ℕ) (j : Fin 3) :
     iso_rotControl k (vertex j) = vertex (j + ⟨k % 3, Nat.mod_lt _ (by norm_num)⟩) := by
   funext i
   simp only [iso_rotControl, vertex]
@@ -197,7 +197,7 @@ private lemma l6h_arc_core {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR 
 
 /-- **An extremal arc with a constant vertex control is the vertex flow** from its initial point
 (`iso_arc_eq_vertexFlow` for `IsExtremalOn`). -/
-theorem l6h_arc {α β : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
+private theorem l6h_arc {α β : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
     (h : IsExtremalOn α β u g X Λ₁ ΛR (-1)) (m : Fin 3)
     (hu : ∀ᵐ t, t ∈ Ioo α β → u t = vertex m) :
     ∀ t ∈ Icc α β, phaseAt X Λ₁ ΛR t = iso_vertexFlow m (phaseAt X Λ₁ ΛR α) (t - α) := by
@@ -213,165 +213,11 @@ theorem l6h_arc {α β : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ �
   simp only [add_sub_cancel, add_zero, sub_zero] at h'
   exact h'
 
-/-! ### Almost-everywhere helpers (as in `SmoothedPolygons/Ch16/RescaledDynamics.lean`) -/
-
-theorem l6h_vertex_inj {i j : Fin 3} (h : vertex i = vertex j) : i = j := by
-  by_contra hij
-  have := congrFun h i
-  simp [vertex, hij] at this
-
-/-- A property holding almost everywhere on a nonempty open interval holds at some point of it. -/
-theorem l6h_exists_mem_of_ae {P : ℝ → Prop} {c d : ℝ} (hcd : c < d)
-    (h : ∀ᵐ t, t ∈ Ioo c d → P t) : ∃ t ∈ Ioo c d, P t := by
-  by_contra hcon
-  push Not at hcon
-  have h0 : volume (Ioo c d) = 0 := by
-    rw [measure_eq_zero_iff_ae_notMem]
-    filter_upwards [h] with t ht hmem
-    exact hcon t hmem (ht hmem)
-  rw [Real.volume_Ioo, ENNReal.ofReal_eq_zero] at h0
-  linarith
-
-/-- A function continuous on `[a, b]` satisfying a closed condition almost everywhere on
-`(p, q) ⊆ [a, b]` satisfies it on `[p, q]`. -/
-theorem l6h_mem_of_ae {f : ℝ → ℝ} {C : Set ℝ} (hC : IsClosed C) {a b p q τ : ℝ}
-    (hf : ContinuousOn f (Icc a b)) (hpq : p < q) (hsub : Icc p q ⊆ Icc a b)
-    (hτ : τ ∈ Icc p q) (hae : ∀ᵐ t, t ∈ Ioo p q → f t ∈ C) : f τ ∈ C := by
-  have hD : IsClosed (Icc p q ∩ f ⁻¹' C) :=
-    (hf.mono hsub).preimage_isClosed_of_isClosed isClosed_Icc hC
-  have hsub2 : Ioo p q ⊆ Icc p q ∩ f ⁻¹' C := by
-    intro t ht
-    by_contra hn
-    have hopen : IsOpen (Ioo p q \ (Icc p q ∩ f ⁻¹' C)) := isOpen_Ioo.sdiff hD
-    obtain ⟨δ, hδ, hball⟩ := Metric.isOpen_iff.1 hopen t ⟨ht, hn⟩
-    have hnull : ∀ᵐ s, s ∉ Metric.ball t δ := by
-      filter_upwards [hae] with s hs hsb
-      have h1 := hball hsb
-      exact h1.2 ⟨Ioo_subset_Icc_self h1.1, hs h1.1⟩
-    have h0 := MeasureTheory.measure_eq_zero_iff_ae_notMem.2 hnull
-    rw [Real.volume_ball] at h0
-    simp only [ENNReal.ofReal_eq_zero] at h0
-    linarith
-  have hcl : closure (Ioo p q) ⊆ Icc p q ∩ f ⁻¹' C := closure_minimal hsub2 hD
-  rw [closure_Ioo hpq.ne] at hcl
-  exact (hcl hτ).2
-
-/-- The Hamiltonians of the vertices are continuous along an extremal. -/
-theorem l6h_continuousOn_phaseHam {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
-    (hext : IsExtremalOn a b u g X Λ₁ ΛR (-1)) (k : Fin 3) :
-    ContinuousOn (fun t ↦ phaseHam (phaseAt X Λ₁ ΛR t) (vertex k)) (Icc a b) := by
-  have hc := hext.continuousOn_lift
-  have hΛ₁ : ContinuousOn Λ₁ (Icc a b) := (continuous_fst.comp continuous_snd).comp_continuousOn hc
-  have hX : ContinuousOn X (Icc a b) :=
-    (continuous_fst.comp (continuous_snd.comp continuous_snd)).comp_continuousOn hc
-  have hΛR : ContinuousOn ΛR (Icc a b) :=
-    (continuous_snd.comp (continuous_snd.comp continuous_snd)).comp_continuousOn hc
-  have htr : Continuous fun M : Mat2 ↦ M.trace := continuous_id.matrix_trace
-  have hne : ∀ t ∈ Icc a b, traceForm (X t) (controlMatrix (vertex k)) ≠ 0 := by
-    intro t ht
-    have hst := (hext.1.2.2.2.1 (t - a) ⟨by linarith [ht.1], by linarith [ht.2]⟩).2
-    simp only [add_sub_cancel] at hst
-    rw [poly_traceForm_comm]
-    exact (poly_traceForm_neg (poly_vertex_mem k) hst).ne
-  exact (htr.comp_continuousOn ((hΛ₁.sub continuousOn_const).mul hX)).sub
-    ((htr.comp_continuousOn (hΛR.mul continuousOn_const)).div
-      (htr.comp_continuousOn (hX.mul continuousOn_const)) hne)
-
-/-- The maximum condition and `H = 0` of an extremal on `[a, b]`, in the original time. -/
-theorem l6h_max {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
-    (hext : IsExtremalOn a b u g X Λ₁ ΛR (-1)) :
-    ∀ᵐ t, t ∈ Ioo a b → phaseHam (phaseAt X Λ₁ ΛR t) (u t) = 0 ∧
-      ∀ v ∈ controlSimplex,
-        phaseHam (phaseAt X Λ₁ ΛR t) v ≤ phaseHam (phaseAt X Λ₁ ΛR t) (u t) := by
-  have hq := (MeasureTheory.measurePreserving_add_left MeasureTheory.volume
-    (-a)).quasiMeasurePreserving.ae hext.2.2.2.2.2
-  filter_upwards [hq] with s hs hsI
-  have := hs ⟨by linarith [hsI.1], by linarith [hsI.2]⟩
-  simpa [phaseHam, phaseAt] using this
-
-/-- **At a switching time the two adjacent vertices maximize the Hamiltonian, with value `0`**
-(`l6f_switch` of `SmoothedPolygons/Ch16/RescaledDynamics.lean`, private there): the maximum
-condition and `H = 0` almost everywhere on each side, and continuity along the lift. -/
-theorem l6h_switch {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
-    (hext : IsExtremalOn a b u g X Λ₁ ΛR (-1)) {τ : ℝ} (hτ : τ ∈ Ioo a b)
-    (hsw : IsSwitchingTime u τ) :
-    ∃ i j : Fin 3, i ≠ j ∧ (∀ k, phaseHam (phaseAt X Λ₁ ΛR τ) (vertex k) ≤ 0) ∧
-      phaseHam (phaseAt X Λ₁ ΛR τ) (vertex i) = 0 ∧
-      phaseHam (phaseAt X Λ₁ ΛR τ) (vertex j) = 0 := by
-  obtain ⟨i, j, hij, ε, hε, hl, hr⟩ := hsw
-  have hφ := l6h_continuousOn_phaseHam hext
-  have hmax := l6h_max hext
-  have key : ∀ {p q : ℝ} {m : Fin 3}, p < q → Icc p q ⊆ Icc a b → τ ∈ Icc p q →
-      (∀ᵐ t, t ∈ Ioo p q → u t = vertex m) → Ioo p q ⊆ Ioo a b →
-      (∀ k, phaseHam (phaseAt X Λ₁ ΛR τ) (vertex k) ≤ 0) ∧
-        phaseHam (phaseAt X Λ₁ ΛR τ) (vertex m) = 0 := by
-    intro p q m hpq hsub hτpq hu hsub'
-    have hae : ∀ᵐ t, t ∈ Ioo p q → phaseHam (phaseAt X Λ₁ ΛR t) (vertex m) = 0 ∧
-        ∀ k, phaseHam (phaseAt X Λ₁ ΛR t) (vertex k) ≤ 0 := by
-      filter_upwards [hmax, hu] with t h1 h2 ht
-      obtain ⟨e1, e2⟩ := h1 (hsub' ht)
-      rw [h2 ht] at e1 e2
-      exact ⟨e1, fun k ↦ (e2 (vertex k) (poly_vertex_mem k)).trans e1.le⟩
-    refine ⟨fun k ↦ l6h_mem_of_ae (f := fun t ↦ phaseHam (phaseAt X Λ₁ ΛR t) (vertex k))
-      isClosed_Iic (hφ k) hpq hsub hτpq ?_,
-      l6h_mem_of_ae (f := fun t ↦ phaseHam (phaseAt X Λ₁ ΛR t) (vertex m))
-        isClosed_singleton (hφ m) hpq hsub hτpq ?_⟩
-    · filter_upwards [hae] with t ht ht' using (ht ht').2 k
-    · filter_upwards [hae] with t ht ht' using (ht ht').1
-  have hp : max a (τ - ε) < τ := max_lt hτ.1 (by linarith)
-  have hq : τ < min b (τ + ε) := lt_min hτ.2 (by linarith)
-  obtain ⟨hle, hi⟩ := key hp (Icc_subset_Icc (le_max_left _ _) hτ.2.le) ⟨hp.le, le_rfl⟩
-    (by filter_upwards [hl] with t ht ht' using ht ⟨lt_of_le_of_lt (le_max_right _ _) ht'.1, ht'.2⟩)
-    (fun t ht ↦ ⟨lt_of_le_of_lt (le_max_left _ _) ht.1, ht.2.trans hτ.2⟩)
-  obtain ⟨-, hj⟩ := key hq (Icc_subset_Icc hτ.1.le (min_le_left _ _)) ⟨le_rfl, hq.le⟩
-    (by filter_upwards [hr] with t ht ht' using ht ⟨ht'.1, lt_of_lt_of_le ht'.2 (min_le_right _ _)⟩)
-    (fun t ht ↦ ⟨hτ.1.trans ht.1, lt_of_lt_of_le ht.2 (min_le_left _ _)⟩)
-  exact ⟨i, j, hij, hle, hi, hj⟩
-
 /-! ### Between two switching times the control is one vertex -/
-
-/-- A time of `(α, β)` that is not a switching time of a finitely bang-bang control has a
-neighbourhood on which the control is one vertex (`l3m_local_vertex` of
-`SmoothedPolygons/Ch16/MahlerFirst.lean`, private there). -/
-private lemma l6h_local_vertex {u : ℝ → Fin 3 → ℝ} {α β t : ℝ} (hbb : IsFiniteBangBang α β u)
-    (ht : t ∈ Ioo α β) (hsw : ¬ IsSwitchingTime u t) :
-    ∃ i : Fin 3, ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (t - η) (t + η) → u τ = vertex i := by
-  obtain ⟨S, hS⟩ := hbb
-  have hfin : ((S.erase t : Finset ℝ) : Set ℝ)ᶜ ∈ 𝓝 t :=
-    (S.erase t).finite_toSet.isClosed.isOpen_compl.mem_nhds (by simp)
-  obtain ⟨ρ₀, hρ₀, hball⟩ := Metric.mem_nhds_iff.1 hfin
-  set ρ := min ρ₀ (min (t - α) (β - t)) with hρ
-  have hρ1 : ρ ≤ ρ₀ := min_le_left _ _
-  have hρ2 : ρ ≤ t - α := (min_le_right _ _).trans (min_le_left _ _)
-  have hρ3 : ρ ≤ β - t := (min_le_right _ _).trans (min_le_right _ _)
-  have hρpos : 0 < ρ := lt_min hρ₀ (lt_min (by linarith [ht.1]) (by linarith [ht.2]))
-  have hloc : ∀ s ∈ Ioo (t - ρ) (t + ρ), s ≠ t →
-      ∃ i : Fin 3, ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (s - η) (s + η) → u τ = vertex i := by
-    intro s hs hst
-    refine hS s ⟨by linarith [hs.1], by linarith [hs.2]⟩ fun hsS ↦ ?_
-    have hsb : s ∈ Metric.ball t ρ₀ := by
-      rw [Metric.mem_ball, Real.dist_eq, abs_lt]
-      constructor <;> linarith [hs.1, hs.2]
-    exact hball hsb (by simp [hsS, hst])
-  obtain ⟨i, hi⟩ := exists_ae_eq_vertex_of_locally (α := t - ρ) (β := t) fun s hs ↦
-    hloc s ⟨hs.1, by linarith [hs.2]⟩ hs.2.ne
-  obtain ⟨j, hj⟩ := exists_ae_eq_vertex_of_locally (α := t) (β := t + ρ) fun s hs ↦
-    hloc s ⟨by linarith [hs.1], hs.2⟩ hs.1.ne'
-  obtain rfl : i = j := by
-    by_contra hij
-    exact hsw ⟨i, j, hij, ρ, hρpos, hi, hj⟩
-  refine ⟨i, ρ, hρpos, ?_⟩
-  have hne : ∀ᵐ τ : ℝ, τ ≠ t := by
-    rw [ae_iff]
-    simp
-  filter_upwards [hi, hj, hne] with τ h1 h2 h3 hτ
-  rcases lt_or_gt_of_ne h3 with h | h
-  · exact h1 ⟨hτ.1, h⟩
-  · exact h2 ⟨h, hτ.2⟩
 
 /-- **Between two consecutive switching times the control is one vertex** (almost everywhere):
 no time of `(τ n, τ (n + 1))` is a switching time, and the control is locally a vertex there. -/
-theorem l6h_ae_vertex_between {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
+private theorem l6h_ae_vertex_between {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
     {τ : ℕ → ℝ} (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) (n : ℕ) :
     ∃ j : Fin 3, ∀ᵐ t, t ∈ Ioo (τ n) (τ (n + 1)) → u t = vertex j := by
   obtain ⟨-, -, -, hbb, hmono, hτI, -, hsw⟩ := h
@@ -384,7 +230,8 @@ theorem l6h_ae_vertex_between {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁
     have h1 : n < m := hmono.lt_iff_lt.1 (hm ▸ ht.1)
     have h2 : m < n + 1 := hmono.lt_iff_lt.1 (hm ▸ ht.2)
     omega
-  exact l6h_local_vertex (hbb ((a + τ n) / 2) ((τ (n + 1) + b) / 2) (by linarith [hn.1])
+  exact IsFiniteBangBang.exists_ae_eq_vertex_of_not_isSwitchingTime (hbb ((a + τ n) / 2) ((τ (n + 1)
+      + b) / 2) (by linarith [hn.1])
     (by linarith [hn1.2])) ⟨by linarith [hn.1, ht.1], by linarith [hn1.2, ht.2]⟩ hnot
 
 /-! ### The next switching point -/
@@ -393,7 +240,8 @@ theorem l6h_ae_vertex_between {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁
 `Ad_{R⁻ᵏ}`, is `q₀`, where `e₁` is strictly below `e₂`, the `e₃`-flow has `H(e₃) < H(e₂)` right
 after `q₀`, and the `e₂`-flow has the switching structure of `eventually_isSwitch_reinSwitchTime`,
 then the `(n + 1)`-st switching point, rotated by `Ad_{R^{-(k+1)}}`, is `reinPoincare q₀`. -/
-theorem l6h_next_switch {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
+theorem IsChatteringArcInto.next_switchPoint_eq_reinPoincare {a b : ℝ} {u :
+    ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
     (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) (n k : ℕ) {q₀ : iso_PhasePt}
     (hq : iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = q₀)
     (h0 : phaseHam q₀ (vertex 0) < phaseHam q₀ (vertex 1))
@@ -417,12 +265,12 @@ theorem l6h_next_switch {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR :
   have hn1 := hτI (n + 1)
   have hlt : τ n < τ (n + 1) := hmono (Nat.lt_succ_self n)
   set kk : Fin 3 := ⟨k % 3, Nat.mod_lt _ (by norm_num)⟩ with hkk
-  have hcont := l6h_continuousOn_phaseHam hext'
-  have hM := l6h_max hext'
+  have hcont := IsExtremalOn.continuousOn_phaseHam hext'
+  have hM := IsExtremalOn.ae_phaseHam hext'
   obtain ⟨j, hj⟩ := l6h_ae_vertex_between h n
   have hj' : ∀ᵐ t, t ∈ Ioo (τ n) (τ (n + 1)) → u' t = vertex (j + kk) := by
     filter_upwards [hj] with t ht htI
-    simp only [hu', ht htI, l6h_rotControl_vertex]
+    simp only [hu', ht htI, iso_rotControl_vertex]
     rfl
   have harc := l6h_arc (hext'.mono hn.1.le hlt hn1.2.le) (j + kk) hj'
   rw [hQ, hq] at harc
@@ -437,7 +285,7 @@ theorem l6h_next_switch {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR :
   -- (i) the control after `τ n` is not `e₁`
   have hj0 : j + kk ≠ 0 := by
     intro hj0
-    have := l6h_mem_of_ae (C := Ici 0) isClosed_Ici
+    have := mem_of_ae_of_continuousOn (C := Ici 0) isClosed_Ici
       ((hcont 0).sub (hcont 1)) hlt hsubn ⟨le_rfl, hlt.le⟩ (by
         filter_upwards [hMj] with t ht htI
         have := ht htI 1
@@ -452,7 +300,7 @@ theorem l6h_next_switch {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR :
     obtain ⟨ε, hε, hε2⟩ := h2
     set δ := min ε (τ (n + 1) - τ n) with hδ
     have hδ0 : 0 < δ := lt_min hε (by linarith)
-    obtain ⟨t, ht, hft⟩ := l6h_exists_mem_of_ae (by linarith : τ n < τ n + δ) (by
+    obtain ⟨t, ht, hft⟩ := exists_mem_Ioo_of_ae (by linarith : τ n < τ n + δ) (by
       filter_upwards [hMj] with t ht htI
       exact ht ⟨htI.1, htI.2.trans_le (by linarith [min_le_right ε (τ (n + 1) - τ n)])⟩ 1)
     have htI : t ∈ Icc (τ n) (τ (n + 1)) :=
@@ -474,7 +322,8 @@ theorem l6h_next_switch {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR :
     obtain ⟨t, ht, hbt⟩ := hbeat (τ (n + 1) - τ n - T) (by linarith)
     have hs : τ n + t ∈ Icc (τ n) (τ (n + 1)) :=
       ⟨by linarith [ht.1, hpos], by linarith [ht.2]⟩
-    have := l6h_mem_of_ae (C := Iic 0) isClosed_Iic ((hcont 0).sub (hcont 1)) hlt hsubn hs (by
+    have := mem_of_ae_of_continuousOn (C := Iic 0) isClosed_Iic ((hcont 0).sub (hcont 1)) hlt hsubn
+        hs (by
       filter_upwards [hMj] with t' ht' ht'I
       exact sub_nonpos.2 (ht' ht'I 0))
     simp only [mem_Iic, Pi.sub_apply, sub_nonpos] at this
@@ -490,12 +339,12 @@ theorem l6h_next_switch {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR :
     have hi₁ : i₁ = j := by
       set c := max (τ (n + 1) - ε₁) (τ n) with hc
       have hc1 : c < τ (n + 1) := max_lt (by linarith) hlt
-      obtain ⟨t, -, h1, h2⟩ := l6h_exists_mem_of_ae
+      obtain ⟨t, -, h1, h2⟩ := exists_mem_Ioo_of_ae
         (P := fun t ↦ u t = vertex i₁ ∧ u t = vertex j) hc1 (by
           filter_upwards [hl, hj] with t h1 h2 htI
           exact ⟨h1 ⟨lt_of_le_of_lt (le_max_left _ _) htI.1, htI.2⟩,
             h2 ⟨lt_of_le_of_lt (le_max_right _ _) htI.1, htI.2⟩⟩)
-      exact l6h_vertex_inj (h1.symm.trans h2)
+      exact vertex_injective (h1.symm.trans h2)
     have hne : j₁ + kk ≠ 1 := by
       intro h'
       apply hij
@@ -505,11 +354,12 @@ theorem l6h_next_switch {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR :
     have hd1 : τ (n + 1) < d := lt_min (by linarith) hn1.2
     have hsub' : Icc (τ (n + 1)) d ⊆ Icc a b :=
       Icc_subset_Icc (hn1.1.le) (min_le_right _ _)
-    have := l6h_mem_of_ae (C := Ici 0) isClosed_Ici ((hcont (j₁ + kk)).sub (hcont 1)) hd1 hsub'
+    have := mem_of_ae_of_continuousOn (C := Ici 0) isClosed_Ici ((hcont (j₁ + kk)).sub (hcont 1))
+        hd1 hsub'
       ⟨le_rfl, hd1.le⟩ (by
         filter_upwards [hM, hr] with t h1 h2 htI
         have hu1 : u' t = vertex (j₁ + kk) := by
-          simp only [hu', h2 ⟨htI.1, htI.2.trans_le (min_le_left _ _)⟩, l6h_rotControl_vertex]
+          simp only [hu', h2 ⟨htI.1, htI.2.trans_le (min_le_left _ _)⟩, iso_rotControl_vertex]
           rfl
         have := (h1 ⟨hn1.1.trans htI.1, htI.2.trans_le (min_le_right _ _)⟩).2 (vertex 1)
           (poly_vertex_mem 1)

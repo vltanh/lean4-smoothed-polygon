@@ -7,6 +7,8 @@ public meta import Lean.DocString
 --   find SmoothedPolygons External Basic -name '*.lean' | sort |
 --     sed 's/\.lean$//; s#/#.#g; s/^/import all /'
 import all Basic.Algebra.Module.ZLattice.PlaneCritical
+import all Basic.Analysis.Analytic.DivisionByCoordinate
+import all Basic.Analysis.Analytic.MatrixExp
 import all Basic.Analysis.Calculus.DerivInverse
 import all Basic.Analysis.Calculus.MatrixEntrywise
 import all Basic.Analysis.Calculus.MatrixEntrywiseExp
@@ -31,8 +33,14 @@ import all Basic.Analysis.Convex.TietzeNakajima
 import all Basic.Analysis.Polynomial.CubicRoots
 import all Basic.Analysis.Polynomial.LeastPositiveRoot
 import all Basic.Analysis.Polynomial.SignNearZero
+import all Basic.Dynamics.HyperbolicBox
 import all Basic.Dynamics.LinearizedStability
 import all Basic.Dynamics.Stability
+import all Basic.Interval.Dyadic
+import all Basic.Interval.Elementary
+import all Basic.Interval.Lipschitz
+import all Basic.Interval.Program
+import all Basic.Interval.ProgramEval
 import all Basic.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
 import all Basic.MeasureTheory.SpecificCodomains.Pi
 import all External.EulerArnold
@@ -50,6 +58,7 @@ import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.Gronwall
 import all SmoothedPolygons.AppA.MatrixIdentities
 import all SmoothedPolygons.AppA.Riemannian
+import all SmoothedPolygons.AppA.StableManifold
 import all SmoothedPolygons.Ch13.Blowup
 import all SmoothedPolygons.Ch13.Defs
 import all SmoothedPolygons.Ch13.Extremals
@@ -62,15 +71,35 @@ import all SmoothedPolygons.Ch13.RScale
 import all SmoothedPolygons.Ch13.SingularLocus
 import all SmoothedPolygons.Ch13.Stability
 import all SmoothedPolygons.Ch13.Symmetry
+import all SmoothedPolygons.Ch14.AnalyticExtension
+import all SmoothedPolygons.Ch14.Asymptotics
+import all SmoothedPolygons.Ch14.ChartFlow
+import all SmoothedPolygons.Ch14.ExtensionConstruction
+import all SmoothedPolygons.Ch14.FixedPointManifolds
+import all SmoothedPolygons.Ch14.LieChart
+import all SmoothedPolygons.Ch14.NoReturn
+import all SmoothedPolygons.Ch14.VertexFlowAnalytic
 import all SmoothedPolygons.Ch15.CellCoordinates
 import all SmoothedPolygons.Ch15.Continuity
 import all SmoothedPolygons.Ch15.FixedPointCells
 import all SmoothedPolygons.Ch15.Involution
 import all SmoothedPolygons.Ch15.SmallerCells
 import all SmoothedPolygons.Ch16.BasinHypotheses
+import all SmoothedPolygons.Ch16.Certificates.ContractionBox
+import all SmoothedPolygons.Ch16.Certificates.ContractionBoxCheck
+import all SmoothedPolygons.Ch16.Certificates.ContractionBoxData
+import all SmoothedPolygons.Ch16.ClusterCoordinates
+import all SmoothedPolygons.Ch16.ClusterPoint
 import all SmoothedPolygons.Ch16.GlobalBasin
 import all SmoothedPolygons.Ch16.MahlerFirst
+import all SmoothedPolygons.Ch16.NextSwitch
+import all SmoothedPolygons.Ch16.NoChattering
 import all SmoothedPolygons.Ch16.OutwardFuller
+import all SmoothedPolygons.Ch16.ReinhardtShadowing
+import all SmoothedPolygons.Ch16.RelaxedFuller
+import all SmoothedPolygons.Ch16.RescaledDynamics
+import all SmoothedPolygons.Ch16.RescaledLimits
+import all SmoothedPolygons.Ch16.SwitchStructure
 import all SmoothedPolygons.Ch2.BalancedCircle
 import all SmoothedPolygons.Ch2.BalancedDensity
 import all SmoothedPolygons.Ch2.Boundary
@@ -150,8 +179,9 @@ import all SmoothedPolygons.Ch8.SingularLocus
 import all SmoothedPolygons.Ch8.VertexControl
 import all SmoothedPolygons.Defs
 import all Solution
--- The OptimalControl package needs no `import all`: the traversal stays inside the libraries,
--- and `collectAxioms` sees the axioms of the package's proofs (its `sorry`s too) without it.
+-- The OptimalControl and StableManifold packages need no `import all`: the traversal stays inside
+-- the libraries, and `collectAxioms` sees the axioms of the packages' proofs (their `sorry`s too)
+-- without it.
 
 /-!
 # Axiom and dependency audit
@@ -190,9 +220,10 @@ open Lean Elab Command
 namespace Audit
 
 /-- The results from prior work, with a short label: the theorems proved in `External/`
-or, when general, in `Basic/`, and, in a conditional formalization, the propositions assumed as
-hypotheses. The traversal
-stops at them. -/
+or, when general, in `Basic/` (or, for Irwin's stable manifold theorem, Theorem A.3.1 of the book,
+proved from the StableManifold package), and, in a conditional formalization, the propositions
+assumed as hypotheses. The traversal stops at them; a hypothesis is shown for a result only if its
+statement assumes it. -/
 meta def externalResults : List (String × Name) :=
   [("Euler–Arnold (Cushman–Bates)", ``External.euler_arnold),
    ("Fejes Tóth 1950", ``External.fejes_toth),
@@ -204,8 +235,12 @@ meta def externalResults : List (String × Name) :=
    ("Filippov (Agrachev–Sachkov, Th. 10.1)", ``External.filippov),
    ("Pontryagin maximum principle (Agrachev–Sachkov, Ch. 12)",
      ``External.pontryagin_maximum_principle),
+   ("Irwin, Ch. 6: the stable manifold theorem (Thm A.3.1, from the StableManifold package)",
+     ``SmoothedPolygons.theoremA_3_1),
    ("Hypothesis: Thms 16.4.1 and 14.4.1 (no chattering into 𝒮_sing)",
      ``SmoothedPolygons.NoChatteringIntoSingularLocus),
+   ("Hypothesis: Thm 14.4.1 (locally finitely bang-bang extremals; Layer 7, contains N4)",
+     ``SmoothedPolygons.Theorem14_4_1),
    ("Hypothesis: Table 16.1 row 𝒟_out and the contraction on 𝒟_out (E78)",
      ``SmoothedPolygons.TriFuller.DOutContracts),
    ("Hypothesis: Table 16.1 rows 𝒟₂, 𝒟₃ and F²𝒟₃ ⊂ 𝒟₀₀ (Fig. 16.2)",
@@ -325,6 +360,7 @@ meta def paperResults : List (String × Name) :=
    ("Thm 8.3.2", ``SmoothedPolygons.theorem8_3_2),
    ("Remark 8.3.3", ``SmoothedPolygons.remark8_3_3),
    ("Lemma 8.3.4", ``SmoothedPolygons.lemma8_3_4),
+   ("Lemma 10.1.1 (Cayley transform)", ``SmoothedPolygons.lemma10_1_1),
    ("eqn:z1z2z3 (13.2.2)", ``SmoothedPolygons.eqn_z1z2z3),
    ("Lemma 13.2.1", ``SmoothedPolygons.lemma13_2_1),
    ("Lemma 13.2.2", ``SmoothedPolygons.lemma13_2_2),
@@ -343,6 +379,29 @@ meta def paperResults : List (String × Name) :=
    ("Remark 13.5.3", ``SmoothedPolygons.remark13_5_3),
    ("Remark 13.5.4 (q_fix; asymptotic claim not formalized)", ``SmoothedPolygons.remark13_5_4),
    ("Lemma 13.5.5", ``SmoothedPolygons.lemma13_5_5),
+   ("§14.1 Lie algebra chart (14.1.1)–(14.1.3), running claims",
+     ``SmoothedPolygons.lieChart_spec),
+   ("§14.1 the star boundary x = 1/√3 in the chart (H*)",
+     ``SmoothedPolygons.lieX_starBoundary_iff),
+   ("§14.1 uniqueness of the chart (full rank of (14.1.3))",
+     ``SmoothedPolygons.lieChart_lieChartInv),
+   ("§14.1 orders of Λ_R", ``SmoothedPolygons.isBigO_lieΛR),
+   ("§14.2 expansions of ẑ", ``SmoothedPolygons.zhat_isBigO),
+   ("§14.2 the limit z(x̃)", ``SmoothedPolygons.tendsto_zhat_div),
+   ("§14.2 Hamiltonian asymptotics H = 24 r³ H_F + O(r⁴)",
+     ``SmoothedPolygons.hamiltonian_lieChart_isBigO),
+   ("§14.2 H_F(z(x̃), ζ) = H_F(z(x̃), ζ²) = 0", ``SmoothedPolygons.ham_fullerOfChart),
+   ("Remark 14.2.1", ``SmoothedPolygons.remark14_2_1),
+   ("§14.2 first control e₂ (along the e₂-flow)",
+     ``SmoothedPolygons.eventually_firstControl_lieChart),
+   ("Lemma 14.2.3", ``SmoothedPolygons.lemma14_2_3),
+   ("Lemma 14.2.4", ``SmoothedPolygons.lemma14_2_4),
+   ("Lemma 14.2.4, the χ₂₃ companion", ``SmoothedPolygons.lemma14_2_4_chi23),
+   ("Lemma 14.3.1", ``SmoothedPolygons.lemma14_3_1),
+   ("§14.3 the derivative of F at (0, x̃_out) (block form; used by Thm 16.4.1)",
+     ``SmoothedPolygons.hasStrictFDerivAt_extension),
+   ("Thm 14.3.3", ``SmoothedPolygons.theorem14_3_3),
+   ("Remark 14.3.4 (mirrored chart, G14.9)", ``SmoothedPolygons.remark14_3_4),
    ("eqn:x3 (15.1.1)", ``SmoothedPolygons.eqn15_1_1),
    ("Lemma 15.1.1", ``SmoothedPolygons.lemma15_1_1),
    ("Def 15.1.2 (big open cells) and the facts after it", ``SmoothedPolygons.definition15_1_2),
@@ -359,12 +418,31 @@ meta def paperResults : List (String × Name) :=
      ``SmoothedPolygons.isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus),
    ("Thm 16.3.1 (conditional on NoChatteringIntoSingularLocus)",
      ``SmoothedPolygons.theorem16_3_1),
+   ("Thm 16.3.1 (conditional on Thm 14.4.1 and the hypotheses of Thm 16.1.1)",
+     ``SmoothedPolygons.theorem16_3_1_of_theorem14_4_1),
+   ("Thm 16.4.1 (conditional on DOutContracts, CellTwoEntersDOut, BoxSubclaims)",
+     ``SmoothedPolygons.theorem16_4_1),
+   ("Thm 16.4.1, first part (the cluster point; the part Thm 16.3.1 uses)",
+     ``SmoothedPolygons.tendstoModVT_switchAng_of_clusterSetForwardInvariant),
+   ("Thm 16.4.1, §16.4.2 repaired: the cluster set is F_ang-invariant (N5)",
+     ``SmoothedPolygons.clusterSetForwardInvariant),
+   ("Thm 16.4.1, time reversed", ``SmoothedPolygons.theorem16_4_1_reverse),
    ("Cor A.1.3", ``SmoothedPolygons.corollaryA_1_3),
+   ("Thm A.3.1 (Irwin; local part)", ``SmoothedPolygons.theoremA_3_1),
+   ("A.3: unstable for f is stable for f⁻¹ (StableManifold package)",
+     ``Function.localStableSet_symm_eq_localUnstableSet),
    ("Prop A.6.1", ``SmoothedPolygons.propositionA_6_1),
    ("Prop A.6.2", ``SmoothedPolygons.propositionA_6_2),
    ("Prop A.6.3", ``SmoothedPolygons.propositionA_6_3),
    ("Lemma A.6.4", ``SmoothedPolygons.lemmaA_6_4),
    ("Lemma A.11.1", ``SmoothedPolygons.lemmaA_11_1)]
+
+/-- Certified pieces of the named numerical facts (`BasinHypotheses`), proved by kernel-checked
+interval arithmetic (`decide +kernel`): not results of the paper, listed so that the audit shows
+their axioms. -/
+meta def certificates : List (String × Name) :=
+  [("Certificate: the contraction on B of DOutContracts (Table 16.1, row 𝒟_out)",
+     ``SmoothedPolygons.TriFuller.ContractionBox.contraction_on_B)]
 
 /-- The theorems that Palomar's comparator checks (`theorem_names` of `comparator.json`). -/
 meta def solutionResults : List Name :=
@@ -475,9 +553,22 @@ elab "#audit" : command => do
     if axs.any (!standardAxioms.contains ·) then bad := bad.push n
     let (uses, deps') := externalUses env library deps n
     deps := deps'
+    -- A named hypothesis (a `Prop`-valued definition) is assumed only if the statement takes it:
+    -- one that a proof derives (`NoChatteringIntoSingularLocus` from `Theorem14_4_1`) is not shown.
+    let typeConsts := match env.find? n with
+      | some ci => ci.type.getUsedConstants
+      | none => #[]
+    let uses := uses.filter fun u => match env.find? u with
+      | some (.defnInfo _) => typeConsts.contains u
+      | _ => true
     let usesStr := if uses.isEmpty then "–" else ", ".intercalate (uses.map fun u => s!"`{u}`")
     let axStr := ", ".intercalate (axs.toList.map toString)
     rows := rows.push s!"| {label} | `{n}` | {usesStr} | {axStr} |"
+  for (label, n) in certificates do
+    let axs ← liftCoreM <| collectAxioms n
+    if axs.any (!standardAxioms.contains ·) then bad := bad.push n
+    let axStr := ", ".intercalate (axs.toList.map toString)
+    rows := rows.push s!"| {label} | `{n}` | – | {axStr} |"
   for n in solutionResults ++ externalResults.map (·.2) do
     let axs ← liftCoreM <| collectAxioms n
     if axs.any (!standardAxioms.contains ·) then bad := bad.push n

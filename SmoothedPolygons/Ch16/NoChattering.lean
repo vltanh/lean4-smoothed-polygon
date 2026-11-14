@@ -52,8 +52,10 @@ meets `𝒮_sing` at `t ∈ (0, T]` and chatters into it from the left; we deriv
    (`l6e_isFiniteBangBang_glue`); if `β ≤ T` or `T ≤ α`, one of the two applies directly.
 4. `exists_isChatteringArcInto` applied on `[e, t + T]` (its hypotheses only need the lift off
    `𝒮_sing` on `(e, t + T)`) gives, for any `e' ∈ (e, t + T)`, a chattering arc into `t + T` on
-   `[e', t + T]`; Theorem 16.4.1 (`theorem16_4_1_of_clusterSetForwardInvariant`, first part) says
-   its switching points converge to `q_in` modulo `V_T`.
+   `[e', t + T]`; Theorem 16.4.1, first part
+   (`tendstoModVT_switchAng_of_clusterSetForwardInvariant`), says its switching points converge to
+   `q_in` modulo `V_T`; the second part (the stable curve) is not used, so the assembly does not
+   depend on Remark 14.3.4 or the stable manifold theorem.
 5. Theorem 14.4.1, second statement (`Theorem14_4_1`), on `[e, t + T]` with `b = e'`: the lift
    avoids `𝒮_sing` at `e`, a contradiction ("Thus, the trajectory is not periodic").
 
@@ -71,10 +73,6 @@ open Set Filter Topology MeasureTheory
 open TriFuller
 
 /-! ### Helpers: scaling the costate -/
-
-private lemma l6e_traceForm_smul_left (c : ℝ) (A B : Mat2) :
-    traceForm (c • A) B = c * traceForm A B := by
-  simp only [traceForm, Matrix.smul_mul, Matrix.trace_smul, smul_eq_mul]
 
 /-- `F' = V` on `[0, T]` gives `(c F)' = c V`. -/
 private lemma l6e_isIntegralCurve_smul {F V W : ℝ → Mat2} {T c : ℝ} (h : IsIntegralCurve F V T)
@@ -109,17 +107,17 @@ private lemma l6e_isStateCostateSolution_normalize {T lam : ℝ} {u : ℝ → Fi
   have hH : ∀ (L R' X' : Mat2) (v : Fin 3 → ℝ),
       hamiltonian (-1) (c • L) (c • R') X' v = c * hamiltonian lam L R' X' v := by
     intro L R' X' v
-    rw [hamiltonian, hamiltonian, hJ, l6e_traceForm_smul_left, l6e_traceForm_smul_left]
+    rw [hamiltonian, hamiltonian, hJ, traceForm_smul_left, traceForm_smul_left]
     ring
   refine ⟨hst, by norm_num, fun t ht ↦ ?_, ?_, ?_, ?_⟩
   · obtain ⟨h1, h2, h3, -⟩ := hpt t ht
     exact ⟨by rw [Matrix.trace_smul, h1, smul_zero], by rw [Matrix.trace_smul, h2, smul_zero],
-      by rw [l6e_traceForm_smul_left, h3, mul_zero], Or.inl (by norm_num)⟩
+      by rw [traceForm_smul_left, h3, mul_zero], Or.inl (by norm_num)⟩
   · exact l6e_isIntegralCurve_smul hI1 fun t ↦ by
       simp only [Matrix.smul_mul, Matrix.mul_smul, smul_sub]
   · refine l6e_isIntegralCurve_smul hIR fun t ↦ ?_
     dsimp only
-    rw [hJ', l6e_traceForm_smul_left]
+    rw [hJ', traceForm_smul_left]
     simp only [Matrix.smul_mul, Matrix.mul_smul]
     module
   · filter_upwards [hmax] with t ht htI
@@ -367,7 +365,7 @@ theorem noChatteringIntoSingularLocus_of_clusterSetForwardInvariant (h₁ : DOut
   have he' : (e + (t + T)) / 2 ∈ Ioo e (t + T) := ⟨by linarith, by linarith⟩
   obtain ⟨τ, hτ⟩ := exists_isChatteringArcInto hextNe ((hsingN (t + T)).2 hLtT)
     (fun s hs h ↦ hfree s hs ((hsingN s).1 h)) hbb _ he'
-  have hconv := (theorem16_4_1_of_clusterSetForwardInvariant h₁ h₂ h₃ hN5 hτ).1
+  have hconv := tendstoModVT_switchAng_of_clusterSetForwardInvariant h₁ h₂ h₃ hN5 hτ
   -- Step 5: Theorem 14.4.1 (second statement) on `[e, t + T]`: the lift avoids `𝒮_sing` at `e`
   exact hNR.2 e _ (t + T) u' g' X' _ _ τ hextNe ⟨he'.1.le, he'.2⟩ hbb hτ hconv e
     ⟨le_rfl, het⟩ ((hsingN e).2 hLe)

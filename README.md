@@ -42,10 +42,10 @@ worst disk) is open and not claimed.
 | Theorem 7.7.1 | [`theorem7_7_1`](SmoothedPolygons/Ch7/Isolated.lean#L508) | the octagon is an isolated extremal, up to time translation (E32) |
 | §6.2, §6.6 | [`exists_isPontryaginExtremal_of_isReinhardtMinimizer`](SmoothedPolygons/Ch6/MatrixExtremal.lean#L564) | every global minimizer lifts to a Pontryagin extremal |
 | §6.1 and `K_min` | [`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250) | a global minimizer exists, is an extremal, and bounds a worst disk `K_min` |
-| Theorem 8.3.2 with 8.1.3 | [`isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L165) | the minimizer is bang-bang with finitely many switches away from the singular locus |
+| Theorem 8.3.2 with 8.1.3 | [`isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L166) | the minimizer is bang-bang with finitely many switches away from the singular locus |
 | Lemma 13.5.5 | [`lemma13_5_5`](SmoothedPolygons/Ch13/Stability.lean#L281) | the fixed point `q_out` of the Fuller–Poincaré map (Lemma 13.5.2) is asymptotically stable, and `q_in = τ(q_out)` is unstable |
 | Theorem 16.1.1 | [`theorem16_1_1`](SmoothedPolygons/Ch16/GlobalBasin.lean#L599) | **under three numerical facts**: every orbit of the Fuller–Poincaré map on `Ξ_{𝒲,0}/V_T` other than `q_in` tends to `q_out` |
-| Theorem 16.3.1 | [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343) | **under the hypothesis**: the minimizer is bang-bang with finitely many switches, and every `K_min` is a smoothed polygon |
+| Theorem 16.3.1 | [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L346) | **under the hypothesis**: the minimizer is bang-bang with finitely many switches, and every `K_min` is a smoothed polygon |
 
 The first two are the Palomar Challenge ([`Challenge.lean`](Challenge.lean)).
 
@@ -54,7 +54,7 @@ The first two are the Palomar Challenge ([`Challenge.lean`](Challenge.lean)).
 Each hypothesis is part of a theorem's statement, not an axiom; nothing else assumes it, and the
 audit lists it among the results that the theorem uses.
 
-- [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L343) assumes [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107): the switching times of an
+- [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L346) assumes [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107): the switching times of an
   edge-extremal Pontryagin extremal do not accumulate where its lift meets the singular locus.
   Theorems 16.4.1 and 14.4.1 give this in the book's last step; Layers 6–7 are to prove it (E60).
 - [`theorem16_1_1`](SmoothedPolygons/Ch16/GlobalBasin.lean#L599) and [`theorem16_2_1`](SmoothedPolygons/Ch16/OutwardFuller.lean#L567) assume three numerical facts

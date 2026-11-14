@@ -57,138 +57,10 @@ open Complex MeasureTheory Set Filter Topology
 
 namespace TriFuller
 
-/-! ### Helpers: the form `RR` on `V_T` and the maximizers of `RR(·, w)` on `U_T`
+/-! ### Helpers: the maximizers of `RR(·, w)` on `U_T`
 
-(Copies of private helpers of `SmoothedPolygons/Ch13/SingularLocus.lean`.) -/
-
-private lemma l6f_sqrt3 : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
-
-private lemma l6f_RR_self_VT {v : ℂ} (hv : v ∈ VT) : RR v v = 1 := by
-  rcases mem_VT.1 hv with rfl | rfl | rfl <;>
-    simp only [RR_eq_re_mul_add_im_mul, Complex.one_re, Complex.one_im, ζ_re, ζ_im, ζ_sq_re,
-      ζ_sq_im] <;> nlinarith [l6f_sqrt3]
-
-private lemma l6f_RR_ne_VT {v w : ℂ} (hv : v ∈ VT) (hw : w ∈ VT) (hne : v ≠ w) :
-    RR v w = -1 / 2 := by
-  rcases mem_VT.1 hv with rfl | rfl | rfl <;> rcases mem_VT.1 hw with rfl | rfl | rfl <;>
-    first
-    | exact absurd rfl hne
-    | simp only [RR_eq_re_mul_add_im_mul, Complex.one_re, Complex.one_im, ζ_re, ζ_im, ζ_sq_re,
-        ζ_sq_im]; nlinarith [l6f_sqrt3]
-
-private lemma l6f_exists_ne_VT (c : ℂ) : ∃ v ∈ VT, v ≠ c := by
-  by_cases h : c = 1
-  · refine ⟨ζ, ζ_mem_VT, fun h' ↦ ?_⟩
-    have := congrArg Complex.re (h'.trans h)
-    rw [ζ_re, Complex.one_re] at this
-    norm_num at this
-  · exact ⟨1, one_mem_VT, Ne.symm h⟩
-
-private lemma l6f_isLinearMap_RR (w : ℂ) : IsLinearMap ℝ (fun v : ℂ ↦ RR v w) :=
-  IsLinearMap.mk (fun x y ↦ RR_add_left x y w)
-    (fun c x ↦ by
-      simp only [RR_eq_re_mul_add_im_mul, Complex.smul_re, Complex.smul_im, smul_eq_mul]; ring)
-
-private lemma l6f_isLinearMap_RR_sub (w m : ℂ) (α : ℝ) :
-    IsLinearMap ℝ (fun v : ℂ ↦ RR v w - α * RR v m) :=
-  IsLinearMap.mk (fun x y ↦ by simp only [RR_add_left]; ring)
-    (fun c x ↦ by
-      simp only [RR_eq_re_mul_add_im_mul, Complex.smul_re, Complex.smul_im, smul_eq_mul]; ring)
-
-private lemma l6f_norm_le_one_of_mem_UT {v : ℂ} (hv : v ∈ UT) : ‖v‖ ≤ 1 := by
-  have hsub : UT ⊆ Metric.closedBall (0 : ℂ) 1 :=
-    convexHull_min (fun x hx ↦ by simp [norm_eq_one_of_mem_VT hx]) (convex_closedBall 0 1)
-  simpa using hsub hv
-
-/-- `U_T` lies in each half-plane `RR(·, c) ≥ -1/2`, `c ∈ V_T`. -/
-private lemma l6f_neg_half_le_RR_of_mem_UT {v c : ℂ} (hv : v ∈ UT) (hc : c ∈ VT) :
-    -1 / 2 ≤ RR v c := by
-  have hsub : UT ⊆ {v : ℂ | -1 / 2 ≤ RR v c} := by
-    refine convexHull_min (fun x hx ↦ ?_) (convex_halfSpace_ge (l6f_isLinearMap_RR c) _)
-    change -1 / 2 ≤ RR x c
-    by_cases hxc : x = c
-    · rw [hxc, l6f_RR_self_VT hc]; norm_num
-    · rw [l6f_RR_ne_VT hx hc hxc]
-  exact hsub hv
-
-/-- Two distinct maximizers of `RR(·, w)` on `U_T` force `w ∈ 𝒲` (the proof of
-`l4d_mem_walls_of_maximizers_UT`, `SmoothedPolygons/Ch13/SingularLocus.lean`). -/
-private lemma l6f_mem_walls_of_maximizers_UT {w v₁ v₂ : ℂ} (h₁ : v₁ ∈ UT) (h₂ : v₂ ∈ UT)
-    (hne : v₁ ≠ v₂) (hm₁ : ∀ v ∈ UT, RR v w ≤ RR v₁ w) (hm₂ : ∀ v ∈ UT, RR v w ≤ RR v₂ w) :
-    w ∈ walls := by
-  by_contra hw
-  obtain ⟨m, hm, hmax⟩ : ∃ m ∈ VT, ∀ x ∈ VT, RR x w ≤ RR m w :=
-    Set.exists_max_image VT (fun x ↦ RR x w) finite_VT ⟨1, one_mem_VT⟩
-  have hm' : ∀ y ∈ VT, RR w y ≤ RR w m := fun y hy ↦ by
-    rw [RR_comm w y, RR_comm w m]; exact hmax y hy
-  have hstrict : ∀ x ∈ VT, x ≠ m → RR x w < RR m w := by
-    intro x hx hxm
-    refine lt_of_le_of_ne (hmax x hx) fun heq ↦ hw ?_
-    refine mem_walls_of_maximizers hx hm hxm (fun y hy ↦ ?_) hm'
-    rw [RR_comm w x, heq, RR_comm m w]
-    exact hm' y hy
-  have hnonempty : (VT \ {m}).Nonempty := by
-    obtain ⟨v, hv, hvm⟩ := l6f_exists_ne_VT m
-    exact ⟨v, hv, hvm⟩
-  obtain ⟨x₀, hx₀, hgap⟩ :=
-    Set.exists_min_image (VT \ {m}) (fun x ↦ RR m w - RR x w)
-      (finite_VT.subset sdiff_subset) hnonempty
-  have hδ : 0 < RR m w - RR x₀ w := sub_pos.2 (hstrict x₀ hx₀.1 hx₀.2)
-  set δ := RR m w - RR x₀ w with hδdef
-  have hS : UT ⊆ {v : ℂ | RR v w - 2 / 3 * δ * RR v m ≤ RR m w - 2 / 3 * δ} := by
-    refine convexHull_min (fun x hx ↦ ?_)
-      (convex_halfSpace_le (l6f_isLinearMap_RR_sub w m (2 / 3 * δ)) _)
-    change RR x w - 2 / 3 * δ * RR x m ≤ RR m w - 2 / 3 * δ
-    by_cases hxm : x = m
-    · rw [hxm, l6f_RR_self_VT hm]; linarith
-    · rw [l6f_RR_ne_VT hx hm hxm]
-      have := hgap x ⟨hx, hxm⟩
-      linarith
-  have key : ∀ v ∈ UT, (∀ v' ∈ UT, RR v' w ≤ RR v w) → v = m := by
-    intro v hv hvmax
-    have h1 : RR v w - 2 / 3 * δ * RR v m ≤ RR m w - 2 / 3 * δ := hS hv
-    have h2 : RR m w ≤ RR v w := hvmax m (VT_subset_UT hm)
-    have h3 : 1 ≤ RR v m := by nlinarith
-    have hnv : v.re * v.re + v.im * v.im ≤ 1 := by
-      have h := l6f_norm_le_one_of_mem_UT hv
-      have h' : ‖v‖ ^ 2 ≤ 1 := by nlinarith [norm_nonneg v]
-      rwa [Complex.sq_norm, Complex.normSq_apply] at h'
-    have hnm : m.re * m.re + m.im * m.im = 1 := by
-      have := l6f_RR_self_VT hm; rwa [RR_eq_re_mul_add_im_mul] at this
-    rw [RR_eq_re_mul_add_im_mul] at h3
-    have hsq : (v.re - m.re) ^ 2 + (v.im - m.im) ^ 2 ≤ 0 := by nlinarith
-    apply Complex.ext <;> nlinarith [sq_nonneg (v.re - m.re), sq_nonneg (v.im - m.im)]
-  exact hne ((key v₁ h₁ hm₁).trans (key v₂ h₂ hm₂).symm)
-
-/-- A nonzero point of a wall has `RR(w, c) < 0` for the vertex `c` of its ray. -/
-private lemma l6f_exists_RR_neg_of_mem_walls {w : ℂ} (hw : w ∈ walls) (hne : w ≠ 0) :
-    ∃ c ∈ VT, RR w c < 0 := by
-  have key : ∀ k : ℕ, ζ ^ k ∈ VT → w ∈ wall k → ∃ c ∈ VT, RR w c < 0 := by
-    rintro k hk ⟨s, hs, rfl⟩
-    refine ⟨ζ ^ k, hk, ?_⟩
-    rw [RR_ofReal_mul_left, l6f_RR_self_VT hk, mul_one]
-    refine lt_of_le_of_ne hs fun h ↦ hne ?_
-    rw [h]; simp
-  rcases hw with (h | h) | h
-  · exact key 0 (by rw [pow_zero]; exact one_mem_VT) h
-  · exact key 1 (by rw [pow_one]; exact ζ_mem_VT) h
-  · exact key 2 ζ_sq_mem_VT h
-
-/-- A point of `𝒲` with `RR(w, c) < 0`, `c ∈ V_T`, lies on the open ray `ℝ_{<0} c`. -/
-private lemma l6f_eq_neg_mul_of_mem_walls {w c : ℂ} (hw : w ∈ walls) (hc : c ∈ VT)
-    (hneg : RR w c < 0) : ∃ s : ℝ, s < 0 ∧ w = s * c := by
-  have key : ∀ k : ℕ, ζ ^ k ∈ VT → w ∈ wall k → ∃ s : ℝ, s < 0 ∧ w = s * c := by
-    rintro k hk ⟨s, hs, rfl⟩
-    rw [RR_ofReal_mul_left] at hneg
-    by_cases hkc : ζ ^ k = c
-    · rw [hkc, l6f_RR_self_VT hc] at hneg
-      exact ⟨s, by linarith, by rw [hkc]⟩
-    · rw [l6f_RR_ne_VT hk hc hkc] at hneg
-      exact absurd hneg (by nlinarith)
-  rcases hw with (h | h) | h
-  · exact key 0 (by rw [pow_zero]; exact one_mem_VT) h
-  · exact key 1 (by rw [pow_one]; exact ζ_mem_VT) h
-  · exact key 2 ζ_sq_mem_VT h
+(The values of `RR` on `V_T` and the half-planes containing `U_T` are in
+`SmoothedPolygons/Ch13/SingularLocus.lean`.) -/
 
 /-- **A maximizer of `RR(·, w)` on `U_T` that is not a vertex** (`w ≠ 0`): the maximizing face is
 an edge, and `w` lies on the open ray `ℝ_{<0} c` of the opposite vertex `c`. (Some vertex `m`
@@ -199,12 +71,12 @@ private lemma l6f_ray_of_max {w u : ℂ} (hw : w ≠ 0) (hu : u ∈ UT) (huV : u
     Set.exists_max_image VT (fun x ↦ RR x w) finite_VT ⟨1, one_mem_VT⟩
   have hmU : ∀ v ∈ UT, RR v w ≤ RR m w := by
     have hsub : UT ⊆ {v : ℂ | RR v w ≤ RR m w} :=
-      convexHull_min (fun x hx ↦ hmm x hx) (convex_halfSpace_le (l6f_isLinearMap_RR w) _)
+      convexHull_min (fun x hx ↦ hmm x hx) (convex_halfSpace_le (isLinearMap_RR w) _)
     exact fun v hv ↦ hsub hv
-  have hwall := l6f_mem_walls_of_maximizers_UT hu (VT_subset_UT hm)
+  have hwall := mem_walls_of_maximizers_UT hu (VT_subset_UT hm)
     (fun h ↦ huV (h ▸ hm)) hmax hmU
-  obtain ⟨c, hc, hneg⟩ := l6f_exists_RR_neg_of_mem_walls hwall hw
-  exact ⟨c, hc, l6f_eq_neg_mul_of_mem_walls hwall hc hneg⟩
+  obtain ⟨c, hc, hneg⟩ := exists_RR_neg_of_mem_walls hwall hw
+  exact ⟨c, hc, eq_neg_mul_of_mem_walls hwall hc hneg⟩
 
 /-! ### Helpers: accumulation points and derivatives -/
 
@@ -326,12 +198,12 @@ private lemma l6f_ae_not_ray {a b : ℝ} {z : ℝ → Fin 3 → ℂ} {u : ℝ �
   -- the maximum condition: `RR(u(t), c) = -1/2`
   obtain ⟨s, hs, hzs⟩ := hray
   have htI : t ∈ Icc a b := Ioo_subset_Icc_self ht
-  obtain ⟨v, hv, hvc⟩ := l6f_exists_ne_VT c
+  obtain ⟨v, hv, hvc⟩ := exists_mem_VT_ne c
   have hA : RR (u t) c = -1 / 2 := by
     have h1 := hmt htI v (VT_subset_UT hv)
     simp only [ham, hzs, add_le_add_iff_left, RR_ofReal_mul_right] at h1
-    rw [l6f_RR_ne_VT hv hc hvc] at h1
-    have h2 := l6f_neg_half_le_RR_of_mem_UT (h.2.2.1 t htI) hc
+    rw [RR_of_mem_VT_of_ne hv hc hvc] at h1
+    have h2 := neg_half_le_RR_of_mem_UT (h.2.2.1 t htI) hc
     nlinarith
   have e : RR (I * c) (-I * u t) = -RR (u t) c := by
     simp only [RR_eq_re_mul_add_im_mul, Complex.mul_re, Complex.mul_im, Complex.neg_re,

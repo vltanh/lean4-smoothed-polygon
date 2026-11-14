@@ -43,9 +43,9 @@ modulo `V_T` from the cluster set (`tendstoModVT_of_forall_mapClusterPt`, compac
 switching time lies in the exceptional set of `IsFiniteBangBang` on any compact subinterval around
 it (`l6e_not_isSwitchingTime`), so those in `(a', β]`, `β < b`, are finitely many
 (`l6e_finite_switch`; switches may accumulate at `a`, so `a' > a` is needed). Every `(c, b)`
-contains one (`l6e_exists_switch`): otherwise the control would be a.e. one vertex there (the
-argument of `l3m_local_vertex` of `SmoothedPolygons/Ch16/MahlerFirst.lean`, private there and
-repeated as `l6e_local_vertex`, with `exists_ae_eq_vertex_of_locally`) and Lemma 8.3.4
+contains one (`l6e_exists_switch`): otherwise the control would be a.e. one vertex there
+(`IsFiniteBangBang.exists_ae_eq_vertex_of_not_isSwitchingTime` of
+`SmoothedPolygons/Ch16/MahlerFirst.lean`, with `exists_ae_eq_vertex_of_locally`) and Lemma 8.3.4
 (`lemma8_3_4`) would keep the lift off the singular locus at `b`. The switching times in `(a', b)`
 are then enumerated increasingly, each term the least switching time after the previous one
 (`l6e_enum`).
@@ -69,7 +69,7 @@ locus are reflected likewise.
 
 `tendstoModVT_of_forall_mapClusterPt`: every cluster point lies in the orbit of `ang (τ q_out)`
 (`mk_eq_mk_iff_exists_mem_VT`); a subsequence staying away from the orbit would have a cluster
-point (compactness of `Ξ`, `l6e_isCompact_Xi`) at positive distance from it.
+point (compactness of `Ξ`, `isCompact_Xi`) at positive distance from it.
 -/
 
 @[expose] public section
@@ -132,16 +132,17 @@ every cluster point is of this kind (`mapClusterPt_switchAng_mem_sectionZero`). 
 def switchClusterSet (ξs : ℕ → Fin 3 → ℂ) : Set XiW0Quot :=
   {x | ∃ ξ ∈ sectionZero, classOf ξ = x ∧ MapClusterPt ξ atTop ξs}
 
-/-! ### Helpers: switching times of locally finite bang-bang controls -/
+/-! ### Vertices, almost-everywhere facts and the Hamiltonian at a switching time -/
 
 /-- The vertices of `U_T` are distinct. -/
-private lemma l6e_vertex_inj {i j : Fin 3} (h : vertex i = vertex j) : i = j := by
+theorem vertex_injective : Function.Injective vertex := by
+  intro i j h
   by_contra hij
   have := congrFun h i
   simp [vertex, hij] at this
 
 /-- A property holding almost everywhere on a nonempty open interval holds at some point of it. -/
-private lemma l6e_exists_mem_of_ae {P : ℝ → Prop} {c d : ℝ} (hcd : c < d)
+theorem exists_mem_Ioo_of_ae {P : ℝ → Prop} {c d : ℝ} (hcd : c < d)
     (h : ∀ᵐ t, t ∈ Ioo c d → P t) : ∃ t ∈ Ioo c d, P t := by
   by_contra hcon
   push Not at hcon
@@ -152,6 +153,104 @@ private lemma l6e_exists_mem_of_ae {P : ℝ → Prop} {c d : ℝ} (hcd : c < d)
   rw [Real.volume_Ioo, ENNReal.ofReal_eq_zero] at h0
   linarith
 
+/-- A function continuous on `[a, b]` satisfying a closed condition almost everywhere on
+`(p, q) ⊆ [a, b]` satisfies it on `[p, q]`. -/
+theorem mem_of_ae_of_continuousOn {f : ℝ → ℝ} {C : Set ℝ} (hC : IsClosed C) {a b p q τ : ℝ}
+    (hf : ContinuousOn f (Icc a b)) (hpq : p < q) (hsub : Icc p q ⊆ Icc a b)
+    (hτ : τ ∈ Icc p q) (hae : ∀ᵐ t, t ∈ Ioo p q → f t ∈ C) : f τ ∈ C := by
+  have hD : IsClosed (Icc p q ∩ f ⁻¹' C) :=
+    (hf.mono hsub).preimage_isClosed_of_isClosed isClosed_Icc hC
+  have hsub2 : Ioo p q ⊆ Icc p q ∩ f ⁻¹' C := by
+    intro t ht
+    by_contra hn
+    have hopen : IsOpen (Ioo p q \ (Icc p q ∩ f ⁻¹' C)) := isOpen_Ioo.sdiff hD
+    obtain ⟨δ, hδ, hball⟩ := Metric.isOpen_iff.1 hopen t ⟨ht, hn⟩
+    have hnull : ∀ᵐ s, s ∉ Metric.ball t δ := by
+      filter_upwards [hae] with s hs hsb
+      have h1 := hball hsb
+      exact h1.2 ⟨Ioo_subset_Icc_self h1.1, hs h1.1⟩
+    have h0 := MeasureTheory.measure_eq_zero_iff_ae_notMem.2 hnull
+    rw [Real.volume_ball] at h0
+    simp only [ENNReal.ofReal_eq_zero] at h0
+    linarith
+  have hcl : closure (Ioo p q) ⊆ Icc p q ∩ f ⁻¹' C := closure_minimal hsub2 hD
+  rw [closure_Ioo hpq.ne] at hcl
+  exact (hcl hτ).2
+
+/-- The Hamiltonians of the vertices are continuous along an extremal. -/
+theorem IsExtremalOn.continuousOn_phaseHam {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
+    (hext : IsExtremalOn a b u g X Λ₁ ΛR (-1)) (k : Fin 3) :
+    ContinuousOn (fun t ↦ phaseHam (phaseAt X Λ₁ ΛR t) (vertex k)) (Icc a b) := by
+  have hc := hext.continuousOn_lift
+  have hΛ₁ : ContinuousOn Λ₁ (Icc a b) := (continuous_fst.comp continuous_snd).comp_continuousOn hc
+  have hX : ContinuousOn X (Icc a b) :=
+    (continuous_fst.comp (continuous_snd.comp continuous_snd)).comp_continuousOn hc
+  have hΛR : ContinuousOn ΛR (Icc a b) :=
+    (continuous_snd.comp (continuous_snd.comp continuous_snd)).comp_continuousOn hc
+  have htr : Continuous fun M : Mat2 ↦ M.trace := continuous_id.matrix_trace
+  have hne : ∀ t ∈ Icc a b, traceForm (X t) (controlMatrix (vertex k)) ≠ 0 := by
+    intro t ht
+    have hst := (hext.1.2.2.2.1 (t - a) ⟨by linarith [ht.1], by linarith [ht.2]⟩).2
+    simp only [add_sub_cancel] at hst
+    rw [poly_traceForm_comm]
+    exact (poly_traceForm_neg (poly_vertex_mem k) hst).ne
+  exact (htr.comp_continuousOn ((hΛ₁.sub continuousOn_const).mul hX)).sub
+    ((htr.comp_continuousOn (hΛR.mul continuousOn_const)).div
+      (htr.comp_continuousOn (hX.mul continuousOn_const)) hne)
+
+/-- The maximum condition and `H = 0` of an extremal on `[a, b]`, in the original time. -/
+theorem IsExtremalOn.ae_phaseHam {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
+    (hext : IsExtremalOn a b u g X Λ₁ ΛR (-1)) :
+    ∀ᵐ t, t ∈ Ioo a b → phaseHam (phaseAt X Λ₁ ΛR t) (u t) = 0 ∧
+      ∀ v ∈ controlSimplex,
+        phaseHam (phaseAt X Λ₁ ΛR t) v ≤ phaseHam (phaseAt X Λ₁ ΛR t) (u t) := by
+  have hq := (MeasureTheory.measurePreserving_add_left MeasureTheory.volume
+    (-a)).quasiMeasurePreserving.ae hext.2.2.2.2.2
+  filter_upwards [hq] with s hs hsI
+  have := hs ⟨by linarith [hsI.1], by linarith [hsI.2]⟩
+  simpa [phaseHam, phaseAt] using this
+
+/-- **At a switching time the two adjacent vertices maximize the Hamiltonian, with value `0`**:
+the maximum condition and `H = 0` almost everywhere on each side, and continuity along the lift. -/
+theorem IsExtremalOn.exists_phaseHam_eq_zero_of_isSwitchingTime {a b : ℝ} {u :
+    ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
+    (hext : IsExtremalOn a b u g X Λ₁ ΛR (-1)) {τ : ℝ} (hτ : τ ∈ Ioo a b)
+    (hsw : IsSwitchingTime u τ) :
+    ∃ i j : Fin 3, i ≠ j ∧ (∀ k, phaseHam (phaseAt X Λ₁ ΛR τ) (vertex k) ≤ 0) ∧
+      phaseHam (phaseAt X Λ₁ ΛR τ) (vertex i) = 0 ∧
+      phaseHam (phaseAt X Λ₁ ΛR τ) (vertex j) = 0 := by
+  obtain ⟨i, j, hij, ε, hε, hl, hr⟩ := hsw
+  have hφ := IsExtremalOn.continuousOn_phaseHam hext
+  have hmax := IsExtremalOn.ae_phaseHam hext
+  have key : ∀ {p q : ℝ} {m : Fin 3}, p < q → Icc p q ⊆ Icc a b → τ ∈ Icc p q →
+      (∀ᵐ t, t ∈ Ioo p q → u t = vertex m) → Ioo p q ⊆ Ioo a b →
+      (∀ k, phaseHam (phaseAt X Λ₁ ΛR τ) (vertex k) ≤ 0) ∧
+        phaseHam (phaseAt X Λ₁ ΛR τ) (vertex m) = 0 := by
+    intro p q m hpq hsub hτpq hu hsub'
+    have hae : ∀ᵐ t, t ∈ Ioo p q → phaseHam (phaseAt X Λ₁ ΛR t) (vertex m) = 0 ∧
+        ∀ k, phaseHam (phaseAt X Λ₁ ΛR t) (vertex k) ≤ 0 := by
+      filter_upwards [hmax, hu] with t h1 h2 ht
+      obtain ⟨e1, e2⟩ := h1 (hsub' ht)
+      rw [h2 ht] at e1 e2
+      exact ⟨e1, fun k ↦ (e2 (vertex k) (poly_vertex_mem k)).trans e1.le⟩
+    refine ⟨fun k ↦ mem_of_ae_of_continuousOn (f := fun t ↦ phaseHam (phaseAt X Λ₁ ΛR t) (vertex k))
+      isClosed_Iic (hφ k) hpq hsub hτpq ?_,
+      mem_of_ae_of_continuousOn (f := fun t ↦ phaseHam (phaseAt X Λ₁ ΛR t) (vertex m))
+        isClosed_singleton (hφ m) hpq hsub hτpq ?_⟩
+    · filter_upwards [hae] with t ht ht' using (ht ht').2 k
+    · filter_upwards [hae] with t ht ht' using (ht ht').1
+  have hp : max a (τ - ε) < τ := max_lt hτ.1 (by linarith)
+  have hq : τ < min b (τ + ε) := lt_min hτ.2 (by linarith)
+  obtain ⟨hle, hi⟩ := key hp (Icc_subset_Icc (le_max_left _ _) hτ.2.le) ⟨hp.le, le_rfl⟩
+    (by filter_upwards [hl] with t ht ht' using ht ⟨lt_of_le_of_lt (le_max_right _ _) ht'.1, ht'.2⟩)
+    (fun t ht ↦ ⟨lt_of_le_of_lt (le_max_left _ _) ht.1, ht.2.trans hτ.2⟩)
+  obtain ⟨-, hj⟩ := key hq (Icc_subset_Icc hτ.1.le (min_le_left _ _)) ⟨le_rfl, hq.le⟩
+    (by filter_upwards [hr] with t ht ht' using ht ⟨ht'.1, lt_of_lt_of_le ht'.2 (min_le_right _ _)⟩)
+    (fun t ht ↦ ⟨hτ.1.trans ht.1, lt_of_lt_of_le ht.2 (min_le_left _ _)⟩)
+  exact ⟨i, j, hij, hle, hi, hj⟩
+
+/-! ### Helpers: switching times of locally finite bang-bang controls -/
+
 /-- A time near which the control is almost everywhere one vertex is not a switching time. -/
 private lemma l6e_not_isSwitchingTime {u : ℝ → Fin 3 → ℝ} {t ε : ℝ} {i : Fin 3} (hε : 0 < ε)
     (h : ∀ᵐ τ, τ ∈ Ioo (t - ε) (t + ε) → u τ = vertex i) : ¬ IsSwitchingTime u t := by
@@ -159,64 +258,26 @@ private lemma l6e_not_isSwitchingTime {u : ℝ → Fin 3 → ℝ} {t ε : ℝ} {
   have hm1 := min_le_left ε ε₁
   have hm2 := min_le_right ε ε₁
   have hδ : 0 < min ε ε₁ := lt_min hε hε₁
-  obtain ⟨s, -, hs1, hs2⟩ := l6e_exists_mem_of_ae
+  obtain ⟨s, -, hs1, hs2⟩ := exists_mem_Ioo_of_ae
     (P := fun s ↦ u s = vertex i ∧ u s = vertex i₁) (by linarith : t - min ε ε₁ < t) (by
       filter_upwards [h, h1] with s hs hs1 hsI
       exact ⟨hs ⟨by linarith [hsI.1], by linarith [hsI.2]⟩,
         hs1 ⟨by linarith [hsI.1], hsI.2⟩⟩)
-  obtain ⟨s', -, hs'1, hs'2⟩ := l6e_exists_mem_of_ae
+  obtain ⟨s', -, hs'1, hs'2⟩ := exists_mem_Ioo_of_ae
     (P := fun s ↦ u s = vertex i ∧ u s = vertex j₁) (by linarith : t < t + min ε ε₁) (by
       filter_upwards [h, h2] with s hs hs2 hsI
       exact ⟨hs ⟨by linarith [hsI.1], by linarith [hsI.2]⟩,
         hs2 ⟨hsI.1, by linarith [hsI.2]⟩⟩)
-  exact hij ((l6e_vertex_inj (hs1.symm.trans hs2)).symm.trans
-    (l6e_vertex_inj (hs'1.symm.trans hs'2)))
-
-/-- **A time inside an interval of finite bang-bang control that is not a switching time has a
-neighbourhood on which the control is one vertex** (the argument of `l3m_local_vertex` of
-`SmoothedPolygons/Ch16/MahlerFirst.lean`, which is private there). -/
-private lemma l6e_local_vertex {u : ℝ → Fin 3 → ℝ} {α β t : ℝ} (hbb : IsFiniteBangBang α β u)
-    (ht : t ∈ Ioo α β) (hsw : ¬ IsSwitchingTime u t) :
-    ∃ i : Fin 3, ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (t - η) (t + η) → u τ = vertex i := by
-  obtain ⟨S, hS⟩ := hbb
-  have hfin : ((S.erase t : Finset ℝ) : Set ℝ)ᶜ ∈ 𝓝 t :=
-    (S.erase t).finite_toSet.isClosed.isOpen_compl.mem_nhds (by simp)
-  obtain ⟨ρ₀, hρ₀, hball⟩ := Metric.mem_nhds_iff.1 hfin
-  set ρ := min ρ₀ (min (t - α) (β - t)) with hρ
-  have hρ1 : ρ ≤ ρ₀ := min_le_left _ _
-  have hρ2 : ρ ≤ t - α := (min_le_right _ _).trans (min_le_left _ _)
-  have hρ3 : ρ ≤ β - t := (min_le_right _ _).trans (min_le_right _ _)
-  have hρpos : 0 < ρ := lt_min hρ₀ (lt_min (by linarith [ht.1]) (by linarith [ht.2]))
-  have hloc : ∀ s ∈ Ioo (t - ρ) (t + ρ), s ≠ t →
-      ∃ i : Fin 3, ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (s - η) (s + η) → u τ = vertex i := by
-    intro s hs hst
-    refine hS s ⟨by linarith [hs.1], by linarith [hs.2]⟩ fun hsS ↦ ?_
-    have hsb : s ∈ Metric.ball t ρ₀ := by
-      rw [Metric.mem_ball, Real.dist_eq, abs_lt]
-      constructor <;> linarith [hs.1, hs.2]
-    exact hball hsb (by simp [hsS, hst])
-  obtain ⟨i, hi⟩ := exists_ae_eq_vertex_of_locally (α := t - ρ) (β := t) fun s hs ↦
-    hloc s ⟨hs.1, by linarith [hs.2]⟩ hs.2.ne
-  obtain ⟨j, hj⟩ := exists_ae_eq_vertex_of_locally (α := t) (β := t + ρ) fun s hs ↦
-    hloc s ⟨by linarith [hs.1], hs.2⟩ hs.1.ne'
-  obtain rfl : i = j := by
-    by_contra hij
-    exact hsw ⟨i, j, hij, ρ, hρpos, hi, hj⟩
-  refine ⟨i, ρ, hρpos, ?_⟩
-  have hne : ∀ᵐ τ : ℝ, τ ≠ t := by
-    rw [ae_iff]
-    simp
-  filter_upwards [hi, hj, hne] with τ h1 h2 h3 hτ
-  rcases lt_or_gt_of_ne h3 with h | h
-  · exact h1 ⟨hτ.1, h⟩
-  · exact h2 ⟨h, hτ.2⟩
+  exact hij ((vertex_injective (hs1.symm.trans hs2)).symm.trans
+    (vertex_injective (hs'1.symm.trans hs'2)))
 
 /-- **Switching times accumulate at a meeting with the singular locus** ("A trajectory cannot
 reach the singular locus with finitely many switches by Lemma 8.3.4", TeX 12815–12816): if the
 control is finitely bang-bang on compact subintervals of `(a, b)` and the lift meets `𝒮_sing` at
 `b`, every `(c, b)` with `c ∈ (a, b)` contains a switching time. Otherwise the control would be
-a.e. one vertex on `(c, b)` (`l6e_local_vertex`, `exists_ae_eq_vertex_of_locally`), and
-Lemma 8.3.4 (`lemma8_3_4`) on `[c, b]` keeps the lift off `𝒮_sing` at `b`. -/
+a.e. one vertex on `(c, b)` (`IsFiniteBangBang.exists_ae_eq_vertex_of_not_isSwitchingTime`,
+`exists_ae_eq_vertex_of_locally`), and Lemma 8.3.4 (`lemma8_3_4`) on `[c, b]` keeps the lift off
+`𝒮_sing` at `b`. -/
 private lemma l6e_exists_switch {a b lam : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
     (hext : IsExtremalOn a b u g X Λ₁ ΛR lam) (hb : (g b, Λ₁ b, X b, ΛR b) ∈ singularLocus)
     (hbb : ∀ α β, a < α → β < b → IsFiniteBangBang α β u) {c : ℝ} (hc : c ∈ Ioo a b) :
@@ -225,7 +286,8 @@ private lemma l6e_exists_switch {a b lam : ℝ} {u : ℝ → Fin 3 → ℝ} {g X
   push Not at hcon
   have hloc : ∀ t ∈ Ioo c b,
       ∃ i : Fin 3, ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (t - η) (t + η) → u τ = vertex i := fun t ht ↦
-    l6e_local_vertex (hbb ((c + t) / 2) ((t + b) / 2) (by linarith [hc.1, ht.1])
+    IsFiniteBangBang.exists_ae_eq_vertex_of_not_isSwitchingTime (hbb ((c + t) / 2) ((t + b) / 2)
+        (by linarith [hc.1, ht.1])
       (by linarith [ht.2])) ⟨by linarith [ht.1], by linarith [ht.2]⟩ (hcon t ht)
   obtain ⟨i, hi⟩ := exists_ae_eq_vertex_of_locally hloc
   exact lemma8_3_4 (hext.mono hc.1.le hc.2 le_rfl) hi b ⟨hc.2.le, le_rfl⟩ hb
@@ -465,26 +527,11 @@ private lemma l6e_diagD_conj_apply (M : Mat2) (i j : Fin 2) :
   fin_cases i <;> fin_cases j <;>
     simp [diagD, Matrix.mul_apply, Fin.sum_univ_two, Matrix.vecMul, dotProduct]
 
-private lemma l6e_matTau_add (A B : Mat2) : matTau (A + B) = matTau A + matTau B := by
-  ext i j; simp only [l6e_matTau_apply, Matrix.add_apply]; ring
-
-private lemma l6e_matTau_sub (A B : Mat2) : matTau (A - B) = matTau A - matTau B := by
-  ext i j; simp only [l6e_matTau_apply, Matrix.sub_apply]; ring
-
 private lemma l6e_matTau_neg (A : Mat2) : matTau (-A) = -matTau A := by
   ext i j; simp only [l6e_matTau_apply, Matrix.neg_apply]; ring
 
-private lemma l6e_matTau_smul (c : ℝ) (A : Mat2) : matTau (c • A) = c • matTau A := by
-  ext i j; simp only [l6e_matTau_apply, Matrix.smul_apply, smul_eq_mul]; ring
-
 private lemma l6e_matTau_zero : matTau 0 = 0 := by
   ext i j; simp [l6e_matTau_apply]
-
-private lemma l6e_matTau_J : matTau J = J := by
-  ext i j; fin_cases i <;> fin_cases j <;> simp [matTau, J]
-
-private lemma l6e_matTau_matTau (A : Mat2) : matTau (matTau A) = A := by
-  ext i j; simp only [l6e_matTau_apply]; split_ifs <;> ring
 
 /-- `(-DAD)(-DBD) = DABD = -(-DABD)`. -/
 private lemma l6e_matTau_mul (A B : Mat2) : matTau A * matTau B = -matTau (A * B) := by
@@ -493,32 +540,19 @@ private lemma l6e_matTau_mul (A B : Mat2) : matTau A * matTau B = -matTau (A * B
 
 private lemma l6e_matTau_comm (A B : Mat2) :
     matTau A * matTau B - matTau B * matTau A = -matTau (A * B - B * A) := by
-  rw [l6e_matTau_mul, l6e_matTau_mul, l6e_matTau_sub]; abel
-
-private lemma l6e_traceForm_matTau (A B : Mat2) :
-    traceForm (matTau A) (matTau B) = traceForm A B := by
-  simp only [traceForm, Matrix.trace_fin_two, matTau, Matrix.mul_apply, Fin.sum_univ_two]
-  simp
+  rw [l6e_matTau_mul, l6e_matTau_mul, matTau_sub]; abel
 
 private lemma l6e_matTau_combo (A B C : Mat2) (c : ℝ) :
     -matTau A - c • -matTau B + -matTau C = -matTau (A - c • B + C) := by
-  rw [l6e_matTau_add, l6e_matTau_sub, l6e_matTau_smul, smul_neg]
+  rw [matTau_add, matTau_sub, matTau_smul, smul_neg]
   abel
-
-private lemma l6e_trace_matTau (A : Mat2) : (matTau A).trace = -A.trace := by
-  simp only [Matrix.trace_fin_two, matTau]
-  simp
-  ring
 
 private lemma l6e_det_diagD_conj (A : Mat2) : (diagD * A * diagD).det = A.det := by
   simp only [Matrix.det_fin_two, l6e_diagD_conj_apply]
   simp
 
-private lemma l6e_vertexSwap_vertexSwap (j : Fin 3) : vertexSwap (vertexSwap j) = j := by
-  fin_cases j <;> rfl
-
 private lemma l6e_vertexSwap_inj {i j : Fin 3} (h : vertexSwap i = vertexSwap j) : i = j := by
-  rw [← l6e_vertexSwap_vertexSwap i, h, l6e_vertexSwap_vertexSwap]
+  rw [← vertexSwap_vertexSwap i, h, vertexSwap_vertexSwap]
 
 /-- `-D Z_u D = Z_{u ∘ τ}` (`e₂ ↔ e₃`). -/
 private lemma l6e_controlMatrix_swap (v : Fin 3 → ℝ) :
@@ -531,15 +565,15 @@ private lemma l6e_controlMatrix_swap (v : Fin 3 → ℝ) :
 
 private lemma l6e_controlP_swap (v : Fin 3 → ℝ) (X : Mat2) :
     controlP (fun j ↦ v (vertexSwap j)) (matTau X) = matTau (controlP v X) := by
-  rw [controlP, controlP, l6e_controlMatrix_swap, l6e_traceForm_matTau, l6e_matTau_smul]
+  rw [controlP, controlP, l6e_controlMatrix_swap, traceForm_matTau, matTau_smul]
 
 private lemma l6e_hamiltonian_swap (lam : ℝ) (Λ₁ ΛR X : Mat2) (v : Fin 3 → ℝ) :
     hamiltonian lam (matTau Λ₁) (matTau ΛR) (matTau X) (fun j ↦ v (vertexSwap j)) =
       hamiltonian lam Λ₁ ΛR X v := by
   have e : matTau Λ₁ - (3 / 2 * lam) • J = matTau (Λ₁ - (3 / 2 * lam) • J) := by
-    rw [l6e_matTau_sub, l6e_matTau_smul, l6e_matTau_J]
-  rw [hamiltonian, hamiltonian, l6e_controlMatrix_swap, e, l6e_traceForm_matTau,
-    l6e_traceForm_matTau, l6e_traceForm_matTau]
+    rw [matTau_sub, matTau_smul, matTau_J]
+  rw [hamiltonian, hamiltonian, l6e_controlMatrix_swap, e, traceForm_matTau,
+    traceForm_matTau, traceForm_matTau]
 
 private lemma l6e_swap_mem_controlSimplex {v : Fin 3 → ℝ} (h : v ∈ controlSimplex) :
     (fun j ↦ v (vertexSwap j)) ∈ controlSimplex := by
@@ -550,27 +584,6 @@ private lemma l6e_swap_mem_controlSimplex {v : Fin 3 → ℝ} (h : v ∈ control
   have h2 : vertexSwap 2 = 1 := rfl
   simp only [h0, h1, h2]
   linarith
-
-private lemma l6e_isStarState_matTau {X : Mat2} (h : IsStarState X) : IsStarState (matTau X) := by
-  obtain ⟨htr, hdet, h0, h1, h2⟩ := h
-  refine ⟨by rw [l6e_trace_matTau, htr, neg_zero], ?_, ?_, ?_, ?_⟩
-  · rw [Matrix.det_fin_two] at hdet ⊢
-    simp only [matTau]
-    simp
-    linarith
-  · have e : ρ₀ (matTau X) = ρ₁ X := by
-      simp only [ρ₀, ρ₁, matTau]
-      simp
-      ring
-    rw [e]; exact h1
-  · have e : ρ₁ (matTau X) = ρ₀ X := by
-      simp only [ρ₀, ρ₁, matTau]
-      simp
-    rw [e]; exact h0
-  · have e : ρ₂ (matTau X) = ρ₂ X := by
-      simp only [ρ₂, matTau]
-      simp
-    rw [e]; exact h2
 
 /-- `u = e_i ⇒ u ∘ τ = e_{τ i}`. -/
 private lemma l6e_vertex_swap (i : Fin 3) :
@@ -638,13 +651,13 @@ private lemma l6e_isStateCostateSolution_reverse {T : ℝ} {u : ℝ → Fin 3 �
   have hmem : ∀ t ∈ Icc 0 T, T - t ∈ Icc 0 T := fun t ht ↦
     ⟨by linarith [ht.2], by linarith [ht.1]⟩
   have hinj : ∀ M : Mat2, matTau M = 0 → M = 0 := fun M h0 ↦ by
-    rw [← l6e_matTau_matTau M, h0, l6e_matTau_zero]
+    rw [← matTau_matTau M, h0, l6e_matTau_zero]
   refine ⟨⟨hT, ?_, fun t ht ↦ l6e_swap_mem_controlSimplex (huU _ (hmem t ht)), fun t ht ↦ ?_,
     ?_, ?_⟩, hlam, fun t ht ↦ ?_, ?_, ?_, ?_⟩
   · exact measurable_pi_iff.2 fun j ↦
       (measurable_pi_apply (vertexSwap j)).comp (hum.comp (measurable_const.sub measurable_id))
   · obtain ⟨hdet, hstar⟩ := hst _ (hmem t ht)
-    exact ⟨by rw [l6e_det_diagD_conj, hdet], l6e_isStarState_matTau hstar⟩
+    exact ⟨by rw [l6e_det_diagD_conj, hdet], isStarState_matTau hstar⟩
   · refine l6e_isIntegralCurve_diagD hT.le hgI fun t ↦ ?_
     ext i j
     fin_cases i <;> fin_cases j <;>
@@ -652,8 +665,8 @@ private lemma l6e_isStateCostateSolution_reverse {T : ℝ} {u : ℝ → Fin 3 �
   · refine l6e_isIntegralCurve_matTau hT.le hXI fun t ↦ ?_
     simp only [l6e_controlP_swap, l6e_matTau_comm]
   · obtain ⟨h1, h2, h3, h4⟩ := hpt _ (hmem t ht)
-    refine ⟨by rw [l6e_trace_matTau, h1, neg_zero], by rw [l6e_trace_matTau, h2, neg_zero],
-      by rw [l6e_traceForm_matTau, h3], ?_⟩
+    refine ⟨by rw [trace_matTau, h1, neg_zero], by rw [trace_matTau, h2, neg_zero],
+      by rw [traceForm_matTau, h3], ?_⟩
     rcases h4 with h4 | h4 | h4
     · exact Or.inl h4
     · exact Or.inr (Or.inl fun h0 ↦ h4 (hinj _ h0))
@@ -662,9 +675,9 @@ private lemma l6e_isStateCostateSolution_reverse {T : ℝ} {u : ℝ → Fin 3 �
   · refine l6e_isIntegralCurve_matTau hT.le hIR fun t ↦ ?_
     have e : -matTau (Λ₁ (T - t)) + (3 / 2 * lam) • J =
         matTau (-Λ₁ (T - t) + (3 / 2 * lam) • J) := by
-      rw [l6e_matTau_add, l6e_matTau_neg, l6e_matTau_smul, l6e_matTau_J]
+      rw [matTau_add, l6e_matTau_neg, matTau_smul, matTau_J]
     dsimp only
-    rw [l6e_controlP_swap, e, l6e_traceForm_matTau, l6e_matTau_comm, l6e_matTau_comm,
+    rw [l6e_controlP_swap, e, traceForm_matTau, l6e_matTau_comm, l6e_matTau_comm,
       l6e_matTau_comm]
     exact l6e_matTau_combo _ _ _ _
   · have hae := (Measure.measurePreserving_sub_left volume T).quasiMeasurePreserving.ae hmax
@@ -673,7 +686,7 @@ private lemma l6e_isStateCostateSolution_reverse {T : ℝ} {u : ℝ → Fin 3 �
     refine ⟨by rw [l6e_hamiltonian_swap]; exact hH, fun v hv ↦ ?_⟩
     have hv' := hM (fun j ↦ v (vertexSwap j)) (l6e_swap_mem_controlSimplex hv)
     rw [← l6e_hamiltonian_swap] at hv'
-    simp only [l6e_vertexSwap_vertexSwap] at hv'
+    simp only [vertexSwap_vertexSwap] at hv'
     rw [l6e_hamiltonian_swap]
     exact hv'
 
@@ -686,7 +699,7 @@ def reverseControl (a b : ℝ) (u : ℝ → Fin 3 → ℝ) (t : ℝ) : Fin 3 →
 private lemma l6e_reverseControl_reverseControl (a b : ℝ) (u : ℝ → Fin 3 → ℝ) :
     reverseControl a b (reverseControl a b u) = u := by
   funext t j
-  simp only [reverseControl, l6e_vertexSwap_vertexSwap, sub_sub_cancel]
+  simp only [reverseControl, vertexSwap_vertexSwap, sub_sub_cancel]
 
 /-- The switching times of the reversed control are the reflections of those of the control:
 the vertices `e_i, e_j` on the two sides of `s` become `e_{τ j}, e_{τ i}` on the two sides of
@@ -740,15 +753,15 @@ private lemma l6e_mem_singularLocus_reverse {g Λ₁ X ΛR : Mat2} :
     (diagD * g * diagD, matTau Λ₁, matTau X, matTau ΛR) ∈ singularLocus ↔
       (g, Λ₁, X, ΛR) ∈ singularLocus := by
   have key : ∀ M N : Mat2, matTau M = matTau N → M = N := fun M N h ↦ by
-    rw [← l6e_matTau_matTau M, h, l6e_matTau_matTau]
-  have hJ : ∀ c : ℝ, matTau (c • J) = c • J := fun c ↦ by rw [l6e_matTau_smul, l6e_matTau_J]
+    rw [← matTau_matTau M, h, matTau_matTau]
+  have hJ : ∀ c : ℝ, matTau (c • J) = c • J := fun c ↦ by rw [matTau_smul, matTau_J]
   simp only [singularLocus, mem_ofPred_eq, l6e_det_diagD_conj]
   constructor
   · rintro ⟨μ, hμ, hdet, h1, hX, hR⟩
-    exact ⟨μ, hμ, hdet, key _ _ (h1.trans (hJ _).symm), key _ _ (hX.trans l6e_matTau_J.symm),
+    exact ⟨μ, hμ, hdet, key _ _ (h1.trans (hJ _).symm), key _ _ (hX.trans matTau_J.symm),
       key _ _ (hR.trans l6e_matTau_zero.symm)⟩
   · rintro ⟨μ, hμ, hdet, h1, hX, hR⟩
-    exact ⟨μ, hμ, hdet, by rw [h1, hJ], by rw [hX, l6e_matTau_J], by rw [hR, l6e_matTau_zero]⟩
+    exact ⟨μ, hμ, hdet, by rw [h1, hJ], by rw [hX, matTau_J], by rw [hR, l6e_matTau_zero]⟩
 
 /-- **Time reversal of chattering arcs** (Remark 10.2.3 for triangular control; "by time reversal",
 TeX 11898, 12000–12013): the time reversal `t ↦ a + b - t` of a chattering arc out of `a`, with the
@@ -784,34 +797,6 @@ theorem IsChatteringArcOutOf.reverse {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g 
     · rintro ⟨n, hn⟩
       exact ⟨n, by linarith⟩
 
-/-- `Ξ` is closed (`φ` is continuous). -/
-private lemma l6e_isClosed_Xi : IsClosed Xi := isClosed_eq continuous_weightedNorm continuous_const
-
-/-- `Ξ` is compact: closed and bounded (`|ξ_j| ≤ 1`, since `|ξ₁|⁶ + |ξ₂|³ + |ξ₃|² = 1`). -/
-private lemma l6e_isCompact_Xi : IsCompact Xi := by
-  refine Metric.isCompact_of_isClosed_isBounded l6e_isClosed_Xi
-    ((Metric.isBounded_closedBall (x := (0 : Fin 3 → ℂ)) (r := 1)).subset fun ξ hξ ↦ ?_)
-  have h1 : weightedNorm ξ = 1 := hξ
-  have h6 : ‖ξ 0‖ ^ 6 + ‖ξ 1‖ ^ 3 + ‖ξ 2‖ ^ 2 = 1 := by
-    have : weightedNorm ξ ^ 6 = ‖ξ 0‖ ^ 6 + ‖ξ 1‖ ^ 3 + ‖ξ 2‖ ^ 2 := by
-      unfold weightedNorm
-      rw [show (1 / 6 : ℝ) = ((6 : ℕ) : ℝ)⁻¹ by norm_num]
-      exact Real.rpow_inv_natCast_pow (by positivity) (by norm_num)
-    rw [← this, h1, one_pow]
-  have a0 := pow_nonneg (norm_nonneg (ξ 0)) 6
-  have a1 := pow_nonneg (norm_nonneg (ξ 1)) 3
-  have a2 := pow_nonneg (norm_nonneg (ξ 2)) 2
-  rw [Metric.mem_closedBall, dist_zero_right, pi_norm_le_iff_of_nonneg zero_le_one]
-  have b0 : ‖ξ 0‖ ≤ 1 :=
-    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 6 ≠ 0)).1 (by linarith)
-  have b1 : ‖ξ 1‖ ≤ 1 :=
-    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 3 ≠ 0)).1 (by linarith)
-  have b2 : ‖ξ 2‖ ≤ 1 :=
-    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 2 ≠ 0)).1 (by linarith)
-  intro j
-  fin_cases j
-  exacts [b0, b1, b2]
-
 /-- **Convergence modulo `V_T` from the cluster points** (compactness of `Ξ`; the step "the set
 of cluster points … `q_in` is the only cluster point" of TeX 13006–13014): if `ξ_n ∈ Ξ` and every
 cluster point of `ξ_n` lies in the Fuller section with class `q_in`, then `ξ_n → ang(τ q_out)`
@@ -823,7 +808,7 @@ theorem tendstoModVT_of_forall_mapClusterPt {ξs : ℕ → Fin 3 → ℂ} (hΞ :
   have horb : ∀ ξ, MapClusterPt ξ atTop ξs → ξ ∈ vtOrbit (ang (tau qOutCart)) := by
     intro ξ hξ
     obtain ⟨hs, hc⟩ := hcl ξ hξ
-    have hXi : ξ ∈ Xi := l6e_isClosed_Xi.mem_of_mapClusterPt hξ (Eventually.of_forall hΞ)
+    have hXi : ξ ∈ Xi := isClosed_Xi.mem_of_mapClusterPt hξ (Eventually.of_forall hΞ)
     unfold classOf at hc
     rw [dite_eq_left hs] at hc
     have hc' := congrArg Subtype.val hc
@@ -839,7 +824,7 @@ theorem tendstoModVT_of_forall_mapClusterPt {ξs : ℕ → Fin 3 → ℂ} (hΞ :
   by_contra hcon
   rw [Filter.not_eventually] at hcon
   obtain ⟨φ, hφ, hφc⟩ := extraction_of_frequently_atTop hcon
-  obtain ⟨ξ, -, ψ, hψ, hlimξ⟩ := l6e_isCompact_Xi.tendsto_subseq fun n ↦ hΞ (φ n)
+  obtain ⟨ξ, -, ψ, hψ, hlimξ⟩ := isCompact_Xi.tendsto_subseq fun n ↦ hΞ (φ n)
   have hcl' : MapClusterPt ξ atTop ξs :=
     MapClusterPt.of_comp (φ := φ ∘ ψ) (hφ.comp hψ).tendsto_atTop hlimξ.mapClusterPt
   have h0 : Metric.infDist ξ (vtOrbit (ang (tau qOutCart))) = 0 :=

@@ -45,28 +45,24 @@ At the singular locus `q = (J, -(3/2) J, 0)` (Definition 8.2.4 with `λ_cost = -
   (`iso_vertexFlow_reinTau`). The mirrored chart at `q_in` (G14.9) is `lieChartIn = reinTau ∘
   lieChart`.
 
-## Proofs (plan)
+## Proofs
 
 Everything here is exact algebra on `2 × 2` matrices (`ext`, `simp`, `field_simp`, `ring`,
-`Real.sq_sqrt`). `sl2Dual`: for traceless `M₁, M₂, M₃`, `⟨[M₂, M₃], M₂⟩ = ⟨[M₂, M₃], M₃⟩ = 0`
-and `⟨[M₂, M₃], M₁⟩` is the (cyclic) triple product, so `sl2Dual` takes the prescribed values.
-For `M₁ = X`, `M₂ = Z₀₁₀`, `M₃ = Z₀₀₁` the triple product is `-(8/(3√3)) X₂₁`, nonzero when
-`X₂₁ = 1 + r x̃₂₁ ≥ √3 r > 0` (on `H*`). `IsBlowupPhasePt` and `phaseOfFuller`: `det X = 1` reads
-`t² - |w|² = 1` for the Cayley coordinates `(t, w)`, and the sheet `X₁₂ < X₂₁` fixes `t = -⟨w⟩`;
-likewise `t = (3/2) ⟨b⟩` for `Λ₁`; the diagonal of `Λ_R` is fixed by `⟨X, Λ_R⟩ = 0`. `Ad_R` is
-conjugation by `diag(e^{-iπ/3}, e^{iπ/3})` after the Cayley transform. The reversal of the flows is
-the uniqueness of the closed forms: `-D exp(A) D = ...`, `D Z_{e₂} D = -Z_{e₃}`, `D J D = -J`, and
-the substitution `s ↦ -s` in the integrals of `iso_vfC`, `iso_vfΛR`. Size: 500–900 lines.
-
-## Status
-
-Everything is proved except `fullerCoords_adR`, which is false as stated: it quantifies over all
-`q`, and `cayleyZ` reads only the entries `M₁₁, M₁₂, M₂₁`, so it fails when an entry of `q` is not
-traceless (`q = (1, 0, 0)`, `l6b_not_fullerCoords_adR`). With the three traces assumed it holds
-(`l6b_fullerCoords_adR`). Two departures from the plan above, both shorter: (14.1.3) is solved in
-closed form, `Λ_R = h K(X)` (`l6b_lieΛR_eq`; the system has full rank iff `X₂₁ ≠ 0`), which gives
-`lieChart_spec`, the uniqueness in `lieChart_lieChartInv` and the orders in `isBigO_lieΛR`
-(`h = r³ g(r)` with `g` continuous at `0`); `Ad_R` is computed entrywise with `ζ² = -1/2 - i√3/2`.
+`Real.sq_sqrt`). The linear system (14.1.3) is solved in closed form: for traceless `X` with
+`X₂₁ ≠ 0`, `Λ_R = h K(X)` with `h = ⟨Λ₁ + (3/2) J, X⟩` and `K(X)` the matrix `X` with its `(1, 2)`
+entry changed so that `⟨X, K⟩ = 0` (`lieΛRShape`, `lieΛR_eq_reducedHam_smul`); the system has full
+rank exactly when `X₂₁ ≠ 0` (its determinant is `-(8/(3√3)) X₂₁`, and `X₂₁ = 1 + r x̃₂₁ ≥ √3 r > 0`
+on `H*`). This gives `lieChart_spec`, the uniqueness in `lieChart_lieChartInv` and the orders in
+`isBigO_lieΛR` (`h = r³ g(r)` with `g` continuous at `0`), shorter than the dual-basis identities of
+`sl2Dual`. `IsBlowupPhasePt` and `phaseOfFuller`: `det X = 1` reads `t² - |w|² = 1` for the Cayley
+coordinates `(t, w)`, and the sheet `X₁₂ < X₂₁` fixes `t = -⟨w⟩`; likewise `t = (3/2) ⟨b⟩` for
+`Λ₁`; the diagonal of `Λ_R` is fixed by `⟨X, Λ_R⟩ = 0`. `Ad_R` is computed entrywise with
+`ζ² = -1/2 - i√3/2`. `fullerCoords_adR` assumes the three entries of the phase point traceless (the
+book's phase points lie in `sl₂(ℝ)`): `cayleyZ` reads only the entries `M₁₁, M₁₂, M₂₁`, and without
+the traces the identity fails at `q = (1, 0, 0)` (`l6b_not_fullerCoords_adR`). The reversal of the
+flows is the uniqueness of the closed forms: `exp(s (-DAD)) = D exp(-s A) D`,
+`D Z_{e₂} D = -Z_{e₃}`, `D J D = -J`, and the substitution `s ↦ -s` in the integrals of `iso_vfC`,
+`iso_vfΛR`.
 -/
 
 @[expose] public section
@@ -144,7 +140,7 @@ noncomputable def cayleyZ (M : Mat2) : ℂ := ⟨(M 0 1 + M 1 0) / 2, M 0 0⟩
 noncomputable def cayleyA : Matrix (Fin 2) (Fin 2) ℂ := ((√2 : ℝ) : ℂ)⁻¹ • !![1, I; I, 1]
 
 /-- `A⁻¹ = (1/√2) [[1, -i], [-i, 1]]` (`det A = 1`). -/
-theorem l6b_cayleyA_inv :
+private theorem l6b_cayleyA_inv :
     cayleyA⁻¹ = ((√2 : ℝ) : ℂ)⁻¹ • !![1, -I; -I, 1] := by
   apply Matrix.inv_eq_left_inv
   have h2 : ((√2 : ℝ) : ℂ)⁻¹ * ((√2 : ℝ) : ℂ)⁻¹ = 1 / 2 := by
@@ -238,8 +234,8 @@ With `h = ⟨Λ₁ + (3/2) J, X⟩`, the three equations (14.1.3) for a traceles
 `⟨Λ_R, X⟩ = 0`, `⟨Λ_R, Z_{e₂}⟩ = h ⟨X, Z_{e₂}⟩`, `⟨Λ_R, Z_{e₃}⟩ = h ⟨X, Z_{e₃}⟩`. The matrices
 `Z_{e₂}, Z_{e₃}` have zero `(2, 1)` entry, so the last two only see the diagonal and the `(2, 1)`
 entry of `Λ_R`: they force `(Λ_R)₁₁ = h X₁₁`, `(Λ_R)₂₁ = h X₂₁`, and the first fixes `(Λ_R)₁₂`
-when `X₂₁ ≠ 0`. Hence `Λ_R = h K(X)` (`l6b_lieΛR_eq`), which gives the full rank claim, the
-uniqueness and the orders `O(r³)`, `O(r⁴)` at once (`h = O(r³)` on the chart). -/
+when `X₂₁ ≠ 0`. Hence `Λ_R = h K(X)` (`lieΛR_eq_reducedHam_smul`), which gives the full rank claim,
+the uniqueness and the orders `O(r³)`, `O(r⁴)` at once (`h = O(r³)` on the chart). -/
 
 private theorem l6b_controlMatrix_vertex1 :
     controlMatrix (vertex 1) = !![1 / √3, -2 / 3; 0, -1 / √3] := by
@@ -251,15 +247,15 @@ private theorem l6b_controlMatrix_vertex2 :
 
 /-- The solution of (14.1.3): `Λ_R = h K` with `K` the matrix `X` with its `(1, 2)` entry changed
 so that `⟨X, K⟩ = 0`. -/
-noncomputable def l6b_K (X : Mat2) : Mat2 :=
+noncomputable def lieΛRShape (X : Mat2) : Mat2 :=
   !![X 0 0, -2 * X 0 0 ^ 2 / X 1 0 - X 0 1; X 1 0, -X 0 0]
 
 /-- **The solution of (14.1.3) in closed form**: for traceless `X` with `X₂₁ ≠ 0` (the system is
 of full rank exactly then: its determinant is `-(8/(3√3)) X₂₁`), `Λ_R = h K(X)` with
 `h = ⟨Λ₁ + (3/2) J, X⟩`. -/
-theorem l6b_lieΛR_eq (X Λ₁ : Mat2) (hX : X 1 1 = -X 0 0) (hc : X 1 0 ≠ 0) :
-    lieΛR X Λ₁ = reducedHam Λ₁ X • l6b_K X := by
-  unfold lieΛR sl2Dual l6b_K
+theorem lieΛR_eq_reducedHam_smul (X Λ₁ : Mat2) (hX : X 1 1 = -X 0 0) (hc : X 1 0 ≠ 0) :
+    lieΛR X Λ₁ = reducedHam Λ₁ X • lieΛRShape X := by
+  unfold lieΛR sl2Dual lieΛRShape
   generalize reducedHam Λ₁ X = h
   have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
   have h3' : √3 ≠ 0 := by positivity
@@ -268,7 +264,7 @@ theorem l6b_lieΛR_eq (X Λ₁ : Mat2) (hX : X 1 1 = -X 0 0) (hc : X 1 0 ≠ 0) 
     simp [traceForm, Matrix.trace_fin_two] <;> field_simp <;> ring_nf
 
 /-- `⟨X, Z_{e₂}⟩ = -(2/√3) ρ₁(X)` for traceless `X`. -/
-theorem l6b_traceForm_vertex1 (X : Mat2) (hX : X 1 1 = -X 0 0) :
+private theorem l6b_traceForm_vertex1 (X : Mat2) (hX : X 1 1 = -X 0 0) :
     traceForm X (controlMatrix (vertex 1)) = -(2 / 3) * (X 1 0 - √3 * X 0 0) := by
   have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
   have h3' : √3 ≠ 0 := by positivity
@@ -278,7 +274,7 @@ theorem l6b_traceForm_vertex1 (X : Mat2) (hX : X 1 1 = -X 0 0) :
   linear_combination (-2 * X 0 0) * h3
 
 /-- `⟨X, Z_{e₃}⟩ = -(2/√3) ρ₀(X)` for traceless `X`. -/
-theorem l6b_traceForm_vertex2 (X : Mat2) (hX : X 1 1 = -X 0 0) :
+private theorem l6b_traceForm_vertex2 (X : Mat2) (hX : X 1 1 = -X 0 0) :
     traceForm X (controlMatrix (vertex 2)) = -(2 / 3) * (X 1 0 + √3 * X 0 0) := by
   have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
   have h3' : √3 ≠ 0 := by positivity
@@ -289,18 +285,18 @@ theorem l6b_traceForm_vertex2 (X : Mat2) (hX : X 1 1 = -X 0 0) :
 
 /-- `K` and `X` agree off the `(1, 2)` entry, which `⟨·, Z⟩` ignores when `Z₂₁ = 0`. -/
 private theorem l6b_traceForm_K (X Z : Mat2) (hX : X 1 1 = -X 0 0) (hZ : Z 1 0 = 0) :
-    traceForm (l6b_K X) Z = traceForm X Z := by
+    traceForm (lieΛRShape X) Z = traceForm X Z := by
   simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two]
-  simp [l6b_K, hZ, hX]
+  simp [lieΛRShape, hZ, hX]
 
 private theorem l6b_traceForm_X_K (X : Mat2) (hX : X 1 1 = -X 0 0) (hc : X 1 0 ≠ 0) :
-    traceForm X (l6b_K X) = 0 := by
-  simp [traceForm, l6b_K, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, hX]
+    traceForm X (lieΛRShape X) = 0 := by
+  simp [traceForm, lieΛRShape, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, hX]
   field_simp
   ring
 
-private theorem l6b_trace_K (X : Mat2) : (l6b_K X).trace = 0 := by
-  simp [l6b_K, Matrix.trace_fin_two]
+private theorem l6b_trace_K (X : Mat2) : (lieΛRShape X).trace = 0 := by
+  simp [lieΛRShape, Matrix.trace_fin_two]
 
 private theorem l6b_traceForm_comm (A B : Mat2) : traceForm A B = traceForm B A := by
   rw [traceForm, traceForm, Matrix.trace_mul_comm]
@@ -314,8 +310,8 @@ private theorem l6b_reducedHam_eq (Λ₁ X : Mat2) :
 private theorem l6b_section_of_K (X Λ₁ : Mat2) (hX : X 1 1 = -X 0 0)
     (h1 : traceForm X (controlMatrix (vertex 1)) ≠ 0)
     (h2 : traceForm X (controlMatrix (vertex 2)) ≠ 0) :
-    hamiltonian (-1) Λ₁ (reducedHam Λ₁ X • l6b_K X) X (vertex 1) = 0 ∧
-      switchingFn 1 2 (reducedHam Λ₁ X • l6b_K X) X = 0 := by
+    hamiltonian (-1) Λ₁ (reducedHam Λ₁ X • lieΛRShape X) X (vertex 1) = 0 ∧
+      switchingFn 1 2 (reducedHam Λ₁ X • lieΛRShape X) X = 0 := by
   have hz1 : controlMatrix (vertex 1) 1 0 = 0 := by simp [controlMatrix, vertex]
   have hz2 : controlMatrix (vertex 2) 1 0 = 0 := by simp [controlMatrix, vertex]
   have k1 := l6b_traceForm_K X _ hX hz1
@@ -334,11 +330,11 @@ private theorem l6b_lieX_11 (r x21 : ℝ) : lieX r x21 1 1 = -lieX r x21 0 0 := 
 
 /-! ### The chart: the running claims of §14.1 -/
 
-/-- **The chart lies on the Poincaré section** (TeX 11575–11602): for `(r, x̃) ∈ H*`, the phase
-point `lieChart (r, x̃)` is a phase point of the blow-up (`det X = 1`, `det Λ₁ = 9/4`,
+/-- **The chart lies on the Poincaré section** (`eqn:Xtilde`, TeX 11575–11602): for `(r, x̃) ∈ H*`,
+the phase point `lieChart (r, x̃)` is a phase point of the blow-up (`det X = 1`, `det Λ₁ = 9/4`,
 `⟨X, Λ_R⟩ = 0`), satisfies (14.1.3) (`H(Z₀₁₀) = 0`, `χ₂₃ = 0`), has `X = J + rX̃` with `x̃₁₁ = 1`
-and `X₂₁ = 1 + r x̃₂₁ ≥ √3 r > 0` ("Hence, we may invert `1 + r x̃₂₁`"), and
-`lieChartInv` recovers `(r, x̃)`. -/
+and `X₂₁ = 1 + r x̃₂₁ ≥ √3 r > 0` ("Hence, we may invert `1 + r x̃₂₁`"), and `lieChartInv` recovers
+`(r, x̃)`. -/
 theorem lieChart_spec {p : ℝ × (Fin 3 → ℝ)} (hp : p ∈ lieChartDomain) :
     IsBlowupPhasePt (lieChart p) ∧
       hamiltonian (-1) (lieChart p).2.1 (lieChart p).2.2 (lieChart p).1 (vertex 1) = 0 ∧
@@ -360,9 +356,9 @@ theorem lieChart_spec {p : ℝ × (Fin 3 → ℝ)} (hp : p ∈ lieChartDomain) :
   have hX00 : X 0 0 = r := by simp [hXdef, lieX]
   have hX10 : X 1 0 = 1 + r * x 0 := by simp [hXdef, lieX]
   have hX01 : X 0 1 = -(1 + r ^ 2) / (1 + r * x 0) := by simp [hXdef, lieX]
-  have hR : lieΛR X L = reducedHam L X • l6b_K X :=
-    l6b_lieΛR_eq X L hX11 (by rw [hX10]; exact hc0.ne')
-  have hlc : lieChart (r, x) = (X, L, reducedHam L X • l6b_K X) := by
+  have hR : lieΛR X L = reducedHam L X • lieΛRShape X :=
+    lieΛR_eq_reducedHam_smul X L hX11 (by rw [hX10]; exact hc0.ne')
+  have hlc : lieChart (r, x) = (X, L, reducedHam L X • lieΛRShape X) := by
     rw [← hR]; rfl
   have t1 : traceForm X (controlMatrix (vertex 1)) ≠ 0 := by
     rw [l6b_traceForm_vertex1 X hX11, hX10, hX00]
@@ -431,16 +427,16 @@ theorem lieX_starBoundary_iff {x y r x21 : ℝ} (hx : 0 < x) (hy : 0 < y)
     rw [sub_nonneg, div_le_iff₀ hy, mul_div_assoc', div_mul_cancel₀ _ hy.ne']
     linarith
 
-/-- **Uniqueness of the chart** (TeX 11584–11602: "`X` is determined uniquely by `r` and
-`x̃₂₁` … `Λ₁` is uniquely determined … `Λ_R ∈ 𝔰𝔩₂` is uniquely determined … by the three linear
-equations (14.1.3) (which is always a full rank system of linear equations for `Λ_R`) … In
+/-- **Uniqueness of the chart** (`eqn:LambdaR-linear`, TeX 11584–11602: "`X` is determined uniquely
+by `r` and `x̃₂₁` … `Λ₁` is uniquely determined … `Λ_R ∈ 𝔰𝔩₂` is uniquely determined … by the three
+linear equations (14.1.3) (which is always a full rank system of linear equations for `Λ_R`) … In
 summary, `(r, x̃) ∈ H*` with `r > 0` is a local coordinate for `(X, Λ₁, Λ_R)`"): a phase point of
-the blow-up on the section (`H(Z₀₁₀) = 0`, `χ₂₃ = 0`), with `X` a star state and `r = X₁₁ > 0`,
-is `lieChart` of its coordinates, which lie in `H*`. The full rank holds because the determinant
-of the system is a nonzero multiple of `X₂₁ > 0`; the star condition makes the denominators
-`⟨X, Z_u⟩` nonzero; `x̃₂₁ > √3 - 1/r` is the star condition `ρ₁(X) > 0` (`X₂₁ > √3 X₁₁`, i.e.
-`x < 1/√3`, `lieX_starBoundary_iff`), and `ℓ̃₂₁ r² < 3/2` is `(Λ₁)₂₁ < 0` (from `det Λ₁ = 9/4`
-and the sheet `(Λ₁)₂₁ < (Λ₁)₁₂`). -/
+the blow-up on the section (`H(Z₀₁₀) = 0`, `χ₂₃ = 0`), with `X` a star state and `r = X₁₁ > 0`, is
+`lieChart` of its coordinates, which lie in `H*`. The full rank holds because the determinant of the
+system is a nonzero multiple of `X₂₁ > 0`; the star condition makes the denominators `⟨X, Z_u⟩`
+nonzero; `x̃₂₁ > √3 - 1/r` is the star condition `ρ₁(X) > 0` (`X₂₁ > √3 X₁₁`, i.e. `x < 1/√3`,
+`lieX_starBoundary_iff`), and `ℓ̃₂₁ r² < 3/2` is `(Λ₁)₂₁ < 0` (from `det Λ₁ = 9/4` and the sheet
+`(Λ₁)₂₁ < (Λ₁)₁₂`). -/
 theorem lieChart_lieChartInv {q : iso_PhasePt} (hq : IsBlowupPhasePt q) (hX : IsStarState q.1)
     (hH : hamiltonian (-1) q.2.1 q.2.2 q.1 (vertex 1) = 0) (hχ : switchingFn 1 2 q.2.2 q.1 = 0)
     (hr : 0 < q.1 0 0) :
@@ -498,7 +494,7 @@ theorem lieChart_lieChartInv {q : iso_PhasePt} (hq : IsBlowupPhasePt q) (hX : Is
     change (lieX r ((X 1 0 - 1) / r), lieΛ₁ r (L 0 0 / r ^ 2) ((L 1 0 + 3 / 2) / r ^ 2),
       lieΛR (lieX r ((X 1 0 - 1) / r)) (lieΛ₁ r (L 0 0 / r ^ 2) ((L 1 0 + 3 / 2) / r ^ 2))) =
       (X, L, Q)
-    rw [eX, eL, l6b_lieΛR_eq X L hX11 hc0.ne']
+    rw [eX, eL, lieΛR_eq_reducedHam_smul X L hX11 hc0.ne']
     congr 2
     set h := reducedHam L X with hh
     have t1 : traceForm X (controlMatrix (vertex 1)) ≠ 0 := by
@@ -531,7 +527,7 @@ theorem lieChart_lieChartInv {q : iso_PhasePt} (hq : IsBlowupPhasePt q) (hX : Is
       field_simp
       rw [hQ00, hQ10] at hXQ
       linarith
-    ext i j; fin_cases i <;> fin_cases j <;> simp [l6b_K, hQ00, hQ01, hQ10, hQ11]
+    ext i j; fin_cases i <;> fin_cases j <;> simp [lieΛRShape, hQ00, hQ01, hQ10, hQ11]
 
 /-- **The orders of `Λ_R`** (TeX 11594–11596): for fixed `x̃`, as `r → 0⁺`, the diagonal entries
 of `Λ_R(r, x̃)` are `O(r⁴)` and the off-diagonal entries `O(r³)` (so `Λ̃_R = Λ_R/r³` has a limit
@@ -568,10 +564,10 @@ theorem isBigO_lieΛR (x : Fin 3 → ℝ) :
     field_simp
     ring
   have hent : ∀ r, c r ≠ 0 → d r ≠ 0 →
-      (lieChart (r, x)).2.2 = (r ^ 3 * g r) • l6b_K (lieX r (x 0)) := by
+      (lieChart (r, x)).2.2 = (r ^ 3 * g r) • lieΛRShape (lieX r (x 0)) := by
     intro r hcr hdr
     change lieΛR (lieX r (x 0)) (lieΛ₁ r (x 1) (x 2)) = _
-    rw [l6b_lieΛR_eq _ _ (l6b_lieX_11 _ _) (by simpa [lieX] using hcr), hh r hcr hdr]
+    rw [lieΛR_eq_reducedHam_smul _ _ (l6b_lieX_11 _ _) (by simpa [lieX] using hcr), hh r hcr hdr]
   have hO : ∀ (k : ℕ) (φ : ℝ → ℝ), ContinuousAt φ 0 →
       (fun r ↦ r ^ k * (g r * φ r)) =O[𝓝[>] 0] (fun r ↦ r ^ k) := by
     intro k φ hφ
@@ -584,7 +580,7 @@ theorem isBigO_lieΛR (x : Fin 3 → ℝ) :
   · refine (hO 4 (fun _ ↦ 1) continuousAt_const).congr' ?_ EventuallyEq.rfl
     filter_upwards [hc0, hd0] with r hcr hdr
     rw [hent r hcr hdr]
-    simp [l6b_K, lieX]
+    simp [lieΛRShape, lieX]
     ring
   · refine (hO 3 (fun r ↦ (1 - r ^ 2) / c r) ?_).congr' ?_ EventuallyEq.rfl
     · exact (by fun_prop : Continuous fun r : ℝ ↦ 1 - r ^ 2).continuousAt.div hc.continuousAt
@@ -592,28 +588,28 @@ theorem isBigO_lieΛR (x : Fin 3 → ℝ) :
     filter_upwards [hc0, hd0] with r hcr hdr
     rw [hent r hcr hdr]
     simp only [hcdef] at hcr
-    simp [l6b_K, lieX, hcdef]
+    simp [lieΛRShape, lieX, hcdef]
     field_simp
     ring
   · refine (hO 3 c hc.continuousAt).congr' ?_ EventuallyEq.rfl
     filter_upwards [hc0, hd0] with r hcr hdr
     rw [hent r hcr hdr]
-    simp [l6b_K, lieX, hcdef]
+    simp [lieΛRShape, lieX, hcdef]
     ring
 
 /-! ### Hyperboloid coordinates: the identification with `ℂ³` -/
 
-theorem l6b_jbr_sq (w : ℂ) : jbr w ^ 2 = 1 + w.re ^ 2 + w.im ^ 2 := by
+theorem jbr_sq (w : ℂ) : jbr w ^ 2 = 1 + w.re ^ 2 + w.im ^ 2 := by
   rw [jbr, Real.sq_sqrt (by positivity), Complex.sq_norm, Complex.normSq_apply]; ring
 
-theorem l6b_jbr_pos (w : ℂ) : 0 < jbr w := Real.sqrt_pos.2 (by positivity)
+theorem jbr_pos (w : ℂ) : 0 < jbr w := Real.sqrt_pos.2 (by positivity)
 
 private theorem l6b_jbr_eq {w : ℂ} {v : ℝ} (hv : 0 < v) (h : v ^ 2 = 1 + w.re ^ 2 + w.im ^ 2) :
     jbr w = v := by
   rw [jbr, Real.sqrt_eq_iff_mul_self_eq_of_pos hv, Complex.sq_norm, Complex.normSq_apply]
   linear_combination h
 
-theorem l6b_cayleyZ_eq (M : Mat2) :
+theorem cayleyZ_eq (M : Mat2) :
     cayleyZ M = (((M 0 1 + M 1 0) / 2 : ℝ) : ℂ) + ((M 0 0 : ℝ) : ℂ) * I := by
   apply Complex.ext <;> simp [cayleyZ]
 
@@ -625,10 +621,10 @@ theorem fullerCoords_phaseOfFuller (z : Fin 3 → ℂ) : fullerCoords (phaseOfFu
 /-- `phaseOfFuller z` is a phase point of the blow-up (the form (10.1.2) "ensures that the
 constraints `det(X) = 1` and `⟨X, Λ_R⟩ = 0` are satisfied", TeX 8481–8483). -/
 theorem isBlowupPhasePt_phaseOfFuller (z : Fin 3 → ℂ) : IsBlowupPhasePt (phaseOfFuller z) := by
-  have h0 := l6b_jbr_sq (2 * z 0)
-  have h1 := l6b_jbr_sq (4 * I * z 1)
-  have p0 := l6b_jbr_pos (2 * z 0)
-  have p1 := l6b_jbr_pos (4 * I * z 1)
+  have h0 := jbr_sq (2 * z 0)
+  have h1 := jbr_sq (4 * I * z 1)
+  have p0 := jbr_pos (2 * z 0)
+  have p1 := jbr_pos (4 * I * z 1)
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · simp [phaseOfFuller, Matrix.trace_fin_two]
   · simp [phaseOfFuller, Matrix.trace_fin_two]
@@ -705,7 +701,7 @@ theorem continuous_fullerCoords_phaseOfFuller :
     Continuous fullerCoords ∧ Continuous phaseOfFuller := by
   have hc : Continuous cayleyZ := by
     have : cayleyZ = fun M : Mat2 ↦
-        (((M 0 1 + M 1 0) / 2 : ℝ) : ℂ) + ((M 0 0 : ℝ) : ℂ) * I := funext l6b_cayleyZ_eq
+        (((M 0 1 + M 1 0) / 2 : ℝ) : ℂ) + ((M 0 0 : ℝ) : ℂ) * I := funext cayleyZ_eq
     rw [this]
     have h : ∀ i j : Fin 2, Continuous fun M : Mat2 ↦ M i j :=
       fun i j ↦ continuous_id.matrix_elem i j
@@ -726,7 +722,7 @@ theorem continuous_fullerCoords_phaseOfFuller :
     have hR : Continuous fun z : Fin 3 → ℂ ↦ RR (2 * z 0) (12 * z 2) / jbr (2 * z 0) := by
       refine Continuous.div (hRR.comp (f := fun z : Fin 3 → ℂ ↦ (2 * z 0, 12 * z 2))
         (by fun_prop)) (hj.comp (f := fun z : Fin 3 → ℂ ↦ 2 * z 0) (by fun_prop)) ?_
-      intro z; exact (l6b_jbr_pos _).ne'
+      intro z; exact (jbr_pos _).ne'
     have hj0 : Continuous fun z : Fin 3 → ℂ ↦ jbr (2 * z 0) := hj.comp (by fun_prop)
     have hj1 : Continuous fun z : Fin 3 → ℂ ↦ jbr (4 * I * z 1) := hj.comp (by fun_prop)
     refine Continuous.prodMk ?_ (Continuous.prodMk ?_ ?_) <;>
@@ -749,45 +745,67 @@ private theorem l6b_diagD_mul_self : diagD * diagD = 1 := by
 
 private theorem l6b_diagD_inv : diagD⁻¹ = diagD := Matrix.inv_eq_left_inv l6b_diagD_mul_self
 
-theorem l6b_matTau_matTau (M : Mat2) : matTau (matTau M) = M := by
+theorem matTau_matTau (M : Mat2) : matTau (matTau M) = M := by
   ext i j; fin_cases i <;> fin_cases j <;> simp [matTau]
 
-theorem l6b_matTau_add (A B : Mat2) : matTau (A + B) = matTau A + matTau B := by
+theorem matTau_add (A B : Mat2) : matTau (A + B) = matTau A + matTau B := by
   ext i j; fin_cases i <;> fin_cases j <;> simp [matTau] <;> ring
 
-theorem l6b_matTau_sub (A B : Mat2) : matTau (A - B) = matTau A - matTau B := by
+theorem matTau_sub (A B : Mat2) : matTau (A - B) = matTau A - matTau B := by
   ext i j; fin_cases i <;> fin_cases j <;> simp [matTau] <;> ring
 
-theorem l6b_matTau_smul (c : ℝ) (A : Mat2) : matTau (c • A) = c • matTau A := by
+theorem matTau_smul (c : ℝ) (A : Mat2) : matTau (c • A) = c • matTau A := by
   ext i j; fin_cases i <;> fin_cases j <;> simp [matTau]
 
-theorem l6b_matTau_J : matTau J = J := by
+theorem matTau_J : matTau J = J := by
   ext i j; fin_cases i <;> fin_cases j <;> simp [matTau, J]
 
-theorem l6b_traceForm_matTau (A B : Mat2) : traceForm (matTau A) (matTau B) = traceForm A B := by
+theorem traceForm_matTau (A B : Mat2) : traceForm (matTau A) (matTau B) = traceForm A B := by
   simp [traceForm, matTau, Matrix.trace, Matrix.mul_apply, Fin.sum_univ_two]
 
-theorem l6b_trace_matTau (A : Mat2) : (matTau A).trace = -A.trace := by
+theorem trace_matTau (A : Mat2) : (matTau A).trace = -A.trace := by
   simp [matTau, Matrix.trace, Fin.sum_univ_two]; ring
 
-theorem l6b_det_matTau (A : Mat2) : (matTau A).det = A.det := by
+private theorem l6b_det_matTau (A : Mat2) : (matTau A).det = A.det := by
   simp [matTau, Matrix.det_fin_two]
 
-theorem l6b_vertexSwap_vertexSwap (m : Fin 3) : vertexSwap (vertexSwap m) = m := by
+theorem vertexSwap_vertexSwap (m : Fin 3) : vertexSwap (vertexSwap m) = m := by
   fin_cases m <;> rfl
 
-theorem l6b_matTau_controlMatrix_vertex (m : Fin 3) :
+private theorem l6b_matTau_controlMatrix_vertex (m : Fin 3) :
     matTau (controlMatrix (vertex (vertexSwap m))) = controlMatrix (vertex m) := by
   fin_cases m <;> ext i j <;> fin_cases i <;> fin_cases j <;>
     simp [matTau, controlMatrix, vertex, vertexSwap] <;> ring
 
-theorem l6b_controlP_matTau (m : Fin 3) (X : Mat2) :
+private theorem l6b_controlP_matTau (m : Fin 3) (X : Mat2) :
     controlP (vertex m) (matTau X) = matTau (controlP (vertex (vertexSwap m)) X) := by
-  rw [controlP, controlP, l6b_matTau_smul, l6b_matTau_controlMatrix_vertex,
-    ← l6b_matTau_controlMatrix_vertex m, l6b_traceForm_matTau]
+  rw [controlP, controlP, matTau_smul, l6b_matTau_controlMatrix_vertex,
+    ← l6b_matTau_controlMatrix_vertex m, traceForm_matTau]
 
-theorem l6b_cayleyZ_matTau (M : Mat2) : cayleyZ (matTau M) = starRingEnd ℂ (cayleyZ M) := by
+private theorem l6b_cayleyZ_matTau (M : Mat2) : cayleyZ (matTau M) = starRingEnd ℂ (cayleyZ M) := by
   apply Complex.ext <;> simp [cayleyZ, matTau]
+
+/-- The time reversal `M ↦ -D M D` preserves the star states (it exchanges `ρ₀` and `ρ₁`). -/
+theorem isStarState_matTau {X : Mat2} (h : IsStarState X) : IsStarState (matTau X) := by
+  obtain ⟨htr, hdet, h0, h1, h2⟩ := h
+  refine ⟨by rw [trace_matTau, htr, neg_zero], ?_, ?_, ?_, ?_⟩
+  · rw [Matrix.det_fin_two] at hdet ⊢
+    simp only [matTau]
+    simp
+    linarith
+  · have e : ρ₀ (matTau X) = ρ₁ X := by
+      simp only [ρ₀, ρ₁, matTau]
+      simp
+      ring
+    rw [e]; exact h1
+  · have e : ρ₁ (matTau X) = ρ₀ X := by
+      simp only [ρ₀, ρ₁, matTau]
+      simp
+    rw [e]; exact h0
+  · have e : ρ₂ (matTau X) = ρ₂ X := by
+      simp only [ρ₂, matTau]
+      simp
+    rw [e]; exact h2
 
 /-- Conjugation by `D = diag(1, -1)`. -/
 private def l6b_conjD (A : Mat2) : Mat2 := diagD * A * diagD
@@ -812,7 +830,7 @@ private theorem l6b_conjD_smul (c : ℝ) (A : Mat2) : l6b_conjD (c • A) = c �
   simp only [l6b_conjD, Matrix.mul_smul, Matrix.smul_mul]
 
 private theorem l6b_conjD_J : l6b_conjD J = -J := by
-  rw [← neg_neg (l6b_conjD J), ← l6b_matTau_eq_neg_conjD, l6b_matTau_J]
+  rw [← neg_neg (l6b_conjD J), ← l6b_matTau_eq_neg_conjD, matTau_J]
 
 private theorem l6b_conjD_inv (A : Mat2) : (l6b_conjD A)⁻¹ = l6b_conjD A⁻¹ := by
   simp only [l6b_conjD, Matrix.mul_inv_rev, l6b_diagD_inv, Matrix.mul_assoc]
@@ -829,7 +847,7 @@ private theorem l6b_exp_smul_matTau (s : ℝ) (A : Mat2) :
 
 private theorem l6b_traceForm_conjD (A B : Mat2) :
     traceForm (l6b_conjD A) (l6b_conjD B) = traceForm A B := by
-  have := l6b_traceForm_matTau A B
+  have := traceForm_matTau A B
   rwa [l6b_matTau_eq_neg_conjD, l6b_matTau_eq_neg_conjD, traceForm, neg_mul_neg] at this
 
 private theorem l6b_conjD_apply (A : Mat2) (i j : Fin 2) :
@@ -865,11 +883,10 @@ private theorem l6b_conj_final (E₁ E₂ A K N : Mat2) (c : ℝ) :
 
 /-! ### The rotation `Ad_R` in Cayley coordinates
 
-`fullerCoords_adR` is false as stated for phase points whose entries are not traceless
-(`l6b_not_fullerCoords_adR`, with `q = (1, 0, 0)`: `cayleyZ 1 = i` is fixed by `Ad_R`); it holds for
-traceless entries (`l6b_fullerCoords_adR`), the only case the book uses. -/
+`fullerCoords_adR` needs the entries of the phase point traceless: otherwise it fails
+(`l6b_not_fullerCoords_adR`, with `q = (1, 0, 0)`: `cayleyZ 1 = i` is fixed by `Ad_R`). -/
 
-theorem l6b_cayleyZ_adR (M : Mat2) (hM : M.trace = 0) :
+private theorem l6b_cayleyZ_adR (M : Mat2) (hM : M.trace = 0) :
     cayleyZ (R * M * R⁻¹) = ζ ^ 2 * cayleyZ M := by
   have h11 : M 1 1 = -M 0 0 := by rw [Matrix.trace_fin_two] at hM; linarith
   have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
@@ -880,7 +897,7 @@ theorem l6b_cayleyZ_adR (M : Mat2) (hM : M.trace = 0) :
   · simp [cayleyZ, R, Complex.mul_im, ζ_sq_re, ζ_sq_im]
     linear_combination (-(1 / 4) * M 0 0) * h3
 
-theorem l6b_cayleyZ_adRinv (M : Mat2) (hM : M.trace = 0) :
+private theorem l6b_cayleyZ_adRinv (M : Mat2) (hM : M.trace = 0) :
     cayleyZ (R⁻¹ * M * R) = ζ * cayleyZ M := by
   have h11 : M 1 1 = -M 0 0 := by rw [Matrix.trace_fin_two] at hM; linarith
   have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
@@ -891,9 +908,9 @@ theorem l6b_cayleyZ_adRinv (M : Mat2) (hM : M.trace = 0) :
   · simp [cayleyZ, R, Complex.mul_im, ζ_re, ζ_im]
     linear_combination (-(1 / 4) * M 0 0) * h3
 
-/-- `fullerCoords_adR` with the traces assumed (the statement as printed is false without them,
-see `l6b_not_fullerCoords_adR`). -/
-theorem l6b_fullerCoords_adR (q : iso_PhasePt) (h1 : q.1.trace = 0) (h2 : q.2.1.trace = 0)
+/-- `Ad_R` and `Ad_{R⁻¹}` in Fuller coordinates, for traceless entries (the proof of
+`fullerCoords_adR`; without the traces the identity fails, `l6b_not_fullerCoords_adR`). -/
+private theorem l6b_fullerCoords_adR (q : iso_PhasePt) (h1 : q.1.trace = 0) (h2 : q.2.1.trace = 0)
     (h3 : q.2.2.trace = 0) :
     fullerCoords (iso_adR q) = ζ ^ 2 • fullerCoords q ∧
       fullerCoords (iso_adRinvPow 1 q) = ζ • fullerCoords q := by
@@ -906,7 +923,7 @@ theorem l6b_fullerCoords_adR (q : iso_PhasePt) (h1 : q.1.trace = 0) (h2 : q.2.1.
         l6b_cayleyZ_adRinv _ h3] <;> ring
 
 /-- `fullerCoords_adR` fails for phase points with non-traceless entries: `q = (1, 0, 0)`. -/
-theorem l6b_not_fullerCoords_adR :
+private theorem l6b_not_fullerCoords_adR :
     ¬ ∀ q : iso_PhasePt, fullerCoords (iso_adR q) = ζ ^ 2 • fullerCoords q := by
   intro h
   have := congrFun (h (1, 0, 0)) 0
@@ -947,12 +964,12 @@ theorem reinTau_spec :
       reinTau singularPhasePt = singularPhasePt ∧
       ∀ q, reinTau (iso_adR q) = iso_adRinvPow 1 (reinTau q) := by
   refine ⟨fun q ↦ ?_, fun q hq ↦ ?_, ?_, fun q ↦ ?_⟩
-  · simp [reinTau, l6b_matTau_matTau]
+  · simp [reinTau, matTau_matTau]
   · obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩ := hq
     refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
-      simp only [reinTau, l6b_trace_matTau, l6b_det_matTau, l6b_traceForm_matTau] <;>
+      simp only [reinTau, trace_matTau, l6b_det_matTau, traceForm_matTau] <;>
       simp_all [matTau]
-  · simp only [reinTau, singularPhasePt, l6b_matTau_J, l6b_matTau_smul, Prod.mk.injEq, true_and]
+  · simp only [reinTau, singularPhasePt, matTau_J, matTau_smul, Prod.mk.injEq, true_and]
     ext i j; fin_cases i <;> fin_cases j <;> simp [matTau]
   · have key : ∀ M : Mat2, matTau (R * M * R⁻¹) = R⁻¹ * matTau M * R := by
       intro M
@@ -979,7 +996,7 @@ theorem iso_vertexFlow_reinTau (m : Fin 3) (q : iso_PhasePt) (t : ℝ) :
     intro s
     rw [iso_vfG, iso_vfG, constControlG, constControlG, hP]
     change NormedSpace.exp (s • (matTau X + matTau P)) * NormedSpace.exp ((-s) • matTau P) = _
-    rw [← l6b_matTau_add, l6b_exp_smul_matTau, l6b_exp_smul_matTau, neg_neg, l6b_conjD_mul]
+    rw [← matTau_add, l6b_exp_smul_matTau, l6b_exp_smul_matTau, neg_neg, l6b_conjD_mul]
   have hΛ₁ : ∀ s, iso_vfΛ₁ m τq s = matTau (iso_vfΛ₁ (vertexSwap m) (X, Λ₁, ΛR) (-s)) := by
     intro s
     rw [iso_vfΛ₁, hG, l6b_conjD_inv]
@@ -1010,7 +1027,7 @@ theorem iso_vertexFlow_reinTau (m : Fin 3) (q : iso_PhasePt) (t : ℝ) :
     rw [l6b_integral_comp_neg' (fun s ↦ traceForm (iso_vfM (vertexSwap m) (X, Λ₁, ΛR) s)
       (X * P - P * X)) σ]
     change traceForm (matTau ΛR) (matTau P) - _ = _
-    rw [l6b_traceForm_matTau, neg_neg]
+    rw [traceForm_matTau, neg_neg]
   have hτ1 : τq.1 = matTau X := rfl
   have hX : iso_vfX m τq t = matTau (iso_vfX (vertexSwap m) (X, Λ₁, ΛR) (-t)) := by
     rw [iso_vfX, constControlX, hP, hτ1, l6b_exp_smul_matTau, l6b_exp_smul_matTau,
@@ -1050,11 +1067,11 @@ theorem switchingFn_reinTau (i j : Fin 3) (q : iso_PhasePt) :
     hamiltonian (-1) (reinTau q).2.1 (reinTau q).2.2 (reinTau q).1 (vertex i) =
       hamiltonian (-1) q.2.1 q.2.2 q.1 (vertex (vertexSwap i)) := by
   constructor
-  · simp only [switchingFn, reinTau, l6b_controlP_matTau, ← l6b_matTau_sub, l6b_traceForm_matTau]
+  · simp only [switchingFn, reinTau, l6b_controlP_matTau, ← matTau_sub, traceForm_matTau]
   · have h : matTau q.2.1 - (3 / 2 * -1 : ℝ) • J = matTau (q.2.1 - (3 / 2 * -1 : ℝ) • J) := by
-      rw [l6b_matTau_sub, l6b_matTau_smul, l6b_matTau_J]
+      rw [matTau_sub, matTau_smul, matTau_J]
     simp only [hamiltonian, reinTau]
-    rw [h, ← l6b_matTau_controlMatrix_vertex i, l6b_traceForm_matTau, l6b_traceForm_matTau,
-      l6b_traceForm_matTau]
+    rw [h, ← l6b_matTau_controlMatrix_vertex i, traceForm_matTau, traceForm_matTau,
+      traceForm_matTau]
 
 end SmoothedPolygons

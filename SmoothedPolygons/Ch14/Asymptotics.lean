@@ -2,7 +2,7 @@ module
 
 public import SmoothedPolygons.Ch14.LieChart
 public import SmoothedPolygons.Ch15.CellCoordinates
-public import SmoothedPolygons.Ch14.L6cAsymptoticsFlow
+public import SmoothedPolygons.Ch14.ChartFlow
 
 /-!
 # Chapter 14: asymptotics near the singular locus (§14.2)
@@ -22,7 +22,8 @@ system.
   `H_F(z(x̃), ζ) = H_F(z(x̃), ζ²) = 0` (TeX 11663–11666, `ham_fullerOfChart`);
 * the inverse `fullerChartInv` of `x̃ ↦ z(x̃)` up to the virial group (Remark 14.2.1's formula), and
   `x̃_out = fullerChartInv qOutCart` (`xTildeOut`; Remark 14.2.1, `remark14_2_1`);
-* the first control `e₂` for small `r` (TeX 11706–11718, `eventually_firstControl_lieChart`);
+* the first control `e₂` for small `r` along the `e₂`-flow (TeX 11706–11718,
+  `eventually_firstControl_lieChart`);
 * Lemma 14.2.3 (`lem:Lie-Fuller`, `lemma14_2_3`) and Lemma 14.2.4 (`lem:chi-asymptotic`,
   `lemma14_2_4`), with the companion formula for `χ₂₃` ("Similar formulas hold for the other
   switching functions", `lemma14_2_4_chi23`), which the proof of Lemma 14.3.1 needs (G14.5).
@@ -53,9 +54,9 @@ function from `ζ` to `1` is `RR(ζ - 1, z₃)` (without the factor `1/√3` of 
 
 ## Proofs
 
-All statements are proved, with no `sorry` and no dependence on the unproved statements of
-`LieChart.lean` (the chart is used through its definitions only). The helpers are in
-`SmoothedPolygons/Ch14/L6cAsymptoticsFlow.lean`; matrix norms are the `L^∞` operator norm.
+All statements are proved. The chart is used through its definitions only (its closed forms are
+proved again here, in the form the estimates need). The helpers are in
+`SmoothedPolygons/Ch14/ChartFlow.lean`; matrix norms are the `L^∞` operator norm.
 
 * **The chart in closed form** (TeX 11576–11602, 11631–11645, "A calculation gives"):
   `X = J + r X̃(r)`, `Λ₁ = -(3/2) J + r² Λ̃₁(r)` (with `ℓ̃₁₂` from `det Λ₁ = 9/4`), and the
@@ -64,7 +65,7 @@ All statements are proved, with no `sorry` and no dependence on the unproved sta
   `N = [[r, (1 - r²)/(1 + r x̃₂₁)], [1 + r x̃₂₁, -r]]`. The scaled matrices are rational in `r`
   and regular at `0`; differentiability at `r = 0` gives the expansions (`zhat_isBigO`,
   `tendsto_zhat_div`). The same closed form gives `H(Z₀₁₀) = χ₂₃ = 0` on the chart
-  (`l6c_chart_section`, (14.1.3)).
+  (`lieChart_section`, (14.1.3)).
 * **Lemmas 14.2.3–14.2.4** (TeX 11720–11758). With `X = J + A`, `Λ₁ = -(3/2) J + B`, `Λ_R = C`
   and the weights `(A, B, C, t) ~ (r₀, r₀², r₀³, r₀)`, the extremal equations along `e₂` (with
   the constant `P = Z_{e₂}/⟨Z_{e₂}, X₀⟩`) have the leading part `A' = [P₀, J]`,
@@ -74,7 +75,7 @@ All statements are proved, with no `sorry` and no dependence on the unproved sta
   `l6c_cayleyZ_XF`, `l6c_cayleyZ_BF`, `l6c_cayleyZ_CF`). The errors `X - XF`, `Λ₁ + (3/2) J - BF`,
   `Λ_R - CF` satisfy, for `|t| ≤ S r₀`, linear differential inequalities
   `‖E'‖ ≤ K ‖E‖ + O(r₀^k)` with initial errors `O(r₀²)`, `O(r₀³)`, `O(r₀⁴)`; three Grönwall steps
-  give `O(r₀²)`, `O(r₀³)`, `O(r₀⁴)` uniformly (`l6c_flow_estimates`). Lemma 14.2.3 follows by
+  give `O(r₀²)`, `O(r₀³)`, `O(r₀⁴)` uniformly (`chartFlow_estimates`). Lemma 14.2.3 follows by
   `cayleyZ`; Lemma 14.2.4 and the companion for `χ₂₃` follow from `P_{e_k}(X) = P_{e_k}(J) + O(r₀)`
   and `⟨M, P_{e_k}(J)⟩ = -2 RR(ζ^k, cayleyZ M)` for symmetric traceless `M`
   (`l6c_switching_estimate`, for every pair of vertices).
@@ -88,9 +89,9 @@ All statements are proved, with no `sorry` and no dependence on the unproved sta
   `24 r³ RR(ζ^m - ζ, z₃) = 24 r³ H_F(z(x̃), ζ^m)` (as `H_F(z(x̃), ζ) = 0`).
 * **The first control** (TeX 11706–11718): at `t = 0`, `χ₂₁ = 24 r³ RR(ζ - 1, z₃) + O(r⁴)` with
   `RR(ζ - 1, z₃) = -(3/2) z₃ > 0`, and `χ₂₃ = 0` with
-  `χ₂₃'(0) = -4√3 ℓ̃₂₁ r² + O(r³) > 0` (`l6c_eventually_chi23Deriv_pos`); by continuity in `t`,
+  `χ₂₃'(0) = -4√3 ℓ̃₂₁ r² + O(r³) > 0` (`eventually_chi23Deriv_pos`); by continuity in `t`,
   `e₂` beats `e₁` and `e₃` on some `[0, ε]`, and the maximum over the simplex is at a vertex
-  (`l6c_hamiltonian_le_of_vertices`, as `poly_hamiltonian_le_of_vertices`, with `⟨X, Z_{e_m}⟩ < 0`
+  (`hamiltonian_le_of_vertices`, as `poly_hamiltonian_le_of_vertices`, with `⟨X, Z_{e_m}⟩ < 0`
   in place of the star condition).
 * **Remark 14.2.1**: `fullerChartInv` inverts `fullerOfChart` on the normalized points (where
   `H_F(z, ζ) = 0` fixes `z₃`), `H_F(q_out, ζ) = 0` comes from `H_F⁺(q_out) = 0` and `z₃ < 0`, and
@@ -136,55 +137,55 @@ noncomputable def xTildeOut : Fin 3 → ℝ := fullerChartInv qOutCart
 /-! ### The Fuller flow as the leading term (helpers) -/
 
 /-- The leading terms of `X` are the Fuller `z₁`: `cayleyZ(XF(r, s r))/2 = r z₁(s)`. -/
-theorem l6c_cayleyZ_XF (x : Fin 3 → ℝ) (r s : ℝ) :
-    cayleyZ (l6c_XF x r (s * r)) / 2 = (r : ℂ) * flow s (fullerOfChart x) ζ 0 := by
-  rw [l6c_XF_eq]
+private theorem l6c_cayleyZ_XF (x : Fin 3 → ℝ) (r s : ℝ) :
+    cayleyZ (chartXF x r (s * r)) / 2 = (r : ℂ) * flow s (fullerOfChart x) ζ 0 := by
+  rw [chartXF_eq]
   apply Complex.ext <;> simp [cayleyZ, flow, fullerOfChart, ζ_re, ζ_im] <;> ring
 
 /-- The leading terms of `Λ₁` are the Fuller `z₂`: `-i cayleyZ(BF(r, s r))/6 = r² z₂(s)`. -/
-theorem l6c_cayleyZ_BF (x : Fin 3 → ℝ) (r s : ℝ) :
-    -I * cayleyZ (l6c_BF x r (s * r)) / 6 = (r : ℂ) ^ 2 * flow s (fullerOfChart x) ζ 1 := by
-  rw [l6c_BF, l6c_br_P0_J, l6c_At, l6c_Bt]
-  simp only [l6c_br_J_of]
+private theorem l6c_cayleyZ_BF (x : Fin 3 → ℝ) (r s : ℝ) :
+    -I * cayleyZ (chartBF x r (s * r)) / 6 = (r : ℂ) ^ 2 * flow s (fullerOfChart x) ζ 1 := by
+  rw [chartBF, matLie_chartP0_J, chartA, chartB]
+  simp only [matLie_J_of]
   apply Complex.ext <;> simp [cayleyZ, flow, fullerOfChart, ζ_re, ζ_im, ← Complex.ofReal_pow] <;>
     ring
 
 /-- The leading terms of `Λ_R` are the Fuller `z₃`: `cayleyZ(CF(r, s r))/12 = r³ z₃(s)`. -/
-theorem l6c_cayleyZ_CF (x : Fin 3 → ℝ) (r s : ℝ) :
-    cayleyZ (l6c_CF x r (s * r)) / 12 = (r : ℂ) ^ 3 * flow s (fullerOfChart x) ζ 2 := by
-  rw [l6c_CF, l6c_br_P0_J, l6c_At, l6c_Bt, l6c_Ct]
-  simp only [l6c_br_J_of]
+private theorem l6c_cayleyZ_CF (x : Fin 3 → ℝ) (r s : ℝ) :
+    cayleyZ (chartCF x r (s * r)) / 12 = (r : ℂ) ^ 3 * flow s (fullerOfChart x) ζ 2 := by
+  rw [chartCF, matLie_chartP0_J, chartA, chartB, chartC]
+  simp only [matLie_J_of]
   apply Complex.ext <;> simp [cayleyZ, flow, fullerOfChart, ζ_re, ζ_im, ← Complex.ofReal_pow] <;>
     ring
 
 /-- The error in `ẑ₁` is the Cayley coordinate of the error in `X`. -/
-theorem l6c_fullerCoords_sub_XF (q : iso_PhasePt) (x : Fin 3 → ℝ) (r s : ℝ) :
+private theorem l6c_fullerCoords_sub_XF (q : iso_PhasePt) (x : Fin 3 → ℝ) (r s : ℝ) :
     fullerCoords q 0 - (r : ℂ) * flow s (fullerOfChart x) ζ 0 =
-      cayleyZ (q.1 - l6c_XF x r (s * r)) / 2 := by
-  rw [l6c_cayleyZ_sub, sub_div, l6c_cayleyZ_XF]; rfl
+      cayleyZ (q.1 - chartXF x r (s * r)) / 2 := by
+  rw [cayleyZ_sub, sub_div, l6c_cayleyZ_XF]; rfl
 
 /-- The error in `ẑ₂` is the Cayley coordinate of the error in `Λ₁`. -/
-theorem l6c_fullerCoords_sub_BF (q : iso_PhasePt) (x : Fin 3 → ℝ) (r s : ℝ) :
+private theorem l6c_fullerCoords_sub_BF (q : iso_PhasePt) (x : Fin 3 → ℝ) (r s : ℝ) :
     fullerCoords q 1 - (r : ℂ) ^ 2 * flow s (fullerOfChart x) ζ 1 =
-      -I * cayleyZ (q.2.1 + (3 / 2 : ℝ) • J - l6c_BF x r (s * r)) / 6 := by
-  rw [l6c_cayleyZ_sub, l6c_cayleyZ_add, l6c_cayleyZ_smul, l6c_cayleyZ_J, ← l6c_cayleyZ_BF]
+      -I * cayleyZ (q.2.1 + (3 / 2 : ℝ) • J - chartBF x r (s * r)) / 6 := by
+  rw [cayleyZ_sub, cayleyZ_add, cayleyZ_smul, cayleyZ_J, ← l6c_cayleyZ_BF]
   simp only [fullerCoords, Matrix.cons_val_one, Matrix.cons_val_zero]
   ring
 
 /-- The error in `ẑ₃` is the Cayley coordinate of the error in `Λ_R`. -/
-theorem l6c_fullerCoords_sub_CF (q : iso_PhasePt) (x : Fin 3 → ℝ) (r s : ℝ) :
+private theorem l6c_fullerCoords_sub_CF (q : iso_PhasePt) (x : Fin 3 → ℝ) (r s : ℝ) :
     fullerCoords q 2 - (r : ℂ) ^ 3 * flow s (fullerOfChart x) ζ 2 =
-      cayleyZ (q.2.2 - l6c_CF x r (s * r)) / 12 := by
-  rw [l6c_cayleyZ_sub, sub_div, l6c_cayleyZ_CF]; rfl
+      cayleyZ (q.2.2 - chartCF x r (s * r)) / 12 := by
+  rw [cayleyZ_sub, sub_div, l6c_cayleyZ_CF]; rfl
 
 /-- The content of Lemma 14.2.3 (`lemma14_2_3`), proved here so that the expansions of `ẑ`
 (its case `s = 0`) can use it: `ẑ_k(flow(s r₀)) - r₀^k z_k(s) = O(r₀^{k+1})`, from
-`l6c_flow_estimates` and `cayleyZ`. -/
-theorem l6c_fullerCoords_flow_isBigO (x : Fin 3 → ℝ) (s : ℝ) (k : Fin 3) :
+`chartFlow_estimates` and `cayleyZ`. -/
+private theorem l6c_fullerCoords_flow_isBigO (x : Fin 3 → ℝ) (s : ℝ) (k : Fin 3) :
     (fun r₀ : ℝ ↦ fullerCoords (iso_vertexFlow 1 (lieChart (r₀, x)) (s * r₀)) k -
         (r₀ : ℂ) ^ (k.val + 1) * flow s (fullerOfChart x) ζ k)
       =O[𝓝[>] 0] (fun r₀ ↦ r₀ ^ (k.val + 2)) := by
-  obtain ⟨C, hC⟩ := l6c_flow_estimates x (abs_nonneg s)
+  obtain ⟨C, hC⟩ := chartFlow_estimates x (abs_nonneg s)
   refine IsBigO.of_bound C ((hC.and eventually_mem_nhdsWithin).mono fun r ⟨h, hr⟩ ↦ ?_)
   have hr0 : (0 : ℝ) < r := hr
   obtain ⟨h1, h2, h3⟩ := h (s * r) (by rw [abs_mul, abs_of_pos hr0])
@@ -193,48 +194,48 @@ theorem l6c_fullerCoords_flow_isBigO (x : Fin 3 → ℝ) (s : ℝ) (k : Fin 3) :
   fin_cases k
   · simp only [Fin.zero_eta, zero_add, pow_one]
     rw [l6c_fullerCoords_sub_XF, norm_div, Complex.norm_ofNat]
-    have := l6c_norm_cayleyZ (q.1 - l6c_XF x r (s * r))
+    have := norm_cayleyZ_le_opNorm (q.1 - chartXF x r (s * r))
     linarith
   · simp only [Fin.mk_one, Nat.reduceAdd]
     rw [l6c_fullerCoords_sub_BF, norm_div, norm_mul, norm_neg, Complex.norm_I, one_mul,
       Complex.norm_ofNat]
-    have := l6c_norm_cayleyZ (q.2.1 + (3 / 2 : ℝ) • J - l6c_BF x r (s * r))
-    have h0 := norm_nonneg (q.2.1 + (3 / 2 : ℝ) • J - l6c_BF x r (s * r))
+    have := norm_cayleyZ_le_opNorm (q.2.1 + (3 / 2 : ℝ) • J - chartBF x r (s * r))
+    have h0 := norm_nonneg (q.2.1 + (3 / 2 : ℝ) • J - chartBF x r (s * r))
     linarith
   · simp only [Fin.reduceFinMk, Nat.reduceAdd]
     rw [l6c_fullerCoords_sub_CF, norm_div, Complex.norm_ofNat]
-    have := l6c_norm_cayleyZ (q.2.2 - l6c_CF x r (s * r))
-    have h0 := norm_nonneg (q.2.2 - l6c_CF x r (s * r))
+    have := norm_cayleyZ_le_opNorm (q.2.2 - chartCF x r (s * r))
+    have h0 := norm_nonneg (q.2.2 - chartCF x r (s * r))
     linarith
 
 /-- The leading term of the switching functions: `⟨CF, P_{e_j}(J) - P_{e_i}(J)⟩ =
 24 r³ RR(ζ^i - ζ^j, z₃(s))`. -/
-theorem l6c_traceForm_CF (x : Fin 3 → ℝ) (r s : ℝ) (i j : Fin 3) :
-    traceForm (l6c_CF x r (s * r)) (controlP (vertex j) J - controlP (vertex i) J) =
+private theorem l6c_traceForm_CF (x : Fin 3 → ℝ) (r s : ℝ) (i j : Fin 3) :
+    traceForm (chartCF x r (s * r)) (controlP (vertex j) J - controlP (vertex i) J) =
       24 * r ^ 3 * RR (ζ ^ (i : ℕ) - ζ ^ (j : ℕ)) (flow s (fullerOfChart x) ζ 2) := by
-  obtain ⟨h1, h2⟩ := l6c_CF_symm x r (s * r)
-  have hc : cayleyZ (l6c_CF x r (s * r)) =
+  obtain ⟨h1, h2⟩ := chartCF_symm x r (s * r)
+  have hc : cayleyZ (chartCF x r (s * r)) =
       ((12 * r ^ 3 : ℝ) : ℂ) * flow s (fullerOfChart x) ζ 2 := by
     have := l6c_cayleyZ_CF x r s
     push_cast
     linear_combination 12 * this
-  rw [l6c_traceForm_sub_right, l6c_traceForm_controlP_J j h1 h2, l6c_traceForm_controlP_J i h1 h2,
-    hc, RR_ofReal_mul_right, RR_ofReal_mul_right, l6c_RR_sub_left]
+  rw [traceForm_sub_right, traceForm_controlP_J j h1 h2, traceForm_controlP_J i h1 h2,
+    hc, RR_ofReal_mul_right, RR_ofReal_mul_right, RR_sub_left]
   ring
 
 /-- **The switching functions along the rescaled flow** (Lemma 14.2.4 and its companions):
 `χ_ij(X(s r), Λ_R(s r)) = 24 r³ RR(ζ^i - ζ^j, z₃(s)) + O(r⁴)`. -/
-theorem l6c_switching_estimate (x : Fin 3 → ℝ) (s : ℝ) (i j : Fin 3) :
+private theorem l6c_switching_estimate (x : Fin 3 → ℝ) (s : ℝ) (i j : Fin 3) :
     (fun r : ℝ ↦ switchingFn i j (iso_vertexFlow 1 (lieChart (r, x)) (s * r)).2.2
         (iso_vertexFlow 1 (lieChart (r, x)) (s * r)).1 -
         24 * r ^ 3 * RR (ζ ^ (i : ℕ) - ζ ^ (j : ℕ)) (flow s (fullerOfChart x) ζ 2))
       =O[𝓝[>] 0] (fun r ↦ r ^ 4) := by
-  obtain ⟨C, hC⟩ := l6c_flow_estimates x (abs_nonneg s)
+  obtain ⟨C, hC⟩ := chartFlow_estimates x (abs_nonneg s)
   set S := |s|
-  set a := ‖l6c_At x‖ + S * ‖l6c_br l6c_P0 J‖
-  set c := ‖l6c_Ct x‖ + S * ‖l6c_br J (l6c_Bt x)‖ +
-      3 / 4 * S ^ 2 * ‖l6c_br J (l6c_br J (l6c_At x))‖ +
-      1 / 4 * S ^ 3 * ‖l6c_br J (l6c_br J (l6c_br l6c_P0 J))‖
+  set a := ‖chartA x‖ + S * ‖matLie chartP0 J‖
+  set c := ‖chartC x‖ + S * ‖matLie J (chartB x)‖ +
+      3 / 4 * S ^ 2 * ‖matLie J (matLie J (chartA x))‖ +
+      1 / 4 * S ^ 3 * ‖matLie J (matLie J (matLie chartP0 J))‖
   set D := |C| + a
   set Zi := ‖controlMatrix (vertex i)‖
   set Zj := ‖controlMatrix (vertex j)‖
@@ -257,8 +258,8 @@ theorem l6c_switching_estimate (x : Fin 3 → ℝ) (s : ℝ) (i j : Fin 3) :
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (pow_pos hr0 _)]
   set q := iso_vertexFlow 1 (lieChart (r, x)) (s * r)
   have hXJ : ‖q.1 - J‖ ≤ D * r := by
-    have h2 := l6c_norm_XF_sub_J x hr0.le (show |s * r| ≤ S * r by rw [abs_mul, abs_of_pos hr0])
-    calc ‖q.1 - J‖ ≤ ‖q.1 - l6c_XF x r (s * r)‖ + ‖l6c_XF x r (s * r) - J‖ :=
+    have h2 := norm_chartXF_sub_J_le x hr0.le (show |s * r| ≤ S * r by rw [abs_mul, abs_of_pos hr0])
+    calc ‖q.1 - J‖ ≤ ‖q.1 - chartXF x r (s * r)‖ + ‖chartXF x r (s * r) - J‖ :=
           norm_sub_le_norm_sub_add_norm_sub _ _ _
       _ ≤ |C| * r ^ 2 + a * r := add_le_add (h1.trans (by gcongr; exact le_abs_self _)) h2
       _ ≤ D * r := by
@@ -269,24 +270,24 @@ theorem l6c_switching_estimate (x : Fin 3 → ℝ) (s : ℝ) (i j : Fin 3) :
     intro k hk
     calc 2 * ‖controlMatrix (vertex k)‖ * ‖q.1 - J‖ ≤ 2 * (Zi + Zj) * (D * r) := by gcongr
       _ ≤ 1 / 3 := by nlinarith
-  have hPi := l6c_controlP_sub_le i (hsmall i (by simp [Zi, Zj]))
-  have hPj := l6c_controlP_sub_le j (hsmall j (by simp [Zi, Zj]))
+  have hPi := norm_controlP_sub_le i (hsmall i (by simp [Zi, Zj]))
+  have hPj := norm_controlP_sub_le j (hsmall j (by simp [Zi, Zj]))
   set dPi := controlP (vertex i) q.1 - controlP (vertex i) J
   set dPj := controlP (vertex j) q.1 - controlP (vertex j) J
   have hdi : ‖dPi‖ ≤ 9 * Zi ^ 2 * (D * r) := hPi.trans (by gcongr)
   have hdj : ‖dPj‖ ≤ 9 * Zj ^ 2 * (D * r) := hPj.trans (by gcongr)
-  have hCF := l6c_norm_CF x hr0.le (show |s * r| ≤ S * r by rw [abs_mul, abs_of_pos hr0])
+  have hCF := norm_chartCF_le x hr0.le (show |s * r| ≤ S * r by rw [abs_mul, abs_of_pos hr0])
   have e : switchingFn i j q.2.2 q.1 -
       24 * r ^ 3 * RR (ζ ^ (i : ℕ) - ζ ^ (j : ℕ)) (flow s (fullerOfChart x) ζ 2) =
-      traceForm (l6c_CF x r (s * r)) (dPj - dPi) +
-        traceForm (q.2.2 - l6c_CF x r (s * r))
+      traceForm (chartCF x r (s * r)) (dPj - dPi) +
+        traceForm (q.2.2 - chartCF x r (s * r))
           (controlP (vertex j) q.1 - controlP (vertex i) q.1) := by
     rw [← l6c_traceForm_CF x r s i j, switchingFn]
     simp only [dPi, dPj, traceForm, Matrix.mul_sub, Matrix.sub_mul, Matrix.trace_sub]
     ring
   rw [e]
-  have hA := l6c_abs_traceForm (l6c_CF x r (s * r)) (dPj - dPi)
-  have hB := l6c_abs_traceForm (q.2.2 - l6c_CF x r (s * r))
+  have hA := abs_traceForm_le_opNorm (chartCF x r (s * r)) (dPj - dPi)
+  have hB := abs_traceForm_le_opNorm (q.2.2 - chartCF x r (s * r))
     (controlP (vertex j) q.1 - controlP (vertex i) q.1)
   have hd1 : ‖dPj - dPi‖ ≤ (9 * Zi ^ 2 + 9 * Zj ^ 2) * D * r := by
     have := norm_sub_le dPj dPi
@@ -302,11 +303,11 @@ theorem l6c_switching_estimate (x : Fin 3 → ℝ) (s : ℝ) (i j : Fin 3) :
     have : (9 * Zi ^ 2 + 9 * Zj ^ 2) * D * r ≤ (9 * Zi ^ 2 + 9 * Zj ^ 2) * D :=
       mul_le_of_le_one_right (by positivity) hr1
     linarith
-  have hE : ‖q.2.2 - l6c_CF x r (s * r)‖ ≤ |C| * r ^ 4 :=
+  have hE : ‖q.2.2 - chartCF x r (s * r)‖ ≤ |C| * r ^ 4 :=
     h3.trans (by gcongr; exact le_abs_self _)
-  calc |traceForm (l6c_CF x r (s * r)) (dPj - dPi) + traceForm (q.2.2 - l6c_CF x r (s * r))
+  calc |traceForm (chartCF x r (s * r)) (dPj - dPi) + traceForm (q.2.2 - chartCF x r (s * r))
         (controlP (vertex j) q.1 - controlP (vertex i) q.1)|
-      ≤ |traceForm (l6c_CF x r (s * r)) (dPj - dPi)| + |traceForm (q.2.2 - l6c_CF x r (s * r))
+      ≤ |traceForm (chartCF x r (s * r)) (dPj - dPi)| + |traceForm (q.2.2 - chartCF x r (s * r))
         (controlP (vertex j) q.1 - controlP (vertex i) q.1)| := abs_add_le _ _
     _ ≤ 2 * (c * r ^ 3) * ((9 * Zi ^ 2 + 9 * Zj ^ 2) * D * r) +
         2 * (|C| * r ^ 4) * (‖controlP (vertex j) J‖ + ‖controlP (vertex i) J‖ +
@@ -315,7 +316,7 @@ theorem l6c_switching_estimate (x : Fin 3 → ℝ) (s : ℝ) (i j : Fin 3) :
     _ = _ := by ring
 
 /-- `H_F(z(x̃), ζ) = H_F(z(x̃), ζ²) = 0` (the computation behind `ham_fullerOfChart`). -/
-theorem l6c_ham_fullerOfChart (x : Fin 3 → ℝ) :
+private theorem l6c_ham_fullerOfChart (x : Fin 3 → ℝ) :
     ham (fullerOfChart x) ζ = 0 ∧ ham (fullerOfChart x) (ζ ^ 2) = 0 := by
   constructor <;>
   · simp [ham, fullerOfChart, RR_eq_re_mul_add_im_mul, ζ_re, ζ_im, ζ_sq_re, ζ_sq_im]
@@ -329,7 +330,7 @@ and `ẑ₃ = (r³/4!)(ℓ̃_{R12} + ℓ̃_{R21}) + O(r⁴)`, where `r³ ℓ̃_R
 
 Proof: the case `s = 0` of `l6c_fullerCoords_flow_isBigO` for `ẑ₁`, `ẑ₂` (at `t = 0` it only
 uses the closed form of the chart); for `ẑ₃`, `ẑ₃ - (ℓ̃_{R12} + ℓ̃_{R21}) r³/24 = i (Λ_R)₁₁/12` and
-`(Λ_R)₁₁ = r⁴ h̃(r)` (`l6c_static_C`). -/
+`(Λ_R)₁₁ = r⁴ h̃(r)` (`norm_lieChart_ΛR_sub_le`). -/
 theorem zhat_isBigO (x : Fin 3 → ℝ) :
     (fun r : ℝ ↦ zhat (r, x) 0 - (r : ℂ) / 2 * ((x 0 : ℂ) + I)) =O[𝓝[>] 0] (fun r ↦ r ^ 2) ∧
       (fun r : ℝ ↦ zhat (r, x) 1 - (r : ℂ) ^ 2 / 6 * ((x 1 : ℂ) - (x 2 : ℂ) * I))
@@ -348,17 +349,18 @@ theorem zhat_isBigO (x : Fin 3 → ℝ) :
     refine h.congr (fun r ↦ ?_) (fun r ↦ rfl)
     simp only [zhat, fullerOfChart, Matrix.cons_val_one, Matrix.cons_val_zero]
     ring
-  · obtain ⟨C, hC⟩ := l6c_static_C x
+  · obtain ⟨C, hC⟩ := norm_lieChart_ΛR_sub_le x
     refine IsBigO.of_bound C ((hC.and eventually_mem_nhdsWithin).mono fun r ⟨h, hr⟩ ↦ ?_)
     have hr0 : (0 : ℝ) < r := hr
     have e : zhat (r, x) 2 - (((lieChart (r, x)).2.2 0 1 + (lieChart (r, x)).2.2 1 0) / 24 : ℝ) =
-        I * (((lieChart (r, x)).2.2 - l6c_CF x r 0) 0 0 : ℝ) / 12 := by
+        I * (((lieChart (r, x)).2.2 - chartCF x r 0) 0 0 : ℝ) / 12 := by
       simp only [zhat, fullerCoords, Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons,
-        Matrix.sub_apply, l6c_CF, l6c_Ct]
-      apply Complex.ext <;> simp [cayleyZ] <;> ring
+        Matrix.sub_apply, chartCF, chartC]
+      apply Complex.ext <;> simp [cayleyZ]
+      ring
     rw [e, norm_div, norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Complex.norm_ofNat,
       Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (pow_pos hr0 _)]
-    have := l6c_abs_le_norm ((lieChart (r, x)).2.2 - l6c_CF x r 0) 0 0
+    have := abs_apply_le_opNorm ((lieChart (r, x)).2.2 - chartCF x r 0) 0 0
     have h0 : 0 ≤ C * r ^ 4 := (norm_nonneg _).trans h
     linarith
 
@@ -407,7 +409,7 @@ theorem tendsto_zhat_div (x : Fin 3 → ℝ) :
 corresponding to `ζ^m` (`24 = 6ρ²`; the book writes `H_F(ũ, z)`, Chapter 13 writes `H_F(z, u)`,
 G14.13).
 
-Proof: on the chart `H(Z₀₁₀) = 0` (`l6c_chart_section`), so `H(e_{m+1}) = χ_{m+1,2}`; the case
+Proof: on the chart `H(Z₀₁₀) = 0` (`lieChart_section`), so `H(e_{m+1}) = χ_{m+1,2}`; the case
 `s = 0` of `l6c_switching_estimate` gives `24 r³ RR(ζ^m - ζ, z₃) = 24 r³ H_F(z(x̃), ζ^m)`. -/
 theorem hamiltonian_lieChart_isBigO (x : Fin 3 → ℝ) (m : Fin 3) :
     (fun r : ℝ ↦ hamiltonian (-1) (lieChart (r, x)).2.1 (lieChart (r, x)).2.2 (lieChart (r, x)).1
@@ -416,16 +418,16 @@ theorem hamiltonian_lieChart_isBigO (x : Fin 3 → ℝ) (m : Fin 3) :
   have h := l6c_switching_estimate x 0 m 1
   simp only [zero_mul, ivf_vertexFlow_zero, flow_zero] at h
   refine h.congr' ?_ (Eventually.of_forall fun _ ↦ rfl)
-  filter_upwards [l6c_eventually_chart x, l6c_eventually_traceForm_lt x 1,
-    l6c_eventually_traceForm_lt x 2] with r ⟨_, _, h1, h2⟩ h3 h4
-  obtain ⟨hH, -⟩ := l6c_chart_section h1 h2 (ne_of_lt (by linarith)) (ne_of_lt (by linarith))
+  filter_upwards [eventually_chart_conditions x, eventually_traceForm_lieX_lt x 1,
+    eventually_traceForm_lieX_lt x 2] with r ⟨_, _, h1, h2⟩ h3 h4
+  obtain ⟨hH, -⟩ := lieChart_section h1 h2 (ne_of_lt (by linarith)) (ne_of_lt (by linarith))
   have hsub := poly_hamiltonian_sub (-1) (lieChart (r, x)).2.1 (lieChart (r, x)).2.2
     (lieChart (r, x)).1 m 1
   have hF : ham (fullerOfChart x) (ζ ^ (m : ℕ)) =
       RR (ζ ^ (m : ℕ) - ζ ^ ((1 : Fin 3) : ℕ)) (fullerOfChart x 2) := by
     have := (l6c_ham_fullerOfChart x).1
     simp only [ham] at this ⊢
-    rw [l6c_RR_sub_left, Fin.val_one, pow_one]
+    rw [RR_sub_left, Fin.val_one, pow_one]
     linarith
   rw [hF]
   linarith
@@ -487,12 +489,12 @@ theorem fullerChartInv_spec :
 `-√3 (1 + r)/(r - 1)`, `-(3√3/2) (r² + r + 1)(r + 1)/((r² - r + 1)(r - 1))` and
 `-(3/2) (r⁴ - 3r³ - 2r² - 3r + 1)(1 + r)²/((r⁴ + r³ + r + 1)(r - 1)²)`; they are bounded with the
 fine enclosures of `r_scale` (`rScale_fine_bounds`) and `√3`, each monomial separately. -/
-theorem l6c_xTildeOut_bounds :
+private theorem l6c_xTildeOut_bounds :
     |xTildeOut 0 - (-2.39)| < 0.01 ∧ |xTildeOut 1 - (-4.90)| < 0.01 ∧
       |xTildeOut 2 - (-1.12)| < 0.01 := by
-  obtain ⟨h0r, h0i, h1r, h1i⟩ := l6c_qOutCart_coords
+  obtain ⟨h0r, h0i, h1r, h1i⟩ := qOutCart_coords
   obtain ⟨hr1, hr2⟩ := rScale_fine_bounds
-  obtain ⟨hs1, hs2⟩ := l6c_sqrt3_fine
+  obtain ⟨hs1, hs2⟩ := sqrt_three_fine_bounds
   have hs0 : 0 < √3 := by positivity
   set r := rScale
   set s := √3
@@ -562,14 +564,15 @@ theorem l6c_xTildeOut_bounds :
     · rw [lt_sub_iff_add_lt, lt_div_iff₀ hd]; ring_nf; linarith
     · rw [sub_lt_iff_lt_add, div_lt_iff₀ hd]; ring_nf; linarith
 
-/-- **Remark 14.2.1** (TeX 11668–11679): with `z_{out,i} = x_i + i y_i` (the representative
-(13.5.1) of `q_out`), `x̃_out = (x₁/y₁, 3x₂/(2y₁²), -3y₂/(2y₁²)) ≈ (-2.39, -4.90, -1.12)`, and
-`ξ(x̃_out)` is the outward fixed point `q_out` modulo the virial group: `z(x̃_out)` is the virial
-rescaling of `q_out` by `1/(2 y₁)`, and it lies in the Fuller section (`sectionZero`: on the walls,
-with `H_F⁺ = 0`), so its class in `Ξ_{𝒲,0}/V_T` is `q_out`. (The exact value is
-`(-2.388856…, -4.902232…, -1.126400…)`; see the module docstring.)
+/-- **Remark 14.2.1** (`rem:xout`, TeX 11668–11679): with `z_{out,i} = x_i + i y_i` (the
+representative (13.5.1) of `q_out`),
+`x̃_out = (x₁/y₁, 3x₂/(2y₁²), -3y₂/(2y₁²)) ≈ (-2.39, -4.90, -1.12)`, and `ξ(x̃_out)` is the outward
+fixed point `q_out` modulo the virial group: `z(x̃_out)` is the virial rescaling of `q_out` by
+`1/(2 y₁)`, and it lies in the Fuller section (`sectionZero`: on the walls, with `H_F⁺ = 0`), so its
+class in `Ξ_{𝒲,0}/V_T` is `q_out`. (The exact value is `(-2.388856…, -4.902232…, -1.126400…)`; see
+the module docstring.)
 
-Proof: the enclosures are `l6c_xTildeOut_bounds`; `H_F(q_out, ζ) = 0` (`l6c_ham_qOutCart`) and
+Proof: the enclosures are `l6c_xTildeOut_bounds`; `H_F(q_out, ζ) = 0` (`ham_qOutCart`) and
 `fullerChartInv_spec` give the identity; `H_F` scales by `λ³` under the virial rescaling. -/
 theorem remark14_2_1 :
     |xTildeOut 0 - (-2.39)| < 0.01 ∧ |xTildeOut 1 - (-4.90)| < 0.01 ∧
@@ -579,7 +582,7 @@ theorem remark14_2_1 :
   obtain ⟨b0, b1, b2⟩ := l6c_xTildeOut_bounds
   have hq0 := qOutCart_signs.1
   obtain ⟨-, hq2, hq2'⟩ := qOutCart_normalization
-  obtain ⟨hζ, hζ2, h1⟩ := l6c_ham_qOutCart
+  obtain ⟨hζ, hζ2, h1⟩ := ham_qOutCart
   have hid : fullerOfChart xTildeOut = scale (2 * (qOutCart 0).im)⁻¹ qOutCart :=
     fullerChartInv_spec.2.2 qOutCart hq0 hq2 hζ
   set c := (2 * (qOutCart 0).im)⁻¹
@@ -598,12 +601,16 @@ theorem remark14_2_1 :
 /-- **The first control is `e₂`** (TeX 11706–11718): "For a given `x̃`, the first control of
 `(X(r, x̃), Λ₁(r, x̃), Λ_R(r, x̃))` is `u = e₂` for all sufficiently small `r > 0`, provided we
 assume `ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁ < 0` and `ℓ̃₂₁ < 0`" (equivalently `x₃ < 0` and `y₂ > 0` for `z(x̃)`):
-the constant control `e₂` maximizes the Hamiltonian along its own flow on some `[0, ε]`.
+the constant control `e₂` maximizes the Hamiltonian along its own flow on some `[0, ε]`. This is
+the half of the claim about the `e₂`-flow; that an extremal through the chart point cannot use
+another control (`e₁` is below the maximum there and `e₃` leaves it at once) is the switching
+structure `eventually_switchStructure` (`SmoothedPolygons/Ch16/SwitchStructure.lean`), at the chart
+points near `(0, x̃_out)` where the proof of Theorem 16.4.1 needs it.
 
 Proof: at `t = 0`, `χ₂₁ = 24 r³ RR(ζ - 1, z₃) + O(r⁴) > 0` (`RR(ζ - 1, z₃) = -(3/2) z₃ > 0`),
-`χ₂₃ = 0` and `χ₂₃'(0) = -4√3 ℓ̃₂₁ r² + O(r³) > 0` (`l6c_eventually_chi23Deriv_pos`); by
+`χ₂₃ = 0` and `χ₂₃'(0) = -4√3 ℓ̃₂₁ r² + O(r³) > 0` (`eventually_chi23Deriv_pos`); by
 continuity `e₂` beats `e₁` and `e₃` on some `[0, ε]`, and the maximum over `U_T` is at a vertex
-(`l6c_hamiltonian_le_of_vertices`, with `⟨X, Z_{e_m}⟩ < 0` near `X = J`). -/
+(`hamiltonian_le_of_vertices`, with `⟨X, Z_{e_m}⟩ < 0` near `X = J`). -/
 theorem eventually_firstControl_lieChart {x : Fin 3 → ℝ} (h₁ : x 1 + x 2 * x 0 < 0)
     (h₂ : x 2 < 0) :
     ∀ᶠ r in 𝓝[>] 0, ∃ ε > 0, ∀ t ∈ Icc 0 ε, ∀ v ∈ controlSimplex,
@@ -636,8 +643,9 @@ theorem eventually_firstControl_lieChart {x : Fin 3 → ℝ} (h₁ : x 1 + x 2 *
     have h4 : C * r ^ 4 ≤ |C| * r ^ 4 := by gcongr; exact le_abs_self _
     have h5 : r ^ 3 * (r * (|C| + 1)) ≤ r ^ 3 * (12 * κ) := mul_le_mul_of_nonneg_left hrC h3.le
     nlinarith
-  filter_upwards [hA, l6c_eventually_chi23Deriv_pos x h₂, l6c_eventually_traceForm_lt x 0,
-    l6c_eventually_traceForm_lt x 1, l6c_eventually_traceForm_lt x 2, l6c_eventually_chart x]
+  filter_upwards [hA, eventually_chi23Deriv_pos x h₂, eventually_traceForm_lieX_lt x 0,
+    eventually_traceForm_lieX_lt x 1, eventually_traceForm_lieX_lt x 2, eventually_chart_conditions
+        x]
     with r hA hB hd0 hd1 hd2 ⟨hr0, hr1, hc1, hc2⟩
   set q := lieChart (r, x)
   have hsymm : ∀ A B : Mat2, traceForm A B = traceForm B A := fun A B ↦ Matrix.trace_mul_comm A B
@@ -651,13 +659,13 @@ theorem eventually_firstControl_lieChart {x : Fin 3 → ℝ} (h₁ : x 1 + x 2 *
   -- the flow is continuous
   have hXc : Continuous fun t ↦ (iso_vertexFlow 1 q t).1 := ivf_vfX_continuous 1 q
   have hRc : Continuous fun t ↦ (iso_vertexFlow 1 q t).2.2 :=
-    continuous_iff_continuousAt.2 fun t ↦ (l6c_hasDerivAt_flowΛR q t).continuousAt
+    continuous_iff_continuousAt.2 fun t ↦ (hasDerivAt_vertexFlow_ΛR q t).continuousAt
   have h0q := ivf_vertexFlow_zero 1 q
   -- (B) `χ₂₃(0) = 0`, `χ₂₃'(0) > 0`
-  have hf := l6c_hasDerivAt_chi23 q (hd' 2)
+  have hf := hasDerivAt_chi23 q (hd' 2)
   have hf0 : switchingFn 1 2 (iso_vertexFlow 1 q 0).2.2 (iso_vertexFlow 1 q 0).1 = 0 := by
     rw [h0q]
-    exact (l6c_chart_section hc1 hc2 (hd 1 |>.trans (by norm_num) |>.ne)
+    exact (lieChart_section hc1 hc2 (hd 1 |>.trans (by norm_num) |>.ne)
       (hd 2 |>.trans (by norm_num) |>.ne)).2
   have hslope := (hasDerivAt_iff_tendsto_slope.1 hf).eventually (lt_mem_nhds hB)
   have hpos : ∀ᶠ t in 𝓝[>] (0 : ℝ),
@@ -671,7 +679,7 @@ theorem eventually_firstControl_lieChart {x : Fin 3 → ℝ} (h₁ : x 1 + x 2 *
   -- (C) continuity of `χ₂₁` and `⟨X, Z_m⟩` at `t = 0`
   have hg : ContinuousAt (fun t ↦ switchingFn 1 0 (iso_vertexFlow 1 q t).2.2
       (iso_vertexFlow 1 q t).1) 0 :=
-    l6c_continuousAt_switchingFn hRc hXc 1 0 (by rw [h0q]; exact hd' 1) (by rw [h0q]; exact hd' 0)
+    continuousAt_switchingFn hRc hXc 1 0 (by rw [h0q]; exact hd' 1) (by rw [h0q]; exact hd' 0)
   have hdc : ∀ m : Fin 3, ContinuousAt (fun t ↦ traceForm (iso_vertexFlow 1 q t).1
       (controlMatrix (vertex m))) 0 := fun m ↦
     ((hXc.matrix_mul continuous_const).matrix_trace).continuousAt
@@ -694,7 +702,7 @@ theorem eventually_firstControl_lieChart {x : Fin 3 → ℝ} (h₁ : x 1 + x 2 *
     rw [Real.dist_eq, sub_zero, abs_of_nonneg ht.1]
     linarith [ht.2, min_le_left δ δ']
   obtain ⟨hgt, hdt⟩ := hδ2 htδ
-  refine l6c_hamiltonian_le_of_vertices (-1) _ _ _ hdt _ (fun m ↦ ?_) v hv
+  refine hamiltonian_le_of_vertices (-1) _ _ _ hdt _ (fun m ↦ ?_) v hv
   fin_cases m
   · have := poly_hamiltonian_sub (-1) (iso_vertexFlow 1 q t).2.1 (iso_vertexFlow 1 q t).2.2
       (iso_vertexFlow 1 q t).1 1 0
@@ -717,7 +725,7 @@ each `s`, as `r₀ → 0⁺`, `ẑ_k(X(s r₀), Λ₁(s r₀), Λ_R(s r₀)) = z
 `k = 1, 2, 3` ("the leading term of the solutions of the Reinhardt and Fuller systems are in
 agreement"; index `k` is `Fin 3` here, `k = 0` for `z₁`).
 
-Proof: `l6c_fullerCoords_flow_isBigO`: the Grönwall comparison `l6c_flow_estimates` of the
+Proof: `l6c_fullerCoords_flow_isBigO`: the Grönwall comparison `chartFlow_estimates` of the
 `e₂`-flow with the leading chain `XF, BF, CF`, whose Cayley coordinates are the Fuller flow.
 Departure from the paper: the book expands the explicit solutions as series in `r₀`; see the
 module docstring. -/

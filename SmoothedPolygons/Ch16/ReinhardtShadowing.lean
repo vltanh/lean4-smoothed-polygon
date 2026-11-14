@@ -123,56 +123,6 @@ private lemma l6i_ae_ne (t : ℝ) : ∀ᵐ s : ℝ, s ≠ t := by
   rw [ae_iff]
   simp
 
-/-- A property holding almost everywhere on a nonempty open interval holds at some point of it. -/
-private lemma l6i_exists_mem_of_ae {P : ℝ → Prop} {c d : ℝ} (hcd : c < d)
-    (h : ∀ᵐ t, t ∈ Ioo c d → P t) : ∃ t ∈ Ioo c d, P t := by
-  by_contra hcon
-  push Not at hcon
-  have h0 : volume (Ioo c d) = 0 := by
-    rw [measure_eq_zero_iff_ae_notMem]
-    filter_upwards [h] with t ht hmem
-    exact hcon t hmem (ht hmem)
-  rw [Real.volume_Ioo, ENNReal.ofReal_eq_zero] at h0
-  linarith
-
-/-- A measurable function bounded on `[a, b]` is interval integrable on its subintervals. -/
-private lemma l6i_intervalIntegrable_of_bound {f : ℝ → ℂ} (hf : Measurable f) {a b C : ℝ}
-    (hb : ∀ t ∈ Icc a b, ‖f t‖ ≤ C) {c d : ℝ} (hc : c ∈ Icc a b) (hd : d ∈ Icc a b) :
-    IntervalIntegrable f volume c d := by
-  have hab : a ≤ b := hc.1.trans hc.2
-  have h : IntervalIntegrable f volume a b :=
-    (intervalIntegrable_iff_integrableOn_Ioc_of_le hab).2
-      (Measure.integrableOn_of_bounded (by simp [Real.volume_Ioc]) hf.aestronglyMeasurable
-        (ae_restrict_of_forall_mem measurableSet_Ioc fun t ht ↦ hb t (Ioc_subset_Icc_self ht)))
-  exact h.mono_set (by rw [uIcc_of_le hab]; exact uIcc_subset_Icc hc hd)
-
-/-- `U_T` lies in the closed unit disk. -/
-private lemma l6i_norm_le_one_of_mem_UT {v : ℂ} (hv : v ∈ UT) : ‖v‖ ≤ 1 := by
-  have hsub : UT ⊆ Metric.closedBall (0 : ℂ) 1 :=
-    convexHull_min (fun x hx ↦ by simp [norm_eq_one_of_mem_VT hx]) (convex_closedBall 0 1)
-  simpa using hsub hv
-
-/-- The simplex is mapped into `U_T`. -/
-private lemma l6i_simplexToUT_mem {v : Fin 3 → ℝ} (hv : v ∈ controlSimplex) :
-    simplexToUT v ∈ UT := by
-  have h : simplexToUT v = ∑ m : Fin 3, v m • ζ ^ (m : ℕ) := by
-    simp only [simplexToUT, Complex.real_smul]
-  rw [h]
-  have hconv : Convex ℝ UT := convex_convexHull ℝ VT
-  refine hconv.sum_mem (fun m _ ↦ (hv.1 m).1) ?_ fun m _ ↦ ?_
-  · rw [Fin.sum_univ_three]; exact hv.2
-  · fin_cases m
-    · simpa using VT_subset_UT one_mem_VT
-    · simpa using VT_subset_UT ζ_mem_VT
-    · simpa using VT_subset_UT ζ_sq_mem_VT
-
-private lemma l6i_norm_simplexToUT_le {v : Fin 3 → ℝ} (hv : v ∈ controlSimplex) :
-    ‖simplexToUT v‖ ≤ 1 :=
-  l6i_norm_le_one_of_mem_UT (l6i_simplexToUT_mem hv)
-
-private lemma l6i_simplexToUT_vertex (m : Fin 3) : simplexToUT (vertex m) = ζ ^ (m : ℕ) := by
-  fin_cases m <;> simp [simplexToUT, vertex, Fin.sum_univ_three]
-
 private lemma l6i_continuous_simplexToUT : Continuous simplexToUT := by
   unfold simplexToUT
   fun_prop
@@ -289,42 +239,6 @@ private lemma l6i_bootstrap {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ 
   exact hbound s hs fun σ hσ ↦ (hin σ ⟨hσ.1, hσ.2.le.trans hs.2⟩).le
 
 /-! ### Helpers: bang-bang controls -/
-
-/-- **A time inside an interval of finite bang-bang control that is not a switching time has a
-neighbourhood on which the control is one vertex** (the argument of `l6e_local_vertex` of
-`SmoothedPolygons/Ch16/ClusterCoordinates.lean`, private there). -/
-private lemma l6i_local_vertex {u : ℝ → Fin 3 → ℝ} {α β t : ℝ} (hbb : IsFiniteBangBang α β u)
-    (ht : t ∈ Ioo α β) (hsw : ¬ IsSwitchingTime u t) :
-    ∃ i : Fin 3, ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (t - η) (t + η) → u τ = vertex i := by
-  obtain ⟨S, hS⟩ := hbb
-  have hfin : ((S.erase t : Finset ℝ) : Set ℝ)ᶜ ∈ 𝓝 t :=
-    (S.erase t).finite_toSet.isClosed.isOpen_compl.mem_nhds (by simp)
-  obtain ⟨ρ₀, hρ₀, hball⟩ := Metric.mem_nhds_iff.1 hfin
-  set ρ := min ρ₀ (min (t - α) (β - t)) with hρ
-  have hρ1 : ρ ≤ ρ₀ := min_le_left _ _
-  have hρ2 : ρ ≤ t - α := (min_le_right _ _).trans (min_le_left _ _)
-  have hρ3 : ρ ≤ β - t := (min_le_right _ _).trans (min_le_right _ _)
-  have hρpos : 0 < ρ := lt_min hρ₀ (lt_min (by linarith [ht.1]) (by linarith [ht.2]))
-  have hloc : ∀ s ∈ Ioo (t - ρ) (t + ρ), s ≠ t →
-      ∃ i : Fin 3, ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (s - η) (s + η) → u τ = vertex i := by
-    intro s hs hst
-    refine hS s ⟨by linarith [hs.1], by linarith [hs.2]⟩ fun hsS ↦ ?_
-    have hsb : s ∈ Metric.ball t ρ₀ := by
-      rw [Metric.mem_ball, Real.dist_eq, abs_lt]
-      constructor <;> linarith [hs.1, hs.2]
-    exact hball hsb (by simp [hsS, hst])
-  obtain ⟨i, hi⟩ := exists_ae_eq_vertex_of_locally (α := t - ρ) (β := t) fun s hs ↦
-    hloc s ⟨hs.1, by linarith [hs.2]⟩ hs.2.ne
-  obtain ⟨j, hj⟩ := exists_ae_eq_vertex_of_locally (α := t) (β := t + ρ) fun s hs ↦
-    hloc s ⟨by linarith [hs.1], hs.2⟩ hs.1.ne'
-  obtain rfl : i = j := by
-    by_contra hij
-    exact hsw ⟨i, j, hij, ρ, hρpos, hi, hj⟩
-  refine ⟨i, ρ, hρpos, ?_⟩
-  filter_upwards [hi, hj, l6i_ae_ne t] with τ h1 h2 h3 hτ
-  rcases lt_or_gt_of_ne h3 with h | h
-  · exact h1 ⟨hτ.1, h⟩
-  · exact h2 ⟨h, hτ.2⟩
 
 /-- Pigeonhole for `Fin 3`: if frequently some `i` works, then some `i` works frequently. -/
 private lemma l6i_frequently_exists {P : ℕ → Fin 3 → Prop}
@@ -455,8 +369,8 @@ private lemma l6i_rescaledControl (h : IsChatteringArcInto a b u g X Λ₁ ΛR �
     change Measurable fun s ↦ simplexToUT (u (τ n + s * switchRadius X Λ₁ ΛR τ n))
     exact l6i_continuous_simplexToUT.measurable.comp
       ((l6i_measurable_control h).comp (by fun_prop))
-  refine l6i_intervalIntegrable_of_bound (C := 1) hmeas (fun s hs ↦ ?_) hc hd
-  refine l6i_norm_simplexToUT_le (l6i_control_mem h ⟨?_, ?_⟩)
+  refine intervalIntegrable_of_bound (C := 1) hmeas.aestronglyMeasurable (fun s hs ↦ ?_) hc hd
+  refine norm_simplexToUT_le (l6i_control_mem h ⟨?_, ?_⟩)
   · nlinarith [hτ.1, hs.1]
   · nlinarith [hs.2]
 
@@ -474,7 +388,7 @@ private lemma l6i_eventually_field_le (R : ℝ) (hR : 0 ≤ R) :
     fin_cases j
     · simp only [fullerField, Fin.zero_eta, Matrix.cons_val_zero, norm_mul, norm_neg,
         Complex.norm_I, one_mul]
-      linarith [l6i_norm_simplexToUT_le hv]
+      linarith [norm_simplexToUT_le hv]
     · simpa [fullerField] using (norm_le_pi_norm y 0).trans (by linarith)
     · simpa [fullerField] using (norm_le_pi_norm y 1).trans (by linarith)
   have h3 := norm_sub_norm_le (rescaledField ρ v y) (fullerField (simplexToUT v) y)
@@ -540,9 +454,9 @@ private lemma l6i_not_reach_zero (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ
   linarith
 
 /-- **On a window without switching times the rescaled control is a vertex** (finite bang-bang
-control between switches, `l6i_local_vertex`, `exists_ae_eq_vertex_of_locally`), so its integral
-over the window `[p, q]` is `(q - p)` times that vertex (the change of variables
-`t = τ_n + sρ_n`). -/
+control between switches, `IsFiniteBangBang.exists_ae_eq_vertex_of_not_isSwitchingTime`,
+`exists_ae_eq_vertex_of_locally`), so its integral over the window `[p, q]` is `(q - p)` times that
+vertex (the change of variables `t = τ_n + sρ_n`). -/
 private lemma l6i_integral_of_no_switch (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) (n : ℕ)
     {S p q : ℝ} (hp : 0 < p) (hpq : p < q) (hqS : q ≤ S)
     (hS : τ n + S * switchRadius X Λ₁ ΛR τ n < b)
@@ -561,7 +475,7 @@ private lemma l6i_integral_of_no_switch (h : IsChatteringArcInto a b u g X Λ₁
     obtain ⟨m, hm⟩ := (h.2.2.2.2.2.2.2 t ⟨hα.trans ht.1, ht.2.trans hβ⟩).1 hsw
     exact hno ⟨m, hm ▸ ht⟩
   obtain ⟨i, hi⟩ := exists_ae_eq_vertex_of_locally fun t ht ↦
-    l6i_local_vertex hbb ht (hnosw t ht)
+    IsFiniteBangBang.exists_ae_eq_vertex_of_not_isSwitchingTime hbb ht (hnosw t ht)
   refine ⟨i, ?_⟩
   have hSb : τ n + S * ρ ≤ b := hS.le
   have hS0 : 0 ≤ S := by linarith
@@ -583,7 +497,7 @@ private lemma l6i_integral_of_no_switch (h : IsChatteringArcInto a b u g X Λ₁
     filter_upwards [hi, l6i_ae_ne (ρ * q + τ n)] with t ht hne htI
     rw [uIoc_of_le hle] at htI
     rw [ht ⟨by linarith [htI.1], lt_of_le_of_ne (by linarith [htI.2]) (by
-      intro e; exact hne (by linarith))⟩, l6i_simplexToUT_vertex]
+      intro e; exact hne (by linarith))⟩, simplexToUT_vertex]
   rw [e1, e2, e3, intervalIntegral.integral_const, Complex.real_smul, Complex.real_smul,
     ← mul_assoc, ← Complex.ofReal_mul]
   congr 2
@@ -640,7 +554,7 @@ private lemma l6i_forced_switch (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ)
     (fun s hs ↦ IsTrajectory.norm_control_le_one subset_rfl htraj s
       ⟨by linarith [hs.1], by linarith [hs.2]⟩)
     (norm_eq_one_of_mem_VT (l6i_pow_mem_VT i)) heq
-  obtain ⟨t, -, ht1, ht2⟩ := l6i_exists_mem_of_ae
+  obtain ⟨t, -, ht1, ht2⟩ := exists_mem_Ioo_of_ae
     (P := fun t ↦ w t = u₀ ∧ w t = ζ ^ (i : ℕ)) (by linarith : T - ε < T) (by
       filter_upwards [hwT, hae] with t h1 h2 htI
       exact ⟨h1 ⟨by linarith [htI.1], htI.2.le⟩, h2 ⟨htI.1, by linarith [htI.2]⟩⟩)
@@ -876,9 +790,9 @@ def ClusterSetForwardInvariant : Prop :=
       MapsTo poincareAngZero (switchClusterSet (switchAng X Λ₁ ΛR τ))
         (switchClusterSet (switchAng X Λ₁ ΛR τ))
 
-/-- **N5 holds** (step 4 of the plan in the module docstring, from
-`exists_tendsto_switchAng_poincare`: a cluster point `ξ` gives the cluster point `ang (F ξ)`, in
-the section, of class `F_ang([ξ])`).
+/-- **N5 holds** (`thm:no-chatter`, the step of §16.4.2 of the proof of Theorem 16.4.1, repaired:
+step 4 of the plan in the module docstring, from `exists_tendsto_switchAng_poincare`: a cluster
+point `ξ` gives the cluster point `ang (F ξ)`, in the section, of class `F_ang([ξ])`).
 
 Proof: `ang (F ξ)` is a cluster point (`exists_tendsto_switchAng_poincare`), so it lies in the
 section (`mapClusterPt_switchAng_mem_sectionZero`), and its class is

@@ -1,8 +1,8 @@
 module
 
 public import SmoothedPolygons.Ch16.ReinhardtShadowing
-public import SmoothedPolygons.Ch16.l6h_SwitchStructure
-public import SmoothedPolygons.Ch16.l6h_NextSwitch
+public import SmoothedPolygons.Ch16.SwitchStructure
+public import SmoothedPolygons.Ch16.NextSwitch
 public import Basic.Dynamics.HyperbolicBox
 
 /-!
@@ -53,9 +53,10 @@ lines, with the ω-limit / hyperbolic-box argument of the plan):
    `lieChart_lieChartInv`; the section conditions `H(e₂) = H(e₃) = 0` hold because the two
    vertices of a switch maximize `H` with value `0` and `H(e₁) < 0` near the ray of `q_out`, by the
    uniform limit `tendstoUniformlyOn_rescaledHam`), and consecutive ones follow `e`
-   (`IsChatteringArcInto.eventually_follows_out`: `l6h_next_switch` with
+   (`IsChatteringArcInto.eventually_follows_out`:
+   `IsChatteringArcInto.next_switchPoint_eq_reinPoincare` with
    `eventually_isSwitch_reinSwitchTime` and the switching structure at the chart point,
-   `l6h_eventually_switchStructure`, see below); `e` fixes `(0, x̃_out)`, leaves `r = 0`
+   `eventually_switchStructure`, see below); `e` fixes `(0, x̃_out)`, leaves `r = 0`
    invariant, expands transversally by `r_scale > 1` and contracts along the divisor (the
    derivative facts `hasStrictFDerivAt_extension`, not the stable manifold theorem), so the
    hyperbolic box (`Function.not_mapClusterPt_of_transverse_expansion`, with `W` the neighbourhood
@@ -65,9 +66,12 @@ lines, with the ω-limit / hyperbolic-box argument of the plan):
    one, else a junk point `(1/(n+1), x̃_out + 2)` outside the box. The representative is unique: two
    rotations of a phase point both on the section near `q_out` coincide, since `Ad_{R⁻¹}` and
    `Ad_{R⁻²}` would move the negative value of `H(e₁)` to `e₂` or `e₃` (`l6h_rep_unique`). No
-   stable manifold theorem is used anywhere in the proof of Theorem 16.4.1 (nor in the assembly of
-   Theorem 16.3.1): the "stable curve" of step 5 is the local unstable set of `e`, by definition;
-   Theorem 14.3.3 (via Theorem A.3.1) adds that it is a `C^∞` curve.
+   stable manifold theorem is used in steps 1–4, which give the first part of the theorem
+   (`tendstoModVT_switchAng_of_clusterSetForwardInvariant`), the only part the assembly of
+   Theorem 16.3.1 uses. The "stable curve" of step 5 is the local unstable set of `e`, by
+   definition, and Theorem 14.3.3 (via Theorem A.3.1) adds that it is a `C^∞` curve; step 5 uses
+   only the conjugacy `F_in = e⁻¹` of `remark14_3_4`, but at the level of declarations it depends on
+   Theorem A.3.1 through `remark14_3_4`, whose unstable-curve clause is proved with it.
 4. (d)–(f) replaced: `Ω` is forward invariant under `F_ang` (N5, `ClusterSetForwardInvariant`); a
    point `ω ≠ q_in` of `Ω` has `F^k(ω) → q_out` (Theorem 16.1.1, `theorem16_1_1`, with the three
    named numerical facts of Layer 5), so `q_out ∈ Ω` (closed: the image of the compact set of
@@ -83,17 +87,19 @@ lines, with the ω-limit / hyperbolic-box argument of the plan):
    `(p_n, p_{n+1}, …)` is a backward `e`-orbit in `U` tending to the fixed point, and `p_n` lies in
    the local unstable set of `e` (by definition).
 
-**The switching structure at a chart point** (a gap of the plan, repaired here): the claim of
-`eventually_follows_out` needs which control an extremal uses right **after** the switching point
-`lieChart p`, while `eventually_isSwitch_reinSwitchTime` describes only the flow with the control
-`e₂`. Two exact computations on the section `Λ_R = h K(X)` decide it
-(`SmoothedPolygons/Ch16/l6h_SwitchStructure.lean`): `H(e₁) = 6h/(3 + 3a² - c²)` with
+**The switching structure at a chart point** (the book's own claim, stated without proof: "the
+first control … is `u = e₂` for all sufficiently small `r > 0`", TeX 11706–11718, and "These
+functions give the value of the Reinhardt–Poincaré map", TeX 11835–11836; proved here): the claim
+of `eventually_follows_out` needs which control an extremal uses right **after** the switching
+point `lieChart p`, while `eventually_isSwitch_reinSwitchTime` describes only the flow with the
+control `e₂`. Two exact computations on the section `Λ_R = h K(X)` decide it
+(`SmoothedPolygons/Ch16/SwitchStructure.lean`): `H(e₁) = 6h/(3 + 3a² - c²)` with
 `h = r³ G(r, x̃)`, `G(0, x̃) = 2(ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁) < 0` at `x̃_out`, so `e₁` is not a maximizer; and
 the slope of `χ₃₂` along the fields of `e₂` and `e₃` is `4√3 (c h + (Λ₁)₂₁ + 3/2)/(c² - 3a²)`
 `= 4√3 r² (c r G + ℓ̃₂₁)/(c² - 3r²) < 0` (`ℓ̃₂₁ < 0` at `x̃_out`), so `e₃` would leave the maximum
 at once. Hence the control after the switch is `e₂`, the extremal is the `e₂`-flow
 (`iso_arc_eq_vertexFlow` for `IsExtremalOn`), and the next switch is at `t_sw` exactly
-(`SmoothedPolygons/Ch16/l6h_NextSwitch.lean`). At `q_in` the same facts are transported by the
+(`SmoothedPolygons/Ch16/NextSwitch.lean`). At `q_in` the same facts are transported by the
 time reversal (`iso_vertexFlow_reinTau`, `switchingFn_reinTau`): the `e₃`-flow from `τ q` is the
 reversed `e₂`-flow from `q`, as the review asks (`F_in = τ F⁻¹ τ`), with no estimate at `q_in`.
 
@@ -125,10 +131,10 @@ private noncomputable def l6h_chartG (p : ℝ × (Fin 3 → ℂ)) : ℝ × (Fin 
 
 private lemma l6h_lieChartInv_eq {r : ℝ} (hr : r ≠ 0) {ξ : Fin 3 → ℂ} (hξ : (ξ 0).im ≠ 0) :
     lieChartInv (phaseOfFuller (scale r ξ)) = l6h_chartG (r, ξ) := by
-  have j0 := l6b_jbr_sq (2 * ((r : ℂ) * ξ 0))
-  have j1 := l6b_jbr_sq (4 * I * ((r : ℂ) ^ 2 * ξ 1))
-  have p0 := l6b_jbr_pos (2 * ((r : ℂ) * ξ 0))
-  have p1 := l6b_jbr_pos (4 * I * ((r : ℂ) ^ 2 * ξ 1))
+  have j0 := jbr_sq (2 * ((r : ℂ) * ξ 0))
+  have j1 := jbr_sq (4 * I * ((r : ℂ) ^ 2 * ξ 1))
+  have p0 := jbr_pos (2 * ((r : ℂ) * ξ 0))
+  have p1 := jbr_pos (4 * I * ((r : ℂ) ^ 2 * ξ 1))
   have e2 : ((r : ℂ) ^ 2) = ((r ^ 2 : ℝ) : ℂ) := by push_cast; ring
   rw [e2] at j1 p1
   simp only [Complex.mul_re, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, Complex.I_re,
@@ -159,7 +165,7 @@ private lemma l6h_continuousAt_chartG {ξ : Fin 3 → ℂ} (hξ : (ξ 0).im ≠ 
     (hj.comp (by fun_prop)).add continuous_const
   have hj1 : Continuous fun p : ℝ × (Fin 3 → ℂ) ↦ jbr (4 * I * ((p.1 : ℂ) ^ 2 * p.2 1)) + 1 :=
     (hj.comp (by fun_prop)).add continuous_const
-  have hpos : ∀ w, jbr w + 1 ≠ 0 := fun w ↦ by linarith [l6b_jbr_pos w]
+  have hpos : ∀ w, jbr w + 1 ≠ 0 := fun w ↦ by linarith [jbr_pos w]
   have him : ContinuousAt (fun p : ℝ × (Fin 3 → ℂ) ↦ (p.2 0).im) (0, ξ) := by fun_prop
   have hre : ∀ k : Fin 3, Continuous fun p : ℝ × (Fin 3 → ℂ) ↦ (p.2 k).re := fun k ↦ by fun_prop
   have him' : ∀ k : Fin 3, Continuous fun p : ℝ × (Fin 3 → ℂ) ↦ (p.2 k).im := fun k ↦ by fun_prop
@@ -178,10 +184,6 @@ private lemma l6h_chartG_zero (ξ : Fin 3 → ℂ) :
     l6h_chartG (0, ξ) = (0, fullerChartInv ξ) := by
   refine Prod.ext (by simp [l6h_chartG]) (funext fun i ↦ ?_)
   fin_cases i <;> simp [l6h_chartG, fullerChartInv]; ring
-
-/-- `τ` commutes with the virial rescalings. -/
-private lemma l6h_tau_scale (r : ℝ) (z : Fin 3 → ℂ) : tau (scale r z) = scale r (tau z) := by
-  ext i; fin_cases i <;> simp [tau, scale]
 
 private lemma l6h_continuous_tau : Continuous tau := by
   refine continuous_pi fun i ↦ ?_
@@ -225,7 +227,7 @@ theorem tendsto_lieChartInInv_phaseOfFuller {ξ : Fin 3 → ℂ} (hξ : (ξ 0).i
     · filter_upwards [self_mem_nhdsWithin] with p hp using hp
   refine ((tendsto_lieChartInv_phaseOfFuller hτξ).comp hmap).congr fun p ↦ ?_
   simp only [Function.comp, lieChartInInv]
-  rw [l6h_reinTau_phaseOfFuller, l6h_tau_scale]
+  rw [l6h_reinTau_phaseOfFuller, tau_scale]
 
 /-- **Near `q_out`, consecutive switching points follow the extended map** (Lemma 14.3.1: "These
 functions give the value of the Reinhardt–Poincaré map", TeX 11838): along a chattering arc, if the
@@ -234,10 +236,10 @@ functions give the value of the Reinhardt–Poincaré map", TeX 11838): along a 
 the extremal follows the control `e₂` (rotated) from the `n`-th switching point, the unique optimal
 control (`eventually_isSwitch_reinSwitchTime`), and switches next at `reinSwitchTime`.
 
-Proof: `l6h_next_switch`. That the control after the switching point is `e₂` is not in
-`eventually_isSwitch_reinSwitchTime` (which describes only the `e₂`-flow): it comes from the
-switching structure at the chart point, `l6h_eventually_switchStructure` (`H(e₁) < 0 = H(e₂)`, and
-`H(e₃) < H(e₂)` right after along the `e₃`-flow). -/
+Proof: `IsChatteringArcInto.next_switchPoint_eq_reinPoincare`. That the control after the switching
+point is `e₂` is not in `eventually_isSwitch_reinSwitchTime` (which describes only the `e₂`-flow):
+it comes from the switching structure at the chart point, `eventually_switchStructure`
+(`H(e₁) < 0 = H(e₂)`, and `H(e₃) < H(e₂)` right after along the `e₃`-flow). -/
 theorem IsChatteringArcInto.eventually_follows_out {a b : ℝ} {u : ℝ → Fin 3 → ℝ}
     {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ} (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ)
     {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ))}
@@ -249,11 +251,12 @@ theorem IsChatteringArcInto.eventually_follows_out {a b : ℝ} {u : ℝ → Fin 
   have hsrc' : ∀ᶠ p in 𝓝[{p : ℝ × (Fin 3 → ℝ) | 0 < p.1}] chartPtOut, p ∈ e.source :=
     nhdsWithin_le_nhds (e.open_source.mem_nhds hsrc)
   obtain ⟨W, hW, hWsub⟩ := mem_nhdsWithin_iff_exists_mem_nhds_inter.1
-    (eventually_isSwitch_reinSwitchTime.and (l6h_eventually_switchStructure.and hsrc'))
+    (eventually_isSwitch_reinSwitchTime.and (eventually_switchStructure.and hsrc'))
   refine ⟨W, hW, fun n k p hpW hp0 hq ↦ ?_⟩
   obtain ⟨⟨h1, h2, h3, h4, h5⟩, ⟨-, hstruct⟩, hpe⟩ := hWsub ⟨hpW, hp0⟩
   obtain ⟨hH0, hH1, -, hε⟩ := hstruct (lieChart p) (Or.inl rfl)
-  have hnext := l6h_next_switch h n k hq (by rw [hH1]; exact hH0) hε h1 h2 h3
+  have hnext := IsChatteringArcInto.next_switchPoint_eq_reinPoincare h n k hq (by rw [hH1]; exact
+      hH0) hε h1 h2 h3
   rw [hpos p hpe hp0]
   exact ⟨h4.1, by rw [hnext, h5]⟩
 
@@ -266,9 +269,9 @@ Proof: through `F_in = τ F⁻¹ τ` (`remark14_3_4`), not by direct estimates a
 switching functions have near-degenerate pairs of roots (see the module docstring of
 `SmoothedPolygons/Ch14/FixedPointManifolds.lean`): `remark14_3_4` gives the `e₂`-flow from
 `lieChartIn p` and `e (reinChartMapIn p) = p`; the switching structure at `lieChartIn p` itself
-(`l6h_eventually_switchStructure`) is that of `lieChart p` transported by the time reversal
+(`eventually_switchStructure`) is that of `lieChart p` transported by the time reversal
 (`iso_vertexFlow_reinTau`, `switchingFn_reinTau`: the `e₃`-flow from `τ q` is the reversed
-`e₂`-flow from `q`); then `l6h_next_switch`. -/
+`e₂`-flow from `q`); then `IsChatteringArcInto.next_switchPoint_eq_reinPoincare`. -/
 theorem IsChatteringArcInto.eventually_follows_in {a b : ℝ} {u : ℝ → Fin 3 → ℝ}
     {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ} (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ)
     {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ))}
@@ -278,11 +281,12 @@ theorem IsChatteringArcInto.eventually_follows_in {a b : ℝ} {u : ℝ → Fin 3
         0 < (reinChartMapIn p).1 ∧ e (reinChartMapIn p) = p ∧
           iso_adRinvPow (k + 1) (phaseAt X Λ₁ ΛR (τ (n + 1))) = lieChartIn (reinChartMapIn p) := by
   obtain ⟨W, hW, hWsub⟩ := mem_nhdsWithin_iff_exists_mem_nhds_inter.1
-    ((remark14_3_4 he).2.1.and l6h_eventually_switchStructure)
+    ((remark14_3_4 he).2.1.and eventually_switchStructure)
   refine ⟨W, hW, fun n k p hpW hp0 hq ↦ ?_⟩
   obtain ⟨⟨h1, h2, h3, h4, h5, -, h6⟩, ⟨-, hstruct⟩⟩ := hWsub ⟨hpW, hp0⟩
   obtain ⟨hH0, hH1, -, hε⟩ := hstruct (lieChartIn p) (Or.inr rfl)
-  have hnext := l6h_next_switch h n k hq (by rw [hH1]; exact hH0) hε h1 h2 h3
+  have hnext := IsChatteringArcInto.next_switchPoint_eq_reinPoincare h n k hq (by rw [hH1]; exact
+      hH0) hε h1 h2 h3
   exact ⟨h4, h6, by rw [hnext, h5]⟩
 
 /-! ### Helpers: rotations of the switching points -/
@@ -291,7 +295,7 @@ private lemma l6h_trace_conj_pow (k : ℕ) (M : Mat2) (h : M.trace = 0) :
     (R⁻¹ ^ k * M * R ^ k).trace = 0 := by
   rw [poly_trace_conj (poly_Rpow_mul_Rinvpow k), h]
 
-/-- `Ad_{R⁻ᵏ}` is multiplication by `ζᵏ` in Fuller coordinates (`l6b_fullerCoords_adR`). -/
+/-- `Ad_{R⁻ᵏ}` is multiplication by `ζᵏ` in Fuller coordinates (`fullerCoords_adR`). -/
 private lemma l6h_fullerCoords_adRinvPow (k : ℕ) {q : iso_PhasePt} (h1 : q.1.trace = 0)
     (h2 : q.2.1.trace = 0) (h3 : q.2.2.trace = 0) :
     fullerCoords (iso_adRinvPow k q) = ζ ^ k • fullerCoords q := by
@@ -300,7 +304,7 @@ private lemma l6h_fullerCoords_adRinvPow (k : ℕ) {q : iso_PhasePt} (h1 : q.1.t
   | succ k ih =>
     have e : iso_adRinvPow (k + 1) q = iso_adRinvPow 1 (iso_adRinvPow k q) := by
       rw [irt_adRinvPow_add, add_comm]
-    rw [e, (l6b_fullerCoords_adR _ (l6h_trace_conj_pow k _ h1) (l6h_trace_conj_pow k _ h2)
+    rw [e, (fullerCoords_adR _ (l6h_trace_conj_pow k _ h1) (l6h_trace_conj_pow k _ h2)
       (l6h_trace_conj_pow k _ h3)).2, ih, smul_smul, ← pow_succ']
 
 /-- The Hamiltonians relabel under `Ad_{R⁻ᵏ}`: `H(e_{m+k})(Ad_{R⁻ᵏ} q) = H(e_m)(q)`. -/
@@ -308,7 +312,7 @@ private lemma l6h_phaseHam_adRinvPow (k : ℕ) (q : iso_PhasePt) (m : Fin 3) :
     phaseHam (iso_adRinvPow k q) (vertex (m + ⟨k % 3, Nat.mod_lt _ (by norm_num)⟩)) =
       phaseHam q (vertex m) :=
   poly_hamiltonian_conj (poly_Rpow_mul_Rinvpow k) (poly_conj_pow_J k)
-    (by rw [ivf_conj_pow_controlMatrix, l6h_rotControl_vertex]) (-1) q.2.1 q.2.2 q.1
+    (by rw [ivf_conj_pow_controlMatrix, iso_rotControl_vertex]) (-1) q.2.1 q.2.2 q.1
 
 /-- `Ad_{R⁻ᵏ}` preserves the phase points of the blow-up (it fixes `J`). -/
 private lemma l6h_isBlowupPhasePt_adRinvPow (k : ℕ) {q : iso_PhasePt} (hq : IsBlowupPhasePt q) :
@@ -330,29 +334,6 @@ private lemma l6h_isBlowupPhasePt_adRinvPow (k : ℕ) {q : iso_PhasePt} (hq : Is
     linarith
   · have := key q.2.1; change (R⁻¹ ^ k * q.2.1 * R ^ k) 1 0 < (R⁻¹ ^ k * q.2.1 * R ^ k) 0 1
     linarith
-
-/-- The time reversal preserves the star states (`l6e_isStarState_matTau`, private in
-`SmoothedPolygons/Ch16/ClusterCoordinates.lean`). -/
-private lemma l6h_isStarState_matTau {X : Mat2} (h : IsStarState X) : IsStarState (matTau X) := by
-  obtain ⟨htr, hdet, h0, h1, h2⟩ := h
-  refine ⟨by rw [l6b_trace_matTau, htr, neg_zero], ?_, ?_, ?_, ?_⟩
-  · rw [Matrix.det_fin_two] at hdet ⊢
-    simp only [matTau]
-    simp
-    linarith
-  · have e : ρ₀ (matTau X) = ρ₁ X := by
-      simp only [ρ₀, ρ₁, matTau]
-      simp
-      ring
-    rw [e]; exact h1
-  · have e : ρ₁ (matTau X) = ρ₀ X := by
-      simp only [ρ₀, ρ₁, matTau]
-      simp
-    rw [e]; exact h0
-  · have e : ρ₂ (matTau X) = ρ₂ X := by
-      simp only [ρ₂, matTau]
-      simp
-    rw [e]; exact h2
 
 /-- **The rotation of a point of the section is unique**: two rotations `Ad_{R^{-k₁}} q`,
 `Ad_{R^{-k₂}} q` of the same phase point, the first with `H(e₁) < 0` and the second with
@@ -381,14 +362,16 @@ private lemma l6h_rep_unique {q q₁ q₂ : iso_PhasePt} {k₁ k₂ : ℕ}
     linarith
 
 /-- **A switching point whose rotation has `H(e₁) < 0` lies, rotated, on the section**: the two
-vertices of the switch maximize `H` with value `0` (`l6h_switch`), and neither is `e₁`. -/
+vertices of the switch maximize `H` with value `0`
+(`IsExtremalOn.exists_phaseHam_eq_zero_of_isSwitchingTime`), and neither is `e₁`. -/
 private lemma l6h_switch_section {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
     {τ : ℕ → ℝ} (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) (n k : ℕ)
     (h0 : phaseHam (iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n))) (vertex 0) < 0) :
     phaseHam (iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n))) (vertex 1) = 0 ∧
       phaseHam (iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n))) (vertex 2) = 0 := by
   obtain ⟨hext, -, -, -, -, hτI, -, hsw⟩ := h
-  obtain ⟨i, j, hij, -, hi, hj⟩ := l6h_switch hext (hτI n) ((hsw _ (hτI n)).2 ⟨n, rfl⟩)
+  obtain ⟨i, j, hij, -, hi, hj⟩ := IsExtremalOn.exists_phaseHam_eq_zero_of_isSwitchingTime hext
+      (hτI n) ((hsw _ (hτI n)).2 ⟨n, rfl⟩)
   have hi' := l6h_phaseHam_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) i
   have hj' := l6h_phaseHam_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) j
   rw [hi] at hi'
@@ -613,7 +596,7 @@ private lemma l6h_tendsto_chart_in {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X 
     have := poly_hamiltonian_sub (-1) q.2.1 q.2.2 q.1 2 1
     simp only [phaseHam] at hH1 hH2
     linarith
-  have hrep := (lieChart_lieChartInv (reinTau_spec.2.1 q hb) (l6h_isStarState_matTau hst) hH1' hχ
+  have hrep := (lieChart_lieChartInv (reinTau_spec.2.1 q hb) (isStarState_matTau hst) hH1' hχ
     hr).2
   refine ⟨hr, h2, ?_⟩
   change reinTau (lieChart (lieChartInv (reinTau q))) = q
@@ -645,7 +628,7 @@ theorem qOut0_not_mem_switchClusterSet {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {
   obtain ⟨e, he⟩ := lemma14_3_1
   obtain ⟨W₀, hW₀, hfol⟩ := h.eventually_follows_out he
   obtain ⟨Ws, hWs, hWsub⟩ :=
-    mem_nhdsWithin_iff_exists_mem_nhds_inter.1 l6h_eventually_switchStructure
+    mem_nhdsWithin_iff_exists_mem_nhds_inter.1 eventually_switchStructure
   have hsrc := he.1
   have hfix := he.2.1
   set q : ℕ → iso_PhasePt := fun n ↦ phaseAt X Λ₁ ΛR (τ n) with hqdef
@@ -790,33 +773,6 @@ theorem qOut0_not_mem_switchClusterSet {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {
 
 /-! ### Helpers for the assembly -/
 
-/-- `Ξ` is compact (`l6e_isCompact_Xi`, private in
-`SmoothedPolygons/Ch16/ClusterCoordinates.lean`). -/
-private lemma l6h_isCompact_Xi : IsCompact Xi := by
-  refine Metric.isCompact_of_isClosed_isBounded (isClosed_eq continuous_weightedNorm
-    continuous_const) ((Metric.isBounded_closedBall (x := (0 : Fin 3 → ℂ)) (r := 1)).subset
-    fun ξ hξ ↦ ?_)
-  have h1 : weightedNorm ξ = 1 := hξ
-  have h6 : ‖ξ 0‖ ^ 6 + ‖ξ 1‖ ^ 3 + ‖ξ 2‖ ^ 2 = 1 := by
-    have : weightedNorm ξ ^ 6 = ‖ξ 0‖ ^ 6 + ‖ξ 1‖ ^ 3 + ‖ξ 2‖ ^ 2 := by
-      unfold weightedNorm
-      rw [show (1 / 6 : ℝ) = ((6 : ℕ) : ℝ)⁻¹ by norm_num]
-      exact Real.rpow_inv_natCast_pow (by positivity) (by norm_num)
-    rw [← this, h1, one_pow]
-  have a0 := pow_nonneg (norm_nonneg (ξ 0)) 6
-  have a1 := pow_nonneg (norm_nonneg (ξ 1)) 3
-  have a2 := pow_nonneg (norm_nonneg (ξ 2)) 2
-  rw [Metric.mem_closedBall, dist_zero_right, pi_norm_le_iff_of_nonneg zero_le_one]
-  have b0 : ‖ξ 0‖ ≤ 1 :=
-    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 6 ≠ 0)).1 (by linarith)
-  have b1 : ‖ξ 1‖ ≤ 1 :=
-    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 3 ≠ 0)).1 (by linarith)
-  have b2 : ‖ξ 2‖ ≤ 1 :=
-    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 2 ≠ 0)).1 (by linarith)
-  intro j
-  fin_cases j
-  exacts [b0, b1, b2]
-
 /-- **The cluster set is closed** (it is the image of the compact set of cluster points, which lie
 in the section, `mapClusterPt_switchAng_mem_sectionZero`, under the continuous class map). -/
 private lemma l6h_isClosed_switchClusterSet {a b : ℝ} {u : ℝ → Fin 3 → ℝ}
@@ -827,7 +783,7 @@ private lemma l6h_isClosed_switchClusterSet {a b : ℝ} {u : ℝ → Fin 3 → �
   have hCsub : C ⊆ Xi := fun ξ hξ ↦
     (isClosed_eq continuous_weightedNorm continuous_const).mem_of_mapClusterPt hξ
       (Eventually.of_forall h.switchPoints.2.2.2.2)
-  have hCc : IsCompact C := l6h_isCompact_Xi.of_isClosed_subset isClosed_setOfPred_clusterPt hCsub
+  have hCc : IsCompact C := isCompact_Xi.of_isClosed_subset isClosed_setOfPred_clusterPt hCsub
   have hCs : C ⊆ sectionZero := fun ξ hξ ↦ mapClusterPt_switchAng_mem_sectionZero h hξ
   have heq : switchClusterSet (switchAng X Λ₁ ΛR τ) = classOf '' C := by
     ext x
@@ -845,15 +801,16 @@ private lemma l6h_lieChartIn_inj {p₁ p₂ : ℝ × (Fin 3 → ℝ)} (h₁ : p�
     exact congrArg reinTau h
   rw [← (lieChart_spec h₁).2.2.2.2.2, this, (lieChart_spec h₂).2.2.2.2.2]
 
-/-- **Theorem 16.4.1, first part** (the cluster point is `q_in`), conditional on N5 and the three
-named numerical facts of Theorem 16.1.1: `Ω` is closed and forward invariant (N5); a class
-`ω ≠ q_in` of `Ω` has `F^k ω → q_out` (Theorem 16.1.1), so `q_out ∈ Ω`, against the hyperbolic box
-(`qOut0_not_mem_switchClusterSet`); hence every cluster point is `q_in` and the angular components
-converge to `q_in` modulo `V_T`. (This part does not use Remark 14.3.4; it is the part the
-assembly of Theorem 16.3.1 uses.) -/
-theorem l6h_tendstoModVT (h₁ : DOutContracts) (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims)
-    (hN5 : ClusterSetForwardInvariant) {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
-    {τ : ℕ → ℝ} (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) :
+/-- **Theorem 16.4.1, first part** (`thm:no-chatter`: the cluster point is `q_in`), conditional on
+N5 and the three named numerical facts of Theorem 16.1.1: `Ω` is closed and forward invariant
+(N5); a class `ω ≠ q_in` of `Ω` has `F^k ω → q_out` (Theorem 16.1.1), so `q_out ∈ Ω`, against the
+hyperbolic box (`qOut0_not_mem_switchClusterSet`); hence every cluster point is `q_in` and the
+angular components converge to `q_in` modulo `V_T`. (This part does not use Remark 14.3.4; it is
+the part the assembly of Theorem 16.3.1 uses.) -/
+theorem tendstoModVT_switchAng_of_clusterSetForwardInvariant (h₁ : DOutContracts)
+    (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims) (hN5 : ClusterSetForwardInvariant) {a b : ℝ}
+    {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
+    (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) :
     TendstoModVT (switchAng X Λ₁ ΛR τ) (ang (tau qOutCart)) := by
   set ξs := switchAng X Λ₁ ΛR τ with hξs
   refine tendstoModVT_of_forall_mapClusterPt h.switchPoints.2.2.2.2 fun ξ hξ ↦ ?_
@@ -879,7 +836,8 @@ theorem theorem16_4_1_of_clusterSetForwardInvariant (h₁ : DOutContracts)
             iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = lieChartIn p := by
   set ξs := switchAng X Λ₁ ΛR τ with hξs
   set ξin := ang (tau qOutCart) with hξin
-  have hmod : TendstoModVT ξs ξin := l6h_tendstoModVT h₁ h₂ h₃ hN5 h
+  have hmod : TendstoModVT ξs ξin := tendstoModVT_switchAng_of_clusterSetForwardInvariant h₁ h₂ h₃
+      hN5 h
   refine ⟨hmod, fun e he U hU ↦ ?_⟩
   -- **(2) the stable curve**: rotations `ζ^{k_n}` bringing `ξ_n` to `ang q_in`
   have hO : ξin ∈ vtOrbit ξin := ⟨1, one_mem_VT, (one_smul _ _).symm⟩
@@ -911,7 +869,7 @@ theorem theorem16_4_1_of_clusterSetForwardInvariant (h₁ : DOutContracts)
   -- the neighbourhoods: `eventually_follows_in`, the switching structure, Remark 14.3.4
   obtain ⟨Wi, hWi, hfol⟩ := h.eventually_follows_in he
   obtain ⟨Ws, hWs, hWsub⟩ :=
-    mem_nhdsWithin_iff_exists_mem_nhds_inter.1 l6h_eventually_switchStructure
+    mem_nhdsWithin_iff_exists_mem_nhds_inter.1 eventually_switchStructure
   obtain ⟨V, hV, hVsub⟩ := mem_nhdsWithin_iff_exists_mem_nhds_inter.1 (remark14_3_4 he).2.1
   have hsrc := he.1
   have hfix := he.2.1
@@ -970,6 +928,12 @@ at `b`), the switching points themselves not being on the divisor (`IsChattering
   `e` at `q_out`, which is the local stable manifold of the Reinhardt–Poincaré map `e⁻¹` at `q_in`
   in the mirrored chart (Remark 14.3.4), a `C^∞` curve (Theorem 14.3.3).
 
+"A Pontryagin extremal Reinhardt trajectory" is read, through `IsChatteringArcInto`, as an
+extremal that is finitely bang-bang on every compact subinterval of `(a, b)`: the same reading
+of "a trajectory of the Reinhardt system" as in `Theorem14_4_1` (see
+`SmoothedPolygons/Ch14/NoReturn.lean`). It is what the assembly of Theorem 16.3.1 supplies
+(Theorem 8.3.2 away from the singular locus).
+
 Proof: `theorem16_4_1_of_clusterSetForwardInvariant` with N5 (`clusterSetForwardInvariant`);
 the steps are in the module docstring. -/
 theorem theorem16_4_1 (h₁ : DOutContracts) (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims)
@@ -982,11 +946,12 @@ theorem theorem16_4_1 (h₁ : DOutContracts) (h₂ : CellTwoEntersDOut) (h₃ : 
             iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = lieChartIn p :=
   theorem16_4_1_of_clusterSetForwardInvariant h₁ h₂ h₃ clusterSetForwardInvariant h
 
-/-- **Theorem 16.4.1, time reversed** (the form used by the proof of Theorem 14.4.1, "All switches
-must be on the unstable curve", TeX 12004–12005; G14.11): for a chattering arc out of the singular
-locus (switching times `τ n ↓ a`), the angular components of the switching points converge to
-`q_out` modulo `V_T`, and eventually each switching point, rotated onto the section `χ₂₃ = 0`, is
-`lieChart p` with `p` on the local unstable manifold of `e` (the unstable curve `W^u(q_out)`).
+/-- **Theorem 16.4.1, time reversed** (`thm:no-chatter`; the form used by the proof of Theorem
+14.4.1, "All switches must be on the unstable curve", TeX 12004–12005; G14.11): for a chattering arc
+out of the singular locus (switching times `τ n ↓ a`), the angular components of the switching
+points converge to `q_out` modulo `V_T`, and eventually each switching point, rotated onto the
+section `χ₂₃ = 0`, is `lieChart p` with `p` on the local unstable manifold of `e` (the unstable
+curve `W^u(q_out)`).
 
 Proof: `IsChatteringArcOutOf.reverse` and `theorem16_4_1`, with `fullerCoords_reinTau`
 (`τ` maps `q_in` to `q_out`) and `lieChartIn = τ ∘ lieChart`. -/

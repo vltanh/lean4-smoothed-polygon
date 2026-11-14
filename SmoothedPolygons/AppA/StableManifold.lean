@@ -18,10 +18,15 @@ neighborhood `U` of `p`, is a `C^r` embedded submanifold tangent at `p` to the s
 the global stable set is a `C^r` immersed submanifold; "There are corresponding statements for
 local and global unstable manifolds".
 
-The definitions are `Function.localStableSet`, `Function.globalStableSet`,
-`Function.localUnstableSet`, `ContinuousLinearMap.IsHyperbolic`,
-`ContinuousLinearMap.stableSubspace` and `ContinuousLinearMap.unstableSubspace`
-(`Basic/Dynamics/StableManifold.lean`).
+The definitions are `Function.localStableSet`, `Function.localUnstableSet`,
+`ContinuousLinearMap.IsHyperbolic`, `ContinuousLinearMap.stableSubspace` and
+`ContinuousLinearMap.unstableSubspace` (`StableManifold/Defs.lean` of the StableManifold package)
+and `Function.globalStableSet` (`StableManifold/LocalSets.lean`). The stable and unstable summands
+are defined by the dynamics of `A = Df(p)`: the vectors `v` with `Aⁿ v → 0`, and those with a
+backward orbit tending to `0`. The book defines them by the characteristic polynomial (the sums of
+the generalized eigenspaces of the eigenvalues of modulus `< 1` and `> 1`, TeX 13191–13197); at a
+hyperbolic fixed point the two definitions agree, and they give complementary summands
+(`ContinuousLinearMap.isCompl_stableSubspace_unstableSubspace`).
 
 "Unstable for `f` means stable for `f⁻¹`" (TeX 13207–13208) is
 `Function.localStableSet_symm_eq_localUnstableSet`, for an open partial homeomorphism and a set
@@ -168,12 +173,13 @@ private lemma l6j_isInvertible_fderiv (e : OpenPartialHomeomorph E E) {p : E} (h
   · simpa using congrArg (fun L : E →L[ℝ] E ↦ L v) h1
   · simpa using congrArg (fun L : E →L[ℝ] E ↦ L v) h2
 
-/-- **Theorem A.3.1** (Irwin; TeX 13198–13211), local part, for a `C^r` diffeomorphism `e` between
-open subsets of a finite-dimensional real normed space with a hyperbolic fixed point `p`
-(`1 ≤ r ≤ ∞`): for some open neighborhood `U` of `p`, the local stable set of `e|_U` at `p` is a
-`C^r` embedded submanifold tangent at `p` to the stable summand of `De(p)` (the graph of a `C^r`
-map `h_s` from the stable summand to the unstable one, with `h_s(0) = 0`, `Dh_s(0) = 0`), and the
-local unstable set is a `C^r` embedded submanifold tangent at `p` to the unstable summand. -/
+/-- **Theorem A.3.1** (`thm:stable-manifold`, Irwin; TeX 13198–13211), local part, for a `C^r`
+diffeomorphism `e` between open subsets of a finite-dimensional real normed space with a hyperbolic
+fixed point `p` (`1 ≤ r ≤ ∞`): for some open neighborhood `U` of `p`, the local stable set of `e|_U`
+at `p` is a `C^r` embedded submanifold tangent at `p` to the stable summand of `De(p)` (the graph of
+a `C^r` map `h_s` from the stable summand to the unstable one, with `h_s(0) = 0`, `Dh_s(0) = 0`),
+and the local unstable set is a `C^r` embedded submanifold tangent at `p` to the unstable summand.
+-/
 theorem theoremA_3_1 (e : OpenPartialHomeomorph E E) {p : E} (hp : p ∈ e.source)
     (hfix : e p = p) {r : ℕ∞} (hr : 1 ≤ r) (he : ContDiffOn ℝ r e e.source)
     (he' : ContDiffOn ℝ r e.symm e.target) (hyp : (fderiv ℝ e p).IsHyperbolic) :

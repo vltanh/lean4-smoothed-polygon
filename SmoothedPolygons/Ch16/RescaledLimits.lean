@@ -36,7 +36,8 @@ integrability of the rescaled field (`l6g_arc_core`).
 `exists_tendsto_rescaledArc`: the thresholds (the window before `b`, and the rescaled field within
 `1` of the Fuller field on the ball of the a priori bound, `tendstoUniformlyOn_rescaledField` with
 `ρ_n → 0⁺`) hold from some `K₀` on; the shifted sequence `φ(k + K₀)` goes to the abstract form
-`l6g_limit`, which follows the book's route in four steps.
+`l6g_limit`, in four steps. The book has no argument for this compactness step (§16.4.2, G16.8,
+N5); the steps are those of the repair route in the module docstring.
 1. Bounds (`l6g_apriori`): `|ξ_n| ≤ 1` on `Ξ`; the triangular structure of the Fuller field gives
    the bounds `1 + 2S`, `1 + S(2 + 2S)`, `B = 1 + S(2 + S(2 + 2S))` on the three components in
    turn (this is the "Grönwall-type bound"; no Grönwall inequality is needed), and a continuity
@@ -78,26 +79,11 @@ private theorem l6g_convex_UT : Convex ℝ UT := convex_convexHull ℝ VT
 
 private theorem l6g_one_mem_UT : (1 : ℂ) ∈ UT := VT_subset_UT one_mem_VT
 
-/-- `U_T` lies in the closed unit disk. -/
-private theorem l6g_norm_le_one_of_mem_UT {v : ℂ} (hv : v ∈ UT) : ‖v‖ ≤ 1 := by
-  have hsub : UT ⊆ Metric.closedBall (0 : ℂ) 1 :=
-    convexHull_min (fun x hx ↦ by simp [norm_eq_one_of_mem_VT hx]) (convex_closedBall 0 1)
-  simpa using hsub hv
-
-/-- `|RR(x, y)| ≤ |x||y|`. -/
-private theorem l6g_abs_RR_le (x y : ℂ) : |RR x y| ≤ ‖x‖ * ‖y‖ := by
-  rw [RR]
-  calc |(starRingEnd ℂ x * y).re| ≤ ‖starRingEnd ℂ x * y‖ := Complex.abs_re_le_norm _
-    _ = ‖x‖ * ‖y‖ := by rw [norm_mul, Complex.norm_conj]
-
-private theorem l6g_RR_sub_left (a b c : ℂ) : RR (a - b) c = RR a c - RR b c := by
-  simp only [RR_eq_re_mul_add_im_mul, Complex.sub_re, Complex.sub_im]; ring
-
 private theorem l6g_RR_sub_right (a b c : ℂ) : RR a (b - c) = RR a b - RR a c := by
   simp only [RR_eq_re_mul_add_im_mul, Complex.sub_re, Complex.sub_im]; ring
 
 /-- The simplex is mapped into `U_T`. -/
-private theorem l6g_simplexToUT_mem {v : Fin 3 → ℝ} (hv : v ∈ controlSimplex) :
+theorem simplexToUT_mem_UT {v : Fin 3 → ℝ} (hv : v ∈ controlSimplex) :
     simplexToUT v ∈ UT := by
   have h : simplexToUT v = ∑ m : Fin 3, v m • ζ ^ (m : ℕ) := by
     simp only [simplexToUT, Complex.real_smul]
@@ -109,12 +95,10 @@ private theorem l6g_simplexToUT_mem {v : Fin 3 → ℝ} (hv : v ∈ controlSimpl
     · simpa using VT_subset_UT ζ_mem_VT
     · simpa using VT_subset_UT ζ_sq_mem_VT
 
-private theorem l6g_norm_simplexToUT_le {v : Fin 3 → ℝ} (hv : v ∈ controlSimplex) :
+/-- The image of the simplex lies in the closed unit disk. -/
+theorem norm_simplexToUT_le {v : Fin 3 → ℝ} (hv : v ∈ controlSimplex) :
     ‖simplexToUT v‖ ≤ 1 :=
-  l6g_norm_le_one_of_mem_UT (l6g_simplexToUT_mem hv)
-
-private theorem l6g_simplexToUT_vertex (m : Fin 3) : simplexToUT (vertex m) = ζ ^ (m : ℕ) := by
-  fin_cases m <;> simp [simplexToUT, vertex, Fin.sum_univ_three]
+  norm_le_one_of_mem_UT (simplexToUT_mem_UT hv)
 
 private theorem l6g_vertex_mem (m : Fin 3) : vertex m ∈ controlSimplex := by
   refine ⟨fun i ↦ ?_, ?_⟩
@@ -215,18 +199,6 @@ private theorem l6g_intervalIntegrable_ofReal {f : ℝ → ℝ} {a b : ℝ}
     (hf : IntervalIntegrable f volume a b) :
     IntervalIntegrable (fun s ↦ ((f s : ℝ) : ℂ)) volume a b :=
   ⟨hf.1.ofReal, hf.2.ofReal⟩
-
-/-- A measurable function bounded on `[a, b]` is integrable on every subinterval. -/
-private theorem l6g_intervalIntegrable_of_bound {E : Type*} [NormedAddCommGroup E]
-    {u : ℝ → E} (hu : AEStronglyMeasurable u volume) {a b C : ℝ}
-    (hb : ∀ t ∈ Icc a b, ‖u t‖ ≤ C) {c d : ℝ} (hc : c ∈ Icc a b) (hd : d ∈ Icc a b) :
-    IntervalIntegrable u volume c d := by
-  have hab : a ≤ b := hc.1.trans hc.2
-  have h : IntervalIntegrable u volume a b :=
-    (intervalIntegrable_iff_integrableOn_Ioc_of_le hab).2
-      (Measure.integrableOn_of_bounded (by simp [Real.volume_Ioc]) hu
-        (ae_restrict_of_forall_mem measurableSet_Ioc fun t ht ↦ hb t (Ioc_subset_Icc_self ht)))
-  exact h.mono_set (by rw [uIcc_of_le hab]; exact uIcc_subset_Icc hc hd)
 
 /-- Integrability on a subinterval. -/
 private theorem l6g_intervalIntegrable_mono {E : Type*} [NormedAddCommGroup E] {f : ℝ → E}
@@ -370,8 +342,8 @@ private theorem l6g_control_limit {S : ℝ} (hS : 0 < S) {c : ℕ → ℝ → �
   classical
   have h0S : (0 : ℝ) ∈ Icc 0 S := ⟨le_rfl, hS.le⟩
   have hint : ∀ k, ∀ s ∈ Icc 0 S, ∀ s' ∈ Icc 0 S, IntervalIntegrable (c k) volume s s' :=
-    fun k s hs s' hs' ↦ l6g_intervalIntegrable_of_bound (hcm k).aestronglyMeasurable
-      (fun σ hσ ↦ l6g_norm_le_one_of_mem_UT (hcU k σ hσ)) hs hs'
+    fun k s hs s' hs' ↦ intervalIntegrable_of_bound (hcm k).aestronglyMeasurable
+      (fun σ hσ ↦ norm_le_one_of_mem_UT (hcU k σ hσ)) hs hs'
   -- `W 0 = 0`
   have hW0 : W 0 = 0 := by
     have := hlim 0 h0S
@@ -397,7 +369,7 @@ private theorem l6g_control_limit {S : ℝ} (hS : 0 < S) {c : ℕ → ℝ → �
   have hWlip : ∀ s ∈ Icc 0 S, ∀ s' ∈ Icc 0 S, dist (W s) (W s') ≤ dist s s' := by
     have key : ∀ s' ∈ Icc 0 S, ∀ s ∈ Icc 0 S, s' < s → dist (W s) (W s') ≤ dist s s' := by
       intro s' hs' s hs hlt
-      have h1 := l6g_norm_le_one_of_mem_UT (hslope s' hs' s hs hlt)
+      have h1 := norm_le_one_of_mem_UT (hslope s' hs' s hs hlt)
       have hpos : 0 < s - s' := sub_pos.2 hlt
       rw [norm_smul, norm_inv, Real.norm_of_nonneg hpos.le, inv_mul_le_iff₀ hpos, mul_one] at h1
       rw [dist_eq_norm, Real.dist_eq, abs_of_pos hpos]
@@ -435,11 +407,11 @@ private theorem l6g_control_limit {S : ℝ} (hS : 0 < S) {c : ℕ → ℝ → �
     exact hslope x (Ioo_subset_Icc_self hx) z ⟨hx.1.le.trans hz.1.le, hz.2.le⟩ hz.1
   -- the primitive of `w`
   have hwint : IntervalIntegrable w volume 0 S :=
-    l6g_intervalIntegrable_of_bound hwm.aestronglyMeasurable
-      (fun σ hσ ↦ l6g_norm_le_one_of_mem_UT (hwU σ hσ)) h0S ⟨hS.le, le_rfl⟩
+    intervalIntegrable_of_bound hwm.aestronglyMeasurable
+      (fun σ hσ ↦ norm_le_one_of_mem_UT (hwU σ hσ)) h0S ⟨hS.le, le_rfl⟩
   have hprim : ∀ s ∈ Icc 0 S, (fun t ↦ ∫ σ in (0 : ℝ)..t, w σ) s =
       (fun t ↦ ∫ σ in (0 : ℝ)..t, w σ) 0 + ∫ σ in (0 : ℝ)..s, w σ := fun s _ ↦ by simp
-  have hplip := l6g_dist_le hwint hprim fun σ hσ ↦ l6g_norm_le_one_of_mem_UT (hwU σ hσ)
+  have hplip := l6g_dist_le hwint hprim fun σ hσ ↦ norm_le_one_of_mem_UT (hwU σ hσ)
   have hac : AbsolutelyContinuousOnInterval (fun x ↦ Wt x - ∫ σ in (0 : ℝ)..x, w σ) 0 S := by
     have h1 : AbsolutelyContinuousOnInterval Wt 0 S :=
       (hWt_lip.lipschitzOnWith (s := uIcc 0 S)).absolutelyContinuousOnInterval
@@ -772,9 +744,9 @@ private theorem l6g_restart {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ 
 private theorem l6g_exists_vertex {v₀ : ℂ} (hv₀ : v₀ ∈ VT) :
     ∃ m : Fin 3, simplexToUT (vertex m) = v₀ := by
   rcases mem_VT.1 hv₀ with rfl | rfl | rfl
-  · exact ⟨0, by simp [l6g_simplexToUT_vertex]⟩
-  · exact ⟨1, by simp [l6g_simplexToUT_vertex]⟩
-  · exact ⟨2, by simp [l6g_simplexToUT_vertex]⟩
+  · exact ⟨0, by simp [simplexToUT_vertex]⟩
+  · exact ⟨1, by simp [simplexToUT_vertex]⟩
+  · exact ⟨2, by simp [simplexToUT_vertex]⟩
 
 /-- **Relaxed limits of rescaled arcs** (the abstract form of `exists_tendsto_rescaledArc`): curves
 `Y_k = Y_k(0) + ∫ F_k` on `[0, S]`, with `F_k = rescaledField ρ_k v_k Y_k`, controls `v_k` in the
@@ -806,12 +778,12 @@ private theorem l6g_limit {S : ℝ} (hS : 0 < S) {ξ : Fin 3 → ℂ} {ρ : ℕ 
   have hB1 := l6g_one_le_bd hS.le
   /- Step 1: bounds. -/
   have hcU : ∀ k, ∀ σ ∈ Icc 0 S, simplexToUT (v k σ) ∈ UT := fun k σ hσ ↦
-    l6g_simplexToUT_mem (hv k σ hσ)
+    simplexToUT_mem_UT (hv k σ hσ)
   have hcn : ∀ k, ∀ σ ∈ Icc 0 S, ‖simplexToUT (v k σ)‖ ≤ 1 := fun k σ hσ ↦
-    l6g_norm_simplexToUT_le (hv k σ hσ)
+    norm_simplexToUT_le (hv k σ hσ)
   have hcint : ∀ k, ∀ s ∈ Icc 0 S, ∀ s' ∈ Icc 0 S,
       IntervalIntegrable (fun σ ↦ simplexToUT (v k σ)) volume s s' := fun k s hs s' hs' ↦
-    l6g_intervalIntegrable_of_bound (hvm k).aestronglyMeasurable (hcn k) hs hs'
+    intervalIntegrable_of_bound (hvm k).aestronglyMeasurable (hcn k) hs hs'
   have hball : ∀ k, ∀ σ ∈ Icc 0 S, ‖Y k σ‖ ≤ l6g_bd S + 1 →
       ‖F k σ - fullerField (simplexToUT (v k σ)) (Y k σ)‖ < 1 := fun k σ hσ hσB ↦ by
     have := hclose k (v k σ, Y k σ) ⟨hv k σ hσ, mem_closedBall_zero_iff.2 hσB⟩
@@ -853,9 +825,9 @@ private theorem l6g_limit {S : ℝ} (hS : 0 < S) {ξ : Fin 3 → ℂ} {ρ : ℕ 
       (𝓝 (W s)) := fun s hs ↦ hVu.tendsto_at hs
   obtain ⟨w, hwm, hwU, hwW⟩ := l6g_control_limit hS
     (c := fun k σ ↦ simplexToUT (v (ψ k) σ)) (fun k ↦ hvm (ψ k)) (fun k ↦ hcU (ψ k)) hVt
-  have hwn : ∀ σ ∈ Icc 0 S, ‖w σ‖ ≤ 1 := fun σ hσ ↦ l6g_norm_le_one_of_mem_UT (hwU σ hσ)
+  have hwn : ∀ σ ∈ Icc 0 S, ‖w σ‖ ≤ 1 := fun σ hσ ↦ norm_le_one_of_mem_UT (hwU σ hσ)
   have hwint : ∀ s ∈ Icc 0 S, ∀ s' ∈ Icc 0 S, IntervalIntegrable w volume s s' :=
-    fun s hs s' hs' ↦ l6g_intervalIntegrable_of_bound hwm.aestronglyMeasurable hwn hs hs'
+    fun s hs s' hs' ↦ intervalIntegrable_of_bound hwm.aestronglyMeasurable hwn hs hs'
   have hy0 : y 0 = ξ := tendsto_nhds_unique (hYu.tendsto_at h0S) (hY0.comp hψt)
   have hyB : ∀ σ ∈ Icc 0 S, ‖y σ‖ ≤ l6g_bd S := fun σ hσ ↦
     le_of_tendsto (hYu.tendsto_at hσ).norm (Eventually.of_forall fun k ↦ hYB (ψ k) σ hσ)
@@ -962,7 +934,7 @@ private theorem l6g_limit {S : ℝ} (hS : 0 < S) {ξ : Fin 3 → ℂ} {ρ : ℕ 
         ((hYcj (ψ k) 2).aestronglyMeasurable measurableSet_Icc)
     have hPb : ∀ k, ∀ σ ∈ Icc 0 S, ‖RR v₀ (Y (ψ k) σ 2)‖ ≤ l6g_bd S := fun k σ hσ ↦ by
       rw [Real.norm_eq_abs]
-      exact (l6g_abs_RR_le _ _).trans (by
+      exact (abs_RR_le _ _).trans (by
         rw [hv₀n, one_mul]; exact (norm_le_pi_norm _ _).trans (hYB _ σ hσ))
     have hQm : ∀ k, AEStronglyMeasurable (fun σ ↦ RR (simplexToUT (v (ψ k) σ)) (Y (ψ k) σ 2))
         (volume.restrict (Icc 0 S)) := fun k ↦
@@ -971,7 +943,7 @@ private theorem l6g_limit {S : ℝ} (hS : 0 < S) {ξ : Fin 3 → ℂ} {ρ : ℕ 
     have hQb : ∀ k, ∀ σ ∈ Icc 0 S,
         ‖RR (simplexToUT (v (ψ k) σ)) (Y (ψ k) σ 2)‖ ≤ l6g_bd S := fun k σ hσ ↦ by
       rw [Real.norm_eq_abs]
-      exact (l6g_abs_RR_le _ _).trans (by
+      exact (abs_RR_le _ _).trans (by
         nlinarith [hcn (ψ k) σ hσ, (norm_le_pi_norm (Y (ψ k) σ) 2).trans (hYB _ σ hσ),
           norm_nonneg (simplexToUT (v (ψ k) σ)), norm_nonneg (Y (ψ k) σ 2)])
     have hPi : ∀ k, IntervalIntegrable (fun σ ↦ RR v₀ (Y (ψ k) σ 2)) volume s₁ s₂ := fun k ↦
@@ -1042,7 +1014,7 @@ private theorem l6g_limit {S : ℝ} (hS : 0 < S) {ξ : Fin 3 → ℂ} {ρ : ℕ 
         (fun σ hσ ↦ (l6g_continuous_RR.tendsto _).comp ((hVt σ hσ).prodMk_nhds
           tendsto_const_nhds)) hs₁ hs₂
       rw [Real.norm_eq_abs]
-      exact (l6g_abs_RR_le _ _).trans (mul_le_mul (hVM _ σ hσ) (hy1B σ hσ) (norm_nonneg _)
+      exact (abs_RR_le _ _).trans (mul_le_mul (hVM _ σ hσ) (hy1B σ hσ) (norm_nonneg _)
         (by linarith))
     have hCt : Tendsto (fun k ↦ ∫ σ in s₁..s₂, RR (simplexToUT (v (ψ k) σ)) (y σ 2)) atTop
         (𝓝 (∫ σ in s₁..s₂, RR (w σ) (y σ 2))) := by
@@ -1059,7 +1031,7 @@ private theorem l6g_limit {S : ℝ} (hS : 0 < S) {ξ : Fin 3 → ℂ} {ρ : ℕ 
         (fun k σ hσ ↦ ?_) (fun σ hσ ↦ ?_) hs₁ hs₂
       · simp only [Pi.sub_apply]
         rw [Real.norm_eq_abs]
-        refine (l6g_abs_RR_le _ _).trans ?_
+        refine (abs_RR_le _ _).trans ?_
         have := norm_sub_le (Y (ψ k) σ 2) (y σ 2)
         have h3 := (norm_le_pi_norm (Y (ψ k) σ) 2).trans (hYB _ σ hσ)
         have h4 := (norm_le_pi_norm (y σ) 2).trans (hyB σ hσ)
@@ -1068,7 +1040,7 @@ private theorem l6g_limit {S : ℝ} (hS : 0 < S) {ξ : Fin 3 → ℂ} {ρ : ℕ 
       · simp only [Pi.sub_apply]
         refine squeeze_zero_norm (a := fun k ↦ ‖Y (ψ k) σ 2 - y σ 2‖) (fun k ↦ ?_) ?_
         · rw [Real.norm_eq_abs]
-          refine (l6g_abs_RR_le _ _).trans ?_
+          refine (abs_RR_le _ _).trans ?_
           have := hcn (ψ k) σ hσ
           nlinarith [norm_nonneg (Y (ψ k) σ 2 - y σ 2), norm_nonneg (simplexToUT (v (ψ k) σ))]
         · have := (tendsto_iff_norm_sub_tendsto_zero.1 (hYt σ hσ 2))
@@ -1079,7 +1051,7 @@ private theorem l6g_limit {S : ℝ} (hS : 0 < S) {ξ : Fin 3 → ℂ} {ρ : ℕ 
         (l6g_aesm_RR (hvm (ψ k)).aestronglyMeasurable.restrict
           ((hycj 2).aestronglyMeasurable.restrict)) (fun σ hσ ↦ by
             rw [Real.norm_eq_abs]
-            refine (l6g_abs_RR_le _ _).trans ?_
+            refine (abs_RR_le _ _).trans ?_
             nlinarith [hcn (ψ k) σ hσ, (norm_le_pi_norm (y σ) 2).trans (hyB σ hσ),
               norm_nonneg (simplexToUT (v (ψ k) σ)), norm_nonneg (y σ 2)]) hs₁ hs₂)
       refine h.congr fun σ _ ↦ ?_
@@ -1111,7 +1083,7 @@ private theorem l6g_limit {S : ℝ} (hS : 0 < S) {ξ : Fin 3 → ℂ} {ρ : ℕ 
             (l6g_aesm_RR hwm.aestronglyMeasurable.restrict
               ((hycj 2).aestronglyMeasurable.restrict)) (fun σ hσ ↦ by
                 rw [Real.norm_eq_abs]
-                refine (l6g_abs_RR_le _ _).trans ?_
+                refine (abs_RR_le _ _).trans ?_
                 nlinarith [hwn σ hσ, (norm_le_pi_norm (y σ) 2).trans (hyB σ hσ),
                   norm_nonneg (w σ), norm_nonneg (y σ 2)]) hs₁ hs₂
       simp only [e, e₀]
@@ -1128,8 +1100,8 @@ private theorem l6g_limit {S : ℝ} (hS : 0 < S) {ξ : Fin 3 → ℂ} {ρ : ℕ 
           (l6g_aesm_RR hwm.aestronglyMeasurable.restrict
             (hycj 2).aestronglyMeasurable.restrict)) (fun σ hσ ↦ ?_) h0S hSS
       have h3 := (norm_le_pi_norm (y σ) 2).trans (hyB σ hσ)
-      have a1 := l6g_abs_RR_le v₀ (y σ 2)
-      have a2 := l6g_abs_RR_le (w σ) (y σ 2)
+      have a1 := abs_RR_le v₀ (y σ 2)
+      have a2 := abs_RR_le (w σ) (y σ 2)
       rw [norm_eq_one_of_mem_VT hv₀] at a1
       rw [Real.norm_eq_abs]
       refine (abs_sub _ _).trans ?_

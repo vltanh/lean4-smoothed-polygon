@@ -59,11 +59,11 @@ uniformity for free:
 * **The cluster points** (`mapClusterPt_switchAng_mem_sectionZero`): at a switching time the two
   vertices adjacent to the switch maximize the Hamiltonian over the vertices, with value `0` (the
   maximum condition and `H = 0` almost everywhere on each side, and continuity of `H(e_k)` along
-  the lift, `l6f_switch`). Writing the switching point as `phaseOfFuller (scale r_n ξ_n)`,
-  dividing by `r_n³` and passing to the limit along a subsequence `ξ_n → ξ`
-  (`tendstoUniformlyOn_rescaledHam` on `U_T × Ξ`), the vector `(24 H_F(ξ, ζ^k))_k` lies in the
-  closed set of vectors with entries `≤ 0` and two zero entries: two vertices maximize
-  (`ξ₃ ∈ 𝒲`, `mem_walls_of_maximizers`) and `H_F⁺(ξ) = 0`.
+  the lift, `IsExtremalOn.exists_phaseHam_eq_zero_of_isSwitchingTime`). Writing the switching point
+  as `phaseOfFuller (scale r_n ξ_n)`, dividing by `r_n³` and passing to the limit along a
+  subsequence `ξ_n → ξ` (`tendstoUniformlyOn_rescaledHam` on `U_T × Ξ`), the vector
+  `(24 H_F(ξ, ζ^k))_k` lies in the closed set of vectors with entries `≤ 0` and two zero entries:
+  two vertices maximize (`ξ₃ ∈ 𝒲`, `mem_walls_of_maximizers`) and `H_F⁺(ξ) = 0`.
 
 ## Not formalized
 
@@ -194,28 +194,9 @@ private lemma l6f_phase (ρ : ℝ) (y : Fin 3 → ℂ) :
 
 /-! ### Helpers: the rescaled field in closed form -/
 
-private lemma l6f_cayleyZ_add (M N : Mat2) : cayleyZ (M + N) = cayleyZ M + cayleyZ N := by
-  apply Complex.ext
-  · simp only [cayleyZ, Matrix.add_apply, Complex.add_re]; ring
-  · simp only [cayleyZ, Matrix.add_apply, Complex.add_im]
-
-private lemma l6f_cayleyZ_sub (M N : Mat2) : cayleyZ (M - N) = cayleyZ M - cayleyZ N := by
-  apply Complex.ext
-  · simp only [cayleyZ, Matrix.sub_apply, Complex.sub_re]; ring
-  · simp only [cayleyZ, Matrix.sub_apply, Complex.sub_im]
-
-private lemma l6f_cayleyZ_smul (c : ℝ) (M : Mat2) : cayleyZ (c • M) = c * cayleyZ M := by
-  apply Complex.ext
-  · simp only [cayleyZ, Matrix.smul_apply, smul_eq_mul, Complex.re_ofReal_mul]; ring
-  · simp only [cayleyZ, Matrix.smul_apply, smul_eq_mul, Complex.im_ofReal_mul]
-
-private lemma l6f_cayleyZ_eq (M : Mat2) :
-    cayleyZ M = (((M 0 1 + M 1 0) / 2 : ℝ) : ℂ) + (M 0 0 : ℂ) * I := by
-  apply Complex.ext <;> simp [cayleyZ]
-
 private lemma l6f_continuous_cayleyZ : Continuous cayleyZ := by
   have : cayleyZ = fun M : Mat2 ↦ (((M 0 1 + M 1 0) / 2 : ℝ) : ℂ) + (M 0 0 : ℂ) * I :=
-    funext l6f_cayleyZ_eq
+    funext cayleyZ_eq
   rw [this]
   fun_prop
 
@@ -266,7 +247,7 @@ private lemma l6f_rescaledField_eq {ρ : ℝ} (hρ : ρ ≠ 0) (v : Fin 3 → �
   have hρc : (ρ : ℂ) ≠ 0 := Complex.ofReal_ne_zero.2 hρ
   funext j
   fin_cases j <;>
-    simp only [fullerCoords, scale, l6f_G, l6f_Xm, l6f_K2, l6f_K3, l6f_cayleyZ_smul,
+    simp only [fullerCoords, scale, l6f_G, l6f_Xm, l6f_K2, l6f_K3, cayleyZ_smul,
       Pi.smul_apply, Complex.real_smul, Matrix.cons_val_zero, Matrix.cons_val_one,
       Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons, Complex.ofReal_inv,
       Complex.ofReal_pow, Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk] <;>
@@ -563,135 +544,10 @@ theorem tendstoUniformlyOn_rescaledHam {K : Set (Fin 3 → ℂ)} (hK : IsCompact
     (fun p hp ↦ l6f_continuousAt_GH hp.1 p.2)
 
 
-/-! ### Helpers: the Hamiltonian at a switching time -/
-
-/-- An almost-everywhere statement after the time shift `t ↦ a + t`, in the original time. -/
-private lemma l6f_ae_unshift {p : ℝ → Prop} {a T : ℝ} (h : ∀ᵐ t, t ∈ Ioo 0 T → p (a + t)) :
-    ∀ᵐ s, s ∈ Ioo a (a + T) → p s := by
-  have hq := (MeasureTheory.measurePreserving_add_left MeasureTheory.volume
-    (-a)).quasiMeasurePreserving.ae h
-  filter_upwards [hq] with s hs hsI
-  simpa using hs ⟨by linarith [hsI.1], by linarith [hsI.2]⟩
-
-/-- A function continuous on `[a, b]` satisfying a closed condition almost everywhere on
-`(p, q) ⊆ [a, b]` satisfies it on `[p, q]` (nonempty open intervals have positive measure). -/
-private lemma l6f_mem_of_ae {f : ℝ → ℝ} {C : Set ℝ} (hC : IsClosed C) {a b p q τ : ℝ}
-    (hf : ContinuousOn f (Icc a b)) (hpq : p < q) (hsub : Icc p q ⊆ Icc a b)
-    (hτ : τ ∈ Icc p q) (hae : ∀ᵐ t, t ∈ Ioo p q → f t ∈ C) : f τ ∈ C := by
-  have hD : IsClosed (Icc p q ∩ f ⁻¹' C) :=
-    (hf.mono hsub).preimage_isClosed_of_isClosed isClosed_Icc hC
-  have hsub2 : Ioo p q ⊆ Icc p q ∩ f ⁻¹' C := by
-    intro t ht
-    by_contra hn
-    have hopen : IsOpen (Ioo p q \ (Icc p q ∩ f ⁻¹' C)) := isOpen_Ioo.sdiff hD
-    obtain ⟨δ, hδ, hball⟩ := Metric.isOpen_iff.1 hopen t ⟨ht, hn⟩
-    have hnull : ∀ᵐ s, s ∉ Metric.ball t δ := by
-      filter_upwards [hae] with s hs hsb
-      have h1 := hball hsb
-      exact h1.2 ⟨Ioo_subset_Icc_self h1.1, hs h1.1⟩
-    have h0 := MeasureTheory.measure_eq_zero_iff_ae_notMem.2 hnull
-    rw [Real.volume_ball] at h0
-    simp only [ENNReal.ofReal_eq_zero] at h0
-    linarith
-  have hcl : closure (Ioo p q) ⊆ Icc p q ∩ f ⁻¹' C := closure_minimal hsub2 hD
-  rw [closure_Ioo hpq.ne] at hcl
-  exact (hcl hτ).2
-
-/-- The Hamiltonians of the three vertices are continuous along an extremal. -/
-private lemma l6f_continuousOn_phaseHam {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
-    (hext : IsExtremalOn a b u g X Λ₁ ΛR (-1)) (k : Fin 3) :
-    ContinuousOn (fun t ↦ phaseHam (phaseAt X Λ₁ ΛR t) (vertex k)) (Icc a b) := by
-  have hc := hext.continuousOn_lift
-  have hΛ₁ : ContinuousOn Λ₁ (Icc a b) := (continuous_fst.comp continuous_snd).comp_continuousOn hc
-  have hX : ContinuousOn X (Icc a b) :=
-    (continuous_fst.comp (continuous_snd.comp continuous_snd)).comp_continuousOn hc
-  have hΛR : ContinuousOn ΛR (Icc a b) :=
-    (continuous_snd.comp (continuous_snd.comp continuous_snd)).comp_continuousOn hc
-  have htr : Continuous fun M : Mat2 ↦ M.trace := continuous_id.matrix_trace
-  have hne : ∀ t ∈ Icc a b, traceForm (X t) (controlMatrix (vertex k)) ≠ 0 := by
-    intro t ht
-    have hst := (hext.1.2.2.2.1 (t - a) ⟨by linarith [ht.1], by linarith [ht.2]⟩).2
-    simp only [add_sub_cancel] at hst
-    rw [poly_traceForm_comm]
-    exact (poly_traceForm_neg (poly_vertex_mem k) hst).ne
-  exact (htr.comp_continuousOn ((hΛ₁.sub continuousOn_const).mul hX)).sub
-    ((htr.comp_continuousOn (hΛR.mul continuousOn_const)).div
-      (htr.comp_continuousOn (hX.mul continuousOn_const)) hne)
-
-/-- **At a switching time the two adjacent vertices maximize the Hamiltonian, with value `0`**
-(the maximum condition and `H = 0` almost everywhere on each side, and continuity of the
-Hamiltonians of the vertices along the lift). -/
-private lemma l6f_switch {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
-    (hext : IsExtremalOn a b u g X Λ₁ ΛR (-1)) {τ : ℝ} (hτ : τ ∈ Ioo a b)
-    (hsw : IsSwitchingTime u τ) :
-    ∃ i j : Fin 3, i ≠ j ∧ (∀ k, phaseHam (phaseAt X Λ₁ ΛR τ) (vertex k) ≤ 0) ∧
-      phaseHam (phaseAt X Λ₁ ΛR τ) (vertex i) = 0 ∧
-      phaseHam (phaseAt X Λ₁ ΛR τ) (vertex j) = 0 := by
-  obtain ⟨i, j, hij, ε, hε, hl, hr⟩ := hsw
-  have hφ := l6f_continuousOn_phaseHam hext
-  have hmax : ∀ᵐ t, t ∈ Ioo a b → phaseHam (phaseAt X Λ₁ ΛR t) (u t) = 0 ∧
-      ∀ v ∈ controlSimplex,
-        phaseHam (phaseAt X Λ₁ ΛR t) v ≤ phaseHam (phaseAt X Λ₁ ΛR t) (u t) := by
-    have := l6f_ae_unshift (a := a) (T := b - a)
-      (p := fun s ↦ phaseHam (phaseAt X Λ₁ ΛR s) (u s) = 0 ∧ ∀ v ∈ controlSimplex,
-        phaseHam (phaseAt X Λ₁ ΛR s) v ≤ phaseHam (phaseAt X Λ₁ ΛR s) (u s)) hext.2.2.2.2.2
-    rwa [add_sub_cancel] at this
-  have key : ∀ {p q : ℝ} {m : Fin 3}, p < q → Icc p q ⊆ Icc a b → τ ∈ Icc p q →
-      (∀ᵐ t, t ∈ Ioo p q → u t = vertex m) → Ioo p q ⊆ Ioo a b →
-      (∀ k, phaseHam (phaseAt X Λ₁ ΛR τ) (vertex k) ≤ 0) ∧
-        phaseHam (phaseAt X Λ₁ ΛR τ) (vertex m) = 0 := by
-    intro p q m hpq hsub hτpq hu hsub'
-    have hae : ∀ᵐ t, t ∈ Ioo p q → phaseHam (phaseAt X Λ₁ ΛR t) (vertex m) = 0 ∧
-        ∀ k, phaseHam (phaseAt X Λ₁ ΛR t) (vertex k) ≤ 0 := by
-      filter_upwards [hmax, hu] with t h1 h2 ht
-      obtain ⟨e1, e2⟩ := h1 (hsub' ht)
-      rw [h2 ht] at e1 e2
-      exact ⟨e1, fun k ↦ (e2 (vertex k) (poly_vertex_mem k)).trans e1.le⟩
-    refine ⟨fun k ↦ l6f_mem_of_ae (f := fun t ↦ phaseHam (phaseAt X Λ₁ ΛR t) (vertex k))
-      isClosed_Iic (hφ k) hpq hsub hτpq ?_,
-      l6f_mem_of_ae (f := fun t ↦ phaseHam (phaseAt X Λ₁ ΛR t) (vertex m))
-        isClosed_singleton (hφ m) hpq hsub hτpq ?_⟩
-    · filter_upwards [hae] with t ht ht' using (ht ht').2 k
-    · filter_upwards [hae] with t ht ht' using (ht ht').1
-  have hp : max a (τ - ε) < τ := max_lt hτ.1 (by linarith)
-  have hq : τ < min b (τ + ε) := lt_min hτ.2 (by linarith)
-  obtain ⟨hle, hi⟩ := key hp (Icc_subset_Icc (le_max_left _ _) hτ.2.le) ⟨hp.le, le_rfl⟩
-    (by filter_upwards [hl] with t ht ht' using ht ⟨lt_of_le_of_lt (le_max_right _ _) ht'.1, ht'.2⟩)
-    (fun t ht ↦ ⟨lt_of_le_of_lt (le_max_left _ _) ht.1, ht.2.trans hτ.2⟩)
-  obtain ⟨-, hj⟩ := key hq (Icc_subset_Icc hτ.1.le (min_le_left _ _)) ⟨le_rfl, hq.le⟩
-    (by filter_upwards [hr] with t ht ht' using ht ⟨ht'.1, lt_of_lt_of_le ht'.2 (min_le_right _ _)⟩)
-    (fun t ht ↦ ⟨hτ.1.trans ht.1, lt_of_lt_of_le ht.2 (min_le_left _ _)⟩)
-  exact ⟨i, j, hij, hle, hi, hj⟩
-
 /-! ### Helpers: the Fuller section -/
 
-/-- `Ξ` is compact: closed and bounded (`|ξ_j| ≤ 1`, since `|ξ₁|⁶ + |ξ₂|³ + |ξ₃|² = 1`). -/
-private lemma l6f_isCompact_Xi : IsCompact Xi := by
-  have hcl : IsClosed Xi := isClosed_eq continuous_weightedNorm continuous_const
-  refine Metric.isCompact_of_isClosed_isBounded hcl
-    ((Metric.isBounded_closedBall (x := (0 : Fin 3 → ℂ)) (r := 1)).subset fun ξ hξ ↦ ?_)
-  have h1 : weightedNorm ξ = 1 := hξ
-  have h6 : ‖ξ 0‖ ^ 6 + ‖ξ 1‖ ^ 3 + ‖ξ 2‖ ^ 2 = 1 := by
-    have : weightedNorm ξ ^ 6 = ‖ξ 0‖ ^ 6 + ‖ξ 1‖ ^ 3 + ‖ξ 2‖ ^ 2 := by
-      unfold weightedNorm
-      rw [show (1 / 6 : ℝ) = ((6 : ℕ) : ℝ)⁻¹ by norm_num]
-      exact Real.rpow_inv_natCast_pow (by positivity) (by norm_num)
-    rw [← this, h1, one_pow]
-  have a0 := pow_nonneg (norm_nonneg (ξ 0)) 6
-  have a1 := pow_nonneg (norm_nonneg (ξ 1)) 3
-  have a2 := pow_nonneg (norm_nonneg (ξ 2)) 2
-  rw [Metric.mem_closedBall, dist_zero_right, pi_norm_le_iff_of_nonneg zero_le_one]
-  have b0 : ‖ξ 0‖ ≤ 1 :=
-    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 6 ≠ 0)).1 (by linarith)
-  have b1 : ‖ξ 1‖ ≤ 1 :=
-    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 3 ≠ 0)).1 (by linarith)
-  have b2 : ‖ξ 2‖ ≤ 1 :=
-    (pow_le_one_iff_of_nonneg (norm_nonneg _) (by norm_num : 2 ≠ 0)).1 (by linarith)
-  intro j
-  fin_cases j
-  exacts [b0, b1, b2]
-
-private lemma l6f_simplexToUT_vertex (k : Fin 3) : simplexToUT (vertex k) = ζ ^ (k : ℕ) := by
+/-- The vertices of the simplex are mapped to the cube roots of unity. -/
+theorem simplexToUT_vertex (k : Fin 3) : simplexToUT (vertex k) = ζ ^ (k : ℕ) := by
   fin_cases k <;> simp [simplexToUT, vertex, Fin.sum_univ_three]
 
 private lemma l6f_continuous_ham (c : ℂ) : Continuous fun w : Fin 3 → ℂ ↦ ham w c := by
@@ -736,7 +592,8 @@ tie of the two maximizing vertices at a switching time and of `H = 0`;
 
 Proof: write the switching point `q_n = phaseOfFuller (scale r_n ξ_n)`, `r_n = φ(ẑ(q_n)) → 0⁺`
 (`IsChatteringArcInto.switchPoints`, `phaseOfFuller_fullerCoords`). At `τ_n` the two adjacent
-vertices `e_i`, `e_j` maximize `H` over the vertices with value `0` (`l6f_switch`); after division
+vertices `e_i`, `e_j` maximize `H` over the vertices with value `0`
+(`IsExtremalOn.exists_phaseHam_eq_zero_of_isSwitchingTime`); after division
 by `r_n³` the vector `h_n = (H(q_n, e_k)/r_n³)_k` lies in the closed set of vectors with entries
 `≤ 0` and two zero entries (pairwise products `0`). Along a subsequence `ξ_n → ξ`,
 `h_n → (24 H_F(ξ, ζ^k))_k` (`tendstoUniformlyOn_rescaledHam` on `U_T × Ξ`, `Ξ` compact), so two
@@ -775,7 +632,8 @@ theorem mapClusterPt_switchAng_mem_sectionZero {a b : ℝ} {u : ℝ → Fin 3 �
   have hvC : ∀ n, hv n ∈ C := by
     intro n
     obtain ⟨i, j, hij, hle, hi, hj⟩ :=
-      l6f_switch hext (hmem n) ((hiff (τ n) (hmem n)).2 ⟨n, rfl⟩)
+      IsExtremalOn.exists_phaseHam_eq_zero_of_isSwitchingTime hext (hmem n) ((hiff (τ n) (hmem n)).2
+          ⟨n, rfl⟩)
     rw [hq n] at hle hi hj
     have hzi : hv n i = 0 := by simp [hvdef, hi]
     have hzj : hv n j = 0 := by simp [hvdef, hj]
@@ -783,7 +641,7 @@ theorem mapClusterPt_switchAng_mem_sectionZero {a b : ℝ} {u : ℝ → Fin 3 �
       l6f_pairs hij hzi hzj⟩
   -- the limit along a subsequence
   obtain ⟨φ, hφ, hξφ⟩ := hξ.tendsto_subseq
-  have hU := tendstoUniformlyOn_iff_tendsto.1 (tendstoUniformlyOn_rescaledHam l6f_isCompact_Xi)
+  have hU := tendstoUniformlyOn_iff_tendsto.1 (tendstoUniformlyOn_rescaledHam isCompact_Xi)
   have hlimk : ∀ k : Fin 3,
       Tendsto (fun n ↦ hv (φ n) k) atTop (𝓝 (24 * ham ξ (ζ ^ (k : ℕ)))) := by
     intro k
@@ -795,7 +653,7 @@ theorem mapClusterPt_switchAng_mem_sectionZero {a b : ℝ} {u : ℝ → Fin 3 �
         (𝓝 (24 * ham ξ (simplexToUT (vertex k)))) :=
       (((l6f_continuous_ham _).tendsto ξ).comp hξφ).const_mul 24
     have := hf.congr_uniformity (hU.comp hg)
-    rwa [l6f_simplexToUT_vertex] at this
+    rwa [simplexToUT_vertex] at this
   have hT : Tendsto (fun n ↦ hv (φ n)) atTop (𝓝 (fun k : Fin 3 ↦ 24 * ham ξ (ζ ^ (k : ℕ)))) :=
     tendsto_pi_nhds.2 hlimk
   have hCξ : (fun k : Fin 3 ↦ 24 * ham ξ (ζ ^ (k : ℕ))) ∈ C :=

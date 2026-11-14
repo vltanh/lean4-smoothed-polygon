@@ -10,10 +10,13 @@ The proof of `IsChatteringArcInto.eventually_follows_out` (and `…_in`) in
 `SmoothedPolygons/Ch16/ClusterPoint.lean` needs, besides the structure of the flow with the control
 `e₂` (`eventually_isSwitch_reinSwitchTime`, `remark14_3_4`), the switching structure **at** a
 chart point `q = lieChart p` (or `lieChartIn p`), `p` near `(0, x̃_out)`, `r > 0`: which control an
-extremal through `q` uses right after `q`. Two facts decide it.
+extremal through `q` uses right after `q`. This is the book's claim "the first control of
+`(X(r, x̃), Λ₁(r, x̃), Λ_R(r, x̃))` is `u = e₂` for all sufficiently small `r > 0`, provided …
+`ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁ < 0` and `ℓ̃₂₁ < 0`" (TeX 11706–11718), stated without proof, at the switching
+points that "give the value of the Reinhardt–Poincaré map" (TeX 11835–11836). Two facts decide it.
 
 * `H(e₁) < H(e₂) = H(e₃) = 0` at `q` (so `e₁` is not a maximizer at `q`): on the section
-  (`Λ_R = h K(X)`, `l6b_lieΛR_eq`) one has exactly `H(e₁) = 6h/(3 + 3a² - c²)` for
+  (`Λ_R = h K(X)`, `lieΛR_eq_reducedHam_smul`) one has exactly `H(e₁) = 6h/(3 + 3a² - c²)` for
   `X = [[a, b], [c, -a]]`, `det X = 1` (`l6h_ham0_eq`), and on the chart `h = r³ G(r, x̃)` with
   `G(0, x̃) = 2(ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁)` (`l6h_reducedHam_lieChart`), negative at `x̃_out`
   (`l6h_xTildeOut_signs`; it is `12 z₃(x̃_out) < 0`, the wall `𝒲₀`).
@@ -28,7 +31,7 @@ The mirrored chart `lieChartIn = reinTau ∘ lieChart` is reduced to the chart b
 (`iso_vertexFlow_reinTau`, `switchingFn_reinTau`): the `e₃`-flow from `τ q` is the reversed
 `e₂`-flow from `q`, so the second fact at `τ q` is the slope of `χ₃₂` along the `e₂`-field at `q`.
 
-The result is `l6h_eventually_switchStructure`. Everything is exact algebra on `2 × 2` matrices
+The result is `eventually_switchStructure`. Everything is exact algebra on `2 × 2` matrices
 (checked with sympy: `notes/l6h_/dchi3.py`) and continuity at `r = 0`.
 -/
 
@@ -79,15 +82,15 @@ private lemma l6h_cP2 (a b c : ℝ) (h2 : √3 * a + c ≠ 0) :
 
 /-- **`H(e₁)` on the section**: for `X = [[a, b], [c, -a]]` with `det X = 1`, `c ≠ 0`,
 `⟨X, Z_{e₁}⟩ ≠ 0` and `Λ_R = h K(X)`, `h = ⟨Λ₁ + (3/2) J, X⟩`: `H(e₁) = 6h/(3 + 3a² - c²)`. -/
-theorem l6h_ham0_eq (a b c l w n : ℝ) (hdet : a ^ 2 + b * c + 1 = 0) (hc : c ≠ 0)
+private theorem l6h_ham0_eq (a b c l w n : ℝ) (hdet : a ^ 2 + b * c + 1 = 0) (hc : c ≠ 0)
     (h0 : 3 + 3 * a ^ 2 - c ^ 2 ≠ 0) :
     hamiltonian (-1) !![l, w; n, -l]
-        (reducedHam !![l, w; n, -l] !![a, b; c, -a] • l6b_K !![a, b; c, -a])
+        (reducedHam !![l, w; n, -l] !![a, b; c, -a] • lieΛRShape !![a, b; c, -a])
         !![a, b; c, -a] (vertex 0) =
       6 * reducedHam !![l, w; n, -l] !![a, b; c, -a] / (3 + 3 * a ^ 2 - c ^ 2) := by
   have hb : b = -(1 + a ^ 2) / c := by field_simp; linarith
-  have hK : l6b_K !![a, b; c, -a] = !![a, -2 * a ^ 2 / c - b; c, -a] := by
-    ext i j; fin_cases i <;> fin_cases j <;> simp [l6b_K]
+  have hK : lieΛRShape !![a, b; c, -a] = !![a, -2 * a ^ 2 / c - b; c, -a] := by
+    ext i j; fin_cases i <;> fin_cases j <;> simp [lieΛRShape]
   have hh : traceForm (!![l, w; n, -l] - (3 / 2 * -1 : ℝ) • J) !![a, b; c, -a] =
       reducedHam !![l, w; n, -l] !![a, b; c, -a] := by
     rw [reducedHam]; congr 1; rw [show (3 / 2 * -1 : ℝ) = -(3 / 2) by norm_num, neg_smul,
@@ -117,14 +120,14 @@ set_option linter.flexible false in
 for `X = [[a, b], [c, -a]]` with `det X = 1`, `c ≠ 0`, `√3 a ∓ c ≠ 0`, `Λ₁ = [[l, w], [n, -l]]`
 and `Λ_R = h K(X)`, the derivative of `χ₃₂ = ⟨Λ_R, P₂ - P₃⟩` along the field is
 `4√3 (c h + n + 3/2)/(c² - 3a²)`. -/
-theorem l6h_dsw_eq (m : Fin 3) (hm : m = 1 ∨ m = 2) (a b c l w n : ℝ)
+private theorem l6h_dsw_eq (m : Fin 3) (hm : m = 1 ∨ m = 2) (a b c l w n : ℝ)
     (hdet : a ^ 2 + b * c + 1 = 0) (hc : c ≠ 0) (h1 : √3 * a - c ≠ 0) (h2 : √3 * a + c ≠ 0) :
-    irt_dsw 2 1 (reducedHam !![l, w; n, -l] !![a, b; c, -a] • l6b_K !![a, b; c, -a])
+    irt_dsw 2 1 (reducedHam !![l, w; n, -l] !![a, b; c, -a] • lieΛRShape !![a, b; c, -a])
       !![a, b; c, -a]
       (iso_extremalField (vertex m) (!![a, b; c, -a], !![l, w; n, -l],
-        reducedHam !![l, w; n, -l] !![a, b; c, -a] • l6b_K !![a, b; c, -a])).2.2
+        reducedHam !![l, w; n, -l] !![a, b; c, -a] • lieΛRShape !![a, b; c, -a])).2.2
       (iso_extremalField (vertex m) (!![a, b; c, -a], !![l, w; n, -l],
-        reducedHam !![l, w; n, -l] !![a, b; c, -a] • l6b_K !![a, b; c, -a])).1 =
+        reducedHam !![l, w; n, -l] !![a, b; c, -a] • lieΛRShape !![a, b; c, -a])).1 =
       4 * √3 * (c * reducedHam !![l, w; n, -l] !![a, b; c, -a] + n + 3 / 2) /
         (c ^ 2 - 3 * a ^ 2) := by
   have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
@@ -132,8 +135,8 @@ theorem l6h_dsw_eq (m : Fin 3) (hm : m = 1 ∨ m = 2) (a b c l w n : ℝ)
     have : c ^ 2 - 3 * a ^ 2 = -((√3 * a - c) * (√3 * a + c)) := by ring_nf; rw [h3]
     rw [this, neg_ne_zero]; exact mul_ne_zero h1 h2
   have hb : b = -(1 + a ^ 2) / c := by field_simp; linarith
-  have hK : l6b_K !![a, b; c, -a] = !![a, -2 * a ^ 2 / c - b; c, -a] := by
-    ext i j; fin_cases i <;> fin_cases j <;> simp [l6b_K]
+  have hK : lieΛRShape !![a, b; c, -a] = !![a, -2 * a ^ 2 / c - b; c, -a] := by
+    ext i j; fin_cases i <;> fin_cases j <;> simp [lieΛRShape]
   have hh : reducedHam !![l, w; n, -l] !![a, b; c, -a] =
       2 * l * a + (w - 3 / 2) * c + (n + 3 / 2) * b := by
     simp [reducedHam, traceForm, J, Matrix.trace_fin_two]; ring
@@ -156,7 +159,7 @@ theorem l6h_dsw_eq (m : Fin 3) (hm : m = 1 ∨ m = 2) (a b c l w n : ℝ)
 
 /-- `h/r³` on the chart: `reducedHam = r³ G(r, x̃)` (`l6h_reducedHam_lieChart`), with
 `G(0, x̃) = 2(ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁)`. -/
-noncomputable def l6h_G (p : ℝ × (Fin 3 → ℝ)) : ℝ :=
+private noncomputable def l6h_G (p : ℝ × (Fin 3 → ℝ)) : ℝ :=
   (2 * p.1 ^ 3 * p.2 0 ^ 2 * p.2 1 ^ 2 - 4 * p.1 ^ 3 * p.2 0 * p.2 1 * p.2 2 +
       2 * p.1 ^ 3 * p.2 2 ^ 2 + 4 * p.1 ^ 2 * p.2 0 * p.2 1 ^ 2 - 4 * p.1 ^ 2 * p.2 1 * p.2 2 +
       3 * p.1 * p.2 0 ^ 2 * p.2 2 + 6 * p.1 * p.2 0 * p.2 1 + 2 * p.1 * p.2 1 ^ 2 +
@@ -164,14 +167,14 @@ noncomputable def l6h_G (p : ℝ × (Fin 3 → ℝ)) : ℝ :=
     ((1 + p.1 * p.2 0) * (3 - 2 * p.1 ^ 2 * p.2 2))
 
 /-- `H(e₁)/r³` on the chart. -/
-noncomputable def l6h_F1 (p : ℝ × (Fin 3 → ℝ)) : ℝ :=
+private noncomputable def l6h_F1 (p : ℝ × (Fin 3 → ℝ)) : ℝ :=
   6 * l6h_G p / (3 + 3 * p.1 ^ 2 - (1 + p.1 * p.2 0) ^ 2)
 
 /-- The slope of `χ₃₂` divided by `4√3 r²` on the chart. -/
-noncomputable def l6h_F2 (p : ℝ × (Fin 3 → ℝ)) : ℝ :=
+private noncomputable def l6h_F2 (p : ℝ × (Fin 3 → ℝ)) : ℝ :=
   ((1 + p.1 * p.2 0) * p.1 * l6h_G p + p.2 2) / ((1 + p.1 * p.2 0) ^ 2 - 3 * p.1 ^ 2)
 
-theorem l6h_reducedHam_lieChart (p : ℝ × (Fin 3 → ℝ)) (hc : 1 + p.1 * p.2 0 ≠ 0)
+private theorem l6h_reducedHam_lieChart (p : ℝ × (Fin 3 → ℝ)) (hc : 1 + p.1 * p.2 0 ≠ 0)
     (hd : 3 - 2 * p.1 ^ 2 * p.2 2 ≠ 0) :
     reducedHam (lieΛ₁ p.1 (p.2 1) (p.2 2)) (lieX p.1 (p.2 0)) = p.1 ^ 3 * l6h_G p := by
   simp only [reducedHam, traceForm, lieΛ₁, lieX, J, l6h_G]
@@ -186,11 +189,12 @@ theorem l6h_reducedHam_lieChart (p : ℝ × (Fin 3 → ℝ)) (hc : 1 + p.1 * p.2
   field_simp
   ring
 
-/-- The chart point on the section in closed form, `Λ_R = h K(X)` (`l6b_lieΛR_eq`). -/
-theorem l6h_lieChart_eq (p : ℝ × (Fin 3 → ℝ)) (hc : 1 + p.1 * p.2 0 ≠ 0) :
+/-- The chart point on the section in closed form, `Λ_R = h K(X)` (`lieΛR_eq_reducedHam_smul`). -/
+private theorem l6h_lieChart_eq (p : ℝ × (Fin 3 → ℝ)) (hc : 1 + p.1 * p.2 0 ≠ 0) :
     lieChart p = (lieX p.1 (p.2 0), lieΛ₁ p.1 (p.2 1) (p.2 2),
-      reducedHam (lieΛ₁ p.1 (p.2 1) (p.2 2)) (lieX p.1 (p.2 0)) • l6b_K (lieX p.1 (p.2 0))) := by
-  rw [lieChart, l6b_lieΛR_eq _ _ (by simp [lieX]) (by simpa [lieX] using hc)]
+      reducedHam (lieΛ₁ p.1 (p.2 1) (p.2 2)) (lieX p.1 (p.2 0)) • lieΛRShape (lieX p.1 (p.2 0))) :=
+          by
+  rw [lieChart, lieΛR_eq_reducedHam_smul _ _ (by simp [lieX]) (by simpa [lieX] using hc)]
 
 /-- The coordinates of a chart point near `r = 0`, and the side conditions. -/
 private def l6h_good (p : ℝ × (Fin 3 → ℝ)) : Prop :=
@@ -215,7 +219,8 @@ private lemma l6h_good_facts {p : ℝ × (Fin 3 → ℝ)} (hp : l6h_good p) :
 
 /-- The signs at `x̃_out`: `ℓ̃₂₁ < 0` and `ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁ < 0` (the latter is `6 z₃(x̃_out)`,
 from `H_F(q_out, ζ) = 0`: `RR(z₁, z₂ i) = z₃/2 < 0`). -/
-theorem l6h_xTildeOut_signs : xTildeOut 2 < 0 ∧ xTildeOut 0 * xTildeOut 2 + xTildeOut 1 < 0 := by
+private theorem l6h_xTildeOut_signs : xTildeOut 2 < 0 ∧ xTildeOut 0 * xTildeOut 2 + xTildeOut 1 <
+    0 := by
   obtain ⟨hq0, -, hq1⟩ := qOutCart_signs
   obtain ⟨hre0, him2, hre2⟩ := qOutCart_normalization
   have hH := hamMax_qOutCart
@@ -369,7 +374,7 @@ private lemma l6h_chart_values {p : ℝ × (Fin 3 → ℝ)} (hp : l6h_good p) (h
     exacts [d0, d1, d2]
   · rw [hLC]
     change hamiltonian (-1) (lieΛ₁ p.1 (p.2 1) (p.2 2))
-      (reducedHam (lieΛ₁ p.1 (p.2 1) (p.2 2)) (lieX p.1 (p.2 0)) • l6b_K (lieX p.1 (p.2 0)))
+      (reducedHam (lieΛ₁ p.1 (p.2 1) (p.2 2)) (lieX p.1 (p.2 0)) • lieΛRShape (lieX p.1 (p.2 0)))
       (lieX p.1 (p.2 0)) (vertex 0) = _
     rw [hX, hL, l6h_ham0_eq _ _ _ _ _ _ hdet hc h0, ← hL, ← hX, hh, l6h_F1]
     ring
@@ -381,7 +386,7 @@ private lemma l6h_chart_values {p : ℝ × (Fin 3 → ℝ)} (hp : l6h_good p) (h
 `p` near `(0, x̃_out)` with `r > 0` and `q = lieChart p` or `q = lieChartIn p`, `p` lies in `H*`,
 `H(e₁) < 0 = H(e₂) = H(e₃)` at `q`, and along the `e₃`-flow from `q`, `H(e₃) < H(e₂)` right after
 `q`. -/
-theorem l6h_eventually_switchStructure :
+theorem eventually_switchStructure :
     ∀ᶠ p in 𝓝[{p | 0 < p.1}] chartPtOut, p ∈ lieChartDomain ∧
       ∀ q ∈ ({lieChart p, lieChartIn p} : Set iso_PhasePt),
         phaseHam q (vertex 0) < 0 ∧ phaseHam q (vertex 1) = 0 ∧ phaseHam q (vertex 2) = 0 ∧

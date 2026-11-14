@@ -74,10 +74,10 @@ lines.
 
 ## Status
 
-Everything is proved; the only `sorry`s used are those of the general stable manifold theorem
-(`Basic/Dynamics/StableManifold.lean`, proved in a separate package), through `theoremA_3_1`.
+Everything is proved. The stable manifold theorem enters through `theoremA_3_1`, proved from the
+StableManifold package, and only for the unstable curves of `theorem14_3_3` and `remark14_3_4`.
 
-* `hasStrictFDerivAt_extension`: as planned (`l6d_tendsto_reinChartMap_fst_div` for `∂_r F₁`; the
+* `hasStrictFDerivAt_extension`: as planned (`tendsto_reinChartMap_fst_div` for `∂_r F₁`; the
   divisor `{r = 0}` for the `x̃`-derivatives).
 * `theorem14_3_3`: the block form gives the characteristic polynomial (a `1 + 3` block matrix in the
   basis `(1, 0), (0, e_k)`, `Matrix.charpoly_fromBlocks_zero₁₂`) and the eigenvalues. The local
@@ -101,7 +101,7 @@ Everything is proved; the only `sorry`s used are those of the general stable man
   `F_in(p) = p'`. The clause "`e₁` beats `e₂` right after `t_sw`" becomes `χ₂₃ < 0` on the
   `e₂`-flow from `lieChart p'` at small negative times, which `eventually_isSwitch_reinSwitchTime`
   does not give: it is the χ₂₃ check before the wall, `χ̃₂₃ = s H` with `H(0, 0, x̃_out) = Q(0) > 0`
-  (`l6j_chi23_neg`, the division of `l6d_eventually_chi23_pos`). Hyperbolicity of `D(e⁻¹)`: its
+  (`l6j_chi23_neg`, from `exists_extChi23_eq_mul`). Hyperbolicity of `D(e⁻¹)`: its
   eigenvalues are the inverses of those of `DF` (complexified matrices, `spectrum.inv_mem_iff`).
 -/
 
@@ -120,7 +120,8 @@ switch at `χ₂₁ = 0`, rotation `Ad_{R⁻¹}`): the time reversal maps the cy
 noncomputable def reinChartMapIn (p : ℝ × (Fin 3 → ℝ)) : ℝ × (Fin 3 → ℝ) :=
   lieChartInInv (reinPoincare (lieChartIn p))
 
-/-- **The derivative of the extended map at the fixed point** (TeX 11905–11917: "The exceptional
+/-- **The derivative of the extended map at the fixed point** (`thm:hyperbolic-out`, in the proof of
+Theorem 14.3.3, TeX 11905–11917: "The exceptional
 divisor `r = 0` is a three-dimensional invariant subset … the linearization of the Fuller–Poincaré
 map … is a contraction on the three dimensional exceptional divisor. Moving away from the
 exceptional divisor in the radial direction, the Reinhardt–Poincaré map has scaling factor
@@ -132,11 +133,12 @@ fixed point, TeX 11849–11856), `∂_{x̃} e₁ = 0` (the divisor `r = 0` is in
 
 These derivative facts are all that Theorem 16.4.1 and the assembly of Theorem 16.3.1 use at
 `q_out` (the hyperbolic box, `qOut0_not_mem_switchClusterSet`): no stable manifold theorem is
-needed there. Proof: `AnalyticAt.hasStrictFDerivAt`; the invariance of `{r = 0}` gives the zero
-block; `IsReinhardtPoincareExtension` gives `e (0, x̃) = (0, fullerChartMap x̃)` on the source;
-`∂_r e₁` from `reinChartMap` (`r' = X'₁₁ = r · (X_sw - J)₁₁/r₀`) and the Fuller fixed point
-(`poincare_qOutCart`: the first coordinate of `ζ F(z(x̃_out))` is `r_scale` times that of
-`z(x̃_out)`). -/
+needed there (the second part of Theorem 16.4.1, the stable curve at `q_in`, uses
+`remark14_3_4`, which does use it). Proof: `AnalyticAt.hasStrictFDerivAt`; the invariance of
+`{r = 0}` gives the zero block; `IsReinhardtPoincareExtension` gives
+`e (0, x̃) = (0, fullerChartMap x̃)` on the source; `∂_r e₁` from `reinChartMap`
+(`r' = X'₁₁ = r · (X_sw - J)₁₁/r₀`) and the Fuller fixed point (`poincare_qOutCart`: the first
+coordinate of `ζ F(z(x̃_out))` is `r_scale` times that of `z(x̃_out)`). -/
 theorem hasStrictFDerivAt_extension
     {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ))}
     (he : IsReinhardtPoincareExtension e) :
@@ -186,7 +188,7 @@ theorem hasStrictFDerivAt_extension
     have h0 : (e (0, xTildeOut)).1 = 0 := by rw [← hpt, hfix]; rfl
     rw [slope_def_field, h0, sub_zero, sub_zero, hrein _ hrs hr0]
   refine ⟨(han _ hp).hasStrictFDerivAt, tendsto_nhds_unique hslope
-    l6d_tendsto_reinChartMap_fst_div, fun v ↦ ?_, h2.differentiableAt.hasFDerivAt, fun v ↦ ?_⟩
+    tendsto_reinChartMap_fst_div, fun v ↦ ?_, h2.differentiableAt.hasFDerivAt, fun v ↦ ?_⟩
   · simpa using congrArg (fun L : (Fin 3 → ℝ) →L[ℝ] ℝ ↦ L v) h1'
   · rw [h2.fderiv]
     rfl
@@ -697,14 +699,14 @@ private lemma l6j_main {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ 
           exact ⟨h1', (hIoo _ h1').2⟩
       exact ⟨y, hy0, fun n ↦ ⟨hyU n, (hy n).2⟩, hyt⟩
 
-/-- **Theorem 14.3.3** (TeX 11891–11895). The fixed point `(0, x̃_out)` of the diffeomorphism `F`
-(any analytic extension `e` of the Reinhardt–Poincaré map, Lemma 14.3.1) is hyperbolic: the
-eigenvalues of `DF(0, x̃_out)` are `r_scale > 1`, a simple root of the characteristic polynomial,
-and three of modulus `< 1/10`; the derivative is block triangular, so the characteristic polynomial
-is `(X - r_scale)` times that of the Fuller–Poincaré map in the chart. The local unstable
-manifold is a `C^∞` curve, the graph `r ↦ (r, γ(r))` of a `C^∞` map with `γ(0) = x̃_out`. In a
-neighborhood of the fixed point, the local stable manifold coincides with the three-dimensional
-exceptional divisor `r = 0`. -/
+/-- **Theorem 14.3.3** (`thm:hyperbolic-out`, TeX 11891–11895). The fixed point `(0, x̃_out)` of the
+diffeomorphism `F` (any analytic extension `e` of the Reinhardt–Poincaré map, Lemma 14.3.1) is
+hyperbolic: the eigenvalues of `DF(0, x̃_out)` are `r_scale > 1`, a simple root of the
+characteristic polynomial, and three of modulus `< 1/10`; the derivative is block triangular, so the
+characteristic polynomial is `(X - r_scale)` times that of the Fuller–Poincaré map in the chart. The
+local unstable manifold is a `C^∞` curve, the graph `r ↦ (r, γ(r))` of a `C^∞` map with
+`γ(0) = x̃_out`. In a neighborhood of the fixed point, the local stable manifold coincides with the
+three-dimensional exceptional divisor `r = 0`. -/
 theorem theorem14_3_3 {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ))}
     (he : IsReinhardtPoincareExtension e) :
     (fderiv ℝ e chartPtOut).IsHyperbolic ∧
@@ -867,48 +869,12 @@ private lemma l6j_phaseHam_mirror (y : iso_PhasePt) :
 
 /-! ### The χ₂₃ check before the wall, the chart domain, the inverse derivative -/
 
-open Asymptotics in
 /-- **`χ₂₃ < 0` just before the wall** (the χ₂₃ check of G14.5 at negative times): near the fixed
-point, `χ̃₂₃(s, r, x̃) < 0` for small `s < 0`. At `(0, x̃_out)` it is `s Q(s)` with `Q(0) > 0`
-(`l6d_v23_xTildeOut`), and `χ̃₂₃(0, r, x̃) = 0` near the fixed point (`l6d_eventually_chi23_zero`),
-so `χ̃₂₃ = s H` with `H` analytic and `H(0, 0, x̃_out) = Q(0) > 0` (division by `s`, as in
-`l6d_eventually_chi23_pos`). -/
+point, `χ̃₂₃(s, r, x̃) < 0` for small `s < 0`, since `χ̃₂₃ = s H` with `H > 0` there (the division
+by `s` of `eventually_extChi23_pos`, `exists_extChi23_eq_mul`). -/
 private lemma l6j_chi23_neg : ∃ ε > 0, ∀ᶠ q in 𝓝 chartPtOut, ∀ s, -ε < s → s < 0 →
-    l6d_chi23 (s, q.1, q.2) < 0 := by
-  set p₀ : ℝ × (Fin 3 → ℝ) := ((0 : ℝ), xTildeOut) with hp₀
-  have han : AnalyticAt ℝ l6d_chi23 ((0 : ℝ), p₀) := l6d_analyticAt_chi23 0 xTildeOut
-  have hk : ∀ᶠ y in 𝓝 p₀, (fun s : ℝ ↦ l6d_chi23 (s, y)) =O[𝓝 0] (fun s ↦ s ^ 1) := by
-    have hev : ∀ᶠ y in 𝓝 p₀, AnalyticAt ℝ l6d_chi23 ((0 : ℝ), y) := by
-      have := han.eventually_analyticAt
-      exact (by fun_prop : ContinuousAt (fun y : ℝ × (Fin 3 → ℝ) ↦ ((0 : ℝ), y)) p₀).eventually
-        this
-    filter_upwards [hev, l6d_eventually_chi23_zero] with y hy hy0
-    have hd : HasDerivAt (fun s : ℝ ↦ l6d_chi23 (s, y)) _ 0 :=
-      (hy.comp_of_eq (by fun_prop : AnalyticAt ℝ (fun s : ℝ ↦ (s, y)) 0) rfl
-        ).differentiableAt.hasDerivAt
-    have := hd.isBigO_sub
-    simp only [sub_zero] at this
-    have hy0' : l6d_chi23 (0, y) = 0 := hy0
-    simpa [hy0'] using this
-  obtain ⟨H, hH, hHeq⟩ := AnalyticAt.exists_eq_pow_smul_of_isBigO han hk
-  have hH0 : 0 < H ((0 : ℝ), p₀) := by
-    have hcont : ContinuousAt (fun s : ℝ ↦ H (s, p₀)) 0 :=
-      hH.continuousAt.comp_of_eq (by fun_prop : ContinuousAt (fun s : ℝ ↦ (s, p₀)) 0) rfl
-    have hev : ∀ᶠ s in 𝓝[≠] (0 : ℝ), H (s, p₀) = l6d_Q s := by
-      have h1 : ∀ᶠ s in 𝓝 (0 : ℝ), l6d_chi23 (s, p₀) = s ^ 1 • H (s, p₀) :=
-        (by fun_prop : ContinuousAt (fun s : ℝ ↦ (s, p₀)) 0).eventually hHeq
-      filter_upwards [nhdsWithin_le_nhds h1, self_mem_nhdsWithin] with s hs hs0
-      rw [hp₀, l6d_chi23_zero, l6d_v23_xTildeOut, pow_one, smul_eq_mul] at hs
-      exact (mul_left_cancel₀ hs0 hs).symm
-    have hQc : ContinuousAt l6d_Q 0 := by unfold l6d_Q; fun_prop
-    have hlim := hcont.tendsto.mono_left (nhdsWithin_le_nhds (s := {(0 : ℝ)}ᶜ))
-    have hlim2 := (hQc.tendsto.mono_left (nhdsWithin_le_nhds (s := {(0 : ℝ)}ᶜ))).congr'
-      (hev.mono fun s h ↦ h.symm)
-    rw [tendsto_nhds_unique hlim hlim2]
-    exact l6d_Q_pos le_rfl
-  have hnear : ∀ᶠ v in 𝓝 ((0 : ℝ), p₀), l6d_chi23 v = v.1 * H v ∧ 0 < H v := by
-    filter_upwards [hHeq, continuousAt_const.eventually_lt hH.continuousAt hH0] with v h1 h2
-    exact ⟨by simpa using h1, h2⟩
+    extChi23 (s, q.1, q.2) < 0 := by
+  obtain ⟨H, hnear⟩ := exists_extChi23_eq_mul
   rw [nhds_prod_eq] at hnear
   obtain ⟨pa, hpa, pb, hpb, hall⟩ := Filter.eventually_prod_iff.1 hnear
   obtain ⟨ε, hε, hεb⟩ := Metric.eventually_nhds_iff.1 hpa
@@ -918,27 +884,6 @@ private lemma l6j_chi23_neg : ∃ ε > 0, ∀ᶠ q in 𝓝 chartPtOut, ∀ s, -�
   obtain ⟨h1, h2⟩ := hall hs hq
   rw [h1]
   exact mul_neg_of_neg_of_pos hs2 h2
-
-/-- Chart points with small `r > 0` near `x̃_out` lie in `H*`. -/
-private lemma l6j_eventually_mem_lieChartDomain :
-    ∀ᶠ q in 𝓝 chartPtOut, 0 < q.1 → q ∈ lieChartDomain := by
-  set c := |√3 - xTildeOut 0| + 2 with hc
-  have hc0 : 0 < c := by positivity
-  have hr : ∀ᶠ q in 𝓝 chartPtOut, q.1 < 1 / c :=
-    (by fun_prop : ContinuousAt (fun q : ℝ × (Fin 3 → ℝ) ↦ q.1) chartPtOut).eventually_lt
-      continuousAt_const (by simp only [chartPtOut]; positivity)
-  have h0 : ∀ᶠ q in 𝓝 chartPtOut, xTildeOut 0 - 1 < q.2 0 :=
-    continuousAt_const.eventually_lt
-      (by fun_prop : ContinuousAt (fun q : ℝ × (Fin 3 → ℝ) ↦ q.2 0) chartPtOut)
-      (by simp [chartPtOut])
-  have h2 : ∀ᶠ q in 𝓝 chartPtOut, q.2 2 * q.1 ^ 2 < 3 / 2 :=
-    (by fun_prop : ContinuousAt (fun q : ℝ × (Fin 3 → ℝ) ↦ q.2 2 * q.1 ^ 2)
-      chartPtOut).eventually_lt continuousAt_const (by simp [chartPtOut])
-  filter_upwards [hr, h0, h2] with q hq1 hq0 hq2 hpos
-  refine ⟨hpos, ?_, hq2⟩
-  have h1 : c < 1 / q.1 := (lt_one_div hc0 hpos).2 hq1
-  have := le_abs_self (√3 - xTildeOut 0)
-  linarith
 
 /-- If `A B = B A = 1`, the eigenvalues of `B` are the inverses of those of `A`. -/
 private lemma l6j_aeval_charpoly_inv {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -1008,8 +953,8 @@ private lemma l6j_isHyperbolic_symm
 /-- `τ(z(x̃_out))` represents `q_in` (`z(x̃_out)` is a rescaling of `q_out`'s representative). -/
 private lemma l6j_classOf_in : classOf (tau (fullerOfChart xTildeOut)) = qIn0 := by
   obtain ⟨-, -, h', hc⟩ := classOf_qOutCart
-  rw [l6d_fullerOfChart_xTildeOut, tau_scale, ← one_smul ℂ (scale l6d_lam (tau qOutCart)),
-    classOf_smul_scale one_mem_VT l6d_lam_pos h', hc]
+  rw [fullerOfChart_xTildeOut, tau_scale, ← one_smul ℂ (scale virialScaleOut (tau qOutCart)),
+    classOf_smul_scale one_mem_VT virialScaleOut_pos h', hc]
 
 
 /-- `Ad_{R⁻¹} ∘ τ ∘ Ad_{R⁻¹} = τ` (`τ Ad_R = Ad_{R⁻¹} τ`, `reinTau_spec`). -/
@@ -1021,10 +966,10 @@ private lemma l6j_adRinv_reinTau_adRinv (x : iso_PhasePt) :
   rw [h] at this
   exact this.symm
 
-/-- **Remark 14.3.4** (TeX 11898–11902), in the mirrored chart (G14.9). "By time reversal, the
-Reinhardt–Poincaré map `F` has a hyperbolic fixed point at `(0, x_in) ∈ ℝ⁴`, its local stable
-manifold is one-dimensional, and its local unstable manifold is the three-dimensional exceptional
-divisor." For an analytic extension `e` of Lemma 14.3.1:
+/-- **Remark 14.3.4** (`rem:hyperbolic-in`, TeX 11898–11902), in the mirrored chart (G14.9). "By
+time reversal, the Reinhardt–Poincaré map `F` has a hyperbolic fixed point at `(0, x_in) ∈ ℝ⁴`, its
+local stable manifold is one-dimensional, and its local unstable manifold is the three-dimensional
+exceptional divisor." For an analytic extension `e` of Lemma 14.3.1:
 * the point `(0, x̃_out)` of the mirrored chart lies over `q_in`: the class of
   `τ(z(x̃_out))` is `q_in`;
 * near `(0, x̃_out)`, with `r > 0`, the switching structure from `lieChartIn p` is that of
@@ -1068,7 +1013,7 @@ theorem remark14_3_4 {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ ×
   rw [eventually_nhdsWithin_iff] at hsw
   have hball : ∀ᶠ q in 𝓝 chartPtOut, q ∈ Metric.ball chartPtOut ρ₀ :=
     Metric.ball_mem_nhds chartPtOut hρ₀
-  have hgood := ((hball.and hsw).and hχ).and l6j_eventually_mem_lieChartDomain
+  have hgood := ((hball.and hsw).and hχ).and eventually_mem_lieChartDomain
   have htgt : ∀ᶠ q in 𝓝 chartPtOut, q ∈ e.target := e.open_target.mem_nhds hpt
   have hgood' := htgt.and ((e.continuousAt_symm hpt).eventually (by rw [hsp]; exact hgood))
   rw [eventually_nhdsWithin_iff]
@@ -1102,8 +1047,8 @@ theorem remark14_3_4 {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ ×
       (iso_vertexFlow 1 (lieChartIn p) t).1 = switchingFn 1 2 (y (T - t)).2.2 (y (T - t)).1 := by
     intro t
     obtain ⟨h0, h1, -⟩ := l6j_phaseHam_mirror (y (T - t))
-    rw [← l6d_hamiltonian_sub (iso_vertexFlow 1 (lieChartIn p) t).2.1,
-      ← l6d_hamiltonian_sub (y (T - t)).2.1, hM t]
+    rw [← hamiltonian_sub_eq_switchingFn (iso_vertexFlow 1 (lieChartIn p) t).2.1,
+      ← hamiltonian_sub_eq_switchingFn (y (T - t)).2.1, hM t]
     simp only [phaseHam] at h0 h1
     rw [h0, h1]
   -- the switching time of the mirrored arc is that of the arc from `q'`
@@ -1115,7 +1060,7 @@ theorem remark14_3_4 {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ ×
     · rintro t ⟨ht0, ht⟩
       by_contra hlt
       push Not at hlt
-      rw [hsf, ← l6d_hamiltonian_sub (y (T - t)).2.1] at ht
+      rw [hsf, ← hamiltonian_sub_eq_switchingFn (y (T - t)).2.1] at ht
       have := hmax (T - t) ⟨by linarith, by linarith⟩ 2 (by decide)
       simp only [phaseHam] at this
       linarith
@@ -1158,12 +1103,12 @@ theorem remark14_3_4 {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ ×
     refine ⟨T - s, ⟨by linarith, by linarith⟩, ?_⟩
     obtain ⟨h0, h1, -⟩ := l6j_phaseHam_mirror (y (T - (T - s)))
     rw [hM, h0, h1, sub_sub_cancel]
-    have hchi : switchingFn 1 2 (y s).2.2 (y s).1 = r ^ 3 * l6d_chi23 (s / r, r, p'.2) := by
-      rw [← l6d_chiRaw_eq_chi23 (p := (s / r, r, p'.2)) hp'1.ne']
-      simp only [l6d_chiRaw, l6d_flowPt, hy, div_mul_cancel₀ s hp'1.ne']
+    have hchi : switchingFn 1 2 (y s).2.2 (y s).1 = r ^ 3 * extChi23 (s / r, r, p'.2) := by
+      rw [← extChi_eq_extChi23 (p := (s / r, r, p'.2)) hp'1.ne']
+      simp only [extChi, extFlowPt, hy, div_mul_cancel₀ s hp'1.ne']
       rfl
     have hneg' := hneg (s / r) hsr hsr0
-    have := l6d_hamiltonian_sub (y s).2.1 (y s).2.2 (y s).1 1 2
+    have := hamiltonian_sub_eq_switchingFn (y s).2.1 (y s).2.2 (y s).1 1 2
     rw [hchi] at this
     simp only [phaseHam]
     nlinarith [pow_pos hp'1 3]

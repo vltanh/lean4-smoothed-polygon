@@ -19,14 +19,15 @@ Smoothed Polygons*, Lemma 14.3.1; `SmoothedPolygons/Ch14/AnalyticExtension.lean`
 form of the extremal flow with a constant control must be shown analytic in time and initial data.
 Mathlib has the analyticity of `NormedSpace.exp` in a Banach algebra (`NormedSpace.exp_analytic`)
 but no analytic parametric integrals; the integrals of the closed form are replaced by the solution
-`exp (t • L) y₀` of a linear ODE (`l6d_eq_exp_smul_apply_of_hasDerivAt`).
+`exp (t • L) y₀` of a linear ODE (`eq_exp_smul_apply_of_hasDerivAt`).
 
-* `l6d_analyticAt_matrix_exp_apply`: the entries of `exp (A y)` are analytic in `y` when the entries
+* `analyticAt_pi_apply`: evaluation at a coordinate of `ℝ^ι` is analytic (for `fun_prop`);
+* `analyticAt_matrix_exp_apply`: the entries of `exp (A y)` are analytic in `y` when the entries
   of `A y` are (no norm on matrices appears in the statement; the proof uses the operator norm);
-* `l6d_analyticAt_clm_of_apply`: a map into `W →L[ℝ] F`, `W` finite-dimensional, is analytic when
+* `analyticAt_clm_of_apply`: a map into `W →L[ℝ] F`, `W` finite-dimensional, is analytic when
   it is analytic applied to every vector;
-* `l6d_eq_exp_smul_apply_of_hasDerivAt`: a solution of `y' = L y` is `t ↦ exp (t • L) (y 0)`;
-* `l6d_isBigO_nhds_of_isBigO_nhdsGT`: a one-variable analytic function which is `O(r^k)` as
+* `eq_exp_smul_apply_of_hasDerivAt`: a solution of `y' = L y` is `t ↦ exp (t • L) (y 0)`;
+* `AnalyticAt.isBigO_nhds_of_isBigO_nhdsGT`: a one-variable analytic function which is `O(r^k)` as
   `r → 0⁺` is `O(r^k)` as `r → 0`.
 -/
 
@@ -36,9 +37,14 @@ open Filter Topology Asymptotics
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
+/-- Evaluation of a vector of `ℝ^ι` at a coordinate is analytic. -/
+theorem analyticAt_pi_apply {ι : Type*} [Fintype ι] (i : ι) (x : ι → ℝ) :
+    AnalyticAt ℝ (fun y : ι → ℝ ↦ y i) x :=
+  (ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : ι ↦ ℝ) i).analyticAt x
+
 /-- The entries of the exponential of a matrix-valued function with analytic entries are
 analytic. -/
-theorem l6d_analyticAt_matrix_exp_apply {n : Type*} [Fintype n] [DecidableEq n]
+theorem analyticAt_matrix_exp_apply {n : Type*} [Fintype n] [DecidableEq n]
     {A : E → Matrix n n ℝ} {x : E} (hA : ∀ i j, AnalyticAt ℝ (fun y ↦ A y i j) x) (i j : n) :
     AnalyticAt ℝ (fun y ↦ NormedSpace.exp (A y) i j) x := by
   open scoped Matrix.Norms.Operator in
@@ -56,7 +62,7 @@ theorem l6d_analyticAt_matrix_exp_apply {n : Type*} [Fintype n] [DecidableEq n]
 
 /-- A map into the continuous linear maps on a finite-dimensional space is analytic if it is
 analytic applied to every vector (write `f y = Σᵢ (b.coord i).smulRight (f y (b i))`). -/
-theorem l6d_analyticAt_clm_of_apply {W F : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W]
+theorem analyticAt_clm_of_apply {W F : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W]
     [FiniteDimensional ℝ W] [NormedAddCommGroup F] [NormedSpace ℝ F]
     {f : E → W →L[ℝ] F} {x : E} (hf : ∀ w, AnalyticAt ℝ (fun y ↦ f y w) x) :
     AnalyticAt ℝ f x := by
@@ -76,7 +82,7 @@ theorem l6d_analyticAt_clm_of_apply {W F : Type*} [NormedAddCommGroup W] [Normed
 
 /-- **Linear ODEs**: a solution of `y' = L y` on `ℝ` (in a Banach space) is
 `y t = exp (t • L) (y 0)`. -/
-theorem l6d_eq_exp_smul_apply_of_hasDerivAt {W : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W]
+theorem eq_exp_smul_apply_of_hasDerivAt {W : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W]
     [CompleteSpace W] {L : W →L[ℝ] W} {y : ℝ → W} (hy : ∀ t, HasDerivAt y (L (y t)) t) (t : ℝ) :
     y t = NormedSpace.exp (t • L) (y 0) := by
   have hE : ∀ s : ℝ, HasDerivAt (fun u : ℝ ↦ NormedSpace.exp ((-u) • L))
@@ -112,7 +118,7 @@ theorem l6d_eq_exp_smul_apply_of_hasDerivAt {W : Type*} [NormedAddCommGroup W] [
 /-- An analytic function of one real variable which is `O(r^k)` as `r → 0⁺` is `O(r^k)` as
 `r → 0`: its order at `0` is at least `k` (if `f = r^m g` with `g 0 ≠ 0` and `m < k`, then
 `g = O(r^{k-m})` on the right, so `g 0 = 0`). -/
-theorem l6d_isBigO_nhds_of_isBigO_nhdsGT {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+theorem AnalyticAt.isBigO_nhds_of_isBigO_nhdsGT {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {f : ℝ → F} (hf : AnalyticAt ℝ f 0) {k : ℕ}
     (hk : f =O[𝓝[>] 0] (fun r ↦ r ^ k)) : f =O[𝓝 0] (fun r ↦ r ^ k) := by
   by_cases h0 : ∀ᶠ z in 𝓝 (0 : ℝ), f z = 0

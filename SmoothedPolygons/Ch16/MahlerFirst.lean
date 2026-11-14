@@ -116,7 +116,8 @@ neighbourhood on which the control is one vertex.** Off the finite exceptional s
 locally a vertex; on each side of the time, next to it, it is therefore one vertex
 (`exists_ae_eq_vertex_of_locally`), and the two vertices agree because the time is not a
 switching time. -/
-private lemma l3m_local_vertex {u : ℝ → Fin 3 → ℝ} {α β t : ℝ} (hbb : IsFiniteBangBang α β u)
+lemma IsFiniteBangBang.exists_ae_eq_vertex_of_not_isSwitchingTime {u : ℝ → Fin 3 → ℝ} {α β t :
+    ℝ} (hbb : IsFiniteBangBang α β u)
     (ht : t ∈ Ioo α β) (hsw : ¬ IsSwitchingTime u t) :
     ∃ i : Fin 3, ∃ η > 0, ∀ᵐ τ, τ ∈ Ioo (t - η) (t + η) → u τ = vertex i := by
   obtain ⟨S, hS⟩ := hbb
@@ -200,7 +201,8 @@ Proof:
    lift does not meet `𝒮_sing` at `d` ("A trajectory cannot reach the singular locus with finitely
    many switches"), against `d ∈ Z`.
 
-The step "with step 5, the control is a.e. constant at one vertex" is `l3m_local_vertex` (near each
+The step "with step 5, the control is a.e. constant at one vertex" is
+`IsFiniteBangBang.exists_ae_eq_vertex_of_not_isSwitchingTime` (near each
 time of `(d - ε', d)`: on each side the control is one vertex, by connectedness, and the two agree
 since the time is not a switching time) and `exists_ae_eq_vertex_of_locally` (a locally constant
 vertex control is constant on an interval: connectedness, and a locally null set is null). -/
@@ -301,7 +303,8 @@ private theorem l3st_forall_not_mem_singularLocus (hNC : NoChatteringIntoSingula
     intro t ht
     have h1 : p < t := lt_of_le_of_lt (le_max_left _ _) ht.1
     have h2 : d - ε < t := lt_of_le_of_lt (le_max_right _ _) ht.1
-    exact l3m_local_vertex (hbb ((p + t) / 2) ((t + d) / 2) (by linarith) (by linarith [ht.2]))
+    exact IsFiniteBangBang.exists_ae_eq_vertex_of_not_isSwitchingTime (hbb ((p + t) / 2) ((t + d) /
+        2) (by linarith) (by linarith [ht.2]))
       ⟨by linarith, by linarith [ht.2]⟩ (hsw t ⟨h2, ht.2⟩)
   obtain ⟨i, hi⟩ := exists_ae_eq_vertex_of_locally hloc
   -- Step 7: Lemma 8.3.4 on `[c, d]`

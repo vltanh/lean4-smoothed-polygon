@@ -32,6 +32,7 @@ public import SmoothedPolygons.Ch15.SmallerCells
 public import SmoothedPolygons.Ch16.BasinHypotheses
 public import SmoothedPolygons.Ch16.GlobalBasin
 public import SmoothedPolygons.Ch16.MahlerFirst
+public import SmoothedPolygons.Ch16.NoChattering
 public import SmoothedPolygons.Ch16.OutwardFuller
 public import SmoothedPolygons.Ch2.BalancedCircle
 public import SmoothedPolygons.Ch2.BalancedDensity

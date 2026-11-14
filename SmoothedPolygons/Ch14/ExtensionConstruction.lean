@@ -1,7 +1,7 @@
 module
 
 public import SmoothedPolygons.Ch14.Asymptotics
-public import SmoothedPolygons.Ch14.l6d_FlowAnalytic
+public import SmoothedPolygons.Ch14.VertexFlowAnalytic
 public import Basic.Analysis.Analytic.DivisionByCoordinate
 public import Mathlib.Analysis.Calculus.ImplicitContDiff
 import SmoothedPolygons.Ch7.Isolated.VertexFlow
@@ -16,20 +16,21 @@ Steps 1–9 of the proof of Lemma 14.3.1 of Hales–Vajjha, *Packings of Smoothe
 `SmoothedPolygons/Ch14/AnalyticExtension.lean`, which uses this file; its module docstring gives
 the route step by step.
 
-* `l6d_flowPt p`: the flow with the control `e₂` from the chart point `(r₀, x̃₀)` at time `s r₀`;
-  `l6d_chiRaw i j p`: the switching function `χ_ij` there, analytic near `r₀ = 0`
+* `extFlowPt p`: the flow with the control `e₂` from the chart point `(r₀, x̃₀)` at time `s r₀`;
+  `extChi i j p`: the switching function `χ_ij` there, analytic near `r₀ = 0`
   (`l6d_analyticAt_chiRaw`);
-* `l6d_divR f k v`: `f/r₀^k` extended by `v` at `r₀ = 0`, analytic when `f = r₀^k v + O(r₀^{k+1})`
-  (`l6d_analyticAt_divR`, division of power series); `l6d_chi21`, `l6d_chi23` (`k = 3`, Lemma
+* `extDivPow f k v`: `f/r₀^k` extended by `v` at `r₀ = 0`, analytic when `f = r₀^k v + O(r₀^{k+1})`
+  (`l6d_analyticAt_divR`, division of power series); `extChi21`, `extChi23` (`k = 3`, Lemma
   14.2.4 and its χ₂₃ companion);
 * the Fuller cubic at `x̃_out` (`l6d_g`, `l6d_g_factor`, `l6d_g'_T_neg`, `l6d_v21_xTildeOut`,
-  `l6d_v23_xTildeOut`), exact;
-* `l6d_sSw`: the analytic switching time (implicit function theorem), `l6d_zero_structure` (it is
-  the least positive zero near the fixed point), `l6d_eventually_chi23_pos` (the χ₂₃ check);
-* `l6d_Xi`: the image point `Ad_{R⁻¹} Y(s r₀)`; its divided entries `l6d_qa`, …, `l6d_qd` (Step 7,
-  from Lemma 14.2.3 and the determinant relations); the extended map `l6d_E`, analytic at the fixed
-  point (`l6d_analyticAt_E`), `lieChartInv` of the image point for `r₀ ≠ 0`
-  (`l6d_E_eq_lieChartInv`), the Fuller–Poincaré map on the divisor (`l6d_eventually_E_divisor`,
+  `extChi23Zero_xTildeOut`), exact;
+* `extSwitchTime`: the analytic switching time (implicit function theorem),
+  `extSwitchTime_zero_structure` (it is
+  the least positive zero near the fixed point), `eventually_extChi23_pos` (the χ₂₃ check);
+* `extSwitchPt`: the image point `Ad_{R⁻¹} Y(s r₀)`; its divided entries `extDivA`, …, `extDivD`
+  (Step 7, from Lemma 14.2.3 and the determinant relations); the extended map `extMap`, analytic at
+  the fixed point (`analyticAt_extMap`), `lieChartInv` of the image point for `r₀ ≠ 0`
+  (`extMap_eq_lieChartInv`), the Fuller–Poincaré map on the divisor (`eventually_extMap_divisor`,
   via `l6d_poincare_eq`).
 -/
 
@@ -40,26 +41,26 @@ namespace SmoothedPolygons
 open Complex Set Filter Topology Asymptotics
 open TriFuller
 
-attribute [local fun_prop] analyticAt_fst analyticAt_snd l6d_analyticAt_pi_apply
+attribute [local fun_prop] analyticAt_fst analyticAt_snd analyticAt_pi_apply
 
-@[simp] lemma l6d_ofReal_pow_re (r : ℝ) (n : ℕ) : ((r : ℂ) ^ n).re = r ^ n := by
+@[simp] lemma _root_.Complex.re_ofReal_pow (r : ℝ) (n : ℕ) : ((r : ℂ) ^ n).re = r ^ n := by
   rw [← Complex.ofReal_pow, Complex.ofReal_re]
 
-@[simp] lemma l6d_ofReal_pow_im (r : ℝ) (n : ℕ) : ((r : ℂ) ^ n).im = 0 := by
+@[simp] lemma _root_.Complex.im_ofReal_pow (r : ℝ) (n : ℕ) : ((r : ℂ) ^ n).im = 0 := by
   rw [← Complex.ofReal_pow, Complex.ofReal_im]
 
 /-! ### The flow from the chart, in rescaled time -/
 
 /-- The flow with the control `e₂` from the chart point `(r₀, x̃₀)` at time `s r₀`
 (`p = (s, r₀, x̃₀)`). -/
-noncomputable def l6d_flowPt (p : ℝ × ℝ × (Fin 3 → ℝ)) : iso_PhasePt :=
+noncomputable def extFlowPt (p : ℝ × ℝ × (Fin 3 → ℝ)) : iso_PhasePt :=
   iso_vertexFlow 1 (lieChart (p.2.1, p.2.2)) (p.1 * p.2.1)
 
-/-- The switching function `χ_ij` along the flow, at `l6d_flowPt p`. -/
-noncomputable def l6d_chiRaw (i j : Fin 3) (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ :=
-  switchingFn i j (l6d_flowPt p).2.2 (l6d_flowPt p).1
+/-- The switching function `χ_ij` along the flow, at `extFlowPt p`. -/
+noncomputable def extChi (i j : Fin 3) (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ :=
+  switchingFn i j (extFlowPt p).2.2 (extFlowPt p).1
 
-lemma l6d_lieChart_zero (x : Fin 3 → ℝ) :
+private lemma l6d_lieChart_zero (x : Fin 3 → ℝ) :
     lieChart (0, x) = (J, (-(3 / 2) : ℝ) • J, 0) := by
   have hX : lieX 0 (x 0) = J := by
     ext i j; fin_cases i <;> fin_cases j <;> simp [lieX, J]
@@ -69,51 +70,52 @@ lemma l6d_lieChart_zero (x : Fin 3 → ℝ) :
     simp [reducedHam, traceForm, J, Matrix.trace_fin_two]
   simp only [lieChart, hX, hΛ, lieΛR, sl2Dual, hh, mul_zero, zero_smul, add_zero, smul_zero]
 
-lemma l6d_flowPt_zero (s : ℝ) (x : Fin 3 → ℝ) :
-    l6d_flowPt (s, 0, x) = (J, (-(3 / 2) : ℝ) • J, 0) := by
-  simp only [l6d_flowPt, mul_zero, ivf_vertexFlow_zero, l6d_lieChart_zero]
+private lemma l6d_flowPt_zero (s : ℝ) (x : Fin 3 → ℝ) :
+    extFlowPt (s, 0, x) = (J, (-(3 / 2) : ℝ) • J, 0) := by
+  simp only [extFlowPt, mul_zero, ivf_vertexFlow_zero, l6d_lieChart_zero]
 
 /-- The coordinates `(s, r₀, x̃₀) ↦ (r₀, x̃₀)` are analytic. -/
-lemma l6d_analyticAt_chartCoord (p : ℝ × ℝ × (Fin 3 → ℝ)) :
+private lemma l6d_analyticAt_chartCoord (p : ℝ × ℝ × (Fin 3 → ℝ)) :
     AnalyticAt ℝ (fun p : ℝ × ℝ × (Fin 3 → ℝ) ↦ (p.2.1, p.2.2)) p := by
   fun_prop
 
 /-- The flow from the chart is analytic near `r₀ = 0` (Steps 1–2 of Lemma 14.3.1). -/
-lemma l6d_MatAn_flowPt (s : ℝ) (x : Fin 3 → ℝ) :
-    l6d_MatAn (fun p ↦ (l6d_flowPt p).1) (s, 0, x) ∧
-      l6d_MatAn (fun p ↦ (l6d_flowPt p).2.1) (s, 0, x) ∧
-      l6d_MatAn (fun p ↦ (l6d_flowPt p).2.2) (s, 0, x) := by
-  obtain ⟨h1, h2, h3⟩ := l6d_MatAn_lieChart (l6d_analyticAt_chartCoord (s, 0, x))
+private lemma l6d_MatAn_flowPt (s : ℝ) (x : Fin 3 → ℝ) :
+    EntrywiseAnalyticAt (fun p ↦ (extFlowPt p).1) (s, 0, x) ∧
+      EntrywiseAnalyticAt (fun p ↦ (extFlowPt p).2.1) (s, 0, x) ∧
+      EntrywiseAnalyticAt (fun p ↦ (extFlowPt p).2.2) (s, 0, x) := by
+  obtain ⟨h1, h2, h3⟩ := entrywiseAnalyticAt_lieChart (l6d_analyticAt_chartCoord (s, 0, x))
     (by simp) (by norm_num)
-  refine l6d_analyticAt_vertexFlow 1 h1 h2 h3 (by fun_prop) ?_
-  simp only [l6d_lieChart_zero, l6d_traceForm_controlMatrix_J]
+  refine entrywiseAnalyticAt_vertexFlow 1 h1 h2 h3 (by fun_prop) ?_
+  simp only [l6d_lieChart_zero, traceForm_controlMatrix_vertex_J]
   norm_num
 
 /-- The switching functions along the flow from the chart are analytic near `r₀ = 0`. -/
-lemma l6d_analyticAt_chiRaw (i j : Fin 3) (s : ℝ) (x : Fin 3 → ℝ) :
-    AnalyticAt ℝ (l6d_chiRaw i j) (s, 0, x) := by
+private lemma l6d_analyticAt_chiRaw (i j : Fin 3) (s : ℝ) (x : Fin 3 → ℝ) :
+    AnalyticAt ℝ (extChi i j) (s, 0, x) := by
   obtain ⟨h1, -, h3⟩ := l6d_MatAn_flowPt s x
-  have hZ : ∀ k : Fin 3, traceForm (controlMatrix (vertex k)) (l6d_flowPt (s, 0, x)).1 ≠ 0 := by
-    intro k; rw [l6d_flowPt_zero, l6d_traceForm_controlMatrix_J]; norm_num
-  exact h3.traceForm ((l6d_MatAn.controlP j h1 (hZ j)).sub (l6d_MatAn.controlP i h1 (hZ i)))
+  have hZ : ∀ k : Fin 3, traceForm (controlMatrix (vertex k)) (extFlowPt (s, 0, x)).1 ≠ 0 := by
+    intro k; rw [l6d_flowPt_zero, traceForm_controlMatrix_vertex_J]; norm_num
+  exact h3.traceForm ((EntrywiseAnalyticAt.controlP j h1 (hZ j)).sub (EntrywiseAnalyticAt.controlP i
+      h1 (hZ i)))
 
 /-! ### Division by `r₀³` (Step 3) -/
 
 /-- `χ_ij/r₀³`, extended at `r₀ = 0` by the value `v (s, x̃₀)`. -/
-noncomputable def l6d_chiT (i j : Fin 3) (v : ℝ × (Fin 3 → ℝ) → ℝ)
+noncomputable def extChiDiv (i j : Fin 3) (v : ℝ × (Fin 3 → ℝ) → ℝ)
     (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ :=
-  if p.2.1 = 0 then v (p.1, p.2.2) else l6d_chiRaw i j p / p.2.1 ^ 3
+  if p.2.1 = 0 then v (p.1, p.2.2) else extChi i j p / p.2.1 ^ 3
 
 /-- The reordering `(r₀, (s, x̃₀)) ↦ (s, r₀, x̃₀)` of the coordinates. -/
-def l6d_swap (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ × ℝ × (Fin 3 → ℝ) := (p.2.1, p.1, p.2.2)
+private def l6d_swap (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ × ℝ × (Fin 3 → ℝ) := (p.2.1, p.1, p.2.2)
 
-lemma l6d_analyticAt_swap (p : ℝ × ℝ × (Fin 3 → ℝ)) : AnalyticAt ℝ l6d_swap p := by
+private lemma l6d_analyticAt_swap (p : ℝ × ℝ × (Fin 3 → ℝ)) : AnalyticAt ℝ l6d_swap p := by
   unfold l6d_swap; fun_prop
 
-lemma l6d_swap_swap (p : ℝ × ℝ × (Fin 3 → ℝ)) : l6d_swap (l6d_swap p) = p := rfl
+private lemma l6d_swap_swap (p : ℝ × ℝ × (Fin 3 → ℝ)) : l6d_swap (l6d_swap p) = p := rfl
 
 /-- If `f(r) = r^k c + O(r^{k+1})` as `r → 0⁺`, then `f(r)/r^k → c`. -/
-lemma l6d_tendsto_div_pow {f : ℝ → ℝ} {c : ℝ} {k : ℕ}
+private lemma l6d_tendsto_div_pow {f : ℝ → ℝ} {c : ℝ} {k : ℕ}
     (h : (fun r ↦ f r - r ^ k * c) =O[𝓝[>] 0] (fun r ↦ r ^ (k + 1))) :
     Tendsto (fun r ↦ f r / r ^ k) (𝓝[>] 0) (𝓝 c) := by
   rw [← tendsto_sub_nhds_zero_iff]
@@ -133,28 +135,29 @@ lemma l6d_tendsto_div_pow {f : ℝ → ℝ} {c : ℝ} {k : ℕ}
   exact tendsto_nhdsWithin_of_tendsto_nhds (continuous_id.tendsto' 0 0 rfl)
 
 /-- `f/r₀^k`, extended at `r₀ = 0` by the value `v (s, x̃₀)`. -/
-noncomputable def l6d_divR (f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ) (k : ℕ) (v : ℝ × (Fin 3 → ℝ) → ℝ)
+noncomputable def extDivPow (f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ) (k : ℕ) (v : ℝ × (Fin 3 → ℝ) → ℝ)
     (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ :=
   if p.2.1 = 0 then v (p.1, p.2.2) else f p / p.2.1 ^ k
 
-lemma l6d_divR_zero (f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ) (k : ℕ) (v : ℝ × (Fin 3 → ℝ) → ℝ) (s : ℝ)
-    (x : Fin 3 → ℝ) : l6d_divR f k v (s, 0, x) = v (s, x) := by
-  simp [l6d_divR]
+private lemma l6d_divR_zero (f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ) (k : ℕ) (v : ℝ × (Fin 3 → ℝ) → ℝ) (s : ℝ)
+    (x : Fin 3 → ℝ) : extDivPow f k v (s, 0, x) = v (s, x) := by
+  simp [extDivPow]
 
-lemma l6d_eq_pow_mul_divR (f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ) (k : ℕ) (v : ℝ × (Fin 3 → ℝ) → ℝ)
-    {p : ℝ × ℝ × (Fin 3 → ℝ)} (hp : p.2.1 ≠ 0) : f p = p.2.1 ^ k * l6d_divR f k v p := by
-  simp only [l6d_divR, hp, ite_false]
+lemma eq_pow_mul_extDivPow (f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ) (k : ℕ) (v : ℝ × (Fin 3 → ℝ) → ℝ)
+    {p : ℝ × ℝ × (Fin 3 → ℝ)} (hp : p.2.1 ≠ 0) : f p = p.2.1 ^ k * extDivPow f k v p := by
+  simp only [extDivPow, hp, ite_false]
   field_simp
 
 /-- **Division of power series** (Step 3 of Lemma 14.3.1, TeX 11800–11806, and Step 7,
 TeX 11846–11848): if `f` is analytic near `r₀ = 0` and `f(s, r₀, x̃₀) = r₀^k v(s, x̃₀) +
 O(r₀^{k+1})` as `r₀ → 0⁺` for each `(s, x̃₀)`, then `f/r₀^k`, extended by `v` at `r₀ = 0`, is
 analytic near every point of `r₀ = 0`. -/
-lemma l6d_analyticAt_divR {f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ} (hf : ∀ s x, AnalyticAt ℝ f (s, 0, x))
+private lemma l6d_analyticAt_divR {f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ} (hf : ∀ s x, AnalyticAt ℝ f (s, 0,
+    x))
     (k : ℕ) {v : ℝ × (Fin 3 → ℝ) → ℝ}
     (hv : ∀ s x, (fun r ↦ f (s, r, x) - r ^ k * v (s, x)) =O[𝓝[>] 0] (fun r ↦ r ^ (k + 1)))
     (s : ℝ) (x : Fin 3 → ℝ) :
-    AnalyticAt ℝ (l6d_divR f k v) (s, 0, x) := by
+    AnalyticAt ℝ (extDivPow f k v) (s, 0, x) := by
   -- the function with the coordinate `r₀` first
   set F : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := fun p ↦ f (l6d_swap p) with hFdef
   have hF : ∀ s' x', AnalyticAt ℝ F (0, s', x') := fun s' x' ↦
@@ -163,7 +166,7 @@ lemma l6d_analyticAt_divR {f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ} (hf : ∀ 
     intro s' x'
     have han : AnalyticAt ℝ (fun r ↦ F (r, s', x')) 0 :=
       (hF s' x').comp_of_eq (by fun_prop : AnalyticAt ℝ (fun r : ℝ ↦ (r, s', x')) 0) rfl
-    refine l6d_isBigO_nhds_of_isBigO_nhdsGT han ?_
+    refine AnalyticAt.isBigO_nhds_of_isBigO_nhdsGT han ?_
     have h4 : (fun r : ℝ ↦ r ^ (k + 1)) =O[𝓝[>] 0] (fun r ↦ r ^ k) :=
       ((isLittleO_pow_pow (by omega : k < k + 1)).isBigO).mono nhdsWithin_le_nhds
     have h3 : (fun r : ℝ ↦ r ^ k * v (s', x')) =O[𝓝[>] 0] (fun r ↦ r ^ k) := by
@@ -191,7 +194,7 @@ lemma l6d_analyticAt_divR {f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ} (hf : ∀ 
       field_simp
     have hlim := (l6d_tendsto_div_pow (hv s' x')).congr' (hev.mono fun r h ↦ h.symm)
     exact tendsto_nhds_unique (hc.tendsto.mono_left nhdsWithin_le_nhds) hlim
-  have hev : l6d_divR f k v =ᶠ[𝓝 (s, 0, x)] fun p ↦ g (l6d_swap p) := by
+  have hev : extDivPow f k v =ᶠ[𝓝 (s, 0, x)] fun p ↦ g (l6d_swap p) := by
     have hpre : l6d_swap ⁻¹' U ∈ 𝓝 (s, 0, x) :=
       (l6d_analyticAt_swap (s, 0, x)).continuousAt.preimage_mem_nhds (hUo.mem_nhds hU0)
     filter_upwards [hpre] with p hp
@@ -199,119 +202,122 @@ lemma l6d_analyticAt_divR {f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ} (hf : ∀ 
     simp only [mem_preimage, l6d_swap] at hp
     by_cases hr : r' = 0
     · subst hr
-      simp only [l6d_divR, l6d_swap, ite_true]
+      simp only [extDivPow, l6d_swap, ite_true]
       exact (hval s' x' hp).symm
     · have := (hUsub _ hp).1
       simp only [F, l6d_swap, smul_eq_mul] at this
-      simp only [l6d_divR, hr, ite_false, l6d_swap, this]
+      simp only [extDivPow, hr, ite_false, l6d_swap, this]
       field_simp
   exact (hg.comp_of_eq (l6d_analyticAt_swap _) rfl).congr hev.symm
 
-lemma l6d_analyticAt_chiT (i j : Fin 3) {v : ℝ × (Fin 3 → ℝ) → ℝ}
-    (hv : ∀ s x, (fun r ↦ l6d_chiRaw i j (s, r, x) - r ^ 3 * v (s, x)) =O[𝓝[>] 0]
+lemma analyticAt_extChiDiv (i j : Fin 3) {v : ℝ × (Fin 3 → ℝ) → ℝ}
+    (hv : ∀ s x, (fun r ↦ extChi i j (s, r, x) - r ^ 3 * v (s, x)) =O[𝓝[>] 0]
       (fun r ↦ r ^ 4)) (s : ℝ) (x : Fin 3 → ℝ) :
-    AnalyticAt ℝ (l6d_chiT i j v) (s, 0, x) :=
+    AnalyticAt ℝ (extChiDiv i j v) (s, 0, x) :=
   l6d_analyticAt_divR (l6d_analyticAt_chiRaw i j) 3 hv s x
 
 /-! ### The rescaled switching functions `χ̃₂₁`, `χ̃₂₃` -/
 
 /-- The limit `24 RR(ζ - 1, z₃(s))` of `χ₂₁/r₀³` (Lemma 14.2.4). -/
-noncomputable def l6d_v21 (p : ℝ × (Fin 3 → ℝ)) : ℝ :=
+noncomputable def extChi21Zero (p : ℝ × (Fin 3 → ℝ)) : ℝ :=
   24 * RR (ζ - 1) (flow p.1 (fullerOfChart p.2) ζ 2)
 
 /-- The limit `24 RR(ζ - ζ², z₃(s))` of `χ₂₃/r₀³` (the χ₂₃ companion of Lemma 14.2.4). -/
-noncomputable def l6d_v23 (p : ℝ × (Fin 3 → ℝ)) : ℝ :=
+noncomputable def extChi23Zero (p : ℝ × (Fin 3 → ℝ)) : ℝ :=
   24 * RR (ζ - ζ ^ 2) (flow p.1 (fullerOfChart p.2) ζ 2)
 
 /-- `χ̃₂₁(s, r₀, x̃₀) = χ₂₁/r₀³`, extended analytically to `r₀ = 0`. -/
-noncomputable def l6d_chi21 : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := l6d_chiT 1 0 l6d_v21
+noncomputable def extChi21 : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := extChiDiv 1 0 extChi21Zero
 
 /-- `χ̃₂₃(s, r₀, x̃₀) = χ₂₃/r₀³`, extended analytically to `r₀ = 0`. -/
-noncomputable def l6d_chi23 : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := l6d_chiT 1 2 l6d_v23
+noncomputable def extChi23 : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := extChiDiv 1 2 extChi23Zero
 
-lemma l6d_analyticAt_chi21 (s : ℝ) (x : Fin 3 → ℝ) : AnalyticAt ℝ l6d_chi21 (s, 0, x) := by
-  refine l6d_analyticAt_chiT 1 0 (fun s x ↦ ?_) s x
+private lemma l6d_analyticAt_chi21 (s : ℝ) (x : Fin 3 → ℝ) : AnalyticAt ℝ extChi21 (s, 0, x) := by
+  refine analyticAt_extChiDiv 1 0 (fun s x ↦ ?_) s x
   refine (lemma14_2_4 x s).congr_left fun r ↦ ?_
-  simp only [l6d_chiRaw, l6d_flowPt, l6d_v21]
+  simp only [extChi, extFlowPt, extChi21Zero]
   ring
 
-lemma l6d_analyticAt_chi23 (s : ℝ) (x : Fin 3 → ℝ) : AnalyticAt ℝ l6d_chi23 (s, 0, x) := by
-  refine l6d_analyticAt_chiT 1 2 (fun s x ↦ ?_) s x
+lemma analyticAt_extChi23 (s : ℝ) (x : Fin 3 → ℝ) : AnalyticAt ℝ extChi23 (s, 0, x) := by
+  refine analyticAt_extChiDiv 1 2 (fun s x ↦ ?_) s x
   refine (lemma14_2_4_chi23 x s).congr_left fun r ↦ ?_
-  simp only [l6d_chiRaw, l6d_flowPt, l6d_v23]
+  simp only [extChi, extFlowPt, extChi23Zero]
   ring
 
-lemma l6d_chi21_zero (s : ℝ) (x : Fin 3 → ℝ) : l6d_chi21 (s, 0, x) = l6d_v21 (s, x) := by
-  simp [l6d_chi21, l6d_chiT]
+private lemma l6d_chi21_zero (s : ℝ) (x : Fin 3 → ℝ) : extChi21 (s, 0, x) = extChi21Zero (s, x) :=
+    by
+  simp [extChi21, extChiDiv]
 
-lemma l6d_chi23_zero (s : ℝ) (x : Fin 3 → ℝ) : l6d_chi23 (s, 0, x) = l6d_v23 (s, x) := by
-  simp [l6d_chi23, l6d_chiT]
+lemma extChi23_zero (s : ℝ) (x : Fin 3 → ℝ) : extChi23 (s, 0, x) = extChi23Zero (s, x) := by
+  simp [extChi23, extChiDiv]
 
-lemma l6d_chiRaw_eq_chi21 {p : ℝ × ℝ × (Fin 3 → ℝ)} (hp : p.2.1 ≠ 0) :
-    l6d_chiRaw 1 0 p = p.2.1 ^ 3 * l6d_chi21 p := by
-  simp only [l6d_chi21, l6d_chiT, hp, ite_false]
+lemma extChi_eq_extChi21 {p : ℝ × ℝ × (Fin 3 → ℝ)} (hp : p.2.1 ≠ 0) :
+    extChi 1 0 p = p.2.1 ^ 3 * extChi21 p := by
+  simp only [extChi21, extChiDiv, hp, ite_false]
   field_simp
 
-lemma l6d_chiRaw_eq_chi23 {p : ℝ × ℝ × (Fin 3 → ℝ)} (hp : p.2.1 ≠ 0) :
-    l6d_chiRaw 1 2 p = p.2.1 ^ 3 * l6d_chi23 p := by
-  simp only [l6d_chi23, l6d_chiT, hp, ite_false]
+lemma extChi_eq_extChi23 {p : ℝ × ℝ × (Fin 3 → ℝ)} (hp : p.2.1 ≠ 0) :
+    extChi 1 2 p = p.2.1 ^ 3 * extChi23 p := by
+  simp only [extChi23, extChiDiv, hp, ite_false]
   field_simp
 
 /-! ### The Fuller cubic at `x̃_out` (Step 4) -/
 
 /-- The virial equivariance of the Fuller flow with a constant control:
 `z(λ τ, (λ z₁, λ² z₂, λ³ z₃), u) = (λ z₁(τ), λ² z₂(τ), λ³ z₃(τ))`. -/
-lemma l6d_flow_scale (l τ : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
+private lemma l6d_flow_scale (l τ : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
     flow (l * τ) (scale l z) u = scale l (flow τ z u) := by
   funext i
   fin_cases i <;> simp [flow, scale] <;> ring
 
 /-- The rescaling factor `λ = 1/(2 Im q_out,₁)` of Remark 14.2.1 (G14.12). -/
-noncomputable def l6d_lam : ℝ := (2 * (qOutCart 0).im)⁻¹
+noncomputable def virialScaleOut : ℝ := (2 * (qOutCart 0).im)⁻¹
 
-lemma l6d_lam_pos : 0 < l6d_lam := inv_pos.2 (by linarith [qOutCart_signs.1])
+lemma virialScaleOut_pos : 0 < virialScaleOut := inv_pos.2 (by linarith [qOutCart_signs.1])
 
 /-- The first switching time `t_sw ≈ 7.40` of `q_out`. -/
-noncomputable def l6d_T : ℝ := firstSwitchTime qOutCart
+noncomputable def tSwOut : ℝ := firstSwitchTime qOutCart
 
-lemma l6d_T_pos : 0 < l6d_T := by
+private lemma l6d_T_pos : 0 < tSwOut := by
   have := firstSwitchTime_qOutCart_bounds.1
-  unfold l6d_T; linarith
+  unfold tSwOut; linarith
 
 /-- The rescaled switching time `s_sw,out = λ t_sw ≈ 8.84` at `x̃_out`. -/
-noncomputable def l6d_S : ℝ := l6d_lam * l6d_T
+noncomputable def sSwOut : ℝ := virialScaleOut * tSwOut
 
-lemma l6d_S_pos : 0 < l6d_S := mul_pos l6d_lam_pos l6d_T_pos
+private lemma l6d_S_pos : 0 < sSwOut := mul_pos virialScaleOut_pos l6d_T_pos
 
 /-- The coefficients of the cubic `g(τ) = RR(ζ - 1, z₃(τ, q_out, ζ))`. -/
-noncomputable def l6d_a0 : ℝ := -(3 / 2) * (qOutCart 2).re
-noncomputable def l6d_a1 : ℝ := -(3 / 2) * (qOutCart 1).re + √3 / 2 * (qOutCart 1).im
-noncomputable def l6d_a2 : ℝ := 3 / 4 + √3 / 4 * (qOutCart 0).im
-noncomputable def l6d_a3 : ℝ := -(√3 / 12)
+noncomputable def outCubicCoeff0 : ℝ := -(3 / 2) * (qOutCart 2).re
+private noncomputable def l6d_a1 : ℝ := -(3 / 2) * (qOutCart 1).re + √3 / 2 * (qOutCart 1).im
+private noncomputable def l6d_a2 : ℝ := 3 / 4 + √3 / 4 * (qOutCart 0).im
+noncomputable def outCubicCoeff3 : ℝ := -(√3 / 12)
 
 /-- The Fuller switching function from `ζ` to `1` along the flow from `q_out` with control `ζ`. -/
-noncomputable def l6d_g (τ : ℝ) : ℝ :=
-  l6d_a0 + l6d_a1 * τ + l6d_a2 * τ ^ 2 + l6d_a3 * τ ^ 3
+private noncomputable def l6d_g (τ : ℝ) : ℝ :=
+  outCubicCoeff0 + l6d_a1 * τ + l6d_a2 * τ ^ 2 + outCubicCoeff3 * τ ^ 3
 
-lemma l6d_RR_flow_qOut (τ : ℝ) : RR (ζ - 1) (flow τ qOutCart ζ 2) = l6d_g τ := by
+private lemma l6d_RR_flow_qOut (τ : ℝ) : RR (ζ - 1) (flow τ qOutCart ζ 2) = l6d_g τ := by
   obtain ⟨h0, h2, -⟩ := qOutCart_normalization
   have hs : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
   rw [RR_eq_re_mul_add_im_mul]
-  simp [flow, l6d_g, l6d_a0, l6d_a1, l6d_a2, l6d_a3, ζ_re, ζ_im, h0, h2]
+  simp [flow, l6d_g, outCubicCoeff0, l6d_a1, l6d_a2, outCubicCoeff3, ζ_re, ζ_im, h0, h2]
   ring_nf
 
-lemma l6d_coeff_signs : 0 < l6d_a0 ∧ 0 < l6d_a1 ∧ 0 < l6d_a2 ∧ l6d_a3 < 0 := by
+private lemma l6d_coeff_signs : 0 < outCubicCoeff0 ∧ 0 < l6d_a1 ∧ 0 < l6d_a2 ∧ outCubicCoeff3 < 0 :=
+    by
   obtain ⟨-, -, h2⟩ := qOutCart_normalization
   obtain ⟨hy1, hx2, hy2⟩ := qOutCart_signs
   have hs : 0 < √3 := by positivity
-  refine ⟨by unfold l6d_a0; linarith, by unfold l6d_a1; nlinarith, by unfold l6d_a2; nlinarith,
-    by unfold l6d_a3; linarith⟩
+  refine ⟨by unfold outCubicCoeff0; linarith, by unfold l6d_a1; nlinarith, by
+      unfold l6d_a2; nlinarith,
+    by unfold outCubicCoeff3; linarith⟩
 
-lemma l6d_g_T : l6d_g l6d_T = 0 := by
+private lemma l6d_g_T : l6d_g tSwOut = 0 := by
   have h := poincare_qOutCart
   rw [poincare, firstControl_qOutCart] at h
   have h2 := congrFun h 2
-  rw [← l6d_RR_flow_qOut, l6d_T, h2]
+  rw [← l6d_RR_flow_qOut, tSwOut, h2]
   obtain ⟨-, hi, -⟩ := qOutCart_normalization
   have hs : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
   rw [RR_eq_re_mul_add_im_mul]
@@ -321,111 +327,114 @@ lemma l6d_g_T : l6d_g l6d_T = 0 := by
   ring
 
 /-- `T³ g(τ) = (T - τ) B(τ)` with `B(τ) > 0` for `τ ≥ 0`. -/
-lemma l6d_g_factor (τ : ℝ) : l6d_T ^ 3 * l6d_g τ = (l6d_T - τ) * (l6d_a0 *
-    (l6d_T ^ 2 + l6d_T * τ + τ ^ 2) + l6d_a1 * τ * l6d_T * (l6d_T + τ) +
-      l6d_a2 * τ ^ 2 * l6d_T ^ 2) := by
+private lemma l6d_g_factor (τ : ℝ) : tSwOut ^ 3 * l6d_g τ = (tSwOut - τ) * (outCubicCoeff0 *
+    (tSwOut ^ 2 + tSwOut * τ + τ ^ 2) + l6d_a1 * τ * tSwOut * (tSwOut + τ) +
+      l6d_a2 * τ ^ 2 * tSwOut ^ 2) := by
   have h := l6d_g_T
   unfold l6d_g at h ⊢
   linear_combination τ ^ 3 * h
 
-lemma l6d_g_factor_pos {τ : ℝ} (hτ : 0 ≤ τ) : 0 < l6d_a0 *
-    (l6d_T ^ 2 + l6d_T * τ + τ ^ 2) + l6d_a1 * τ * l6d_T * (l6d_T + τ) +
-      l6d_a2 * τ ^ 2 * l6d_T ^ 2 := by
+private lemma l6d_g_factor_pos {τ : ℝ} (hτ : 0 ≤ τ) : 0 < outCubicCoeff0 *
+    (tSwOut ^ 2 + tSwOut * τ + τ ^ 2) + l6d_a1 * τ * tSwOut * (tSwOut + τ) +
+      l6d_a2 * τ ^ 2 * tSwOut ^ 2 := by
   obtain ⟨h0, h1, h2, -⟩ := l6d_coeff_signs
   have hT := l6d_T_pos
-  have : 0 < l6d_T ^ 2 + l6d_T * τ + τ ^ 2 := by positivity
-  have : 0 ≤ l6d_a1 * τ * l6d_T * (l6d_T + τ) := by positivity
-  have : 0 ≤ l6d_a2 * τ ^ 2 * l6d_T ^ 2 := by positivity
+  have : 0 < tSwOut ^ 2 + tSwOut * τ + τ ^ 2 := by positivity
+  have : 0 ≤ l6d_a1 * τ * tSwOut * (tSwOut + τ) := by positivity
+  have : 0 ≤ l6d_a2 * τ ^ 2 * tSwOut ^ 2 := by positivity
   nlinarith
 
-lemma l6d_g_pos {τ : ℝ} (h0 : 0 ≤ τ) (h1 : τ < l6d_T) : 0 < l6d_g τ := by
+private lemma l6d_g_pos {τ : ℝ} (h0 : 0 ≤ τ) (h1 : τ < tSwOut) : 0 < l6d_g τ := by
   have h := l6d_g_factor τ
   have hB := l6d_g_factor_pos h0
-  have hT3 : 0 < l6d_T ^ 3 := pow_pos l6d_T_pos 3
-  have : 0 < l6d_T ^ 3 * l6d_g τ := by rw [h]; exact mul_pos (by linarith) hB
+  have hT3 : 0 < tSwOut ^ 3 := pow_pos l6d_T_pos 3
+  have : 0 < tSwOut ^ 3 * l6d_g τ := by rw [h]; exact mul_pos (by linarith) hB
   exact pos_of_mul_pos_right this hT3.le
 
-lemma l6d_g_neg {τ : ℝ} (h1 : l6d_T < τ) : l6d_g τ < 0 := by
+private lemma l6d_g_neg {τ : ℝ} (h1 : tSwOut < τ) : l6d_g τ < 0 := by
   have h := l6d_g_factor τ
   have hB := l6d_g_factor_pos (l6d_T_pos.le.trans h1.le)
-  have hT3 : 0 < l6d_T ^ 3 := pow_pos l6d_T_pos 3
-  have : l6d_T ^ 3 * l6d_g τ < 0 := by rw [h]; exact mul_neg_of_neg_of_pos (by linarith) hB
+  have hT3 : 0 < tSwOut ^ 3 := pow_pos l6d_T_pos 3
+  have : tSwOut ^ 3 * l6d_g τ < 0 := by rw [h]; exact mul_neg_of_neg_of_pos (by linarith) hB
   exact neg_of_mul_neg_right this hT3.le
 
 /-- The derivative of the cubic. -/
-noncomputable def l6d_g' (τ : ℝ) : ℝ := l6d_a1 + 2 * l6d_a2 * τ + 3 * l6d_a3 * τ ^ 2
+private noncomputable def l6d_g' (τ : ℝ) : ℝ := l6d_a1 + 2 * l6d_a2 * τ + 3 * outCubicCoeff3 * τ ^ 2
 
-lemma l6d_hasDerivAt_g (τ : ℝ) : HasDerivAt l6d_g (l6d_g' τ) τ := by
-  have h := ((((hasDerivAt_id τ).const_mul l6d_a1).const_add l6d_a0).add
-    (((hasDerivAt_id τ).pow 2).const_mul l6d_a2)).add (((hasDerivAt_id τ).pow 3).const_mul l6d_a3)
+private lemma l6d_hasDerivAt_g (τ : ℝ) : HasDerivAt l6d_g (l6d_g' τ) τ := by
+  have h := ((((hasDerivAt_id τ).const_mul l6d_a1).const_add outCubicCoeff0).add
+    (((hasDerivAt_id τ).pow 2).const_mul l6d_a2)).add (((hasDerivAt_id τ).pow 3).const_mul
+        outCubicCoeff3)
   convert h using 1
   · funext x; simp [l6d_g]
   · simp [l6d_g']; ring
 
 /-- The root `t_sw` of the cubic is simple: `g'(t_sw) < 0`. -/
-lemma l6d_g'_T_neg : l6d_g' l6d_T < 0 := by
+private lemma l6d_g'_T_neg : l6d_g' tSwOut < 0 := by
   have h := l6d_g_T
   obtain ⟨h0, h1, h2, -⟩ := l6d_coeff_signs
   have hT := l6d_T_pos
   unfold l6d_g at h
-  have key : l6d_T * l6d_g' l6d_T = -3 * l6d_a0 - 2 * l6d_a1 * l6d_T - l6d_a2 * l6d_T ^ 2 := by
+  have key : tSwOut * l6d_g' tSwOut = -3 * outCubicCoeff0 - 2 * l6d_a1 * tSwOut - l6d_a2 * tSwOut ^
+      2 := by
     unfold l6d_g'; linear_combination 3 * h
-  have : l6d_T * l6d_g' l6d_T < 0 := by rw [key]; nlinarith
+  have : tSwOut * l6d_g' tSwOut < 0 := by rw [key]; nlinarith
   exact neg_of_mul_neg_right this hT.le
 
 /-- `z(x̃_out)` is the virial rescaling of `q_out` by `λ` (Remark 14.2.1). -/
-lemma l6d_fullerOfChart_xTildeOut : fullerOfChart xTildeOut = scale l6d_lam qOutCart :=
+lemma fullerOfChart_xTildeOut : fullerOfChart xTildeOut = scale virialScaleOut qOutCart :=
   remark14_2_1.2.2.2.1
 
 /-- `χ̃₂₁(s, 0, x̃_out) = 24 λ³ g(s/λ)`. -/
-lemma l6d_v21_xTildeOut (s : ℝ) :
-    l6d_v21 (s, xTildeOut) = 24 * l6d_lam ^ 3 * l6d_g (s / l6d_lam) := by
-  have hl := l6d_lam_pos.ne'
-  have h := l6d_flow_scale l6d_lam (s / l6d_lam) qOutCart ζ
+private lemma l6d_v21_xTildeOut (s : ℝ) :
+    extChi21Zero (s, xTildeOut) = 24 * virialScaleOut ^ 3 * l6d_g (s / virialScaleOut) := by
+  have hl := virialScaleOut_pos.ne'
+  have h := l6d_flow_scale virialScaleOut (s / virialScaleOut) qOutCart ζ
   rw [mul_div_cancel₀ s hl] at h
-  simp only [l6d_v21, l6d_fullerOfChart_xTildeOut, h, ← l6d_RR_flow_qOut]
+  simp only [extChi21Zero, fullerOfChart_xTildeOut, h, ← l6d_RR_flow_qOut]
   simp only [scale, Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons]
   rw [← Complex.ofReal_pow, RR_ofReal_mul_right]
   ring
 
-lemma l6d_v21_xTildeOut_pos {s : ℝ} (h0 : 0 ≤ s) (h1 : s < l6d_S) :
-    0 < l6d_v21 (s, xTildeOut) := by
-  have hl := l6d_lam_pos
+private lemma l6d_v21_xTildeOut_pos {s : ℝ} (h0 : 0 ≤ s) (h1 : s < sSwOut) :
+    0 < extChi21Zero (s, xTildeOut) := by
+  have hl := virialScaleOut_pos
   rw [l6d_v21_xTildeOut]
-  have : s / l6d_lam < l6d_T := by
-    rw [div_lt_iff₀ hl]; unfold l6d_S at h1; linarith
+  have : s / virialScaleOut < tSwOut := by
+    rw [div_lt_iff₀ hl]; unfold sSwOut at h1; linarith
   exact mul_pos (by positivity) (l6d_g_pos (div_nonneg h0 hl.le) this)
 
-lemma l6d_v21_xTildeOut_neg {s : ℝ} (h1 : l6d_S < s) : l6d_v21 (s, xTildeOut) < 0 := by
-  have hl := l6d_lam_pos
+private lemma l6d_v21_xTildeOut_neg {s : ℝ} (h1 : sSwOut < s) : extChi21Zero (s, xTildeOut) < 0 :=
+    by
+  have hl := virialScaleOut_pos
   rw [l6d_v21_xTildeOut]
-  have : l6d_T < s / l6d_lam := by
-    rw [lt_div_iff₀ hl]; unfold l6d_S at h1; linarith
+  have : tSwOut < s / virialScaleOut := by
+    rw [lt_div_iff₀ hl]; unfold sSwOut at h1; linarith
   exact mul_neg_of_pos_of_neg (by positivity) (l6d_g_neg this)
 
-lemma l6d_v21_xTildeOut_S : l6d_v21 (l6d_S, xTildeOut) = 0 := by
-  rw [l6d_v21_xTildeOut, l6d_S, mul_div_cancel_left₀ _ l6d_lam_pos.ne', l6d_g_T, mul_zero]
+private lemma l6d_v21_xTildeOut_S : extChi21Zero (sSwOut, xTildeOut) = 0 := by
+  rw [l6d_v21_xTildeOut, sSwOut, mul_div_cancel_left₀ _ virialScaleOut_pos.ne', l6d_g_T, mul_zero]
 
 /-- The derivative `24 λ² g'(t_sw) < 0` of `s ↦ χ̃₂₁(s, 0, x̃_out)` at `s_sw,out`. -/
-noncomputable def l6d_D : ℝ := 24 * l6d_lam ^ 2 * l6d_g' l6d_T
+private noncomputable def l6d_D : ℝ := 24 * virialScaleOut ^ 2 * l6d_g' tSwOut
 
-lemma l6d_D_neg : l6d_D < 0 :=
-  mul_neg_of_pos_of_neg (by have := l6d_lam_pos; positivity) l6d_g'_T_neg
+private lemma l6d_D_neg : l6d_D < 0 :=
+  mul_neg_of_pos_of_neg (by have := virialScaleOut_pos; positivity) l6d_g'_T_neg
 
-lemma l6d_hasDerivAt_v21_xTildeOut :
-    HasDerivAt (fun s ↦ l6d_v21 (s, xTildeOut)) l6d_D l6d_S := by
-  have hl := l6d_lam_pos.ne'
-  have hg := l6d_hasDerivAt_g (l6d_S / l6d_lam)
-  have hdiv : HasDerivAt (fun s ↦ s / l6d_lam) (1 / l6d_lam) l6d_S :=
+private lemma l6d_hasDerivAt_v21_xTildeOut :
+    HasDerivAt (fun s ↦ extChi21Zero (s, xTildeOut)) l6d_D sSwOut := by
+  have hl := virialScaleOut_pos.ne'
+  have hg := l6d_hasDerivAt_g (sSwOut / virialScaleOut)
+  have hdiv : HasDerivAt (fun s ↦ s / virialScaleOut) (1 / virialScaleOut) sSwOut :=
     (hasDerivAt_id _).div_const _
-  have h := (hg.comp l6d_S hdiv).const_mul (24 * l6d_lam ^ 3)
+  have h := (hg.comp sSwOut hdiv).const_mul (24 * virialScaleOut ^ 3)
   convert h using 1
   · funext s; simp [l6d_v21_xTildeOut]
-  · rw [l6d_S, mul_div_cancel_left₀ _ hl]; simp only [l6d_D]; field_simp
+  · rw [sSwOut, mul_div_cancel_left₀ _ hl]; simp only [l6d_D]; field_simp
 
 /-- The Fuller switching function from `ζ` to `ζ²` along the flow from `q_out`:
 `√3 τ (y₂ + y₁ τ/2 + τ²/12)`. -/
-lemma l6d_RR23_flow_qOut (τ : ℝ) : RR (ζ - ζ ^ 2) (flow τ qOutCart ζ 2) =
+private lemma l6d_RR23_flow_qOut (τ : ℝ) : RR (ζ - ζ ^ 2) (flow τ qOutCart ζ 2) =
     √3 * τ * ((qOutCart 1).im + (qOutCart 0).im * τ / 2 + τ ^ 2 / 12) := by
   obtain ⟨-, h2, -⟩ := qOutCart_normalization
   rw [RR_eq_re_mul_add_im_mul]
@@ -433,25 +442,26 @@ lemma l6d_RR23_flow_qOut (τ : ℝ) : RR (ζ - ζ ^ 2) (flow τ qOutCart ζ 2) =
   ring
 
 /-- `χ̃₂₃(s, 0, x̃_out) = s Q(s)` with `Q > 0` on `[0, ∞)`. -/
-noncomputable def l6d_Q (s : ℝ) : ℝ :=
-  24 * l6d_lam ^ 2 * √3 * ((qOutCart 1).im + (qOutCart 0).im * (s / l6d_lam) / 2 +
-    (s / l6d_lam) ^ 2 / 12)
+noncomputable def extChi23Factor (s : ℝ) : ℝ :=
+  24 * virialScaleOut ^ 2 * √3 * ((qOutCart 1).im + (qOutCart 0).im * (s / virialScaleOut) / 2 +
+    (s / virialScaleOut) ^ 2 / 12)
 
-lemma l6d_v23_xTildeOut (s : ℝ) : l6d_v23 (s, xTildeOut) = s * l6d_Q s := by
-  have hl := l6d_lam_pos.ne'
-  have h := l6d_flow_scale l6d_lam (s / l6d_lam) qOutCart ζ
+lemma extChi23Zero_xTildeOut (s : ℝ) : extChi23Zero (s, xTildeOut) = s * extChi23Factor s := by
+  have hl := virialScaleOut_pos.ne'
+  have h := l6d_flow_scale virialScaleOut (s / virialScaleOut) qOutCart ζ
   rw [mul_div_cancel₀ s hl] at h
-  simp only [l6d_v23, l6d_fullerOfChart_xTildeOut, h]
+  simp only [extChi23Zero, fullerOfChart_xTildeOut, h]
   simp only [scale, Matrix.cons_val_two, Matrix.tail_cons, Matrix.head_cons]
-  rw [← Complex.ofReal_pow, RR_ofReal_mul_right, l6d_RR23_flow_qOut, l6d_Q]
+  rw [← Complex.ofReal_pow, RR_ofReal_mul_right, l6d_RR23_flow_qOut, extChi23Factor]
   field_simp
 
-lemma l6d_Q_pos {s : ℝ} (hs : 0 ≤ s) : 0 < l6d_Q s := by
+lemma extChi23Factor_pos {s : ℝ} (hs : 0 ≤ s) : 0 < extChi23Factor s := by
   obtain ⟨hy1, -, hy2⟩ := qOutCart_signs
-  have hl := l6d_lam_pos
-  unfold l6d_Q
-  have : 0 ≤ (qOutCart 0).im * (s / l6d_lam) / 2 := by positivity
-  have : 0 < (qOutCart 1).im + (qOutCart 0).im * (s / l6d_lam) / 2 + (s / l6d_lam) ^ 2 / 12 := by
+  have hl := virialScaleOut_pos
+  unfold extChi23Factor
+  have : 0 ≤ (qOutCart 0).im * (s / virialScaleOut) / 2 := by positivity
+  have : 0 < (qOutCart 1).im + (qOutCart 0).im * (s / virialScaleOut) / 2 + (s / virialScaleOut) ^ 2
+      / 12 := by
     positivity
   positivity
 
@@ -461,39 +471,41 @@ open scoped ContDiff
 
 /-- The implicit equation `χ̃₂₁(s, r₀, x̃₀) = 0` for the unknown `s`, as a function of
 `((r₀, x̃₀), s)`. -/
-noncomputable def l6d_Φ (v : (ℝ × (Fin 3 → ℝ)) × ℝ) : ℝ := l6d_chi21 (v.2, v.1.1, v.1.2)
+noncomputable def extImplicitFn (v : (ℝ × (Fin 3 → ℝ)) × ℝ) : ℝ := extChi21 (v.2, v.1.1, v.1.2)
 
 /-- The base point `((0, x̃_out), s_sw,out)` of the implicit equation. -/
-noncomputable def l6d_u0 : (ℝ × (Fin 3 → ℝ)) × ℝ := ((0, xTildeOut), l6d_S)
+noncomputable def extImplicitBase : (ℝ × (Fin 3 → ℝ)) × ℝ := ((0, xTildeOut), sSwOut)
 
-lemma l6d_analyticAt_Φ (x : Fin 3 → ℝ) (s : ℝ) : AnalyticAt ℝ l6d_Φ (((0 : ℝ), x), s) := by
+private lemma l6d_analyticAt_Φ (x : Fin 3 → ℝ) (s : ℝ) : AnalyticAt ℝ extImplicitFn (((0 : ℝ), x),
+    s) := by
   have h : AnalyticAt ℝ (fun v : (ℝ × (Fin 3 → ℝ)) × ℝ ↦ (v.2, v.1.1, v.1.2)) (((0 : ℝ), x), s) :=
     by fun_prop
   exact (l6d_analyticAt_chi21 s x).comp_of_eq h rfl
 
-lemma l6d_Φ_u0 : l6d_Φ l6d_u0 = 0 := by
-  simp only [l6d_Φ, l6d_u0, l6d_chi21_zero, l6d_v21_xTildeOut_S]
+private lemma l6d_Φ_u0 : extImplicitFn extImplicitBase = 0 := by
+  simp only [extImplicitFn, extImplicitBase, l6d_chi21_zero, l6d_v21_xTildeOut_S]
 
-lemma l6d_contDiffAt_Φ : ContDiffAt ℝ ω l6d_Φ l6d_u0 :=
-  (l6d_analyticAt_Φ xTildeOut l6d_S).contDiffAt
+lemma contDiffAt_extImplicitFn : ContDiffAt ℝ ω extImplicitFn extImplicitBase :=
+  (l6d_analyticAt_Φ xTildeOut sSwOut).contDiffAt
 
-lemma l6d_fderiv_Φ_inr :
-    fderiv ℝ l6d_Φ l6d_u0 ∘L .inr ℝ (ℝ × (Fin 3 → ℝ)) ℝ = (1 : ℝ →L[ℝ] ℝ).smulRight l6d_D := by
-  have hF : HasFDerivAt l6d_Φ (fderiv ℝ l6d_Φ l6d_u0) l6d_u0 :=
-    (l6d_analyticAt_Φ xTildeOut l6d_S).differentiableAt.hasFDerivAt
+private lemma l6d_fderiv_Φ_inr :
+    fderiv ℝ extImplicitFn extImplicitBase ∘L .inr ℝ (ℝ × (Fin 3 → ℝ)) ℝ = (1 :
+        ℝ →L[ℝ] ℝ).smulRight l6d_D := by
+  have hF : HasFDerivAt extImplicitFn (fderiv ℝ extImplicitFn extImplicitBase) extImplicitBase :=
+    (l6d_analyticAt_Φ xTildeOut sSwOut).differentiableAt.hasFDerivAt
   have hin : HasFDerivAt (fun s : ℝ ↦ (((0 : ℝ), xTildeOut), s))
-      (ContinuousLinearMap.inr ℝ (ℝ × (Fin 3 → ℝ)) ℝ) l6d_S :=
+      (ContinuousLinearMap.inr ℝ (ℝ × (Fin 3 → ℝ)) ℝ) sSwOut :=
     (hasFDerivAt_const _ _).prodMk (hasFDerivAt_id _)
-  have h1 := hF.comp l6d_S hin
-  have h2 : HasFDerivAt (fun s : ℝ ↦ l6d_Φ (((0 : ℝ), xTildeOut), s))
-      ((1 : ℝ →L[ℝ] ℝ).smulRight l6d_D) l6d_S := by
+  have h1 := hF.comp sSwOut hin
+  have h2 : HasFDerivAt (fun s : ℝ ↦ extImplicitFn (((0 : ℝ), xTildeOut), s))
+      ((1 : ℝ →L[ℝ] ℝ).smulRight l6d_D) sSwOut := by
     have := l6d_hasDerivAt_v21_xTildeOut.hasFDerivAt
     refine this.congr_of_eventuallyEq (Eventually.of_forall fun s ↦ ?_)
-    simp [l6d_Φ, l6d_chi21_zero]
+    simp [extImplicitFn, l6d_chi21_zero]
   exact h1.unique h2
 
-lemma l6d_isInvertible_Φ :
-    (fderiv ℝ l6d_Φ l6d_u0 ∘L .inr ℝ (ℝ × (Fin 3 → ℝ)) ℝ).IsInvertible := by
+lemma isInvertible_extImplicitFn :
+    (fderiv ℝ extImplicitFn extImplicitBase ∘L .inr ℝ (ℝ × (Fin 3 → ℝ)) ℝ).IsInvertible := by
   rw [l6d_fderiv_Φ_inr]
   have hD := l6d_D_neg.ne
   refine ContinuousLinearMap.IsInvertible.of_inverse (g := (1 : ℝ →L[ℝ] ℝ).smulRight l6d_D⁻¹)
@@ -502,33 +514,35 @@ lemma l6d_isInvertible_Φ :
 /-- **The analytic switching time** `s_sw(r₀, x̃₀)` (Step 5, TeX 11813–11821): the implicit function
 of `χ̃₂₁(s, r₀, x̃₀) = 0` near `((0, x̃_out), s_sw,out)` (the analytic implicit function theorem,
 `ContDiffAt.implicitFunction` with `n = ω`). -/
-noncomputable def l6d_sSw : ℝ × (Fin 3 → ℝ) → ℝ :=
-  l6d_contDiffAt_Φ.implicitFunction (by simp) l6d_isInvertible_Φ
+noncomputable def extSwitchTime : ℝ × (Fin 3 → ℝ) → ℝ :=
+  contDiffAt_extImplicitFn.implicitFunction (by simp) isInvertible_extImplicitFn
 
-lemma l6d_sSw_base : l6d_sSw (0, xTildeOut) = l6d_S :=
-  l6d_contDiffAt_Φ.implicitFunction_apply_self (by simp) l6d_isInvertible_Φ
+lemma extSwitchTime_base : extSwitchTime (0, xTildeOut) = sSwOut :=
+  contDiffAt_extImplicitFn.implicitFunction_apply_self (by simp) isInvertible_extImplicitFn
 
-lemma l6d_eventually_chi21_sSw :
-    ∀ᶠ p in 𝓝 ((0 : ℝ), xTildeOut), l6d_chi21 (l6d_sSw p, p.1, p.2) = 0 := by
-  have h := l6d_contDiffAt_Φ.eventually_apply_implicitFunction (by simp) l6d_isInvertible_Φ
+private lemma l6d_eventually_chi21_sSw :
+    ∀ᶠ p in 𝓝 ((0 : ℝ), xTildeOut), extChi21 (extSwitchTime p, p.1, p.2) = 0 := by
+  have h := contDiffAt_extImplicitFn.eventually_apply_implicitFunction (by simp)
+      isInvertible_extImplicitFn
   rw [l6d_Φ_u0] at h
   exact h
 
-lemma l6d_eventually_chi21_eq_zero_iff :
-    ∀ᶠ v in 𝓝 l6d_u0, l6d_Φ v = 0 ↔ l6d_sSw v.1 = v.2 := by
-  have h := l6d_contDiffAt_Φ.eventually_apply_eq_iff_implicitFunction (by simp)
-    l6d_isInvertible_Φ
+private lemma l6d_eventually_chi21_eq_zero_iff :
+    ∀ᶠ v in 𝓝 extImplicitBase, extImplicitFn v = 0 ↔ extSwitchTime v.1 = v.2 := by
+  have h := contDiffAt_extImplicitFn.eventually_apply_eq_iff_implicitFunction (by simp)
+    isInvertible_extImplicitFn
   rw [l6d_Φ_u0] at h
   exact h
 
-lemma l6d_analyticAt_sSw : AnalyticAt ℝ l6d_sSw ((0 : ℝ), xTildeOut) :=
-  (l6d_contDiffAt_Φ.contDiffAt_implicitFunction (by simp) l6d_isInvertible_Φ).analyticAt
+private lemma l6d_analyticAt_sSw : AnalyticAt ℝ extSwitchTime ((0 : ℝ), xTildeOut) :=
+  (contDiffAt_extImplicitFn.contDiffAt_implicitFunction (by simp)
+      isInvertible_extImplicitFn).analyticAt
 
 /-! ### The switching structure near the fixed point -/
 
 /-- The dual basis property of `sl2Dual`: `⟨sl2Dual M₁ M₂ M₃ c₁ c₂ c₃, M_k⟩ = c_k` (`k = 2, 3`)
 when `T = ⟨M₁, [M₂, M₃]⟩ ≠ 0`. -/
-lemma l6d_traceForm_sl2Dual (M₁ M₂ M₃ : Mat2) (c₁ c₂ c₃ : ℝ)
+private lemma l6d_traceForm_sl2Dual (M₁ M₂ M₃ : Mat2) (c₁ c₂ c₃ : ℝ)
     (hT : traceForm M₁ (M₂ * M₃ - M₃ * M₂) ≠ 0) :
     traceForm (sl2Dual M₁ M₂ M₃ c₁ c₂ c₃) M₂ = c₂ ∧
       traceForm (sl2Dual M₁ M₂ M₃ c₁ c₂ c₃) M₃ = c₃ := by
@@ -551,13 +565,13 @@ lemma l6d_traceForm_sl2Dual (M₁ M₂ M₃ : Mat2) (c₁ c₂ c₃ : ℝ)
 /-- The chart lies on the wall `χ₂₃ = 0` (whenever the linear system (14.1.3) is
 nondegenerate and the denominators `⟨Z_{e₂}, X⟩`, `⟨Z_{e₃}, X⟩` are nonzero; for every sign of
 `r`). -/
-lemma l6d_switchingFn12_lieChart {p : ℝ × (Fin 3 → ℝ)} (h1 : 1 + p.1 * p.2 0 ≠ 0)
+private lemma l6d_switchingFn12_lieChart {p : ℝ × (Fin 3 → ℝ)} (h1 : 1 + p.1 * p.2 0 ≠ 0)
     (hZ1 : traceForm (controlMatrix (vertex 1)) (lieChart p).1 ≠ 0)
     (hZ2 : traceForm (controlMatrix (vertex 2)) (lieChart p).1 ≠ 0) :
     switchingFn 1 2 (lieChart p).2.2 (lieChart p).1 = 0 := by
   have hT : traceForm (lieChart p).1 (controlMatrix (vertex 1) * controlMatrix (vertex 2) -
       controlMatrix (vertex 2) * controlMatrix (vertex 1)) ≠ 0 := by
-    rw [show (lieChart p).1 = lieX p.1 (p.2 0) from rfl, l6d_traceForm_lieX_bracket]
+    rw [show (lieChart p).1 = lieX p.1 (p.2 0) from rfl, traceForm_lieX_controlMatrix_bracket]
     have h3 : (0 : ℝ) < √3 := by positivity
     exact mul_ne_zero (by rw [neg_ne_zero]; positivity) h1
   obtain ⟨hd1, hd2⟩ := l6d_traceForm_sl2Dual (lieChart p).1 (controlMatrix (vertex 1))
@@ -582,86 +596,94 @@ lemma l6d_switchingFn12_lieChart {p : ℝ × (Fin 3 → ℝ)} (h1 : 1 + p.1 * p.
   field_simp
   ring
 
-lemma l6d_eventually_chi23_zero :
-    ∀ᶠ p in 𝓝 ((0 : ℝ), xTildeOut), l6d_chi23 (0, p.1, p.2) = 0 := by
+lemma eventually_extChi23_zero :
+    ∀ᶠ p in 𝓝 ((0 : ℝ), xTildeOut), extChi23 (0, p.1, p.2) = 0 := by
   -- the denominators at the singular locus
   have hc : ∀ k : Fin 3, ContinuousAt (fun p : ℝ × (Fin 3 → ℝ) ↦
       traceForm (controlMatrix (vertex k)) (lieChart p).1) ((0 : ℝ), xTildeOut) := by
     intro k
-    obtain ⟨h1, -, -⟩ := l6d_MatAn_lieChart (E := ℝ × (Fin 3 → ℝ)) (g := id)
+    obtain ⟨h1, -, -⟩ := entrywiseAnalyticAt_lieChart (E := ℝ × (Fin 3 → ℝ)) (g := id)
       (x := ((0 : ℝ), xTildeOut)) analyticAt_id (by simp) (by norm_num)
-    exact ((l6d_MatAn.const _).traceForm h1).continuousAt
+    exact ((EntrywiseAnalyticAt.const _).traceForm h1).continuousAt
   have h0 : ∀ k : Fin 3, traceForm (controlMatrix (vertex k)) (lieChart (0, xTildeOut)).1 ≠ 0 := by
-    intro k; rw [l6d_lieChart_zero, l6d_traceForm_controlMatrix_J]; norm_num
+    intro k; rw [l6d_lieChart_zero, traceForm_controlMatrix_vertex_J]; norm_num
   have h1c : ContinuousAt (fun p : ℝ × (Fin 3 → ℝ) ↦ 1 + p.1 * p.2 0) ((0 : ℝ), xTildeOut) := by
     fun_prop
   filter_upwards [(hc 1).eventually_ne (h0 1), (hc 2).eventually_ne (h0 2),
     h1c.eventually_ne (by simp : 1 + (0 : ℝ) * xTildeOut 0 ≠ 0)] with p hp1 hp2 hp3
   by_cases hr : p.1 = 0
-  · simp only [l6d_chi23, l6d_chiT, hr, ite_true, l6d_v23, flow_zero]
+  · simp only [extChi23, extChiDiv, hr, ite_true, extChi23Zero, flow_zero]
     have : (fullerOfChart p.2 2).im = 0 := by simp [fullerOfChart]
     rw [RR_eq_re_mul_add_im_mul]
     simp [this, ζ_re, ζ_sq_re]
-  · simp only [l6d_chi23, l6d_chiT, hr, ite_false, l6d_chiRaw, l6d_flowPt, zero_mul,
+  · simp only [extChi23, extChiDiv, hr, ite_false, extChi, extFlowPt, zero_mul,
       ivf_vertexFlow_zero]
     rw [l6d_switchingFn12_lieChart hp3 hp1 hp2, zero_div]
 
-/-- **The χ₂₃ check** (G14.5): for every `B > 0`, near the fixed point `χ̃₂₃(s, r₀, x̃₀) > 0` for
-`0 < s ≤ B` (at `(0, x̃_out)` it is `s Q(s)` with `Q > 0`; one more division by `s` handles small
-`s`, and compactness the rest). -/
-lemma l6d_eventually_chi23_pos (B : ℝ) :
-    ∀ᶠ p in 𝓝 ((0 : ℝ), xTildeOut), ∀ s ∈ Ioc 0 B, 0 < l6d_chi23 (s, p.1, p.2) := by
+/-- **`χ̃₂₃ = s H` with `H > 0` near `(0, 0, x̃_out)`** (the division by `s` of the χ₂₃ check,
+G14.5, used for both signs of `s`): `χ̃₂₃(0, r₀, x̃₀) = 0` near the fixed point
+(`eventually_extChi23_zero`), so `χ̃₂₃ = s H` with `H` analytic (division of power series), and
+`H(0, 0, x̃_out) = Q(0) > 0` since `χ̃₂₃(s, 0, x̃_out) = s Q(s)` (`extChi23Zero_xTildeOut`). -/
+lemma exists_extChi23_eq_mul : ∃ H : ℝ × ℝ × (Fin 3 → ℝ) → ℝ,
+    ∀ᶠ v in 𝓝 ((0 : ℝ), ((0 : ℝ), xTildeOut)), extChi23 v = v.1 * H v ∧ 0 < H v := by
   set p₀ : ℝ × (Fin 3 → ℝ) := ((0 : ℝ), xTildeOut) with hp₀
-  have han : AnalyticAt ℝ l6d_chi23 ((0 : ℝ), p₀) := l6d_analyticAt_chi23 0 xTildeOut
+  have han : AnalyticAt ℝ extChi23 ((0 : ℝ), p₀) := analyticAt_extChi23 0 xTildeOut
   -- division by `s`
-  have hk : ∀ᶠ y in 𝓝 p₀, (fun s : ℝ ↦ l6d_chi23 (s, y)) =O[𝓝 0] (fun s ↦ s ^ 1) := by
-    have hev : ∀ᶠ y in 𝓝 p₀, AnalyticAt ℝ l6d_chi23 ((0 : ℝ), y) := by
+  have hk : ∀ᶠ y in 𝓝 p₀, (fun s : ℝ ↦ extChi23 (s, y)) =O[𝓝 0] (fun s ↦ s ^ 1) := by
+    have hev : ∀ᶠ y in 𝓝 p₀, AnalyticAt ℝ extChi23 ((0 : ℝ), y) := by
       have := han.eventually_analyticAt
       exact (by fun_prop : ContinuousAt (fun y : ℝ × (Fin 3 → ℝ) ↦ ((0 : ℝ), y)) p₀).eventually
         this
-    filter_upwards [hev, l6d_eventually_chi23_zero] with y hy hy0
-    have hd : HasDerivAt (fun s : ℝ ↦ l6d_chi23 (s, y)) _ 0 :=
+    filter_upwards [hev, eventually_extChi23_zero] with y hy hy0
+    have hd : HasDerivAt (fun s : ℝ ↦ extChi23 (s, y)) _ 0 :=
       (hy.comp_of_eq (by fun_prop : AnalyticAt ℝ (fun s : ℝ ↦ (s, y)) 0) rfl
         ).differentiableAt.hasDerivAt
     have := hd.isBigO_sub
     simp only [sub_zero] at this
-    have hy0' : l6d_chi23 (0, y) = 0 := hy0
+    have hy0' : extChi23 (0, y) = 0 := hy0
     simpa [hy0'] using this
   obtain ⟨H, hH, hHeq⟩ := AnalyticAt.exists_eq_pow_smul_of_isBigO han hk
   -- `H(0, p₀) = Q(0) > 0`
   have hH0 : 0 < H ((0 : ℝ), p₀) := by
     have hcont : ContinuousAt (fun s : ℝ ↦ H (s, p₀)) 0 :=
       hH.continuousAt.comp_of_eq (by fun_prop : ContinuousAt (fun s : ℝ ↦ (s, p₀)) 0) rfl
-    have hev : ∀ᶠ s in 𝓝[≠] (0 : ℝ), H (s, p₀) = l6d_Q s := by
-      have h1 : ∀ᶠ s in 𝓝 (0 : ℝ), l6d_chi23 (s, p₀) = s ^ 1 • H (s, p₀) :=
+    have hev : ∀ᶠ s in 𝓝[≠] (0 : ℝ), H (s, p₀) = extChi23Factor s := by
+      have h1 : ∀ᶠ s in 𝓝 (0 : ℝ), extChi23 (s, p₀) = s ^ 1 • H (s, p₀) :=
         (by fun_prop : ContinuousAt (fun s : ℝ ↦ (s, p₀)) 0).eventually hHeq
       filter_upwards [nhdsWithin_le_nhds h1, self_mem_nhdsWithin] with s hs hs0
-      rw [hp₀, l6d_chi23_zero, l6d_v23_xTildeOut, pow_one, smul_eq_mul] at hs
+      rw [hp₀, extChi23_zero, extChi23Zero_xTildeOut, pow_one, smul_eq_mul] at hs
       exact (mul_left_cancel₀ hs0 hs).symm
-    have hQc : ContinuousAt l6d_Q 0 := by unfold l6d_Q; fun_prop
+    have hQc : ContinuousAt extChi23Factor 0 := by unfold extChi23Factor; fun_prop
     have hlim := hcont.tendsto.mono_left (nhdsWithin_le_nhds (s := {(0 : ℝ)}ᶜ))
     have hlim2 := (hQc.tendsto.mono_left (nhdsWithin_le_nhds (s := {(0 : ℝ)}ᶜ))).congr'
       (hev.mono fun s h ↦ h.symm)
     rw [tendsto_nhds_unique hlim hlim2]
-    exact l6d_Q_pos le_rfl
-  -- near `(0, p₀)`: `χ̃₂₃ = s H` with `H > 0`
-  have hnear : ∀ᶠ v in 𝓝 ((0 : ℝ), p₀), l6d_chi23 v = v.1 * H v ∧ 0 < H v := by
-    filter_upwards [hHeq, continuousAt_const.eventually_lt hH.continuousAt hH0] with v h1 h2
-    exact ⟨by simpa using h1, h2⟩
-  rw [nhds_prod_eq] at hnear
+    exact extChi23Factor_pos le_rfl
+  refine ⟨H, ?_⟩
+  filter_upwards [hHeq, continuousAt_const.eventually_lt hH.continuousAt hH0] with v h1 h2
+  exact ⟨by simpa using h1, h2⟩
+
+/-- **The χ₂₃ check** (G14.5): for every `B > 0`, near the fixed point `χ̃₂₃(s, r₀, x̃₀) > 0` for
+`0 < s ≤ B` (at `(0, x̃_out)` it is `s Q(s)` with `Q > 0`; one more division by `s` handles small
+`s`, `exists_extChi23_eq_mul`, and compactness the rest). -/
+lemma eventually_extChi23_pos (B : ℝ) :
+    ∀ᶠ p in 𝓝 ((0 : ℝ), xTildeOut), ∀ s ∈ Ioc 0 B, 0 < extChi23 (s, p.1, p.2) := by
+  set p₀ : ℝ × (Fin 3 → ℝ) := ((0 : ℝ), xTildeOut) with hp₀
+  obtain ⟨H, hnear⟩ := exists_extChi23_eq_mul
+  rw [← hp₀, nhds_prod_eq] at hnear
   obtain ⟨pa, hpa, pb, hpb, hall⟩ := Filter.eventually_prod_iff.1 hnear
   obtain ⟨ε, hε, hεb⟩ := Metric.eventually_nhds_iff.1 hpa
   -- compactness on `[ε/2, B]`
-  have htube : ∀ᶠ p in 𝓝 p₀, ∀ s ∈ Icc (ε / 2) B, 0 < l6d_chi23 (s, p.1, p.2) := by
+  have htube : ∀ᶠ p in 𝓝 p₀, ∀ s ∈ Icc (ε / 2) B, 0 < extChi23 (s, p.1, p.2) := by
     refine (isCompact_Icc).eventually_forall_of_forall_eventually fun s hs ↦ ?_
-    have hca : ContinuousAt (fun z : (ℝ × (Fin 3 → ℝ)) × ℝ ↦ l6d_chi23 (z.2, z.1.1, z.1.2))
+    have hca : ContinuousAt (fun z : (ℝ × (Fin 3 → ℝ)) × ℝ ↦ extChi23 (z.2, z.1.1, z.1.2))
         (p₀, s) :=
-      ((l6d_analyticAt_chi23 s xTildeOut).comp_of_eq (by fun_prop :
+      ((analyticAt_extChi23 s xTildeOut).comp_of_eq (by fun_prop :
         AnalyticAt ℝ (fun z : (ℝ × (Fin 3 → ℝ)) × ℝ ↦ (z.2, z.1.1, z.1.2)) (p₀, s)) rfl
         ).continuousAt
-    have hpos : 0 < l6d_chi23 (s, p₀.1, p₀.2) := by
-      rw [hp₀, l6d_chi23_zero, l6d_v23_xTildeOut]
-      exact mul_pos (by linarith [hs.1]) (l6d_Q_pos (by linarith [hs.1]))
+    have hpos : 0 < extChi23 (s, p₀.1, p₀.2) := by
+      rw [hp₀, extChi23_zero, extChi23Zero_xTildeOut]
+      exact mul_pos (by linarith [hs.1]) (extChi23Factor_pos (by linarith [hs.1]))
     exact continuousAt_const.eventually_lt hca hpos
   filter_upwards [hpb, htube] with p hp hpt s hs
   by_cases hsε : s < ε / 2
@@ -676,73 +698,76 @@ lemma l6d_eventually_chi23_pos (B : ℝ) :
 s_sw,out + δ)` is a zero of `χ̃₂₁(·, r₀, x̃₀)`, which is positive on `[0, s_sw)` and negative on
 `(s_sw, s_sw,out + δ]` (at the fixed point: `s = 0` is not a zero and the least positive zero
 `s_sw,out` is simple; the implicit function theorem and compactness of `[0, s_sw,out]`). -/
-lemma l6d_zero_structure : ∃ δ > 0, δ < l6d_S ∧ ∀ᶠ p in 𝓝 ((0 : ℝ), xTildeOut),
-    l6d_sSw p ∈ Ioo (l6d_S - δ) (l6d_S + δ) ∧ l6d_Φ (p, l6d_sSw p) = 0 ∧
-      (∀ s ∈ Ico 0 (l6d_sSw p), 0 < l6d_Φ (p, s)) ∧
-      ∀ s ∈ Ioc (l6d_sSw p) (l6d_S + δ), l6d_Φ (p, s) < 0 := by
+lemma extSwitchTime_zero_structure : ∃ δ > 0, δ < sSwOut ∧ ∀ᶠ p in 𝓝 ((0 : ℝ), xTildeOut),
+    extSwitchTime p ∈ Ioo (sSwOut - δ) (sSwOut + δ) ∧ extImplicitFn (p, extSwitchTime p) = 0 ∧
+      (∀ s ∈ Ico 0 (extSwitchTime p), 0 < extImplicitFn (p, s)) ∧
+      ∀ s ∈ Ioc (extSwitchTime p) (sSwOut + δ), extImplicitFn (p, s) < 0 := by
   set p₀ : ℝ × (Fin 3 → ℝ) := ((0 : ℝ), xTildeOut) with hp₀
   have hS := l6d_S_pos
   -- the uniqueness box of the implicit function theorem
   have hbox := l6d_eventually_chi21_eq_zero_iff
-  rw [l6d_u0, nhds_prod_eq] at hbox
+  rw [extImplicitBase, nhds_prod_eq] at hbox
   obtain ⟨pa, hpa, pb, hpb, hall⟩ := Filter.eventually_prod_iff.1 hbox
   obtain ⟨ε, hε, hεb⟩ := Metric.eventually_nhds_iff.1 hpb
-  set δ := min (ε / 2) (l6d_S / 2) with hδ
+  set δ := min (ε / 2) (sSwOut / 2) with hδ
   have hδ0 : 0 < δ := lt_min (by linarith) (by linarith)
   have hδε : δ < ε := (min_le_left _ _).trans_lt (by linarith)
-  have hδS : δ < l6d_S := (min_le_right _ _).trans_lt (by linarith)
-  have hin : ∀ s ∈ Icc (l6d_S - δ) (l6d_S + δ), pb s := fun s hs ↦
+  have hδS : δ < sSwOut := (min_le_right _ _).trans_lt (by linarith)
+  have hin : ∀ s ∈ Icc (sSwOut - δ) (sSwOut + δ), pb s := fun s hs ↦
     hεb (by rw [Real.dist_eq, abs_lt]; constructor <;> linarith [hs.1, hs.2])
   refine ⟨δ, hδ0, hδS, ?_⟩
-  have hjoint : ∀ s, ContinuousAt l6d_Φ (p₀, s) := fun s ↦
+  have hjoint : ∀ s, ContinuousAt extImplicitFn (p₀, s) := fun s ↦
     (l6d_analyticAt_Φ xTildeOut s).continuousAt
   -- positivity on `[0, S - δ]`
-  have hpos : ∀ᶠ p in 𝓝 p₀, ∀ s ∈ Icc 0 (l6d_S - δ), 0 < l6d_Φ (p, s) := by
+  have hpos : ∀ᶠ p in 𝓝 p₀, ∀ s ∈ Icc 0 (sSwOut - δ), 0 < extImplicitFn (p, s) := by
     refine isCompact_Icc.eventually_forall_of_forall_eventually fun s hs ↦ ?_
-    have h0 : 0 < l6d_Φ (p₀, s) := by
-      simp only [l6d_Φ, hp₀, l6d_chi21_zero]
+    have h0 : 0 < extImplicitFn (p₀, s) := by
+      simp only [extImplicitFn, hp₀, l6d_chi21_zero]
       exact l6d_v21_xTildeOut_pos hs.1 (by linarith [hs.2])
     exact continuousAt_const.eventually_lt (hjoint s) h0
   -- negativity at `S + δ`
-  have hneg : ∀ᶠ p in 𝓝 p₀, l6d_Φ (p, l6d_S + δ) < 0 := by
-    have h0 : l6d_Φ (p₀, l6d_S + δ) < 0 := by
-      simp only [l6d_Φ, hp₀, l6d_chi21_zero]
+  have hneg : ∀ᶠ p in 𝓝 p₀, extImplicitFn (p, sSwOut + δ) < 0 := by
+    have h0 : extImplicitFn (p₀, sSwOut + δ) < 0 := by
+      simp only [extImplicitFn, hp₀, l6d_chi21_zero]
       exact l6d_v21_xTildeOut_neg (by linarith)
-    have hc : ContinuousAt (fun p ↦ l6d_Φ (p, l6d_S + δ)) p₀ :=
+    have hc : ContinuousAt (fun p ↦ extImplicitFn (p, sSwOut + δ)) p₀ :=
       (hjoint _).comp_of_eq (by fun_prop) rfl
     exact hc.eventually_lt continuousAt_const h0
   -- continuity on `[S - δ, S + δ]`
-  have hcont : ∀ᶠ p in 𝓝 p₀, ∀ s ∈ Icc (l6d_S - δ) (l6d_S + δ), AnalyticAt ℝ l6d_Φ (p, s) := by
+  have hcont : ∀ᶠ p in 𝓝 p₀, ∀ s ∈ Icc (sSwOut - δ) (sSwOut + δ), AnalyticAt ℝ extImplicitFn (p,
+      s) := by
     refine isCompact_Icc.eventually_forall_of_forall_eventually fun s _ ↦ ?_
     exact (l6d_analyticAt_Φ xTildeOut s).eventually_analyticAt
-  have hsw : ∀ᶠ p in 𝓝 p₀, l6d_sSw p ∈ Ioo (l6d_S - δ) (l6d_S + δ) := by
+  have hsw : ∀ᶠ p in 𝓝 p₀, extSwitchTime p ∈ Ioo (sSwOut - δ) (sSwOut + δ) := by
     have hc := l6d_analyticAt_sSw.continuousAt
     rw [← hp₀] at hc
     refine hc.preimage_mem_nhds (isOpen_Ioo.mem_nhds ?_)
-    rw [hp₀, l6d_sSw_base]
+    rw [hp₀, extSwitchTime_base]
     constructor <;> linarith
   filter_upwards [hpa, hpos, hneg, hcont, hsw, l6d_eventually_chi21_sSw] with p hpa' hp1 hp2 hp3
     hp4 hp5
-  have hz : l6d_Φ (p, l6d_sSw p) = 0 := hp5
-  have hcon : ContinuousOn (fun s ↦ l6d_Φ (p, s)) (Icc (l6d_S - δ) (l6d_S + δ)) := fun s hs ↦
+  have hz : extImplicitFn (p, extSwitchTime p) = 0 := hp5
+  have hcon : ContinuousOn (fun s ↦ extImplicitFn (p, s)) (Icc (sSwOut - δ) (sSwOut + δ)) :=
+      fun s hs ↦
     ((hp3 s hs).continuousAt.comp_of_eq (by fun_prop) rfl).continuousWithinAt
   -- a zero in the box is `s_sw`
-  have huniq : ∀ s ∈ Icc (l6d_S - δ) (l6d_S + δ), l6d_Φ (p, s) = 0 → l6d_sSw p = s :=
+  have huniq : ∀ s ∈ Icc (sSwOut - δ) (sSwOut + δ), extImplicitFn (p, s) = 0 → extSwitchTime p =
+      s :=
     fun s hs h ↦ (hall hpa' (hin s hs)).1 h
   refine ⟨hp4, hz, fun s hs ↦ ?_, fun s hs ↦ ?_⟩
-  · by_cases hsδ : s ≤ l6d_S - δ
+  · by_cases hsδ : s ≤ sSwOut - δ
     · exact hp1 s ⟨hs.1, hsδ⟩
     by_contra hle
     push Not at hle hsδ
-    have hsub : Icc (l6d_S - δ) s ⊆ Icc (l6d_S - δ) (l6d_S + δ) :=
+    have hsub : Icc (sSwOut - δ) s ⊆ Icc (sSwOut - δ) (sSwOut + δ) :=
       Icc_subset_Icc le_rfl (by linarith [hs.2, hp4.2])
-    have hS0 : 0 < l6d_Φ (p, l6d_S - δ) := hp1 _ ⟨by linarith, le_rfl⟩
+    have hS0 : 0 < extImplicitFn (p, sSwOut - δ) := hp1 _ ⟨by linarith, le_rfl⟩
     obtain ⟨s', hs', hs'0⟩ := intermediate_value_Icc' hsδ.le (hcon.mono hsub) ⟨hle, hS0.le⟩
     have := huniq s' (hsub hs') hs'0
     linarith [hs'.2, hs.2]
   · by_contra hle
     push Not at hle
-    have hsub : Icc s (l6d_S + δ) ⊆ Icc (l6d_S - δ) (l6d_S + δ) :=
+    have hsub : Icc s (sSwOut + δ) ⊆ Icc (sSwOut - δ) (sSwOut + δ) :=
       Icc_subset_Icc (by linarith [hs.1, hp4.1]) le_rfl
     obtain ⟨s', hs', hs'0⟩ := intermediate_value_Icc' hs.2 (hcon.mono hsub) ⟨hp2.le, hle⟩
     have := huniq s' (hsub hs') hs'0
@@ -751,194 +776,198 @@ lemma l6d_zero_structure : ∃ δ > 0, δ < l6d_S ∧ ∀ᶠ p in 𝓝 ((0 : ℝ
 /-! ### The image point and its divided entries (Steps 6–7) -/
 
 /-- The flow point rotated by `Ad_{R⁻¹}`, `Y_sw = Ad_{R⁻¹} Y(s r₀)` at `s = s_sw` (Step 6). -/
-noncomputable def l6d_Xi (p : ℝ × ℝ × (Fin 3 → ℝ)) : iso_PhasePt :=
-  iso_adRinvPow 1 (l6d_flowPt p)
+noncomputable def extSwitchPt (p : ℝ × ℝ × (Fin 3 → ℝ)) : iso_PhasePt :=
+  iso_adRinvPow 1 (extFlowPt p)
 
 /-- The entries of `X_sw - J` and `Λ₁sw + (3/2) J` read off by the chart and the determinant
 relations. -/
-noncomputable def l6d_fa (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (l6d_Xi p).1 0 0
-noncomputable def l6d_fb (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (l6d_Xi p).1 1 0 - 1
-noncomputable def l6d_fe (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (l6d_Xi p).1 0 1 + 1
-noncomputable def l6d_fc (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (l6d_Xi p).2.1 0 0
-noncomputable def l6d_fd (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (l6d_Xi p).2.1 1 0 + 3 / 2
-noncomputable def l6d_ff (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (l6d_Xi p).2.1 0 1 - 3 / 2
+noncomputable def extEntryA (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (extSwitchPt p).1 0 0
+noncomputable def extEntryB (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (extSwitchPt p).1 1 0 - 1
+private noncomputable def l6d_fe (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (extSwitchPt p).1 0 1 + 1
+noncomputable def extEntryC (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (extSwitchPt p).2.1 0 0
+noncomputable def extEntryD (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (extSwitchPt p).2.1 1 0 + 3 / 2
+private noncomputable def l6d_ff (p : ℝ × ℝ × (Fin 3 → ℝ)) : ℝ := (extSwitchPt p).2.1 0 1 - 3 / 2
 
 /-- `w(s, x̃) = ζ z(s, z(x̃), ζ)`, the rotated Fuller flow. -/
-noncomputable def l6d_w (q : ℝ × (Fin 3 → ℝ)) : Fin 3 → ℂ := ζ • flow q.1 (fullerOfChart q.2) ζ
+noncomputable def extFullerFlow (q : ℝ × (Fin 3 → ℝ)) : Fin 3 → ℂ :=
+    ζ • flow q.1 (fullerOfChart q.2) ζ
 
 /-- The limits of the divided entries: `2 Im w₁`, `2 Re w₁`, `6 Re w₂`, `-6 Im w₂`. -/
-noncomputable def l6d_va (q : ℝ × (Fin 3 → ℝ)) : ℝ := 2 * (l6d_w q 0).im
-noncomputable def l6d_vb (q : ℝ × (Fin 3 → ℝ)) : ℝ := 2 * (l6d_w q 0).re
-noncomputable def l6d_vc (q : ℝ × (Fin 3 → ℝ)) : ℝ := 6 * (l6d_w q 1).re
-noncomputable def l6d_vd (q : ℝ × (Fin 3 → ℝ)) : ℝ := -(6 * (l6d_w q 1).im)
+noncomputable def extLimitA (q : ℝ × (Fin 3 → ℝ)) : ℝ := 2 * (extFullerFlow q 0).im
+noncomputable def extLimitB (q : ℝ × (Fin 3 → ℝ)) : ℝ := 2 * (extFullerFlow q 0).re
+noncomputable def extLimitC (q : ℝ × (Fin 3 → ℝ)) : ℝ := 6 * (extFullerFlow q 1).re
+noncomputable def extLimitD (q : ℝ × (Fin 3 → ℝ)) : ℝ := -(6 * (extFullerFlow q 1).im)
 
-lemma l6d_MatAn_Xi (s : ℝ) (x : Fin 3 → ℝ) :
-    l6d_MatAn (fun p ↦ (l6d_Xi p).1) (s, 0, x) ∧ l6d_MatAn (fun p ↦ (l6d_Xi p).2.1) (s, 0, x) := by
+lemma entrywiseAnalyticAt_extSwitchPt (s : ℝ) (x : Fin 3 → ℝ) :
+    EntrywiseAnalyticAt (fun p ↦ (extSwitchPt p).1) (s, 0, x) ∧ EntrywiseAnalyticAt (fun p ↦
+        (extSwitchPt p).2.1) (s, 0, x) := by
   obtain ⟨h1, h2, -⟩ := l6d_MatAn_flowPt s x
-  simp only [l6d_Xi, iso_adRinvPow, pow_one]
-  exact ⟨((l6d_MatAn.const _).mul h1).mul (l6d_MatAn.const _),
-    ((l6d_MatAn.const _).mul h2).mul (l6d_MatAn.const _)⟩
+  simp only [extSwitchPt, iso_adRinvPow, pow_one]
+  exact ⟨((EntrywiseAnalyticAt.const _).mul h1).mul (EntrywiseAnalyticAt.const _),
+    ((EntrywiseAnalyticAt.const _).mul h2).mul (EntrywiseAnalyticAt.const _)⟩
 
-lemma l6d_Rinv_J_R : R⁻¹ * J * R = J := by
+lemma Rinv_mul_J_mul_R : R⁻¹ * J * R = J := by
   rw [Matrix.mul_assoc, poly_J_mul_R, ← Matrix.mul_assoc, poly_inv_mul_R, Matrix.one_mul]
 
-lemma l6d_Xi_zero (s : ℝ) (x : Fin 3 → ℝ) :
-    l6d_Xi (s, 0, x) = (J, (-(3 / 2) : ℝ) • J, 0) := by
-  simp only [l6d_Xi, l6d_flowPt_zero, iso_adRinvPow, pow_one, Matrix.mul_smul, Matrix.smul_mul,
-    l6d_Rinv_J_R, Matrix.mul_zero, Matrix.zero_mul]
+lemma extSwitchPt_zero (s : ℝ) (x : Fin 3 → ℝ) :
+    extSwitchPt (s, 0, x) = (J, (-(3 / 2) : ℝ) • J, 0) := by
+  simp only [extSwitchPt, l6d_flowPt_zero, iso_adRinvPow, pow_one, Matrix.mul_smul, Matrix.smul_mul,
+    Rinv_mul_J_mul_R, Matrix.mul_zero, Matrix.zero_mul]
 
-lemma l6d_analyticAt_entries (s : ℝ) (x : Fin 3 → ℝ) :
-    AnalyticAt ℝ l6d_fa (s, 0, x) ∧ AnalyticAt ℝ l6d_fb (s, 0, x) ∧
-      AnalyticAt ℝ l6d_fe (s, 0, x) ∧ AnalyticAt ℝ l6d_fc (s, 0, x) ∧
-      AnalyticAt ℝ l6d_fd (s, 0, x) ∧ AnalyticAt ℝ l6d_ff (s, 0, x) := by
-  obtain ⟨h1, h2⟩ := l6d_MatAn_Xi s x
+private lemma l6d_analyticAt_entries (s : ℝ) (x : Fin 3 → ℝ) :
+    AnalyticAt ℝ extEntryA (s, 0, x) ∧ AnalyticAt ℝ extEntryB (s, 0, x) ∧
+      AnalyticAt ℝ l6d_fe (s, 0, x) ∧ AnalyticAt ℝ extEntryC (s, 0, x) ∧
+      AnalyticAt ℝ extEntryD (s, 0, x) ∧ AnalyticAt ℝ l6d_ff (s, 0, x) := by
+  obtain ⟨h1, h2⟩ := entrywiseAnalyticAt_extSwitchPt s x
   exact ⟨h1 0 0, (h1 1 0).sub analyticAt_const, (h1 0 1).add analyticAt_const, h2 0 0,
     (h2 1 0).add analyticAt_const, (h2 0 1).sub analyticAt_const⟩
 
-lemma l6d_entries_zero (s : ℝ) (x : Fin 3 → ℝ) :
-    l6d_fa (s, 0, x) = 0 ∧ l6d_fb (s, 0, x) = 0 ∧ l6d_fe (s, 0, x) = 0 ∧
-      l6d_fc (s, 0, x) = 0 ∧ l6d_fd (s, 0, x) = 0 ∧ l6d_ff (s, 0, x) = 0 := by
-  simp only [l6d_fa, l6d_fb, l6d_fe, l6d_fc, l6d_fd, l6d_ff, l6d_Xi_zero]
+private lemma l6d_entries_zero (s : ℝ) (x : Fin 3 → ℝ) :
+    extEntryA (s, 0, x) = 0 ∧ extEntryB (s, 0, x) = 0 ∧ l6d_fe (s, 0, x) = 0 ∧
+      extEntryC (s, 0, x) = 0 ∧ extEntryD (s, 0, x) = 0 ∧ l6d_ff (s, 0, x) = 0 := by
+  simp only [extEntryA, extEntryB, l6d_fe, extEntryC, extEntryD, l6d_ff, extSwitchPt_zero]
   simp [J]
 
 /-- The chart takes values in `𝔰𝔩₂(ℝ)³`. -/
-lemma l6d_lieChart_traceless (p : ℝ × (Fin 3 → ℝ)) :
+private lemma l6d_lieChart_traceless (p : ℝ × (Fin 3 → ℝ)) :
     (lieChart p).1.trace = 0 ∧ (lieChart p).2.1.trace = 0 ∧ (lieChart p).2.2.trace = 0 := by
   refine ⟨by simp [lieChart, lieX, Matrix.trace_fin_two], by simp [lieChart, lieΛ₁,
     Matrix.trace_fin_two], ?_⟩
   simp only [lieChart, lieΛR, sl2Dual, Matrix.trace_smul, Matrix.trace_add, irt_trace_bracket,
     smul_zero, add_zero]
 
-lemma l6d_flowPt_traceless (p : ℝ × ℝ × (Fin 3 → ℝ)) :
-    (l6d_flowPt p).1.trace = 0 ∧ (l6d_flowPt p).2.1.trace = 0 ∧ (l6d_flowPt p).2.2.trace = 0 := by
+lemma extFlowPt_traceless (p : ℝ × ℝ × (Fin 3 → ℝ)) :
+    (extFlowPt p).1.trace = 0 ∧ (extFlowPt p).2.1.trace = 0 ∧ (extFlowPt p).2.2.trace = 0 := by
   obtain ⟨h1, h2, h3⟩ := l6d_lieChart_traceless (p.2.1, p.2.2)
   exact irt_vertexFlow_traceless 1 h1 h2 h3 _
 
 /-- The Fuller coordinates of the image point: `ẑ(Y_sw) = ζ ẑ(Y(s r₀))`. -/
-lemma l6d_fullerCoords_Xi (p : ℝ × ℝ × (Fin 3 → ℝ)) :
-    fullerCoords (l6d_Xi p) = ζ • fullerCoords (l6d_flowPt p) := by
-  obtain ⟨h1, h2, h3⟩ := l6d_flowPt_traceless p
-  exact (fullerCoords_adR (l6d_flowPt p) h1 h2 h3).2
+private lemma l6d_fullerCoords_Xi (p : ℝ × ℝ × (Fin 3 → ℝ)) :
+    fullerCoords (extSwitchPt p) = ζ • fullerCoords (extFlowPt p) := by
+  obtain ⟨h1, h2, h3⟩ := extFlowPt_traceless p
+  exact (fullerCoords_adR (extFlowPt p) h1 h2 h3).2
 
-lemma l6d_fullerCoords_Xi_zero (p : ℝ × ℝ × (Fin 3 → ℝ)) :
-    (fullerCoords (l6d_Xi p) 0).im = l6d_fa p / 2 ∧
-      (fullerCoords (l6d_Xi p) 0).re = (l6d_fe p + l6d_fb p) / 4 := by
+private lemma l6d_fullerCoords_Xi_zero (p : ℝ × ℝ × (Fin 3 → ℝ)) :
+    (fullerCoords (extSwitchPt p) 0).im = extEntryA p / 2 ∧
+      (fullerCoords (extSwitchPt p) 0).re = (l6d_fe p + extEntryB p) / 4 := by
   constructor
   · simp only [fullerCoords, cayleyZ, Fin.isValue, neg_mul, Matrix.cons_val_zero, div_ofNat_im,
-      l6d_fa]
+      extEntryA]
   · simp only [fullerCoords, cayleyZ, Fin.isValue, neg_mul, Matrix.cons_val_zero, div_ofNat_re,
-      l6d_fe, l6d_fb, add_add_sub_cancel]
+      l6d_fe, extEntryB, add_add_sub_cancel]
     ring
 
-lemma l6d_fullerCoords_Xi_one (p : ℝ × ℝ × (Fin 3 → ℝ)) :
-    (fullerCoords (l6d_Xi p) 1).re = l6d_fc p / 6 ∧
-      (fullerCoords (l6d_Xi p) 1).im = -(l6d_ff p + l6d_fd p) / 12 := by
+private lemma l6d_fullerCoords_Xi_one (p : ℝ × ℝ × (Fin 3 → ℝ)) :
+    (fullerCoords (extSwitchPt p) 1).re = extEntryC p / 6 ∧
+      (fullerCoords (extSwitchPt p) 1).im = -(l6d_ff p + extEntryD p) / 12 := by
   constructor
   · simp only [fullerCoords, cayleyZ, Fin.isValue, neg_mul, Matrix.cons_val_one,
       Matrix.cons_val_zero, div_ofNat_re, neg_re, mul_re, I_re, zero_mul, I_im, one_mul, zero_sub,
-      neg_neg, l6d_fc]
+      neg_neg, extEntryC]
   · simp only [fullerCoords, cayleyZ, Fin.isValue, neg_mul, Matrix.cons_val_one,
       Matrix.cons_val_zero, div_ofNat_im, neg_im, mul_im, I_re, zero_mul, I_im, one_mul, zero_add,
-      l6d_ff, l6d_fd, sub_add_add_cancel, neg_add_rev]
+      l6d_ff, extEntryD, sub_add_add_cancel, neg_add_rev]
     ring
 
 /-- Lemma 14.2.3, rotated: `ẑ_k(Y_sw) = r₀^{k+1} w_k(s) + O(r₀^{k+2})`. -/
-lemma l6d_isBigO_fullerCoords_Xi (s : ℝ) (x : Fin 3 → ℝ) (k : Fin 3) :
-    (fun r : ℝ ↦ fullerCoords (l6d_Xi (s, r, x)) k - (r : ℂ) ^ (k.val + 1) * l6d_w (s, x) k)
+private lemma l6d_isBigO_fullerCoords_Xi (s : ℝ) (x : Fin 3 → ℝ) (k : Fin 3) :
+    (fun r : ℝ ↦ fullerCoords (extSwitchPt (s, r, x)) k - (r : ℂ) ^ (k.val + 1) * extFullerFlow (s,
+        x) k)
       =O[𝓝[>] 0] (fun r ↦ r ^ (k.val + 2)) := by
   have h := (lemma14_2_3 x s k).const_mul_left ζ
   refine h.congr_left fun r ↦ ?_
-  simp only [l6d_fullerCoords_Xi, l6d_w, Pi.smul_apply, smul_eq_mul, l6d_flowPt]
+  simp only [l6d_fullerCoords_Xi, extFullerFlow, Pi.smul_apply, smul_eq_mul, extFlowPt]
   ring
 
 /-- A real part (or imaginary part) of `O(g)` is `O(g)`. -/
-lemma l6d_isBigO_re {f : ℝ → ℂ} {g : ℝ → ℝ} {l : Filter ℝ} (h : f =O[l] g) :
+private lemma l6d_isBigO_re {f : ℝ → ℂ} {g : ℝ → ℝ} {l : Filter ℝ} (h : f =O[l] g) :
     (fun r ↦ (f r).re) =O[l] g :=
   (isBigO_of_le l fun r ↦ by
     simpa [Real.norm_eq_abs] using Complex.abs_re_le_norm (f r)).trans h
 
-lemma l6d_isBigO_im {f : ℝ → ℂ} {g : ℝ → ℝ} {l : Filter ℝ} (h : f =O[l] g) :
+private lemma l6d_isBigO_im {f : ℝ → ℂ} {g : ℝ → ℝ} {l : Filter ℝ} (h : f =O[l] g) :
     (fun r ↦ (f r).im) =O[l] g :=
   (isBigO_of_le l fun r ↦ by
     simpa [Real.norm_eq_abs] using Complex.abs_im_le_norm (f r)).trans h
 
-lemma l6d_isBigO_fa (s : ℝ) (x : Fin 3 → ℝ) :
-    (fun r ↦ l6d_fa (s, r, x) - r ^ 1 * l6d_va (s, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 2) := by
+private lemma l6d_isBigO_fa (s : ℝ) (x : Fin 3 → ℝ) :
+    (fun r ↦ extEntryA (s, r, x) - r ^ 1 * extLimitA (s, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 2) := by
   have h := (l6d_isBigO_im (l6d_isBigO_fullerCoords_Xi s x 0)).const_mul_left 2
   refine h.congr_left fun r ↦ ?_
   have := (l6d_fullerCoords_Xi_zero (s, r, x)).1
   simp only [Fin.val_zero, zero_add, pow_one, Complex.sub_im, Complex.im_ofReal_mul] at this ⊢
-  rw [this, l6d_va]
+  rw [this, extLimitA]
   ring
 
-lemma l6d_isBigO_feb (s : ℝ) (x : Fin 3 → ℝ) :
-    (fun r ↦ l6d_fe (s, r, x) + l6d_fb (s, r, x) - r * (2 * l6d_vb (s, x))) =O[𝓝[>] 0]
+private lemma l6d_isBigO_feb (s : ℝ) (x : Fin 3 → ℝ) :
+    (fun r ↦ l6d_fe (s, r, x) + extEntryB (s, r, x) - r * (2 * extLimitB (s, x))) =O[𝓝[>] 0]
       (fun r ↦ r ^ 2) := by
   have h := (l6d_isBigO_re (l6d_isBigO_fullerCoords_Xi s x 0)).const_mul_left 4
   refine h.congr_left fun r ↦ ?_
   have := (l6d_fullerCoords_Xi_zero (s, r, x)).2
   simp only [Fin.val_zero, zero_add, pow_one, Complex.sub_re, Complex.re_ofReal_mul] at this ⊢
-  rw [this, l6d_vb]
+  rw [this, extLimitB]
   ring
 
-lemma l6d_isBigO_fc (s : ℝ) (x : Fin 3 → ℝ) :
-    (fun r ↦ l6d_fc (s, r, x) - r ^ 2 * l6d_vc (s, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 3) := by
+private lemma l6d_isBigO_fc (s : ℝ) (x : Fin 3 → ℝ) :
+    (fun r ↦ extEntryC (s, r, x) - r ^ 2 * extLimitC (s, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 3) := by
   have h := (l6d_isBigO_re (l6d_isBigO_fullerCoords_Xi s x 1)).const_mul_left 6
   refine h.congr_left fun r ↦ ?_
   have := (l6d_fullerCoords_Xi_one (s, r, x)).1
   simp only [Fin.val_one, Complex.sub_re] at this ⊢
-  rw [← Complex.ofReal_pow, Complex.re_ofReal_mul, this, l6d_vc]
+  rw [← Complex.ofReal_pow, Complex.re_ofReal_mul, this, extLimitC]
   ring
 
-lemma l6d_isBigO_ffd (s : ℝ) (x : Fin 3 → ℝ) :
-    (fun r ↦ l6d_ff (s, r, x) + l6d_fd (s, r, x) - r ^ 2 * (2 * l6d_vd (s, x))) =O[𝓝[>] 0]
+private lemma l6d_isBigO_ffd (s : ℝ) (x : Fin 3 → ℝ) :
+    (fun r ↦ l6d_ff (s, r, x) + extEntryD (s, r, x) - r ^ 2 * (2 * extLimitD (s, x))) =O[𝓝[>] 0]
       (fun r ↦ r ^ 3) := by
   have h := (l6d_isBigO_im (l6d_isBigO_fullerCoords_Xi s x 1)).const_mul_left (-12)
   refine h.congr_left fun r ↦ ?_
   have := (l6d_fullerCoords_Xi_one (s, r, x)).2
   simp only [Fin.val_one, Complex.sub_im] at this ⊢
-  rw [← Complex.ofReal_pow, Complex.im_ofReal_mul, this, l6d_vd]
+  rw [← Complex.ofReal_pow, Complex.im_ofReal_mul, this, extLimitD]
   ring
 
 /-- The determinant relations on the image point (`det X = 1`, `det Λ₁ = 9/4`, traceless). -/
-lemma l6d_det_relations (p : ℝ × ℝ × (Fin 3 → ℝ)) (h1 : 1 + p.2.1 * p.2.2 0 ≠ 0)
+private lemma l6d_det_relations (p : ℝ × ℝ × (Fin 3 → ℝ)) (h1 : 1 + p.2.1 * p.2.2 0 ≠ 0)
     (h2 : 3 / 2 - p.2.1 ^ 2 * p.2.2 2 ≠ 0) :
-    l6d_fb p - l6d_fe p = l6d_fa p ^ 2 + l6d_fe p * l6d_fb p ∧
-      3 / 2 * (l6d_ff p - l6d_fd p) = l6d_fc p ^ 2 + l6d_ff p * l6d_fd p := by
-  obtain ⟨t1, t2, -⟩ := l6d_flowPt_traceless p
-  have hdX : (l6d_Xi p).1.det = 1 := by
-    simp only [l6d_Xi, iso_adRinvPow, pow_one]
-    rw [poly_det_conj poly_R_mul_inv, l6d_flowPt, l6d_vertexFlow_det_fst]
+    extEntryB p - l6d_fe p = extEntryA p ^ 2 + l6d_fe p * extEntryB p ∧
+      3 / 2 * (l6d_ff p - extEntryD p) = extEntryC p ^ 2 + l6d_ff p * extEntryD p := by
+  obtain ⟨t1, t2, -⟩ := extFlowPt_traceless p
+  have hdX : (extSwitchPt p).1.det = 1 := by
+    simp only [extSwitchPt, iso_adRinvPow, pow_one]
+    rw [poly_det_conj poly_R_mul_inv, extFlowPt, det_vertexFlow_fst]
     simp only [lieChart, lieX, Matrix.det_fin_two_of]
     field_simp
     ring
-  have hdΛ : (l6d_Xi p).2.1.det = 9 / 4 := by
-    simp only [l6d_Xi, iso_adRinvPow, pow_one]
-    rw [poly_det_conj poly_R_mul_inv, l6d_flowPt, l6d_vertexFlow_det_snd]
+  have hdΛ : (extSwitchPt p).2.1.det = 9 / 4 := by
+    simp only [extSwitchPt, iso_adRinvPow, pow_one]
+    rw [poly_det_conj poly_R_mul_inv, extFlowPt, det_vertexFlow_snd]
     simp only [lieChart, lieΛ₁, Matrix.det_fin_two_of]
     rw [show (-(3 / 2) + p.2.1 ^ 2 * p.2.2 2) = -(3 / 2 - p.2.1 ^ 2 * p.2.2 2) by ring]
     generalize 3 / 2 - p.2.1 ^ 2 * p.2.2 2 = D at h2 ⊢
     field_simp
     ring
-  have htX : (l6d_Xi p).1.trace = 0 := by
-    simp only [l6d_Xi, iso_adRinvPow, pow_one]
+  have htX : (extSwitchPt p).1.trace = 0 := by
+    simp only [extSwitchPt, iso_adRinvPow, pow_one]
     rw [poly_trace_conj poly_R_mul_inv, t1]
-  have htΛ : (l6d_Xi p).2.1.trace = 0 := by
-    simp only [l6d_Xi, iso_adRinvPow, pow_one]
+  have htΛ : (extSwitchPt p).2.1.trace = 0 := by
+    simp only [extSwitchPt, iso_adRinvPow, pow_one]
     rw [poly_trace_conj poly_R_mul_inv, t2]
   rw [Matrix.trace_fin_two] at htX htΛ
   rw [Matrix.det_fin_two] at hdX hdΛ
-  simp only [l6d_fa, l6d_fb, l6d_fe, l6d_fc, l6d_fd, l6d_ff]
+  simp only [extEntryA, extEntryB, l6d_fe, extEntryC, extEntryD, l6d_ff]
   constructor
-  · have : (l6d_Xi p).1 1 1 = -(l6d_Xi p).1 0 0 := by linarith
+  · have : (extSwitchPt p).1 1 1 = -(extSwitchPt p).1 0 0 := by linarith
     rw [this] at hdX
     linear_combination hdX
-  · have : (l6d_Xi p).2.1 1 1 = -(l6d_Xi p).2.1 0 0 := by linarith
+  · have : (extSwitchPt p).2.1 1 1 = -(extSwitchPt p).2.1 0 0 := by linarith
     rw [this] at hdΛ
     linear_combination hdΛ
 
 /-- If `v (κ + v/4) = w` with `v → 0` and `w = O(g)`, then `v = O(g)`. -/
-lemma l6d_isBigO_of_quad {v w g : ℝ → ℝ} {κ : ℝ} (hκ : 0 < κ) (hv : Tendsto v (𝓝[>] 0) (𝓝 0))
+private lemma l6d_isBigO_of_quad {v w g : ℝ → ℝ} {κ : ℝ} (hκ : 0 < κ) (hv :
+    Tendsto v (𝓝[>] 0) (𝓝 0))
     (h : ∀ᶠ r in 𝓝[>] 0, v r * (κ + v r / 4) = w r) (hw : w =O[𝓝[>] 0] g) :
     v =O[𝓝[>] 0] g := by
   refine (IsBigO.of_bound (2 / κ) ?_).trans hw
@@ -953,7 +982,7 @@ lemma l6d_isBigO_of_quad {v w g : ℝ → ℝ} {κ : ℝ} (hκ : 0 < κ) (hv : T
     _ ≤ 2 / κ * (|v r| * |κ + v r / 4|) := by gcongr
 
 /-- `f = r^k c + O(r^{k+1})` implies `f = O(r^k)` as `r → 0⁺`. -/
-lemma l6d_isBigO_of_sub {f : ℝ → ℝ} {c : ℝ} {k : ℕ}
+private lemma l6d_isBigO_of_sub {f : ℝ → ℝ} {c : ℝ} {k : ℕ}
     (h : (fun r ↦ f r - r ^ k * c) =O[𝓝[>] 0] (fun r ↦ r ^ (k + 1))) :
     f =O[𝓝[>] 0] (fun r ↦ r ^ k) := by
   have h4 : (fun r : ℝ ↦ r ^ (k + 1)) =O[𝓝[>] 0] (fun r ↦ r ^ k) :=
@@ -962,7 +991,7 @@ lemma l6d_isBigO_of_sub {f : ℝ → ℝ} {c : ℝ} {k : ℕ}
     simpa [mul_comm] using (isBigO_refl (fun r : ℝ ↦ r ^ k) (𝓝[>] 0)).const_mul_left c
   simpa using (h.trans h4).add h3
 
-lemma l6d_eventually_den (x : Fin 3 → ℝ) :
+private lemma l6d_eventually_den (x : Fin 3 → ℝ) :
     ∀ᶠ r in 𝓝[>] (0 : ℝ), 1 + r * x 0 ≠ 0 ∧ 3 / 2 - r ^ 2 * x 2 ≠ 0 := by
   have h1 : ∀ᶠ r in 𝓝 (0 : ℝ), 1 + r * x 0 ≠ 0 :=
     (by fun_prop : ContinuousAt (fun r : ℝ ↦ 1 + r * x 0) 0).eventually_ne (by simp)
@@ -971,7 +1000,7 @@ lemma l6d_eventually_den (x : Fin 3 → ℝ) :
   exact nhdsWithin_le_nhds (h1.and h2)
 
 /-- An entry vanishing at `r₀ = 0` tends to `0` as `r₀ → 0⁺`. -/
-lemma l6d_tendsto_entry {f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ} {s : ℝ} {x : Fin 3 → ℝ}
+private lemma l6d_tendsto_entry {f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ} {s : ℝ} {x : Fin 3 → ℝ}
     (hf : AnalyticAt ℝ f (s, 0, x)) (h0 : f (s, 0, x) = 0) :
     Tendsto (fun r ↦ f (s, r, x)) (𝓝[>] 0) (𝓝 0) := by
   have hc : ContinuousAt (fun r : ℝ ↦ f (s, r, x)) 0 :=
@@ -979,25 +1008,25 @@ lemma l6d_tendsto_entry {f : ℝ × ℝ × (Fin 3 → ℝ) → ℝ} {s : ℝ} {x
   have := hc.tendsto.mono_left (nhdsWithin_le_nhds (s := Ioi (0 : ℝ)))
   rwa [h0] at this
 
-lemma l6d_isBigO_fb (s : ℝ) (x : Fin 3 → ℝ) :
-    (fun r ↦ l6d_fb (s, r, x) - r ^ 1 * l6d_vb (s, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 2) := by
+private lemma l6d_isBigO_fb (s : ℝ) (x : Fin 3 → ℝ) :
+    (fun r ↦ extEntryB (s, r, x) - r ^ 1 * extLimitB (s, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 2) := by
   obtain ⟨ha, hb, he, -, -, -⟩ := l6d_analyticAt_entries s x
   obtain ⟨ha0, hb0, he0, -, -, -⟩ := l6d_entries_zero s x
   have hu := l6d_isBigO_feb s x
-  have hfa : (fun r ↦ l6d_fa (s, r, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 1) :=
+  have hfa : (fun r ↦ extEntryA (s, r, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 1) :=
     l6d_isBigO_of_sub (l6d_isBigO_fa s x)
-  have hu1 : (fun r ↦ l6d_fe (s, r, x) + l6d_fb (s, r, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 1) :=
-    l6d_isBigO_of_sub (c := 2 * l6d_vb (s, x)) (by simpa using hu)
-  have hw : (fun r ↦ l6d_fa (s, r, x) ^ 2 + (l6d_fe (s, r, x) + l6d_fb (s, r, x)) ^ 2 / 4)
+  have hu1 : (fun r ↦ l6d_fe (s, r, x) + extEntryB (s, r, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 1) :=
+    l6d_isBigO_of_sub (c := 2 * extLimitB (s, x)) (by simpa using hu)
+  have hw : (fun r ↦ extEntryA (s, r, x) ^ 2 + (l6d_fe (s, r, x) + extEntryB (s, r, x)) ^ 2 / 4)
       =O[𝓝[>] 0] (fun r ↦ r ^ 2) := by
     have h1 := hfa.mul hfa
     have h2 := (hu1.mul hu1).const_mul_left (1 / 4)
     refine (h1.add h2).congr (fun r ↦ by ring) (fun r ↦ by ring)
-  have hv : Tendsto (fun r ↦ l6d_fb (s, r, x) - l6d_fe (s, r, x)) (𝓝[>] 0) (𝓝 0) := by
+  have hv : Tendsto (fun r ↦ extEntryB (s, r, x) - l6d_fe (s, r, x)) (𝓝[>] 0) (𝓝 0) := by
     simpa using (l6d_tendsto_entry hb hb0).sub (l6d_tendsto_entry he he0)
-  have hq : ∀ᶠ r in 𝓝[>] (0 : ℝ), (l6d_fb (s, r, x) - l6d_fe (s, r, x)) *
-      (1 + (l6d_fb (s, r, x) - l6d_fe (s, r, x)) / 4) =
-        l6d_fa (s, r, x) ^ 2 + (l6d_fe (s, r, x) + l6d_fb (s, r, x)) ^ 2 / 4 := by
+  have hq : ∀ᶠ r in 𝓝[>] (0 : ℝ), (extEntryB (s, r, x) - l6d_fe (s, r, x)) *
+      (1 + (extEntryB (s, r, x) - l6d_fe (s, r, x)) / 4) =
+        extEntryA (s, r, x) ^ 2 + (l6d_fe (s, r, x) + extEntryB (s, r, x)) ^ 2 / 4 := by
     filter_upwards [l6d_eventually_den x] with r ⟨h1, h2⟩
     have := (l6d_det_relations (s, r, x) h1 h2).1
     linear_combination this
@@ -1005,28 +1034,28 @@ lemma l6d_isBigO_fb (s : ℝ) (x : Fin 3 → ℝ) :
   refine ((hu.const_mul_left (1 / 2)).add (hvO.const_mul_left (1 / 2))).congr_left fun r ↦ ?_
   ring
 
-lemma l6d_isBigO_fd (s : ℝ) (x : Fin 3 → ℝ) :
-    (fun r ↦ l6d_fd (s, r, x) - r ^ 2 * l6d_vd (s, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 3) := by
+private lemma l6d_isBigO_fd (s : ℝ) (x : Fin 3 → ℝ) :
+    (fun r ↦ extEntryD (s, r, x) - r ^ 2 * extLimitD (s, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 3) := by
   obtain ⟨-, -, -, -, hd, hf⟩ := l6d_analyticAt_entries s x
   obtain ⟨-, -, -, -, hd0, hf0⟩ := l6d_entries_zero s x
   have hu := l6d_isBigO_ffd s x
-  have hfc : (fun r ↦ l6d_fc (s, r, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 2) :=
+  have hfc : (fun r ↦ extEntryC (s, r, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 2) :=
     l6d_isBigO_of_sub (l6d_isBigO_fc s x)
-  have hu1 : (fun r ↦ l6d_ff (s, r, x) + l6d_fd (s, r, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 2) :=
-    l6d_isBigO_of_sub (c := 2 * l6d_vd (s, x)) (by simpa using hu)
+  have hu1 : (fun r ↦ l6d_ff (s, r, x) + extEntryD (s, r, x)) =O[𝓝[>] 0] (fun r ↦ r ^ 2) :=
+    l6d_isBigO_of_sub (c := 2 * extLimitD (s, x)) (by simpa using hu)
   have h43 : (fun r : ℝ ↦ r ^ 2 * r ^ 2) =O[𝓝[>] 0] (fun r ↦ r ^ 3) := by
     refine ((isLittleO_pow_pow (by norm_num : 3 < 4)).isBigO.mono nhdsWithin_le_nhds).congr_left
       fun r ↦ by ring
-  have hw : (fun r ↦ l6d_fc (s, r, x) ^ 2 + (l6d_ff (s, r, x) + l6d_fd (s, r, x)) ^ 2 / 4)
+  have hw : (fun r ↦ extEntryC (s, r, x) ^ 2 + (l6d_ff (s, r, x) + extEntryD (s, r, x)) ^ 2 / 4)
       =O[𝓝[>] 0] (fun r ↦ r ^ 3) := by
     have h1 := (hfc.mul hfc).trans h43
     have h2 := ((hu1.mul hu1).trans h43).const_mul_left (1 / 4)
     refine (h1.add h2).congr_left (fun r ↦ by ring)
-  have hv : Tendsto (fun r ↦ l6d_ff (s, r, x) - l6d_fd (s, r, x)) (𝓝[>] 0) (𝓝 0) := by
+  have hv : Tendsto (fun r ↦ l6d_ff (s, r, x) - extEntryD (s, r, x)) (𝓝[>] 0) (𝓝 0) := by
     simpa using (l6d_tendsto_entry hf hf0).sub (l6d_tendsto_entry hd hd0)
-  have hq : ∀ᶠ r in 𝓝[>] (0 : ℝ), (l6d_ff (s, r, x) - l6d_fd (s, r, x)) *
-      (3 / 2 + (l6d_ff (s, r, x) - l6d_fd (s, r, x)) / 4) =
-        l6d_fc (s, r, x) ^ 2 + (l6d_ff (s, r, x) + l6d_fd (s, r, x)) ^ 2 / 4 := by
+  have hq : ∀ᶠ r in 𝓝[>] (0 : ℝ), (l6d_ff (s, r, x) - extEntryD (s, r, x)) *
+      (3 / 2 + (l6d_ff (s, r, x) - extEntryD (s, r, x)) / 4) =
+        extEntryC (s, r, x) ^ 2 + (l6d_ff (s, r, x) + extEntryD (s, r, x)) ^ 2 / 4 := by
     filter_upwards [l6d_eventually_den x] with r ⟨h1, h2⟩
     have := (l6d_det_relations (s, r, x) h1 h2).2
     linear_combination this
@@ -1036,14 +1065,14 @@ lemma l6d_isBigO_fd (s : ℝ) (x : Fin 3 → ℝ) :
 
 /-- The divided entries `(X_sw - J)₁₁/r₀`, `(X_sw - J)₂₁/r₀`, `(Λ₁sw + (3/2) J)₁₁/r₀²`,
 `(Λ₁sw + (3/2) J)₂₁/r₀²` (Step 7, G14.7), analytic near `r₀ = 0`. -/
-noncomputable def l6d_qa : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := l6d_divR l6d_fa 1 l6d_va
-noncomputable def l6d_qb : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := l6d_divR l6d_fb 1 l6d_vb
-noncomputable def l6d_qc : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := l6d_divR l6d_fc 2 l6d_vc
-noncomputable def l6d_qd : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := l6d_divR l6d_fd 2 l6d_vd
+noncomputable def extDivA : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := extDivPow extEntryA 1 extLimitA
+noncomputable def extDivB : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := extDivPow extEntryB 1 extLimitB
+noncomputable def extDivC : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := extDivPow extEntryC 2 extLimitC
+noncomputable def extDivD : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := extDivPow extEntryD 2 extLimitD
 
-lemma l6d_analyticAt_divided (s : ℝ) (x : Fin 3 → ℝ) :
-    AnalyticAt ℝ l6d_qa (s, 0, x) ∧ AnalyticAt ℝ l6d_qb (s, 0, x) ∧
-      AnalyticAt ℝ l6d_qc (s, 0, x) ∧ AnalyticAt ℝ l6d_qd (s, 0, x) := by
+lemma analyticAt_extDiv (s : ℝ) (x : Fin 3 → ℝ) :
+    AnalyticAt ℝ extDivA (s, 0, x) ∧ AnalyticAt ℝ extDivB (s, 0, x) ∧
+      AnalyticAt ℝ extDivC (s, 0, x) ∧ AnalyticAt ℝ extDivD (s, 0, x) := by
   have h := l6d_analyticAt_entries
   exact ⟨l6d_analyticAt_divR (fun s x ↦ (h s x).1) 1 l6d_isBigO_fa s x,
     l6d_analyticAt_divR (fun s x ↦ (h s x).2.1) 1 l6d_isBigO_fb s x,
@@ -1052,12 +1081,12 @@ lemma l6d_analyticAt_divided (s : ℝ) (x : Fin 3 → ℝ) :
 
 /-! ### The extended map in the chart (Steps 8–9) -/
 
-lemma l6d_fullerOfChart_ne_zero (x : Fin 3 → ℝ) : fullerOfChart x ≠ 0 := by
+lemma fullerOfChart_ne_zero (x : Fin 3 → ℝ) : fullerOfChart x ≠ 0 := by
   intro h
   have := congrArg (fun z : Fin 3 → ℂ ↦ (z 0).im) h
   simp [fullerOfChart] at this
 
-lemma l6d_ham_sub (z : Fin 3 → ℂ) (u v : ℂ) : ham z u - ham z v = RR (u - v) (z 2) := by
+private lemma l6d_ham_sub (z : Fin 3 → ℂ) (u v : ℂ) : ham z u - ham z v = RR (u - v) (z 2) := by
   simp only [ham, RR_eq_re_mul_add_im_mul, Complex.sub_re, Complex.sub_im]
   ring
 
@@ -1065,18 +1094,20 @@ lemma l6d_ham_sub (z : Fin 3 → ℂ) (u v : ℂ) : ham z u - ham z v = RR (u - 
 `z(x̃)` the switching function to `1` is positive on `[0, σ)`, vanishes at `σ` and is negative
 just after, and the one to `ζ²` is positive on `(0, B]`, then the first control of `z(x̃)` is
 `ζ`, its first switching time is `σ`, and `F(z(x̃)) = z(σ, z(x̃), ζ)`. -/
-lemma l6d_poincare_eq {x : Fin 3 → ℝ} {σ B : ℝ} (hσ : 0 < σ) (hσB : σ < B)
-    (h21pos : ∀ s ∈ Ico 0 σ, 0 < l6d_v21 (s, x)) (h21zero : l6d_v21 (σ, x) = 0)
-    (h21neg : ∀ s ∈ Ioc σ B, l6d_v21 (s, x) < 0) (h23 : ∀ s ∈ Ioc 0 B, 0 < l6d_v23 (s, x)) :
+private lemma l6d_poincare_eq {x : Fin 3 → ℝ} {σ B : ℝ} (hσ : 0 < σ) (hσB : σ < B)
+    (h21pos : ∀ s ∈ Ico 0 σ, 0 < extChi21Zero (s, x)) (h21zero : extChi21Zero (σ, x) = 0)
+    (h21neg : ∀ s ∈ Ioc σ B, extChi21Zero (s, x) < 0) (h23 : ∀ s ∈ Ioc 0 B, 0 < extChi23Zero (s,
+        x)) :
     poincare (fullerOfChart x) = flow σ (fullerOfChart x) ζ := by
   set z := fullerOfChart x with hz
-  have hz0 : z ≠ 0 := l6d_fullerOfChart_ne_zero x
-  have h1 : ∀ t, ham (flow t z ζ) ζ - ham (flow t z ζ) 1 = l6d_v21 (t, x) / 24 := fun t ↦ by
-    rw [l6d_ham_sub, l6d_v21]; ring
-  have h2 : ∀ t, ham (flow t z ζ) ζ - ham (flow t z ζ) (ζ ^ 2) = l6d_v23 (t, x) / 24 := fun t ↦ by
-    rw [l6d_ham_sub, l6d_v23]; ring
-  have h23zero : l6d_v23 (0, x) = 0 := by
-    simp only [l6d_v23, flow_zero]
+  have hz0 : z ≠ 0 := fullerOfChart_ne_zero x
+  have h1 : ∀ t, ham (flow t z ζ) ζ - ham (flow t z ζ) 1 = extChi21Zero (t, x) / 24 := fun t ↦ by
+    rw [l6d_ham_sub, extChi21Zero]; ring
+  have h2 : ∀ t, ham (flow t z ζ) ζ - ham (flow t z ζ) (ζ ^ 2) = extChi23Zero (t, x) / 24 :=
+      fun t ↦ by
+    rw [l6d_ham_sub, extChi23Zero]; ring
+  have h23zero : extChi23Zero (0, x) = 0 := by
+    simp only [extChi23Zero, flow_zero]
     have : (fullerOfChart x 2).im = 0 := by simp [fullerOfChart]
     rw [RR_eq_re_mul_add_im_mul]
     simp [this, ζ_re, ζ_sq_re]
@@ -1084,13 +1115,13 @@ lemma l6d_poincare_eq {x : Fin 3 → ℝ} {σ B : ℝ} (hσ : 0 < σ) (hσB : σ
   have hopt : ∀ t ∈ Icc 0 σ, ∀ v ∈ VT, ham (flow t z ζ) v ≤ ham (flow t z ζ) ζ := by
     intro t ht v hv
     rcases mem_VT.1 hv with rfl | rfl | rfl
-    · have : 0 ≤ l6d_v21 (t, x) := by
+    · have : 0 ≤ extChi21Zero (t, x) := by
         rcases eq_or_lt_of_le ht.2 with h | h
         · rw [h, h21zero]
         · exact (h21pos t ⟨ht.1, h⟩).le
       linarith [h1 t]
     · exact le_rfl
-    · have : 0 ≤ l6d_v23 (t, x) := by
+    · have : 0 ≤ extChi23Zero (t, x) := by
         rcases eq_or_lt_of_le ht.1 with h | h
         · rw [← h, h23zero]
         · exact (h23 t ⟨h, ht.2.trans hσB.le⟩).le
@@ -1119,61 +1150,63 @@ lemma l6d_poincare_eq {x : Fin 3 → ℝ} {σ B : ℝ} (hσ : 0 < σ) (hσB : σ
 /-- **The extended Reinhardt–Poincaré map in the chart** (Steps 8–9): with
 `σ = s_sw(r, x̃)` and the divided entries at `(σ, r, x̃)`,
 `(r, x̃) ↦ (r a₁, b₁/a₁, c₂/a₁², d₂/a₁²)`. -/
-noncomputable def l6d_E (q : ℝ × (Fin 3 → ℝ)) : ℝ × (Fin 3 → ℝ) :=
-  (q.1 * l6d_qa (l6d_sSw q, q.1, q.2),
-    ![l6d_qb (l6d_sSw q, q.1, q.2) / l6d_qa (l6d_sSw q, q.1, q.2),
-      l6d_qc (l6d_sSw q, q.1, q.2) / l6d_qa (l6d_sSw q, q.1, q.2) ^ 2,
-      l6d_qd (l6d_sSw q, q.1, q.2) / l6d_qa (l6d_sSw q, q.1, q.2) ^ 2])
+noncomputable def extMap (q : ℝ × (Fin 3 → ℝ)) : ℝ × (Fin 3 → ℝ) :=
+  (q.1 * extDivA (extSwitchTime q, q.1, q.2),
+    ![extDivB (extSwitchTime q, q.1, q.2) / extDivA (extSwitchTime q, q.1, q.2),
+      extDivC (extSwitchTime q, q.1, q.2) / extDivA (extSwitchTime q, q.1, q.2) ^ 2,
+      extDivD (extSwitchTime q, q.1, q.2) / extDivA (extSwitchTime q, q.1, q.2) ^ 2])
 
 /-- `w(s_sw,out, x̃_out) = λ r_scale q_out` (the fixed point equation (13.5.2), rescaled). -/
-lemma l6d_w_base : l6d_w (l6d_S, xTildeOut) 0 = (l6d_lam * rScale : ℝ) * qOutCart 0 := by
+private lemma l6d_w_base : extFullerFlow (sSwOut, xTildeOut) 0 = (virialScaleOut * rScale :
+    ℝ) * qOutCart 0 := by
   have h := poincare_qOutCart
   rw [poincare, firstControl_qOutCart] at h
-  have hl := l6d_flow_scale l6d_lam l6d_T qOutCart ζ
-  rw [l6d_w, l6d_S, l6d_fullerOfChart_xTildeOut, hl, show l6d_T = firstSwitchTime qOutCart from rfl,
+  have hl := l6d_flow_scale virialScaleOut tSwOut qOutCart ζ
+  rw [extFullerFlow, sSwOut, fullerOfChart_xTildeOut, hl, show tSwOut = firstSwitchTime qOutCart
+      from rfl,
     h]
   simp only [Pi.smul_apply, scale, Matrix.cons_val_zero, smul_eq_mul]
   have h3 : ζ * (ζ ^ 2 * ((rScale : ℂ) * qOutCart 0)) = ζ ^ 3 * ((rScale : ℂ) * qOutCart 0) := by
     ring
-  rw [show ζ * (↑l6d_lam * (ζ ^ 2 * (↑rScale * qOutCart 0))) =
-    ↑l6d_lam * (ζ * (ζ ^ 2 * (↑rScale * qOutCart 0))) by ring, h3, ζ_pow_three]
+  rw [show ζ * (↑virialScaleOut * (ζ ^ 2 * (↑rScale * qOutCart 0))) =
+    ↑virialScaleOut * (ζ * (ζ ^ 2 * (↑rScale * qOutCart 0))) by ring, h3, ζ_pow_three]
   push_cast
   ring
 
-lemma l6d_va_base : l6d_va (l6d_S, xTildeOut) = rScale := by
+private lemma l6d_va_base : extLimitA (sSwOut, xTildeOut) = rScale := by
   have hq := qOutCart_signs.1.ne'
-  rw [l6d_va, l6d_w_base, Complex.im_ofReal_mul, l6d_lam]
+  rw [extLimitA, l6d_w_base, Complex.im_ofReal_mul, virialScaleOut]
   field_simp
 
-lemma l6d_qa_base : l6d_qa (l6d_S, 0, xTildeOut) = rScale := by
-  rw [l6d_qa, l6d_divR_zero, l6d_va_base]
+lemma extDivA_base : extDivA (sSwOut, 0, xTildeOut) = rScale := by
+  rw [extDivA, l6d_divR_zero, l6d_va_base]
 
-lemma l6d_analyticAt_sSw_triple :
-    AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ (l6d_sSw q, q.1, q.2)) ((0 : ℝ), xTildeOut) := by
+lemma analyticAt_extSwitchTime_triple :
+    AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ (extSwitchTime q, q.1, q.2)) ((0 : ℝ), xTildeOut) := by
   have h := l6d_analyticAt_sSw
   fun_prop
 
-lemma l6d_sSw_triple_base :
-    (fun q : ℝ × (Fin 3 → ℝ) ↦ (l6d_sSw q, q.1, q.2)) ((0 : ℝ), xTildeOut) =
-      (l6d_S, 0, xTildeOut) := by
-  simp [l6d_sSw_base]
+lemma extSwitchTime_triple_base :
+    (fun q : ℝ × (Fin 3 → ℝ) ↦ (extSwitchTime q, q.1, q.2)) ((0 : ℝ), xTildeOut) =
+      (sSwOut, 0, xTildeOut) := by
+  simp [extSwitchTime_base]
 
 /-- The extended map is analytic at the fixed point. -/
-lemma l6d_analyticAt_E : AnalyticAt ℝ l6d_E ((0 : ℝ), xTildeOut) := by
-  obtain ⟨ha, hb, hc, hd⟩ := l6d_analyticAt_divided l6d_S xTildeOut
-  have ht := l6d_analyticAt_sSw_triple
-  have hta : AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ l6d_qa (l6d_sSw q, q.1, q.2))
-      ((0 : ℝ), xTildeOut) := ha.comp_of_eq ht l6d_sSw_triple_base
-  have htb : AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ l6d_qb (l6d_sSw q, q.1, q.2))
-      ((0 : ℝ), xTildeOut) := hb.comp_of_eq ht l6d_sSw_triple_base
-  have htc : AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ l6d_qc (l6d_sSw q, q.1, q.2))
-      ((0 : ℝ), xTildeOut) := hc.comp_of_eq ht l6d_sSw_triple_base
-  have htd : AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ l6d_qd (l6d_sSw q, q.1, q.2))
-      ((0 : ℝ), xTildeOut) := hd.comp_of_eq ht l6d_sSw_triple_base
-  have h0 : l6d_qa (l6d_sSw ((0 : ℝ), xTildeOut), ((0 : ℝ), xTildeOut).1,
+lemma analyticAt_extMap : AnalyticAt ℝ extMap ((0 : ℝ), xTildeOut) := by
+  obtain ⟨ha, hb, hc, hd⟩ := analyticAt_extDiv sSwOut xTildeOut
+  have ht := analyticAt_extSwitchTime_triple
+  have hta : AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ extDivA (extSwitchTime q, q.1, q.2))
+      ((0 : ℝ), xTildeOut) := ha.comp_of_eq ht extSwitchTime_triple_base
+  have htb : AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ extDivB (extSwitchTime q, q.1, q.2))
+      ((0 : ℝ), xTildeOut) := hb.comp_of_eq ht extSwitchTime_triple_base
+  have htc : AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ extDivC (extSwitchTime q, q.1, q.2))
+      ((0 : ℝ), xTildeOut) := hc.comp_of_eq ht extSwitchTime_triple_base
+  have htd : AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ extDivD (extSwitchTime q, q.1, q.2))
+      ((0 : ℝ), xTildeOut) := hd.comp_of_eq ht extSwitchTime_triple_base
+  have h0 : extDivA (extSwitchTime ((0 : ℝ), xTildeOut), ((0 : ℝ), xTildeOut).1,
       ((0 : ℝ), xTildeOut).2) ≠ 0 := by
-    rw [l6d_sSw_base, l6d_qa_base]; linarith [rScale_spec.1]
-  have h1 : AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ q.1 * l6d_qa (l6d_sSw q, q.1, q.2))
+    rw [extSwitchTime_base, extDivA_base]; linarith [rScale_spec.1]
+  have h1 : AnalyticAt ℝ (fun q : ℝ × (Fin 3 → ℝ) ↦ q.1 * extDivA (extSwitchTime q, q.1, q.2))
       ((0 : ℝ), xTildeOut) := by fun_prop
   refine h1.prod (AnalyticAt.pi fun i ↦ ?_)
   fin_cases i
@@ -1182,22 +1215,22 @@ lemma l6d_analyticAt_E : AnalyticAt ℝ l6d_E ((0 : ℝ), xTildeOut) := by
   · exact htd.fun_div (hta.fun_pow 2) (pow_ne_zero 2 h0)
 
 /-- For `r ≠ 0` the extended map is `lieChartInv` of the image point (TeX 11849–11856). -/
-lemma l6d_E_eq_lieChartInv {q : ℝ × (Fin 3 → ℝ)} (hq : q.1 ≠ 0) :
-    l6d_E q = lieChartInv (l6d_Xi (l6d_sSw q, q.1, q.2)) := by
-  set p : ℝ × ℝ × (Fin 3 → ℝ) := (l6d_sSw q, q.1, q.2) with hp
+lemma extMap_eq_lieChartInv {q : ℝ × (Fin 3 → ℝ)} (hq : q.1 ≠ 0) :
+    extMap q = lieChartInv (extSwitchPt (extSwitchTime q, q.1, q.2)) := by
+  set p : ℝ × ℝ × (Fin 3 → ℝ) := (extSwitchTime q, q.1, q.2) with hp
   have hp1 : p.2.1 ≠ 0 := hq
-  have ha := l6d_eq_pow_mul_divR l6d_fa 1 l6d_va hp1
-  have hb := l6d_eq_pow_mul_divR l6d_fb 1 l6d_vb hp1
-  have hc := l6d_eq_pow_mul_divR l6d_fc 2 l6d_vc hp1
-  have hd := l6d_eq_pow_mul_divR l6d_fd 2 l6d_vd hp1
-  simp only [l6d_fa, l6d_fb, l6d_fc, l6d_fd] at ha hb hc hd
-  have hb' : (l6d_Xi p).1 1 0 = 1 + p.2.1 ^ 1 * l6d_qb p := by
-    simp only [l6d_qb]; linarith
-  have hd' : (l6d_Xi p).2.1 1 0 = -(3 / 2) + p.2.1 ^ 2 * l6d_qd p := by
-    simp only [l6d_qd]; linarith
-  simp only [l6d_E, lieChartInv, ← hp]
+  have ha := eq_pow_mul_extDivPow extEntryA 1 extLimitA hp1
+  have hb := eq_pow_mul_extDivPow extEntryB 1 extLimitB hp1
+  have hc := eq_pow_mul_extDivPow extEntryC 2 extLimitC hp1
+  have hd := eq_pow_mul_extDivPow extEntryD 2 extLimitD hp1
+  simp only [extEntryA, extEntryB, extEntryC, extEntryD] at ha hb hc hd
+  have hb' : (extSwitchPt p).1 1 0 = 1 + p.2.1 ^ 1 * extDivB p := by
+    simp only [extDivB]; linarith
+  have hd' : (extSwitchPt p).2.1 1 0 = -(3 / 2) + p.2.1 ^ 2 * extDivD p := by
+    simp only [extDivD]; linarith
+  simp only [extMap, lieChartInv, ← hp]
   rw [ha, hb', hc, hd']
-  simp only [l6d_qa, l6d_qc, pow_one, Prod.mk.injEq]
+  simp only [extDivA, extDivC, pow_one, Prod.mk.injEq]
   refine ⟨rfl, ?_⟩
   funext i
   fin_cases i <;>
@@ -1208,25 +1241,25 @@ lemma l6d_E_eq_lieChartInv {q : ℝ × (Fin 3 → ℝ)} (hq : q.1 ≠ 0) :
 
 /-- **On the divisor the extended map is the Fuller–Poincaré map** (Step 9, TeX 11858–11860):
 `E(0, x̃) = (0, fullerChartInv (ζ F(z(x̃))))` for `x̃` near `x̃_out`. -/
-lemma l6d_eventually_E_divisor : ∀ᶠ x in 𝓝 xTildeOut,
-    l6d_E (0, x) = (0, fullerChartInv (ζ • poincare (fullerOfChart x))) := by
-  obtain ⟨δ, hδ, hδS, hZ⟩ := l6d_zero_structure
-  have h23 := l6d_eventually_chi23_pos (l6d_S + δ)
+lemma eventually_extMap_divisor : ∀ᶠ x in 𝓝 xTildeOut,
+    extMap (0, x) = (0, fullerChartInv (ζ • poincare (fullerOfChart x))) := by
+  obtain ⟨δ, hδ, hδS, hZ⟩ := extSwitchTime_zero_structure
+  have h23 := eventually_extChi23_pos (sSwOut + δ)
   have hc : ContinuousAt (fun x : Fin 3 → ℝ ↦ ((0 : ℝ), x)) xTildeOut := by fun_prop
   filter_upwards [hc.eventually hZ, hc.eventually h23] with x ⟨hσ, hz, hpos, hneg⟩ h23x
-  set σ := l6d_sSw ((0 : ℝ), x) with hσdef
+  set σ := extSwitchTime ((0 : ℝ), x) with hσdef
   have hP : poincare (fullerOfChart x) = flow σ (fullerOfChart x) ζ := by
-    refine l6d_poincare_eq (B := l6d_S + δ) (by linarith [hσ.1]) hσ.2 (fun s hs ↦ ?_) ?_
+    refine l6d_poincare_eq (B := sSwOut + δ) (by linarith [hσ.1]) hσ.2 (fun s hs ↦ ?_) ?_
       (fun s hs ↦ ?_) (fun s hs ↦ ?_)
-    · have := hpos s hs; simpa [l6d_Φ, l6d_chi21_zero] using this
-    · simpa [l6d_Φ, l6d_chi21_zero] using hz
-    · have := hneg s hs; simpa [l6d_Φ, l6d_chi21_zero] using this
-    · have := h23x s hs; simpa [l6d_chi23_zero] using this
-  simp only [l6d_E, zero_mul, l6d_qa, l6d_qb, l6d_qc, l6d_qd, l6d_divR_zero, Prod.mk.injEq,
+    · have := hpos s hs; simpa [extImplicitFn, l6d_chi21_zero] using this
+    · simpa [extImplicitFn, l6d_chi21_zero] using hz
+    · have := hneg s hs; simpa [extImplicitFn, l6d_chi21_zero] using this
+    · have := h23x s hs; simpa [extChi23_zero] using this
+  simp only [extMap, zero_mul, extDivA, extDivB, extDivC, extDivD, l6d_divR_zero, Prod.mk.injEq,
     true_and, ← hσdef, hP]
-  rw [show ζ • flow σ (fullerOfChart x) ζ = l6d_w (σ, x) from rfl]
-  simp only [l6d_va, l6d_vb, l6d_vc, l6d_vd]
-  generalize l6d_w (σ, x) = w
+  rw [show ζ • flow σ (fullerOfChart x) ζ = extFullerFlow (σ, x) from rfl]
+  simp only [extLimitA, extLimitB, extLimitC, extLimitD]
+  generalize extFullerFlow (σ, x) = w
   funext i
   fin_cases i <;> simp [fullerChartInv] <;> ring
 
