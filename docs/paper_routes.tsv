@@ -265,7 +265,9 @@ thm:mahler	theorem	1	lem:constant-not-singular,prop:edge-extremal,thm:finite-ban
 # bang-bang with finitely many switches on every interval on which its lift avoids the singular locus. Label of this
 # formalization.
 thm:mahler:away	theorem	1	prop:edge-extremal,thm:finite-bang-bang
-thm:no-chatter	theorem	0	
+# Theorem 16.4.1: its proof is the subsection "Proof" of section 16.4 (lines 12989-13070), not a proof
+# environment, so the extraction marked it unproved; that subsection cites Theorem 16.1.1 (thm:basin) twice.
+thm:no-chatter	theorem	1	thm:basin
 thm:Gronwall	corollary	0	
 # Unlabelled Theorem A.3.1 (line 13198; Irwin, cited without proof). Label of this formalization.
 thm:stable-manifold	theorem	0	
