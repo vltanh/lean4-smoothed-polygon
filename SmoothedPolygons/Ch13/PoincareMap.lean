@@ -49,7 +49,8 @@ private lemma l4h_ham_le_iff (w : Fin 3 → ℂ) (x y : ℂ) :
   unfold ham
   rw [RR_comm x (w 2), RR_comm y (w 2), add_le_add_iff_left]
 
-private lemma l4h_ne_zero_of_mem_VT {v : ℂ} (hv : v ∈ VT) : v ≠ 0 := by
+/-- The elements of `V_T` are nonzero. -/
+theorem ne_zero_of_mem_VT {v : ℂ} (hv : v ∈ VT) : v ≠ 0 := by
   intro h
   have := norm_eq_one_of_mem_VT hv
   rw [h, norm_zero] at this
@@ -79,7 +80,7 @@ private lemma l4h_hamMax_eq {w : Fin 3 → ℂ} {M : ℝ} (h₁ : ∀ v ∈ VT, 
 private lemma l4h_ham_smul {v : ℂ} (hv : v ∈ VT) (w : Fin 3 → ℂ) (x : ℂ) :
     ham (v • w) x = ham w (v⁻¹ * x) := by
   have h := ham_smul_scale (norm_eq_one_of_mem_VT hv) 1 w (v⁻¹ * x)
-  rwa [scale_one, mul_inv_cancel_left₀ (l4h_ne_zero_of_mem_VT hv), one_pow, one_mul] at h
+  rwa [scale_one, mul_inv_cancel_left₀ (ne_zero_of_mem_VT hv), one_pow, one_mul] at h
 
 /-- `H_F(r z₁, r² z₂, r³ z₃; x) = r³ H_F(z, x)` (`ham_smul_scale` with `v = 1`). -/
 private lemma l4h_ham_scale (r : ℝ) (w : Fin 3 → ℂ) (x : ℂ) :
@@ -108,7 +109,8 @@ private lemma l4h_continuous_ham_flow (z : Fin 3 → ℂ) (u v : ℂ) :
 private lemma l4h_continuous_hamMax : Continuous hamMax :=
   (l4h_continuous_ham 1).max ((l4h_continuous_ham ζ).max (l4h_continuous_ham _))
 
-private lemma l4h_tau_smul (c : ℂ) (z : Fin 3 → ℂ) : tau (c • z) = starRingEnd ℂ c • tau z := by
+/-- `τ(c z) = c̄ τ(z)`. -/
+theorem tau_smul (c : ℂ) (z : Fin 3 → ℂ) : tau (c • z) = starRingEnd ℂ c • tau z := by
   funext j; fin_cases j <;> simp [tau]
 
 private lemma l4h_continuous_tau : Continuous tau := by
@@ -145,7 +147,7 @@ private lemma l4h_norm_le_weightedNorm (z : Fin 3 → ℂ) :
       _ = (weightedNorm z ^ 3) ^ 2 := by ring
 
 /-- The walls are cones: `c 𝒲 ⊆ 𝒲` for `c ≥ 0`. -/
-private lemma l4h_ofReal_mul_mem_walls {c : ℝ} (hc : 0 ≤ c) {w : ℂ} (hw : w ∈ walls) :
+theorem ofReal_mul_mem_walls {c : ℝ} (hc : 0 ≤ c) {w : ℂ} (hw : w ∈ walls) :
     (c : ℂ) * w ∈ walls := by
   have key : ∀ k, w ∈ wall k → (c : ℂ) * w ∈ wall k := by
     rintro k ⟨s, hs, rfl⟩
@@ -156,7 +158,7 @@ private lemma l4h_ofReal_mul_mem_walls {c : ℝ} (hc : 0 ≤ c) {w : ℂ} (hw : 
   · exact Or.inr (key 2 h)
 
 /-- `conj 𝒲 = 𝒲` (`conj ζ = ζ²` exchanges `𝒲₁` and `𝒲₂`). -/
-private lemma l4h_conj_mem_walls {w : ℂ} (hw : w ∈ walls) : starRingEnd ℂ w ∈ walls := by
+theorem conj_mem_walls {w : ℂ} (hw : w ∈ walls) : starRingEnd ℂ w ∈ walls := by
   have hζ : starRingEnd ℂ ζ = ζ ^ 2 := by
     rw [← inv_eq_conj_of_mem_VT ζ_mem_VT]
     exact inv_eq_of_mul_eq_one_right (by rw [show ζ * ζ ^ 2 = ζ ^ 3 by ring, ζ_pow_three])
@@ -226,7 +228,7 @@ theorem poincare_ne_zero {z : Fin 3 → ℂ} (hz : z ≠ 0) : poincare z ≠ 0 :
 /-- `F` lands on the walls: at `t_sw` the first control and the control that beats it right after
 `t_sw` both maximize `RR(z₃(t_sw), ·)` (`firstControl_maximizes`, `firstControl_beaten`
 and continuity), so `z₃(t_sw) ∈ 𝒲` (`mem_walls_of_maximizers`). -/
-private theorem l4st_poincare_mem_walls {z : Fin 3 → ℂ} (hz : z ≠ 0) : poincare z 2 ∈ walls := by
+theorem poincare_mem_walls {z : Fin 3 → ℂ} (hz : z ≠ 0) : poincare z 2 ∈ walls := by
   have hfc := isFirstControl_firstControl hz
   have hmax := firstControl_maximizes hz
   have hT : firstSwitchTime z ∈ Icc 0 (firstSwitchTime z) :=
@@ -293,7 +295,7 @@ solutions with `H_F = 0` (13.2.6), and `z⁰` here is arbitrary (as in Lemma 13.
 theorem poincare_smul {v : ℂ} (hv : v ∈ VT) {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     firstControl (v • z) = v * firstControl z ∧ firstSwitchTime (v • z) = firstSwitchTime z ∧
       poincare (v • z) = v • poincare z := by
-  have hv0 := l4h_ne_zero_of_mem_VT hv
+  have hv0 := ne_zero_of_mem_VT hv
   have hvz : v • z ≠ 0 := smul_ne_zero hv0 hz
   obtain ⟨huV, ε, hε, hmax⟩ := isFirstControl_firstControl hz
   have hfc : firstControl (v • z) = v * firstControl z := by
@@ -390,7 +392,7 @@ theorem hamMax_smul_scale_and_tau {v : ℂ} (hv : v ∈ VT) {r : ℝ} (hr : 0 < 
       exact mul_le_mul_of_nonneg_left (ham_le_hamMax z (l4h_inv_mul_mem_VT hv hx)) hr3
     · obtain ⟨x, hx, hxe⟩ := l4h_exists_ham_eq_hamMax z
       refine ⟨v * x, mul_mem_VT hv hx, ?_⟩
-      rw [l4h_ham_smul hv, l4h_ham_scale, inv_mul_cancel_left₀ (l4h_ne_zero_of_mem_VT hv), hxe]
+      rw [l4h_ham_smul hv, l4h_ham_scale, inv_mul_cancel_left₀ (ne_zero_of_mem_VT hv), hxe]
   · apply l4h_hamMax_eq
     · intro x hx
       rw [ham_tau]
@@ -488,8 +490,8 @@ theorem ang_poincare_mem_XiW {ξ : Fin 3 → ℂ} (hξ : ξ ∈ XiW) : ang (poin
       (((weightedNorm (poincare ξ))⁻¹ ^ 3 : ℝ) : ℂ) * poincare ξ 2 := by
     simp [ang, scale]
   rw [e]
-  exact l4h_ofReal_mul_mem_walls (pow_nonneg (inv_nonneg.2 (weightedNorm_pos hF).le) 3)
-    (l4st_poincare_mem_walls hz)
+  exact ofReal_mul_mem_walls (pow_nonneg (inv_nonneg.2 (weightedNorm_pos hF).le) 3)
+    (poincare_mem_walls hz)
 
 /-- The Fuller–Poincaré map `F_ang : Ξ_𝒲 → Ξ_𝒲` (TeX 11256–11265), `ξ ↦ π_ang F(1, ξ)`. -/
 noncomputable def poincareAng (ξ : XiW) : XiW := ⟨ang (poincare ξ), ang_poincare_mem_XiW ξ.2⟩
@@ -561,7 +563,7 @@ theorem tau_mem_XiW {ξ : Fin 3 → ℂ} (hξ : ξ ∈ XiW) : tau ξ ∈ XiW := 
     exact h1
   · have e : tau ξ 2 = starRingEnd ℂ (ξ 2) := by simp [tau]
     rw [e]
-    exact l4h_conj_mem_walls h2
+    exact conj_mem_walls h2
 
 /-- The time reversal `τ` on `Ξ_𝒲`. -/
 noncomputable def tauXiW (ξ : XiW) : XiW := ⟨tau ξ, tau_mem_XiW ξ.2⟩
@@ -575,7 +577,7 @@ theorem tauXiW_orbitRel (ξ η : XiW) (h : MulAction.orbitRel (rootsOfUnity 3 �
   change (((g⁻¹ : rootsOfUnity 3 ℂ) : ℂˣ) : ℂ) • tau (η : Fin 3 → ℂ) =
     tau (((g : ℂˣ) : ℂ) • (η : Fin 3 → ℂ))
   have e : (((g⁻¹ : rootsOfUnity 3 ℂ) : ℂˣ) : ℂ) = (((g : ℂˣ) : ℂ))⁻¹ := by simp
-  rw [l4h_tau_smul, e, inv_eq_conj_of_mem_VT hv]
+  rw [tau_smul, e, inv_eq_conj_of_mem_VT hv]
 
 /-- The time reversal `τ` on `Ξ_𝒲/V_T`. -/
 noncomputable def tauQuot : XiWQuot → XiWQuot := Quotient.map' tauXiW tauXiW_orbitRel

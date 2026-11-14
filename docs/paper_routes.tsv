@@ -216,6 +216,29 @@ lem:eigenvalues	lemma	1
 lem:Lie-Fuller	lemma	1	
 lem:chi-asymptotic	lemma	1	
 thm:no-return	theorem	1	
+# Equation (15.1.1) (line 12051): x_3 = 2 r_1 r_2 sin(theta_1 - theta_2) = -2 r_1 r_2 sin psi; "the vanishing
+# Hamiltonian condition implies" it (a one-line derivation, no citation).
+eqn:x3	proposition	1	
+# Unlabelled Lemma 15.1.1 (line 12060): the unique virial rescaling with r_1 + r_2 = 1; its proof cites (15.1.1) by
+# \eqref, which the extractor does not read. Label of this formalization.
+lem:cell-rescale	lemma	1	eqn:x3
+# Definition 15.1.2 (line 12104) and the facts stated after it (the open boxes, the first controls, the involution
+# tau in cell coordinates), stated without proof.
+def:big:open	definition	0	
+# Unlabelled Remark 15.2.1 (line 12287): the rotation by zeta carries C_2(zeta,1,1) to C_2(zeta^2,1,1) (no proof).
+# Label of this formalization.
+rem:two-cells	remark	0	
+# Unlabelled Proposition 15.2.2 (line 12300), proved by "the discussion leading up to the statement" (sections 15.1
+# and 15.2), which uses (15.1.1) by \eqref, the rescaling of Lemma 15.1.1 ("We may assume r_2 = 1 - r_1", line
+# 12214) and the first controls on the big cells stated after Definition 15.1.2. Label of this formalization.
+prop:closed-cells	proposition	1	def:big:open,eqn:x3,lem:cell-rescale
+# Unlabelled Remark 15.3.1 (line 12445), with q_in and q_out corrected (REPORT.md, E75): numerical, no proof.
+# Label of this formalization.
+rem:qin-juncture	remark	0	
+# Unlabelled Proposition 15.3.2 (line 12467): "The proof is contained in the discussion leading up to the
+# proposition", whose summary cites Lemma 13.2.4; read off Figures 15.2-15.3 (REPORT.md, E72). Stated as the
+# named proposition Proposition15_3_2, not proved. Label of this formalization.
+prop:partition	proposition	1	lem:switch-reversal
 thm:basin	theorem	1	
 thm:outward-fuller	theorem	1	
 thm:mahler	theorem	1	lem:constant-not-singular,prop:edge-extremal,thm:finite-bang-bang,thm:no-chatter,thm:no-return,thm:no-singular-arcs

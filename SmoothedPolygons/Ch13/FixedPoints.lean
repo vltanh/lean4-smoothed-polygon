@@ -2,6 +2,7 @@ module
 
 public import SmoothedPolygons.Ch13.PoincareMap
 public import SmoothedPolygons.Ch13.RScale
+public import Basic.Analysis.Polynomial.CubicRoots
 
 /-!
 # Chapter 13: the fixed points `q_out` and `q_in` (verification)
@@ -122,13 +123,13 @@ private lemma l4g_ham_lt_iff (w : Fin 3 → ℂ) (u v : ℂ) :
   simp [ham]
 
 /-- `τ(v · (c z₁, c² z₂, c³ z₃)) = v̄ · (c τ(z)₁, c² τ(z)₂, c³ τ(z)₃)` for real `c`. -/
-private lemma l4g_tau_smul_scale (v : ℂ) (c : ℝ) (z : Fin 3 → ℂ) :
+theorem tau_smul_scale (v : ℂ) (c : ℝ) (z : Fin 3 → ℂ) :
     tau (v • scale c z) = starRingEnd ℂ v • scale c (tau z) := by
   ext j
   fin_cases j <;> simp [tau, scale]
 
-/-- Composition of virial actions. -/
-private lemma l4g_smul_scale_smul_scale (v w : ℂ) (c d : ℝ) (z : Fin 3 → ℂ) :
+/-- Composition of virial actions: `v (c-scaling)(w (d-scaling) z) = (v w)((c d)-scaling) z`. -/
+theorem smul_scale_smul_scale (v w : ℂ) (c d : ℝ) (z : Fin 3 → ℂ) :
     v • scale c (w • scale d z) = (v * w) • scale (c * d) z := by
   ext j
   fin_cases j <;> simp [scale] <;> ring
@@ -136,48 +137,6 @@ private lemma l4g_smul_scale_smul_scale (v w : ℂ) (c d : ℝ) (z : Fin 3 → �
 /-- A point whose first coordinate has nonzero real part is not `0`. -/
 private lemma l4g_ne_zero_of_re {z : Fin 3 → ℂ} (h : (z 0).re ≠ 0) : z ≠ 0 :=
   fun hz ↦ h (by simp [hz])
-
-/-- **The sign of a cubic below and above a positive root.** If
-`f(t) = a₀ + a₁t + a₂t² + a₃t³` with `a₀, a₁, a₂ ≥ 0` vanishes at `T > 0`, then
-`T³ f(t) = a₀(T³ - t³) + a₁ t T (T² - t²) + a₂ t² T² (T - t)`, so `f ≥ 0` on `[0, T]`. (This is
-Descartes' rule of signs for the sign pattern `+ + + -`.) -/
-private lemma l4g_cubic_nonneg {a0 a1 a2 a3 T t : ℝ} (h0 : 0 ≤ a0) (h1 : 0 ≤ a1) (h2 : 0 ≤ a2)
-    (hT : 0 < T) (hroot : a0 + a1 * T + a2 * T ^ 2 + a3 * T ^ 3 = 0) (ht0 : 0 ≤ t)
-    (htT : t ≤ T) : 0 ≤ a0 + a1 * t + a2 * t ^ 2 + a3 * t ^ 3 := by
-  have key : T ^ 3 * (a0 + a1 * t + a2 * t ^ 2 + a3 * t ^ 3) =
-      a0 * (T ^ 3 - t ^ 3) + a1 * t * T * (T ^ 2 - t ^ 2) + a2 * t ^ 2 * T ^ 2 * (T - t) := by
-    linear_combination t ^ 3 * hroot
-  have h3 : 0 ≤ T ^ 3 - t ^ 3 := sub_nonneg.2 (pow_le_pow_left₀ ht0 htT 3)
-  have h2' : 0 ≤ T ^ 2 - t ^ 2 := sub_nonneg.2 (pow_le_pow_left₀ ht0 htT 2)
-  have hrhs : 0 ≤ a0 * (T ^ 3 - t ^ 3) + a1 * t * T * (T ^ 2 - t ^ 2) +
-      a2 * t ^ 2 * T ^ 2 * (T - t) :=
-    add_nonneg (add_nonneg (mul_nonneg h0 h3) (mul_nonneg (mul_nonneg (mul_nonneg h1 ht0) hT.le)
-      h2')) (mul_nonneg (by positivity) (sub_nonneg.2 htT))
-  by_contra hneg
-  have := mul_neg_of_pos_of_neg (pow_pos hT 3) (not_le.1 hneg)
-  linarith
-
-/-- The same cubic is negative after its root `T` (with `a₀ > 0`). -/
-private lemma l4g_cubic_neg {a0 a1 a2 a3 T t : ℝ} (h0 : 0 < a0) (h1 : 0 ≤ a1) (h2 : 0 ≤ a2)
-    (hT : 0 < T) (hroot : a0 + a1 * T + a2 * T ^ 2 + a3 * T ^ 3 = 0) (hTt : T < t) :
-    a0 + a1 * t + a2 * t ^ 2 + a3 * t ^ 3 < 0 := by
-  have ht0 : 0 < t := hT.trans hTt
-  have key : T ^ 3 * (a0 + a1 * t + a2 * t ^ 2 + a3 * t ^ 3) =
-      a0 * (T ^ 3 - t ^ 3) + a1 * t * T * (T ^ 2 - t ^ 2) + a2 * t ^ 2 * T ^ 2 * (T - t) := by
-    linear_combination t ^ 3 * hroot
-  have h3 : T ^ 3 - t ^ 3 < 0 := sub_neg.2 (pow_lt_pow_left₀ hTt hT.le (by norm_num))
-  have h2' : T ^ 2 - t ^ 2 < 0 := sub_neg.2 (pow_lt_pow_left₀ hTt hT.le (by norm_num))
-  have hrhs : a0 * (T ^ 3 - t ^ 3) + a1 * t * T * (T ^ 2 - t ^ 2) +
-      a2 * t ^ 2 * T ^ 2 * (T - t) < 0 := by
-    have e1 := mul_neg_of_pos_of_neg h0 h3
-    have e2 : a1 * t * T * (T ^ 2 - t ^ 2) ≤ 0 :=
-      mul_nonpos_of_nonneg_of_nonpos (by positivity) h2'.le
-    have e3 : a2 * t ^ 2 * T ^ 2 * (T - t) ≤ 0 :=
-      mul_nonpos_of_nonneg_of_nonpos (by positivity) (by linarith)
-    linarith
-  by_contra hnn
-  have := mul_nonneg (pow_pos hT 3).le (not_lt.1 hnn)
-  linarith
 
 /-- The imaginary part of the first coordinate of (13.5.1). -/
 private noncomputable def l4g_qb (r s : ℝ) : ℝ := (-1 + r) / (s * (1 + r))
@@ -334,6 +293,13 @@ theorem qOutCart_ne_zero : qOutCart ≠ 0 :=
 theorem tau_qOutCart_ne_zero : tau qOutCart ≠ 0 :=
   l4g_ne_zero_of_re (by rw [l4g_qOutCart_mk]; simp [tau])
 
+/-- The signs of the coordinates of (13.5.1): `qOutCart = (-1 + ib, x + iy, z₃)` with `b > 0` and
+`x < 0 < y` (`r_scale > 6`). -/
+theorem qOutCart_signs : 0 < (qOutCart 0).im ∧ (qOutCart 1).re < 0 ∧ 0 < (qOutCart 1).im := by
+  obtain ⟨hr6, hs0, -, -⟩ := l4g_rs_facts
+  rw [l4g_qOutCart_mk]
+  exact ⟨l4g_qb_pos (by linarith) hs0, l4g_qx_neg (by linarith) hs0, l4g_qy_pos hr6.le⟩
+
 /-- **The fixed-point equation (13.5.2) at `q_out`** along the constant control `ζ`. -/
 private lemma l4g_flow_T :
     flow (l4g_T rScale √3) qOutCart ζ = ζ ^ 2 • scale rScale qOutCart := by
@@ -397,7 +363,7 @@ private lemma l4g_max {t : ℝ} (ht0 : 0 ≤ t) (htT : t ≤ l4g_T rScale √3) 
   intro v hv
   rw [l4g_ham_le_iff]
   rcases mem_VT.1 hv with rfl | rfl | rfl
-  · have := l4g_cubic_nonneg c0.le c1.le c2.le (l4g_T_pos (by linarith) hs0) hroot ht0 htT
+  · have := cubic_nonneg_of_le_root c0.le c1.le c2.le (l4g_T_pos (by linarith) hs0) hroot ht0 htT
     linarith
   · exact le_rfl
   · have : 0 ≤ √3 * t * (l4g_qy rScale + l4g_qb rScale √3 * t / 2 + t ^ 2 / 12) := by
@@ -411,7 +377,7 @@ private lemma l4g_beaten {t : ℝ} (ht : l4g_T rScale √3 < t) :
     ham (flow t qOutCart ζ) ζ < ham (flow t qOutCart ζ) 1 := by
   obtain ⟨hr6, hs0, -, -⟩ := l4g_rs_facts
   obtain ⟨c0, c1, c2, hroot⟩ := l4g_switching_coeffs
-  have := l4g_cubic_neg c0 c1.le c2.le (l4g_T_pos (by linarith) hs0) hroot ht
+  have := cubic_neg_of_root_lt c0 c1.le c2.le (l4g_T_pos (by linarith) hs0) hroot ht
   rw [l4g_ham_lt_iff]
   linarith [(l4g_switching t).1]
 
@@ -475,7 +441,7 @@ the wall `𝒲₀` is broken by `Im z₂ > 0`). Proof: the constant control `ζ`
 trajectory on `[0, t_sw]` (the switching functions of `firstSwitchTime_qOutCart`; the one to
 `ζ²` is `√3 t (Im z₂⁰ + Im z₁⁰ t/2 + t²/12) ≥ 0`, which is where `Im z₂⁰ > 0` enters), and the
 first control is unique (`firstControl_eq_iff`). -/
-private theorem l4st_firstControl_qOutCart : firstControl qOutCart = ζ := by
+theorem firstControl_qOutCart : firstControl qOutCart = ζ := by
   obtain ⟨hr6, hs0, -, -⟩ := l4g_rs_facts
   exact (firstControl_eq_iff qOutCart_ne_zero).2
     ⟨ζ_mem_VT, l4g_T rScale √3, l4g_T_pos (by linarith) hs0,
@@ -496,7 +462,7 @@ exactly up to `t_sw`, and the set of times at which `ζ` is beaten is `(t_sw, �
 theorem firstSwitchTime_qOutCart :
     firstSwitchTime qOutCart = 2 * (1 + rScale + rScale ^ 2) / (√3 * (rScale + 1)) := by
   obtain ⟨hr6, hs0, -, -⟩ := l4g_rs_facts
-  rw [firstSwitchTime, l4st_firstControl_qOutCart]
+  rw [firstSwitchTime, firstControl_qOutCart]
   have hset : {t : ℝ | 0 < t ∧ ∃ v ∈ VT,
       ham (flow t qOutCart ζ) ζ < ham (flow t qOutCart ζ) v} = Ioi (l4g_T rScale √3) := by
     ext t
@@ -515,7 +481,7 @@ Proof: with `t_sw` from `firstSwitchTime_qOutCart`, both sides are explicit elem
 of `ℚ(√3)(r)`; the six real coordinates of the linear system (13.5.2) agree modulo `s² - 3` and
 `P(r)` (`l4g_fixed_eqs`). -/
 theorem poincare_qOutCart : poincare qOutCart = ζ ^ 2 • scale rScale qOutCart := by
-  rw [poincare, firstSwitchTime_qOutCart, l4st_firstControl_qOutCart]
+  rw [poincare, firstSwitchTime_qOutCart, firstControl_qOutCart]
   exact l4g_flow_T
 
 /-- **The Hamiltonian vanishes at `q_out`** (REPORT.md, E67: the statement of Lemma 13.5.2
@@ -561,12 +527,12 @@ theorem poincare_tau_qOutCart :
       rw [l4g_qOutCart_mk]
       simpa [scale, tau] using hr.ne')
   have h1 := poincare_tau_poincare qOutCart_ne_zero
-    (by rw [l4st_firstControl_qOutCart]; exact l4g_not_mostRecent)
-  rw [poincare_qOutCart, l4g_tau_smul_scale, conj_ζ_sq,
+    (by rw [firstControl_qOutCart]; exact l4g_not_mostRecent)
+  rw [poincare_qOutCart, tau_smul_scale, conj_ζ_sq,
     (poincare_smul ζ_mem_VT hsτ).2.2, (poincare_scale hr hτ).2.2] at h1
   calc poincare (tau qOutCart)
       = ζ ^ 2 • scale rScale⁻¹ (ζ • scale rScale (poincare (tau qOutCart))) := by
-        rw [l4g_smul_scale_smul_scale, ← pow_succ, ζ_pow_three, inv_mul_cancel₀ hr.ne',
+        rw [smul_scale_smul_scale, ← pow_succ, ζ_pow_three, inv_mul_cancel₀ hr.ne',
           one_smul, scale_one]
     _ = ζ ^ 2 • scale rScale⁻¹ (tau qOutCart) := by rw [h1]
 

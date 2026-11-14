@@ -9,7 +9,7 @@ How this formalization was made, from the run log and the session transcript.
   formula by the Leibniz expansion instead of the book's argument, and proving Theorem 3.1.4(3)
   with the hypothesis that the tangents are Lipschitz (E13). The later rounds' decisions are listed
   under each round below.
-- **Formalization:** Claude Opus 5.5 (`claude-opus-5-5`) in Claude Code 2.1.318 (VS Code
+- **Formalization:** Claude Opus 5.5 (`claude-opus-5-5`) in Claude Code 2.1.318 and 2.1.323 (VS Code
   extension, Claude Agent SDK), in one session, with sub-agents of the same model. There was no
   earlier draft; the project was written from scratch.
 - **Procedure:** the [formalize-math-paper](https://github.com/vltanh/formalize-math-paper) skill
@@ -358,3 +358,50 @@ that completes the round's REPORT.md (22:44 CST), from the session transcript:
 For the whole project (seven rounds, to the same time): 56.6 hours elapsed, 170 sub-agents (149 on
 the formalization and its packages; at most 13 at once), 68.1 hours of sub-agent work, 12,861 tool
 calls by sub-agents and 1,529 by the main session.
+
+## Eighth round (7–14 November 2026)
+
+After publishing the fourth layer (with the user's approval), the round took the plan's fifth
+layer: Chapter 15 (the geometry of the Fuller–Poincaré map) and Theorems 16.1.1 (the global basin)
+and 16.2.1 (outward Fuller). Both theorems are proved conditionally on three named numerical facts
+that the book reads off Mathematica plots (Table 16.1); a later layer is to certify them. The work
+stopped for 154 hours when the machine was rebooted. The reboot wiped the session's scratch
+directory (the TeX source, the agents' briefs and one agent's scripts): the TeX was downloaded
+again from arXiv, the briefs were rebuilt from the session transcript, and the two interrupted
+review agents were resumed.
+
+How it was made:
+
+- **Statements** (one agent, started in the seventh round): every statement with `sorry`, and the
+  numerical facts as three named propositions.
+- **Review** (two agents): an independent review against the TeX found no wrong statement and
+  dropped one hypothesis the book does not have; an independent numerical check (mpmath, about
+  1.1 million evaluations) found the three facts true and confirmed that the contraction needs two
+  steps of the map.
+- **Proofs** (seven agents, at most seven at once): cell coordinates, the smaller cells, continuity
+  of the switching time (with a new lemma in Basic/ on the continuity of the least positive root),
+  the involution, Remark 15.3.1 (its numerical crossings certified in exact interval arithmetic),
+  Theorem 16.1.1 and Theorem 16.2.1.
+- **Verification and cleanup** (two agents): an independent comparison with the book found no
+  unforced departure and eight docstrings to fix; the cleanup registered the layer, made public the
+  Chapter 13 helpers that four agents had proved again, and recorded every route difference.
+- **Audit** (one agent): REPORT.md (E70–E80), README.md, formalization.yaml, with Theorems 16.1.1
+  and 16.2.1 marked as conditional throughout.
+
+Figures, from the end of the seventh round (7 November 2026, 22:44 CST) to just before the commit
+that completes the round's REPORT.md (14 November, 11:42 CST), from the session transcript:
+
+- elapsed time: 157.0 hours, of which 154.1 stopped (7 November, 23:19 CST, to 14 November, 09:24
+  CST), so 2.9 hours of work;
+- sub-agents: 13 (12 started in the round, and the statement agent from the seventh), at most 7
+  running at once, 2 resumptions (the review agents interrupted by the reboot); their total
+  working time 5.6 hours;
+- tool calls: 1,072 by the sub-agents, 112 by the main session;
+- tokens: sub-agents 2.05M output, 5.63M input (uncached input and cache writes), 281M cache reads;
+  main session 0.09M output, 0.34M input, 22M cache reads;
+- model calls: `claude-opus-5-5` only, 993 by the sub-agents and 112 by the main session; Claude
+  Code 2.1.318 and, after the restart, 2.1.323.
+
+For the whole project (eight rounds, to the same time): 213.6 hours elapsed (including the stops),
+182 sub-agents (161 on the formalization and its packages; at most 13 at once), 73.8 hours of
+sub-agent work, 13,935 tool calls by sub-agents and 1,645 by the main session.

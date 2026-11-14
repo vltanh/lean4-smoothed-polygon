@@ -376,7 +376,7 @@ private lemma l4c_ham_flow_tau (s : ℝ) (z : Fin 3 → ℂ) (u v : ℂ) :
 
 /-- `u` is the most recent control of `z⁰` if and only if `ū` is the first control of `τ(z⁰)`
 (the time reversal, TeX 10891–10906). -/
-private lemma l4c_isMostRecentControl_iff {z : Fin 3 → ℂ} {u : ℂ} :
+theorem isMostRecentControl_iff_isFirstControl_tau {z : Fin 3 → ℂ} {u : ℂ} :
     IsMostRecentControl z u ↔ IsFirstControl (tau z) (starRingEnd ℂ u) := by
   constructor
   · rintro ⟨hu, ε, hε, h⟩
@@ -393,8 +393,8 @@ private lemma l4c_isMostRecentControl_iff {z : Fin 3 → ℂ} {u : ℂ} :
 /-- The most recent control is unique (the time reversal of `IsFirstControl.unique`). -/
 private theorem l4st_isMostRecentControl_unique {z : Fin 3 → ℂ} {u u' : ℂ}
     (hu : IsMostRecentControl z u) (hu' : IsMostRecentControl z u') : u = u' := by
-  have := IsFirstControl.unique (l4c_isMostRecentControl_iff.1 hu)
-    (l4c_isMostRecentControl_iff.1 hu')
+  have := IsFirstControl.unique (isMostRecentControl_iff_isFirstControl_tau.1 hu)
+    (isMostRecentControl_iff_isFirstControl_tau.1 hu')
   simpa using congrArg (starRingEnd ℂ) this
 
 /-! ### Helpers: `V_{T,max}` -/
@@ -920,12 +920,13 @@ theorem lemma13_2_5 :
       (∀ (z : Fin 3 → ℂ) (u : ℂ), IsFirstControl (tau z) (starRingEnd ℂ u) →
         IsMostRecentControl z u) ∧
       ∀ z : Fin 3 → ℂ, z ≠ 0 → mostRecentSwitchTime z = -firstSwitchTime (tau z) := by
-  refine ⟨tau_flow_neg, fun z u h ↦ l4c_isMostRecentControl_iff.2 h, fun z hz ↦ ?_⟩
+  refine ⟨tau_flow_neg, fun z u h ↦ isMostRecentControl_iff_isFirstControl_tau.2 h,
+    fun z hz ↦ ?_⟩
   have hτ : tau z ≠ 0 := fun h ↦ hz (by
     rw [← tau_tau z, h]; funext j; fin_cases j <;> simp [tau])
   -- the most recent control `u` of `z⁰` is the conjugate of the first control of `τ(z⁰)`
   have hmr : IsMostRecentControl z (starRingEnd ℂ (firstControl (tau z))) := by
-    rw [l4c_isMostRecentControl_iff, Complex.conj_conj]
+    rw [isMostRecentControl_iff_isFirstControl_tau, Complex.conj_conj]
     exact isFirstControl_firstControl hτ
   have hex : ∃ u, IsMostRecentControl z u := ⟨_, hmr⟩
   have hmrc : mostRecentControl z = starRingEnd ℂ (firstControl (tau z)) := by

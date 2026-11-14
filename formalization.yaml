@@ -8,11 +8,14 @@ project:
     Packings of Smoothed Polygons (arXiv:2405.04331v1, 2024), with its geometric foundations. The
     book reformulates the Reinhardt problem, which asks for the centrally symmetric convex disk
     whose densest packing is least dense, as an optimal control problem on SL2(R), and studies its
-    Pontryagin extremals. One theorem is conditional: the book's main theorem, Mahler's First
+    Pontryagin extremals. Three theorems are conditional: the book's main theorem, Mahler's First
     conjecture (Theorem 16.3.1), is proved only under one named hypothesis,
     NoChatteringIntoSingularLocus, which stands for the book's Theorems 16.4.1 and 14.4.1, not yet
-    formalized (they rest on Chapters 13-16, of which Chapter 13 is formalized); every other result
-    below is proved unconditionally.
+    formalized (they rest on Chapters 13-16, of which Chapters 13 and 15 and Sections 16.1-16.2 are
+    formalized); and the global basin theorem (Theorem 16.1.1) and Theorem 16.2.1 are proved only
+    under three named numerical facts, DOutContracts, CellTwoEntersDOut and BoxSubclaims, which
+    state the containments that the book reads off Mathematica plots and a contraction that its
+    argument lacks. Every other result below is proved unconditionally.
 
 
     The formalization covers Chapters 2, 3, 4, 6 and 7 of the book with Appendices A.6 and A.11:
@@ -90,6 +93,32 @@ project:
     for maps, which Mathlib lacks. The proof of Lemma 13.3.2 has a gap (a maximizing face assumed
     constant in time), repaired along the book's lines, and the book's diffeomorphism of Section
     13.4 is only C2 along z2 = 0.
+
+
+    An eighth round, the fifth layer, formalizes Chapter 15, the geometry of the Fuller-Poincare
+    map: the cell coordinates (r2, psi, theta2) on the zero set of the Hamiltonian modulo the
+    virial group, used as charts on that quotient; the smaller cells, with the root counts of the
+    switching cubics by Descartes's rule of signs; Proposition 15.2.2; the continuity of the first
+    switching time and of the cell maps, which the book asserts; the involution tau o F, which is
+    an involution only at switching points; and Remark 15.3.1, whose labels q_in and q_out the book
+    swaps, proved with the labels corrected and certified in exact rational arithmetic. It also
+    formalizes Sections 16.1-16.2: Theorem 16.1.1, that every orbit of the Fuller-Poincare map on
+    the zero set of the Hamiltonian modulo the virial group other than the fixed point q_in tends
+    to q_out, and Theorem 16.2.1, that the switching points of a Fuller trajectory emanating from
+    the singular locus lie on the outward spiral of q_out and those of one tending to it on the
+    inward spiral of q_in. Both are proved only conditionally, on three named numerical facts:
+    DOutContracts (the Poincare map maps the box D_out = D_00 into itself, and an iterate maps it
+    into a box on which the map is a contraction), CellTwoEntersDOut (every point of the second big
+    cell reaches D_00 within three steps) and BoxSubclaims (from every other box of the first cell
+    but D_22 the map goes to the second cell or to a lexicographically smaller box). They state
+    what the book reads off Mathematica plots and figures (Table 16.1, Figures 16.1-16.4), with
+    the contraction that its convergence argument lacks; an independent multiple-precision check
+    (about 1.1 million evaluations) found them true, with margins of at least 0.015, and a later
+    layer (5b) is to certify them by interval enclosures. The book's proof of Theorem 16.1.1 has
+    two further gaps, repaired: the convergence in D_out (by the contraction and Banach's fixed
+    point theorem) and the last row of its table (by whole-box subclaims and a time-reversal step).
+    Proposition 15.3.2, whose topology the book reads off figures, is stated as a named proposition
+    and not proved; no result uses it.
   authors:
     - "The-Anh Vu-Le"
   license: "Apache-2.0"
@@ -277,11 +306,21 @@ status:
     under one named hypothesis, NoChatteringIntoSingularLocus (an explicit hypothesis of
     SmoothedPolygons.theorem16_3_1, not an axiom; the axiom audit lists it among the results the
     theorem uses), which stands for Theorems 16.4.1 and 14.4.1, not yet formalized (they rest on
-    Chapters 13-16, of which Chapter 13 is formalized): the switching times of an edge-extremal
+    Chapters 13-16, of which Chapters 13 and 15 and Sections 16.1-16.2 are formalized): the
+    switching times of an edge-extremal
     Pontryagin extremal with the boundary conditions of Problem 3.6.2 do not accumulate at a time
-    where its lift meets the singular locus. Everything else listed here is proved unconditionally.
-    Formalized: every numbered result of Chapters 2, 3, 4, 5, 6, 7, 8 and 13 of the book and of
-    Appendices A.6 and A.11, and Corollary A.1.3, including Theorem 6.1.1 (Filippov, cited without a source),
+    where its lift meets the singular locus. Also conditional: Theorems 16.1.1 (the global basin of
+    the Fuller-Poincare map) and 16.2.1 (outward Fuller trajectories), SmoothedPolygons.theorem16_1_1
+    and SmoothedPolygons.theorem16_2_1, are proved only under three named numerical facts,
+    SmoothedPolygons.TriFuller.DOutContracts, CellTwoEntersDOut and BoxSubclaims (explicit
+    hypotheses of the two theorems, not axioms; the axiom audit lists them among the results the
+    theorems use), which stand for the containments of Table 16.1 that the book reads off
+    Mathematica plots, with a contraction near q_out that the book's convergence argument lacks;
+    they hold numerically and are to be certified by interval enclosures in a later layer.
+    Everything else listed here is proved unconditionally.
+    Formalized: every numbered result of Chapters 2, 3, 4, 5, 6, 7, 8 and 13 of the book, of
+    Chapter 15 except Proposition 15.3.2, and of Appendices A.6 and A.11, and Corollary A.1.3,
+    including Theorem 6.1.1 (Filippov, cited without a source),
     Definition 6.3.1 and Proposition 6.4.1 (left-invariant systems on Lie groups), Theorem 5.0.6
     (whose second case the book only sketches) and Theorem 7.7.1 (the smoothed octagon is an
     isolated extremal; the book gives a proof sketch), and Remarks 2.2.4, 7.5.2 and 7.6.4, the
@@ -323,13 +362,22 @@ status:
     certified bounds 6.27 < r_scale < 6.28 and 7.4 < t_sw < 7.41 in place of the book's
     approximations) and Lemma 13.5.5 (SmoothedPolygons.lemma13_5_5: q_out asymptotically stable,
     q_in unstable), whose Mathematica computation is replaced by an exact Jacobian and a certified
-    eigenvalue bound (E68); Remark 13.5.3; and the verifiable part of Remark 13.5.4 (E69). Not
-    formalized: Chapter 1; Chapters 9-12 and 14-16, apart from Theorem 16.3.1, proved
-    conditionally; Appendix A.1 apart from Corollary A.1.3, Appendices A.2-A.5, A.7-A.10 and B;
-    within the formalized chapters, the conjectural Remarks 7.6.1 and 7.6.3, the printed Theorem
-    8.2.7 for abnormal lifts, which is open, the interpretation in Remark 13.5.4 of a fixed point
-    as a limit of the extremals of Section 7.5 (Mathematica and a forward reference to Section
-    14.2), and the informal corollary after Lemma 13.2.8, which is not used later. Pontryagin
+    eigenvalue bound (E68); Remark 13.5.3; and the verifiable part of Remark 13.5.4 (E69). Also
+    proved (eighth round, the fifth layer): Chapter 15, with Proposition 15.2.2
+    (SmoothedPolygons.proposition15_2_2: the cells cover the quotient, with their first controls
+    and the vanishing limiting switching times on their faces), the involution tau o F at
+    switching points (E73), and Remark 15.3.1 with q_in and q_out swapped back
+    (SmoothedPolygons.remark15_3_1, remark15_3_1_segment; r2 = 2 - sqrt 3 exactly, E75); and,
+    conditionally, Theorems 16.1.1 and 16.2.1 (above). Not formalized: Chapter 1; Chapters 9-12 and
+    14 and Section 16.4, apart from Theorem 16.3.1, proved conditionally; Appendix A.1 apart from
+    Corollary A.1.3, Appendices A.2-A.5, A.7-A.10 and B; within the formalized chapters, the
+    conjectural Remarks 7.6.1 and 7.6.3, the printed Theorem 8.2.7 for abnormal lifts, which is
+    open, the interpretation in Remark 13.5.4 of a fixed point as a limit of the extremals of
+    Section 7.5 (Mathematica and a forward reference to Section 14.2), the informal corollary after
+    Lemma 13.2.8, which is not used later, Proposition 15.3.2 (stated as a named proposition,
+    SmoothedPolygons.TriFuller.Proposition15_3_2, and not used), the two-sides claim of Remark
+    15.2.1, the attachment of the 2-cell C2(zeta^2, 1, 1), and the claims of Chapters 15-16 read
+    off figures that the proofs do not use (REPORT.md, Section 9). Pontryagin
     extremals are defined by the conditions of the maximum principle (IsPontryaginExtremal), and
     the maximum principle shows that minimizers are extremals. No cited theorem is assumed: Fejes
     Toth's theorem, Gruber's density formula, the theorems of Minkowski and Mahler on critical
@@ -347,7 +395,9 @@ status:
     hypothesis), E55 (Theorem 8.2.7 in the authors' reading, the user's decision), E56 (the false
     Theorem 8.3.1 in its one-sided form, the user's decision), E57, E58 (Remark 8.3.3's disk as a
     hypothesis), E65 (the type of z_j in Lemma 13.3.2), E66 (the identification of Section 13.4,
-    which the book calls a diffeomorphism, as a homeomorphism with phi of class C2).
+    which the book calls a diffeomorphism, as a homeomorphism with phi of class C2), E73 (F^-1 =
+    tau F tau at switching points only), E75 (the labels q_in and q_out of Remark 15.3.1), E76 (the
+    index of the boxes of Section 16.1).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -356,11 +406,11 @@ automation:
   methods:
     - method: "agent"
       models: ["claude-opus-5-5"]
-      framework: "Claude Code 2.1.318 (VS Code extension, Claude Agent SDK)"
+      framework: "Claude Code 2.1.318 and 2.1.323 (VS Code extension, Claude Agent SDK)"
       tool_setup: >-
         The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, local copy
         dated 2026-10-17, versions 3.0.1 to 3.2.5 of its repository in the fourth round, and 3.3.0
-        and 3.4.0 in the seventh) in one Claude Code session, in seven rounds, with 149 sub-agents
+        and 3.4.0 in the seventh) in one Claude Code session, in eight rounds, with 161 sub-agents
         of the same model on the formalization and its two packages (at most 13 sub-agents at once): statement reviews against the TeX
         source and the cited sources, parallel proofs by chapter and by part, proof reviews,
         verification of the audit and of its literature section, and an exploration of follow-up
@@ -369,10 +419,11 @@ automation:
         Comparator were run locally.
       cost:
         wall_time: >-
-          56.6 hours elapsed from the start to the completed audit report of the seventh round
-          (5-7 November 2026, including two nights and about 15 hours stopped by a usage limit);
-          the rounds took 3.2, 15.5, 21.5, 5.6, 2.4, 3.4 and 2.0 hours; 68.1 hours of sub-agent
-          working time in all (1.5 of them evaluating the skill)
+          213.6 hours elapsed from the start to the completed audit report of the eighth round
+          (5-14 November 2026), including two nights, about 15 hours stopped by a usage limit and
+          154 hours stopped by a reboot (7-14 November); the rounds took 3.2, 15.5, 21.5, 5.6, 2.4,
+          3.4, 2.0 and 2.9 hours of work; 73.8 hours of sub-agent working time in all (1.5 of them
+          evaluating the skill)
         spend_usd: "not tracked"
         hardware: "local machine (Linux) for Lean builds; models via API"
       prompting_notes: >-
@@ -397,12 +448,13 @@ automation:
         round, the fourth layer (Chapter 13) and short READMEs, with the details in REPORT.md.
   spend_usd: "not tracked"
   notes: >-
-    The-Anh Vu-Le requested the formalization, chose its scope in seven rounds (first the
+    The-Anh Vu-Le requested the formalization, chose its scope in eight rounds (first the
     control-theoretic core, then Chapter 2 with every cited theorem proved, then the rest of the
     formalized chapters, then the first layer of a plan for Chapters 5 and 8-16: the maximum
     principle and the lift of every minimizer to an extremal, then the second layer: Chapter 5, the
     existence of a minimizer and its identification with K_min, then the third layer: Chapter 8
-    and Theorem 16.3.1 conditional on one named hypothesis, then the fourth layer: Chapter 13)
+    and Theorem 16.3.1 conditional on one named hypothesis, then the fourth layer: Chapter 13, then the fifth
+    layer: Chapter 15 and Theorems 16.1.1 and 16.2.1, conditional on three named numerical facts)
     and made the decisions it needed
     (the proof of Jacobi's formula, the hypothesis of Theorem 3.1.4(3), the routes for Lemmas
     2.2.1 and 2.2.5 and for Mahler's Lemma 3 (along Mahler's 1946 paper), the corrected form of
@@ -471,12 +523,22 @@ fidelity:
     which stands for Theorems 16.4.1 and 14.4.1 (E60); E65, the statement of Lemma 13.3.2 types
     z_j with values in C^3 for C; E66, the identification of C^3 minus 0 with R_{>0} x Xi in
     Section 13.4, which the book calls a diffeomorphism, is only C2 along z2 = 0 (the term |z2|^3
-    of phi^6) and is stated as a homeomorphism with phi of class C2, smooth off z2 = 0. Slips in
-    proofs corrected where they occur: E8, E14, E24, E44 (a region in the proof of Lemma 5.0.7
-    (3)), E50 (the constant of Lemma 8.1.5), E59 (a sign in the proof of Lemma 8.3.4), E64 (a
-    strict inequality that should be weak in the proof of Corollary 13.2.7), E65 (the initial
-    conditions of u3 in the proof of Lemma 13.3.2), E67 (a garbled display of the maximum
-    principle in the proof of Lemma 13.5.2).
+    of phi^6) and is stated as a homeomorphism with phi of class C2, smooth off z2 = 0; E73, the
+    identity F^-1 = tau F tau that Section 15.3 uses on the closed big cells holds only at
+    switching points (it fails at the points of the top faces of the cells, for example
+    z = (-0.3 + 0.7i, -0.6, -0.84)), so tau o F is an involution there only, and the book's claim
+    that a discriminant locus and a top face are in involution fails; E75, Remark 15.3.1 gives the
+    coordinates of the attracting fixed point q_out as those of q_in, and is proved with the labels
+    corrected; E76, the boxes D_ij of the proof of Theorem 16.1.1 have theta2 in [b_{j+1}, b_j]
+    (the book prints the index i, so that its boxes do not depend on j); and Theorems 16.1.1 and
+    16.2.1 are proved conditionally on three named numerical facts, which stand for the book's
+    Mathematica containments (E77). Slips corrected where they occur: E8, E14, E24, E44 (a region in
+    the proof of Lemma 5.0.7 (3)), E50 (the constant of Lemma 8.1.5), E59 (a sign in the proof of
+    Lemma 8.3.4), E64 (a strict inequality that should be weak in the proof of Corollary 13.2.7),
+    E65 (the initial conditions of u3 in the proof of Lemma 13.3.2), E67 (a garbled display of the
+    maximum principle in the proof of Lemma 13.5.2), E71 (two ranges, a region, a reversed
+    substitution, a wrong locus and typos in Sections 15.1-15.3), E80 (two slips in the proof of
+    Theorem 16.2.1).
 
 
     Redundant hypotheses omitted from the Lean statements (REPORT.md, Section 5): Theorem 3.1.4
@@ -489,8 +551,11 @@ fidelity:
     extremality of Theorem 8.3.1 (only its control form needs it), z0 != 0 and z3 in R_{<=0} in
     Lemma 13.2.8 (the identity holds for every z0), the first control in Lemma 13.3.1 (the proof
     holds for every vertex control), the face condition in Lemma 13.3.2 (the maximizers always
-    form a face; only that they are not a vertex is used), "n positive" in Corollary A.1.3, and the
-    smoothness of f in q in Filippov's theorem.
+    form a face; only that they are not a vertex is used), res_AB != 0 in the continuity of the
+    first switching time on the big open cells of Section 15.1 (a common simple root of the two
+    switching polynomials is still a sign change of one of them), the cell coordinates of the
+    point in the impossibility of (m_A, m_B) = (0, 3) in Section 15.2 (the argument holds for every
+    point), "n positive" in Corollary A.1.3, and the smoothness of f in q in Filippov's theorem.
 
 
     Readings (REPORT.md, Section 6): the book's disks B_r are Euclidean disks, congruent copies
@@ -579,7 +644,24 @@ fidelity:
     palindromic polynomial, with certified bounds in place of the book's approximations; and the
     stability notions of Lemma 13.5.5 are Lyapunov stability, asymptotic stability (fixed, Lyapunov
     stable and attracting a neighbourhood) and instability (fixed and not Lyapunov stable) of a
-    fixed point of a map of a topological space.
+    fixed point of a map of a topological space. In Chapters 15 and 16, the book's cell complex is
+    not built: the cells are charts on Xi_{W,0}/V_T, the class of the point with coordinates
+    (r2, psi, theta2) being continuous on the closed cells, onto from their union and injective on
+    each open box, and Proposition 15.2.2 is stated there, a face point "not identified with a
+    point in the domain" being one at which the cell's control is not the first control (the
+    switching time tends to 0 there and the extended map is a change of representative); (15.1.1)
+    is read with the maximized Hamiltonian, and "psi in (0, pi) modulo 2 pi" as sin psi > 0; the
+    second big cell is theta2 in (-pi, 0], its top face included, the points with x3 < 0 and first
+    control zeta^2; the closed 2-cell C2(zeta, 1, 1) has theta2 in [pi/3, pi], with its switching
+    facts stated on its relative interior, where (m_A, m_B) = (1, 1); the involution tau o F is
+    defined on the quotient with the Poincare map, and the loci built from the top face of the
+    second cell with the book's root-based maps F_A, F_B; the parts D2, D3, D4 are defined by the
+    control to which the Poincare map switches, and D1 by connected components; the boxes D_ij are
+    sets of the quotient with the corrected index, D_out is D_00 and D_in is replaced by the box
+    D_22; Theorem 16.1.1 is stated as printed for the Poincare map of the quotient; and in Theorem
+    16.2.1 an outward trajectory is a backward orbit and an inward one a forward orbit from a point
+    on a wall, of the Poincare map on C^3 minus 0, tending to 0, with the vanishing of the
+    Hamiltonian derived rather than assumed.
 
 
     Departures from the book's proofs (REPORT.md, Section 7), each forced by an error or gap of the
@@ -647,7 +729,26 @@ fidelity:
     computation is replaced by an exact Jacobian in the chart Re z1 = -1, z3 < 0, H_F = 0, with
     entries in Q(sqrt 3, r_scale), a certificate that the roots of its characteristic polynomial
     lie in (-0.1, 0.1), linearized stability for maps, and time reversal, tau o F_ang being an
-    involution near q_out and q_in). Every other proof follows the book's argument; the remaining
+    involution near q_out and q_in). In Chapters 15 and 16: the involution of Section 15.3 (E73:
+    F^-1 = tau F tau, which the book uses on the closed cells, proved exactly at switching points
+    and branch-wise for the root-based maps, and applied only at images of the map, which are
+    switching points); the map F_A on the part C2^A of the top face of the second cell (E74: at a
+    double root of chi_{A,0}, a tangency, the dynamics does not switch, so F_A is the continuous
+    extension of the Poincare map, not the map itself; the bound t1 <= t_B, which the book does not
+    argue, is proved); Remark 15.3.1 (E75: the labels swapped back, the coordinates and the
+    crossings of the boundary loci certified in exact rational arithmetic); Theorem 16.1.1 (E77-E79:
+    the containments of Table 16.1, which the book computes by a boundary method that needs
+    injectivity, invariance of domain and the images of curved faces, none of them established,
+    are replaced by three named facts about whole boxes, which avoid the curved parts and
+    Proposition 15.3.2; the convergence in D_out, which containment and local stability do not
+    give, uses a contraction and Banach's fixed point theorem, with F^-1(q_in) = {q_in} proved for
+    the points that are not switching points; and the book's exclusion argument for the last row
+    of the table, which uses D0 in D_in, impossible as written, and the injectivity of a
+    multi-valued map, is replaced by whole-box subclaims with the target "the second cell or a
+    smaller box", a descent on the box indices, and a re-entry step by time reversal); and Theorem
+    16.2.1 (E80: the continuity of the radial factor at q_out proved in the chart of Lemma 13.5.5,
+    and the vanishing of the Hamiltonian along a trajectory tending to the singular locus derived).
+    Every other proof follows the book's argument; the remaining
     gaps are filled along the book's lines (among them those of Lemma 3.1.8, of the sketch of
     Theorem 7.7.1, whose "direct calculation" of hyperbolicity is supplied in closed form, and of
     Chapter 5: the compactness of the compactified star domain, the second claim of Lemma 5.0.3,
@@ -659,8 +760,10 @@ fidelity:
     Theorem 8.3.1, and Corollary A.1.3; and of Chapter 13: the constancy of the Hamiltonian along
     extremals with measurable controls and the uniqueness of extremals up to the first switching
     time, which the book asserts, E62, the well-definedness of the Poincare map, E67, and the facts
-    about r_scale, by sign changes of the palindromic polynomial at rational points), and the
-    index slips of Lemmas 2.4.5 and 5.0.7 (3) are corrected. In Lemma 8.1.5 and Theorem 8.3.1 the
+    about r_scale, by sign changes of the palindromic polynomial at rational points; and of
+    Chapter 15: the continuity of the first switching time and of the cell maps, which the book
+    asserts, E70, by the continuity of a least positive sign change, and the vanishing limiting
+    switching time on the faces of Figure 15.1, E72, by semicontinuity), and the index slips of Lemmas 2.4.5 and 5.0.7 (3) are corrected. In Lemma 8.1.5 and Theorem 8.3.1 the
     estimates use l1 norms, and in Lemma 8.3.4 Taylor expansions with remainder replace the
     analyticity of the solutions (inessential).
     Remarks 6.6.1, 7.5.2, 7.6.4 and 8.3.3 have no proof in the book, nor have the converse of
@@ -716,7 +819,12 @@ review:
     agent compared the formalization with the book's Chapter 8 and the proof of Theorem 16.3.1 and
     checked the gaps and errors reported. In the seventh round an independent agent reviewed the
     Chapter 13 statements before the proofs, and another compared the formalization with the
-    book's Chapter 13 and checked the gaps and errors reported. No person has reviewed the proofs.
+    book's Chapter 13 and checked the gaps and errors reported. In the eighth round an independent
+    agent reviewed the Chapter 15 and Section 16.1-16.2 statements before the proofs, another
+    checked the three numerical facts of Theorem 16.1.1 in its own multiple-precision
+    implementation (about 1.1 million evaluations, no violation), and another compared the
+    formalization with the book's Chapter 15 and Sections 16.1-16.2 and checked the gaps and errors
+    reported. No person has reviewed the proofs.
 
 alignment:
   namespace: "SmoothedPolygonsChallenge"

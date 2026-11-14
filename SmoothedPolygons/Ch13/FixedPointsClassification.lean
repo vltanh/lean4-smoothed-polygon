@@ -112,7 +112,8 @@ private lemma l4i_RR_mul_left (c a b : ℂ) : RR (c * a) b = RR a (starRingEnd �
   simp only [RR, map_mul]
   ring_nf
 
-private lemma l4i_scale_ne_zero {r : ℝ} (hr : 0 < r) {z : Fin 3 → ℂ} (hz : z ≠ 0) :
+/-- The rescaling `(r z₁, r² z₂, r³ z₃)` of a point `z ≠ 0` by `r > 0` is nonzero. -/
+theorem scale_ne_zero {r : ℝ} (hr : 0 < r) {z : Fin 3 → ℂ} (hz : z ≠ 0) :
     scale r z ≠ 0 := by
   intro h
   apply hz
@@ -133,7 +134,7 @@ private lemma l4i_pow_mem_VT {v : ℂ} (hv : v ∈ VT) (k : ℕ) : v ^ k ∈ VT 
 
 /-- Two points of `Ξ_𝒲` have the same class in `Ξ_𝒲/V_T` if and only if they differ by a rotation
 in `V_T`. -/
-private lemma l4i_mk_eq_iff {ξ η : XiW} :
+theorem mk_eq_mk_iff_exists_mem_VT {ξ η : XiW} :
     (Quotient.mk'' ξ : XiWQuot) = Quotient.mk'' η ↔
       ∃ v ∈ VT, (ξ : Fin 3 → ℂ) = v • (η : Fin 3 → ℂ) := by
   rw [Quotient.eq'', MulAction.orbitRel_apply, MulAction.mem_orbit_iff]
@@ -337,7 +338,7 @@ private theorem l4st_fixedPoint_cases {z : Fin 3 → ℂ} (hz : z ≠ 0) {r : �
   have hFz : poincare z ≠ 0 := poincare_ne_zero hz
   -- the first control of `F(z⁰) = ζ₁ (r z₁⁰, r² z₂⁰, r³ z₃⁰)` is `ζ₁ u` (Lemmas 13.2.1, 13.2.2)
   have hfc : firstControl (poincare z) = w * u := by
-    rw [h, (poincare_smul hw (l4i_scale_ne_zero hr hz)).1, (poincare_scale hr hz).1]
+    rw [h, (poincare_smul hw (scale_ne_zero hr hz)).1, (poincare_scale hr hz).1]
   -- `ζ₁ = 1` is impossible: the control switches at `t_sw`
   have hw1 : w ≠ 1 := by
     rintro rfl
@@ -518,7 +519,7 @@ private theorem l4st_qOut_ne_qIn : qOut ≠ qIn := by
   have hq := qOutCart_ne_zero
   have hτq := tau_qOutCart_ne_zero
   -- `q_out = q_in` gives `qOutCart = v · (ρ-scaling)(τ qOutCart)` with `v ∈ V_T`, `ρ > 0`
-  obtain ⟨v, hv, hξ⟩ := l4i_mk_eq_iff.1 h
+  obtain ⟨v, hv, hξ⟩ := mk_eq_mk_iff_exists_mem_VT.1 h
   set ρ := weightedNorm qOutCart / weightedNorm (tau qOutCart)
   have hρ : 0 < ρ := div_pos (weightedNorm_pos hq) (weightedNorm_pos hτq)
   have heq : qOutCart = v • scale ρ (tau qOutCart) := l4i_eq_smul_scale_of_ang hq hξ
@@ -526,7 +527,7 @@ private theorem l4st_qOut_ne_qIn : qOut ≠ qIn := by
   -- spiral, through the equivariance of `F`)
   have hF : poincare qOutCart = ζ ^ 2 • scale rScale⁻¹ qOutCart := by
     conv_lhs => rw [heq]
-    rw [(poincare_smul hv (l4i_scale_ne_zero hρ hτq)).2.2, (poincare_scale hρ hτq).2.2,
+    rw [(poincare_smul hv (scale_ne_zero hρ hτq)).2.2, (poincare_scale hρ hτq).2.2,
       poincare_tau_qOutCart]
     conv_rhs => rw [heq]
     rw [scale_smul, scale_scale, scale_smul, scale_scale, smul_smul, smul_smul,
@@ -590,7 +591,7 @@ theorem lemma13_5_2 :
       poincareAngQuot (Quotient.mk'' ⟨ang q, hmem⟩) = Quotient.mk'' ⟨ang q, hmem⟩ := by
     intro q hq hmem r hr hF
     change (Quotient.mk'' (poincareAng ⟨ang q, hmem⟩) : XiWQuot) = _
-    refine l4i_mk_eq_iff.2 ⟨ζ ^ 2, ζ_sq_mem_VT, ?_⟩
+    refine mk_eq_mk_iff_exists_mem_VT.2 ⟨ζ ^ 2, ζ_sq_mem_VT, ?_⟩
     change ang (poincare (ang q)) = ζ ^ 2 • ang q
     rw [ang_poincare_ang hq, hF, (weightedNorm_ang_smul_scale hq hr ζ_sq_mem_VT).2]
   ext x
@@ -604,7 +605,7 @@ theorem lemma13_5_2 :
       rwa [scale_one] at this
     -- step 1: `F_ang ξ = v ξ` lifts to `F(ξ) = v · (r ξ₁, r² ξ₂, r³ ξ₃)`, `r = φ(F(ξ))`
     change (Quotient.mk'' (poincareAng ξ) : XiWQuot) = Quotient.mk'' ξ at hfx
-    obtain ⟨v, hv, hFv⟩ := l4i_mk_eq_iff.1 hfx
+    obtain ⟨v, hv, hFv⟩ := mk_eq_mk_iff_exists_mem_VT.1 hfx
     have hFξ0 := poincare_ne_zero hξ0
     have hρ := weightedNorm_pos hFξ0
     have hFeq : poincare ξ = v • scale (weightedNorm (poincare ξ)) ξ := by
@@ -621,7 +622,7 @@ theorem lemma13_5_2 :
       have hc := l4st_eq_fixedPointCandidate hρ ζ_sq_mem_VT (fun h' ↦ l4i_ζ_sq_ne_one h'.2) hFeq
       rw [hrs] at hc
       obtain ⟨ρ', hρ', v', hv', hv'eq⟩ := (l4st_fixedPointCandidate_virialEquiv huV hT).1
-      refine l4i_mk_eq_iff.2 ⟨v', hv', ?_⟩
+      refine mk_eq_mk_iff_exists_mem_VT.2 ⟨v', hv', ?_⟩
       change (ξ : Fin 3 → ℂ) = v' • ang qOutCart
       rw [← (weightedNorm_ang_smul_scale qOutCart_ne_zero hρ' hv').2, ← hv'eq, ← hc,
         ang_of_mem_Xi hξXi]
@@ -629,7 +630,7 @@ theorem lemma13_5_2 :
       have hc := l4st_eq_fixedPointCandidate hρ ζ_sq_mem_VT (fun h' ↦ l4i_ζ_sq_ne_one h'.2) hFeq
       rw [hrs] at hc
       obtain ⟨ρ', hρ', v', hv', hv'eq⟩ := (l4st_fixedPointCandidate_virialEquiv huV hT).2
-      refine l4i_mk_eq_iff.2 ⟨v', hv', ?_⟩
+      refine mk_eq_mk_iff_exists_mem_VT.2 ⟨v', hv', ?_⟩
       change (ξ : Fin 3 → ℂ) = v' • ang (tau qOutCart)
       rw [← (weightedNorm_ang_smul_scale tau_qOutCart_ne_zero hρ' hv').2, ← hv'eq, ← hc,
         ang_of_mem_Xi hξXi]
@@ -660,7 +661,7 @@ theorem remark13_5_3 (k : ℕ) :
     | succ k ih =>
       have hrk : 0 < r ^ k := pow_pos hr k
       rw [Function.iterate_succ_apply', ih,
-        (poincare_smul (l4i_pow_mem_VT ζ_sq_mem_VT k) (l4i_scale_ne_zero hrk hq)).2.2,
+        (poincare_smul (l4i_pow_mem_VT ζ_sq_mem_VT k) (scale_ne_zero hrk hq)).2.2,
         (poincare_scale hrk hq).2.2, hF, scale_smul, scale_scale, smul_smul,
         ← pow_succ, ← pow_succ]
   exact ⟨key qOutCart_ne_zero hs0 lemma13_5_2.2.2.1 k,

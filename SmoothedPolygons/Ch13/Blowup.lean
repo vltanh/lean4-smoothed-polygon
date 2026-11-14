@@ -177,8 +177,8 @@ private theorem l4e_mem_walls_iff {w : ℂ} :
     · rw [h]; exact Or.inl (Or.inr ⟨s, hs, rfl⟩)
     · rw [h]; exact Or.inr ⟨s, hs, rfl⟩
 
-/-- `V_T 𝒲 = 𝒲`. -/
-private theorem l4e_mul_mem_walls {v w : ℂ} (hv : v ∈ VT) (hw : w ∈ walls) : v * w ∈ walls := by
+/-- `V_T 𝒲 = 𝒲`: the rotations of `V_T` permute the walls. -/
+theorem mul_mem_walls {v w : ℂ} (hv : v ∈ VT) (hw : w ∈ walls) : v * w ∈ walls := by
   obtain ⟨m, rfl⟩ := l4e_mem_VT_iff_pow.mp hv
   obtain ⟨s, hs, n, rfl⟩ := l4e_mem_walls_iff.mp hw
   exact l4e_mem_walls_iff.mpr ⟨s, hs, m + n, by ring⟩
@@ -408,7 +408,7 @@ theorem smul_mem_XiW (g : rootsOfUnity 3 ℂ) {ξ : Fin 3 → ℂ}
   · change weightedNorm _ = 1
     rw [weightedNorm_smul hv]
     exact h.1
-  · exact l4e_mul_mem_walls hv h.2
+  · exact mul_mem_walls hv h.2
 
 /-- The Poincaré section `Ξ_𝒲 = {ξ ∈ Ξ | ξ₃ ∈ 𝒲}` (TeX 11221–11225), with the diagonal action of
 `V_T = rootsOfUnity 3 ℂ` by scalar multiplication (TeX 11225–11229). -/
