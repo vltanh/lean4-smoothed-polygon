@@ -405,3 +405,52 @@ that completes the round's REPORT.md (14 November, 11:42 CST), from the session 
 For the whole project (eight rounds, to the same time): 213.6 hours elapsed (including the stops),
 182 sub-agents (161 on the formalization and its packages; at most 13 at once), 73.8 hours of
 sub-agent work, 13,935 tool calls by sub-agents and 1,645 by the main session.
+
+## Ninth round (14 November 2026)
+
+After publishing the fifth layer (with the user's approval), the round proved the plan's sixth
+layer: Chapter 14 up to §14.3, Appendix A.3 and Theorem 16.4.1, the cluster point theorem. With
+them Theorem 16.3.1, Mahler's First conjecture, is proved conditionally on Theorem 14.4.1 (Layer 7)
+and the three numerical facts of the fifth layer. The user decided four questions:
+- the certification of the numerical facts waits until Layers 6–7 have fixed which facts are
+  needed, with a pilot meanwhile;
+- the stable manifold theorem, which the book cites from Irwin, is proved in full `Cⁿ` graph form
+  as a separate public package, StableManifold (published with the user's approval);
+- the gap of the book's §16.4.2 is repaired by a new argument rather than assumed;
+- Step 10 of Lemma 14.3.1, which the book proves "in a similar way", follows the book: the
+  construction is stated once and applied twice, and the shorter argument by the inverse function
+  theorem is documented instead of used.
+
+How it was made:
+
+- **Statements** (three agents): every statement with `sorry`; an independent review found a false
+  general lemma, an unusable quantifier and two gaps in the proof plans, all fixed before the
+  proofs.
+- **Proofs** (eleven agents, at most seven at once): the hyperbolic box and division by a
+  coordinate, the Lie algebra chart, the asymptotics, the analytic extension, Theorem 14.3.3 and
+  Appendix A.3, the cluster-set coordinates and the final assembly, the four modules of the repair
+  of §16.4.2, and Theorem 16.4.1; one false helper statement was corrected (counterexample in Lean).
+- **Certification pilot** (one agent): a verified interval arithmetic checked by Lean's kernel,
+  which certifies the contraction part of `DOutContracts`, with measurements of the cost.
+- **StableManifold package** (fourteen agents): the statements and module plan, ten proof agents in
+  parallel, the packaging for Palomar, an independent review and its fixes.
+- **Verification, cleanup and Step 10** (three agents): an independent comparison with the book
+  found no unrecorded departure and one that was not forced (Step 10), redone along the book; the
+  cleanup registered the layer, renamed the agent-prefixed files and merged duplicated helpers.
+- **Audit** (one agent): REPORT.md (E81–E92), README.md, formalization.yaml.
+
+Figures, from the end of the eighth round (14 November 2026, 11:42 CST) to just before the commit
+that completes the round's REPORT.md (17:53 CST), from the session transcript:
+
+- elapsed time: 6.2 hours (including the publication of the fifth layer and of the package);
+- sub-agents: 33 (31 started in the round: 17 on the formalization, 14 on the StableManifold
+  package), at most 10 running at once, 2 resumptions; their total working time 16.6 hours;
+- tool calls: 3,184 by the sub-agents, 178 by the main session;
+- tokens: sub-agents 5.28M output, 12.73M input (uncached input and cache writes), 912M cache
+  reads; main session 0.17M output, 0.36M input, 88M cache reads;
+- model calls: `claude-opus-5-5` only, 3,027 by the sub-agents and 172 by the main session; Claude
+  Code 2.1.323.
+
+For the whole project (nine rounds, to the same time): 219.8 hours elapsed (including the stops),
+215 sub-agents (194 on the formalization and its three packages; at most 13 at once), 90.3 hours of
+sub-agent work, 17,119 tool calls by sub-agents and 1,824 by the main session.

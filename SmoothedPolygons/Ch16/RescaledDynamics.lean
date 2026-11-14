@@ -10,8 +10,9 @@ public import Mathlib.Topology.UniformSpace.UniformConvergence
 asymptotic formulas in `r₀` for the Reinhardt switching functions are functions of rescaled time
 `s` … By the earlier asymptotic formulas (adapted to this system of variables), the switching
 functions extend analytically to a neighborhood of `r = 0`. When `r = 0`, the Reinhardt switching
-function agrees with the Fuller switching function"), in the form the proof of N5 uses: in the
-blow-up coordinates `z = (ρ y₁, ρ² y₂, ρ³ y₃)` of §16.4.1 and in rescaled time `s = t/ρ`, the
+function agrees with the Fuller switching function"), in the form that the proof of the forward
+invariance of the cluster set uses (the repair of §16.4.2, REPORT.md, E90): in the blow-up
+coordinates `z = (ρ y₁, ρ² y₂, ρ³ y₃)` of §16.4.1 and in rescaled time `s = t/ρ`, the
 Reinhardt state–costate vector field and the Reinhardt Hamiltonians converge, as `ρ → 0⁺`, to the
 Fuller vector field (13.2.1) and to `24 H_F`, **uniformly in the control `v ∈ U_T`** and in `y` on
 compact sets.
@@ -70,7 +71,7 @@ uniformity for free:
 The book's further claims of §16.4.2 — the third `s`-derivative of the rescaled switching
 functions is nonzero for small `r`, so they "behave qualitatively like a monic cubic polynomial"
 (at most three zeros, TeX 12888–12902), Weierstrass preparation at the roots, the Reinhardt cells
-`𝒞_k^R`, parts `𝒟_i^R` and branch maps (TeX 12919–12987) — are not used by the proof of N5: the
+`𝒞_k^R`, parts `𝒟_i^R` and branch maps (TeX 12919–12987) — are not used by that proof: the
 zero count bounds the zeros of one constant-control piece, not the number of pieces (the third
 derivative of `χ_ij` along the true trajectory changes sign with the control), and the
 relaxed-limit argument needs neither cells nor Weierstrass polynomials.

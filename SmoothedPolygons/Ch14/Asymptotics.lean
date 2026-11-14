@@ -26,7 +26,8 @@ system.
   `eventually_firstControl_lieChart`);
 * Lemma 14.2.3 (`lem:Lie-Fuller`, `lemma14_2_3`) and Lemma 14.2.4 (`lem:chi-asymptotic`,
   `lemma14_2_4`), with the companion formula for `χ₂₃` ("Similar formulas hold for the other
-  switching functions", `lemma14_2_4_chi23`), which the proof of Lemma 14.3.1 needs (G14.5).
+  switching functions", `lemma14_2_4_chi23`), which the proof of Lemma 14.3.1 needs (REPORT.md,
+  E85).
 
 The Fuller control `ζ^{j-1}` corresponds to the Reinhardt vertex `e_j` (TeX 11655–11657), so the
 vertex `vertex m` (`e_{m+1}`) corresponds to `ζ ^ m`. In the book's normalization the switching
@@ -41,7 +42,7 @@ function from `ζ` to `1` is `RR(ζ - 1, z₃)` (without the factor `1/√3` of 
 * Lemma 14.2.3 is printed "for each `s` such that `r(s) < 1`"; for fixed `s` the condition holds
   for all small `r₀` (the chart coordinate along the flow tends to `0`), so it is dropped. The
   `O`-constants depend on `s` and `x̃⁰`, as printed; the uniformity the proof of Lemma 14.3.1
-  needs (G14.4) is provided there by analyticity (`analyticAt_rescaledChi`,
+  needs (E84) is provided there by analyticity (`analyticAt_rescaledChi`,
   `SmoothedPolygons/Ch14/AnalyticExtension.lean`).
 * "`ξ(x̃) ∈ Ξ_{𝒲,0}`" (TeX 11612–11649) holds only when `ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁ ≤ 0` (a slip; see
   `xiOfChart`).
@@ -407,7 +408,7 @@ theorem tendsto_zhat_div (x : Fin 3 → ℝ) :
 /-- **The Reinhardt Hamiltonians are asymptotically the Fuller Hamiltonians** (TeX 11651–11658):
 `H(Z_u, X(r, x̃), Λ₁(r, x̃), Λ_R(r, x̃)) = 24 r³ H_F(ũ, z(x̃)) + O(r⁴)`, with the vertex `e_{m+1}`
 corresponding to `ζ^m` (`24 = 6ρ²`; the book writes `H_F(ũ, z)`, Chapter 13 writes `H_F(z, u)`,
-G14.13).
+REPORT.md, E82).
 
 Proof: on the chart `H(Z₀₁₀) = 0` (`lieChart_section`), so `H(e_{m+1}) = χ_{m+1,2}`; the case
 `s = 0` of `l6c_switching_estimate` gives `24 r³ RR(ζ^m - ζ, z₃) = 24 r³ H_F(z(x̃), ζ^m)`. -/

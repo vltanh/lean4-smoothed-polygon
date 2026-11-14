@@ -17,14 +17,15 @@ from the exceptional divisor at an earlier time. Thus, the trajectory is not per
 contrary to the boundary conditions of the Reinhardt conjecture."
 
 Layer 3 stated this step as the named hypothesis `NoChatteringIntoSingularLocus` of
-`theorem16_3_1` (`SmoothedPolygons/Ch16/MahlerFirst.lean`). Here it is derived from Theorem 16.4.1
-(`theorem16_4_1`, proved in this layer from the three named numerical facts of Layer 5 and N5) and
+`theorem16_3_1` (`SmoothedPolygons/Ch16/MahlerFirst.lean`). Here it is derived (REPORT.md, E89) from
+Theorem 16.4.1 (`theorem16_4_1`, proved in this layer from the three named numerical facts of
+Layer 5 and the forward invariance of the cluster set, `clusterSetForwardInvariant`) and
 Theorem 14.4.1 (the named proposition `Theorem14_4_1`, Layer 7):
 
-* `noChatteringIntoSingularLocus_of_clusterSetForwardInvariant`: from the numerical facts, N5 and
-  Theorem 14.4.1;
+* `noChatteringIntoSingularLocus_of_clusterSetForwardInvariant`: from the numerical facts,
+  `ClusterSetForwardInvariant` and Theorem 14.4.1;
 * `noChatteringIntoSingularLocus_of_theorem14_4_1`: from the numerical facts and Theorem 14.4.1
-  (N5 proved, `clusterSetForwardInvariant`);
+  (`ClusterSetForwardInvariant` proved, `clusterSetForwardInvariant`);
 * `theorem16_3_1_of_theorem14_4_1`: **Mahler's First conjecture conditional on Theorem 14.4.1 and
   the three named numerical facts of Theorem 16.1.1**.
 
@@ -244,8 +245,8 @@ private lemma l6e_mem_singularLocus_rot {G A B C : Mat2} :
   · rintro ⟨μ, hμ, hdet, h1, hX, hR⟩
     exact ⟨μ, hμ, hdet, by rw [h1, hJ], by rw [hX, R_inv_mul_J_mul_R], by rw [hR, h0]⟩
 
-/-- **The hypothesis of Mahler's First from Theorems 16.4.1 and 14.4.1**, with N5 as a hypothesis
-(the steps are in the module docstring). -/
+/-- **The hypothesis of Mahler's First from Theorems 16.4.1 and 14.4.1**, with
+`ClusterSetForwardInvariant` as a hypothesis (the steps are in the module docstring). -/
 theorem noChatteringIntoSingularLocus_of_clusterSetForwardInvariant (h₁ : DOutContracts)
     (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims) (hN5 : ClusterSetForwardInvariant)
     (hNR : Theorem14_4_1) : NoChatteringIntoSingularLocus := by

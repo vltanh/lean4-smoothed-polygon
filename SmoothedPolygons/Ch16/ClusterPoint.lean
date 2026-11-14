@@ -24,7 +24,8 @@ neighborhood `U` of the fixed point, eventually each switching point, rotated on
 the local unstable manifold of `e`, which is the local stable curve `W^s(q_in)` of `e⁻¹`, the
 Reinhardt–Poincaré map in the mirrored chart (`remark14_3_4`; a `C^∞` curve, `theorem14_3_3`).
 `theorem16_4_1_reverse` is the time reversal (switching points emanating from the divisor converge
-to `q_out` backward and lie on `W^u(q_out)`), which the proof of Theorem 14.4.1 needs (G14.11).
+to `q_out` backward and lie on `W^u(q_out)`), which the proof of Theorem 14.4.1 needs (REPORT.md,
+E88).
 
 ## The book's proof (TeX 12991–13056), and this proof
 
@@ -38,11 +39,11 @@ cluster point in a part gives one in a smaller part, ending in `𝒟_out^R`; (f)
 `𝒟_out^R` makes `q_out` a cluster point ("the dynamics are analytic on `𝒟_out^R`, and the set of
 cluster points being closed"), against (c).
 
-Gaps (G16.9, G16.10): (b)'s `ε/r_scale` argument is unclear; (c) uses `W^s(q_out) ⊆ divisor`
+Gaps (REPORT.md, E90, E91): (b)'s `ε/r_scale` argument is unclear; (c) uses `W^s(q_out) ⊆ divisor`
 globally, while Theorem 14.3.3 is local; (d)–(e) need the Reinhardt parts and branch maps of
-§16.4.2 (unproved, G16.8) and ignore the diagonal rows of Table 16.1; (f) "analytic on
+§16.4.2 (unproved, E90) and ignore the diagonal rows of Table 16.1; (f) "analytic on
 `𝒟_out^R`" is not established (Lemma 14.3.1 is local at the fixed point). Repair (along the book's
-lines, with the ω-limit / hyperbolic-box argument of the plan):
+lines, with an ω-limit and hyperbolic-box argument):
 
 1. (a) holds by construction: `τ` is strictly increasing (`IsSwitchingSeqInto`); the switching
    points have Fuller coordinates `→ 0`, `≠ 0` (`IsChatteringArcInto.switchPoints`).
@@ -72,7 +73,7 @@ lines, with the ω-limit / hyperbolic-box argument of the plan):
    definition, and Theorem 14.3.3 (via Theorem A.3.1) adds that it is a `C^∞` curve; step 5 uses
    only the conjugacy `F_in = e⁻¹` of `remark14_3_4`, but at the level of declarations it depends on
    Theorem A.3.1 through `remark14_3_4`, whose unstable-curve clause is proved with it.
-4. (d)–(f) replaced: `Ω` is forward invariant under `F_ang` (N5, `ClusterSetForwardInvariant`); a
+4. (d)–(f) replaced: `Ω` is forward invariant under `F_ang` (`ClusterSetForwardInvariant`, E90); a
    point `ω ≠ q_in` of `Ω` has `F^k(ω) → q_out` (Theorem 16.1.1, `theorem16_1_1`, with the three
    named numerical facts of Layer 5), so `q_out ∈ Ω` (closed: the image of the compact set of
    cluster points under the continuous class map): impossible by step 3. Hence `Ω = {q_in}`, and
@@ -89,8 +90,8 @@ lines, with the ω-limit / hyperbolic-box argument of the plan):
 
 **The switching structure at a chart point** (the book's own claim, stated without proof: "the
 first control … is `u = e₂` for all sufficiently small `r > 0`", TeX 11706–11718, and "These
-functions give the value of the Reinhardt–Poincaré map", TeX 11835–11836; proved here): the claim
-of `eventually_follows_out` needs which control an extremal uses right **after** the switching
+functions give the value of the Reinhardt–Poincaré map", TeX 11835–11836; proved here, E83): the
+claim of `eventually_follows_out` needs which control an extremal uses right **after** the switching
 point `lieChart p`, while `eventually_isSwitch_reinSwitchTime` describes only the flow with the
 control `e₂`. Two exact computations on the section `Λ_R = h K(X)` decide it
 (`SmoothedPolygons/Ch16/SwitchStructure.lean`): `H(e₁) = 6h/(3 + 3a² - c²)` with
@@ -103,9 +104,10 @@ at once. Hence the control after the switch is `e₂`, the extremal is the `e₂
 time reversal (`iso_vertexFlow_reinTau`, `switchingFn_reinTau`): the `e₃`-flow from `τ q` is the
 reversed `e₂`-flow from `q`, as the review asks (`F_in = τ F⁻¹ τ`), with no estimate at `q_in`.
 
-Departure from the paper: steps 3–5 replace (b)–(f) as described (forced by G16.8–G16.10); the
-descent through Table 16.1 on Reinhardt parts is replaced by Theorem 16.1.1 applied to the cluster
-set, which is the book's "Repeating the argument of Theorem 16.1.1" done once on the Fuller side.
+Departure from the paper: steps 3–5 replace (b)–(f) as described (forced by the gaps of E90 and
+E91); the descent through Table 16.1 on Reinhardt parts is replaced by Theorem 16.1.1 applied to
+the cluster set, which is the book's "Repeating the argument of Theorem 16.1.1" done once on the
+Fuller side.
 Size: about 1,000 lines here and in the two helper files.
 -/
 
@@ -200,8 +202,9 @@ private lemma l6h_reinTau_phaseOfFuller (z : Fin 3 → ℂ) :
 
 /-- **The chart covers the switching points near `q_out`**: for `ξ` with `Im ξ₁ > 0` (as `q_out`'s
 representatives on `𝒲₀`), the chart coordinates of the phase point with Fuller coordinates
-`(r ξ'₁, r² ξ'₂, r³ ξ'₃)` tend to `(0, fullerChartInv ξ)` as `r → 0⁺`, `ξ' → ξ` (the change of
-chart of G16.12: `r_chart = X₁₁ = 2 r Im ξ'₁`, `x̃₂₁ = (X₂₁ - 1)/X₁₁ → Re ξ₁/Im ξ₁`, …). -/
+`(r ξ'₁, r² ξ'₂, r³ ξ'₃)` tend to `(0, fullerChartInv ξ)` as `r → 0⁺`, `ξ' → ξ` (the change of chart
+between the coordinates of §16.4.1 and the chart of §14.1, which the book does not give:
+`r_chart = X₁₁ = 2 r Im ξ'₁`, `x̃₂₁ = (X₂₁ - 1)/X₁₁ → Re ξ₁/Im ξ₁`, …). -/
 theorem tendsto_lieChartInv_phaseOfFuller {ξ : Fin 3 → ℂ} (hξ : 0 < (ξ 0).im) :
     Tendsto (fun p : ℝ × (Fin 3 → ℂ) ↦ lieChartInv (phaseOfFuller (scale p.1 p.2)))
       (𝓝[{p | 0 < p.1}] (0, ξ)) (𝓝 (0, fullerChartInv ξ)) := by
@@ -603,7 +606,7 @@ private lemma l6h_tendsto_chart_in {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X 
   rw [hrep, reinTau_spec.1]
 
 /-- **`q_out` is not a cluster point** (TeX 13015–13026, claim (c) of the proof, repaired by the
-hyperbolic box, G16.9): along a chattering arc into the singular locus, `q_out` is not a cluster
+hyperbolic box, E91): along a chattering arc into the singular locus, `q_out` is not a cluster
 class of the switching points.
 
 Proof. Fix an extension `e` (`lemma14_3_1`) and the neighborhood `W₀` of
@@ -802,11 +805,11 @@ private lemma l6h_lieChartIn_inj {p₁ p₂ : ℝ × (Fin 3 → ℝ)} (h₁ : p�
   rw [← (lieChart_spec h₁).2.2.2.2.2, this, (lieChart_spec h₂).2.2.2.2.2]
 
 /-- **Theorem 16.4.1, first part** (`thm:no-chatter`: the cluster point is `q_in`), conditional on
-N5 and the three named numerical facts of Theorem 16.1.1: `Ω` is closed and forward invariant
-(N5); a class `ω ≠ q_in` of `Ω` has `F^k ω → q_out` (Theorem 16.1.1), so `q_out ∈ Ω`, against the
-hyperbolic box (`qOut0_not_mem_switchClusterSet`); hence every cluster point is `q_in` and the
-angular components converge to `q_in` modulo `V_T`. (This part does not use Remark 14.3.4; it is
-the part the assembly of Theorem 16.3.1 uses.) -/
+`ClusterSetForwardInvariant` and the three named numerical facts of Theorem 16.1.1: `Ω` is closed
+and forward invariant; a class `ω ≠ q_in` of `Ω` has `F^k ω → q_out` (Theorem 16.1.1), so
+`q_out ∈ Ω`, against the hyperbolic box (`qOut0_not_mem_switchClusterSet`); hence every cluster
+point is `q_in` and the angular components converge to `q_in` modulo `V_T`. (This part does not
+use Remark 14.3.4; it is the part the assembly of Theorem 16.3.1 uses.) -/
 theorem tendstoModVT_switchAng_of_clusterSetForwardInvariant (h₁ : DOutContracts)
     (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims) (hN5 : ClusterSetForwardInvariant) {a b : ℝ}
     {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
@@ -823,8 +826,9 @@ theorem tendstoModVT_switchAng_of_clusterSetForwardInvariant (h₁ : DOutContrac
   exact qOut0_not_mem_switchClusterSet h ((l6h_isClosed_switchClusterSet h).mem_of_tendsto
     (theorem16_1_1 h₁ h₂ h₃ _ hne) (Eventually.of_forall hit))
 
-/-- **Theorem 16.4.1, conditional on N5** (`ClusterSetForwardInvariant`) and on the three named
-numerical facts of Theorem 16.1.1. See `theorem16_4_1`. -/
+/-- **Theorem 16.4.1, conditional on the forward invariance of the cluster set**
+(`ClusterSetForwardInvariant`) and on the three named numerical facts of Theorem 16.1.1. See
+`theorem16_4_1`. -/
 theorem theorem16_4_1_of_clusterSetForwardInvariant (h₁ : DOutContracts)
     (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims) (hN5 : ClusterSetForwardInvariant)
     {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
@@ -934,7 +938,7 @@ of "a trajectory of the Reinhardt system" as in `Theorem14_4_1` (see
 `SmoothedPolygons/Ch14/NoReturn.lean`). It is what the assembly of Theorem 16.3.1 supplies
 (Theorem 8.3.2 away from the singular locus).
 
-Proof: `theorem16_4_1_of_clusterSetForwardInvariant` with N5 (`clusterSetForwardInvariant`);
+Proof: `theorem16_4_1_of_clusterSetForwardInvariant` with `clusterSetForwardInvariant`;
 the steps are in the module docstring. -/
 theorem theorem16_4_1 (h₁ : DOutContracts) (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims)
     {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
@@ -947,7 +951,7 @@ theorem theorem16_4_1 (h₁ : DOutContracts) (h₂ : CellTwoEntersDOut) (h₃ : 
   theorem16_4_1_of_clusterSetForwardInvariant h₁ h₂ h₃ clusterSetForwardInvariant h
 
 /-- **Theorem 16.4.1, time reversed** (`thm:no-chatter`; the form used by the proof of Theorem
-14.4.1, "All switches must be on the unstable curve", TeX 12004–12005; G14.11): for a chattering arc
+14.4.1, "All switches must be on the unstable curve", TeX 12004–12005; E88): for a chattering arc
 out of the singular locus (switching times `τ n ↓ a`), the angular components of the switching
 points converge to `q_out` modulo `V_T`, and eventually each switching point, rotated onto the
 section `χ₂₃ = 0`, is `lieChart p` with `p` on the local unstable manifold of `e` (the unstable

@@ -23,17 +23,18 @@ exceptional divisor `r = 0` is the Fuller–Poincaré map.
 
 * `reinSwitchTime q`: the least positive zero of `χ₂₁` along the flow with the control `e₂` from `q`
   (the switching time, TeX 11807–11811); `reinPoincare q = Ad_{R⁻¹}(q(t_sw))` (the book writes
-  `ad_{R⁻¹}`, G14.6; "The rotation is chosen to make the fixed point property hold exactly",
-  TeX 11826–11838); `reinChartMap`, the map `F` in the chart (TeX 11683–11686: "We can write the
-  Reinhardt–Poincaré map `F` in local coordinates `(r, x̃) ↦ F(r, x̃)`"); `reinChartMapIn`, the map
-  `F⁻¹` that moves backwards in time, in the same chart (`τ F τ`, `reinChartMapIn_eq`);
+  `ad_{R⁻¹}`, REPORT.md, E85; "The rotation is chosen to make the fixed point property hold
+  exactly", TeX 11826–11838); `reinChartMap`, the map `F` in the chart (TeX 11683–11686: "We can
+  write the Reinhardt–Poincaré map `F` in local coordinates `(r, x̃) ↦ F(r, x̃)`");
+  `reinChartMapIn`, the map `F⁻¹` that moves backwards in time, in the same chart (`τ F τ`,
+  `reinChartMapIn_eq`);
 * `fullerChartMap`: the Fuller–Poincaré map in the chart `x̃` of the divisor (rotation by `ζ` to the
   wall `𝒲₀`, rescaling to `Im z₁ = 1/2`), with the fixed point `x̃_out` and its linearization, whose
   eigenvalues have modulus `< 1/10` (transferred from Lemma 13.5.5's certified Jacobian);
 * `analyticAt_rescaledChi`: the first step of the proof, "`χ₂₁(X(s r₀), Λ₁(s r₀), Λ_R(s r₀))/r₀³`
   extends to an analytic function `χ̃₂₁(s, r₀, x̃₀)` in a neighborhood of `r₀ = 0`";
 * `eventually_isSwitch_reinSwitchTime`: near the fixed point, with `r > 0`, the control `e₂` is
-  optimal on `[0, t_sw]` and is beaten by `e₁` right after (the χ₂₃ check, G14.5: the book examines
+  optimal on `[0, t_sw]` and is beaten by `e₁` right after (the χ₂₃ check, E85: the book examines
   only `χ₂₁`), so `reinPoincare` is the map of consecutive switching points of extremals;
   `eventually_isSwitch_reinSwitchTime_in`, the same for the backward map;
 * `IsReinhardtPoincareExtension`, `lemma14_3_1`: **Lemma 14.3.1**.
@@ -69,11 +70,11 @@ on the side `κ r > 0` (`eventually_reinChartMap_eq_extMap h`), with the switchi
    show that it is the least positive zero (`extSwitchTime_zero_structure`), so
    `reinSwitchTime (lieChart q) = |r| u_sw(q)` for `κ r > 0` (`l6s_reinSwitchTime_eq`).
 6. Rotate by `Ad_{R⁻¹}` (`extSwitchPt`).
-7. G14.7: the entries of `X_sw - J` and `Λ₁sw + (3/2) J` read by the chart are `O(r₀)`, `O(r₀²)`
-   (Lemma 14.2.3, rotated by `fullerCoords_adR`, with the determinant relations `det X = 1`,
-   `det Λ₁ = 9/4`, `l6d_det_relations`, for the entries `cayleyZ` does not see), so they are
-   divisible by `r₀`, `r₀²` (`extDivA`, `extDivB`, `extDivC`, `extDivD`), with limits
-   `2 Im w₁, 2 Re w₁, 6 Re w₂, -6 Im w₂`, `w = ζ z(s)`.
+7. The divisibility the book asserts (E85): the entries of `X_sw - J` and `Λ₁sw + (3/2) J` read
+   by the chart are `O(r₀)`, `O(r₀²)` (Lemma 14.2.3, rotated by `fullerCoords_adR`, with the
+   determinant relations `det X = 1`, `det Λ₁ = 9/4`, `l6d_det_relations`, for the entries
+   `cayleyZ` does not see), so they are divisible by `r₀`, `r₀²` (`extDivA`, `extDivB`,
+   `extDivC`, `extDivD`), with limits `2 Im w₁, 2 Re w₁, 6 Re w₂, -6 Im w₂`, `w = ζ z(s)`.
 8. The `(1, 1)` entry of `(X_sw - J)/r₀` at the divisor point is nonzero (`r_scale` at `x̃_out`,
    `extDivA_base`), so `extMap h (r, x̃) = (r a₁, b₁/a₁, c₂/a₁², d₂/a₁²)` is analytic there
    (`analyticAt_extMap`) and equals `reinChartMap` for `κ r > 0`
@@ -99,7 +100,7 @@ on the side `κ r > 0` (`eventually_reinChartMap_eq_extMap h`), with the switchi
    `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq`, `l6s_eventually_comp_eq`). "Hence, `F` is
    a diffeomorphism" (`lemma14_3_1`).
 
-The χ₂₃ check missing from the book (G14.5): `χ₂₃ = r³ χ̃₂₃` with
+The χ₂₃ check missing from the book (E85): `χ₂₃ = r³ χ̃₂₃` with
 `χ̃₂₃(s, 0, x̃_out) = 24 RR(ζ - ζ², z₃(s)) = s Q(s)`, `Q > 0` (`extChi23Zero_xTildeOut`); `χ̃₂₃`
 vanishes at `s = 0` (the chart lies on `χ₂₃ = 0` for every sign of `r`,
 `l6d_switchingFn12_lieChart`), so one more division by `s` (`exists_extChi23_eq_mul`) and
@@ -147,7 +148,7 @@ noncomputable def chartPtOut : ℝ × (Fin 3 → ℝ) := (0, xTildeOut)
 
 /-- **The Reinhardt–Poincaré map `F⁻¹` that moves backwards in time** (Lemma 14.3.1, Step 10), in
 the chart at `q_out`; equivalently, the Reinhardt–Poincaré map in the mirrored chart at `q_in`
-(Remark 14.3.4, G14.9). The forward dynamics near `q_in` follows the same rule as near `q_out`
+(Remark 14.3.4, E87). The forward dynamics near `q_in` follows the same rule as near `q_out`
 (control `e₂` from the wall `χ₂₃ = 0`, switch at `χ₂₁ = 0`, rotation `Ad_{R⁻¹}`): the time reversal
 maps the cyclic switching sequence `3 → 2 → 1 → 3` to itself. In the chart it is `σ F σ`
 (`reinChartMapIn_eq`). -/
@@ -693,7 +694,7 @@ private lemma l6s_lieChart_lieChartInv {Y : iso_PhasePt} (hb : IsBlowupPhasePt Y
   · exact (lieChart_lieChartInv hb hst hH hχ hpos).2
 
 /-- **The switching structure near a divisor point with Fuller data** (TeX 11807–11813, with the
-χ₂₃ check of G14.5), stated once: for chart points `q` near `(0, x̃₀)` on the side `κ r > 0`, along
+χ₂₃ check of E85), stated once: for chart points `q` near `(0, x̃₀)` on the side `κ r > 0`, along
 the flow with the control `e₂` from `lieChart q` (a point of the wall `χ₂₃ = 0`), `e₂` is the strict
 maximizer of the Hamiltonian among the vertices on `(0, t_sw)`, `t_sw > 0`, `e₁` beats it at times
 arbitrarily close to `t_sw` on the right, and the image `reinPoincare (lieChart q)` is the chart
@@ -809,7 +810,7 @@ private lemma l6d_E_chartPtOut : extMap fullerSwitchData_out chartPtOut = chartP
   exact congrArg (Prod.mk 0) fullerChartMap_xTildeOut
 
 /-- **The switching structure near the fixed point** (TeX 11807–11813, with the χ₂₃ check of
-G14.5; the forward instance of `eventually_isSwitch_of_fullerSwitchData`): for chart points `p`
+E85; the forward instance of `eventually_isSwitch_of_fullerSwitchData`): for chart points `p`
 near `(0, x̃_out)` with `r > 0`, along the flow with the control `e₂` from `q = lieChart p` the
 control `e₂` is the strict maximizer of the Hamiltonian among the vertices on `(0, t_sw(q))` (so it
 is optimal on `[0, t_sw(q)]`), `t_sw(q) > 0`, `e₁` beats it at times arbitrarily close to `t_sw(q)`

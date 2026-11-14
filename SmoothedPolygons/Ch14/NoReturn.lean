@@ -18,7 +18,7 @@ divisor at a single point `(0, x_out)`. Any trajectory that returns to the singu
 chatter … This would require the unstable curve to contain a sequence of forward iterates of points
 tending to the exceptional divisor. This does not happen, because the unstable curve hits the
 boundary of the star domain" (the numerical computation of Figure 14.2, TeX 11951–11991,
-uncertified by the authors' own statement; G14.10).
+uncertified by the authors' own statement; REPORT.md, E88).
 
 ## The formal statement
 
@@ -45,12 +45,12 @@ it has a counterexample (a non-bang-bang extremal through the singular locus) or
 reading is the only sensible one. Registration name: "Thm 14.4.1 (locally finitely bang-bang
 extremals)".
 
-## Plan for Layer 7 (N4)
+## Plan for Layer 7
 
 1. By the time-reversed Theorem 16.4.1 (`theorem16_4_1_reverse`; the book does not cite it,
-   G14.11), the switching points of a trajectory emanating from `q_out` lie on the local unstable
+   E88), the switching points of a trajectory emanating from `q_out` lie on the local unstable
    curve `W^u_loc(q_out)` (`theorem14_3_3`), eventually backward.
-2. **N4** (the numerical content, to be certified): every point of `W^u_loc(q_out)` with `r > 0` has
+2. **The numerical fact** (to be certified): every point of `W^u_loc(q_out)` with `r > 0` has
    a forward iterate under the Reinhardt–Poincaré map at which the trajectory reaches the boundary
    of the star domain before its next switch (the curve reaches the boundary near
    `(r, x̃₂₁) ≈ (0.21, -3.03)`; from `r ≳ 0.065` on, one arc suffices, TeX 11975–11991). A
@@ -63,7 +63,8 @@ extremals)".
    (before reaching the divisor the trajectory leaves the star domain, where no Reinhardt
    trajectory lives, Theorem 4.4.1).
 4. The second statement: time reversal (`IsChatteringArcOutOf.reverse`, `fullerCoords_reinTau`).
-Size: 150–400 lines with N4 as a hypothesis; certification of N4 5,000–15,000 lines.
+Size: 150–400 lines with the numerical fact of step 2 as a hypothesis; its certification
+5,000–15,000 lines.
 -/
 
 @[expose] public section

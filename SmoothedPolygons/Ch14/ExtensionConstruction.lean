@@ -11,8 +11,8 @@ import SmoothedPolygons.Ch7.Isolated.Return
 # Chapter 14: the analytic construction behind Lemma 14.3.1, stated once for both directions
 
 Steps 1–9 of the proof of Lemma 14.3.1 of Hales–Vajjha, *Packings of Smoothed Polygons*
-(TeX 11784–11860), with the χ₂₃ check (G14.5), in the coordinates `(s, r₀, x̃₀)` (rescaled time
-`s = t/r₀` and the initial chart point). The statements of the book are in
+(TeX 11784–11860), with the χ₂₃ check (REPORT.md, E85), in the coordinates `(s, r₀, x̃₀)` (rescaled
+time `s = t/r₀` and the initial chart point). The statements of the book are in
 `SmoothedPolygons/Ch14/AnalyticExtension.lean`, which uses this file; its module docstring gives
 the route step by step.
 
@@ -592,7 +592,7 @@ private lemma l6d_isBigO_fd (s : ℝ) (x : Fin 3 → ℝ) :
   ring
 
 /-- The divided entries `(X_sw - J)₁₁/r₀`, `(X_sw - J)₂₁/r₀`, `(Λ₁sw + (3/2) J)₁₁/r₀²`,
-`(Λ₁sw + (3/2) J)₂₁/r₀²` (Step 7, G14.7), analytic near `r₀ = 0`. -/
+`(Λ₁sw + (3/2) J)₂₁/r₀²` (Step 7, E85), analytic near `r₀ = 0`. -/
 noncomputable def extDivA : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := extDivPow extEntryA 1 extLimitA
 noncomputable def extDivB : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := extDivPow extEntryB 1 extLimitB
 noncomputable def extDivC : ℝ × ℝ × (Fin 3 → ℝ) → ℝ := extDivPow extEntryC 2 extLimitC
@@ -621,7 +621,7 @@ lemma extChi23Zero_zero (x : Fin 3 → ℝ) : extChi23Zero (0, x) = 0 := by
 
 /-- **The Fuller switching data at a divisor point** `(0, x̃₀)` (Step 4, TeX 11807–11813: "the
 least positive zero `s_sw,out ≈ 8.84 > 0` is a simple zero, and `s = 0` is not a zero"; the χ₂₃
-check, G14.5; the scaling factor, TeX 11849–11856), on the side `κ r₀ > 0` (`κ = ±1`), in the
+check, E85; the scaling factor, TeX 11849–11856), on the side `κ r₀ > 0` (`κ = ±1`), in the
 physical rescaled time `u = κ s`: the Fuller switching function `κ χ̃₂₁(κ u, 0, x̃₀)` is positive on
 `[0, u₀)` and has a simple zero at `u₀ > 0` (derivative `< 0`); `κ χ̃₂₃(κ u, 0, x̃₀)` is positive on
 `(0, B]` for some `B > u₀`, with a positive slope at `u = 0`; and the `(1, 1)` coefficient
@@ -670,7 +670,8 @@ private lemma l6d_flow_scale (l τ : ℝ) (z : Fin 3 → ℂ) (u : ℂ) :
   funext i
   fin_cases i <;> simp [flow, scale] <;> ring
 
-/-- The rescaling factor `λ = 1/(2 Im q_out,₁)` of Remark 14.2.1 (G14.12). -/
+/-- The rescaling factor `λ = 1/(2 Im q_out,₁)` of Remark 14.2.1, between the normalizations of
+Chapters 13 and 14 (E82). -/
 noncomputable def virialScaleOut : ℝ := (2 * (qOutCart 0).im)⁻¹
 
 lemma virialScaleOut_pos : 0 < virialScaleOut := inv_pos.2 (by linarith [qOutCart_signs.1])
@@ -1240,7 +1241,7 @@ lemma analyticAt_extSwitchTime (h : FullerSwitchData κ x₀ u₀) :
   ((contDiffAt_extImplicitFn κ x₀ u₀).contDiffAt_implicitFunction (by simp)
       (isInvertible_extImplicitFn h)).analyticAt
 
-/-! ### The χ₂₃ check (G14.5) -/
+/-! ### The χ₂₃ check (E85) -/
 
 /-- The dual basis property of `sl2Dual`: `⟨sl2Dual M₁ M₂ M₃ c₁ c₂ c₃, M_k⟩ = c_k` (`k = 2, 3`)
 when `T = ⟨M₁, [M₂, M₃]⟩ ≠ 0`. -/
@@ -1322,7 +1323,7 @@ lemma eventually_extChi23_zero (x₀ : Fin 3 → ℝ) :
       ivf_vertexFlow_zero]
     rw [l6d_switchingFn12_lieChart hp3 hp1 hp2, zero_div]
 
-/-- **`χ̃₂₃ = s H` with `H > 0` near `(0, 0, x̃₀)`** (the division by `s` of the χ₂₃ check, G14.5):
+/-- **`χ̃₂₃ = s H` with `H > 0` near `(0, 0, x̃₀)`** (the division by `s` of the χ₂₃ check, E85):
 `χ̃₂₃(0, r₀, x̃₀) = 0` near the divisor point (`eventually_extChi23_zero`), so `χ̃₂₃ = s H` with `H`
 analytic (division of power series), and `H(0, 0, x̃₀)` is the slope of `χ̃₂₃(·, 0, x̃₀)` at `0`,
 positive by the Fuller data. -/
@@ -1370,7 +1371,7 @@ lemma exists_extChi23_eq_mul (h : FullerSwitchData κ x₀ u₀) : ∃ H : ℝ �
   filter_upwards [hHeq, continuousAt_const.eventually_lt hH.continuousAt hH0] with v h1 h2
   exact ⟨by simpa using h1, h2⟩
 
-/-- **The χ₂₃ check** (G14.5): if `κ χ̃₂₃(κ u, 0, x̃₀) > 0` for `0 < u ≤ B`, then near the divisor
+/-- **The χ₂₃ check** (E85): if `κ χ̃₂₃(κ u, 0, x̃₀) > 0` for `0 < u ≤ B`, then near the divisor
 point `κ χ̃₂₃(κ u, r₀, x̃₀) > 0` for `0 < u ≤ B` (one more division by `s` handles small `u`,
 `exists_extChi23_eq_mul`, and compactness the rest). -/
 lemma eventually_extChi23_pos (h : FullerSwitchData κ x₀ u₀) {B : ℝ}

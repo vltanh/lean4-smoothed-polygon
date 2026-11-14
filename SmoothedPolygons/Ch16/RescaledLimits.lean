@@ -8,9 +8,10 @@ import Mathlib.Topology.MetricSpace.UniformConvergence
 /-!
 # Chapter 16: limits of rescaled Reinhardt arcs are relaxed Fuller extremals (§16.4.2, part 2)
 
-The compactness step of the proof of N5 (`clusterSetForwardInvariant`,
-`SmoothedPolygons/Ch16/ReinhardtShadowing.lean`). Along a chattering arc into the singular locus,
-after the `n`-th switching time `τ_n`, with the radius `ρ_n = φ(ẑ(q_n))` of the switching point:
+The compactness step of the proof that the cluster set is forward invariant
+(`clusterSetForwardInvariant`, `SmoothedPolygons/Ch16/ReinhardtShadowing.lean`). Along a
+chattering arc into the singular locus, after the `n`-th switching time `τ_n`, with the radius
+`ρ_n = φ(ẑ(q_n))` of the switching point:
 
 * `switchRadius n = ρ_n`, `rescaledArc n s = scale ρ_n⁻¹ ẑ(q(τ_n + s ρ_n))` (so
   `rescaledArc n 0 = ξ_n`, the angular component of the switching point), and
@@ -36,8 +37,8 @@ integrability of the rescaled field (`l6g_arc_core`).
 `exists_tendsto_rescaledArc`: the thresholds (the window before `b`, and the rescaled field within
 `1` of the Fuller field on the ball of the a priori bound, `tendstoUniformlyOn_rescaledField` with
 `ρ_n → 0⁺`) hold from some `K₀` on; the shifted sequence `φ(k + K₀)` goes to the abstract form
-`l6g_limit`, in four steps. The book has no argument for this compactness step (§16.4.2, G16.8,
-N5); the steps are those of the repair route in the module docstring.
+`l6g_limit`, in four steps. The book has no argument for this compactness step (§16.4.2,
+REPORT.md, E90); the steps are those of the repair route in the module docstring.
 1. Bounds (`l6g_apriori`): `|ξ_n| ≤ 1` on `Ξ`; the triangular structure of the Fuller field gives
    the bounds `1 + 2S`, `1 + S(2 + 2S)`, `B = 1 + S(2 + S(2 + 2S))` on the three components in
    turn (this is the "Grönwall-type bound"; no Grönwall inequality is needed), and a continuity

@@ -19,9 +19,9 @@ one-dimensional local stable manifold and the divisor as its local unstable mani
 * `theorem14_3_3`, for every analytic extension `e` of Lemma 14.3.1
   (`IsReinhardtPoincareExtension e`);
 * `remark14_3_4`, with `reinChartMapIn` (AnalyticExtension.lean), the Reinhardt–Poincaré map in
-  the mirrored chart `lieChartIn` at `q_in` (G14.9: the chart (14.1.1)–(14.1.2) does not contain
-  `q_in`, whose representatives have `Im z₁ < 0`), which is also the map `F⁻¹` moving backwards in
-  time in the chart at `q_out` (`reinChartMapIn_eq`): in the mirrored chart the point
+  the mirrored chart `lieChartIn` at `q_in` (REPORT.md, E87: the chart (14.1.1)–(14.1.2) does not
+  contain `q_in`, whose representatives have `Im z₁ < 0`), which is also the map `F⁻¹` moving
+  backwards in time in the chart at `q_out` (`reinChartMapIn_eq`): in the mirrored chart the point
   `(0, x̃_out)` is `q_in`, the Reinhardt–Poincaré map there is the inverse of `e` near the fixed
   point, and `e⁻¹` has a hyperbolic fixed point whose local stable manifold is the curve of
   Theorem 14.3.3 and whose local unstable manifold is the divisor.
@@ -33,7 +33,7 @@ one-dimensional local stable manifold and the divisor as its local unstable mani
 linearization of the Fuller–Poincaré map `F` near the fixed point is a contraction on the three
 dimensional exceptional divisor. Moving away from the exceptional divisor in the radial direction,
 the Reinhardt–Poincaré map has scaling factor `r_scale > 1`. The Fuller–Poincaré map [read: the
-extended map, G14.8] is therefore hyperbolic, with three eigenvalues `|λ| < 1` and one eigenvalue
+extended map, E86] is therefore hyperbolic, with three eigenvalues `|λ| < 1` and one eigenvalue
 `|λ| > 1`. By general theory, the unstable curve is `C^∞`, because the diffeomorphism is `C^∞`."
 
 1. Invariance of `r = 0` (`IsReinhardtPoincareExtension`: `e (0, x̃) = (0, fullerChartMap x̃)`), so
@@ -47,14 +47,13 @@ extended map, G14.8] is therefore hyperbolic, with three eigenvalues `|λ| < 1` 
 3. Theorem A.3.1 (`theoremA_3_1`, with `r = ∞`; `e` is analytic, hence `C^∞`): the local unstable
    set is a `C^∞` curve tangent to the `r_scale`-eigenvector `(1, v)`, so a graph over the
    `r`-axis ("we use `t = r` as the local parameter", TeX 11931–11932).
-4. `W^s_loc = {r = 0}` near the fixed point (implicit in the book, G14.8): by Theorem A.3.1 the
+4. `W^s_loc = {r = 0}` near the fixed point (implicit in the book, E86): by Theorem A.3.1 the
    local stable set is a 3-dimensional graph over the stable summand `{0} × ℝ³`, and the divisor
    points near `x̃_out` are in it (the Fuller map contracts there, `hasFDerivAt_fullerChartMap` and
    linearized stability), so the two coincide near the fixed point; alternatively and more simply
    (no stable manifold theorem): `F.1(r, x̃) = r m(r, x̃)` with `m ≥ λ > 1` near the fixed point, so
    no orbit with `r ≠ 0` stays in a small box, and a box can be chosen forward invariant for the
    Fuller part (adapted norm).
-Size: Theorem 14.3.3, 400–800 lines given Theorem A.3.1.
 
 Remark 14.3.4 (no proof in the book, "By time reversal"): the map in the mirrored chart is
 `F_in = τ F⁻¹ τ`, i.e. `reinChartMapIn` is `F⁻¹` in the chart at `q_out`, which Step 10 of
@@ -805,7 +804,7 @@ private lemma l6j_classOf_in : classOf (tau (fullerOfChart xTildeOut)) = qIn0 :=
     classOf_smul_scale one_mem_VT virialScaleOut_pos h', hc]
 
 
-/-- **Remark 14.3.4** (`rem:hyperbolic-in`, TeX 11898–11902), in the mirrored chart (G14.9). "By
+/-- **Remark 14.3.4** (`rem:hyperbolic-in`, TeX 11898–11902), in the mirrored chart (E87). "By
 time reversal, the Reinhardt–Poincaré map `F` has a hyperbolic fixed point at `(0, x_in) ∈ ℝ⁴`, its
 local stable manifold is one-dimensional, and its local unstable manifold is the three-dimensional
 exceptional divisor." For an analytic extension `e` of Lemma 14.3.1:

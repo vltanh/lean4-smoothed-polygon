@@ -40,8 +40,9 @@ Other citations need no file here:
   directly (REPORT.md, E11).
 - Hales 2011, Lemmas 11, 17 and 18 are recalled with their proofs in the book (Lemmas 2.4.2, 2.4.3).
 - Irwin's stable manifold theorem (*Smooth Dynamical Systems*, Chapter 6), which the book recalls
-  as Theorem A.3.1 without proof, is proved in the StableManifold package (required at
-  `../lean4-stable-manifold` in [`lakefile.toml`](../lakefile.toml)); Theorem A.3.1 is stated in
-  the book's form in [`SmoothedPolygons/AppA/StableManifold.lean`](../SmoothedPolygons/AppA/StableManifold.lean) ([`theoremA_3_1`](../SmoothedPolygons/AppA/StableManifold.lean#L183), from the
+  as Theorem A.3.1 without proof, is proved in the public StableManifold package
+  ([vltanh/lean4-stable-manifold](https://github.com/vltanh/lean4-stable-manifold), required in
+  [`lakefile.toml`](../lakefile.toml)); Theorem A.3.1 is stated in
+  the book's form in [`SmoothedPolygons/AppA/StableManifold.lean`](../SmoothedPolygons/AppA/StableManifold.lean) ([`theoremA_3_1`](../SmoothedPolygons/AppA/StableManifold.lean#L186), from the
   package's `Function.exists_localStableSet_localUnstableSet_eq_graph`), and the audit lists it
   among the results from prior work, as it does Filippov's theorem.

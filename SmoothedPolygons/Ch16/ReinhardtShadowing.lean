@@ -4,10 +4,10 @@ public import SmoothedPolygons.Ch16.RescaledLimits
 public import SmoothedPolygons.Ch16.GlobalBasin
 
 /-!
-# Chapter 16: the cluster set of the switching points is invariant (§16.4.2, part 3; N5)
+# Chapter 16: the cluster set of the switching points is invariant (§16.4.2, part 3)
 
 §16.4.2 of Hales–Vajjha, *Packings of Smoothed Polygons* ("Reinhardt switching functions as cubic
-polynomials", TeX 12887–12987), and the gap N5 / G16.8 of the plan: the cluster set of the
+polynomials", TeX 12887–12987), and its repair (REPORT.md, E90): the cluster set of the
 switching points of a chattering arc is forward invariant under the Fuller–Poincaré map.
 
 ## The book's argument, and why it falls short
@@ -23,19 +23,19 @@ continuous extension `F_i` of the Reinhardt–Poincaré map from the interior of
 `𝒟_i^R`", restricting to the Fuller parts at `r = 0`; (4) the proof of Theorem 16.4.1 runs the
 descent of Table 16.1 through these parts.
 
-Step (3) is asserted without proof (G16.8): it needs the Fuller parts `𝒟_i` with continuous
+Step (3) is asserted without proof (E90): it needs the Fuller parts `𝒟_i` with continuous
 branches on closed parts (Proposition 15.3.2, itself only a named proposition, read off Figures
 15.2–15.3, and not used by the formal Theorem 16.1.1), and uniform control of the Reinhardt
 switching functions near the whole divisor, including the faces where `t_sw → 0`, the 2-cells and
 the double-root loci; "`χ_W` … defined for all `s`" also needs a bound on the rescaled switching
-times (G16.11). Step (4) ignores the diagonal entries of Table 16.1 (G16.10). The zero count of
-step (1) bounds the zeros of one constant-control piece, not the number of pieces of a trajectory
-(the third derivative of `χ_ij` changes sign with the control).
+times. Step (4) ignores the diagonal entries of Table 16.1. The zero count of step (1) bounds the
+zeros of one constant-control piece, not the number of pieces of a trajectory (the third
+derivative of `χ_ij` changes sign with the control).
 
 ## The repair (along the book's lines): relaxed limits
 
 The descent through Reinhardt parts serves only to make the image `F_i(q)` of a cluster point a
-cluster point. This is the one property used (`ClusterSetForwardInvariant`, N5): **the cluster set
+cluster point. This is the one property used (`ClusterSetForwardInvariant`): **the cluster set
 `Ω = switchClusterSet` is mapped into itself by the honest Fuller–Poincaré map `F_ang =
 poincareAngZero`** (with `Ω ⊆ Ξ_{𝒲,0}/V_T`, `mapClusterPt_switchAng_mem_sectionZero`). With it,
 Theorem 16.4.1 follows from Theorem 16.1.1 itself (the book's "Repeating the argument of Theorem
@@ -43,8 +43,8 @@ Theorem 16.4.1 follows from Theorem 16.1.1 itself (the book's "Repeating the arg
 (`SmoothedPolygons/Ch16/ClusterPoint.lean`). No Reinhardt cells, parts, branch maps or Weierstrass
 polynomials are needed, and the three named numerical facts of Layer 5 suffice.
 
-The proof of N5, for a cluster point `ξ ∈ sectionZero` of the `ξ_n` along `n_k`, with
-`u₀ = firstControl ξ` and `T = firstSwitchTime ξ`:
+The proof of `ClusterSetForwardInvariant`, for a cluster point `ξ ∈ sectionZero` of the `ξ_n` along
+`n_k`, with `u₀ = firstControl ξ` and `T = firstSwitchTime ξ`:
 1. (`exists_window`) The rescaled windows `[0, T + δ]` after `τ_{n_k}` stay before `b` for some
    `δ > 0`: otherwise the rescaled arcs, uniformly Lipschitz (equicontinuity), would reach `0`
    (`ẑ(q(b)) = 0`, the singular point) at rescaled times `σ_k → σ* ≤ T + δ`, and their limit, a
@@ -102,8 +102,8 @@ The four steps above, with two simplifications of the plan.
   `firstControl_beaten_UT` (300–600 lines);
 * `SmoothedPolygons/Ch16/RescaledLimits.lean`: the integral equation and the relaxed limits
   (Arzelà–Ascoli; 700–1,000 lines);
-* this file: the window, the forced switch and N5 (500–900 lines).
-Total for N5: 2,000–3,400 lines.
+* this file: the window, the forced switch and the invariance (500–900 lines).
+Total: 2,000–3,400 lines.
 
 `ClusterSetForwardInvariant` is a named proposition so that Theorem 16.4.1 can also be used
 conditionally on it (`theorem16_4_1_of_clusterSetForwardInvariant`).
@@ -504,10 +504,11 @@ private lemma l6i_integral_of_no_switch (h : IsChatteringArcInto a b u g X Λ₁
   field_simp
   ring
 
-/-- **The forced switch** (steps 2–3 of the proof of N5): let `(y, w)` be the relaxed limit on
-`[0, T + δ]`, `T = t_sw(ξ)`, of the rescaled arcs along `n_k` (`exists_tendsto_rescaledArc`), with
-`w = u₀` a.e. on `[0, T]` (`eq_flow_of_maxCondition_UT`). Then for every `ε ∈ (0, min T δ)`
-eventually some switching time has rescaled time in `(T - ε, T + ε)`.
+/-- **The forced switch** (steps 2–3 of the proof of the invariance): let `(y, w)` be the relaxed
+limit on `[0, T + δ]`, `T = t_sw(ξ)`, of the rescaled arcs along `n_k`
+(`exists_tendsto_rescaledArc`), with `w = u₀` a.e. on `[0, T]` (`eq_flow_of_maxCondition_UT`).
+Then for every `ε ∈ (0, min T δ)` eventually some switching time has rescaled time in
+`(T - ε, T + ε)`.
 
 Otherwise, frequently, the control is one vertex `ζ^i` on that window (`l6i_integral_of_no_switch`),
 for one `i` frequently (pigeonhole), and the integrated controls converge
@@ -570,9 +571,9 @@ private lemma l6i_forced_switch (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ)
 
 end Arc
 
-/-! ### The window, the forced switch and N5 -/
-/-- **The rescaled windows stay before the singular time** (step 1 of the proof of N5; the
-equicontinuity argument): along a chattering arc into `b`, if `ξ_{n_k} → ξ ∈ sectionZero`, then
+/-! ### The window, the forced switch and the invariance -/
+/-- **The rescaled windows stay before the singular time** (step 1 of the proof of the invariance;
+the equicontinuity argument): along a chattering arc into `b`, if `ξ_{n_k} → ξ ∈ sectionZero`, then
 for some `δ > 0` the windows `[τ_{n_k}, τ_{n_k} + (t_sw(ξ) + δ) ρ_{n_k}]` lie before `b` for all
 large `k`. (The rescaled arcs reach `0` at the rescaled time of `b`; their relaxed limit is
 `flow · ξ (firstControl ξ)` on `[0, t_sw(ξ)]`, which does not vanish, `flow_firstControl_ne_zero`.)
@@ -682,8 +683,8 @@ theorem exists_window {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : �
         mul_le_mul (by linarith) hgap (by linarith) hM.le
       exact lt_min (by linarith) (by linarith)
 
-/-- **A Reinhardt switch at rescaled time `→ t_sw`** (steps 2–3 of the proof of N5): along a
-chattering arc into `b`, if `ξ_{n_k} → ξ ∈ sectionZero`, then there are switching indices
+/-- **A Reinhardt switch at rescaled time `→ t_sw`** (steps 2–3 of the proof of the invariance):
+along a chattering arc into `b`, if `ξ_{n_k} → ξ ∈ sectionZero`, then there are switching indices
 `m_k → ∞` whose angular components tend to `ang (F ξ)`, the angular component of the
 Fuller–Poincaré image of `ξ` (relaxed limits, `exists_tendsto_rescaledArc`;
 `eq_flow_of_maxCondition_UT`; `firstControl_beaten_UT`; the extremality of the vertices of
@@ -778,7 +779,7 @@ theorem exists_tendsto_switchAng_poincare {a b : ℝ} {u : ℝ → Fin 3 → ℝ
   obtain ⟨m, hm, hlim⟩ := hcl.tendsto_subseq
   exact ⟨m, hm.tendsto_atTop, hlim⟩
 
-/-- **N5: the cluster set is forward invariant under the Fuller–Poincaré map** (the precise form of
+/-- **The cluster set is forward invariant under the Fuller–Poincaré map** (the precise form of
 the book's §16.4.2 claim "a continuous extension `F_i` of the Reinhardt–Poincaré map … The
 restriction of each `𝒟_i^R` to the exceptional divisor `r = 0` is the previously defined
 Fuller-system part `𝒟_i`", TeX 12970–12976, as the proof of Theorem 16.4.1 uses it, TeX
@@ -790,9 +791,10 @@ def ClusterSetForwardInvariant : Prop :=
       MapsTo poincareAngZero (switchClusterSet (switchAng X Λ₁ ΛR τ))
         (switchClusterSet (switchAng X Λ₁ ΛR τ))
 
-/-- **N5 holds** (`thm:no-chatter`, the step of §16.4.2 of the proof of Theorem 16.4.1, repaired:
-step 4 of the plan in the module docstring, from `exists_tendsto_switchAng_poincare`: a cluster
-point `ξ` gives the cluster point `ang (F ξ)`, in the section, of class `F_ang([ξ])`).
+/-- **The cluster set is forward invariant** (`thm:no-chatter`, the step of §16.4.2 of the proof of
+Theorem 16.4.1, repaired: step 4 of the proof in the module docstring, from
+`exists_tendsto_switchAng_poincare`: a cluster point `ξ` gives the cluster point `ang (F ξ)`, in
+the section, of class `F_ang([ξ])`).
 
 Proof: `ang (F ξ)` is a cluster point (`exists_tendsto_switchAng_poincare`), so it lies in the
 section (`mapClusterPt_switchAng_mem_sectionZero`), and its class is

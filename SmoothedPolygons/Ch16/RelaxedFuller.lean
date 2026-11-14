@@ -6,11 +6,12 @@ import Mathlib.Topology.Order.Separable
 import Mathlib.Analysis.Calculus.Deriv.Slope
 
 /-!
-# Chapter 16: relaxed Fuller extremals follow the first control (for §16.4.2, N5)
+# Chapter 16: relaxed Fuller extremals follow the first control (for the repair of §16.4.2)
 
 Two facts about trajectories of the Fuller system with controls in the triangle `U_T` (relaxed
 controls: weak-* limits of `V_T`-valued controls) satisfying the maximum condition, needed by the
-proof of N5 (`clusterSetForwardInvariant`, `SmoothedPolygons/Ch16/ReinhardtShadowing.lean`): the
+proof that the cluster set is forward invariant (`clusterSetForwardInvariant`,
+`SmoothedPolygons/Ch16/ReinhardtShadowing.lean`; the repair of §16.4.2, REPORT.md, E90): the
 limits of rescaled Reinhardt extremals near the singular locus are such trajectories
 (`exists_tendsto_rescaledArc`), and these two facts identify them.
 

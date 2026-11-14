@@ -142,7 +142,7 @@ thm:outward-fuller	+lem:first-control	the Fuller–Poincaré map and its first s
 #
 # Chapter 14 and section 16.4
 eqn:Xtilde	-eqn:LambdaR-linear	forced: the chart cites (14.1.3) for the definition of Λ_R, which is the definition lieΛR (the solution of the linear system by the dual basis, sl2Dual); the running claims are proved from its closed form Λ_R = h K(X) (lieΛR_eq_reducedHam_smul), and the uniqueness claim of (14.1.3) (lieChart_lieChartInv) is not needed
-lem:analytic-extension	+lem:Lie-Fuller	"The asymptotic formulas given above" (TeX 11861) and the divisibility of X_sw - J by r₀ and of Λ₁sw + (3/2)J by r₀² (Step 7, G14.7) are Lemma 14.2.3, used without naming it
+lem:analytic-extension	+lem:Lie-Fuller	"The asymptotic formulas given above" (TeX 11861) and the divisibility of X_sw - J by r₀ and of Λ₁sw + (3/2)J by r₀² (Step 7, REPORT.md, E85) are Lemma 14.2.3, used without naming it
 lem:analytic-extension	+lem:first-control	the Fuller–Poincaré map, to which the extension restricts at r = 0 (TeX 11861–11862, Step 9), is defined by the first control of Lemma 13.2.6, which the book uses without naming it
 lem:analytic-extension	+rem:xout	the fixed point (0, x_out) of the statement is that of Remark 14.2.1 (unlabelled; label of this formalization), x̃_out = fullerChartInv q_out with z(x̃_out) a virial rescaling of q_out, which the book uses without citing it
 lem:analytic-extension	+eqn:LambdaR-linear	Step 10, "F and F⁻¹ are inverse functions" for r₀ > 0 (TeX 11866–11868): the image of a switching point near the fixed point is again a point of the chart, by the uniqueness of the solution of (14.1.3) (lieChart_lieChartInv), so that F⁻¹ ∘ F and F ∘ F⁻¹ are compositions of maps in the chart; used without naming it

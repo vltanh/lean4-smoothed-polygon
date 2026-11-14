@@ -7,14 +7,18 @@ A Lean 4 formalization of Thomas Hales and Koundinya Vajjha, *Packings of Smooth
 problem (which centrally symmetric convex disk packs least densely?) as an optimal control problem
 on `SL₂(ℝ)` and studies its Pontryagin extremals.
 
-Chapters 2–8, 13 and 15 are formalized: every numbered result is proved, some in corrected form
-(see below), except two conjectural remarks, the Mathematica-based part of Remark 13.5.4 and
-Proposition 15.3.2 (read off figures). The global basin theorem of the Fuller system (Theorem
-16.1.1) and Theorem 16.2.1 are proved **conditionally**, on three named numerical facts that the
-book reads off Mathematica plots. The book's main theorem, Mahler's First conjecture (Theorem
-16.3.1), is proved **conditionally**, on one named hypothesis that stands for Theorems 16.4.1 and
-14.4.1, not yet formalized. The Reinhardt conjecture itself (that the smoothed octagon is the
-worst disk) is open and not claimed.
+Chapters 2–8, 13 and 15, Chapter 14 up to §14.3 and Appendix A.3 are formalized: every numbered
+result is proved, some in corrected form (see below), except two conjectural remarks, the
+Mathematica-based part of Remark 13.5.4 and Proposition 15.3.2 (read off figures).
+
+- **Conditional:** Theorems 16.1.1 (the global basin of the Fuller system), 16.2.1 and 16.4.1 (the
+  cluster point theorem) rest on three named numerical facts that the book reads off Mathematica
+  plots.
+- **Conditional:** the book's main theorem, Mahler's First conjecture (Theorem 16.3.1), rests on
+  Theorem 14.4.1, stated but not yet proved (the book proves it from an uncertified computation),
+  and on the same three facts.
+- The Reinhardt conjecture itself (that the smoothed octagon is the worst disk) is open and not
+  claimed.
 
 ## Status
 
@@ -27,11 +31,13 @@ worst disk) is open and not claimed.
 | Ch. 7, the smoothed `(6k+2)`-gons are extremals; the octagon is an isolated extremal | proved |
 | Ch. 8, edge problems, singular locus, finite bang-bang | proved (two theorems restated, see below) |
 | Ch. 13, the triangular Fuller system: blow-up, Poincaré map, fixed points `q_out`, `q_in` and their stability | proved |
+| Ch. 14 §14.1–14.3, the analytic extension of the Reinhardt–Poincaré map across the singular locus; stable and unstable manifolds at `q_out`, `q_in` | proved |
+| Ch. 14 §14.4, Theorem 14.4.1 (no return) | stated ([`Theorem14_4_1`](SmoothedPolygons/Ch14/NoReturn.lean#L87)), not proved: Layer 7 |
 | Ch. 15, the geometry of the Fuller–Poincaré map: cell coordinates, smaller cells, the involution `τF` | proved (Proposition 15.3.2 stated only) |
-| §16.1–16.2, Theorems 16.1.1 (global basin) and 16.2.1 (outward Fuller trajectories) | **conditional** on three numerical facts (`DOutContracts`, `CellTwoEntersDOut`, `BoxSubclaims`) |
-| Appendix A.1 (Corollary A.1.3), A.6, A.11 | proved |
-| Theorem 16.3.1, Mahler's First conjecture | **conditional** on [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107) |
-| Ch. 9–12 (circular control, off the main path), Ch. 14, §16.4 | not yet formalized |
+| §16.1–16.2 and §16.4, Theorems 16.1.1 (global basin), 16.2.1 (outward Fuller trajectories) and 16.4.1 (cluster point theorem) | **conditional** on three numerical facts (`DOutContracts`, `CellTwoEntersDOut`, `BoxSubclaims`) |
+| Appendix A.1 (Corollary A.1.3), A.3 (Theorem A.3.1, local part), A.6, A.11 | proved |
+| Theorem 16.3.1, Mahler's First conjecture | **conditional** on Theorem 14.4.1 and the three numerical facts |
+| Ch. 9–12 (circular control, off the main path), apart from Lemma 10.1.1 | not formalized |
 
 ## Main results
 
@@ -45,22 +51,25 @@ worst disk) is open and not claimed.
 | Theorem 8.3.2 with 8.1.3 | [`isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L166) | the minimizer is bang-bang with finitely many switches away from the singular locus |
 | Lemma 13.5.5 | [`lemma13_5_5`](SmoothedPolygons/Ch13/Stability.lean#L281) | the fixed point `q_out` of the Fuller–Poincaré map (Lemma 13.5.2) is asymptotically stable, and `q_in = τ(q_out)` is unstable |
 | Theorem 16.1.1 | [`theorem16_1_1`](SmoothedPolygons/Ch16/GlobalBasin.lean#L599) | **under three numerical facts**: every orbit of the Fuller–Poincaré map on `Ξ_{𝒲,0}/V_T` other than `q_in` tends to `q_out` |
-| Theorem 16.3.1 | [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L346) | **under the hypothesis**: the minimizer is bang-bang with finitely many switches, and every `K_min` is a smoothed polygon |
+| Theorem 16.4.1 | [`theorem16_4_1`](SmoothedPolygons/Ch16/ClusterPoint.lean#L943) | **under three numerical facts**: switching points that accumulate on the singular locus converge to `q_in`, along its stable curve |
+| Theorem 16.3.1 | [`theorem16_3_1_of_theorem14_4_1`](SmoothedPolygons/Ch16/NoChattering.lean#L387) | **under Theorem 14.4.1 and the three facts**: the minimizer is bang-bang with finitely many switches, and every `K_min` is a smoothed polygon |
 
 The first two are the Palomar Challenge ([`Challenge.lean`](Challenge.lean)).
 
 ### The conditional results
 
-Each hypothesis is part of a theorem's statement, not an axiom; nothing else assumes it, and the
-audit lists it among the results that the theorem uses.
+Each hypothesis is part of a theorem's statement, not an axiom; only the theorems built on it
+assume it, and the audit lists it among the results that they use.
 
-- [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L346) assumes [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107): the switching times of an
-  edge-extremal Pontryagin extremal do not accumulate where its lift meets the singular locus.
-  Theorems 16.4.1 and 14.4.1 give this in the book's last step; Layers 6–7 are to prove it (E60).
-- [`theorem16_1_1`](SmoothedPolygons/Ch16/GlobalBasin.lean#L599) and [`theorem16_2_1`](SmoothedPolygons/Ch16/OutwardFuller.lean#L567) assume three numerical facts
+- [`theorem16_3_1_of_theorem14_4_1`](SmoothedPolygons/Ch16/NoChattering.lean#L387) assumes [`Theorem14_4_1`](SmoothedPolygons/Ch14/NoReturn.lean#L87), Theorem 14.4.1 (no return), which the
+  book proves from a Mathematica computation of an unstable curve (E88); Layer 7 is to prove it.
+  With Theorem 16.4.1 it gives [`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107), the hypothesis of the third layer's
+  [`theorem16_3_1`](SmoothedPolygons/Ch16/MahlerFirst.lean#L346), along the book's last step (E89).
+- [`theorem16_1_1`](SmoothedPolygons/Ch16/GlobalBasin.lean#L599), [`theorem16_2_1`](SmoothedPolygons/Ch16/OutwardFuller.lean#L567) and [`theorem16_4_1`](SmoothedPolygons/Ch16/ClusterPoint.lean#L943) assume three numerical facts
   ([`BasinHypotheses.lean`](SmoothedPolygons/Ch16/BasinHypotheses.lean)): the book's Table 16.1,
   read off Mathematica plots, restated on boxes. An independent check (about 1.1 million
-  evaluations) found them true, with margins of at least 0.015; Layer 5b is to certify them.
+  evaluations) found them true, with margins of at least 0.015; a kernel-checked interval
+  computation certifies the contraction in `DOutContracts`, and Layer 5b is to certify the rest.
 
 | Fact | What it says |
 | --- | --- |
@@ -68,11 +77,11 @@ audit lists it among the results that the theorem uses.
 | `CellTwoEntersDOut` | every point of the second big cell reaches `𝒟_out` within three steps |
 | `BoxSubclaims` | every other box except `𝒟₂₂` goes to the second cell or to a smaller box |
 
-Layers 6–7 will use Theorem 16.1.1, so Theorem 16.3.1 will rest on these facts until 5b is done.
+Through Theorem 16.4.1, Theorem 16.3.1 rests on these facts until 5b is done.
 
 ## What the audit found
 
-[REPORT.md](REPORT.md) checks the book against the formalization; 80 findings (E1–E80). The main
+[REPORT.md](REPORT.md) checks the book against the formalization; 92 findings (E1–E92). The main
 ones:
 
 | | Finding |
@@ -89,13 +98,14 @@ ones:
 | E68 | Lemma 13.5.5 (stability of `q_out`) rests on a Mathematica computation; proved here with an exact Jacobian and certified eigenvalue bounds. |
 | E73, E75 | §15.3 uses `F⁻¹ = τFτ` where it fails (on the top faces of the cells), and Remark 15.3.1 swaps `q_in` and `q_out`. |
 | E77–E79 | Theorem 16.1.1 rests on Mathematica containments, and two of its steps have gaps (convergence near `q_out`, the last row of its table); repaired, with the containments as three named facts. |
+| E85, E88–E91 | Lemma 14.3.1 skips a switching function and sketches its last step; §16.4.2's Reinhardt cells are asserted, and the proof of Theorem 16.4.1 turns a cluster point into a limit without justification; repaired (the forward invariance of the cluster set, a hyperbolic box). Theorem 14.4.1 rests on an uncertified Mathematica computation; it is stated as a named proposition. |
 
-Every proof follows the book's argument; the departures, each forced, are listed in
-[REPORT.md, Section 7](REPORT.md#7-departures-from-the-papers-proofs).
+Every proof follows the book's argument; the departures, each forced or where the book only
+sketches, are listed in [REPORT.md, Section 7](REPORT.md#7-departures-from-the-papers-proofs).
 
 ## Trust
 
-- No `sorry` outside the statements of [`Challenge.lean`](Challenge.lean); no `axiom`.
+- No `sorry` outside the statements of [`Challenge.lean`](Challenge.lean); no `axiom` or `native_decide`.
 - `lake env lean scripts/Audit.lean` checks that every declaration depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext),
   [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound).
 - A route check compares each proof with the results the book's proof cites; every difference is
@@ -109,8 +119,11 @@ Every proof follows the book's argument; the departures, each forced, are listed
   a state constraint) and the Pontryagin maximum principle, by Agrachev and Sachkov's proof.
 - [FixedPoint](https://github.com/vltanh/lean4-fixed-point): Brouwer's fixed-point theorem, which
   the maximum principle needs.
+- [StableManifold](https://github.com/vltanh/lean4-stable-manifold): the stable manifold theorem
+  for maps (Lyapunov–Perron method, `Cⁿ` graphs, `n ≤ ∞`), which Appendix A.3 recalls from Irwin.
 
-Both are required at pinned commits in [`lakefile.toml`](lakefile.toml).
+OptimalControl (which requires FixedPoint) and StableManifold are required at pinned commits in
+[`lakefile.toml`](lakefile.toml).
 
 ## Building
 
@@ -128,7 +141,7 @@ Lean and Mathlib `v4.36.0-rc2`.
 
 | Path | Content |
 | --- | --- |
-| [`SmoothedPolygons/`](SmoothedPolygons) | the book, one directory per chapter (`Ch2`–`Ch8`, `Ch13`, `Ch15`, `Ch16`, `AppA`) |
+| [`SmoothedPolygons/`](SmoothedPolygons) | the book, one directory per chapter (`Ch2`–`Ch8`, `Ch13`–`Ch16`, `AppA`) |
 | [`External/`](External) | cited results, all proved ([External/README.md](External/README.md)) |
 | [`Basic/`](Basic) | general mathematics written for this project ([Basic/README.md](Basic/README.md)) |
 | [`Challenge.lean`](Challenge.lean), [`Solution.lean`](Solution.lean) | Palomar's statement of record and its proof |
@@ -137,15 +150,15 @@ Lean and Mathlib `v4.36.0-rc2`.
 
 ## What's next
 
-The plan's remaining layers are to certify the three numerical facts and to prove
-[`NoChatteringIntoSingularLocus`](SmoothedPolygons/Ch16/MahlerFirst.lean#L107) (details in [REPORT.md, Section 11](REPORT.md#11-whats-next)):
+The plan's remaining layers are to certify the three numerical facts and to prove Theorem 14.4.1
+(details in [REPORT.md, Section 11](REPORT.md#11-whats-next)):
 
 | Layer | Content | Status |
 | --- | --- | --- |
 | 5 | Ch. 15 and Theorems 16.1.1, 16.2.1, the global basin of the Fuller system, with its numerical facts as named hypotheses | done (conditional) |
-| 5b | certify the three numerical facts and Proposition 15.3.2 by interval enclosures of the Fuller–Poincaré map | planned |
-| 6 | Ch. 14 and Theorem 16.4.1, the cluster point theorem (stable manifolds, Weierstrass preparation) | planned |
-| 7 | Theorem 14.4.1 (no return, an unstable curve to certify) and the final assembly | planned |
+| 5b | certify the three numerical facts and Proposition 15.3.2 by interval enclosures of the Fuller–Poincaré map | pilot done (the contraction in `DOutContracts`, about 2.6 s of kernel time per box); the rest planned |
+| 6 | Ch. 14 to §14.3, App. A.3 and Theorem 16.4.1, the cluster point theorem; Theorem 16.3.1 from Theorem 14.4.1 | done (conditional) |
+| 7 | Theorem 14.4.1 (no return), by a certified enclosure of the unstable curve | planned |
 
 ## Related work
 
@@ -161,7 +174,7 @@ The plan's remaining layers are to certify the three numerical facts and to prov
 - Written by Claude (Opus 5.5, model `claude-opus-5-5`) in Claude Code, with parallel sub-agents,
   at the request of The-Anh Vu-Le, who chose the scope and made the decisions recorded in REPORT.md,
   following the [formalize-math-paper](https://github.com/vltanh/formalize-math-paper) skill.
-- Made on 5–14 November 2026 in eight rounds; [CREDITS.md](CREDITS.md) has the procedure and figures.
+- Made on 5–14 November 2026 in nine rounds; [CREDITS.md](CREDITS.md) has the procedure and figures.
 
 ## License
 

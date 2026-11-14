@@ -46,8 +46,9 @@ variations (formerly `Analysis/ODE/Control/`), and supporting cones and Agrachev
 12.1 (formerly `Analysis/Convex/Cone/`), together with the maximum principle (formerly
 `External/Pontryagin/`).
 
-The stable manifold theorem is in the StableManifold package, required at `../lean4-stable-manifold`
-in [`lakefile.toml`](../lakefile.toml) (formerly `Dynamics/StableManifold.lean`, statements only):
+The stable manifold theorem is in the public StableManifold package
+([vltanh/lean4-stable-manifold](https://github.com/vltanh/lean4-stable-manifold)), required in
+[`lakefile.toml`](../lakefile.toml) (formerly `Dynamics/StableManifold.lean`, statements only):
 local stable and unstable sets, hyperbolic linear maps and their splitting, and the theorem in graph
 form, which Theorem A.3.1 of the book ([`SmoothedPolygons/AppA/StableManifold.lean`](../SmoothedPolygons/AppA/StableManifold.lean)) applies; it
 also provides `ContinuousLinearMap.exists_norm_pow_lt_one`, which `Dynamics/LinearizedStability.lean`

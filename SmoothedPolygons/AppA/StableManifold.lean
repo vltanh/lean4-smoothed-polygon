@@ -10,7 +10,7 @@ import Mathlib.Topology.OpenPartialHomeomorph.Continuity
 # Stable and unstable manifolds (Appendix A.3)
 
 Appendix A.3 of Hales–Vajjha, *Packings of Smoothed Polygons* (`sec:stable-manifold`,
-TeX 13176–13211) recalls from Irwin (*Smooth Dynamical Systems*, World Scientific 2001,
+TeX 13176–13211) recalls from Irwin (*Smooth Dynamical Systems*, Academic Press 1980, reprinted World Scientific 2001,
 Chapter 6) the local and global stable sets of a fixed point of a diffeomorphism, hyperbolic fixed
 points and their stable and unstable summands, and Theorem A.3.1 (Irwin): at a hyperbolic fixed
 point of a `C^r` diffeomorphism (`r ≥ 1`), the local stable set of `f|_U`, for some open
@@ -41,12 +41,15 @@ manifold" by iterating, TeX 11922–11932, which needs no theorem).
 
 Proof: `Function.exists_localStableSet_localUnstableSet_eq_graph`, with `n = r`, `W = e.source`;
 `Df(p)` is invertible because `e.symm ∘ e = id` near `p` and both are differentiable (chain rule).
-The general theorem gives some open neighborhood `U` of `p`, not necessarily inside `e.source`, and
-says nothing about smaller neighborhoods; so it is applied to the map that is `e` on the source and
+The one-neighbourhood form of the general theorem gives some open neighbourhood `U` of `p`, not
+necessarily inside `e.source`; so it is applied to the map that is `e` on the source and
 sends every other point to a fixed point `q ∉ e.source` (when `e.source ≠ univ`). An orbit of that
 map leaving the source becomes constant `q ≠ p`, and a backward orbit through a point of the source
 stays in it, so the local sets of `e` on `U ∩ e.source` are those of the modified map on `U`
 (intersected with the source, a graph over a smaller neighborhood of `0` in the unstable summand).
+The package's stronger form, for every small neighbourhood
+(`Function.exists_nhds_localStableSet_localUnstableSet_eq_graph`), would make this cut-off
+unnecessary (REPORT.md, Section 11).
 -/
 
 @[expose] public section

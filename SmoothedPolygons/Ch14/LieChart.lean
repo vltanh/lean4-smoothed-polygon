@@ -22,7 +22,7 @@ At the singular locus `q = (J, -(3/2) J, 0)` (Definition 8.2.4 with `λ_cost = -
 
 * **The Lie algebra chart** (14.1.1)–(14.1.3): `X = J + r X̃`, `Λ₁ = -(3/2) J + r² Λ̃₁`,
   `Λ_R = r³ Λ̃_R` with `x̃₁₁ = 1`, in the coordinates `(r, x̃)`, `x̃ = (x̃₂₁, ℓ̃₁₁, ℓ̃₂₁)`:
-  `lieX` (the displayed matrix at TeX 11582, which is `X`, not `X̃`: G14.1), `lieΛ₁` (from
+  `lieX` (the displayed matrix at TeX 11582, which is `X`, not `X̃`: REPORT.md, E81), `lieΛ₁` (from
   `det Λ₁ = 9/4`, `tr Λ₁ = 0`), `lieΛR` (the solution of the linear system (14.1.3)
   `⟨X, Λ_R⟩ = H(Z₀₁₀, X, Λ₁, Λ_R) = χ₂₃(X, Λ_R) = 0`, by the dual basis of `(X, Z₀₁₀, Z₀₀₁)` for
   the trace form, `sl2Dual`), `lieChart`, its inverse `lieChartInv` and the domain `H*`
@@ -42,7 +42,7 @@ At the singular locus `q = (J, -(3/2) J, 0)` (Definition 8.2.4 with `λ_cost = -
   (`fullerCoords_adR`); the time reversal of Remark 10.2.3 (`eqn:wbc-reverse`), on phase points
   `reinTau (X, Λ₁, Λ_R) = (-DXD, -DΛ₁D, -DΛ_RD)`, `D = diag(1, -1)`, is the Fuller `τ`
   (`fullerCoords_reinTau`) and reverses the vertex flows, exchanging `e₂` and `e₃`
-  (`iso_vertexFlow_reinTau`). The mirrored chart at `q_in` (G14.9) is `lieChartIn = reinTau ∘
+  (`iso_vertexFlow_reinTau`). The mirrored chart at `q_in` (E87) is `lieChartIn = reinTau ∘
   lieChart`.
 
 ## Proofs
@@ -85,7 +85,7 @@ noncomputable def sl2Dual (M₁ M₂ M₃ : Mat2) (c₁ c₂ c₃ : ℝ) : Mat2 
 
 /-- The state `X = J + r X̃` with `x̃₁₁ = 1` (TeX 11576–11583):
 `X = [[r, -(1 + r²)/(1 + r x̃₂₁)], [1 + r x̃₂₁, -r]]`, determined by `det X = 1`. The book labels
-this matrix `X̃` (G14.1); it is `X`. -/
+this matrix `X̃` (E81); it is `X`. -/
 noncomputable def lieX (r x21 : ℝ) : Mat2 :=
   !![r, -(1 + r ^ 2) / (1 + r * x21); 1 + r * x21, -r]
 
@@ -124,7 +124,7 @@ noncomputable def lieChartInv (q : iso_PhasePt) : ℝ × (Fin 3 → ℝ) :=
 
 /-- The domain `H*` of the chart, with `r > 0` (TeX 11557–11570, (14.1.2)
 `eqn:coord-restriction`): `0 < r`, `x̃₂₁ > x̃*₂₁(r) = √3 - 1/r` and `ℓ̃₂₁ r² < 3/2`. (`H*` imposes
-only the boundary `x = 1/√3` of the star domain, G14.3.) -/
+only the boundary `x = 1/√3` of the star domain, E81.) -/
 def lieChartDomain : Set (ℝ × (Fin 3 → ℝ)) :=
   {p | 0 < p.1 ∧ √3 - 1 / p.1 < p.2 0 ∧ p.2 2 * p.1 ^ 2 < 3 / 2}
 
@@ -220,7 +220,7 @@ noncomputable def reinTau (q : iso_PhasePt) : iso_PhasePt :=
 (`-D Z_{e₂} D = Z_{e₃}`, `-D Z_{e₁} D = Z_{e₁}`). -/
 def vertexSwap (m : Fin 3) : Fin 3 := ![0, 2, 1] m
 
-/-- **The mirrored chart at `q_in`** (Remark 14.3.4, G14.9): `(r, x̃) ↦ τ(lieChart (r, x̃))`. The
+/-- **The mirrored chart at `q_in`** (Remark 14.3.4, E87): `(r, x̃) ↦ τ(lieChart (r, x̃))`. The
 chart (14.1.1)–(14.1.2) normalizes `x̃₁₁ = 1`, so `Im ẑ₁ > 0`, while `q_in = τ(q_out)` has
 `Im z₁ < 0`; the mirrored chart normalizes `x̃₁₁ = -1`. -/
 noncomputable def lieChartIn (p : ℝ × (Fin 3 → ℝ)) : iso_PhasePt := reinTau (lieChart p)
