@@ -4,145 +4,58 @@ version: "v0.4"
 project:
   name: "Smoothed polygons in the Reinhardt optimal control problem"
   description: >-
-    A Lean 4 formalization of the smoothed-polygon core of Thomas Hales and Koundinya Vajjha,
-    Packings of Smoothed Polygons (arXiv:2405.04331v1, 2024), with its geometric foundations. The
-    book reformulates the Reinhardt problem, which asks for the centrally symmetric convex disk
-    whose densest packing is least dense, as an optimal control problem on SL2(R), and studies its
-    Pontryagin extremals. Four theorems are conditional: the book's main theorem, Mahler's First
-    conjecture (Theorem 16.3.1), is proved only under the book's Theorem 14.4.1 (no return), stated
-    as the named proposition Theorem14_4_1 and not proved (the book proves it from an uncertified
-    numerical computation of an unstable curve), and three named numerical facts, DOutContracts,
-    CellTwoEntersDOut and BoxSubclaims, which state the containments that the book reads off
-    Mathematica plots and a contraction that its argument lacks; and the global basin theorem
-    (Theorem 16.1.1), Theorem 16.2.1 and the cluster point theorem (Theorem 16.4.1) are proved only
-    under the three facts. Every other result below is proved unconditionally.
+    A Lean 4 formalization of Thomas Hales and Koundinya Vajjha, Packings of Smoothed Polygons
+    (arXiv:2405.04331v1, 2024). The book reformulates the Reinhardt problem, which asks for the
+    centrally symmetric convex disk whose densest packing is least dense, as an optimal control
+    problem on SL2(R), and studies its Pontryagin extremals.
 
 
-    The formalization covers Chapters 2, 3, 4, 6 and 7 of the book with Appendices A.6 and A.11:
-    packing and lattice packing densities, critical lattices and circumscribed hexagons, the
-    boundary of the minimizer and balanced disks, the state dynamics, the cost and its area
-    formula, the upper half-plane model, Filippov's existence theorem, left-invariant control
-    systems, the Hamiltonian and the costate equations, constant and bang-bang controls. Its main
-    results are Theorem 7.5.6, that for every k >= 1 the smoothed (6k+2)-gon is a Pontryagin
-    extremal of the Reinhardt control problem with bang-bang control; that the smoothed octagon is
-    a balanced disk of area sqrt(12)(8 - sqrt(32) - ln 2)/(sqrt(8) - 1) whose greatest packing
-    density is (8 - sqrt(32) - ln 2)/(sqrt(8) - 1); and Theorem 7.7.1, that the smoothed octagon is
-    an isolated extremal, whose proof the book only sketches. The cited results the proofs use are
-    proved, among them Fejes Toth's theorem that lattice packings are densest for centrally
-    symmetric disks and Mahler's theorems on critical lattices, and so is Filippov's theorem. Four
-    results of the book are false as printed and are proved in corrected form: Lemma 2.2.1
-    (refuted in Lean), Lemma 3.1.8 and Filippov's theorem (each missing a hypothesis), and Theorem
-    7.7.1 (true up to time translation, for terminal times near t_f).
+    Proved unconditionally: Chapters 2-8, 13 and 15, Chapter 14 up to Section 14.3, Appendices
+    A.3, A.6 and A.11, and Corollary A.1.3. Among the results: Theorem 7.5.6, that every smoothed
+    (6k+2)-gon is a Pontryagin extremal with bang-bang control; the smoothed octagon's greatest
+    packing density (8 - sqrt(32) - ln 2)/(sqrt(8) - 1); Theorem 7.7.1, that the octagon is an
+    isolated extremal (up to time translation); that every minimizer lifts to a Pontryagin
+    extremal (Section 6.2, through the maximum principle), that a global minimizer exists
+    (Chapter 5 and Section 6.1) and that the minimizers correspond to Reinhardt's K_min; Chapter
+    8's finite bang-bang control away from the singular locus; Chapter 13's triangular Fuller
+    system, with the stability of its fixed point q_out (Lemma 13.5.5, by an exact Jacobian and
+    a certificate for its eigenvalues); Chapter 15's cell geometry of the Fuller-Poincare map;
+    and Chapter 14's analytic extension of the Reinhardt-Poincare map across the exceptional
+    divisor (Lemma 14.3.1) with the hyperbolic fixed points over q_out and q_in (Theorem 14.3.3,
+    Remark 14.3.4).
 
 
-    A fourth round, the first layer of a plan for the book's remaining chapters, proves the claim
-    of Section 6.2 that every minimizer of the Reinhardt control problem lifts to a Pontryagin
-    extremal, along the book's route, through the Pontryagin maximum principle (free terminal time,
-    integral cost, mixed boundary conditions), which the book cites from Agrachev and Sachkov and
-    which the package OptimalControl proves by their argument, with Brouwer's fixed-point theorem
-    from the package FixedPoint; and Remark 6.6.1, that every extremal extends to a periodic one.
+    Conditional: the book's main theorem, Mahler's First conjecture (Theorem 16.3.1: the global
+    minimizer is bang-bang with finitely many switches, and every K_min is a smoothed polygon),
+    is proved only under Theorem 14.4.1 (no return), stated as the named proposition
+    Theorem14_4_1 and not proved (the book proves it from an uncertified computation of an
+    unstable curve), and three named numerical facts, DOutContracts, CellTwoEntersDOut and
+    BoxSubclaims (SmoothedPolygons.theorem16_3_1_of_theorem14_4_1). The facts state the
+    containments of Table 16.1 that the book reads off Mathematica plots, with a contraction its
+    argument lacks; an independent multiple-precision check found them true with margins of at
+    least 0.015, and kernel-checked interval arithmetic already certifies the contraction part
+    of DOutContracts. The global basin theorem 16.1.1, Theorem 16.2.1 and the cluster point
+    theorem 16.4.1 are proved under the same three facts. Proposition 15.3.2, read off figures,
+    is stated and not proved; no result uses it. Each assumption is an explicit hypothesis of
+    the theorems that use it, never an axiom.
 
 
-    A fifth round, the second layer, formalizes Chapter 5 (the compactification of the star
-    domain: Definition 5.0.1 with the compactness and dihedral invariance of the compact set,
-    Theorem 5.0.2, Lemmas 5.0.3-5.0.5, Theorem 5.0.6, whose second case the book only sketches, and
-    Lemma 5.0.7) and the argument of Section 6.1 that a global minimizer exists, repaired along the
-    book's lines with Filippov's theorem under a closed state constraint, with a compact set of
-    initial points and a closed endpoint relation (proved in OptimalControl). Its result is that
-    the Reinhardt control problem has a global minimizer, which lifts to a Pontryagin extremal and
-    bounds a centrally symmetric convex disk of least greatest packing density (Reinhardt's K_min).
-    On the way it shows that the converse of the control problem that Section 6.1 uses, that an
-    admissible trajectory bounds a balanced disk whose area is its cost, is false (the unit circle
-    traversed seven times is admissible) and holds for trajectories of winding number one, among
-    them every trajectory of cost below 7 pi/2; and it proves that the minimizers of the control
-    problem correspond to the K_min, which the book uses without proof: the disk bounded by a
-    global minimizer is a K_min, and a linear image of every K_min is the disk of a global
-    minimizer.
+    The audit (REPORT.md, 92 findings) records results false as printed and proved in corrected
+    form (Lemmas 2.2.1 and 3.1.8, Filippov's theorem, Theorems 7.7.1 and 8.3.1), the converse of
+    the control problem used in Section 6.1 (false; true for winding number one), Theorem 8.2.7
+    proved in the authors' reading, swapped labels in Remark 15.3.1, and gaps repaired along the
+    book's lines, among them the identification of minimizers with K_min, the convergence and
+    last row of Table 16.1 in Theorem 16.1.1, and the Reinhardt cells of Section 16.4.2,
+    replaced by the forward invariance of the cluster set of switching points under the
+    Fuller-Poincare map. Every proof follows the book's argument except where the report lists a
+    departure, each forced by a gap or made where the book only sketches or computes.
 
 
-    A sixth round, the third layer, formalizes Chapter 8 (the edge control problem, singular
-    subarcs, and finite bang-bang control away from the singular locus) and Corollary A.1.3 of
-    Gronwall's inequality: every global minimizer is edge extremal (Proposition 8.1.3), has no
-    singular subarc in the authors' reading of Theorem 8.2.7, and is bang-bang with finitely many
-    switches on every interval on which its lift avoids the singular locus (Theorem 8.3.2). Theorem
-    8.3.1 is false as printed and is proved in a one-sided form, and Theorem 8.2.7, whose proof
-    covers only part of its statement, is proved in the authors' reading, both by the user's
-    decision; the printed Theorem 8.2.7 is proved for normal lifts and is open for abnormal ones.
-    Mahler's First conjecture (Theorem 16.3.1: the global minimizer is bang-bang with finitely many
-    switches, and every K_min is a finite-sided smoothed polygon with hyperbolic arcs at its
-    corners) is proved conditionally on NoChatteringIntoSingularLocus: the switching times of an
-    edge-extremal Pontryagin extremal, with the boundary conditions of the control problem, do not
-    accumulate at a time where its lift meets the singular locus. This is the consequence of
-    Theorems 16.4.1 (cluster point) and 14.4.1 (no return) that the last step of the book's proof
-    uses. The hypothesis is an explicit hypothesis of the theorem, not an axiom; it is not proved,
-    so Mahler's First conjecture is not proved here.
-
-
-    A seventh round, the fourth layer, formalizes Chapter 13, the Fuller system for triangular
-    control, the first of the chapters whose results are to discharge that hypothesis (which is
-    unchanged): its symmetries (Lemmas 13.2.1-13.2.5), the first control and the first switching
-    time (Lemma 13.2.6, Corollary 13.2.7, Lemma 13.2.8), the singular locus (Lemmas 13.3.1 and
-    13.3.2), the weighted blow-up of Section 13.4, the Fuller-Poincare map, its two fixed points
-    q_out and q_in = tau(q_out) at which the Hamiltonian vanishes, with the scaling factor r_scale
-    the unique real root greater than 1 of a palindromic sextic (Lemma 13.5.2, Remark 13.5.3), and
-    Lemma 13.5.5: q_out is an asymptotically stable fixed point of the Fuller-Poincare map on the
-    zero set of the Hamiltonian, and q_in is unstable. The book proves Lemma 13.5.5 by a
-    Mathematica computation of eigenvalues; the formalization computes the Jacobian at q_out
-    exactly in Q(sqrt 3, r_scale), certifies that its eigenvalues lie in (-0.1, 0.1) by sign
-    changes of its characteristic polynomial at rational points, and proves linearized stability
-    for maps, which Mathlib lacks. The proof of Lemma 13.3.2 has a gap (a maximizing face assumed
-    constant in time), repaired along the book's lines, and the book's diffeomorphism of Section
-    13.4 is only C2 along z2 = 0.
-
-
-    An eighth round, the fifth layer, formalizes Chapter 15, the geometry of the Fuller-Poincare
-    map: the cell coordinates (r2, psi, theta2) on the zero set of the Hamiltonian modulo the
-    virial group, used as charts on that quotient; the smaller cells, with the root counts of the
-    switching cubics by Descartes's rule of signs; Proposition 15.2.2; the continuity of the first
-    switching time and of the cell maps, which the book asserts; the involution tau o F, which is
-    an involution only at switching points; and Remark 15.3.1, whose labels q_in and q_out the book
-    swaps, proved with the labels corrected and certified in exact rational arithmetic. It also
-    formalizes Sections 16.1-16.2: Theorem 16.1.1, that every orbit of the Fuller-Poincare map on
-    the zero set of the Hamiltonian modulo the virial group other than the fixed point q_in tends
-    to q_out, and Theorem 16.2.1, that the switching points of a Fuller trajectory emanating from
-    the singular locus lie on the outward spiral of q_out and those of one tending to it on the
-    inward spiral of q_in. Both are proved only conditionally, on three named numerical facts:
-    DOutContracts (the Poincare map maps the box D_out = D_00 into itself, and an iterate maps it
-    into a box on which the map is a contraction), CellTwoEntersDOut (every point of the second big
-    cell reaches D_00 within three steps) and BoxSubclaims (from every other box of the first cell
-    but D_22 the map goes to the second cell or to a lexicographically smaller box). They state
-    what the book reads off Mathematica plots and figures (Table 16.1, Figures 16.1-16.4), with
-    the contraction that its convergence argument lacks; an independent multiple-precision check
-    (about 1.1 million evaluations) found them true, with margins of at least 0.015, and a later
-    layer (5b) is to certify them by interval enclosures. The book's proof of Theorem 16.1.1 has
-    two further gaps, repaired: the convergence in D_out (by the contraction and Banach's fixed
-    point theorem) and the last row of its table (by whole-box subclaims and a time-reversal step).
-    Proposition 15.3.2, whose topology the book reads off figures, is stated as a named proposition
-    and not proved; no result uses it.
-
-
-    A ninth round, the sixth layer, formalizes Chapter 14 up to Section 14.3 and Appendix A.3: the
-    Lie algebra chart near the singular locus and its mirror image at q_in, with Lemma 10.1.1; the
-    asymptotics of the Reinhardt system near the singular locus (Lemmas 14.2.3-14.2.4, which the
-    book proves by a Mathematica series expansion, proved by a comparison of differential
-    equations); Lemma 14.3.1, that the Reinhardt-Poincare map, written in the chart, extends to an
-    analytic diffeomorphism across the exceptional divisor near the fixed point over q_out, where it
-    is the Fuller-Poincare map, along the book's route; Theorem 14.3.3 and Remark 14.3.4, the
-    hyperbolic fixed points over q_out and q_in, with a C-infinity unstable, respectively stable,
-    curve and the divisor as the other local manifold; and Theorem A.3.1, the stable manifold
-    theorem that the book cites from Irwin, in its local part, proved in the package
-    StableManifold. It also formalizes Section 16.4: Theorem 16.4.1, the cluster point theorem (if
-    the switching points of a Pontryagin extremal accumulate on the singular locus in finite time,
-    they converge to q_in and lie on its stable curve), with its time reversal, under the three
-    numerical facts. The book's Section 16.4.2, which asserts Reinhardt cells and branch maps near
-    the divisor, is repaired by the forward invariance of the cluster set of the switching points
-    under the Fuller-Poincare map, and the passage from a cluster point to a limit by a hyperbolic
-    box at q_out. With Theorem 14.4.1, stated as a named proposition, these give the hypothesis
-    NoChatteringIntoSingularLocus along the book's last step, so that Mahler's First conjecture is
-    proved conditionally on Theorem 14.4.1 and the three numerical facts
-    (SmoothedPolygons.theorem16_3_1_of_theorem14_4_1); it is not proved here. A pilot of the
-    certification of the three facts certifies the contraction part of DOutContracts by
-    kernel-checked interval arithmetic (decide +kernel, no native_decide).
+    The results the book cites are proved: Fejes Toth's theorem and Mahler's theorems on
+    critical lattices in this repository, the Pontryagin maximum principle and Filippov's
+    theorem (also under a state constraint) in the package OptimalControl, Brouwer's fixed-point
+    theorem in FixedPoint, and the stable manifold theorem in StableManifold, all by their
+    sources' arguments.
   authors:
     - "The-Anh Vu-Le"
   license: "Apache-2.0"
