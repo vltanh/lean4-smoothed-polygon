@@ -2,6 +2,7 @@ module
 
 public import SmoothedPolygons.Ch15.CellCoordinates
 public import Mathlib.Topology.EMetricSpace.Lipschitz
+import Mathlib.Analysis.Real.Pi.Bounds
 
 /-!
 # Chapter 16: the numerical facts behind the global basin theorem (Table 16.1)
@@ -99,16 +100,110 @@ noncomputable def boxSet (i j : Fin 3) : Set XiW0Quot := cellClass '' cellBox i 
 (TeX 12686–12691). -/
 def BoxLexLt (k l i j : Fin 3) : Prop := k < i ∨ (k = i ∧ l < j)
 
+private lemma l5e_basinA_vals :
+    basinA 0 = 0 ∧ basinA 1 = π / 3 ∧ basinA 2 = 2 * π / 3 ∧ basinA 3 = π := by
+  simp [basinA]
+
+private lemma l5e_basinB_vals :
+    basinB 0 = π ∧ basinB 1 = π - 1.1 ∧ basinB 2 = 1.1 ∧ basinB 3 = 0 := by
+  simp [basinB]
+
+/-- Membership in a box, with the breakpoints evaluated. -/
+private lemma l5e_mem_cellBox_iff (i j : Fin 3) (p : Fin 3 → ℝ) :
+    p ∈ cellBox i j ↔ p 0 ∈ Icc 0 1 ∧ p 1 ∈ Icc (basinA i.castSucc) (basinA i.succ) ∧
+      p 2 ∈ Icc (basinB j.succ) (basinB j.castSucc) := Iff.rfl
+
+/-- Every box lies in the closed first big cell (the breakpoints lie in `[0, π]`). -/
+private lemma l5e_cellBox_subset (i j : Fin 3) : cellBox i j ⊆ closedBoxOne := by
+  obtain ⟨a0, a1, a2, a3⟩ := l5e_basinA_vals
+  obtain ⟨b0, b1, b2, b3⟩ := l5e_basinB_vals
+  have hpi := Real.pi_gt_three
+  intro p hp
+  rw [l5e_mem_cellBox_iff] at hp
+  obtain ⟨h0, ⟨h1, h1'⟩, ⟨h2, h2'⟩⟩ := hp
+  refine ⟨h0, ⟨?_, ?_⟩, ⟨?_, ?_⟩⟩
+  · fin_cases i <;> simp_all <;> linarith
+  · fin_cases i <;> simp_all <;> linarith
+  · fin_cases j <;> simp_all <;> linarith
+  · fin_cases j <;> simp_all <;> linarith
+
 /-- The nine boxes cover the closed first big cell. -/
 theorem closedBoxOne_eq_iUnion_cellBox : closedBoxOne = ⋃ i, ⋃ j, cellBox i j := by
-  sorry
+  obtain ⟨a0, a1, a2, a3⟩ := l5e_basinA_vals
+  obtain ⟨b0, b1, b2, b3⟩ := l5e_basinB_vals
+  have hpi := Real.pi_gt_three
+  refine Subset.antisymm (fun p hp ↦ ?_) (iUnion_subset fun i ↦ iUnion_subset fun j ↦
+    l5e_cellBox_subset i j)
+  obtain ⟨h0, ⟨h1, h1'⟩, ⟨h2, h2'⟩⟩ := hp
+  simp only [mem_iUnion]
+  -- the `ψ`-index
+  obtain ⟨i, hi⟩ : ∃ i : Fin 3, p 1 ∈ Icc (basinA i.castSucc) (basinA i.succ) := by
+    rcases le_total (p 1) (π / 3) with h | h
+    · exact ⟨0, by simp [a0, a1, h1, h]⟩
+    rcases le_total (p 1) (2 * π / 3) with h' | h'
+    · exact ⟨1, by simp [a1, a2, h, h']⟩
+    · exact ⟨2, by simp [a2, a3, h', h1']⟩
+  -- the `θ₂`-index
+  obtain ⟨j, hj⟩ : ∃ j : Fin 3, p 2 ∈ Icc (basinB j.succ) (basinB j.castSucc) := by
+    rcases le_total (π - 1.1) (p 2) with h | h
+    · exact ⟨0, by simp [b0, b1, h2', h]⟩
+    rcases le_total 1.1 (p 2) with h' | h'
+    · exact ⟨1, by simp [b1, b2, h, h']⟩
+    · exact ⟨2, by simp [b2, b3, h2, h']⟩
+  exact ⟨i, j, h0, hi, hj⟩
 
 /-- The time reversal exchanges `𝒟₀₀ = 𝒟_out` and `𝒟₂₂` (TeX 12729–12732: `τ(𝒟_in) ⊆ 𝒟_out`):
 `τ(r₂, ψ, θ₂) = (r₂, π - ψ, π - θ₂)` maps `ψ ∈ [0, π/3]`, `θ₂ ∈ [π - 1.1, π]` onto `ψ ∈ [2π/3, π]`,
 `θ₂ ∈ [0, 1.1]` (`cellClass_cellTau`). -/
 theorem tauZero_image_boxSet :
     tauZero '' boxSet 0 0 = boxSet 2 2 ∧ tauZero '' boxSet 2 2 = boxSet 0 0 := by
-  sorry
+  obtain ⟨a0, a1, a2, a3⟩ := l5e_basinA_vals
+  obtain ⟨b0, b1, b2, b3⟩ := l5e_basinB_vals
+  have hpi := Real.pi_gt_three
+  -- `τ` on classes is `cellTau` on coordinates, on the closed first cell
+  have himage : ∀ i j : Fin 3,
+      tauZero '' boxSet i j = cellClass '' (cellTau '' cellBox i j) := by
+    intro i j
+    rw [boxSet, image_image, image_image]
+    refine image_congr fun p hp ↦ ?_
+    have hp' := l5e_cellBox_subset i j hp
+    exact (cellClass_cellTau ⟨hp'.1, hp'.2.1, ⟨by linarith [hp'.2.2.1], hp'.2.2.2⟩⟩).2.symm
+  -- `cellTau` is `(r₂, ψ, θ₂) ↦ (r₂, π - ψ, π - θ₂)` there, and exchanges the two boxes
+  have hform : ∀ p : Fin 3 → ℝ, 0 ≤ p 2 → cellTau p = ![p 0, π - p 1, π - p 2] := by
+    intro p hp
+    simp [cellTau, hp]
+  have hmaps : ∀ p ∈ cellBox 0 0, cellTau p ∈ cellBox 2 2 := by
+    intro p hp
+    obtain ⟨h0, ⟨h1, h1'⟩, ⟨h2, h2'⟩⟩ := hp
+    simp only [Fin.castSucc_zero, Fin.succ_zero_eq_one, a0, a1, b0, b1] at h1 h1' h2 h2'
+    rw [hform p (by linarith)]
+    refine ⟨by simpa using h0, ⟨?_, ?_⟩, ⟨?_, ?_⟩⟩ <;>
+      simp [a2, a3, b2, b3] <;> linarith
+  have hmaps' : ∀ p ∈ cellBox 2 2, cellTau p ∈ cellBox 0 0 := by
+    intro p hp
+    obtain ⟨h0, ⟨h1, h1'⟩, ⟨h2, h2'⟩⟩ := hp
+    simp only [show (2 : Fin 3).castSucc = 2 from rfl, show (2 : Fin 3).succ = 3 from rfl, a2, a3,
+      b2, b3] at h1 h1' h2 h2'
+    rw [hform p h2]
+    refine ⟨by simpa using h0, ⟨?_, ?_⟩, ⟨?_, ?_⟩⟩ <;>
+      simp [a0, a1, b0, b1] <;> linarith
+  have hinv : ∀ p : Fin 3 → ℝ, 0 ≤ p 2 → p 2 ≤ π → cellTau (cellTau p) = p := by
+    intro p h h'
+    rw [hform p h, hform _ (by simp; linarith)]
+    ext k
+    fin_cases k <;> simp
+  have hsurj : ∀ {S T : Set (Fin 3 → ℝ)}, (∀ p ∈ S, cellTau p ∈ T) →
+      (∀ p ∈ T, cellTau p ∈ S) → (∀ p ∈ T, cellTau (cellTau p) = p) →
+      cellTau '' S = T := by
+    intro S T hST hTS hTT
+    refine Subset.antisymm (image_subset_iff.2 hST) fun p hp ↦ ⟨cellTau p, hTS p hp, hTT p hp⟩
+  have h00 : ∀ p ∈ cellBox 0 0, cellTau (cellTau p) = p := fun p hp ↦
+    hinv p ((l5e_cellBox_subset 0 0 hp).2.2.1) ((l5e_cellBox_subset 0 0 hp).2.2.2)
+  have h22 : ∀ p ∈ cellBox 2 2, cellTau (cellTau p) = p := fun p hp ↦
+    hinv p ((l5e_cellBox_subset 2 2 hp).2.2.1) ((l5e_cellBox_subset 2 2 hp).2.2.2)
+  refine ⟨?_, ?_⟩
+  · rw [himage, hsurj hmaps hmaps' h22, boxSet]
+  · rw [himage, hsurj hmaps' hmaps h00, boxSet]
 
 /-! ### The named numerical facts -/
 
