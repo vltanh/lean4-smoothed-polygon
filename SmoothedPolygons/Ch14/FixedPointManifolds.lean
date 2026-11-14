@@ -18,12 +18,13 @@ one-dimensional local stable manifold and the divisor as its local unstable mani
 
 * `theorem14_3_3`, for every analytic extension `e` of Lemma 14.3.1
   (`IsReinhardtPoincareExtension e`);
-* `reinChartMapIn`: the Reinhardt–Poincaré map in the mirrored chart `lieChartIn` at `q_in` (G14.9:
-  the chart (14.1.1)–(14.1.2) does not contain `q_in`, whose representatives have `Im z₁ < 0`);
-* `remark14_3_4`: in the mirrored chart the point `(0, x̃_out)` is `q_in`, the Reinhardt–Poincaré
-  map there is the inverse of `e` near the fixed point (time reversal, `F⁻¹ = τ F τ`), and `e⁻¹` has
-  a hyperbolic fixed point whose local stable manifold is the curve of Theorem 14.3.3 and whose
-  local unstable manifold is the divisor.
+* `remark14_3_4`, with `reinChartMapIn` (AnalyticExtension.lean), the Reinhardt–Poincaré map in
+  the mirrored chart `lieChartIn` at `q_in` (G14.9: the chart (14.1.1)–(14.1.2) does not contain
+  `q_in`, whose representatives have `Im z₁ < 0`), which is also the map `F⁻¹` moving backwards in
+  time in the chart at `q_out` (`reinChartMapIn_eq`): in the mirrored chart the point
+  `(0, x̃_out)` is `q_in`, the Reinhardt–Poincaré map there is the inverse of `e` near the fixed
+  point, and `e⁻¹` has a hyperbolic fixed point whose local stable manifold is the curve of
+  Theorem 14.3.3 and whose local unstable manifold is the divisor.
 
 ## The book's proof of Theorem 14.3.3 (TeX 11905–11919), and what is added
 
@@ -55,22 +56,18 @@ extended map, G14.8] is therefore hyperbolic, with three eigenvalues `|λ| < 1` 
    Fuller part (adapted norm).
 Size: Theorem 14.3.3, 400–800 lines given Theorem A.3.1.
 
-Remark 14.3.4 (no proof in the book, "By time reversal"): `iso_vertexFlow_reinTau`,
-`switchingFn_reinTau` and `reinTau_spec` give `reinPoincare (τ (reinPoincare q)) = τ q` at the
-switching points near `q_out` (the Reinhardt form of `F⁻¹ = τ F τ`, Lemma 13.2.5), so the map in
-the mirrored chart is `F_in = τ F⁻¹ τ`, i.e. `e⁻¹` in the chart; then Theorem 14.3.3 for `e` is
-the remark for `e⁻¹` (with `Function.localStableSet_symm_eq_localUnstableSet`). The point
-`(0, x̃_out)` of the mirrored chart is `q_in` (`fullerCoords_reinTau`, `tauQuot_qOut`).
-
-All the claims at `q_in`, including the switching structure from `lieChartIn p`, are to be proved
-through `F_in = τ F⁻¹ τ` (the arc from `τ q` is the time reversal of the arc of `F⁻¹` ending at
-`q`, with the controls relabelled), **not** by direct estimates at `q_in`: there the Fuller
-switching functions from `τ(q_out)` have two near-degenerate pairs of roots just after the switch
-at `s = 1.409426…` (`= s_{sw,out}/r_scale`), namely `1.648502… ± 0.008433… i` (`χ_{ζ→1}`) and a
-near-tangency of `χ₂₃` at `1.5 ± 0.0529 i`; both are images under `s ↦ (s_{sw,out} - s')/r_scale`
-of roots at `q_out` (of the quadratic factor of `χ_{ζ→ζ²}` at `s' ≈ -1.5 ± 0.054 i`, and of
-`χ_{ζ→1}` at `s' ≈ -0.568 ± 0.332 i`), where they are far from the real axis. Size: 300–600
-lines.
+Remark 14.3.4 (no proof in the book, "By time reversal"): the map in the mirrored chart is
+`F_in = τ F⁻¹ τ`, i.e. `reinChartMapIn` is `F⁻¹` in the chart at `q_out`, which Step 10 of
+Lemma 14.3.1 builds directly as the second instance of the construction of Steps 1–9 (at the
+reflected point `(0, x̃_in)`, `fullerSwitchData_in`, whose Fuller data are derived from those at
+`x̃_out`, not estimated at `q_in`: there the Fuller switching functions from `τ(q_out)` have two
+near-degenerate pairs of roots just after the switch at `s = 1.409426…` (`= s_{sw,out}/r_scale`),
+namely `1.648502… ± 0.008433… i` (`χ_{ζ→1}`) and a near-tangency of `χ₂₃` at `1.5 ± 0.0529 i`;
+both are images under `s ↦ (s_{sw,out} - s')/r_scale` of roots at `q_out` at negative times, of the
+quadratic factor of `χ_{ζ→ζ²}` at `s' ≈ -1.5 ± 0.054 i` and of `χ_{ζ→1}` at
+`s' ≈ -0.568 ± 0.332 i`). Theorem 14.3.3 for `e` is then the remark for `e⁻¹` (with
+`Function.localStableSet_symm_eq_localUnstableSet`). The point `(0, x̃_out)` of the mirrored chart
+is `q_in` (`fullerCoords_reinTau`, `tauQuot_qOut`).
 
 ## Status
 
@@ -91,17 +88,12 @@ StableManifold package, and only for the unstable curves of `theorem14_3_3` and 
   `u₁ = 1` (the stable summand lies in `{0} × ℝ³`, the unstable one meets it only in `0` because
   some power of `D fullerChartMap` has norm `< 1`); a backward orbit from a point of the curve in
   `U` stays in `U` because `e⁻¹` maps `U` into the ball where `|F₁| ≥ |r|`.
-* `remark14_3_4`, through `F_in = τ F⁻¹ τ` as planned: for `p` near the fixed point with `r > 0`,
-  `p' = e⁻¹(p)` has `r > 0` (`F₁` preserves the sign of `r` on the ball) and `e(p') = p` is the
-  Reinhardt–Poincaré map from `lieChart p'`; by the time reversal (`iso_vertexFlow_reinTau`), the
-  rotation of the vertex flows (`l6j_adRinv_vertexFlow`, Grönwall uniqueness) and the flow property
-  (`l6j_vertexFlow_add`), the `e₂`-flow from `lieChartIn p` is `t ↦ τ Ad_{R⁻¹}(q'(t_sw - t))` along
-  the arc `q'` from `lieChart p'`, with `H(e₁) ↔ H(e₃)` exchanged. So the switching time is that of
-  `q'`, the maximality on `(0, t_sw)` is that of `q'`, and the image is `lieChartIn p'`, i.e.
-  `F_in(p) = p'`. The clause "`e₁` beats `e₂` right after `t_sw`" becomes `χ₂₃ < 0` on the
-  `e₂`-flow from `lieChart p'` at small negative times, which `eventually_isSwitch_reinSwitchTime`
-  does not give: it is the χ₂₃ check before the wall, `χ̃₂₃ = s H` with `H(0, 0, x̃_out) = Q(0) > 0`
-  (`l6j_chi23_neg`, from `exists_extChi23_eq_mul`). Hyperbolicity of `D(e⁻¹)`: its
+* `remark14_3_4`, through `F_in = τ F⁻¹ τ`: the switching structure from `lieChartIn p` is the
+  backward instance of the switching structure of Steps 5–8
+  (`eventually_isSwitch_reinSwitchTime_in`), and `reinChartMapIn p` is the analytic `F⁻¹`
+  (`extMapBack`, analytic at the fixed point, which it fixes), so it lies in `e.source` for `p` near
+  the fixed point, has `r > 0`, and `e (reinChartMapIn p) = F (F⁻¹ p) = p` by the time reversal of
+  trajectories (`eventually_reinChartMap_reinChartMapIn`). Hyperbolicity of `D(e⁻¹)`: its
   eigenvalues are the inverses of those of `DF` (complexified matrices, `spectrum.inv_mem_iff`).
 -/
 
@@ -112,13 +104,6 @@ namespace SmoothedPolygons
 open Complex Set Filter Topology
 open TriFuller
 open scoped ContDiff
-
-/-- The Reinhardt–Poincaré map in the mirrored chart at `q_in` (Remark 14.3.4). The forward
-dynamics near `q_in` follows the same rule as near `q_out` (control `e₂` from the wall `χ₂₃ = 0`,
-switch at `χ₂₁ = 0`, rotation `Ad_{R⁻¹}`): the time reversal maps the cyclic switching sequence
-`3 → 2 → 1 → 3` to itself. -/
-noncomputable def reinChartMapIn (p : ℝ × (Fin 3 → ℝ)) : ℝ × (Fin 3 → ℝ) :=
-  lieChartInInv (reinPoincare (lieChartIn p))
 
 /-- **The derivative of the extended map at the fixed point** (`thm:hyperbolic-out`, in the proof of
 Theorem 14.3.3, TeX 11905–11917: "The exceptional
@@ -746,144 +731,7 @@ theorem theorem14_3_3 {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ �
     exact ⟨U, hU, hUo, fun q hq ↦ (hUs hq).1, hst, hun⟩
 
 
-/-! ### The vertex flows: uniqueness, the flow property, the rotation, the time reversal -/
-
-/-- A curve solving the state–costate equations with the control `e_m` (`λ_cost = -1`, with
-`P = Z_{e_m}/⟨Z_{e_m}, X(0)⟩` in the state equation) is the vertex flow from its value at `0`
-(Grönwall, forward and backward in time, as in `iso_vertexFlow_qFix`). -/
-private lemma l6j_eq_vertexFlow (m : Fin 3) (Y : ℝ → iso_PhasePt)
-    (hX : ∀ s, Matrix.HasDerivAtEntrywise (fun s ↦ (Y s).1)
-      (controlP (vertex m) (Y 0).1 * (Y s).1 - (Y s).1 * controlP (vertex m) (Y 0).1) s)
-    (hL : ∀ s, Matrix.HasDerivAtEntrywise (fun s ↦ (Y s).2.1)
-      ((Y s).2.1 * (Y s).1 - (Y s).1 * (Y s).2.1) s)
-    (hR : ∀ s, Matrix.HasDerivAtEntrywise (fun s ↦ (Y s).2.2)
-      (costateRHS (-1) (Y s).2.1 (Y s).2.2 (Y s).1 (vertex m)) s) (t : ℝ) :
-    Y t = iso_vertexFlow m (Y 0) t := by
-  set q := Y 0 with hq
-  set P := controlP (vertex m) q.1 with hP
-  have hXeq : ∀ t, (Y t).1 = iso_vfX m q t := by
-    intro t
-    refine ivf_eq_of_hasDerivAt (a := 0) (f := fun s ↦ (Y s).1) (g := iso_vfX m q)
-      (G := fun _ M ↦ P * M - M * P)
-      (K := 4 * ∑ k, ∑ l, |P k l|) (fun s _ M N i j ↦ ?_) hX (fun s ↦ ?_)
-      (congrArg Prod.fst (ivf_vertexFlow_zero m q)).symm
-    · rw [← Matrix.sub_apply, show P * M - M * P - (P * N - N * P) =
-        P * (M - N) - (M - N) * P by noncomm_ring]
-      simpa only [Matrix.sub_apply] using poly_abs_bracket_le P (M - N) i j
-    · have := ivf_vfX_hasDerivAt m q s
-      rwa [ivf_controlP_vfX] at this
-  have hLeq : ∀ t, (Y t).2.1 = iso_vfΛ₁ m q t := by
-    intro t
-    obtain ⟨K, hK⟩ := ivf_lax_lipschitz (isCompact_uIcc (a := 0) (b := t))
-      (ivf_vfX_continuous m q).continuousOn
-    exact ivf_eq_of_hasDerivAt (a := 0) (f := fun s ↦ (Y s).2.1) (g := iso_vfΛ₁ m q)
-      (G := fun s M ↦ M * iso_vfX m q s - iso_vfX m q s * M) hK
-      (fun s ↦ by have := hL s; rwa [hXeq s] at this) (ivf_vfΛ₁_hasDerivAt m q)
-      (congrArg (fun y : iso_PhasePt ↦ y.2.1) (ivf_vertexFlow_zero m q)).symm
-  have hReq : ∀ t, (Y t).2.2 = iso_vfΛR m q t := by
-    intro t
-    obtain ⟨K, hK⟩ := ivf_costateRHS_lipschitz (isCompact_uIcc (a := 0) (b := t))
-      (ivf_vfX_continuous m q).continuousOn P
-    exact ivf_eq_of_hasDerivAt (a := 0) (f := fun s ↦ (Y s).2.2) (g := iso_vfΛR m q)
-      (G := fun s M ↦ costateRHS (-1) (iso_vfΛ₁ m q s) M (iso_vfX m q s) (vertex m))
-      (fun s hs M N i j ↦ hK s hs (-1) _ (vertex m) (ivf_controlP_vfX m q s) M N i j)
-      (fun s ↦ by have := hR s; rwa [hXeq s, hLeq s] at this) (ivf_vfΛR_hasDerivAt m q)
-      (congrArg (fun y : iso_PhasePt ↦ y.2.2) (ivf_vertexFlow_zero m q)).symm
-  exact Prod.ext (hXeq t) (Prod.ext (hLeq t) (hReq t))
-
-/-- **The flow property** of the vertex flows: `q(a + t) = (q(a))(t)`. -/
-private lemma l6j_vertexFlow_add (m : Fin 3) (q : iso_PhasePt) (a t : ℝ) :
-    iso_vertexFlow m q (a + t) = iso_vertexFlow m (iso_vertexFlow m q a) t := by
-  have hsh : ∀ s, HasDerivAt (fun s : ℝ ↦ a + s) 1 s := fun s ↦ (hasDerivAt_id' s).const_add a
-  have h := l6j_eq_vertexFlow m (fun s ↦ iso_vertexFlow m q (a + s)) (fun s ↦ ?_) (fun s ↦ ?_)
-    (fun s ↦ ?_) t
-  · simpa using h
-  · have := (ivf_vfX_hasDerivAt m q (a + s)).scomp (hsh s)
-    rw [one_smul, ivf_controlP_vfX] at this
-    refine this.congr_deriv ?_
-    simp only [add_zero]
-    rw [show controlP (vertex m) (iso_vertexFlow m q a).1 = iso_vfP m q from
-      ivf_controlP_vfX m q a]
-    rfl
-  · have := (ivf_vfΛ₁_hasDerivAt m q (a + s)).scomp (hsh s)
-    rw [one_smul] at this
-    exact this
-  · have := (ivf_vfΛR_hasDerivAt m q (a + s)).scomp (hsh s)
-    rw [one_smul] at this
-    exact this
-
-/-- **The rotation conjugates the vertex flows** (`R⁻¹ Z_{e_m} R = Z_{e_{m+1}}`, `R⁻¹ J R = J`, the
-equations are equivariant): `Ad_{R⁻¹}` of the `e_m`-flow from `q` is the `e_{m+1}`-flow from
-`Ad_{R⁻¹} q`. -/
-private lemma l6j_adRinv_vertexFlow (m : Fin 3) (q : iso_PhasePt) (t : ℝ) :
-    iso_adRinvPow 1 (iso_vertexFlow m q t) = iso_vertexFlow (m + 1) (iso_adRinvPow 1 q) t := by
-  have hC : R ^ 1 * R⁻¹ ^ 1 = 1 := poly_Rpow_mul_Rinvpow 1
-  have hZ : R⁻¹ ^ 1 * controlMatrix (vertex m) * R ^ 1 = controlMatrix (vertex (m + 1)) := by
-    simpa only [pow_one] using poly_Rinv_conj_vertex m
-  have hJ : R⁻¹ ^ 1 * J * R ^ 1 = J := poly_conj_pow_J 1
-  have hY0 : iso_adRinvPow 1 (iso_vertexFlow m q 0) = iso_adRinvPow 1 q := by
-    rw [ivf_vertexFlow_zero]
-  have h := l6j_eq_vertexFlow (m + 1) (fun s ↦ iso_adRinvPow 1 (iso_vertexFlow m q s))
-    (fun s ↦ ?_) (fun s ↦ ?_) (fun s ↦ ?_) t
-  · rw [hY0] at h
-    exact h
-  · have := ((ivf_vfX_hasDerivAt m q s).const_mul (R⁻¹ ^ 1)).mul_const (R ^ 1)
-    refine this.congr_deriv ?_
-    simp only [iso_adRinvPow, iso_vertexFlow]
-    rw [poly_conj_bracket hC, ← poly_controlP_conj hC hZ, ivf_controlP_vfX, ivf_controlP_vfX]
-  · have := ((ivf_vfΛ₁_hasDerivAt m q s).const_mul (R⁻¹ ^ 1)).mul_const (R ^ 1)
-    refine this.congr_deriv ?_
-    simp only [iso_adRinvPow, iso_vertexFlow]
-    rw [poly_conj_bracket hC]
-  · have := ((ivf_vfΛR_hasDerivAt m q s).const_mul (R⁻¹ ^ 1)).mul_const (R ^ 1)
-    refine this.congr_deriv ?_
-    simp only [iso_adRinvPow, iso_vertexFlow]
-    rw [poly_costateRHS_conj hC hJ hZ]
-
-/-- The Hamiltonians under `Ad_{R⁻¹}`: `H(e_{m+1})(Ad_{R⁻¹} q) = H(e_m)(q)`. -/
-private lemma l6j_phaseHam_adRinv (q : iso_PhasePt) (m : Fin 3) :
-    phaseHam (iso_adRinvPow 1 q) (vertex (m + 1)) = phaseHam q (vertex m) := by
-  have hC : R ^ 1 * R⁻¹ ^ 1 = 1 := poly_Rpow_mul_Rinvpow 1
-  have hZ : R⁻¹ ^ 1 * controlMatrix (vertex m) * R ^ 1 = controlMatrix (vertex (m + 1)) := by
-    simpa only [pow_one] using poly_Rinv_conj_vertex m
-  exact poly_hamiltonian_conj hC (poly_conj_pow_J 1) hZ (-1) _ _ _
-
-/-- The Hamiltonians at the time reversal of a rotated point: `e₂` is fixed and `e₁ ↔ e₃`
-(`τ` exchanges `e₂, e₃`, `Ad_{R⁻¹}` shifts the indices). -/
-private lemma l6j_phaseHam_mirror (y : iso_PhasePt) :
-    phaseHam (reinTau (iso_adRinvPow 1 y)) (vertex 0) = phaseHam y (vertex 2) ∧
-      phaseHam (reinTau (iso_adRinvPow 1 y)) (vertex 1) = phaseHam y (vertex 1) ∧
-      phaseHam (reinTau (iso_adRinvPow 1 y)) (vertex 2) = phaseHam y (vertex 0) := by
-  have h := fun j ↦ (switchingFn_reinTau j 0 (iso_adRinvPow 1 y)).2
-  refine ⟨?_, ?_, ?_⟩
-  · have := l6j_phaseHam_adRinv y 2
-    rw [show (2 : Fin 3) + 1 = 0 from rfl] at this
-    exact (h 0).trans this
-  · have := l6j_phaseHam_adRinv y 1
-    rw [show (1 : Fin 3) + 1 = 2 from rfl] at this
-    exact (h 1).trans this
-  · have := l6j_phaseHam_adRinv y 0
-    rw [show (0 : Fin 3) + 1 = 1 from rfl] at this
-    exact (h 2).trans this
-
-
-/-! ### The χ₂₃ check before the wall, the chart domain, the inverse derivative -/
-
-/-- **`χ₂₃ < 0` just before the wall** (the χ₂₃ check of G14.5 at negative times): near the fixed
-point, `χ̃₂₃(s, r, x̃) < 0` for small `s < 0`, since `χ̃₂₃ = s H` with `H > 0` there (the division
-by `s` of `eventually_extChi23_pos`, `exists_extChi23_eq_mul`). -/
-private lemma l6j_chi23_neg : ∃ ε > 0, ∀ᶠ q in 𝓝 chartPtOut, ∀ s, -ε < s → s < 0 →
-    extChi23 (s, q.1, q.2) < 0 := by
-  obtain ⟨H, hnear⟩ := exists_extChi23_eq_mul
-  rw [nhds_prod_eq] at hnear
-  obtain ⟨pa, hpa, pb, hpb, hall⟩ := Filter.eventually_prod_iff.1 hnear
-  obtain ⟨ε, hε, hεb⟩ := Metric.eventually_nhds_iff.1 hpa
-  refine ⟨ε, hε, ?_⟩
-  filter_upwards [hpb] with q hq s hs1 hs2
-  have hs : pa s := hεb (by rw [Real.dist_eq, sub_zero, abs_lt]; constructor <;> linarith)
-  obtain ⟨h1, h2⟩ := hall hs hq
-  rw [h1]
-  exact mul_neg_of_neg_of_pos hs2 h2
+/-! ### The inverse derivative and the point `q_in` -/
 
 /-- If `A B = B A = 1`, the eigenvalues of `B` are the inverses of those of `A`. -/
 private lemma l6j_aeval_charpoly_inv {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -957,15 +805,6 @@ private lemma l6j_classOf_in : classOf (tau (fullerOfChart xTildeOut)) = qIn0 :=
     classOf_smul_scale one_mem_VT virialScaleOut_pos h', hc]
 
 
-/-- `Ad_{R⁻¹} ∘ τ ∘ Ad_{R⁻¹} = τ` (`τ Ad_R = Ad_{R⁻¹} τ`, `reinTau_spec`). -/
-private lemma l6j_adRinv_reinTau_adRinv (x : iso_PhasePt) :
-    iso_adRinvPow 1 (reinTau (iso_adRinvPow 1 x)) = reinTau x := by
-  have h : iso_adR (iso_adRinvPow 1 x) = x :=
-    irt_adRinvPow_injective 1 (irt_adRinvPow_one_adR (iso_adRinvPow 1 x))
-  have := reinTau_spec.2.2.2 (iso_adRinvPow 1 x)
-  rw [h] at this
-  exact this.symm
-
 /-- **Remark 14.3.4** (`rem:hyperbolic-in`, TeX 11898–11902), in the mirrored chart (G14.9). "By
 time reversal, the Reinhardt–Poincaré map `F` has a hyperbolic fixed point at `(0, x_in) ∈ ℝ⁴`, its
 local stable manifold is one-dimensional, and its local unstable manifold is the three-dimensional
@@ -977,7 +816,13 @@ exceptional divisor." For an analytic extension `e` of Lemma 14.3.1:
   then beaten by `e₁`), and the Reinhardt–Poincaré map in the mirrored chart is the inverse of `e`:
   `e (reinChartMapIn p) = p`;
 * `e⁻¹` has the hyperbolic fixed point `(0, x̃_out)`; its local stable manifold is the curve of
-  Theorem 14.3.3 (the local unstable set of `e`) and its local unstable manifold is the divisor. -/
+  Theorem 14.3.3 (the local unstable set of `e`) and its local unstable manifold is the divisor.
+
+Proof: `reinChartMapIn` is the map `F⁻¹` of Lemma 14.3.1, Step 10, built there directly: the
+switching structure is its instance of Steps 5–8 (`eventually_isSwitch_reinSwitchTime_in`), it is
+the analytic `extMapBack` near the fixed point (so `reinChartMapIn p ∈ e.source`), and
+`e (F⁻¹ p) = F (F⁻¹ p) = p` (`eventually_reinChartMap_reinChartMapIn`); the rest is
+Theorem 14.3.3 for `e` read for `e⁻¹`. -/
 theorem remark14_3_4 {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ))}
     (he : IsReinhardtPoincareExtension e) :
     classOf (tau (fullerOfChart xTildeOut)) = qIn0 ∧
@@ -997,120 +842,25 @@ theorem remark14_3_4 {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ ×
         Function.localUnstableSet e.symm chartPtOut U = {p ∈ U | p.1 = 0} ∧
         ∃ δ > 0, ∃ γ : ℝ → (Fin 3 → ℝ), ContDiffOn ℝ ∞ γ (Ioo (-δ) δ) ∧ γ 0 = xTildeOut ∧
           Function.localStableSet e.symm chartPtOut U = (fun r ↦ (r, γ r)) '' Ioo (-δ) δ := by
-  obtain ⟨hp, hfix, -, -, hrein, -⟩ := id he
-  have hpt : chartPtOut ∈ e.target := hfix ▸ e.map_source hp
-  have hsp : e.symm chartPtOut = chartPtOut := by simpa [hfix] using e.left_inv hp
+  obtain ⟨hp, -, -, -, hrein, -⟩ := id he
   refine ⟨l6j_classOf_in, ?_, l6j_isHyperbolic_symm he, ?_⟩
   swap
   · -- the local sets of `e⁻¹`: unstable for `e` is stable for `e⁻¹`
     obtain ⟨U, hU, hUo, hUs, hst, δ, hδ, γ, hγC, hγ0, hun⟩ := l6j_main he
     obtain ⟨h1, h2⟩ := Function.localStableSet_symm_eq_localUnstableSet e hUs
     exact ⟨U, hU, hUo, hUs, h1, h2.trans hst, δ, hδ, γ, hγC, hγ0, h1.trans hun⟩
-  -- the switching structure, through `F_in = τ F⁻¹ τ`
-  obtain ⟨ρ₀, hρ₀, -, hB₀⟩ := l6j_expand he
-  obtain ⟨ε₀, hε₀, hχ⟩ := l6j_chi23_neg
-  have hsw := eventually_isSwitch_reinSwitchTime
-  rw [eventually_nhdsWithin_iff] at hsw
-  have hball : ∀ᶠ q in 𝓝 chartPtOut, q ∈ Metric.ball chartPtOut ρ₀ :=
-    Metric.ball_mem_nhds chartPtOut hρ₀
-  have hgood := ((hball.and hsw).and hχ).and eventually_mem_lieChartDomain
-  have htgt : ∀ᶠ q in 𝓝 chartPtOut, q ∈ e.target := e.open_target.mem_nhds hpt
-  have hgood' := htgt.and ((e.continuousAt_symm hpt).eventually (by rw [hsp]; exact hgood))
-  rw [eventually_nhdsWithin_iff]
-  filter_upwards [hgood'] with p ⟨hpt', ⟨⟨hB, hP⟩, hneg⟩, hdom⟩ hp1
+  -- the switching structure at `lieChartIn p`, and `e (F⁻¹ p) = p`: the backward instance of the
+  -- construction is the analytic `F⁻¹ = reinChartMapIn` near the fixed point, and `F ∘ F⁻¹ = id`
+  -- there (time reversal of trajectories)
+  have hG : Tendsto extMapBack (𝓝 chartPtOut) (𝓝 chartPtOut) := by
+    have := analyticAt_extMapBack.continuousAt.tendsto
+    rwa [extMapBack_chartPtOut] at this
+  have hsrc := hG.eventually (e.open_source.mem_nhds hp)
+  filter_upwards [eventually_isSwitch_reinSwitchTime_in, eventually_reinChartMap_reinChartMapIn,
+    nhdsWithin_le_nhds (hsrc.and eventually_extMapBack_eq), self_mem_nhdsWithin] with p
+    ⟨h1, h2, h3, h4, h5⟩ hFG ⟨hs, hGp⟩ hp1
   have hp1 : 0 < p.1 := hp1
-  -- the preimage `p' = e⁻¹ p`, a chart point with `r > 0`
-  set p' := e.symm p with hp'
-  have hs' : p' ∈ e.source := e.map_target hpt'
-  have hep : e p' = p := e.right_inv hpt'
-  have hp'1 : 0 < p'.1 := by
-    by_contra h
-    push Not at h
-    have := (hB₀ p' hB).2 h
-    rw [hep] at this
-    linarith
-  obtain ⟨hT0, hmax, -, -, himg⟩ := hP hp'1
-  have hdom' := lieChart_spec (hdom hp'1)
-  set T := reinSwitchTime (lieChart p') with hTdef
-  set y : ℝ → iso_PhasePt := fun s ↦ iso_vertexFlow 1 (lieChart p') s with hy
-  have hlc : lieChart p = iso_adRinvPow 1 (y T) := by
-    rw [← hep, hrein p' hs' hp'1, himg]
-    rfl
-  -- the flow from `τ(q)` with `e₂` is the reversed arc from `q'`, rotated and reflected
-  have hM : ∀ t, iso_vertexFlow 1 (lieChartIn p) t = reinTau (iso_adRinvPow 1 (y (T - t))) := by
-    intro t
-    have h2 : iso_vertexFlow 2 (iso_adRinvPow 1 (y T)) (-t) =
-        iso_adRinvPow 1 (iso_vertexFlow 1 (y T) (-t)) := (l6j_adRinv_vertexFlow 1 (y T) (-t)).symm
-    rw [lieChartIn, iso_vertexFlow_reinTau, show vertexSwap 1 = 2 from rfl, hlc, h2, hy,
-      ← l6j_vertexFlow_add, sub_eq_add_neg]
-  have hsf : ∀ t, switchingFn 1 0 (iso_vertexFlow 1 (lieChartIn p) t).2.2
-      (iso_vertexFlow 1 (lieChartIn p) t).1 = switchingFn 1 2 (y (T - t)).2.2 (y (T - t)).1 := by
-    intro t
-    obtain ⟨h0, h1, -⟩ := l6j_phaseHam_mirror (y (T - t))
-    rw [← hamiltonian_sub_eq_switchingFn (iso_vertexFlow 1 (lieChartIn p) t).2.1,
-      ← hamiltonian_sub_eq_switchingFn (y (T - t)).2.1, hM t]
-    simp only [phaseHam] at h0 h1
-    rw [h0, h1]
-  -- the switching time of the mirrored arc is that of the arc from `q'`
-  have hT : reinSwitchTime (lieChartIn p) = T := by
-    refine IsLeast.csInf_eq ⟨⟨hT0, ?_⟩, ?_⟩
-    · rw [hsf, sub_self, hy]
-      simp only [ivf_vertexFlow_zero]
-      exact hdom'.2.2.1
-    · rintro t ⟨ht0, ht⟩
-      by_contra hlt
-      push Not at hlt
-      rw [hsf, ← hamiltonian_sub_eq_switchingFn (y (T - t)).2.1] at ht
-      have := hmax (T - t) ⟨by linarith, by linarith⟩ 2 (by decide)
-      simp only [phaseHam] at this
-      linarith
-  -- the image of the mirrored map is `p'`
-  have hRP : reinPoincare (lieChartIn p) = lieChartIn p' := by
-    rw [reinPoincare, hT, hM T, sub_self, l6j_adRinv_reinTau_adRinv, hy]
-    simp only [ivf_vertexFlow_zero]
-    rfl
-  have hcm : reinChartMapIn p = p' := by
-    rw [reinChartMapIn, hRP, lieChartIn, lieChartInInv, reinTau_spec.1, hdom'.2.2.2.2.2]
-  refine ⟨by rw [hT]; exact hT0, ?_, ?_, by rw [hcm]; exact hp'1, by rw [hcm, hRP],
-    by rw [hcm]; exact hs', by rw [hcm, hep]⟩
-  · -- `e₂` is the strict maximizer on `(0, t_sw)`
-    intro t ht j hj
-    rw [hT] at ht
-    obtain ⟨h0, h1, h2⟩ := l6j_phaseHam_mirror (y (T - t))
-    have hs : T - t ∈ Ioo 0 T := ⟨by linarith [ht.2], by linarith [ht.1]⟩
-    rw [hM t]
-    obtain rfl | rfl | rfl : j = 0 ∨ j = 1 ∨ j = 2 := by fin_cases j <;> simp
-    · rw [h0, h1]
-      exact hmax (T - t) hs 2 (by decide)
-    · exact absurd rfl hj
-    · rw [h2, h1]
-      exact hmax (T - t) hs 0 (by decide)
-  · -- `e₁` beats `e₂` right after `t_sw`: `χ₂₃ < 0` just before the wall on the arc from `q'`
-    intro ε hε
-    rw [hT]
-    set r := p'.1 with hr
-    set s := -(min ε (r * ε₀)) / 2 with hs
-    have hm : 0 < min ε (r * ε₀) := lt_min hε (mul_pos hp'1 hε₀)
-    have hs0 : s < 0 := by rw [hs]; linarith
-    have hsε : -ε < s := by
-      have := min_le_left ε (r * ε₀)
-      rw [hs]; linarith
-    have hsr : -ε₀ < s / r := by
-      rw [lt_div_iff₀ hp'1]
-      have := min_le_right ε (r * ε₀)
-      rw [hs]; nlinarith
-    have hsr0 : s / r < 0 := div_neg_of_neg_of_pos hs0 hp'1
-    refine ⟨T - s, ⟨by linarith, by linarith⟩, ?_⟩
-    obtain ⟨h0, h1, -⟩ := l6j_phaseHam_mirror (y (T - (T - s)))
-    rw [hM, h0, h1, sub_sub_cancel]
-    have hchi : switchingFn 1 2 (y s).2.2 (y s).1 = r ^ 3 * extChi23 (s / r, r, p'.2) := by
-      rw [← extChi_eq_extChi23 (p := (s / r, r, p'.2)) hp'1.ne']
-      simp only [extChi, extFlowPt, hy, div_mul_cancel₀ s hp'1.ne']
-      rfl
-    have hneg' := hneg (s / r) hsr hsr0
-    have := hamiltonian_sub_eq_switchingFn (y s).2.1 (y s).2.2 (y s).1 1 2
-    rw [hchi] at this
-    simp only [phaseHam]
-    nlinarith [pow_pos hp'1 3]
+  have hs' : reinChartMapIn p ∈ e.source := by rw [← hGp hp1]; exact hs
+  exact ⟨h1, h2, h3, h4, h5, hs', by rw [hrein _ hs' h4]; exact hFG⟩
 
 end SmoothedPolygons

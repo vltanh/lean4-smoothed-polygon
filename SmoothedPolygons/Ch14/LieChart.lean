@@ -1074,4 +1074,89 @@ theorem switchingFn_reinTau (i j : Fin 3) (q : iso_PhasePt) :
     rw [h, ← l6b_matTau_controlMatrix_vertex i, traceForm_matTau, traceForm_matTau,
       traceForm_matTau]
 
+/-! ### The time reversal on the chart
+
+`τ(lieChart(r, x̃)) = lieChart(-r, σ x̃)` with `σ(x̃₂₁, ℓ̃₁₁, ℓ̃₂₁) = (-x̃₂₁, -ℓ̃₁₁, ℓ̃₂₁)`:
+entrywise for `X` and `Λ₁`; for `Λ_R`, `τ` fixes `J` and the trace form and exchanges `Z_{e₂}`
+and `Z_{e₃}`, so it maps the solution of (14.1.3) to the solution of (14.1.3) (`τ[A, B] = [τB, τA]`
+in the dual basis `sl2Dual`). So the mirrored chart is the chart at the reflected coordinates, and
+the Reinhardt–Poincaré map moving backwards in time near `q_out` is the forward one at the reflected
+point (Lemma 14.3.1, Step 10). -/
+
+/-- The reflection of the chart coordinates by the time reversal,
+`(r, x̃₂₁, ℓ̃₁₁, ℓ̃₂₁) ↦ (-r, -x̃₂₁, -ℓ̃₁₁, ℓ̃₂₁)` (`lieChart_chartReflect`). -/
+noncomputable def chartReflect (p : ℝ × (Fin 3 → ℝ)) : ℝ × (Fin 3 → ℝ) :=
+  (-p.1, ![-p.2 0, -p.2 1, p.2 2])
+
+theorem chartReflect_chartReflect (p : ℝ × (Fin 3 → ℝ)) : chartReflect (chartReflect p) = p := by
+  obtain ⟨r, x⟩ := p
+  simp only [chartReflect, neg_neg, Prod.mk.injEq, true_and]
+  funext i
+  fin_cases i <;> simp
+
+private theorem l6s_matTau_lieX (r x : ℝ) : matTau (lieX r x) = lieX (-r) (-x) := by
+  ext i j; fin_cases i <;> fin_cases j <;> simp [matTau, lieX]
+
+private theorem l6s_matTau_lieΛ₁ (r l m : ℝ) : matTau (lieΛ₁ r l m) = lieΛ₁ (-r) (-l) m := by
+  ext i j; fin_cases i <;> fin_cases j <;> simp [matTau, lieΛ₁, show (-r) ^ 4 = r ^ 4 by ring]
+
+private theorem l6s_matTau_bracket (A B : Mat2) :
+    matTau (A * B - B * A) = matTau B * matTau A - matTau A * matTau B := by
+  ext i j; fin_cases i <;> fin_cases j <;> simp [matTau, Matrix.mul_apply, Fin.sum_univ_two] <;>
+    ring
+
+private theorem l6s_matTau_sl2Dual (M₁ M₂ M₃ : Mat2) (c₁ c₂ c₃ : ℝ) :
+    matTau (sl2Dual M₁ M₂ M₃ c₁ c₂ c₃) =
+      sl2Dual (matTau M₁) (matTau M₃) (matTau M₂) c₁ c₃ c₂ := by
+  have hT : traceForm (matTau M₁) (matTau M₃ * matTau M₂ - matTau M₂ * matTau M₃) =
+      traceForm M₁ (M₂ * M₃ - M₃ * M₂) := by
+    rw [← l6s_matTau_bracket, traceForm_matTau]
+  simp only [sl2Dual, hT, matTau_smul, matTau_add, l6s_matTau_bracket]
+  congr 1
+  abel
+
+private theorem l6s_reducedHam_matTau (Λ₁ X : Mat2) :
+    reducedHam (matTau Λ₁) (matTau X) = reducedHam Λ₁ X := by
+  have h : matTau Λ₁ + (3 / 2 : ℝ) • J = matTau (Λ₁ + (3 / 2 : ℝ) • J) := by
+    rw [matTau_add, matTau_smul, matTau_J]
+  rw [reducedHam, reducedHam, h, traceForm_matTau]
+
+private theorem l6s_lieΛR_matTau (X Λ₁ : Mat2) :
+    lieΛR (matTau X) (matTau Λ₁) = matTau (lieΛR X Λ₁) := by
+  have e1 : matTau (controlMatrix (vertex 2)) = controlMatrix (vertex 1) :=
+    l6b_matTau_controlMatrix_vertex 1
+  have e2 : matTau (controlMatrix (vertex 1)) = controlMatrix (vertex 2) :=
+    l6b_matTau_controlMatrix_vertex 2
+  have t1 : traceForm (matTau X) (controlMatrix (vertex 1)) =
+      traceForm X (controlMatrix (vertex 2)) := by rw [← e1, traceForm_matTau]
+  have t2 : traceForm (matTau X) (controlMatrix (vertex 2)) =
+      traceForm X (controlMatrix (vertex 1)) := by rw [← e2, traceForm_matTau]
+  rw [lieΛR, lieΛR, l6s_matTau_sl2Dual, e1, e2, l6s_reducedHam_matTau, t1, t2]
+
+/-- **The time reversal on the chart**: `τ(lieChart(r, x̃)) = lieChart(-r, σ x̃)`
+(`lieChartIn = lieChart ∘ chartReflect`). -/
+theorem lieChart_chartReflect (p : ℝ × (Fin 3 → ℝ)) :
+    lieChart (chartReflect p) = reinTau (lieChart p) := by
+  obtain ⟨r, x⟩ := p
+  simp only [lieChart, chartReflect, reinTau, l6s_matTau_lieX, l6s_matTau_lieΛ₁,
+    ← l6s_lieΛR_matTau]
+  simp
+
+/-- The inverse of the chart commutes with the time reversal:
+`lieChartInv (τ q) = σ (lieChartInv q)` (`lieChartInInv = chartReflect ∘ lieChartInv`). -/
+theorem lieChartInv_reinTau (q : iso_PhasePt) :
+    lieChartInv (reinTau q) = chartReflect (lieChartInv q) := by
+  refine Prod.ext (by simp [lieChartInv, reinTau, chartReflect, matTau]) ?_
+  funext i
+  fin_cases i <;> simp [lieChartInv, reinTau, chartReflect, matTau, div_neg, neg_div]
+
+/-- `lieChartInv` recovers the chart coordinates for every `r ≠ 0` (on `H*`: `lieChart_spec`). -/
+theorem lieChartInv_lieChart_of_ne {p : ℝ × (Fin 3 → ℝ)} (hp : p.1 ≠ 0) :
+    lieChartInv (lieChart p) = p := by
+  obtain ⟨r, x⟩ := p
+  simp only at hp
+  refine Prod.ext (by simp [lieChartInv, lieChart, lieX]) ?_
+  funext i
+  fin_cases i <;> simp [lieChartInv, lieChart, lieX, lieΛ₁] <;> field_simp
+
 end SmoothedPolygons
