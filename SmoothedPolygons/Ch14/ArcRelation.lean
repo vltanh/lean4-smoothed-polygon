@@ -50,6 +50,12 @@ simplify to `0`):
   `B₁ = 4Y²ε⁴ l_f + 4Y(ε⁴ + ε²) l_h - (1 + ε²)² l_e`
   (an identity of rational functions in `ε, Y, s, l`: after clearing denominators,
   `linear_combination K * h3` up to the normalization `field_simp` chooses).
+  The Lean proof of `arcParams_rel_identity` uses this cofactor. With
+  `Λ₁ = ofFrame (l_h + (3/2)/s) (l_e + 6/s) (l_f - (3/2)/s)` (`det_ofFrame`),
+  `9/4 - det Λ₁ - β(l) = (s² - 3) K₂`, `K₂ = 9/(4s²) - l_h/s + l_e/(2s) - 2l_f/s`, so
+  `R - (4Y²/3)(9/4 - det Λ₁) = (s² - 3) (K/(36ε⁴s²) - (4Y²/3) K₂)`: one
+  `linear_combination (norm := skip)` of `h3` with this cofactor, then `field_simp; ring` (an
+  identity of rational functions, true without `s² = 3`).
   **Simpler, without a cofactor**: put `λ = l/√3` (the frame of `Λ̂₀/√3`). Then `√3` cancels
   (each pairing uses `√3 · √3 = 3` once, `Real.mul_self_sqrt`):
   `f₀(1.5) = (4Y²ε² λ_f + 4Yε² λ_h - (1 + ε²) λ_e)/(2ε²(1 + ε²))`, `q = (4Y² λ_f + 4Y λ_h - λ_e)/2`,
@@ -70,14 +76,18 @@ simplify to `0`):
 
 1. `frame_reducedCostate`: on a section point, `f₀ = f₀(1.5)` (`arcF0_eq_reducedHam`); compute the
    three pairings of `ofFrame l_h l_e l_f` (`traceForm_ofFrame`, `frame_state`) and compare with
-   `Λ̂₀` by injectivity of the pairings (or solve the `3 × 3` linear system directly).
+   `Λ̂₀` by injectivity of the pairings (or solve the `3 × 3` linear system directly). In Lean:
+   write `Λ̂₀ = ofFrame l_h l_e l_f`; substituting the three pairings into the right-hand sides,
+   each component is one `linear_combination` of `h3 : √3 ^ 2 = 3`, with the cofactors
+   `(4Y²ε⁴ l_f + 4Yε⁴ l_h - (1 + ε²)² l_e)/(12Yε²)`, `-l_e/3` and
+   `-(1 + ε²)(4Y²ε² l_f + 4Yε² l_h - (1 + ε²) l_e)/(12Y²ε²)` (no injectivity argument needed).
 2. `arcParams_rel_identity`: `Λ̂₀ = ofFrame (frameH Λ̂₀) (frameE Λ̂₀) (frameF Λ̂₀)`
    (`ofFrame_frame`); express `f₀(1.5)`, `q`, `p` through the components and verify the polynomial
    identity above.
 3. `arcParams_rel`: step 2 with `det Λ₁ = 9/4` and `f₀ = f₀(1.5)` (`arcF0_eq_reducedHam`).
 4. `arcParams_injOn`: `ε`, `Y` and (1.3) give `ρ₀, ρ₁, ρ₂`, hence `X₀` (traceless, `ρ`'s determine
-   `a, b, c`); step 1 gives `Λ̂₀` and `Λ₁ = Λ̂₀ - (3/2) J`; `frame_section_costateR` gives
-   `Λ_R` (traceless).
+   `a, b, c`; in Lean through the frame, `X₀ = ofFrame (-ε) (-2εY) (εY'/2)`, `frame_state`);
+   step 1 gives `Λ̂₀` and `Λ₁ = Λ̂₀ - (3/2) J`; `frame_section_costateR` gives `Λ_R` (traceless).
 
 Checked numerically (`notes/n4f/check1.py`: `R = 0` at a chart point near `W^u`, the identity at a
 generic traceless point, the frame of `Λ̂₀`; `notes/n4f/check2.py`: `R = 0` at Poincaré images).
@@ -90,6 +100,30 @@ namespace SmoothedPolygons
 open Set Filter Topology
 
 variable {q : iso_PhasePt}
+
+/-! ### Helpers: `Λ̂₀` and `Λ₁` in the frame -/
+
+private lemma n4d_ofFrame_sub_smul (a b c a' b' c' r : ℝ) :
+    ofFrame a b c - r • ofFrame a' b' c' = ofFrame (a - r * a') (b - r * b') (c - r * c') := by
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [ofFrame] <;> ring
+
+private lemma n4d_arcVe_eq (q : iso_PhasePt) :
+    arcVe q.1 = ofFrame (frameE q.1) (-frameE q.1 ^ 2 / arcEps q) (arcEps q) := rfl
+
+private lemma n4d_arcVf_eq (q : iso_PhasePt) :
+    arcVf q.1 = ofFrame (frameF q.1) (arcEps q) (-frameF q.1 ^ 2 / arcEps q) := rfl
+
+/-- `Λ̂₀ = Λ₁(0) + (3/2) J` is traceless when `Λ₁(0)` is. -/
+private lemma n4d_trace_reducedCostate (hL : q.2.1.trace = 0) :
+    (q.2.1 + (3 / 2 : ℝ) • J).trace = 0 := by
+  simp [Matrix.trace_add, hL, J, Matrix.trace_fin_two]
+
+/-- `Y' = (1 + ε²)/(ε² Y)` ((1.3)). -/
+private lemma n4d_arcY'_eq (hX : IsStarState q.1) :
+    arcY' q = (1 + arcEps q ^ 2) / (arcEps q ^ 2 * arcY q) := by
+  rw [← arcParams_Y' hX]
+  rfl
 
 /-- **The frame of `Λ̂₀ = Λ₁(0) + (3/2) J` on a section point**, in the parameters (proof.md §2.1;
 `notes/n4/relation.py`): with `κ = 1 + ε²`,
@@ -105,26 +139,112 @@ theorem frame_reducedCostate (hq : IsArcSectionPt q) :
       frameF (q.2.1 + (3 / 2 : ℝ) • J) =
         -(√3 * (arcY q ^ 2 * arcEps q ^ 2 * arcP q - (1 + arcEps q ^ 2) ^ 2 * arcF0 q)) /
           (2 * arcY q ^ 2) := by
-  sorry
+  have hX := hq.2
+  have he := arcEps_pos hX
+  have hY := one_lt_arcY hX
+  have hs : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have hs0 : √3 ≠ 0 := by positivity
+  obtain ⟨-, hxe, hxf, -⟩ := frame_state hX
+  obtain ⟨lh, le, lf, hΛ⟩ : ∃ a b c, q.2.1 + (3 / 2 : ℝ) • J = ofFrame a b c :=
+    ⟨_, _, _, (ofFrame_frame (n4d_trace_reducedCostate hq.1.1.2.1)).symm⟩
+  rw [arcF0_eq_reducedHam hq]
+  unfold arcQ arcP reducedHam
+  rw [hΛ, n4d_arcVe_eq, n4d_arcVf_eq, hxe, hxf, n4d_state_eq hX]
+  simp only [traceForm_ofFrame, frameH_ofFrame, frameE_ofFrame, frameF_ofFrame]
+  rw [n4d_arcY'_eq hX]
+  set e := arcEps q
+  set Y := arcY q
+  refine ⟨?_, ?_, ?_⟩
+  · linear_combination (norm := skip)
+      ((4 * Y ^ 2 * e ^ 4 * lf + 4 * Y * e ^ 4 * lh - e ^ 4 * le - 2 * e ^ 2 * le - le) /
+        (12 * Y * e ^ 2)) * hs
+    field_simp
+    ring
+  · linear_combination (norm := skip) (-le / 3) * hs
+    field_simp
+    ring
+  · linear_combination (norm := skip)
+      (-(e ^ 2 + 1) * (4 * Y ^ 2 * e ^ 2 * lf + 4 * Y * e ^ 2 * lh - e ^ 2 * le - le) /
+        (12 * Y ^ 2 * e ^ 2)) * hs
+    field_simp
+    ring
 
 /-- **The quadric relation as an identity** (proof.md (2.1), `notes/n4/relation.py`): for a phase
 point with `X₀` a star state and `Λ₁` traceless, with `f₀` given by (1.5),
 `R(ε, Y, f₀, q, p) = (4Y²/3)(9/4 - det Λ₁)`. The identity needs `√3² = 3`: see the module
 docstring for the `linear_combination` cofactor `K` (with `h3 : √3 ^ 2 = 3`) and for the
-substitution `λ = (frame of Λ̂₀)/√3`, after which it is `field_simp; ring`. -/
+substitution `λ = (frame of Λ̂₀)/√3`, after which it is `field_simp; ring`. The proof is one
+`linear_combination` of `h3` with the cofactor `K/(36ε⁴s²) - (4Y²/3) K₂` of the module docstring
+(`s = √3`, `Λ̂₀ = ofFrame l_h l_e l_f`). -/
 theorem arcParams_rel_identity (hX : IsStarState q.1) (hL : q.2.1.trace = 0) :
     (⟨arcEps q, arcY q, -(√3 / (3 * arcEps q ^ 3 * arcY' q)) * reducedHam q.2.1 q.1, 0,
         arcQ q, arcP q⟩ : ArcParams).rel =
       4 * arcY q ^ 2 / 3 * (9 / 4 - q.2.1.det) := by
-  sorry
+  have he := arcEps_pos hX
+  have hY := one_lt_arcY hX
+  have hs : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have hs0 : √3 ≠ 0 := by positivity
+  obtain ⟨-, hxe, hxf, -⟩ := frame_state hX
+  obtain ⟨lh, le, lf, hΛ⟩ : ∃ a b c, q.2.1 + (3 / 2 : ℝ) • J = ofFrame a b c :=
+    ⟨_, _, _, (ofFrame_frame (n4d_trace_reducedCostate hL)).symm⟩
+  -- `Λ₁ = Λ̂₀ - (3/2) J` in the frame
+  have hdet : q.2.1.det = -((lh - 3 / 2 * -(1 / √3)) ^ 2 +
+      (le - 3 / 2 * -(4 / √3)) * (lf - 3 / 2 * (1 / √3))) := by
+    rw [eq_sub_of_add_eq hΛ, frame_controlMatrix.2.2.2, n4d_ofFrame_sub_smul, det_ofFrame]
+  rw [hdet]
+  simp only [ArcParams.rel]
+  unfold arcQ arcP reducedHam
+  rw [hΛ, n4d_arcVe_eq, n4d_arcVf_eq, hxe, hxf, n4d_state_eq hX]
+  simp only [traceForm_ofFrame]
+  rw [n4d_arcY'_eq hX]
+  set e := arcEps q
+  set Y := arcY q
+  -- the cofactor `K/(36ε⁴s²) - (4Y²/3) K₂` of `s² - 3` (module docstring)
+  linear_combination (norm := skip)
+    ((√3 ^ 2 * (4 * Y ^ 2 * e ^ 4 * lf + 4 * Y * e ^ 4 * lh + (1 - e ^ 4) * le) ^ 2 -
+        3 * (4 * Y ^ 2 * e ^ 4 * lf + 4 * Y * (e ^ 4 + e ^ 2) * lh - (1 + e ^ 2) ^ 2 * le) *
+          (4 * Y ^ 2 * e ^ 4 * lf + 4 * Y * (e ^ 4 + e ^ 2) * lh - (1 + e ^ 2) ^ 2 * le +
+            4 * e ^ 2 * √3 * (Y - 2))) / (36 * e ^ 4 * √3 ^ 2) -
+      4 * Y ^ 2 / 3 * (9 / (4 * √3 ^ 2) - lh / √3 + le / (2 * √3) - 2 * lf / √3)) * hs
+  field_simp
+  ring
 
 /-- **(2.1)**: the parameters of a section point satisfy the quadric relation `R = 0`. -/
 theorem arcParams_rel (hq : IsArcSectionPt q) : (arcParams q).rel = 0 := by
-  sorry
+  have h := arcParams_rel_identity hq.2 hq.1.1.2.1
+  rw [hq.1.2, sub_self, mul_zero] at h
+  rw [← h]
+  simp only [ArcParams.rel, arcParams, arcF0_eq_reducedHam hq]
 
 /-- **A section point is determined by its parameters** (proof.md §2.1): `arcParams` is injective
 on section points. -/
 theorem arcParams_injOn : Set.InjOn arcParams {q | IsArcSectionPt q} := by
-  sorry
+  intro q hq q' hq' h
+  have hε : arcEps q = arcEps q' := congrArg ArcParams.eps h
+  have hY : arcY q = arcY q' := congrArg ArcParams.Y h
+  have hf : arcF0 q = arcF0 q' := congrArg ArcParams.f0 h
+  have hqq : arcQ q = arcQ q' := congrArg ArcParams.q h
+  have hp : arcP q = arcP q' := congrArg ArcParams.p h
+  have hY' : arcY' q = arcY' q' := by
+    rw [← arcParams_Y' hq.2, ← arcParams_Y' hq'.2, h]
+  -- `X₀` by `(ε, Y)` (Proposition 1.1, (1.3))
+  have hX : q.1 = q'.1 := by
+    rw [n4d_state_eq hq.2, n4d_state_eq hq'.2, hε, hY, hY']
+  -- `Λ̂₀` by `(ε, Y, f₀, q, p)` (`frame_reducedCostate`)
+  have hL : q.2.1 = q'.2.1 := by
+    have e1 := frame_reducedCostate hq
+    have e2 := frame_reducedCostate hq'
+    have hΛ : q.2.1 + (3 / 2 : ℝ) • J = q'.2.1 + (3 / 2 : ℝ) • J := by
+      rw [← ofFrame_frame (n4d_trace_reducedCostate hq.1.1.2.1),
+        ← ofFrame_frame (n4d_trace_reducedCostate hq'.1.1.2.1), e1.1, e1.2.1, e1.2.2, e2.1,
+        e2.2.1, e2.2.2, hε, hY, hf, hqq, hp]
+    exact add_right_cancel hΛ
+  -- `Λ_R` by the linear conditions of the section (`frame_section_costateR`)
+  have hR : q.2.2 = q'.2.2 := by
+    have e1 := frame_section_costateR hq
+    have e2 := frame_section_costateR hq'
+    rw [← ofFrame_frame hq.1.1.2.2.1, ← ofFrame_frame hq'.1.1.2.2.1, e1.1, e1.2.1, e1.2.2,
+      e2.1, e2.2.1, e2.2.2, hε, hX, hL]
+  exact Prod.ext hX (Prod.ext hL hR)
 
 end SmoothedPolygons
