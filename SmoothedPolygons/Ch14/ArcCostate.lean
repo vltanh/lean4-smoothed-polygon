@@ -40,6 +40,12 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
 * `traceForm_iso_vfM_arcVe`, `traceForm_iso_vfM_arcVf`:
   `⟨M(t), V_e⟩ = u ⟨Λ₁(0), V_e⟩ - (√3/2)(2x_e + x_e² u/ε + 4ε/u)` and
   `⟨M(t), V_f⟩ = u⁻¹ ⟨Λ₁(0), V_f⟩ + (√3/2)(-2x_f + ε u + 4x_f²/(ε u))`.
+* `iso_vfΛ₁_one_eq` (`notes/inv/inv.md` (1.4), the first step of its Theorem 1): the costate has
+  constant coefficients in the moving eigenbasis,
+  `Λ₁(t) = α (X(t) + P) + β u⁻² V_e(X(t)) + γ u² V_f(X(t))`, `α = 2ε² ⟨Λ₁(0), X₀ + P⟩`,
+  `β = ε² ⟨Λ₁(0), V_f⟩`, `γ = ε² ⟨Λ₁(0), V_e⟩`. On a section point the coefficients are explicit
+  in the parameters (`iso_vfΛ₁_one_eq_arcParams`, `SmoothedPolygons/Ch14/ArcPoincareMap.lean`);
+  this gives the parameters of the image without the quadratures and without Lemma 2.3.
 
 ## Proofs (the route, proof.md §1.3)
 
@@ -81,6 +87,7 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
    ⟨Λ₁(0), e^{tA} V_e e^{-tA}⟩ = u ⟨Λ₁(0), V_e⟩`; `e^{tP} V_e e^{-tP} = x_e H - 2ω x_e² u E +
    ε u⁻¹ F` (`exp_conj_ofFrame`), and `⟨J, a H + b E + c F⟩ = (-2a + b - 4c)/√3` ((1.2),
    `traceForm_ofFrame`). The same for `V_f` (`e^{tP} V_f e^{-tP} = x_f H + ε u E - 2ω x_f² u⁻¹ F`).
+7. `iso_vfΛ₁_one_eq` (inv.md Theorem 1 (i)): see its docstring.
 
 All of these were checked against a literal model of the Lean definitions (matrix exponentials,
 the quadratures of `iso_vfC` and `iso_vfΛR` by numerical integration): `notes/n4f/check1.py`.
@@ -210,6 +217,43 @@ theorem traceForm_iso_vfM_arcVf (hX : IsStarState q.1) (t : ℝ) :
       Real.exp (t / arcEps q) * traceForm q.2.1 (arcVf q.1) +
         √3 / 2 * (-2 * frameF q.1 + arcEps q * Real.exp (-t / arcEps q) +
           4 * frameF q.1 ^ 2 / arcEps q * Real.exp (t / arcEps q)) := by
+  sorry
+
+/-! ### The costate in the moving eigenbasis (`notes/inv/inv.md` (1.4)) -/
+
+/-- **(1.4): the costate along the `e₂`-arc in the moving eigenbasis** (`notes/inv/inv.md`
+Theorem 1 (i)). For `X₀` a star state and `Λ₁(0)` traceless, with `u = e^{-t/ε}`, `A = X₀ + P`,
+`Λ₁(t) = α (X(t) + P) + β u⁻² V_e(X(t)) + γ u² V_f(X(t))`, where `α = 2ε² ⟨Λ₁(0), A⟩`,
+`β = ε² ⟨Λ₁(0), V_f⟩` and `γ = ε² ⟨Λ₁(0), V_e⟩`. No quadrature and no logarithm: the costate is
+an algebraic function of `u`. On a section point `α, β, γ` are explicit in the parameters
+(`iso_vfΛ₁_one_eq_arcParams`, `SmoothedPolygons/Ch14/ArcPoincareMap.lean`).
+
+Route (inv.md §1, proof of Theorem 1 (i)):
+1. *The basis.* In the frame `A = ofFrame (-ε - ω) x_e x_f` (`frame_state`, `iso_vfP_one_eq`,
+   `ω = 1/(2ε)`), `V_e = ofFrame x_e (-x_e²/ε) ε`, `V_f = ofFrame x_f ε (-x_f²/ε)`; with
+   `x_e x_f = -(1 + ε²)` and `traceForm_ofFrame`: `⟨A, A⟩ = 1/(2ε²)`, `⟨V_e, V_f⟩ = 1/ε²`, and
+   `⟨A, V_e⟩ = ⟨A, V_f⟩ = ⟨V_e, V_e⟩ = ⟨V_f, V_f⟩ = 0`. So for traceless `Λ₁(0)`
+   (`ofFrame_frame`), `Λ₁(0) = α A + β V_e + γ V_f` (compare the three frame components:
+   `field_simp`, `ring`, with `x_e = -2εY`, `x_f = εY'/2`, `ε² Y Y' = 1 + ε²`).
+2. *The flow.* `Λ₁(t) = g⁻¹ Λ₁(0) g`, `g = e^{tA} e^{-tP}` (`iso_vfΛ₁`, `iso_vfG`, `constControlG`),
+   so `Λ₁(t) = e^{tP} (e^{-tA} Λ₁(0) e^{tA}) e^{-tP}` (as in `iso_vfM_eq`:
+   `e^{sB} e^{-sB} = 1`).
+3. `e^{-tA} A e^{tA} = A`; `e^{-tA} V_e e^{tA} = u⁻¹ V_e`, `e^{-tA} V_f e^{tA} = u V_f`
+   (`exp_conj_arcVe`, `exp_conj_arcVf` at `-t`).
+4. `Ad e^{tP}` in the frame (`exp_conj_ofFrame`): `A ↦ ofFrame (-ε - ω) (u x_e) (u⁻¹ x_f) =
+   X(t) + P` (`iso_vfX_one_eq`); `V_e ↦ ofFrame x_e (-u x_e²/ε) (u⁻¹ ε) = u⁻¹ arcVe (X(t))` and
+   `V_f ↦ ofFrame x_f (u ε) (-u⁻¹ x_f²/ε) = u arcVf (X(t))` (the frame of `X(t)` is
+   `(-ε, u x_e, u⁻¹ x_f)` and `ρ₁(X(t)) = ε`, `ρ_iso_vfX_one`).
+5. Collect: `u⁻² = e^{2t/ε}`, `u² = e^{-2t/ε}`.
+Checked exactly against the literal definitions (matrix exponentials `cosh(ωt) I + ω⁻¹ sinh(ωt) M`
+for `M² = ω² I`): `notes/n4s2/lit.py` (symbolic) and `lit_exact.py`; inv.md `verify.py` §1. -/
+theorem iso_vfΛ₁_one_eq (hX : IsStarState q.1) (hL : q.2.1.trace = 0) (t : ℝ) :
+    iso_vfΛ₁ 1 q t =
+      (2 * arcEps q ^ 2 * traceForm q.2.1 (q.1 + iso_vfP 1 q)) • (iso_vfX 1 q t + iso_vfP 1 q) +
+        (arcEps q ^ 2 * traceForm q.2.1 (arcVf q.1) * Real.exp (2 * t / arcEps q)) •
+          arcVe (iso_vfX 1 q t) +
+        (arcEps q ^ 2 * traceForm q.2.1 (arcVe q.1) * Real.exp (-2 * t / arcEps q)) •
+          arcVf (iso_vfX 1 q t) := by
   sorry
 
 end SmoothedPolygons

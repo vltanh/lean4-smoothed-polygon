@@ -1,6 +1,7 @@
 module
 
 public import SmoothedPolygons.Ch14.ArcPoincareMap
+public import SmoothedPolygons.Ch14.ArcStepExit
 public import SmoothedPolygons.Ch14.UnstableCurve
 
 /-!
@@ -35,6 +36,9 @@ of `F(log Y)`, by the exact structure of the arcs (see `SmoothedPolygons/Ch14/Ar
   (3) `arcLeavesStarDomain_of_arc`: `r > 0` ∧ P1 ∧ P2 ∧ P4 ∧ `F(log Y) ≥ 0` ⟹
   `ArcLeavesStarDomain q` (with `T = ε log Y`), and `arcLeavesStarDomain_of_cusp`:
   `r > 0` ∧ P4 ∧ (the cusp criterion `A + min(B, 0) > Y`) ⟹ `ArcLeavesStarDomain q`;
+  `arcLeavesStarDomain_of_Y_ge` (`notes/inv/inv.md` Lemma 6, the exit criterion of the proof of
+  (INV)): `r > 0` ∧ P1 ∧ P4 ∧ `Y ≥ 16/5` ∧ `f₀ ≥ q (1 - 1/Y)` ⟹ `ArcLeavesStarDomain q` (no sign
+  condition on `q`);
   (4) `arc_propagation` (with (3.1)): in case (2), `F(q)` is a section point with P1 and P4,
   `ε_new < ε`, `r(F q) > 0` and `r(F q)/r(q) > λ_lb`.
 * `arcRegion` (`𝒢*`) and `radius_lt_of_mem_arcRegion`: on `𝒢*`, in case (2), `r(F q) > r(q)`.
@@ -65,7 +69,8 @@ Throughout, `q` is a section point (`IsArcSectionPt`), so `H(e₂) = H(e₃) = 0
    inside the star domain, `f < 0` (`ArcParams.tauSw_spec`), so `H(e₁) > H(e₂)`.
 5. (3): `T = ε log Y > 0` (`arcExitTime_pos`), `X(T)` is not a star state
    (`ρ₂_iso_vfX_one_arcExitTime`); on `(0, T)`, `f > 0` by `ArcParams.f_pos_of_F_log_nonneg`
-   (resp. `ArcParams.f_pos_of_cusp`) and `g > 0` by `ArcParams.g_pos`.
+   (resp. `ArcParams.f_pos_of_cusp`, resp. `ArcParams.f_pos_of_Y_ge` for
+   `arcLeavesStarDomain_of_Y_ge`) and `g > 0` by `ArcParams.g_pos`.
 6. (4): `arcParams_reinPoincare`, `radius_reinPoincare` (Theorem 2.1, with step 3 for
    `SwitchesBeforeExit`) and `ArcParams.step_spec` (`Y > 1` by `one_lt_arcY`, `Y' > 2` from
    `r > 0`, `g₀ = 0`); `arcParams_radius` translates `radius` to `X₁₁`.
@@ -126,6 +131,24 @@ theorem arcLeavesStarDomain_of_arc (hq : IsArcSectionPt q) (hr : 0 < q.1 0 0)
 theorem arcLeavesStarDomain_of_cusp (hq : IsArcSectionPt q) (hr : 0 < q.1 0 0)
     (h4 : 0 < arcP q) (hc : arcY q < (arcParams q).A + min (arcParams q).B 0) :
     ArcLeavesStarDomain q := by
+  sorry
+
+/-- **inv.md Lemma 6** (the exit criterion): `r > 0` ∧ P1 ∧ P4 ∧ `Y ≥ 16/5` ∧
+`f₀ ≥ q (1 - 1/Y)` ⟹ `ArcLeavesStarDomain q`, with `T = ε log Y`. No sign condition on `q` (the
+point is an image `F(q₀)`, where P2 may fail). In the proof of (INV) it is applied at `F(q₀)` when E
+fails there: then `Y ≥ 16/5` by Proposition 4 (`ArcParams.YNew_ge`) and `f₀ ≥ q (1 - 1/Y)` by
+Proposition 5 (`ArcParams.qNew_le_f0New`).
+
+Route: as `arcLeavesStarDomain_of_arc` (step 5 of the module docstring), with
+`ArcParams.f_pos_of_Y_ge` (`f > 0` on `[0, log Y)`) in place of `f_pos_of_F_log_nonneg`:
+`T = ε log Y > 0`, `X(T)` is not a star state (`ρ₂ = 0`), and on `(0, T)` the state is a star
+state (`isStarState_iso_vfX_one_iff`), `N₂₁ = (8ε³/√3) f(t/ε) > 0` and
+`N₂₃ = (8ε³/√3) g(t/ε) > 0` (`arc_normalForm`, `ArcParams.g_pos` with `g₀ = 0`, `p > 0`,
+`Y' > 2` from `r > 0`), so `χ₂₁, χ₂₃ > 0` (`switchingFn_pos_iff`), i.e. `e₂` is the strict
+maximizer. -/
+theorem arcLeavesStarDomain_of_Y_ge (hq : IsArcSectionPt q) (hr : 0 < q.1 0 0)
+    (h1 : 0 < arcF0 q) (h4 : 0 < arcP q) (hY : 16 / 5 ≤ arcY q)
+    (hfq : arcQ q * (1 - 1 / arcY q) ≤ arcF0 q) : ArcLeavesStarDomain q := by
   sorry
 
 /-- **Proposition 3.4 (4)** (propagation) and (3.1): in case (2), `F(q)` is a section point with

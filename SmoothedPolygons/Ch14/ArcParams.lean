@@ -15,8 +15,10 @@ Mathematica and reads off that it reaches the boundary of the star domain (Figur
 TeX 11951–11991; not certified, REPORT.md E88). The formalization does not follow the curve: it
 solves the Reinhardt flow along an `e₂`-arc in closed form (four-term exponential sums), turns the
 Reinhardt–Poincaré map into an explicit map of the arc parameters below, and proves N4 from the
-open single-step statement (INV) (`ArcRegionInvariant`). This file is the part of that argument
-that involves only real numbers.
+single-step statement (INV) (`ArcRegionInvariant`), which is proved in `notes/inv/inv.md` (Lean
+proof in progress: `arcRegionInvariant`, `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`). This file
+is the part of that argument that involves only real numbers; the real-number part of the proof of
+(INV) is in `SmoothedPolygons/Ch14/ArcStepClosed.lean`, `ArcStepRegion.lean`, `ArcStepExit.lean`.
 
 ## The parameters
 
@@ -34,7 +36,10 @@ is parametrized by `(ε, Y, f₀, p)` and a choice of root, and the Reinhardt–
 explicit map `step` (Theorem 2.1, `arcParams_reinPoincare`): with `τ_sw` the switching root of `f`
 (`tauSw`), `u = e^{-τ_sw}` and `k = Y u - 1` (`stepK`),
 `ε_new = k ε`, `Y_new = 1 + (Y' e^{τ_sw} - 1)/k` (equivalently `Y'_new = Y u/k`),
-`f₀,new = g(τ_sw)/k²`, `g₀,new = 0`, `p_new = -f'(τ_sw)/k²`, `q_new` a root of `rel = 0`.
+`f₀,new = g(τ_sw)/k²`, `g₀,new = 0`, `p_new = -f'(τ_sw)/k²`, `q_new` a root of `rel = 0`. Which
+root is settled by Theorem 1 of `notes/inv/inv.md`: with `s = e^{τ_sw}`,
+`q_new = Φ(s)/(Y - s)²` (`ArcParams.qNew`, `arcQ_reinPoincare`), and the other components are
+rational in `s` as well (`ArcParams.step_closed`).
 
 ## Statements (proof.md numbering)
 

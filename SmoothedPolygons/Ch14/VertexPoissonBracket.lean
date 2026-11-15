@@ -9,12 +9,15 @@ import SmoothedPolygons.Ch7.Isolated.Return
 
 `notes/n4/proof.md` Lemma 2.3: for the vertex vector fields `V_u` (`iso_extremalField (vertex u)`,
 `λ_cost = -1`) and the vertex Hamiltonians `H_u` (`phaseHam · (vertex u)`), `L_{V_u} H_u = 0` and
-`L_{V_u} H_v + L_{V_v} H_u = 0`: the Hamiltonian structure of the maximum principle. Used for the
-slope of `p_new` in Theorem 2.1 (`SmoothedPolygons/Ch14/ArcPoincareMap.lean`: the slope of `χ₂₁`
-is the same along the `e₁`- and the `e₂`-flow) and for `SwitchEntersE2` in Proposition 3.4 (1)
-(`SmoothedPolygons/Ch14/ArcConditions.lean`: the slope of `H(e₃) - H(e₂)` along the `e₃`-flow is
-minus the slope of `χ₂₃` along the `e₂`-flow). Part of the reduction of N4 to (INV)
-(`ArcRegionInvariant`).
+`L_{V_u} H_v + L_{V_v} H_u = 0`: the Hamiltonian structure of the maximum principle. Used for
+`SwitchEntersE2` in Proposition 3.4 (1) (`SmoothedPolygons/Ch14/ArcConditions.lean`: the slope of
+`H(e₃) - H(e₂)` along the `e₃`-flow is minus the slope of `χ₂₃` along the `e₂`-flow). proof.md
+also uses it for the slope of `p_new` in Theorem 2.1 (`phaseHamSlope_chi21`: the slope of `χ₂₁`
+is the same along the `e₁`- and the `e₂`-flow), but that is no longer needed: `p_new` follows
+from the closed form (1.4) of `Λ₁(t)` (`arcP_adRinv_vertexFlow`,
+`SmoothedPolygons/Ch14/ArcPoincareMap.lean`, route there, "Simpler route for steps 5–6"). So only
+`phaseHamSlope_e3` (with `hasDerivAt_phaseHam_vertexFlow`) is on the critical path of N4. Part
+of the reduction of N4 to (INV) (`ArcRegionInvariant`).
 
 **Departure from the paper.** The book computes the unstable curve numerically (Figure 14.2,
 TeX 11951–11991); the formalization proves N4 from (INV) by the exact structure of the arcs (see
@@ -50,15 +53,22 @@ trace condition is needed, only `⟨X, Z_u⟩ ≠ 0` and `⟨X, Z_v⟩ ≠ 0`.
 1. `hasDerivAt_phaseHam_vertexFlow`: `iso_vertexFlow_solution` gives the derivative of the flow,
    which is `iso_extremalField (vertex u)` at the current point; then the product and quotient
    rules entrywise (as in `irt_chi_hasDerivAt`, `SmoothedPolygons/Ch7/Isolated/Return.lean`, and
-   `hamiltonian_vertexFlow`, `SmoothedPolygons/Ch14/VertexFlowAnalytic.lean`;
-   `l6d_traceForm_hasDerivAt` there is the product rule for the trace form).
+   `hamiltonian_vertexFlow`, `SmoothedPolygons/Ch14/VertexFlowAnalytic.lean`). The product rule
+   for the trace form there, `l6d_traceForm_hasDerivAt` (VertexFlowAnalytic.lean:347), is
+   **private**: reprove it here as a private helper (about three lines: from
+   `HasDerivAtEntrywise A A' t` and `HasDerivAtEntrywise B B' t`, `h := hA.mul hB`, then
+   `(h 0 0).add (h 1 1)` and `simp [traceForm, Matrix.trace_fin_two]`, `ring`, giving
+   `HasDerivAt (fun s ↦ traceForm (A s) (B s)) (traceForm A' (B t) + traceForm (A t) B') t`).
 2. `phaseHamSlope_eq`: with `X' = [P_u, X]`, `Λ₁' = [Λ₁, X]`,
    `Λ_R' = [P_u, Λ_R] - ⟨Λ_R, P_u⟩[P_u, X] - [Λ̂, X]` (`costateRHS (-1)`): `⟨Λ₁', X⟩ = 0`; the
    quotient rule gives `d(⟨Λ_R, Z_v⟩/⟨X, Z_v⟩) = ⟨Λ_R', P_v⟩ - ⟨Λ_R, P_v⟩⟨X', P_v⟩`; and the
    invariance `⟨[A, B], C⟩ = ⟨A, [B, C]⟩` of the trace form gives
    `⟨[P_u, Λ_R], P_v⟩ = -⟨Λ_R, [P_u, P_v]⟩`, `⟨[Λ̂, X], P_v⟩ = -⟨Λ̂, [P_v, X]⟩`,
    `⟨[P_u, X], P_v⟩ = -⟨X, [P_u, P_v]⟩`. Entrywise: `field_simp` (the denominators `⟨X, Z_u⟩`,
-   `⟨X, Z_v⟩`), `ring`.
+   `⟨X, Z_v⟩`), `ring`. The identity holds for **arbitrary** `2 × 2` matrices `Z_u`, `Z_v` in place
+   of the control matrices (the review, `notes/n4rev/t12_pb_generic.py`, sympy): so the proof can
+   generalize `controlMatrix (vertex u)`, `controlMatrix (vertex v)` to variables `Z`, `W` (with
+   `⟨X, Z⟩ ≠ 0`, `⟨X, W⟩ ≠ 0`) and needs no `√3` arithmetic.
 3. Lemma 2.3 from step 2: swapping `u, v` changes the sign of each of the three terms.
 
 Checked numerically against the literal flow (`notes/n4f/check2.py` at section points,
