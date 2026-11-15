@@ -28,25 +28,21 @@ field as Mathlib files it. Nothing here imports [`External`](../External) or [`S
 | `Analysis/Polynomial/SignNearZero.lean` | a real cubic `a + bt + ct² + dt³` whose first nonzero coefficient is positive is positive on some `(0, ε]` (so near `0⁺` a cubic has the sign of its first nonzero coefficient) | Mathlib (`Mathlib/Analysis/Polynomial/`) |
 | `Analysis/SpecialFunctions/Log/Bounds.lean` | two lower bounds for the real logarithm, partial sums of the series of `log(1 + 1/a)`: `2(s - 1)/(s + 1) ≤ log s` for `s ≥ 1`, and `297/256 < log(16/5)` | Mathlib (`Mathlib/Analysis/SpecialFunctions/Log/Deriv.lean`, next to `Real.hasSum_log_one_add_inv`) |
 | `Dynamics/Stability.lean` | Lyapunov stability, asymptotic stability and instability of a fixed point of a map; invariance of asymptotic stability under a local conjugacy (chart); time reversal turns an asymptotically stable fixed point into an unstable one | Mathlib (`Mathlib/Dynamics/`) |
-| `Dynamics/LinearizedStability.lean` | linearized stability for maps of a finite-dimensional real normed space: a fixed point at which the map is differentiable with a derivative whose complex eigenvalues all have modulus `< 1` is asymptotically stable; `‖A^N‖ < 1` for some `N ≥ 1` from the eigenvalue bound (`ContinuousLinearMap.exists_norm_pow_lt_one`, Gelfand's formula, which now comes from the StableManifold package, `StableManifold.Linear.Spectral`) | Mathlib (`Mathlib/Dynamics/`, `Mathlib/Analysis/Normed/Algebra/`) |
+| `Dynamics/LinearizedStability.lean` | linearized stability for maps of a finite-dimensional real normed space: a fixed point at which the map is differentiable with a derivative whose complex eigenvalues all have modulus `< 1` is asymptotically stable; `‖A^N‖ < 1` for some `N ≥ 1` from the eigenvalue bound (`ContinuousLinearMap.exists_norm_pow_lt_one`, Gelfand's formula, which comes from the StableManifold package, `StableManifold.Linear.Spectral`) | Mathlib (`Mathlib/Dynamics/`, `Mathlib/Analysis/Normed/Algebra/`) |
 | `Dynamics/HyperbolicBox.lean` | an isolating box at a fixed point with an invariant hyperplane, transverse expansion and contraction along the hyperplane: a sequence following the map on any given neighborhood of the point, with transverse coordinate `> 0` tending to `0`, cannot cluster at the point | Mathlib (`Mathlib/Dynamics/`) |
 | `MeasureTheory/Integral/IntervalIntegral/AbsolutelyContinuousFun.lean` | the fundamental theorem of calculus for absolutely continuous functions, in the integral form `f t = f a + ∫ₐᵗ v` of Carathéodory solutions: an absolutely continuous function with derivative `v` almost everywhere is `f a + ∫ₐᵗ v`, and conversely; such a function has derivative `v` almost everywhere (Lebesgue's differentiation theorem, with values in a Banach space) and is continuous; absolute continuity by comparison of increments, and of a `C¹` function along such a curve | Mathlib (`Mathlib/MeasureTheory/Integral/IntervalIntegral/AbsolutelyContinuousFun.lean`) |
 | `MeasureTheory/SpecificCodomains/Pi.lean` | the components of an interval integral of a function with values in `ι → ℝ`, `ι` finite, are the interval integrals of its components | Mathlib (`Mathlib/MeasureTheory/SpecificCodomains/Pi.lean`) |
 
-The general theory of control systems moved to the OptimalControl package
+The general theory of control systems is in the OptimalControl package
 (`https://github.com/vltanh/lean4-optimal-control`), which the project requires at the commit
 pinned in [`lakefile.toml`](../lakefile.toml): control systems with Carathéodory trajectories, Filippov's
-compactness theorem and the existence of optimal controls (formerly
-`Analysis/ODE/ControlSystem.lean`), measurable selection (formerly
-`MeasureTheory/MeasurableSelection.lean`), Lebesgue points, Carathéodory theory, flows and needle
-variations (formerly `Analysis/ODE/Control/`), and supporting cones and Agrachev–Sachkov's Lemma
-12.1 (formerly `Analysis/Convex/Cone/`), together with the maximum principle (formerly
-`External/Pontryagin/`).
+compactness theorem and the existence of optimal controls, measurable selection, Lebesgue points,
+Carathéodory theory, flows and needle variations, and supporting cones and Agrachev–Sachkov's
+Lemma 12.1, together with the maximum principle.
 
 The stable manifold theorem is in the public StableManifold package
 ([vltanh/lean4-stable-manifold](https://github.com/vltanh/lean4-stable-manifold)), required in
-[`lakefile.toml`](../lakefile.toml) (formerly `Dynamics/StableManifold.lean`, statements only):
-local stable and unstable sets, hyperbolic linear maps and their splitting, and the theorem in graph
+[`lakefile.toml`](../lakefile.toml): local stable and unstable sets, hyperbolic linear maps and their splitting, and the theorem in graph
 form, which Theorem A.3.1 of the book ([`SmoothedPolygons/AppA/StableManifold.lean`](../SmoothedPolygons/AppA/StableManifold.lean)) applies; it
 also provides `ContinuousLinearMap.exists_norm_pow_lt_one`, which `Dynamics/LinearizedStability.lean`
 and `Dynamics/HyperbolicBox.lean` use.

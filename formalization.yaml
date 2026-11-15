@@ -282,10 +282,10 @@ status:
     the proof of Theorem 14.4.1 uses, that the global unstable curve over q_out reaches the boundary
     of the star domain (SmoothedPolygons.UnstableCurveLeavesStarDomain, N4), proved as
     unstableCurveLeavesStarDomain from the exact structure of the Reinhardt flow along an arc and an
-    invariant region (arcRegionInvariant). The earlier conditional forms remain as corollaries:
+    invariant region (arcRegionInvariant). The conditional forms are corollaries:
     SmoothedPolygons.theorem16_3_1, on the named hypothesis NoChatteringIntoSingularLocus (the
     switching times of an edge-extremal Pontryagin extremal with the boundary conditions of Problem
-    3.6.2 do not accumulate at a time where its lift meets the singular locus), now proved
+    3.6.2 do not accumulate at a time where its lift meets the singular locus), which is proved
     (noChatteringIntoSingularLocus, from Theorems 16.4.1 and 14.4.1 along the book's last step,
     E89); theorem16_3_1_of_theorem14_4_1, on Theorem 14.4.1 and the three facts; and
     theorem16_1_1, theorem16_2_1 and theorem16_4_1, on the three facts. Nothing is assumed.
@@ -303,20 +303,18 @@ status:
     corrected form (REPORT.md, E1); Theorem 7.7.1 is false read literally and is proved up to time
     translation, for terminal times near t_f (E32); Lemma 3.1.8 and the existence claim of Theorem
     6.1.1 are proved with a missing hypothesis added (E34, E35); the user approved the four
-    corrected statements. Also proved (fourth round, the first layer of a plan for Chapters 5 and
-    8-16): the claim of Sections 6.2 and 6.6, used in Proposition 8.1.3, that every global
+    corrected statements. Also proved: the claim of Sections 6.2 and 6.6, used in Proposition 8.1.3, that every global
     minimizer of the Reinhardt control problem lifts to a Pontryagin extremal
     (SmoothedPolygons.exists_isPontryaginExtremal_of_isReinhardtMinimizer), with the boundary
     conditions written without two equations made redundant by first integrals (E21), and Remark
-    6.6.1, stated in the book without proof (E38). Also proved (fifth round, the second layer): the
-    existence of a global minimizer of the Reinhardt control problem (Section 6.1,
+    6.6.1, stated in the book without proof (E38). Also proved: the existence of a global minimizer of the Reinhardt control problem (Section 6.1,
     SmoothedPolygons.exists_isReinhardtMinimizer; the book's argument repaired with Filippov's
     theorem under a closed state constraint, E46), the converse of Problem 3.6.2 for trajectories
     of winding number one (E15; false for higher winding), the identification of the global
     minimizers with Reinhardt's K_min, which the book uses without proof (E47), and their
     combination: a global minimizer exists, lifts to a Pontryagin extremal and bounds a K_min
-    (SmoothedPolygons.exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk). Also proved
-    (sixth round, the third layer): Chapter 8 and Corollary A.1.3 (stated for t >= 0, with the
+    (SmoothedPolygons.exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk). Also proved:
+    Chapter 8 and Corollary A.1.3 (stated for t >= 0, with the
     two-sided form that Chapter 8 uses, E61); Proposition 8.1.3, every global minimizer is edge
     extremal (the principle of optimality made precise, E48); Theorem 8.1.4 for every extremal of
     the edge problem (E49); Remark 8.1.6 with the signs of both costates reversed (E51); Lemma 8.2.1
@@ -329,20 +327,19 @@ status:
     that a global minimizer is bang-bang with finitely many switches on every interval on which its
     lift avoids the singular locus
     (SmoothedPolygons.isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus). Also
-    proved (seventh round, the fourth layer): Chapter 13, the Fuller system for triangular control,
+    proved: Chapter 13, the Fuller system for triangular control,
     with Lemma 13.5.2 (SmoothedPolygons.lemma13_5_2: exactly two fixed points of the
     Fuller-Poincare map at which the Hamiltonian vanishes, q_out and q_in = tau(q_out), with
     certified bounds 6.27 < r_scale < 6.28 and 7.4 < t_sw < 7.41 in place of the book's
     approximations) and Lemma 13.5.5 (SmoothedPolygons.lemma13_5_5: q_out asymptotically stable,
     q_in unstable), whose Mathematica computation is replaced by an exact Jacobian and a certified
     eigenvalue bound (E68); Remark 13.5.3; and the verifiable part of Remark 13.5.4 (E69). Also
-    proved (eighth round, the fifth layer): Chapter 15, with Proposition 15.2.2
+    proved: Chapter 15, with Proposition 15.2.2
     (SmoothedPolygons.proposition15_2_2: the cells cover the quotient, with their first controls
     and the vanishing limiting switching times on their faces), the involution tau o F at
     switching points (E73), and Remark 15.3.1 with q_in and q_out swapped back
     (SmoothedPolygons.remark15_3_1, remark15_3_1_segment; r2 = 2 - sqrt 3 exactly, E75); and,
-    on the three facts, Theorems 16.1.1 and 16.2.1 (above). Also proved (ninth round, the sixth
-    layer): Lemma 10.1.1; Chapter 14 up to Section 14.3, with the chart of Section 14.1 and its
+    on the three facts, Theorems 16.1.1 and 16.2.1 (above). Also proved: Lemma 10.1.1; Chapter 14 up to Section 14.3, with the chart of Section 14.1 and its
     mirror image at q_in (E81, E87), the asymptotics of Section 14.2 (Lemmas 14.2.3-14.2.4 by a comparison of
     differential equations, E84), Lemma 14.3.1 (SmoothedPolygons.lemma14_3_1: the
     Reinhardt-Poincare map extends to an analytic diffeomorphism across the exceptional divisor,
@@ -352,8 +349,7 @@ status:
     14.3.4 (in a mirrored chart, E87); Theorem A.3.1, the stable manifold theorem, in its local part
     (SmoothedPolygons.theoremA_3_1, E92); and, conditionally on the three facts, Theorem 16.4.1 and
     its time reversal (SmoothedPolygons.theorem16_4_1, theorem16_4_1_reverse; Section 16.4.2 and the
-    passage from a cluster point to a limit repaired, E90, E91). Also proved (tenth round, the
-    seventh layer): Theorem 14.4.1 by the book's proof from N4, with the steps it does not cite
+    passage from a cluster point to a limit repaired, E90, E91). Also proved: Theorem 14.4.1 by the book's proof from N4, with the steps it does not cite
     (the time reversal of Theorem 16.4.1, Lemma 8.3.4 at the first return; E88), its reading for
     locally finitely bang-bang extremals shown to be no restriction
     (SmoothedPolygons.theorem14_4_1_iff_unrestricted); the three facts of Table 16.1 and N4 without
@@ -361,8 +357,8 @@ status:
     hypothesis (above); and part of Proposition 15.3.2 (its second clause,
     SmoothedPolygons.TriFuller.isGeometricPartition_closedBoxTwo, the continuous extensions to two
     of the parts, the clauses that follow from the definitions, and a reduction of the rest to four
-    statements, TriFuller.proposition15_3_2_of_remaining). Not formalized, and by the user's decision
-    (15 November 2026: formalize what the main results need) not planned: Chapter 1; Chapters 9-12
+    statements, TriFuller.proposition15_3_2_of_remaining). Not formalized, by the user's decision
+    (15 November 2026: formalize what the main results need): Chapter 1; Chapters 9-12
     apart from Lemma 10.1.1; Appendix A.1 apart from Corollary A.1.3, Appendices A.2, A.4, A.5,
     A.7-A.10 and B, and the global part of Theorem A.3.1, which no proof uses; within the formalized
     chapters, the
@@ -459,8 +455,7 @@ automation:
         in the tenth round, proofs without computer assistance of the facts that the book reads off
         Mathematica computations, with the computations kept in another language as a reference and
         each proof recorded as a departure, an attempt at such a proof of the unstable-curve fact N4
-        (a research round first), and the scope: formalize what the main results need, with no
-        further layer.
+        (a research round first), and the scope: formalize what the main results need.
   spend_usd: "not tracked"
   notes: >-
     The-Anh Vu-Le requested the formalization, chose its scope in ten rounds (first the
@@ -484,7 +479,7 @@ automation:
     the named hypothesis of Theorem 16.3.1, the one-sided form of the false Theorem 8.3.1, and the
     authors' reading of Theorem 8.2.7; in the tenth round, proofs without computer assistance of the
     computed facts, and the scope of what the main results need). Claude Opus 5.5 wrote the
-    statements, the proofs, the two packages, the audit report and the packaging; independent
+    statements, the proofs, the three packages, the audit report and the packaging; independent
     agents reviewed the statements, the proofs and the report. No person has reviewed the proofs.
     Details and token counts in CREDITS.md.
 
@@ -538,9 +533,8 @@ fidelity:
     E57, the restatement of Theorem 8.3.2 in Chapter 1 drops edge extremality and is false for
     extremals on an interval, and the statement of Chapter 8 is formalized; E58, the balanced disk
     of Remark 8.3.3 is a hypothesis, since a trajectory bounds one only if it winds once; and
-    Theorem 16.3.1 was first proved conditionally on the named hypothesis
-    NoChatteringIntoSingularLocus, which stands for Theorems 16.4.1 and 14.4.1 and is now proved
-    (E60); E65, the statement of Lemma 13.3.2 types
+    Theorem 16.3.1 is also stated on the named hypothesis NoChatteringIntoSingularLocus, which
+    stands for Theorems 16.4.1 and 14.4.1 and is proved (E60); E65, the statement of Lemma 13.3.2 types
     z_j with values in C^3 for C; E66, the identification of C^3 minus 0 with R_{>0} x Xi in
     Section 13.4, which the book calls a diffeomorphism, is only C2 along z2 = 0 (the term |z2|^3
     of phi^6) and is stated as a homeomorphism with phi of class C2, smooth off z2 = 0; E73, the
@@ -767,11 +761,10 @@ fidelity:
     elsewhere, and, for normal lifts, the Reinhardt costate pulled back to the edge); Theorem 8.3.1
     (E56: claims (a)-(c) run directly on each side of t0, and the passage to the control through
     Theorem 8.1.4 moved to the corollary, as the restatement requires); and Theorem 16.3.1 (E60:
-    its last step, Theorems 16.4.1 and 14.4.1, replaced by the named hypothesis, and the set of
-    times at which the lift meets the singular locus, which the book does not handle, handled
-    through Theorem 8.2.3, the transversality conditions and Lemma 8.3.4 at the end of an
-    interval; in the ninth round its last step was derived from Theorems 16.4.1 and 14.4.1 by the
-    book's argument made precise, E89: the costate normalized,
+    the set of times at which the lift meets the singular locus, which the book does not handle,
+    handled through Theorem 8.2.3, the transversality conditions and Lemma 8.3.4 at the end of an
+    interval; its last step derived from Theorems 16.4.1 and 14.4.1 by the book's argument made
+    precise, E89: the costate normalized,
     the extremal extended periodically, the last meeting time before the next one, and the finite
     bang-bang structure glued at the period). In Chapter 13: Lemma 13.2.5 and the descent of the
     Poincare map (E63: Lemmas 13.2.1-13.2.3 assume H_F = 0, which need not hold at z0, so their
@@ -913,39 +906,28 @@ review:
   reviewers:
     - "none (no human review of the proofs)"
   notes: >-
-    The statements were reviewed against the book's TeX source by an independent agent before
-    the proofs were written; the proofs were compared with the book's by two further agents; the
+    Independent agents reviewed the statements against the book's TeX source before the proofs
+    were written, part by part (Chapters 2-4, 6 and 7 with Appendices A.6 and A.11, the maximum
+    principle and Section 6.2, Chapter 5 and
+    Section 6.1, Chapter 8, Chapter 13, Chapter 15 and Sections 16.1-16.2, Chapter 14 with Section
+    16.4 and Appendix A.3, and Theorem 14.4.1 with the reduction of N4). Further agents compared the
+    proofs with the book's, chapter by chapter, and checked the gaps and errors reported, and the
     findings of REPORT.md and its sections on the literature were checked against the TeX source
-    and the cited works by independent agents. In the fourth round an independent agent reviewed
-    the new statements before the proofs, and another compared the proof of the maximum principle
-    with Agrachev and Sachkov's and confirmed the gaps it repairs. In the fifth round an
-    independent agent reviewed the new statements before the proofs, and another compared the
-    formalization with the book's Chapter 5 and Section 6.1 and checked the gaps and errors
-    reported. In the sixth round an independent agent reviewed the new statements before the
-    proofs, the counterexamples to Theorem 8.3.1 as printed were checked independently, and another
-    agent compared the formalization with the book's Chapter 8 and the proof of Theorem 16.3.1 and
-    checked the gaps and errors reported. In the seventh round an independent agent reviewed the
-    Chapter 13 statements before the proofs, and another compared the formalization with the
-    book's Chapter 13 and checked the gaps and errors reported. In the eighth round an independent
-    agent reviewed the Chapter 15 and Section 16.1-16.2 statements before the proofs, another
-    checked the three numerical facts of Theorem 16.1.1 in its own multiple-precision
-    implementation (about 1.1 million evaluations, no violation), and another compared the
-    formalization with the book's Chapter 15 and Sections 16.1-16.2 and checked the gaps and errors
-    reported. In the ninth round an independent agent reviewed the statements of Chapter 14,
-    Section 16.4 and Appendix A.3 before the proofs, with its own numerical checks (it found a
-    general lemma on the division of analytic functions false without a complete space of values,
-    and a lemma of the repair unusable as first stated, both corrected before the proofs), the
-    statements and proofs of the StableManifold package were reviewed by further agents, and
-    another agent compared the formalization with the book's Chapter 14, Sections 16.3-16.4 and
-    Appendix A.3, checked the gaps and errors reported, and found the switching structure after a
-    switch to be a gap of the book. In the tenth round independent agents reviewed the statements of
-    Theorem 14.4.1 and of the reduction of N4 before the proofs (one of them confirmed the written
-    proof of the single-step statement (INV) and assembled it in Lean from the statements), another
-    compared Theorem 14.4.1 and the proofs of the three facts of Table 16.1 with the book and found
-    an interval chain described as written by hand (corrected), and another checked the proof of N4:
-    it re-derived every certificate exactly with sympy, checked the axioms with every module imported
-    with import all, and found no wrong statement and nothing unsound or vacuous. No person has
-    reviewed the proofs.
+    and the cited works. One agent compared the proof of the maximum principle with Agrachev and
+    Sachkov's and confirmed the gaps it repairs; the counterexamples to Theorem 8.3.1 as printed
+    were checked independently; and one agent checked the three numerical facts of Theorem 16.1.1
+    in its own multiple-precision implementation (about 1.1 million evaluations, no violation). The
+    review of Chapter 14, Section 16.4 and Appendix A.3, with its own numerical checks, found a
+    general lemma on the division of analytic functions false without a complete space of values
+    and a lemma of the repair unusable as first stated, both corrected before the proofs, and found
+    the switching structure after a switch to be a gap of the book; the statements and proofs of
+    the StableManifold package were reviewed by further agents. For Theorem 14.4.1 and N4, one
+    agent confirmed the written proof of the single-step statement (INV) and assembled it in Lean
+    from the statements; another compared Theorem 14.4.1 and the proofs of the three facts of Table
+    16.1 with the book and found an interval chain described as written by hand (corrected); and
+    another checked the proof of N4: it re-derived every certificate exactly with sympy, checked the
+    axioms with every module imported with import all, and found no wrong statement and nothing
+    unsound or vacuous. No person has reviewed the proofs.
 
 alignment:
   namespace: "SmoothedPolygonsChallenge"

@@ -175,7 +175,7 @@ thm:mahler	+rem:smoothed-polygon	"A bang-bang trajectory with finitely many swit
 thm:mahler	+sec:existence-opt-control:kmin	the second sentence is about K_min, the first about the minimizer of the control problem: a linear image of K_min is a balanced disk whose boundary trajectory is a global minimizer (§6.1, exists_isReinhardtMinimizer_of_isWorstDisk), which the book takes for granted
 thm:mahler	+lem:no-corner	"the minimizer K_min has no corners" (TeX 12800–12802, the meaning of "the sort described by Reinhardt and Mahler") is Lemma 2.2.5, which the book uses without naming it
 #
-# Layer 7 and the analytic proofs
+# Theorem 14.4.1 and the analytic proofs of Table 16.1
 thm:no-return	+rem:hyperbolic-in	"All switches must be on the unstable curve" (TeX 12004-12005) is the second part of Theorem 16.4.1, time reversed, which the book does not cite (E88): IsChatteringArcOutOf.eventually_mem_localUnstableSet, derived by time reversal from the form into the singular locus, whose switching points lie on the stable curve at q_in of Remark 14.3.4 (the mirrored chart), with no numerical fact
 thm:no-return	+eqn:Xtilde	the unstable curve and its switching points live in the Lie algebra chart (14.1.1) (lieChart, lieChart_spec; the coordinates (r, x̃) of Figure 14.2), which the proof uses without naming it
 thm:no-return	+eqn:LambdaR-linear	a switching point on the unstable curve is identified with its chart point by the uniqueness of the chart (the full rank of (14.1.3), lieChart_lieChartInv), which the proof uses without naming it
