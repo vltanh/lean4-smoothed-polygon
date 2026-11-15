@@ -16,7 +16,7 @@ named numerical facts that the book takes from computations it did not certify:
 * N4, the unstable curve `W^u(q_out)` reaches the boundary of the star domain (Figure 14.2, Layer 7,
   `SmoothedPolygons/Ch14/UnstableCurve.lean`): `UnstableCurveLeavesStarDomain`.
 
-Proof (planned, one line): `theorem16_3_1_of_theorem14_4_1 h₁ h₂ h₃ (theorem14_4_1 h₄)`
+Proof (one line): `theorem16_3_1_of_theorem14_4_1 h₁ h₂ h₃ (theorem14_4_1 h₄)`
 (`SmoothedPolygons/Ch16/NoChattering.lean`, `SmoothedPolygons/Ch14/NoReturnProof.lean`).
 -/
 
@@ -36,7 +36,7 @@ theorem theorem16_3_1_of_numerical_facts (h₁ : DOutContracts) (h₂ : CellTwoE
     (h₃ : BoxSubclaims) (h₄ : UnstableCurveLeavesStarDomain) :
     (∀ (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2), IsReinhardtMinimizer T u g X →
       IsFiniteBangBang 0 T u) ∧
-    ∀ K : Set (Fin 2 → ℝ), IsWorstDisk K → IsSmoothedPolygon K := by
-  sorry
+    ∀ K : Set (Fin 2 → ℝ), IsWorstDisk K → IsSmoothedPolygon K :=
+  theorem16_3_1_of_theorem14_4_1 h₁ h₂ h₃ (theorem14_4_1 h₄)
 
 end SmoothedPolygons

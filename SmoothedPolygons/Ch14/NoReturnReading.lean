@@ -11,8 +11,8 @@ public import SmoothedPolygons.Ch8.FiniteBangBang
 `Theorem14_4_1` (`SmoothedPolygons/Ch14/NoReturn.lean`) reads "a trajectory of the Reinhardt
 system" (Theorem 14.4.1, Hales–Vajjha, *Packings of Smoothed Polygons*, TeX 11995–12002) as an
 extremal on `[a, c]` (`λ_cost = -1`) that is bang-bang with finitely many switches on every compact
-subinterval of `(a, c)`. The module docstring there leaves open whether the statement without that
-hypothesis has a counterexample. It has none: **the two statements are equivalent**
+subinterval of `(a, c)`. Whether the statement without that hypothesis has a counterexample was
+left open when it was stated. It has none: **the two statements are equivalent**
 (`theorem14_4_1_iff_unrestricted`).
 
 ## Why
@@ -41,12 +41,11 @@ clause inside `IsChatteringArcOutOf` / `IsChatteringArcInto` is likewise a conse
 Theorem 8.3.2 (the lift avoids the singular locus on the open arc); it is kept there because the
 switching sequence `τ` is part of the statement.
 
-## Proof (planned)
+## Proof
 
 `→`: the argument above (first statement: `exists_first_mem_singularLocus`, `IsExtremalOn.mono`,
 `theorem8_3_2` with `isEdgeExtremalOn_of_ne_zero` for `α < β`, the empty case `β ≤ α` directly;
 second statement: the reflection, as in `theorem14_4_1_in`). `←`: drop the hypothesis.
-Size: 100–150 lines.
 -/
 
 @[expose] public section
@@ -71,6 +70,56 @@ theorem theorem14_4_1_iff_unrestricted : Theorem14_4_1 ↔
       IsChatteringArcInto b c u g X Λ₁ ΛR τ →
       TendstoModVT (switchAng X Λ₁ ΛR τ) (ang (tau qOutCart)) →
       ∀ t ∈ Ico a c, (g t, Λ₁ t, X t, ΛR t) ∉ singularLocus := by
-  sorry
+  constructor
+  · intro hT
+    -- The first statement without the finite bang-bang hypothesis.
+    have first : ∀ (a b c : ℝ) (u : ℝ → Fin 3 → ℝ) (g X Λ₁ ΛR : ℝ → Mat2) (τ : ℕ → ℝ),
+        IsExtremalOn a c u g X Λ₁ ΛR (-1) → b ∈ Ioc a c →
+        IsChatteringArcOutOf a b u g X Λ₁ ΛR τ →
+        TendstoModVT (switchAng X Λ₁ ΛR τ) (ang qOutCart) →
+        ∀ t ∈ Ioc a c, (g t, Λ₁ t, X t, ΛR t) ∉ singularLocus := by
+      intro a b c u g X Λ₁ ΛR τ hext hb hout hconv t ht hmem
+      have hoff := hout.2.2.1
+      have htb : b < t := by
+        by_contra hcon
+        exact hoff t ⟨ht.1, not_lt.1 hcon⟩ hmem
+      -- The first meeting time `s ∈ (b, t]`; the lift is off the singular locus on `(a, s)`.
+      obtain ⟨s, hs, hsmem, hsoff⟩ :=
+        hext.exists_first_mem_singularLocus hb.1.le htb.le ht.2 (hoff b ⟨hb.1, le_rfl⟩) hmem
+      have has : a < s := hb.1.trans hs.1
+      have hoff' : ∀ r ∈ Ioo a s, (g r, Λ₁ r, X r, ΛR r) ∉ singularLocus := by
+        intro r hr
+        rcases le_or_gt r b with hrb | hrb
+        · exact hoff r ⟨hr.1, hrb⟩
+        · exact hsoff r ⟨hrb.le, hr.2⟩
+      -- Theorem 8.3.2 on compact subintervals of `(a, s)`.
+      have hbb' : ∀ α β, a < α → β < s → IsFiniteBangBang α β u := by
+        intro α β hα hβ
+        rcases lt_or_ge α β with hαβ | hβα
+        · have hsub := hext.mono hα.le hαβ (hβ.le.trans (hs.2.trans ht.2))
+          exact theorem8_3_2 hsub (hsub.isEdgeExtremalOn_of_ne_zero (by norm_num))
+            fun r hr ↦ hoff' r ⟨hα.trans_le hr.1, hr.2.trans_lt hβ⟩
+        · exact ⟨∅, fun r hr _ ↦ absurd (hr.1.trans hr.2) (not_lt.2 hβα)⟩
+      -- `Theorem14_4_1` on `[a, s]` (with the same `b`) at `s`: a contradiction.
+      exact hT.1 a b s u g X Λ₁ ΛR τ (hext.mono le_rfl has (hs.2.trans ht.2)) ⟨hb.1, hs.1.le⟩
+        hbb' hout hconv s ⟨has, le_rfl⟩ hsmem
+    refine ⟨first, ?_⟩
+    -- The second statement: the first for the reflected extremal, as in `theorem14_4_1_in`.
+    intro a b c u g X Λ₁ ΛR τ hext hb hin hconv t ht hmem
+    have hang : switchAng (fun t ↦ matTau (X (a + c - t))) (fun t ↦ matTau (Λ₁ (a + c - t)))
+        (fun t ↦ matTau (ΛR (a + c - t))) (fun n ↦ a + c - τ n) =
+          fun n ↦ tau (switchAng X Λ₁ ΛR τ n) := funext (switchAng_reverse (a + c) X Λ₁ ΛR τ)
+    have hconv' := hconv.tau
+    rw [tau_ang_tau_qOutCart] at hconv'
+    have h1 := first a (a + c - b) c _ _ _ _ _ _ hext.reverse
+      ⟨by linarith [hb.2], by linarith [hb.1]⟩ (hin.reverse a) (by rw [hang]; exact hconv')
+      (a + c - t) ⟨by linarith [ht.2], by linarith [ht.1]⟩
+    apply h1
+    simp only [sub_sub_cancel]
+    exact reverse_mem_singularLocus_iff.2 hmem
+  · -- `←`: drop the hypothesis.
+    intro h
+    exact ⟨fun a b c u g X Λ₁ ΛR τ h1 h2 _ h4 h5 ↦ h.1 a b c u g X Λ₁ ΛR τ h1 h2 h4 h5,
+      fun a b c u g X Λ₁ ΛR τ h1 h2 _ h4 h5 ↦ h.2 a b c u g X Λ₁ ΛR τ h1 h2 h4 h5⟩
 
 end SmoothedPolygons

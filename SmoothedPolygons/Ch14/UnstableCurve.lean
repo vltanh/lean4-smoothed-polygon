@@ -22,8 +22,8 @@ boundary of the star domain" (TeX 12007–12008).
 
 ## The statement (`UnstableCurveLeavesStarDomain`, N4)
 
-For an analytic extension `e` of the Reinhardt–Poincaré map at `(0, x̃_out)` (Lemma 14.3.1) and a
-neighborhood `U` of the fixed point, every point `p` of the local unstable curve
+For some analytic extension `e` of the Reinhardt–Poincaré map at `(0, x̃_out)` (Lemma 14.3.1) and
+some neighborhood `U` of the fixed point, every point `p` of the local unstable curve
 `W^u_loc(e, U)` (`Function.localUnstableSet`, a `C^∞` curve by Theorem 14.3.3) with `r > 0` has a
 forward orbit that reaches the boundary of the star domain (`ReachesStarBoundary (lieChart p)`):
 for some `K`, the iterates `q_j = F^j (lieChart p)` (`F = reinPoincare`, phase points, no chart
@@ -42,13 +42,19 @@ plus the exit: what the proof needs (`IsChatteringArcInto.not_reachesStarBoundar
 (`iso_vertexFlow`), and nothing about the chart beyond the first point.
 
 Remarks on the form.
-* `∃ e` or `∀ e` give equivalent statements: two extensions agree on a ball around the fixed point
-  (both are analytic and equal `reinChartMap` on `{r > 0}`; identity theorem), so their local
-  unstable sets in a small `U` agree, and `lemma14_3_1` provides one. `∃` is the weaker form.
+* With `∃ U`, `∃ e` and `∀ e` give equivalent statements: two extensions agree on a ball around
+  the fixed point (both are analytic and equal `reinChartMap` on `{r > 0}`; identity theorem), so
+  their local unstable sets in a small `U` agree (`localUnstableSet e p U` uses `e` only on `U`,
+  and it shrinks with `U`), and `lemma14_3_1` provides one extension. `∃ e` is the weaker form.
+* `U` stays existential: for a large `U`, `e` off its source and `lieChart` off its domain are junk
+  values, so "for every `U`" would be false. One `U` is all the proof needs, because the switching
+  points lie on `W^u_loc(e, U)` for every `U ∈ 𝓝 chartPtOut`
+  (`IsChatteringArcOutOf.eventually_mem_localUnstableSet`). The statement is not vacuous:
+  Theorem 14.3.3 puts points with `r > 0` on `W^u_loc(e, U)` for every such `U`.
 * The statement is about all of `W^u_loc(e, U) ∩ {r > 0}`, not a fundamental domain: `K` grows like
   `log(1/r)/log r_scale` as `r → 0`. Near the fixed point the conditions are those of the local
   theory (`eventually_isSwitch_reinSwitchTime`, `eventually_switchStructure`), and the reduction to
-  a fundamental domain is the first step of the certificate (below).
+  a fundamental domain is the first step of any proof (below).
 * Along the `e₂`-arc `ρ₁` is constant (`⟨Z_{e₂}, X⟩` is constant, Lemma 7.1.1); the arc leaves `𝔥*`
   through `ρ₂ = 0`, where `⟨X, Z_{e₁}⟩ → 0` and `H(e₁) → -∞` (so `e₂` stays the strict maximizer up
   to the boundary). In Lean `phaseHam` at a point with `⟨X, Z_v⟩ = 0` is a junk value (division by
@@ -68,33 +74,57 @@ contracted by `≈ 0.08` per step. Checks: the fixed point (`t_sw/r → 8.843`,
 (double precision) and 32 orbits started on `{r ∈ [10⁻⁵, 6.27·10⁻⁵)}` (mpmath), each followed to its
 exit.
 
-Results. Every orbit switches cyclically and then leaves the star domain through `ρ₂ = 0`, with
-`K = 2` or `3` steps from `D` (`K = 4` or `5` from `r ~ 10⁻⁵`), as the book says. The last
-switching point before a one-arc exit has `r ≥ r* ≈ 0.0650` (the book's "about 0.065"; its comment
-gives `0.0641`), and the switching points approach the chart boundary at
-`(r, x̃₂₁) → (0.2098, -3.0326)` (the book's `(0.21, -3.03)`; `√3 - 1/0.2098 = -3.034`).
-Margins (mpmath, 188 arcs of the 32 orbits). Near the divisor (`r < 0.01`), in the natural scales
-`H ~ r³`, `t ~ r`: `H(e₂) - H(e₁) ≥ 13.2 r³` at the switching points; the slope of
-`H(e₃) - H(e₂)` along the `e₃`-flow `≤ -7.8 r²`; `χ₂₃(t)/t ≥ 8.5 r²` on the arcs;
-`χ₂₁(t)/(t_sw - t) ≥ 1.8 r²` before a switch; `-N₂₁'(t_sw) ≥ 115 r²` (simple zeros). In the global
-part (`r ≥ 0.01`, raw values): `H(e₂) - H(e₁) ≥ 1.4·10⁻⁵`, `-(H(e₃) - H(e₂))' ≥ 8.5·10⁻⁴`,
-`χ₂₃(t)/t ≥ 9.3·10⁻⁴`, `χ₂₁(t)/(t_sw - t) ≥ 2.0·10⁻⁴`, `-N₂₁'(t_sw) ≥ 0.012` (all at `r ≈ 0.0102`,
-still the scale `r³ ≈ 10⁻⁶`); on the exit arcs `χ₂₁ ≥ 0.0054` on `(0, T)` and `ρ₂'(T) = -1.000`
-(transversal). The 480 double-precision orbits give the same signs. All margins are positive, and
-bounded below in these scales, away from one point:
+A review (`notes/l7rev/`) repeated the check with a third, independent model: the exact
+`cosh`/`sinh` closed form of `iso_vertexFlow` (mpmath, 60 digits, checked against RK4), with points
+of `W^u` from forward iteration of `(10⁻¹¹, x̃_out)`, on 240 orbits covering a fundamental domain
+(2971 switching arcs, 240 exit arcs). Where the two checks differ, the margins below are the
+smaller value.
 
-**The threshold** `r*`, where the switch and the exit coincide (`N₂₁` and `ρ₂` vanish together),
-is degenerate; the orbits of the points of `W^u` near one parameter value in each fundamental domain
-pass close to it (on `D`, `s* ≈ 0.0018895`):
-* from above (one-arc exit): `N₂₁(T_exit) ≈ 23.4 (s - s*)`, linear in the parameter `s` of `D`;
+Results. Every orbit switches cyclically and then leaves the star domain through `ρ₂ = 0`, with
+`K = 2` or `3` steps from `D` (`K = 4` or `5` from `r ~ 10⁻⁵`), as the book says. There is one
+threshold per fundamental domain (on `D`, the review's sample points have `K = 3` for
+`r ∈ [1.003, 1.875]·10⁻³` and `K = 2` for `r ∈ [1.890, 6.18]·10⁻³`). The last switching point
+before a one-arc exit has `r ≥ r* ≈ 0.06495` (the book's "about 0.065"; its comment gives
+`0.0641`), and the switching points approach the chart boundary `x̃₂₁ = √3 - 1/r` at
+`(r, x̃₂₁) → (0.209847, -3.033319)` (the book's `(0.21, -3.03)`).
+
+Margins. Near the divisor (`r < 0.01`) they are in the natural scales `H ~ r³`, `t ~ r`; in the
+global part (`r ≥ 0.01`) they are raw values, still in the scale `r³ ≈ 10⁻⁶` at its small end.
+
+| Margin | Near the divisor | Global |
+|---|---|---|
+| `H(e₂) - H(e₁)` at the switching points | `≥ 13.2 r³` | `≥ 1.36·10⁻⁵` |
+| slope of `H(e₃) - H(e₂)` along the `e₃`-flow | `≤ -7.80 r²` | `≤ -8.26·10⁻⁴` |
+| `χ₂₃(t)/t` on the arcs (1) | `≥ 7.80 r²` | `≥ 8.3·10⁻⁴` |
+| `χ₂₁(t)/(t_sw - t)` before a switch (2) | `≥ 1.50 r²` | `≥ 1.59·10⁻⁴` |
+| `-N₂₁'(t_sw)` (simple zeros) | `≥ 114.8 r²` | `≥ 0.0115` |
+
+(1) The infimum is the limit `t → 0⁺`, equal to the `e₃` slope. (2) At `t = 0` the ratio is
+`13.27/8.843 ≈ 1.50` (`H(e₂) - H(e₁)` over `t_sw`, both in their natural scales).
+
+On the exit arcs, `χ₂₁ ≥ 0.00466` on `(0, T)` (smallest at the threshold) and `ρ₂'(T) = -1.000`
+(transversal). The 480 double-precision orbits give the same signs. All margins are positive, and
+bounded below in these scales. At one point an ordering degenerates:
+
+**The threshold** `r*`, where the switch and the exit coincide (`N₂₁` and `ρ₂` vanish together).
+The orbits of the points of `W^u` near one parameter value in each fundamental domain pass close to
+it (on `D`, `s* ≈ 0.0018895`):
+* from above (one-arc exit): `N₂₁(T_exit)/(s - s*) → 23.4045`, linear in the parameter `s` of `D`;
 * from below (switch, then exit): the switching point lies at distance `ε = ρ₁ → 0` from the side
   `ρ₁ = 0` (after the rotation), and the next arc runs along that side into a cusp of `𝔥*`, with the
-  rate `ω = 1/(2ε)`; for `ε ∈ [1.5·10⁻⁴, 4·10⁻³]` (18 orbits, double precision; smaller `ε` is
-  numerically stiff and was not reached) `T/ε - log(1/ε) = 0.854…0.868`, `N₂₁(T)/ε² = 0.50…0.43`
-  and `⟨Λ_R(T), Z_{e₁}⟩/ε = -0.44…-0.37` (the exit sign, in the natural scale `Λ_R ~ ε` of that
-  arc), fitted by `a + b ε log(1/ε)` with limits `0.868`, `0.42`, `-0.36` as `ε → 0`.
-So N4 holds there too, but with margins that vanish at `r*`: no uniform inequality (and no interval
-enclosure) gives it there; it needs a local asymptotic argument.
+  rate `ω = 1/(2ε)`. Computed from the closed form down to `ε ≈ 5·10⁻¹⁷` (review):
+  `T/ε - log(1/ε) → 0.868228`, `N₂₁(T)/ε² → 0.41972` and `⟨Λ_R(T), Z_{e₁}⟩/ε → -0.36349` (the exit
+  sign, in the natural scale `Λ_R ~ ε` of that arc). The first check, with an ODE solver in double
+  precision, had fitted the same limits (`0.868`, `0.42`, `-0.36`) from `ε ∈ [1.5·10⁻⁴, 4·10⁻³]`;
+  it could not go lower because the arc is stiff for an ODE solver in `t`. The closed form has no
+  such difficulty.
+* on the cusp arc the margins in its natural scales have positive limits: `min χ₂₁ → 0.315`,
+  `H(e₂) - H(e₁)` at its start `→ 0.528`, and the slopes `χ₂₃/t` (from above) and of
+  `H(e₃) - H(e₂)` (from below) are both about `±0.315/ε`.
+So N4 holds on both sides of the threshold. What degenerates at `r*` is only the ordering of `t_sw`
+and `T` (they coincide there) and `N₂₁(T)`, which tends to `0`. No uniform inequality in the raw
+variables (and no interval enclosure) decides that ordering near `r*`; it needs a local asymptotic
+argument.
 
 ## Proving N4 in Lean without computer assistance (the user's decision), and why it is hard
 
@@ -112,10 +142,13 @@ arithmetic). The best analytic route I can see for N4:
    `N₂ⱼ(t) = χ₂ⱼ ⟨X, Z_{e_j}⟩ ⟨X, Z_{e₂}⟩` are exponential polynomials
    `Σ c_{mk} t^m e^{2kωt}` (`m ≤ 2` from the quadratures of `Λ_R`, `|k| ≤ 3`) whose coefficients
    are polynomial in the entries of the initial point and in `1/ρ₁` (checked numerically: the fit
-   residual is `10⁻¹⁵`, `notes/l7st/`). All conditions of N4 on one arc are then sign conditions of
-   such functions on explicit intervals; the zero counts (one simple zero of `N₂₁`, none of `N₂₃`,
-   `ρ₂`) could come from Rolle/Descartes-type bounds for exponential polynomials, the switching and
-   exit times from sign changes at two explicit bracketing times.
+   residual is `10⁻¹⁵`, `notes/l7st/`). They are explicit, not fitted: the integrand of the
+   `Λ_R` quadrature is `M₀ + M_c cosh 2ωs + M_s sinh 2ωs` (the conjugations by `e^{sP}` and by
+   `e^{s(X₀+P)}` share `ω`), so `iso_vfC` and `iso_vfΛR` integrate exactly (review,
+   `notes/l7rev/rmodel.py`; `m ≤ 2`, `|k| ≤ 3` confirmed). All conditions of N4 on one arc are
+   then sign conditions of such functions on explicit intervals; the zero counts (one simple zero
+   of `N₂₁`, none of `N₂₃`, `ρ₂`) could come from Rolle/Descartes-type bounds for exponential
+   polynomials, the switching and exit times from sign changes at two explicit bracketing times.
 2. **A trapping region instead of the curve.** `W^u` is only known to be a `C^∞` graph
    (Theorem A.3.1), with no explicit bounds. Replace it by an explicit region
    `𝒯 = {0 < r ≤ r₂, |x̃ - c(r)| ≤ κ(r)}` around a polynomial centre curve `c` (from the reference
@@ -130,7 +163,7 @@ arithmetic). The best analytic route I can see for N4:
 3. **The threshold** by an asymptotic analysis of the closed form: above `r*` the sign of
    `N₂₁(T_exit)` (linear in `r - r*`) and the monotonicity of `N₂₁` before `T_exit`; below `r*` the
    cusp arc, with `ω = 1/(2ε)`, expanded in `ε` through the cusp (`T/ε - log(1/ε)` and
-   `⟨Λ_R(T), Z_{e₁}⟩/ε` have finite nonzero limits).
+   `⟨Λ_R(T), Z_{e₁}⟩/ε` have finite nonzero limits, `0.868228` and `-0.36349`).
 
 What makes it hard: (i) the global part has no small parameter (`r` up to `0.21`; the chart
 coordinates move far from `x̃_out`, e.g. `ℓ̃₁₁` from `-4.9` to `-9` at `r ≈ 0.16`), so nothing
@@ -139,10 +172,12 @@ zeros of exponential polynomials with secular terms `t e^{…}`, `t² e^{…}`, 
 rule does not apply directly), and each of the 2–3 arcs needs them bracketed for every point of a
 4-dimensional region (or of a validated tube around a curve); (iii) the curve itself must be
 located, which needs explicit derivative bounds of a 4-dimensional map near the divisor, i.e.
-the asymptotics of Chapter 14 with explicit constants; (iv) the threshold makes every uniform margin
-vanish, so it needs its own asymptotic argument, through the cusp of `𝔥*`. I see no structure
-(monotonicity, an invariant ordering, a conserved quantity beyond `H = 0`, `det Λ₁ = 9/4`,
-`⟨X, Λ_R⟩ = 0`) that would replace (ii)–(iii) by a few inequalities. A computer-free proof of N4
+the asymptotics of Chapter 14 with explicit constants; (iv) at the threshold the ordering of
+`t_sw` and `T` degenerates (they coincide, and `N₂₁(T) → 0`), so it needs its own asymptotic
+argument, through the cusp of `𝔥*`; the other margins, in the natural scales of the cusp arc, have
+positive limits. I see no structure (monotonicity, an invariant ordering, a conserved quantity
+beyond `H = 0`, `det Λ₁ = 9/4`, `⟨X, Λ_R⟩ = 0`) that would replace (ii)–(iii) by a few
+inequalities. A computer-free proof of N4
 looks like a research project of its own (more than 10,000 lines, without a firm estimate); I
 recommend keeping N4 as a named hypothesis unless the reference computation reveals more structure.
 
@@ -154,11 +189,12 @@ recommend keeping N4 as a named hypothesis unless the reference computation reve
 2. Along each orbit from `D`, per arc: the switching time and the slope `N₂₁'(t_sw)`, the exit time
    and `ρ₂'(T)`, and every margin of N4 (as in the numerical check above, normalized by `r³`, `r²`
    near the divisor), the number `K` of arcs (2 or 3) as a function on `D`.
-3. The threshold: its parameter `s*` on `D`, `r*`, the end point `(0.2098, -3.0326)` of the curve of
-   switching points, the slope `dN₂₁(T_exit)/ds` at `s*`, and below `s*` the `ε`-expansion of the
-   cusp arc (`T/ε - log(1/ε)`, `N₂₁(T)/ε²`, `⟨Λ_R(T), Z_{e₁}⟩/ε`) with rigorous bounds for
-   `ε ∈ (0, ε₀]`, in the time `t/ε` and the costate `Λ_R/ε` (in `t` the arc is stiff: the
-   double-precision check did not get below `ε ≈ 10⁻⁴`).
+3. The threshold: its parameter `s*` on `D`, `r*`, the end point `(0.209847, -3.033319)` of the
+   curve of switching points, the slope `dN₂₁(T_exit)/ds` at `s*`, and below `s*` the
+   `ε`-expansion of the cusp arc (`T/ε - log(1/ε)`, `N₂₁(T)/ε²`, `⟨Λ_R(T), Z_{e₁}⟩/ε`) with
+   rigorous bounds for `ε ∈ (0, ε₀]`, in the time `t/ε` and the costate `Λ_R/ε`. The closed form
+   reaches small `ε` directly; an ODE solver in `t` finds the arc stiff (the double-precision check
+   did not get below `ε ≈ 10⁻⁴`).
 4. For the trapping region: a candidate `𝒯` (centre `c(r)`, widths `κ(r)`), its forward-invariance
    margins, the expansion `r'/r`, and bounds of `DF` on `𝒯` (the transversal contraction).
 5. The coefficients `c_{mk}(p)` of `N₂₁`, `N₂₃`, `ρ₀`, `ρ₂` on each arc and their sign patterns over
@@ -171,7 +207,7 @@ three parts would be: quantitative local bounds near the divisor (Taylor models 
 rescaled flow, 2,000–4,000 lines); validated iteration of `10²–10³` thin boxes covering `D` through
 their 2–3 arcs (a new `exp` enclosure; about `10⁵` steps, 10 h CPU, a soundness chain of 1,500–2,500
 lines); and the threshold by the analytic argument of step 3 (1,000–2,000 lines): 5,000–10,000 lines
-in all, the estimate of `SmoothedPolygons/Ch14/NoReturn.lean`.
+in all.
 -/
 
 @[expose] public section
@@ -223,12 +259,13 @@ def ReachesStarBoundary (q : iso_PhasePt) : Prop :=
 
 /-- **N4: the unstable curve `W^u(q_out)` reaches the boundary of the star domain** (Figure 14.2,
 TeX 11951–11991; the numerical fact on which the proof of Theorem 14.4.1 rests, "This does not
-happen, because the unstable curve hits the boundary of the star domain", TeX 12007–12008). For an
-analytic extension `e` of the Reinhardt–Poincaré map at `(0, x̃_out)` (Lemma 14.3.1) there is a
+happen, because the unstable curve hits the boundary of the star domain", TeX 12007–12008). There
+are an analytic extension `e` of the Reinhardt–Poincaré map at `(0, x̃_out)` (Lemma 14.3.1) and a
 neighborhood `U` of the fixed point such that the forward orbit of every point `p` of the local
 unstable curve `W^u_loc(e, U)` with `r > 0` reaches the boundary of the star domain
-(`ReachesStarBoundary (lieChart p)`). See the module docstring for the reading, the numerical check
-and the certification plan. -/
+(`ReachesStarBoundary (lieChart p)`). With `∃ U`, this is equivalent to the same for every
+extension `e`; `U` must stay existential (module docstring). See the module docstring for the
+reading, the numerical check and the plan for a proof. -/
 def UnstableCurveLeavesStarDomain : Prop :=
   ∃ e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ)),
     IsReinhardtPoincareExtension e ∧ ∃ U ∈ 𝓝 chartPtOut,

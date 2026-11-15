@@ -63,13 +63,14 @@ The book's "trajectory of the Reinhardt system" lives in the star domain: the hy
 "trajectory") is used only on `(a, s)`, where Theorem 8.3.2 gives it anyway: the statement without
 it is equivalent (`theorem14_4_1_iff_unrestricted`, `SmoothedPolygons/Ch14/NoReturnReading.lean`).
 
-## Proofs (planned)
+## Proofs
 
-`theorem14_4_1_out`: steps 1–4 above (about 150 lines: the choice of `N` with
-`eventually_atTop`, the location of `τ N` in `σ` from the two enumerations — `τ N ∈ (a', s)` is a
-switching time, so `τ N = σ n₀` by `IsSwitchingSeqInto` — and the bookkeeping of intervals).
-`theorem14_4_1_in`: the reflection (about 60 lines). `theorem14_4_1`: the two together.
-Size: 200–300 lines.
+`theorem14_4_1_out`: steps 1–4 above (the choice of `N` with `eventually_atTop`; the location of
+`τ N` in `σ` from the two enumerations: `τ N ∈ (a', s)` is a switching time, so `τ N = σ n₀` by
+`IsSwitchingSeqInto`; the bookkeeping of intervals). `theorem14_4_1_in`: the reflection, an instance
+of `theorem14_4_1_out`. `theorem14_4_1`: the two together. The helpers are in
+`SmoothedPolygons/Ch14/NoReturnTools.lean`, `UnstableCurveSwitches.lean` and
+`SwitchingPointsOnCurve.lean`.
 -/
 
 @[expose] public section
@@ -91,7 +92,39 @@ theorem theorem14_4_1_out (hN4 : UnstableCurveLeavesStarDomain) {a b c : ℝ}
     (hout : IsChatteringArcOutOf a b u g X Λ₁ ΛR τ)
     (hconv : TendstoModVT (switchAng X Λ₁ ΛR τ) (ang qOutCart)) :
     ∀ t ∈ Ioc a c, (g t, Λ₁ t, X t, ΛR t) ∉ singularLocus := by
-  sorry
+  intro t ht hmem
+  obtain ⟨e, he, U, hU, hN⟩ := hN4
+  obtain ⟨-, -, hoff, -, hanti, hτI, -, hsw⟩ := id hout
+  have htb : b < t := by
+    by_contra hcon
+    exact hoff t ⟨ht.1, not_lt.1 hcon⟩ hmem
+  -- Step 1: the first return `s ∈ (b, t]` to the singular locus.
+  obtain ⟨s, hs, hsmem, hsoff⟩ :=
+    hext.exists_first_mem_singularLocus hb.1.le htb.le ht.2 (hoff b ⟨hb.1, le_rfl⟩) hmem
+  -- Step 2: all switches are on the unstable curve; fix `N`.
+  obtain ⟨N, hNev⟩ := eventually_atTop.1 (hout.eventually_mem_localUnstableSet hconv he hU)
+  obtain ⟨k, p, hp, hp0, hrot⟩ := hNev N le_rfl
+  -- Step 3: the return chatters, on `[a', s]` with `a' = (τ (N + 1) + τ N) / 2`.
+  have has : a < s := hb.1.trans hs.1
+  have hext' : IsExtremalOn a s u g X Λ₁ ΛR (-1) := hext.mono le_rfl has (hs.2.trans ht.2)
+  have hoff' : ∀ r ∈ Ioo a s, (g r, Λ₁ r, X r, ΛR r) ∉ singularLocus := by
+    intro r hr
+    rcases le_or_gt r b with hrb | hrb
+    · exact hoff r ⟨hr.1, hrb⟩
+    · exact hsoff r ⟨hrb.le, hr.2⟩
+  have hbb' : ∀ α β, a < α → β < s → IsFiniteBangBang α β u :=
+    fun α β h1 h2 ↦ hbb α β h1 (h2.trans_le (hs.2.trans ht.2))
+  have hN1 := hτI (N + 1)
+  have hN0 := hτI N
+  have hlt : τ (N + 1) < τ N := hanti (Nat.lt_succ_self N)
+  obtain ⟨σ, hσ⟩ := exists_isChatteringArcInto hext' hsmem hoff' hbb' ((τ (N + 1) + τ N) / 2)
+    ⟨by linarith [hN1.1], by linarith [hN0.2, hs.1]⟩
+  -- `τ N` is a switching time in `(a', s)`, so it is `σ n₀` for some `n₀`.
+  have hswN : IsSwitchingTime u (τ N) := (hsw (τ N) hN0).2 ⟨N, rfl⟩
+  obtain ⟨n₀, hn₀⟩ := (hσ.2.2.2.2.2.2.2 (τ N) ⟨by linarith, by linarith [hN0.2, hs.1]⟩).1 hswN
+  -- Step 4: by N4 the orbit of `lieChart p` reaches the star boundary, which `σ n₀` cannot do.
+  exact hσ.not_reachesStarBoundary n₀ k (q₀ := lieChart p) (by rw [hn₀]; exact hrot)
+    (hN p hp hp0)
 
 /-- **Theorem 14.4.1, second statement** (`thm:no-return`, TeX 11999–12002), from N4, by time
 reversal (an instance of `theorem14_4_1_out` for the reflected extremal): a trajectory that tends to
@@ -105,14 +138,30 @@ theorem theorem14_4_1_in (hN4 : UnstableCurveLeavesStarDomain) {a b c : ℝ}
     (hin : IsChatteringArcInto b c u g X Λ₁ ΛR τ)
     (hconv : TendstoModVT (switchAng X Λ₁ ΛR τ) (ang (tau qOutCart))) :
     ∀ t ∈ Ico a c, (g t, Λ₁ t, X t, ΛR t) ∉ singularLocus := by
-  sorry
+  intro t ht hmem
+  -- The switching points of the reflected arc converge backward to `τ (ang (τ q_out)) = ang q_out`.
+  have hang : switchAng (fun t ↦ matTau (X (a + c - t))) (fun t ↦ matTau (Λ₁ (a + c - t)))
+      (fun t ↦ matTau (ΛR (a + c - t))) (fun n ↦ a + c - τ n) =
+        fun n ↦ tau (switchAng X Λ₁ ΛR τ n) := funext (switchAng_reverse (a + c) X Λ₁ ΛR τ)
+  have hconv' := hconv.tau
+  rw [tau_ang_tau_qOutCart] at hconv'
+  -- The first statement for the reflected extremal on `[a, c]`, at the time `a + c - t ∈ (a, c]`.
+  have h1 := theorem14_4_1_out hN4 hext.reverse (b := a + c - b)
+    ⟨by linarith [hb.2], by linarith [hb.1]⟩
+    (fun α β hα hβ ↦ IsFiniteBangBang.reverseControl (hbb _ _ (by linarith) (by linarith)))
+    (hin.reverse a) (by rw [hang]; exact hconv') (a + c - t)
+    ⟨by linarith [ht.2], by linarith [ht.1]⟩
+  apply h1
+  simp only [sub_sub_cancel]
+  exact reverse_mem_singularLocus_iff.2 hmem
 
 /-- **Theorem 14.4.1** (`thm:no-return`, TeX 11995–12013), for locally finitely bang-bang extremals
 (the reading of `Theorem14_4_1`, equivalent to the unrestricted statement,
 `theorem14_4_1_iff_unrestricted`), **from the numerical fact N4** (`UnstableCurveLeavesStarDomain`,
 Figure 14.2): the book's proof, the first statement by `theorem14_4_1_out` and the second by time
 reversal, `theorem14_4_1_in`. -/
-theorem theorem14_4_1 (hN4 : UnstableCurveLeavesStarDomain) : Theorem14_4_1 := by
-  sorry
+theorem theorem14_4_1 (hN4 : UnstableCurveLeavesStarDomain) : Theorem14_4_1 :=
+  ⟨fun _ _ _ _ _ _ _ _ _ h1 h2 h3 h4 h5 ↦ theorem14_4_1_out hN4 h1 h2 h3 h4 h5,
+    fun _ _ _ _ _ _ _ _ _ h1 h2 h3 h4 h5 ↦ theorem14_4_1_in hN4 h1 h2 h3 h4 h5⟩
 
 end SmoothedPolygons
