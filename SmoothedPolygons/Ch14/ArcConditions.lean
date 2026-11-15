@@ -8,22 +8,24 @@ import SmoothedPolygons.Ch7.Isolated.VertexFlow
 /-!
 # Chapter 14, N4: the conditions on one arc (Proposition 3.4) and the region `𝒢*`
 
-`notes/n4/proof.md` §3: four sign conditions on the arc parameters of a section point decide the
-three predicates of N4 (`SmoothedPolygons/Ch14/UnstableCurve.lean`) on one arc,
+Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
+computer assistance. **Departure from the paper**, by the user's decision: the book checks along
+the computed unstable curve that "the other switching functions `χ_ij` remain positive" and that
+the curve reaches the star boundary (Figure 14.2, TeX 11951–11991; REPORT.md E88); the
+formalization proves these on one arc from P1–P4 and the sign of `F(log Y)`, by the exact
+structure of the Reinhardt flow along an `e₂`-arc (see `SmoothedPolygons/Ch14/ArcParams.lean`, and
+`SmoothedPolygons/Ch14/ArcRegionInvariant.lean` for the numbering of the steps).
+
+This file is §3: four sign conditions on the arc parameters of a section point decide the three
+predicates of N4 (`SmoothedPolygons/Ch14/UnstableCurve.lean`) on one arc,
 
   **P1** `f₀ > 0`, **P2** `q ≤ 0`, **P4** `p > 0`, and the sign of `F(log Y)`
   (`F(log Y) = A - Y + B/Y + Y log Y`, `ArcParams.F_log`),
 
 and P1, P4 carry over to the next point by themselves, `ρ₁` decreases and the radius expands by at
-least `λ_lb = (Y - 2)/((Y - 1)(Y' - 2))`. The region `𝒢*` (`arcRegion`) is the set of section
-points with `r > 0`, P1, P2, P4 and **E** (`λ_lb ≥ 1`, i.e. `(Y - 1)(Y' - 2) ≤ Y - 2`): five
-explicit inequalities, no logarithm. Part of the reduction of N4 to (INV)
-(`ArcRegionInvariant`, `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`).
-
-**Departure from the paper.** The book checks along the computed unstable curve that "the other
-switching functions `χ_ij` remain positive" and that the curve reaches the star boundary
-(Figure 14.2, TeX 11951–11991); the formalization proves these on one arc from P1–P4 and the sign
-of `F(log Y)`, by the exact structure of the arcs (see `SmoothedPolygons/Ch14/ArcParams.lean`).
+least `λ_lb = (Y - 2)/((Y - 1)(Y' - 2))`. The region `𝒢*` (`arcRegion`, §5.2) is the set of
+section points with `r > 0`, P1, P2, P4 and **E** (`λ_lb ≥ 1`, i.e. `(Y - 1)(Y' - 2) ≤ Y - 2`):
+five explicit inequalities, no logarithm.
 
 ## Statements
 
@@ -37,14 +39,14 @@ of `F(log Y)`, by the exact structure of the arcs (see `SmoothedPolygons/Ch14/Ar
   (3) `arcLeavesStarDomain_of_arc`: `r > 0` ∧ P1 ∧ P2 ∧ P4 ∧ `F(log Y) ≥ 0` ⟹
   `ArcLeavesStarDomain q` (with `T = ε log Y`), and `arcLeavesStarDomain_of_cusp`:
   `r > 0` ∧ P4 ∧ (the cusp criterion `A + min(B, 0) > Y`) ⟹ `ArcLeavesStarDomain q`;
-  `arcLeavesStarDomain_of_Y_ge` (`notes/inv/inv.md` Lemma 6, the exit criterion of the proof of
-  (INV)): `r > 0` ∧ P1 ∧ P4 ∧ `Y ≥ 16/5` ∧ `f₀ ≥ q (1 - 1/Y)` ⟹ `ArcLeavesStarDomain q` (no sign
+  `arcLeavesStarDomain_of_Y_ge` (INV Lemma 6, the exit criterion of the proof of (INV)):
+  `r > 0` ∧ P1 ∧ P4 ∧ `Y ≥ 16/5` ∧ `f₀ ≥ q (1 - 1/Y)` ⟹ `ArcLeavesStarDomain q` (no sign
   condition on `q`);
   (4) `arc_propagation` (with (3.1)): in case (2), `F(q)` is a section point with P1 and P4,
   `ε_new < ε`, `r(F q) > 0` and `r(F q)/r(q) > λ_lb`.
 * `arcRegion` (`𝒢*`) and `radius_lt_of_mem_arcRegion`: on `𝒢*`, in case (2), `r(F q) > r(q)`.
 
-## Proofs (the route, proof.md §3)
+## Proofs (the route, §3)
 
 Throughout, `q` is a section point (`IsArcSectionPt`), so `H(e₂) = H(e₃) = 0`, `g₀ = 0`
 (`arcG0_eq_zero`), and Theorem 1.3 (`arc_normalForm`) gives `N₂₁ = (8ε³/√3) f(t/ε)`,
@@ -59,8 +61,8 @@ Throughout, `q` is a section point (`IsArcSectionPt`), so `H(e₂) = H(e₃) = 0
    `ρ₀ = ε(Y' - 1)` this is `2√3 p/(Y' - 1)`.
 2. (1): `H(e₁) < H(e₂)` is `χ₂₁ > 0`, i.e. `N₂₁(q) > 0`, i.e. `f₀ > 0`. Step 1 and `p > 0`:
    `H(e₃) - H(e₂)` vanishes at `0` (section) with negative slope, so it is negative on some
-   `(0, δ)` (`HasDerivAt` and the definition of the derivative, e.g. via
-   `hasDerivAt_iff_tendsto_slope` and `Filter.Tendsto.eventually_lt`).
+   `(0, δ)` (`HasDerivWithinAt.limsup_slope_le'` on `Ioi 0`: the slopes are eventually below a
+   negative number; then `mem_nhdsGT_iff_exists_Ioo_subset`).
 3. `switchesBeforeExit_of_arc`: `τ_sw < log Y` (`ArcParams.tauSw_lt_log_iff`); on `(0, τ_sw)`
    `f > 0`, at `τ_sw` it vanishes (`ArcParams.tauSw_spec`); so the zero set of `χ₂₁` on
    `(0, T)` starts at `ε τ_sw` and `reinSwitchTime q = ε τ_sw ∈ (0, T)` (as in
@@ -84,7 +86,7 @@ namespace SmoothedPolygons
 
 open Set Filter Topology
 
-/-- **The region `𝒢*`** (proof.md §5.2): the section points with `r > 0` and
+/-- **The region `𝒢*`** (§5.2): the section points with `r > 0` and
 **P1** `f₀ > 0`, **P2** `q ≤ 0`, **P4** `p > 0`, **E** `(Y - 1)(Y' - 2) ≤ Y - 2` (`λ_lb ≥ 1`):
 five explicit inequalities between algebraic functions of the chart coordinates. -/
 def arcRegion : Set iso_PhasePt :=
@@ -126,9 +128,9 @@ private theorem n4g_signs (hq : IsArcSectionPt q) {t : ℝ} (ht0 : 0 ≤ t)
         (arcParams q).f (t / arcEps q) = 0) ∧
       (phaseHam (iso_vertexFlow 1 q t) (vertex 2) < phaseHam (iso_vertexFlow 1 q t) (vertex 1) ↔
         0 < (arcParams q).g (t / arcEps q)) := by
-  obtain ⟨hX, hL, hR, hH, -⟩ := n4g_section hq
+  obtain ⟨hX, -, hR, hH, -⟩ := n4g_section hq
   have hXt : IsStarState (iso_vertexFlow 1 q t).1 := (isStarState_iso_vfX_one_iff hX ht0).2 htT
-  obtain ⟨hf, hg⟩ := arc_normalForm hX hL hR hH t
+  obtain ⟨hf, hg⟩ := arc_normalForm hX hR hH t
   have hc : 0 < √3 / (8 * arcEps q ^ 3) := by have := arcEps_pos hX; positivity
   obtain ⟨p1, n1, z1⟩ := n4g_sign_mul (N := switchingNum 1 0 (iso_vertexFlow 1 q t)) hc
   obtain ⟨p2, -, -⟩ := n4g_sign_mul (N := switchingNum 1 2 (iso_vertexFlow 1 q t)) hc
@@ -147,7 +149,7 @@ private theorem n4g_two_lt_Y' (hq : IsArcSectionPt q) (hr : 0 < q.1 0 0) :
   have hX := hq.2
   have hε := arcEps_pos hX
   rw [arcParams_Y' hX]
-  have h := X00_eq_arcRadius hX.1 hε.ne'
+  have h := X00_eq_arcRadius hε.ne'
   by_contra h'
   have : arcEps q * (arcY' q - 2) ≤ 0 :=
     mul_nonpos_of_nonneg_of_nonpos hε.le (by linarith [not_lt.1 h'])
@@ -159,7 +161,7 @@ is `2√3 g'(0)/(Y' - 1) = 2√3 p/(Y' - 1)` (`g(0) = g₀ = 0`). -/
 private theorem n4g_hasDerivAt_chi23 (hq : IsArcSectionPt q) :
     HasDerivAt (fun t ↦ switchingFn 1 2 (iso_vertexFlow 1 q t).2.2 (iso_vertexFlow 1 q t).1)
       (2 * √3 * arcP q / (arcY' q - 1)) 0 := by
-  obtain ⟨hX, hL, hR, hH, -⟩ := n4g_section hq
+  obtain ⟨hX, -, hR, hH, -⟩ := n4g_section hq
   have hε : 0 < arcEps q := arcEps_pos hX
   have hY'1 : 1 < arcY' q := one_lt_arcY' hX
   have hg0 : (arcParams q).g0 = 0 := arcG0_eq_zero hq
@@ -194,7 +196,7 @@ private theorem n4g_hasDerivAt_chi23 (hq : IsArcSectionPt q) :
     have hN := switchingNum_eq 1 2 (iso_vertexFlow 1 q t) n1 n2
     change _ = _ * (traceForm (iso_vfX 1 q t) _ * traceForm (iso_vfX 1 q t) _) at hN
     rw [t1, t2] at hN
-    have hnf := (arc_normalForm hX hL hR hH t).2
+    have hnf := (arc_normalForm hX hR hH t).2
     rw [hN] at hnf
     rw [← hnf]
     field_simp
@@ -350,11 +352,11 @@ theorem arcLeavesStarDomain_of_cusp (hq : IsArcSectionPt q) (hr : 0 < q.1 0 0)
   exact n4g_arcLeaves hq hr h4 fun τ hτ ↦
     (arcParams q).f_pos_of_cusp (one_lt_arcY hq.2) hc ⟨hτ.1.le, hτ.2.le⟩
 
-/-- **inv.md Lemma 6** (the exit criterion): `r > 0` ∧ P1 ∧ P4 ∧ `Y ≥ 16/5` ∧
+/-- **INV Lemma 6** (the exit criterion): `r > 0` ∧ P1 ∧ P4 ∧ `Y ≥ 16/5` ∧
 `f₀ ≥ q (1 - 1/Y)` ⟹ `ArcLeavesStarDomain q`, with `T = ε log Y`. No sign condition on `q` (the
 point is an image `F(q₀)`, where P2 may fail). In the proof of (INV) it is applied at `F(q₀)` when E
-fails there: then `Y ≥ 16/5` by Proposition 4 (`ArcParams.YNew_ge`) and `f₀ ≥ q (1 - 1/Y)` by
-Proposition 5 (`ArcParams.qNew_le_f0New`).
+fails there: then `Y ≥ 16/5` by INV Proposition 4 (`ArcParams.YNew_ge`) and `f₀ ≥ q (1 - 1/Y)`
+by INV Proposition 5 (`ArcParams.qNew_le_f0New`).
 
 Route: as `arcLeavesStarDomain_of_arc` (step 5 of the module docstring), with
 `ArcParams.f_pos_of_Y_ge` (`f > 0` on `[0, log Y)`) in place of `f_pos_of_F_log_nonneg`:
@@ -401,7 +403,7 @@ theorem arc_propagation (hq : IsArcSectionPt q) (hr : 0 < q.1 0 0) (h1 : 0 < arc
   · rw [lt_div_iff₀ hr, hr', ← hrq, ← hb]
     exact hexp
 
-/-- **Expansion on `𝒢*`** (proof.md §5.2): for `q ∈ 𝒢*` whose arc switches inside the star domain,
+/-- **Expansion on `𝒢*`** (§5.2): for `q ∈ 𝒢*` whose arc switches inside the star domain,
 `r(F q) > r(q)` (E gives `λ_lb ≥ 1`). -/
 theorem radius_lt_of_mem_arcRegion (hq : q ∈ arcRegion)
     (hF : (arcParams q).F (Real.log (arcY q)) < 0) : q.1 0 0 < (reinPoincare q).1 0 0 := by

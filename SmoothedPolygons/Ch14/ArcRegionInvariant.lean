@@ -6,50 +6,84 @@ public import SmoothedPolygons.Ch14.ArcStepRegion
 /-!
 # Chapter 14, N4 from the single-step statement (INV) (Theorem 5.2), and (INV)
 
-`notes/n4/proof.md` §5.2. The numerical fact N4 (`UnstableCurveLeavesStarDomain`,
-`SmoothedPolygons/Ch14/UnstableCurve.lean`: the global unstable curve over `q_out` reaches the
-boundary of the star domain, Figure 14.2) follows from one statement about one step of the
-Reinhardt–Poincaré map on the explicit region `𝒢*` (`arcRegion`):
+Part of the formalization's proof of N4 without computer assistance (a departure from the paper,
+by the user's decision: the book reads N4 off the computed Figure 14.2; see below), and its last
+step. N4
+(`UnstableCurveLeavesStarDomain`, `SmoothedPolygons/Ch14/UnstableCurve.lean`: the global unstable
+curve over `q_out` reaches the boundary of the star domain, Figure 14.2) follows from one statement
+about one step of the Reinhardt–Poincaré map on the explicit region `𝒢*` (`arcRegion`):
 
 > **(INV)** (`ArcRegionInvariant`) If `q ∈ 𝒢*` and `F(log Y) < 0` (the arc from `q` switches
 > inside the star domain), then `F(q) ∈ 𝒢*`, or the arc from `F(q)` leaves the star domain
 > before switching (`ArcLeavesStarDomain (F q)`).
 
-**Departure from the paper.** The book computes the unstable curve in Mathematica and reads off
-that it reaches the boundary of the star domain (Figure 14.2, TeX 11951–11991; the authors did not
-certify it, TeX 11954–11957, REPORT.md E88). The formalization does not locate the curve: it
-proves N4 from (INV) by the exact structure of the `e₂`-arcs (closed-form state, four-term
-switching numerators, an explicit one-step map of four parameters, the telescoping of the radii;
-`SmoothedPolygons/Ch14/ArcParams.lean` … `ArcLocal.lean`), and proves (INV) by explicit identities
-and inequalities (`notes/inv/inv.md`; `SmoothedPolygons/Ch14/ArcStepClosed.lean`,
-`ArcStepRegion.lean`, `ArcStepExit.lean`). So N4 holds (`unstableCurveLeavesStarDomain`), and with
-it Mahler's First conjecture (`theorem16_3_1_unconditional`,
+**Departure from the paper**, by the user's decision. The book computes the unstable curve in
+Mathematica and reads off that it reaches the boundary of the star domain (Figure 14.2,
+TeX 11951–11991; the authors did not certify it, TeX 11954–11957, REPORT.md E88). The
+formalization does not locate the curve: it proves N4 from (INV) by the exact structure of the
+`e₂`-arcs (closed-form state, four-term switching numerators, an explicit one-step map of four
+parameters, the telescoping of the radii; `SmoothedPolygons/Ch14/ArcParams.lean` …
+`ArcLocal.lean`), and proves (INV) by explicit identities and inequalities
+(`SmoothedPolygons/Ch14/ArcStepClosed.lean`, `ArcStepRegion.lean`, `ArcStepExit.lean`). So N4
+holds (`unstableCurveLeavesStarDomain`), and with it Theorem 14.4.1 and Mahler's First conjecture
+(`theorem14_4_1_unconditional`, `theorem16_3_1_unconditional`,
 `SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean`).
+
+## The numbering of the steps
+
+The N4 modules (all in `SmoothedPolygons/Ch14/`) number the steps of the proof as follows.
+
+The reduction of N4 to (INV):
+* §1, the `e₂`-arc. §1.1–§1.2: the frame, (1.1)–(1.3) and **Proposition 1.1** (the state along
+  the arc, the exit time `T = ε log Y`), `ArcFrame.lean`. §1.3: **Lemma 1.2** (the nilpotent
+  eigenvectors `V_e`, `V_f`) and the quadratures, `ArcCostate.lean`; **Theorem 1.3** (the
+  four-term normal form) and (1.5) (`f₀` from the reduced Hamiltonian), `ArcNormalForm.lean`;
+  (1.4), the normal form in the parameters, `ArcParams.lean`.
+* §2, the map. §2.1, the quadric relation (2.1): `ArcRelation.lean`. §2.2, **Theorem 2.1** (the
+  map in closed form), (2.2) (the radius) and **Corollary 2.4** (the telescoping of the radii):
+  `ArcPoincareMap.lean`. **Lemma 2.3** (the Poisson brackets of the vertex Hamiltonians):
+  `VertexPoissonBracket.lean`.
+* §3, one arc: **Lemmas 3.1–3.3** on the parameters, `ArcParams.lean`; **Proposition 3.4** and the
+  expansion bound (3.1), `ArcConditions.lean`.
+* §5, the region: `𝒢*` (§5.2, `ArcConditions.lean`), **Lemma 5.1** (`ArcLocal.lean`) and
+  **Theorem 5.2** ((INV) implies N4, this file).
+
+The proof of (INV), whose items carry the prefix INV (INV §1–§7 are the proofs of INV Theorem 1,
+INV Propositions 2–5, INV Lemma 6 and INV Theorem 2, in that order):
+* **INV Theorem 1** (the map in closed form, `q_new` included), with its formulas INV (1.1)–(1.5)
+  and **INV Corollary 1.2** (E at the image): `ArcStepClosed.lean`, `ArcCostate.lean` (INV (1.4),
+  the costate in a moving eigenbasis) and `ArcPoincareMap.lean` (at the phase point);
+* **INV Proposition 2** (`R = Y²ε⁴R̃`, the form INV (2.2) of the relation) and INV Corollary 2.1
+  (the relation as a budget, INV (2.3)): `ArcStepClosed.lean`, `ArcStepRegion.lean`;
+* **INV Propositions 3 and 4**: `ArcStepRegion.lean`; **INV Proposition 5** and **INV Lemma 6**:
+  `ArcStepExit.lean` (and `ArcConditions.lean` for Lemma 6 on the flow);
+* **INV Theorem 2** ((INV) in a sharp form): this file.
 
 ## Statements
 
-* `ArcRegionInvariant` (INV), with its status below.
+* `ArcRegionInvariant` (INV).
 * `ArcRegionInvariant.reachesStarBoundary`: under (INV), the forward orbit of every point of `𝒢*`
   reaches the boundary of the star domain (`ReachesStarBoundary`).
 * **Theorem 5.2** (`unstableCurveLeavesStarDomain_of_arcRegionInvariant`): (INV) implies N4.
-* **inv.md Theorem 2** (`arcRegionInvariant_sharp`, (INV) in a sharper form): for `q ∈ 𝒢*` with
+* **INV Theorem 2** (`arcRegionInvariant_sharp`, (INV) in a sharper form): for `q ∈ 𝒢*` with
   `F(log Y) < 0` and `s = e^{τ_sw}`, `F(q)` is a section point with `r > 0`, P1, P4,
   `SwitchEntersE2`, and `f₀ ≥ q (1 - 1/Y)` at `F(q)`; if `ψ(s) ≥ 0` then `F(q) ∈ 𝒢*`; if
   `ψ(s) < 0` then `Y(F q) ≥ 16/5` and the arc from `F(q)` exits (`ArcLeavesStarDomain`).
-* `arcRegionInvariant : ArcRegionInvariant` ((INV), from the sharp form; proved below from it).
+* `arcRegionInvariant : ArcRegionInvariant` ((INV), from the sharp form).
 * `unstableCurveLeavesStarDomain : UnstableCurveLeavesStarDomain` (N4, unconditionally; a term).
 
-## Proofs (the route, proof.md Theorem 5.2)
+## Proofs (the route, Theorem 5.2)
 
-1. `ArcRegionInvariant.reachesStarBoundary`, by strong induction on `⌊ρ₁(q)/r(q)⌋₊` (or on any
-   natural number bounding `ρ₁(q)/(2 r(q))`). Let `q ∈ 𝒢*`; it has P1 and P4, so
-   `SwitchEntersE2 q` (`switchEntersE2_of_arc`).
+1. `ArcRegionInvariant.reachesStarBoundary`, by induction on a natural number `n > ρ₁(q)/r(q)`
+   (`n4h_reach`: the statement for all `q ∈ 𝒢*` with `ρ₁(q)/r(q) < n`). Let `q ∈ 𝒢*`; it has P1
+   and P4, so `SwitchEntersE2 q` (`switchEntersE2_of_arc`).
    * If `F(log Y) ≥ 0`: `ArcLeavesStarDomain q` (`arcLeavesStarDomain_of_arc`); take `K = 0`.
    * If `F(log Y) < 0`: `ArcSwitchesToE1 q` (`arcSwitchesToE1_of_arc`); `F q` is a section point
      with P1, P4, `r > 0` (`arc_propagation`), so `SwitchEntersE2 (F q)`. By (INV), either
      `ArcLeavesStarDomain (F q)` (take `K = 1`), or `F q ∈ 𝒢*`: then `r(F q) > r(q)`
      (`radius_lt_of_mem_arcRegion`) and `ρ₁(F q) = ρ₁(q) - 2 r(F q)` (`radius_reinPoincare`), so
-     `ρ₁(F q)/r(F q) < ρ₁(q)/r(q) - 2`; by induction `ReachesStarBoundary (F q)` with some `K'`,
+     `ρ₁(F q)/r(F q) < ρ₁(q)/r(q) - 2`, so `F q` satisfies the bound `n - 1`; by induction
+     `ReachesStarBoundary (F q)` with some `K'`,
      and `ReachesStarBoundary q` with `K = K' + 1` (`Function.iterate_succ_apply`).
    This is the termination argument of Corollary 2.4: the radii increase and sum to less than
    `ρ₁(q₀)/2`, so the orbit has fewer than `ρ₁(q₀)/(2 r(q₀))` switching points.
@@ -57,45 +91,50 @@ it Mahler's First conjecture (`theorem16_3_1_unconditional`,
    (`exists_nhds_lieChart_mem_arcRegion`). A point `p` of `Function.localUnstableSet e chartPtOut U`
    lies in `U` (its backward orbit starts at `p`), so for `r > 0`, `lieChart p ∈ 𝒢*`, and step 1
    gives `ReachesStarBoundary (lieChart p)`.
-3. `arcRegionInvariant_sharp` (inv.md §7, the proof of Theorem 2): see its docstring; it assembles
-   Theorem 1 (`ArcParams.step_closed`, `arcQ_reinPoincare`), Proposition 2 (`ArcParams.rel_eq`),
-   Corollary 1.2 (`ArcParams.E_new_iff`), Propositions 3–5 (`ArcParams.Phi_nonpos`,
-   `ArcParams.YNew_ge`, `ArcParams.qNew_le_f0New`) and Lemma 6 (`arcLeavesStarDomain_of_Y_ge`) with
-   Proposition 3.4 (`switchesBeforeExit_of_arc`, `arc_propagation`, `switchEntersE2_of_arc`).
-4. `arcRegionInvariant`: the two cases of the sharp form (proved below).
+3. `arcRegionInvariant_sharp` (INV §7, the proof of INV Theorem 2): see its docstring; it
+   assembles INV Theorem 1 (`ArcParams.step_closed`, `arcQ_reinPoincare`), INV Proposition 2
+   (`ArcParams.rel_eq`), INV Corollary 1.2 (`ArcParams.E_new_iff`), INV Propositions 3–5
+   (`ArcParams.Phi_nonpos`, `ArcParams.YNew_ge`, `ArcParams.qNew_le_f0New`) and INV Lemma 6
+   (`arcLeavesStarDomain_of_Y_ge`) with Proposition 3.4 (`switchesBeforeExit_of_arc`,
+   `arc_propagation`, `switchEntersE2_of_arc`).
+4. `arcRegionInvariant`: the two cases of the sharp form.
 5. `unstableCurveLeavesStarDomain`: Theorem 5.2 applied to `arcRegionInvariant` (a term).
 
-## Status of (INV)
+## (INV)
 
 * *In words*: on the region `𝒢*` of section points with `r > 0`, `f₀ > 0`, `q ≤ 0`, `p > 0` and
   `(Y - 1)(Y' - 2) ≤ Y - 2`, one step of the Reinhardt–Poincaré map either stays in `𝒢*` or lands
   on a point whose arc exits. P1, P4 and `r > 0` at `F(q)` hold automatically
   (`arc_propagation`); what remains is P2 (`q_new ≤ 0`) and E at `F(q)`, unless `F(q)` exits.
-* *Proved* (research round 2, `notes/inv/inv.md` Theorem 2; confirmed by the independent review,
-  `notes/briefs/n4_review_report.md`, which re-derived Theorem 1, recomputed all three Bernstein
-  certificates and assembled (INV) in Lean from the statements now in this library,
-  `notes/n4rev/InvAssemblyCheck.lean`). **Proved in Lean**: `arcRegionInvariant`, from
-  `arcRegionInvariant_sharp`, with the real-number lemmas of `ArcStepClosed.lean`,
-  `ArcStepRegion.lean`, `ArcStepExit.lean` and the flow lemmas `arcQ_reinPoincare`
-  (`ArcPoincareMap.lean`) and `arcLeavesStarDomain_of_Y_ge` (`ArcConditions.lean`). The
-  proof uses no computer: every step is a polynomial identity, a finite list of nonnegative
-  rationals, `log s ≥ 2(s - 1)/(s + 1)` or `log(16/5) > 297/256`. Three facts make it work:
-  1. `q_new` is explicit, `q_new = Φ(s)/(Y - s)²` with `s = e^{τ_sw}` (Theorem 1: the costate has
-     constant coefficients in a moving eigenbasis, (1.4)); no root of (2.1) is chosen (along `W^u`
-     it is the larger root, but not in general, see `SmoothedPolygons/Ch14/ArcPoincareMap.lean`).
+* *Proved*: `arcRegionInvariant`, from `arcRegionInvariant_sharp`, with the real-number lemmas of
+  `ArcStepClosed.lean`, `ArcStepRegion.lean`, `ArcStepExit.lean` and the flow lemmas
+  `arcQ_reinPoincare` (`ArcPoincareMap.lean`) and `arcLeavesStarDomain_of_Y_ge`
+  (`ArcConditions.lean`). (The argument was confirmed by an independent review, which re-derived
+  INV Theorem 1, recomputed the three Bernstein certificates and assembled (INV) in Lean from these
+  statements before they were proved.) The proof uses no computer: every step is a polynomial
+  identity, a finite list of nonnegative rationals, an inequality for the logarithm
+  (`log s ≥ 2(s - 1)/(s + 1)`, `log(16/5) > 297/256`, `log t ≥ 1 - 1/t`, `log t ≤ sinh(log t)`),
+  or elementary calculus (the intermediate value theorem, and monotonicity from the sign of a
+  derivative in Lemmas 3.1–3.2; the intermediate value theorem in INV Proposition 4). Three facts
+  make it work:
+  1. `q_new` is explicit, `q_new = Φ(s)/(Y - s)²` with `s = e^{τ_sw}` (INV Theorem 1: the costate
+     has constant coefficients in a moving eigenbasis, INV (1.4)); no root of (2.1) is chosen
+     (along `W^u` it is the larger root, but not in general, see
+     `SmoothedPolygons/Ch14/ArcPoincareMap.lean`).
   2. The relation is a budget: `R = Y²ε⁴R̃` and `R̃ = 0` reads
      `2(YY' - 1)(Y' - 2)(-q) = [Y'(f₀ - q) - Yp]² + 4p(-q) + 2(YY' - 1)(Y - 2)p
      + 2Y'(3 - (Y - 2)(Y' - 2)) f₀`: on `𝒢*` every term on the right is `≥ 0`.
   3. A dichotomy by E at the image, the cubic inequality `ψ(s) ≥ 0`: if it holds the image is in
-     `𝒢*` (Proposition 3); if not, `Y_new ≥ 16/5`, beyond the root `Y_* = 3.16258` of
-     `g(Y) = Y log Y - (Y - 1) - (Y - 1)²/Y`, and the next arc exits (Proposition 5, Lemma 6).
-* *Numerical evidence* (not part of the proof): `notes/n4/region_star.py` (845 switching points of
-  `𝒢*` and their orbits, round 1), `notes/inv/crosscheck.py` (35,418 points of `𝒢*`, 34,921
-  switching; every hypothesis and conclusion of Propositions 3–5 and Theorem 2), the review's
-  `notes/n4rev/t9_inv_sample.py` (12,900 points, 0 failures; the least `Y_new` where `ψ < 0` is
-  `3.287 ≥ 16/5`) and `t11_chart_orbits.py` (2,588 chart points: every orbit exits after at most 7
-  switching arcs). Along `W^u` the orbit has seven switching arcs; at the seventh `ψ(s) = -19.5`,
-  `Y_new = 38.2`, and the next arc exits.
+     `𝒢*` (INV Proposition 3); if not, `Y_new ≥ 16/5`, beyond the root `Y_* = 3.16258` of
+     `g(Y) = Y log Y - (Y - 1) - (Y - 1)²/Y`, and the next arc exits (INV Proposition 5, INV
+     Lemma 6).
+* *Numerical evidence* (not part of the proof): samples of 845 switching points of `𝒢*` and
+  their orbits; of 35,418 points of `𝒢*` (34,921 switching), checking every hypothesis and
+  conclusion of INV Propositions 3–5 and INV Theorem 2; of 12,900 points (no failure; the least
+  `Y_new` where `ψ < 0` is `3.287 ≥ 16/5`); and of 2,588 chart points (every orbit exits after at
+  most 7 switching arcs). Along `W^u`, from the point with `r = 10⁻⁶`, the orbit has seven
+  switching arcs; at the seventh
+  `ψ(s) = -19.5`, `Y_new = 38.2`, and the next arc exits.
 * (INV) is not weaker than N4: it concerns all of `𝒢*`, not only the unstable curve.
 -/
 
@@ -106,18 +145,17 @@ namespace SmoothedPolygons
 open Set Filter Topology
 
 /-- **(INV): the region `𝒢*` is invariant under the Reinhardt–Poincaré map until the exit**
-(`notes/n4/proof.md` §5.2). For every point `q` of `𝒢*` (`arcRegion`: a section point with
+(§5.2). For every point `q` of `𝒢*` (`arcRegion`: a section point with
 `r > 0`, `f₀ > 0`, `q ≤ 0`, `p > 0`, `(Y - 1)(Y' - 2) ≤ Y - 2`) whose `e₂`-arc switches inside the
 star domain (`F(log Y) < 0`), its image `F(q) = reinPoincare q` is again in `𝒢*`, or the `e₂`-arc
 from `F(q)` leaves the star domain before switching. A single-step statement about an explicit map
-of four real parameters (Theorem 2.1). Status: **proved** in `notes/inv/inv.md` (Theorem 2;
-confirmed by the review, `notes/briefs/n4_review_report.md`); proved in Lean as
-`arcRegionInvariant`, from `arcRegionInvariant_sharp`. See the module docstring. -/
+of four real parameters (Theorem 2.1). It is proved: `arcRegionInvariant` (INV Theorem 2), from
+`arcRegionInvariant_sharp`. See the module docstring. -/
 def ArcRegionInvariant : Prop :=
   ∀ q ∈ arcRegion, (arcParams q).F (Real.log (arcY q)) < 0 →
     reinPoincare q ∈ arcRegion ∨ ArcLeavesStarDomain (reinPoincare q)
 
-/-- The induction of `ArcRegionInvariant.reachesStarBoundary` (proof.md Corollary 2.4): every
+/-- The induction of `ArcRegionInvariant.reachesStarBoundary` (Corollary 2.4): every
 point of `𝒢*` with `ρ₁(q)/r(q) < n` reaches the boundary of the star domain. -/
 private theorem n4h_reach (h : ArcRegionInvariant) :
     ∀ n : ℕ, ∀ q ∈ arcRegion, ρ₁ q.1 / q.1 0 0 < n → ReachesStarBoundary q := by
@@ -185,10 +223,10 @@ theorem ArcRegionInvariant.reachesStarBoundary (h : ArcRegionInvariant) {q : iso
   obtain ⟨n, hn⟩ := exists_nat_gt (ρ₁ q.1 / q.1 0 0)
   exact n4h_reach h n q hq hn
 
-/-- **Theorem 5.2** (proof.md §5.2): **(INV) implies N4**, the numerical fact behind
-Theorem 14.4.1 (`UnstableCurveLeavesStarDomain`, Figure 14.2). Departure from the paper: the book
-computes the unstable curve numerically; here N4 follows from (INV) by the exact structure of the
-arcs, without locating the curve. -/
+/-- **Theorem 5.2** (§5.2): **(INV) implies N4** (`fig:unstable-curve`), the numerical fact behind
+Theorem 14.4.1 (`UnstableCurveLeavesStarDomain`, Figure 14.2). Departure from the paper (the
+user's decision): the book computes the unstable curve numerically; here N4 follows from (INV) by
+the exact structure of the arcs, without locating the curve. -/
 theorem unstableCurveLeavesStarDomain_of_arcRegionInvariant (h : ArcRegionInvariant) :
     UnstableCurveLeavesStarDomain := by
   obtain ⟨e, he⟩ := lemma14_3_1
@@ -199,16 +237,17 @@ theorem unstableCurveLeavesStarDomain_of_arcRegionInvariant (h : ArcRegionInvari
   obtain ⟨n, hn⟩ := exists_nat_gt (ρ₁ (lieChart p).1 / (lieChart p).1 0 0)
   exact n4h_reach h n _ (hVr p hpV hp1) hn
 
-/-- **(INV), sharp form** (`notes/inv/inv.md` Theorem 2). Let `q ∈ 𝒢*` with `F(log Y) < 0` (the
+/-- **(INV), sharp form** (INV Theorem 2). Let `q ∈ 𝒢*` with `F(log Y) < 0` (the
 arc switches inside the star domain) and `s = e^{τ_sw}`. Then `F(q) = reinPoincare q` is a section
 point with `r > 0`, P1 and P4 (so `SwitchEntersE2 (F q)`), and `f₀ ≥ q (1 - 1/Y)` at `F(q)`
-(Proposition 5); moreover
+(INV Proposition 5); moreover
 * if `ψ(s) ≥ 0` (`ArcParams.psiE`), then `F(q) ∈ 𝒢*`;
 * if `ψ(s) < 0`, then `Y(F q) ≥ 16/5` and the arc from `F(q)` leaves the star domain before
   switching.
-Equivalently, `F(q)`'s arc exits whenever `Y_new ≥ 16/5`, and `F(q) ∈ 𝒢*` whenever `Y_new < 16/5`.
+Consequently, `F(q)`'s arc exits whenever `Y_new ≥ 16/5`, and `F(q) ∈ 𝒢*` whenever
+`Y_new < 16/5` (the two cases of `ψ(s)` overlap in `Y_new`, so this is not an equivalence).
 
-Route (inv.md §7). Write `a = arcParams q`, `s = e^{τ_sw}`.
+Route (INV §7). Write `a = arcParams q`, `s = e^{τ_sw}`.
 1. From `q ∈ 𝒢*`: a section point, `r > 0`, P1, P2, P4, E. `switchesBeforeExit_of_arc`:
    `SwitchesBeforeExit q`. `arc_propagation`: `F q` is a section point with P1, P4, `r(F q) > 0`;
    `switchEntersE2_of_arc` at `F q`.
@@ -221,7 +260,7 @@ Route (inv.md §7). Write `a = arcParams q`, `s = e^{τ_sw}`.
    and `ArcParams.step_closed` give `arcY (F q) = Y_new(s)`, `arcY' (F q) = Y'_new(s)`
    (`arcParams_Y'` at `F q`), `arcF0 (F q) = f₀,new(s)`; `arcQ_reinPoincare` gives
    `arcQ (F q) = q_new(s)`.
-6. Proposition 5 (`ArcParams.qNew_le_f0New`, with `Y - 2 ≥ 0`, `Y' - 2 ≥ 0`): the inequality
+6. INV Proposition 5 (`ArcParams.qNew_le_f0New`, with `Y - 2 ≥ 0`, `Y' - 2 ≥ 0`): the inequality
    `f₀ ≥ q (1 - 1/Y)` at `F q`.
 7. If `ψ(s) ≥ 0`: `ArcParams.Phi_nonpos` gives `Φ(s) ≤ 0`, so `q_new = Φ(s)/(Y - s)² ≤ 0`
    (`div_nonpos_of_nonpos_of_nonneg`); `ArcParams.E_new_iff` gives E at `F q`; with step 1,
@@ -275,13 +314,13 @@ theorem arcRegionInvariant_sharp {q : iso_PhasePt} (hq : q ∈ arcRegion)
   · refine ⟨hFs, hFr, hF1, ?_, hF4, ?_⟩
     · rw [hQ]
       exact div_nonpos_of_nonpos_of_nonneg
-        (a.Phi_nonpos ha hb hE' h1.le h2 h4.le hR hsY1.le hsY hpi.le hpsi) (sq_nonneg _)
+        (a.Phi_nonpos ha hb hE' h2 h4.le hR hsY1.le hsY hpi.le hpsi) (sq_nonneg _)
     · rw [hYn, hYn']
       exact (a.E_new_iff hsY.ne).2 hpsi
   · have hYge := a.YNew_ge (by linarith) (by linarith) hsY1.le hsY hpsi
     exact ⟨hYn ▸ hYge, arcLeavesStarDomain_of_Y_ge hFs hFr hF1 hF4 (hYn ▸ hYge) h5'⟩
 
-/-- **(INV)** (`notes/inv/inv.md` Theorem 2): the region `𝒢*` is invariant under the
+/-- **(INV)** (INV Theorem 2): the region `𝒢*` is invariant under the
 Reinhardt–Poincaré map until the exit. From the sharp form `arcRegionInvariant_sharp`, by cases on
 the sign of `ψ(s)`. -/
 theorem arcRegionInvariant : ArcRegionInvariant := by
@@ -291,11 +330,11 @@ theorem arcRegionInvariant : ArcRegionInvariant := by
   · exact Or.inl (hin h)
   · exact Or.inr (hout (not_le.1 h)).2
 
-/-- **N4, unconditionally**: the unstable curve `W^u(q_out)` reaches the boundary of the star
-domain (Figure 14.2; the numerical fact behind Theorem 14.4.1). Theorem 5.2 applied to (INV).
-Departure from the paper: the book computes the unstable curve numerically (TeX 11951–11991);
-here N4 is proved, from the exact structure of the arcs and the proof of (INV) in
-`notes/inv/inv.md`. -/
+/-- **N4, unconditionally** (`fig:unstable-curve`): the unstable curve `W^u(q_out)` reaches the
+boundary of the star domain (Figure 14.2; the numerical fact behind Theorem 14.4.1). Theorem 5.2
+applied to (INV) (`arcRegionInvariant`). Departure from the paper (the user's decision): the book
+computes the unstable curve numerically (TeX 11951–11991); here N4 is proved without computer
+assistance, from the exact structure of the arcs and the proof of (INV). -/
 theorem unstableCurveLeavesStarDomain : UnstableCurveLeavesStarDomain :=
   unstableCurveLeavesStarDomain_of_arcRegionInvariant arcRegionInvariant
 

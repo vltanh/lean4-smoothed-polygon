@@ -2148,15 +2148,10 @@ theorem theorem2_2_2 {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) (hpar : ¬ IsP
   refine ⟨⟨v, hleast⟩, fun v' hv' ↦ ?_⟩
   rw [hδ, le_antisymm (hmin v' hv'.1 hv'.2.1) ((rein_least_le hv' hv hKH).trans hHdet)]
 
-/-! ### Support lines and hyperbolic arcs -/
+/-! ### Support lines and hyperbolic arcs
 
-/-- **Definition 2.2.3** (support line; `def:support`). For a convex disk `K`, a support line is a
-line containing at least one point of `K` that does not separate any two points of `K`. The line
-is `{x | a · x = c}` with `a ≠ 0`; it separates `x` and `y` when they lie strictly on opposite
-sides, `(a · x - c)(a · y - c) < 0`. -/
-def IsSupportLine (K ℓ : Set (Fin 2 → ℝ)) : Prop :=
-  (∃ a : Fin 2 → ℝ, a ≠ 0 ∧ ∃ c : ℝ, ℓ = {x | a ⬝ᵥ x = c} ∧
-    ∀ x ∈ K, ∀ y ∈ K, 0 ≤ (a ⬝ᵥ x - c) * (a ⬝ᵥ y - c)) ∧ (ℓ ∩ K).Nonempty
+Support lines (Definition 2.2.3, `IsSupportLine`) are defined in `SmoothedPolygons/Defs.lean`
+(shared with the Challenge). -/
 
 /-- The function `p ↦ det(e₁, p - v_j) · det(e₂, p - v_{j+1})`, with `e₁ = v_j - v_{j-1}` and
 `e₂ = v_{j+2} - v_{j+1}`: the product of the (scaled) signed distances from `p` to the lines of

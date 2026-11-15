@@ -9,7 +9,8 @@ public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 
 The state-dependent curvatures `κ_j` (`eqn:state-dep-curvature`), their positivity
 (Lemma 3.3.1), the control variables (Definition 3.3.2), the control simplex `U_T`
-(Definition 3.3.3, `controlSimplex` in `SmoothedPolygons.Defs`), the control matrix `Z_u`
+(Definition 3.3.3, `controlSimplex` in `SmoothedPolygons.Defs`, with its vertices `vertex`, also
+there), the control matrix `Z_u`
 (`eqn:Z0`, `eqn:def-Z0`) and the star condition in terms of `Z_u` (Lemma 3.3.4).
 -/
 
@@ -131,10 +132,6 @@ lemma algA_det_eq_rho (X : Mat2) (hX : X.trace = 0) :
   simp [ρ₀, ρ₁, ρ₂, Matrix.det_fin_two]
   field_simp
   linear_combination (-2 * X 0 1 * X 1 0) * h3
-
-/-- The vertex `e_{i+1}` of the control simplex `U_T`: `vertex 0 = e₁ = (1, 0, 0)`,
-`vertex 1 = e₂ = (0, 1, 0)`, `vertex 2 = e₃ = (0, 0, 1)`. -/
-noncomputable def vertex (i : Fin 3) : Fin 3 → ℝ := Pi.single i 1
 
 /-- The state-dependent curvature `κ_j = det(s_{2j}*, (X + X⁻¹X') s_{2j}*)`, `j = 0, 1, 2`
 (`eqn:state-dep-curvature`), as a function of `X` and its derivative `X'`. -/

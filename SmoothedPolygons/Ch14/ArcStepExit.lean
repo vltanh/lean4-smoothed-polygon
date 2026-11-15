@@ -1,34 +1,38 @@
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+public import Basic.Analysis.SpecialFunctions.Log.Bounds
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 public import SmoothedPolygons.Ch14.ArcStepClosed
 
 /-!
 # Chapter 14, N4: the exit criterion for the next arc (the proof of (INV), III)
 
-`notes/inv/inv.md` Proposition 5, Lemma 6 and the two transcendental inputs of the proof:
-* `two_mul_sub_one_div_add_one_le_log`: `log s ≥ 2(s - 1)/(s + 1)` for `s ≥ 1`;
-* `log_sixteen_div_five_gt`: `log(16/5) > 297/256`;
-* `qNew_le_f0New` (Proposition 5): on every switching arc,
-  `f₀,new ≥ q_new (1 - 1/Y_new)`; it needs neither E nor the relation, only `F(log s) = 0`;
-* `f_pos_of_Y_ge` (Lemma 6, the parameter part): if `Y ≥ 16/5`, `f₀ > 0` and
+Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
+computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
+computed figure (Figure 14.2, TeX 11951–11991; REPORT.md E88); the formalization proves it from
+the exact structure of the Reinhardt flow along an `e₂`-arc (see
+`SmoothedPolygons/Ch14/ArcParams.lean`) and the invariance of a region, the single-step statement
+(INV) (`arcRegionInvariant`, `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`, where the numbering
+of the steps is listed).
+
+This file holds INV Proposition 5 and INV Lemma 6:
+* `qNew_le_f0New` (INV Proposition 5): on every switching arc, `f₀,new ≥ q_new (1 - 1/Y_new)`;
+  it needs neither E nor the relation, only `F(log s) = 0`;
+* `f_pos_of_Y_ge` (INV Lemma 6, the parameter part): if `Y ≥ 16/5`, `f₀ > 0` and
   `f₀ ≥ q (1 - 1/Y)`, then `f > 0` on `[0, log Y)`, so the arc exits before switching
   (`arcLeavesStarDomain_of_Y_ge`, `SmoothedPolygons/Ch14/ArcConditions.lean`).
-Part of the proof of (INV) (`arcRegionInvariant`, `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`).
-
-**Departure from the paper.** The book computes the unstable curve numerically (Figure 14.2,
-TeX 11951–11991); the formalization proves N4 from (INV) by the exact structure of the arcs (see
-`SmoothedPolygons/Ch14/ArcParams.lean`), and (INV) by the argument of `notes/inv/inv.md`.
+Their two transcendental inputs, `log s ≥ 2(s - 1)/(s + 1)` for `s ≥ 1`
+(`Real.two_mul_sub_one_div_add_one_le_log`) and `log(16/5) > 297/256`
+(`Real.log_sixteen_div_five_gt`), are in `Basic/Analysis/SpecialFunctions/Log/Bounds.lean`.
 
 ## Notation
 
-As in `SmoothedPolygons/Ch14/ArcStepClosed.lean`; `x = Y - 2`, `y = Y' - 2`, `z = s - Y + 1`
-(inv.md's `a, b, c`), `N_Y = Y' s² - 2s + Y` (the numerator of `Y_new`),
-`φ(s) = (Y' - 1) s³ - (2Y' + 1) s² + (2Y + 1) s - (Y - 1)`, and (inv.md (1.1))
+As in `SmoothedPolygons/Ch14/ArcStepClosed.lean`; `x = Y - 2`, `y = Y' - 2`, `z = s - Y + 1`,
+`N_Y = Y' s² - 2s + Y` (the numerator of `Y_new`),
+`φ(s) = (Y' - 1) s³ - (2Y' + 1) s² + (2Y + 1) s - (Y - 1)`, and (INV (1.1))
 `b_Y(y) = Y log y - (y - 1) - (Y - 1)(y - 1)/y`, so that `F(log y) = f₀ + b_Y(y) - q (y - 1)/y`.
-The identities are checked exactly in `notes/inv/verify.py` §5–§6, `notes/n4rev/t8_inv_exact.py`,
-and as written here (with the certificates) in `notes/n4s2/docs_check.py`.
+The identities were also checked exactly with sympy, twice independently and once as written here
+(with the certificates); the Lean proofs do not depend on these checks.
 -/
 
 @[expose] public section
@@ -37,47 +41,7 @@ namespace SmoothedPolygons
 
 open Set
 
-/-- **`log s ≥ 2(s - 1)/(s + 1)` for `s ≥ 1`** (inv.md §5, used in Proposition 5).
-
-Route: for `s = 1` both sides are `0`. For `s > 1`, `Real.hasSum_log_one_add_inv` with
-`a = 1/(s - 1)` (`1 + a⁻¹ = s`, `1/(2a + 1) = (s - 1)/(s + 1)`) writes `log s` as a series of
-nonnegative terms `2/(2k + 1) · ((s - 1)/(s + 1))^{2k + 1}` whose first term is the bound
-(`sum_le_hasSum (Finset.range 1)`). Alternatively: `h(s) = log s - 2(s - 1)/(s + 1)` has `h(1) = 0`
-and `h'(s) = (s - 1)²/(s (s + 1)²) ≥ 0`. -/
-theorem two_mul_sub_one_div_add_one_le_log {s : ℝ} (hs : 1 ≤ s) :
-    2 * (s - 1) / (s + 1) ≤ Real.log s := by
-  rcases hs.lt_or_eq with hs | rfl
-  · have ha : 0 < 1 / (s - 1) := one_div_pos.2 (by linarith)
-    have h := Real.hasSum_log_one_add_inv ha
-    rw [show 1 + (1 / (s - 1))⁻¹ = s by field_simp; ring] at h
-    have h0 := sum_le_hasSum (Finset.range 1) (fun k _ => by positivity) h
-    rw [Finset.sum_range_one] at h0
-    have e2 : 2 * (1 / (s - 1)) + 1 = (s + 1) / (s - 1) := by
-      have : s - 1 ≠ 0 := by linarith
-      field_simp
-      ring
-    rw [e2, one_div_div] at h0
-    norm_num at h0
-    rw [mul_div_assoc]
-    linarith
-  · simp
-
-/-- **`log(16/5) > 297/256`** (inv.md Lemma 6: `g(16/5) > 0`, i.e.
-`log(16/5) > (Y - 1)(2Y - 1)/Y²` at `Y = 16/5`, which is `297/256 = 1.16016`).
-
-Route: `Real.hasSum_log_one_add_inv` with `a = 5/11` (`1 + a⁻¹ = 16/5`, `1/(2a + 1) = 11/21`;
-this is `log(16/5) = 2 atanh(11/21)`); the terms are nonnegative, so the partial sum of the first
-four, `2 (x + x³/3 + x⁵/5 + x⁷/7)` at `x = 11/21`, which is `73269045344/63038098935 = 1.16230`,
-is a lower bound (`sum_le_hasSum (Finset.range 4)`, then `norm_num [Finset.sum_range_succ]`).
-The true value is `1.16315`. -/
-theorem log_sixteen_div_five_gt : 297 / 256 < Real.log (16 / 5) := by
-  have h := Real.hasSum_log_one_add_inv (by norm_num : (0 : ℝ) < 5 / 11)
-  rw [show (1 : ℝ) + (5 / 11)⁻¹ = 16 / 5 by norm_num] at h
-  have h0 := sum_le_hasSum (Finset.range 4) (fun k _ => by positivity) h
-  norm_num [Finset.sum_range_succ] at h0
-  linarith
-
-/-! ### Real-number lemmas for Proposition 5 (inv.md §5)
+/-! ### Real-number lemmas for INV Proposition 5 (INV §5)
 
 In `x = Y - 2`, `y = Y' - 2`, `z = s - Y + 1`, `w = 1 - z` (so `Y = 2 + x`, `Y' = 2 + y`,
 `s = 1 + x + z`), with `N_Y = Y' s² - 2s + Y`. -/
@@ -145,7 +109,7 @@ private theorem n4h_bern_U₁ (x y z w : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) (hz 
       x ^ 5 * y ^ 2 * (2 * w + 1 * z) := by
   positivity
 
-/-- inv.md §5: `τ_q = -Y' s (s - 1) N_Y + Y (Y' s - 1)(Y' s² - 1) ≥ 0` for `Y, Y' ≥ 2`,
+/-- INV §5: `τ_q = -Y' s (s - 1) N_Y + Y (Y' s - 1)(Y' s² - 1) ≥ 0` for `Y, Y' ≥ 2`,
 `Y - 1 ≤ s ≤ Y` (the Bernstein certificate in `z ∈ [0, 1]`). -/
 private theorem n4h_tq_nonneg {Y Y' s : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤ Y' - 2)
     (hs1 : Y - 1 ≤ s) (hs2 : s ≤ Y) :
@@ -156,7 +120,7 @@ private theorem n4h_tq_nonneg {Y Y' s : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤ Y' -
   have := n4h_bern_tq x y z (1 - z) (by linarith) (by linarith) (by linarith) (by linarith)
   linarith
 
-/-- inv.md §5: `U = s (s + 1) T₀' + τ_f (s - 1) z - s τ_q z ≥ 0` for `Y, Y' ≥ 2`,
+/-- INV §5: `U = s (s + 1) T₀' + τ_f (s - 1) z - s τ_q z ≥ 0` for `Y, Y' ≥ 2`,
 `Y - 1 ≤ s ≤ Y`, with `T₀' = s (YY' - Y - Y')(s - 1) N_Y - Y (Y' s - 1) φ(s)` and
 `τ_f = Y' s² (Y' s - 2)(s - Y)` (the Bernstein certificate in `z ∈ [0, 1]`). -/
 private theorem n4h_U_nonneg {Y Y' s : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤ Y' - 2)
@@ -173,7 +137,7 @@ private theorem n4h_U_nonneg {Y Y' s : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤ Y' - 
   have := n4h_bern_U₁ x y z (1 - z) (by linarith) (by linarith) (by linarith) (by linarith)
   linarith
 
-/-- inv.md Proposition 5 in the log-free form: `T_b = s Ψ(s) N_Y - Y (Y' s - 1) Φ(s) ≥ 0` (with
+/-- INV Proposition 5 in the log-free form: `T_b = s Ψ(s) N_Y - Y (Y' s - 1) Φ(s) ≥ 0` (with
 the definitions of `Ψ`, `Φ` unfolded) for `Y, Y' ≥ 2`, `1 < s`, `Y - 1 ≤ s ≤ Y`, `p ≥ 0` and the
 two bounds `s (s + 1) f₀ ≤ (s - 1)² z`, `(s + 1)(-q) ≤ (s - 1) z` (`z = s - Y + 1`). By (5.3),
 `s (s + 1) T_b - (s - 1) U = τ_f (s (s + 1) f₀ - (s - 1)² z) + s τ_q ((s + 1) q + (s - 1) z)
@@ -217,7 +181,7 @@ private theorem n4h_g_nonneg {Y : ℝ} (hY : 16 / 5 ≤ Y) :
     congr 1
     ring
   have h1 := Real.one_sub_inv_le_log_of_pos (by positivity : (0:ℝ) < 5 * Y / 16)
-  have h2 := log_sixteen_div_five_gt
+  have h2 := Real.log_sixteen_div_five_gt
   rw [inv_div] at h1
   have h3 : Y ^ 2 * (1 - 16 / (5 * Y)) = Y ^ 2 - 16 / 5 * Y := by field_simp
   have h4 : Y ^ 2 * (297 / 256 + (1 - 16 / (5 * Y))) ≤ Y ^ 2 * Real.log Y := by
@@ -229,15 +193,16 @@ namespace ArcParams
 
 variable (a : ArcParams)
 
-/-- **inv.md Proposition 5** (the next arc never switches unless `Y_new < Y_*`). Let `Y - 2 ≥ 0`,
+/-- **INV Proposition 5** (the next arc never switches unless `Y_new < Y_*`). Let `Y - 2 ≥ 0`,
 `Y' - 2 ≥ 0`, `f₀ ≥ 0 ≥ q`, `p ≥ 0`, `1 < s < Y`, `s ≥ Y - 1` and `F(log s) = 0` (`s` is the
 switch). Then `f₀,new ≥ q_new (1 - 1/Y_new)`. Neither E nor the relation is used.
 
-Route (inv.md §5; `x = Y - 2`, `y = Y' - 2`, `z = s - Y + 1 ∈ [0, 1]`):
+Route (INV §5; `x = Y - 2`, `y = Y' - 2`, `z = s - Y + 1 ∈ [0, 1]`):
 1. **(5.1).** `N_Y > 0` (`N_Y ≥ 2s² - 2s + Y > 0`), `1 - 1/Y_new = s (Y' s - 1)/N_Y`, and
    `f₀,new - q_new (1 - 1/Y_new) = s T_b/(Y (Y - s)² N_Y)` with
    `T_b := s Ψ(s) N_Y - Y (Y' s - 1) Φ(s)`. So the claim is `T_b ≥ 0`.
-2. **(5.2), (3.1), (5.3).** `Ψ(s) = (YY' - Y - Y')(s - 1)² + Y' s f₀ - Y'(s - 1) q + Y s (s - 1) p`,
+2. **(5.2), (3.1), (5.3).**
+   `Ψ(s) = (YY' - Y - Y')(s - 1)² + Y' s f₀ - Y'(s - 1) q + Y s (s - 1) p`,
    `Φ(s) = (s - 1) φ(s) + Y' s² f₀ - (Y' s² - 1) q + s² (s² - Y) p`, hence
    `T_b = T₀ + τ_f f₀ + τ_q q + τ_p p` with
    `τ_f = Y' s² (Y' s - 2)(s - Y) ≤ 0`, `τ_p = Y s² (Y - s)((1 + Y') s - 2) ≥ 0`,
@@ -245,7 +210,7 @@ Route (inv.md §5; `x = Y - 2`, `y = Y' - 2`, `z = s - Y + 1 ∈ [0, 1]`):
    `T₀ = s (YY' - Y - Y')(s - 1)² N_Y - Y (Y' s - 1)(s - 1) φ(s)`.
 3. **The switching identity.** `F(log s) = -s + A + B/s + Y log s = f₀ + b_Y(s) - q (s - 1)/s`
    (`F_log`-style unfolding, `Real.exp_log`). With `log s ≥ 2(s - 1)/(s + 1)`
-   (`two_mul_sub_one_div_add_one_le_log`) and the identity (5.4)
+   (`Real.two_mul_sub_one_div_add_one_le_log`) and the identity (5.4)
    `(s - 1) + (Y - 1)(s - 1)/s - 2Y(s - 1)/(s + 1) = (s - 1)² z/(s (s + 1))`:
    `f₀ + (-q)(s - 1)/s = -b_Y(s) ≤ (s - 1)² z/(s (s + 1))`, so
    `0 ≤ f₀ ≤ (s - 1)² z/(s (s + 1))` and `0 ≤ -q ≤ (s - 1) z/(s + 1)`.
@@ -290,10 +255,10 @@ theorem qNew_le_f0New (ha : 0 ≤ a.Y - 2) (hb : 0 ≤ a.Y' - 2) (h1 : 0 ≤ a.f
     unfold A B at hFs
     field_simp at hFs
     linear_combination hFs
-  have hlog := two_mul_sub_one_div_add_one_le_log hs0.le
+  have hlog := Real.two_mul_sub_one_div_add_one_le_log hs0.le
   have hlog' : 2 * (s - 1) ≤ (s + 1) * Real.log s := by
     rw [div_le_iff₀ (by linarith)] at hlog; linarith
-  -- `s (s + 1) f₀ + (s + 1)(s - 1)(-q) ≤ (s - 1)² z` (inv.md (5.4))
+  -- `s (s + 1) f₀ + (s + 1)(s - 1)(-q) ≤ (s - 1)² z` (INV (5.4))
   have hb0 : s * (s + 1) * a.f0 + (s + 1) * (s - 1) * (-a.q) ≤
       (s - 1) ^ 2 * (s - a.Y + 1) := by
     nlinarith [mul_le_mul_of_nonneg_left hlog' (by positivity : (0:ℝ) ≤ a.Y * s)]
@@ -321,16 +286,16 @@ theorem qNew_le_f0New (ha : 0 ≤ a.Y - 2) (hb : 0 ≤ a.Y' - 2) (h1 : 0 ≤ a.f
     div_nonneg (mul_nonneg hs.le hT) (by positivity)
   linarith
 
-/-- **inv.md Lemma 6, the parameter part** (the exit criterion). If `Y ≥ 16/5`, `f₀ > 0` and
+/-- **INV Lemma 6, the parameter part** (the exit criterion). If `Y ≥ 16/5`, `f₀ > 0` and
 `f₀ ≥ q (1 - 1/Y)` (no sign condition on `q`), then `f > 0` on `[0, log Y)`: the arc does not
 switch before it leaves the star domain.
 
-Route (inv.md §6): for `τ ∈ [0, log Y)` put `y = e^{τ} ∈ [1, Y)`; `f(τ) = e^{-τ} F(τ)` and
-`F(τ) = f₀ + b_Y(y) - q (y - 1)/y` ((1.1), `Real.log_exp`), so it suffices that this is `> 0`.
+Route (INV §6): for `τ ∈ [0, log Y)` put `y = e^{τ} ∈ [1, Y)`; `f(τ) = e^{-τ} F(τ)` and
+`F(τ) = f₀ + b_Y(y) - q (y - 1)/y` (INV (1.1), `Real.log_exp`), so it suffices that this is `> 0`.
 1. `g(Y) := b_Y(Y) = Y log Y - (Y - 1) - (Y - 1)²/Y ≥ 0` for `Y ≥ 16/5`:
    `g(Y) = Y h(Y)`, `h(Y) = log Y - (Y - 1)(2Y - 1)/Y²`, `h'(Y) = (Y - 1)(Y - 2)/Y³ > 0` for
-   `Y > 2`, and `h(16/5) = log(16/5) - 297/256 > 0` (`log_sixteen_div_five_gt`). (inv.md argues
-   with `g'(Y) = log Y - 1 + 1/Y² > 0`; either works.)
+   `Y > 2`, and `h(16/5) = log(16/5) - 297/256 > 0` (`Real.log_sixteen_div_five_gt`). (INV §6
+   argues with `g'(Y) = log Y - 1 + 1/Y² > 0`; either works.)
 2. `b_Y'(y) = -(y - 1)(y - (Y - 1))/y²` and `b_Y(1) = 0`: `b_Y` increases on `[1, Y - 1]` and
    decreases on `[Y - 1, Y]`, so `b_Y ≥ min(b_Y(1), b_Y(Y)) = min(0, g(Y)) = 0` on `[1, Y]`.
 
@@ -338,7 +303,8 @@ In Lean, the monotonicity arguments of steps 1–2 are replaced by three inequal
 the same conclusions (`g(Y) ≥ 0`, `b_Y ≥ 0` on `[1, Y]`):
 * step 1: `log Y = log(16/5) + log(5Y/16)` and `log t ≥ 1 - 1/t` give
   `Y² log Y - Y(Y - 1) - (Y - 1)² ≥ (Y - 16/5)((41/256) Y + 5/16) ≥ 0`;
-* step 2 on `[1, Y - 1]`: `log y ≥ 2(y - 1)/(y + 1)` (`two_mul_sub_one_div_add_one_le_log`)
+* step 2 on `[1, Y - 1]`: `log y ≥ 2(y - 1)/(y + 1)`
+  (`Real.two_mul_sub_one_div_add_one_le_log`)
   gives `(y + 1) y b_Y(y) ≥ (y - 1)²(Y - 1 - y) ≥ 0`;
 * step 2 on `[Y - 1, Y]`: `log t ≤ sinh(log t) = (t - 1/t)/2` at `t = Y/y ≥ 1`
   (`Real.self_le_sinh_iff`, `Real.sinh_log`) gives
@@ -354,7 +320,7 @@ theorem f_pos_of_Y_ge (hY : 16 / 5 ≤ a.Y) (h1 : 0 < a.f0) (hq : a.q * (1 - 1 /
   have hyY : y < a.Y := by rw [← Real.exp_log hY0]; exact Real.exp_lt_exp.2 hτY
   have hy0 : 0 < y := by positivity
   have hτlog : Real.log y = τ := Real.log_exp τ
-  -- `f(τ) = (f₀ + b_Y(y) - q (y - 1)/y)/y`, `b_Y(y) = Y τ - (y - 1) - (Y - 1)(y - 1)/y` ((1.1))
+  -- `f(τ) = (f₀ + b_Y(y) - q (y - 1)/y)/y`, `b_Y(y) = Y τ - (y - 1) - (Y - 1)(y - 1)/y` (INV (1.1))
   have e : a.f τ = (a.f0 + (a.Y * τ * y - (y - 1) * y - (a.Y - 1) * (y - 1)) / y -
       a.q * (y - 1) / y) / y := by
     unfold f A B
@@ -366,7 +332,7 @@ theorem f_pos_of_Y_ge (hY : 16 / 5 ≤ a.Y) (h1 : 0 < a.f0) (hq : a.q * (1 - 1 /
     rcases le_total y (a.Y - 1) with hyl | hyl
     · -- on `[1, Y - 1]`: `log y ≥ 2(y - 1)/(y + 1)`, and
       -- `(y + 1) b ≥ 2Y y (y - 1) - (y - 1)(y + 1)(y + Y - 1) = (y - 1)²(Y - 1 - y)`
-      have hl := two_mul_sub_one_div_add_one_le_log hy1
+      have hl := Real.two_mul_sub_one_div_add_one_le_log hy1
       rw [hτlog, div_le_iff₀ (by linarith)] at hl
       have : 0 ≤ (y - 1) ^ 2 * (a.Y - 1 - y) := mul_nonneg (sq_nonneg _) (by linarith)
       have h' : 0 ≤ (y + 1) * (a.Y * τ * y - (y - 1) * y - (a.Y - 1) * (y - 1)) := by

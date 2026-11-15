@@ -9,16 +9,19 @@ import SmoothedPolygons.Ch7.Isolated.Return
 /-!
 # Chapter 14, N4: the Reinhardt–Poincaré map in closed form (Theorem 2.1, Corollary 2.4)
 
-`notes/n4/proof.md` §2.2: if the `e₂`-arc from a section point `q` switches inside the star
-domain, its image `F(q) = reinPoincare q = Ad_{R⁻¹} q(t_sw)` is a section point whose arc
-parameters are explicit functions of those of `q` and of the switching root `τ_sw` of the
-four-term exponential sum `f` (`ArcParams.step`): no ODE, one root per step. The radii telescope,
-`r(F q) = (ρ₁(q) - ρ₁(F q))/2`, so along any orbit that keeps switching they sum to less than
-`ρ₁(q₀)/2`. Part of the reduction of N4 to (INV) (`ArcRegionInvariant`).
+Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
+computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
+computed figure (Figure 14.2, TeX 11951–11991; REPORT.md E88); the formalization proves it from
+the exact structure of the Reinhardt flow along an `e₂`-arc and an invariant region (see
+`SmoothedPolygons/Ch14/ArcParams.lean`, and `SmoothedPolygons/Ch14/ArcRegionInvariant.lean` for
+the numbering of the steps).
 
-**Departure from the paper.** The book computes the unstable curve numerically (Figure 14.2,
-TeX 11951–11991); the formalization proves N4 from (INV) by the exact structure of the arcs (see
-`SmoothedPolygons/Ch14/ArcParams.lean`).
+This file is §2.2: if the `e₂`-arc from a section point `q` switches inside the star domain, its
+image `F(q) = reinPoincare q = Ad_{R⁻¹} q(t_sw)` is a section point whose arc parameters are
+explicit functions of those of `q` and of the switching root `τ_sw` of the four-term exponential
+sum `f` (`ArcParams.step`): no ODE, one root per step. The radii telescope,
+`r(F q) = (ρ₁(q) - ρ₁(F q))/2`, so along any orbit that keeps switching they sum to less than
+`ρ₁(q₀)/2`. It also holds INV Theorem 1 at the phase point (`q_new` in closed form).
 
 ## Statements
 
@@ -33,8 +36,8 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
   `f₀,new = g(τ_sw)/k²`, `g₀,new = 0`, `p_new = -f'(τ_sw)/k²`, with `q_new = arcQ (F q)` a root of
   `R = 0` at the new point, `arcParams_rel`), `radius_reinPoincare`
   (`r(F q) = (ρ₁(q) - ρ₁(F q))/2 = ε(1 - k)/2`).
-* **Theorem 1 of `notes/inv/inv.md`** (the map in closed form, including `q_new`):
-  `iso_vfΛ₁_one_eq_arcParams` ((1.4) on a section point: `Λ₁(t) = α (X(t) + P) + β u⁻² V_e(t)
+* **INV Theorem 1** (the map in closed form, including `q_new`):
+  `iso_vfΛ₁_one_eq_arcParams` (INV (1.4) on a section point: `Λ₁(t) = α (X(t) + P) + β u⁻² V_e(t)
   + γ u² V_f(t)` with `α, β, γ` explicit in the parameters, `ArcParams.lamAlpha` …);
   `arcQ_adRinv_vertexFlow`, `arcP_adRinv_vertexFlow` (for every `t < T`, with `s = e^{t/ε}`, the
   rotated point `Ad_{R⁻¹} q(t)` has `q = Φ(s)/(Y - s)²` and `p = π(s)/(Y - s)²`, `ArcParams.qNew`,
@@ -46,7 +49,7 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
   `tendsto_radius_reinPoincare_iterate` (an orbit that switches forever with `r_n ≥ 0` has
   `r_n → 0`: it chatters into the divisor).
 
-## Proofs (the route, proof.md Theorem 2.1)
+## Proofs (the route, Theorem 2.1)
 
 1. `ρ_adRinv`: entrywise, `R = [[1/2, -√3/2], [√3/2, 1/2]]`, `R⁻¹ = Rᵀ` (`field_simp`, `ring`,
    `Real.sq_sqrt`). `switchingNum_adRinv`: `⟨R⁻¹ M R, Z_{m+1}⟩ = ⟨M, R Z_{m+1} R⁻¹⟩ = ⟨M, Z_m⟩`
@@ -68,7 +71,7 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
 4. `ρ_reinPoincare`: step 1. Hence `ε_new = ρ₂(t_sw) = ε k` with `k = Y u - 1`, `u = e^{-τ_sw}`
    (`ρ_iso_vfX_one`), `Y_new = 1 + ρ₀(t_sw)/ε_new = 1 + (Y' e^{τ_sw} - 1)/k`, and
    `r(F q) = (ρ₀ - ρ₁)(F q)/2 = (ε - ε k)/2` (`X00_eq_arcRadius`).
-5. `f₀,new` (the route of proof.md; a simpler one is below): by step 1 `N₂₁^new = N₁₃(t_sw)`;
+5. `f₀,new` (the route of §2.2; a simpler one is below): by step 1 `N₂₁^new = N₁₃(t_sw)`;
    at a zero of `N₂₁`, `χ₁₃ = χ₂₃`, so
    `N₁₃ = N₂₃ ⟨X, Z_{e₁}⟩/⟨X, Z_{e₂}⟩ = N₂₃ ε_new/ε` ((1.1)); normalizing by `8ε_new³/√3` and
    `arc_normalForm` gives `f₀,new = ε² g(τ_sw)/ε_new² = g(τ_sw)/k²`. `g₀,new = 0`
@@ -81,13 +84,13 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
    factor, and the slope of `χ₂₁` along the `e₁`-field equals its slope along the `e₂`-field
    (`phaseHamSlope_chi21`, Lemma 2.3; `hasDerivAt_phaseHam_vertexFlow`). With `arc_normalForm`,
    `ε_new² p_new = -ε² f'(τ_sw)`, i.e. `p_new = -f'(τ_sw)/k²`.
-   **Simpler route for steps 5–6** (the review, `notes/briefs/n4_review_report.md`, item 5):
-   `arcQ`, `arcP` and the (1.5) form `-(√3/(3ε³Y')) ⟨Λ̂, X⟩` of `f₀` depend only on `(X, Λ₁)`, and
-   `Λ₁(t)` has the closed form (1.4) (`iso_vfΛ₁_one_eq_arcParams`). So `p_new = π(s)/(Y - s)²`
-   (`arcP_adRinv_vertexFlow` at `t = t_sw`), which is `-f'(τ_sw)/k²` by `ArcParams.step_closed`
-   (it uses `f(τ_sw) = 0`); and `f₀,new` is the (1.5) form at the section point `F q`
-   (`arcF0_eq_reducedHam`, `isArcSectionPt_reinPoincare`), which the table (1.5) of inv.md
-   evaluates to `s² Ψ(s)/(Y (Y - s)²) = g(τ_sw)/k²` (`ArcParams.step_closed`). Then Lemma 2.3
+   **Simpler route for steps 5–6** (found in review): `arcQ`, `arcP` and the (1.5) form
+   `-(√3/(3ε³Y')) ⟨Λ̂, X⟩` of `f₀` depend only on `(X, Λ₁)`, and `Λ₁(t)` has the closed form
+   INV (1.4) (`iso_vfΛ₁_one_eq_arcParams`). So `p_new = π(s)/(Y - s)²` (`arcP_adRinv_vertexFlow`
+   at `t = t_sw`), which is `-f'(τ_sw)/k²` by `ArcParams.neg_fDeriv_div_sq_eq_pNew` (it uses
+   `f(τ_sw) = 0`); and `f₀,new` is the (1.5) form at the section point `F q`
+   (`arcF0_eq_reducedHam`, `isArcSectionPt_reinPoincare`), which the table INV (1.5) evaluates
+   to `s² Ψ(s)/(Y (Y - s)²) = g(τ_sw)/k²` (`ArcParams.g_div_sq_eq_f0New`). Then Lemma 2.3
    (`SmoothedPolygons/Ch14/VertexPoissonBracket.lean`) is needed only for `SwitchEntersE2`
    (Proposition 3.4 (1)).
 7. `q_new = arcQ (F q)` by definition of `step`; it is a root of `R = 0` by `arcParams_rel` at the
@@ -97,33 +100,36 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
    `ρ₁(F^N q) > 0` (a section point is a star state); the limit: the partial sums of the
    nonnegative `r_n` are bounded, so the series is summable and `r_n → 0`
    (`Summable.tendsto_atTop_zero`).
-9. Theorem 1 of inv.md (`iso_vfΛ₁_one_eq_arcParams`, `arcQ_adRinv_vertexFlow`,
+9. INV Theorem 1 (`iso_vfΛ₁_one_eq_arcParams`, `arcQ_adRinv_vertexFlow`,
    `arcP_adRinv_vertexFlow`, `arcQ_reinPoincare`): see their docstrings (the eigenframe
-   computation, inv.md §1 (i)–(iii) and the table (1.5)).
+   computation, INV §1 (i)–(iii) and the table INV (1.5)).
 
 **What the Lean proofs do.** Steps 5–6 take the simpler route, so Lemma 2.3 is not used here.
 `ArcParams.step_closed` is not used either: its hypotheses (P1, P2, `F(log Y) < 0`) are not those
 of Theorem 2.1, which needs only `f(τ_sw) = 0` and `1 < s < Y`; its steps 6–7 (eliminate
-`Y τ_sw = s - A - B/s`) are redone under these hypotheses. Theorem 1 of inv.md is computed in the
-frame: `Ad_{R⁻¹}` acts on frame components by `(h, e, f) ↦ (e/2 - h, e - 4h - 4f, -e/4)` (from
-`S⁻¹ R S = [[0, -2], [1/2, 1]]`), the star functions are `(ρ₀, ρ₁, ρ₂) = (h + 2f, -h, h - e/2)`,
+`Y τ_sw = s - A - B/s`) are the lemmas `ArcParams.g_div_sq_eq_f0New` and
+`ArcParams.neg_fDeriv_div_sq_eq_pNew`, which need only these, and which both proofs use.
+INV Theorem 1 is computed in the frame: `Ad_{R⁻¹}` acts on frame components by
+`(h, e, f) ↦ (e/2 - h, e - 4h - 4f, -e/4)` (from `S⁻¹ R S = [[0, -2], [1/2, 1]]`), the star
+functions are `(ρ₀, ρ₁, ρ₂) = (h + 2f, -h, h - e/2)`,
 and `(3/2) J = √3 · ofFrame (-1/2) (-2) (1/2)`, so `Λ̂(t) = √3 M(t)` with `M(t)` free of `√3`.
-Instead of pairing `Λ̂(t)` with the carried-back vectors `R V_{e,n} R⁻¹` (the table (1.5)), the
+Instead of pairing `Λ̂(t)` with the carried-back vectors `R V_{e,n} R⁻¹` (the table INV (1.5)), the
 proofs conjugate `Λ̂(t)` by `R⁻¹` and pair it with `V_e`, `V_f`, `X` of the rotated state (the same
 numbers). `√3` then enters each closed form once, as `√3 · √3 = 3`, and the rest is `field_simp`,
 `ring` in `(ε, Y, s, f₀, q, p)` with `Y' = (1 + ε²)/(ε² Y)`. Step 1 uses `ρ_R_conj` and
 `poly_Rinv_conj_vertex`; step 3 uses `poly_hamiltonian_conj` for the relabelled Hamiltonians; step 4
 uses `X₁₁ = (ρ₀ - ρ₁)/2`.
 
-Checked against the literal model (`notes/n4f/check2.py`: the update rules, the permutation of the
-`ρ`'s, the radius identities, the section conditions at `F q`, to `10⁻¹⁴`, at two section points).
-**Which root of `R = 0` is `q_new`.** At those two points, and along `W^u` (the research), `q_new`
-is the larger root, but not in general: the review (`notes/briefs/n4_review_report.md`,
-Documentation 2) found the section point `(ε, Y, f₀, p) = (0.3, 3, 0.01, 0.01)`, `q = -0.00666`
-(P1, P2, P4, `r > 0`; E fails), whose image has `q_new = 2587.398`, the smaller root (the other is
-`2618.817`); off `𝒢*`, 118 of 696 sampled images took the smaller root, inside `𝒢*` all 72 the
-larger, and a point of `𝒢*` can itself sit on either root. Theorem 1 of inv.md removes the
-question: `q_new = Φ(s)/(Y - s)²` (`arcQ_reinPoincare`).
+Also checked numerically, while the statements were written, against a literal model of the Lean
+definitions: the update rules, the permutation of the `ρ`'s, the radius identities, the section
+conditions at `F q`, to `10⁻¹⁴`, at two section points. The proofs do not depend on these checks.
+**Which root of `R = 0` is `q_new`.** At those two points, and along `W^u` (numerically), `q_new`
+is the larger root, but not in general: an independent review found the section point
+`(ε, Y, f₀, p) = (0.3, 3, 0.01, 0.01)`, `q = -0.00666` (P1, P2, P4, `r > 0`; E fails), whose
+image has `q_new = 2587.398`, the smaller root (the other is `2618.817`); off `𝒢*`, 118 of 696
+sampled images took the smaller root, inside `𝒢*` all 72 the larger, and a point of `𝒢*` can
+itself sit on either root. INV Theorem 1 removes the question: `q_new = Φ(s)/(Y - s)²`
+(`arcQ_reinPoincare`).
 -/
 
 @[expose] public section
@@ -149,36 +155,6 @@ private lemma n4f_sqrt3_sq : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
 private lemma n4f_sqrt3_pow4 : √3 ^ 4 = 9 := by
   rw [show (4 : ℕ) = 2 * 2 from rfl, pow_mul, n4f_sqrt3_sq]; norm_num
 
-private lemma n4f_ofFrame_add (h e f h' e' f' : ℝ) :
-    ofFrame h e f + ofFrame h' e' f' = ofFrame (h + h') (e + e') (f + f') := by
-  ext i j; fin_cases i <;> fin_cases j <;> simp [ofFrame] <;> ring
-
-private lemma n4f_ofFrame_sub (h e f h' e' f' : ℝ) :
-    ofFrame h e f - ofFrame h' e' f' = ofFrame (h - h') (e - e') (f - f') := by
-  ext i j; fin_cases i <;> fin_cases j <;> simp [ofFrame] <;> ring
-
-private lemma n4f_smul_ofFrame (c h e f : ℝ) :
-    c • ofFrame h e f = ofFrame (c * h) (c * e) (c * f) := by
-  ext i j; fin_cases i <;> fin_cases j <;> simp [ofFrame] <;> ring
-
-/-- The star functions in the frame: `ρ₀ = h + 2f`, `ρ₁ = -h`, `ρ₂ = h - e/2`. -/
-private lemma n4f_ρ_ofFrame (h e f : ℝ) :
-    ρ₀ (ofFrame h e f) = h + 2 * f ∧ ρ₁ (ofFrame h e f) = -h ∧ ρ₂ (ofFrame h e f) = h - e / 2 := by
-  have h3 := n4f_sqrt3_ne
-  refine ⟨?_, ?_, ?_⟩
-  · simp only [ρ₀, ofFrame, Fin.isValue, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.cons_val_fin_one]
-    field_simp
-    ring
-  · simp only [ρ₁, ofFrame, Fin.isValue, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.cons_val_fin_one]
-    field_simp
-    ring
-  · simp only [ρ₂, ofFrame, Fin.isValue, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.cons_val_fin_one]
-    field_simp
-    linear_combination (e - 2 * h - f) * n4f_sqrt3_sq
-
 /-- `Ad_{R⁻¹}` in the frame (`S⁻¹ R S = [[0, -2], [1/2, 1]]`):
 `R⁻¹ (h H + e E + f F) R = (e/2 - h) H + (e - 4h - 4f) E - (e/4) F`. -/
 private lemma n4f_adRinv_ofFrame (h e f : ℝ) :
@@ -199,11 +175,11 @@ private lemma n4f_three_halves_J :
 
 private lemma n4f_arcVe_ofFrame (h e f : ℝ) :
     arcVe (ofFrame h e f) = ofFrame e (-e ^ 2 / -h) (-h) := by
-  rw [arcVe, frameE_ofFrame, (n4f_ρ_ofFrame h e f).2.1]
+  rw [arcVe, frameE_ofFrame, (ρ_ofFrame h e f).1]
 
 private lemma n4f_arcVf_ofFrame (h e f : ℝ) :
     arcVf (ofFrame h e f) = ofFrame f (-h) (-f ^ 2 / -h) := by
-  rw [arcVf, frameF_ofFrame, (n4f_ρ_ofFrame h e f).2.1]
+  rw [arcVf, frameF_ofFrame, (ρ_ofFrame h e f).1]
 
 /-! ### Section points (helpers) -/
 
@@ -221,19 +197,19 @@ private lemma n4f_chi21_iff (hq : IsArcSectionPt q) {t : ℝ} (ht0 : 0 ≤ t)
     switchingFn 1 0 (iso_vertexFlow 1 q t).2.2 (iso_vertexFlow 1 q t).1 = 0 ↔
       (arcParams q).f (t / arcEps q) = 0 := by
   have hH := n4f_phaseHam_one hq
-  obtain ⟨⟨⟨-, hL, hR, -⟩, -⟩, hX⟩ := hq
+  obtain ⟨⟨⟨-, -, hR, -⟩, -⟩, hX⟩ := hq
   have hstar : IsStarState (iso_vertexFlow 1 q t).1 :=
     (isStarState_iso_vfX_one_iff hX ht0).2 ht
   have hε := arcEps_pos hX
   rw [switchingFn_eq_zero_iff 1 0 hstar,
-    ← (arc_normalForm hX hL hR hH t).1]
+    ← (arc_normalForm hX hR hH t).1]
   constructor
   · intro h
     rw [h, mul_zero]
   · intro h
     exact (mul_eq_zero.mp h).resolve_left (by positivity)
 
-/-! ### The costate along the arc in closed form (helpers; inv.md Theorem 1) -/
+/-! ### The costate along the arc in closed form (helpers; INV Theorem 1) -/
 
 private lemma n4f_ofFrame_eq {h e f h' e' f' : ℝ} (hh : h = h') (he : e = e') (hf : f = f') :
     ofFrame h e f = ofFrame h' e' f' := by
@@ -254,14 +230,14 @@ private lemma n4f_sqrt3_cancel3 (x z y : ℝ) :
     n4f_sqrt3_mul_self]
   ring
 
-/-- `α/√3` of (1.4). -/
+/-- `α/√3` of INV (1.4). -/
 private noncomputable def n4f_al (a : ArcParams) : ℝ :=
   a.eps * (1 + a.eps ^ 2 * (a.Y + a.Y' * a.A - a.Y * a.B'))
 
-/-- `β/√3` of (1.4). -/
+/-- `β/√3` of INV (1.4). -/
 private noncomputable def n4f_be (a : ArcParams) : ℝ := -(1 / 2) * a.eps ^ 3 * (a.Y' ^ 2 - a.B')
 
-/-- `γ/√3` of (1.4). -/
+/-- `γ/√3` of INV (1.4). -/
 private noncomputable def n4f_ga (a : ArcParams) : ℝ := 2 * a.eps ^ 3 * (a.Y ^ 2 - a.B)
 
 private lemma n4f_lam (a : ArcParams) :
@@ -270,7 +246,7 @@ private lemma n4f_lam (a : ArcParams) :
     simp only [ArcParams.lamAlpha, ArcParams.lamBeta, ArcParams.lamGamma, n4f_al, n4f_be,
       n4f_ga] <;> ring
 
-/-- The coefficients of (1.4) on a section point (inv.md Theorem 1 (i)). -/
+/-- The coefficients of INV (1.4) on a section point (INV Theorem 1 (i)). -/
 private lemma n4f_coeffs (hq : IsArcSectionPt q) :
     2 * arcEps q ^ 2 * traceForm q.2.1 (q.1 + iso_vfP 1 q) = (arcParams q).lamAlpha ∧
       arcEps q ^ 2 * traceForm q.2.1 (arcVf q.1) = (arcParams q).lamBeta ∧
@@ -291,13 +267,13 @@ private lemma n4f_coeffs (hq : IsArcSectionPt q) :
   rw [fh, fe, ff, ← arcParams_Y' hX] at hX0
   rw [hΛ0, ← hX0, iso_vfP_one_eq hX, n4f_arcVe_ofFrame, n4f_arcVf_ofFrame, (n4f_lam _).1,
     (n4f_lam _).2.1, (n4f_lam _).2.2]
-  simp only [n4f_smul_ofFrame, n4f_ofFrame_sub, n4f_ofFrame_add, traceForm_ofFrame]
+  simp only [smul_ofFrame, ofFrame_sub, ofFrame_add, traceForm_ofFrame]
   refine ⟨?_, ?_, ?_⟩ <;>
     simp only [n4f_al, n4f_be, n4f_ga, ArcParams.A, ArcParams.B, ArcParams.B', ArcParams.Y',
       arcParams] <;>
     field_simp <;> ring
 
-/-- (1.4) on a section point (the content of `iso_vfΛ₁_one_eq_arcParams`). -/
+/-- INV (1.4) on a section point (the content of `iso_vfΛ₁_one_eq_arcParams`). -/
 private lemma n4f_vfΛ₁ (hq : IsArcSectionPt q) (t : ℝ) :
     iso_vfΛ₁ 1 q t =
       (arcParams q).lamAlpha • (iso_vfX 1 q t + iso_vfP 1 q) +
@@ -352,7 +328,7 @@ private lemma n4f_frame_flow (hq : IsArcSectionPt q) (t : ℝ) :
   refine ⟨hXt, ?_⟩
   rw [n4f_vfΛ₁ hq t, hXt, iso_vfP_one_eq hX, h2, h2', n4f_arcVe_ofFrame, n4f_arcVf_ofFrame,
     n4f_three_halves_J, (n4f_lam _).1, (n4f_lam _).2.1, (n4f_lam _).2.2]
-  simp only [n4f_smul_ofFrame, n4f_ofFrame_add]
+  simp only [smul_ofFrame, ofFrame_add]
   refine n4f_ofFrame_eq ?_ ?_ ?_ <;> simp only [n4f_Mh, n4f_Me, n4f_Mf, arcParams] <;> ring
 
 /-- The rotated point `Ad_{R⁻¹} q(t)` in the frame: `ε_n = ε (Y - s)/s`. -/
@@ -404,7 +380,7 @@ private lemma n4f_arcQ_rot (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTi
   obtain ⟨hXn, hΛn⟩ := n4f_frame_rot hq t
   rw [arcQ, show arcEps (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       ρ₁ (iso_adRinvPow 1 (iso_vertexFlow 1 q t)).1 from rfl, hΛn, hXn,
-    ivf_traceForm_smul_left, n4f_sqrt3_cancel6, n4f_arcVe_ofFrame, (n4f_ρ_ofFrame _ _ _).2.1,
+    ivf_traceForm_smul_left, n4f_sqrt3_cancel6, n4f_arcVe_ofFrame, (ρ_ofFrame _ _ _).1,
     traceForm_ofFrame]
   generalize Real.exp (t / arcEps q) = s at hsY hs0 ⊢
   simp only [n4f_Mh, n4f_Me, n4f_Mf, n4f_al, n4f_be, n4f_ga, ArcParams.qNew, ArcParams.Phi,
@@ -423,7 +399,7 @@ private lemma n4f_arcP_rot (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTi
   obtain ⟨hXn, hΛn⟩ := n4f_frame_rot hq t
   rw [arcP, show arcEps (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       ρ₁ (iso_adRinvPow 1 (iso_vertexFlow 1 q t)).1 from rfl, hΛn, hXn,
-    ivf_traceForm_smul_left, n4f_sqrt3_cancel2, n4f_arcVf_ofFrame, (n4f_ρ_ofFrame _ _ _).2.1,
+    ivf_traceForm_smul_left, n4f_sqrt3_cancel2, n4f_arcVf_ofFrame, (ρ_ofFrame _ _ _).1,
     traceForm_ofFrame]
   generalize Real.exp (t / arcEps q) = s at hsY hs0 ⊢
   simp only [n4f_Mh, n4f_Me, n4f_Mf, n4f_al, n4f_be, n4f_ga, ArcParams.pNew,
@@ -431,7 +407,7 @@ private lemma n4f_arcP_rot (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTi
   field_simp
   ring
 
-/-- `f₀` of the rotated point, when it is a section point ((1.5) and the table (1.5) of inv.md):
+/-- `f₀` of the rotated point, when it is a section point ((1.5) and the table INV (1.5)):
 `s² Ψ(s)/(Y (Y - s)²)`. -/
 private lemma n4f_arcF0_rot (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTime q)
     (hn : IsArcSectionPt (iso_adRinvPow 1 (iso_vertexFlow 1 q t))) :
@@ -444,78 +420,16 @@ private lemma n4f_arcF0_rot (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitT
   obtain ⟨hXn, hΛn⟩ := n4f_frame_rot hq t
   have hY'n : arcY' (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       arcY q / (arcY q - Real.exp (t / arcEps q)) := by
-    rw [arcY', hXn, (n4f_ρ_ofFrame _ _ _).1, (n4f_ρ_ofFrame _ _ _).2.1]
+    rw [arcY', hXn, (ρ_ofFrame _ _ _).2.2, (ρ_ofFrame _ _ _).1]
     simp only [arcParams]
     field_simp
     ring
   rw [arcF0_eq_reducedHam hn, reducedHam, show arcEps (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       ρ₁ (iso_adRinvPow 1 (iso_vertexFlow 1 q t)).1 from rfl, hY'n, hΛn, hXn,
-    ivf_traceForm_smul_left, n4f_sqrt3_cancel3, (n4f_ρ_ofFrame _ _ _).2.1, traceForm_ofFrame]
+    ivf_traceForm_smul_left, n4f_sqrt3_cancel3, (ρ_ofFrame _ _ _).1, traceForm_ofFrame]
   generalize Real.exp (t / arcEps q) = s at hsY hs0 ⊢
   simp only [n4f_Mh, n4f_Me, n4f_Mf, n4f_al, n4f_be, n4f_ga, ArcParams.f0New, ArcParams.Psi,
     ArcParams.A, ArcParams.B, ArcParams.B', ArcParams.Y', arcParams]
-  field_simp
-  ring
-
-/-! ### The update rules at a zero of `f` (helpers; `ArcParams.step_closed`, steps 6–7) -/
-
-private lemma n4f_exp_two (τ : ℝ) :
-    Real.exp (2 * τ) = Real.exp τ ^ 2 ∧ Real.exp (-2 * τ) = (Real.exp τ ^ 2)⁻¹ ∧
-      Real.exp (-τ) = (Real.exp τ)⁻¹ := by
-  have h2 : Real.exp (2 * τ) = Real.exp τ ^ 2 := by
-    rw [← Real.exp_nat_mul]
-    push_cast
-    ring_nf
-  refine ⟨h2, ?_, Real.exp_neg τ⟩
-  rw [← h2, ← Real.exp_neg]
-  ring_nf
-
-/-- At a zero of `f`: `Y τ = s - A - B/s`, `s = e^{τ}`. -/
-private lemma n4f_Ytau (a : ArcParams) {τ : ℝ} (hf : a.f τ = 0) :
-    a.Y * τ = Real.exp τ - a.A - a.B / Real.exp τ := by
-  obtain ⟨-, h2', h1⟩ := n4f_exp_two τ
-  have hs0 : Real.exp τ ≠ 0 := (Real.exp_pos _).ne'
-  have e : a.Y * τ - (Real.exp τ - a.A - a.B / Real.exp τ) = Real.exp τ * a.f τ := by
-    simp only [ArcParams.f, h1, h2']
-    field_simp
-    ring
-  linear_combination e + Real.exp τ * hf
-
-/-- At a zero of `f` with `g₀ = 0`: `g(τ)/k² = s² Ψ(s)/(Y (Y - s)²)`, `k = Y e^{-τ} - 1`. -/
-private lemma n4f_g_div (a : ArcParams) (hg0 : a.g0 = 0) {τ : ℝ} (hf : a.f τ = 0)
-    (hY : a.Y ≠ 0) (hsY : a.Y - Real.exp τ ≠ 0) :
-    a.g τ / (a.Y * Real.exp (-τ) - 1) ^ 2 = a.f0New (Real.exp τ) := by
-  obtain ⟨h2, -, h1⟩ := n4f_exp_two τ
-  have hs0 : Real.exp τ ≠ 0 := (Real.exp_pos _).ne'
-  have hτ := n4f_Ytau a hf
-  have hg : a.g τ = (-a.Y + a.Y * a.A' * Real.exp τ + a.Y * a.B' * Real.exp τ ^ 2 -
-      a.Y' * Real.exp τ * (Real.exp τ - a.A - a.B / Real.exp τ)) / a.Y := by
-    rw [← hτ]
-    simp only [ArcParams.g, h2]
-    field_simp
-  have hk : a.Y * (Real.exp τ)⁻¹ - 1 = (a.Y - Real.exp τ) / Real.exp τ := by
-    field_simp
-  rw [hg, h1, hk]
-  simp only [ArcParams.f0New, ArcParams.Psi, ArcParams.A', ArcParams.B', hg0]
-  field_simp
-  ring
-
-/-- At a zero of `f`: `-f'(τ)/k² = π(s)/(Y - s)²`, `k = Y e^{-τ} - 1`. -/
-private lemma n4f_fDeriv_div (a : ArcParams) {τ : ℝ} (hf : a.f τ = 0)
-    (hsY : a.Y - Real.exp τ ≠ 0) :
-    -a.fDeriv τ / (a.Y * Real.exp (-τ) - 1) ^ 2 = a.pNew (Real.exp τ) := by
-  obtain ⟨-, h2', h1⟩ := n4f_exp_two τ
-  have hs0 : Real.exp τ ≠ 0 := (Real.exp_pos _).ne'
-  have hτ := n4f_Ytau a hf
-  have hd : a.fDeriv τ = -a.A / Real.exp τ - 2 * a.B / Real.exp τ ^ 2 +
-      (a.Y - (Real.exp τ - a.A - a.B / Real.exp τ)) / Real.exp τ := by
-    rw [← hτ]
-    simp only [ArcParams.fDeriv, h1, h2']
-    field_simp
-  have hk : a.Y * (Real.exp τ)⁻¹ - 1 = (a.Y - Real.exp τ) / Real.exp τ := by
-    field_simp
-  rw [hd, h1, hk]
-  simp only [ArcParams.pNew]
   field_simp
   ring
 
@@ -636,9 +550,9 @@ theorem isArcSectionPt_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBefore
   · rw [poly_det_conj poly_R_mul_inv, det_vertexFlow_snd]; exact h8
   · exact poly_isStarState_Rinv_conj hstar
 
-set_option linter.unusedVariables false in
-/-- **Theorem 2.1**: `(ρ₀, ρ₁, ρ₂)(F q) = (ρ₁(q), ρ₂(X(t_sw)), ρ₀(X(t_sw)))`. -/
-theorem ρ_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit q) :
+/-- **Theorem 2.1**: `(ρ₀, ρ₁, ρ₂)(F q) = (ρ₁(q), ρ₂(X(t_sw)), ρ₀(X(t_sw)))`. It holds for every
+section point, whether or not its arc switches before it exits (`SwitchesBeforeExit`). -/
+theorem ρ_reinPoincare (hq : IsArcSectionPt q) :
     ρ₀ (reinPoincare q).1 = ρ₁ q.1 ∧
       ρ₁ (reinPoincare q).1 = ρ₂ (iso_vfX 1 q (reinSwitchTime q)) ∧
       ρ₂ (reinPoincare q).1 = ρ₀ (iso_vfX 1 q (reinSwitchTime q)) := by
@@ -652,7 +566,7 @@ private lemma n4f_ρ₁_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBefor
     ρ₁ (reinPoincare q).1 = arcEps q * (arcParams q).stepK := by
   have hε := arcEps_pos hq.2
   obtain ⟨hτ, -⟩ := reinSwitchTime_eq_tauSw hq hs
-  rw [(ρ_reinPoincare hq hs).2.1, (ρ_iso_vfX_one hq.2 _).2.1, hτ, neg_div,
+  rw [(ρ_reinPoincare hq).2.1, (ρ_iso_vfX_one hq.2 _).2.1, hτ, neg_div,
     mul_div_cancel_left₀ _ hε.ne']
   rfl
 
@@ -684,19 +598,19 @@ theorem arcParams_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit 
     rfl
   have e2 : arcY (reinPoincare q) =
       1 + ((arcParams q).Y' * Real.exp (arcParams q).tauSw - 1) / (arcParams q).stepK := by
-    rw [arcY, hρ₁, (ρ_reinPoincare hq hs).2.2, (ρ_iso_vfX_one hX _).2.2, htτ,
+    rw [arcY, hρ₁, (ρ_reinPoincare hq).2.2, (ρ_iso_vfX_one hX _).2.2, htτ,
       ← arcParams_Y' hX, mul_div_mul_left _ _ hε.ne']
   have e3 : arcF0 (reinPoincare q) = (arcParams q).g (arcParams q).tauSw /
       ((arcParams q).Y * Real.exp (-(arcParams q).tauSw) - 1) ^ 2 := by
     have h := n4f_arcF0_rot hq hs.2 hn
     rw [htτ] at h
-    rw [n4f_g_div _ (arcG0_eq_zero hq) hf hY (sub_pos.2 hsY).ne']
+    rw [ArcParams.g_div_sq_eq_f0New _ (arcG0_eq_zero hq) hf hY (sub_pos.2 hsY).ne']
     exact h
   have e6 : arcP (reinPoincare q) = -(arcParams q).fDeriv (arcParams q).tauSw /
       ((arcParams q).Y * Real.exp (-(arcParams q).tauSw) - 1) ^ 2 := by
     have h := n4f_arcP_rot hq hs.2
     rw [htτ] at h
-    rw [n4f_fDeriv_div _ hf (sub_pos.2 hsY).ne']
+    rw [ArcParams.neg_fDeriv_div_sq_eq_pNew _ hf (sub_pos.2 hsY).ne']
     exact h
   calc arcParams (reinPoincare q)
       = ⟨arcEps (reinPoincare q), arcY (reinPoincare q), arcF0 (reinPoincare q),
@@ -710,9 +624,9 @@ theorem arcParams_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit 
         rw [e1, e2, e3, arcG0_eq_zero hn, e6]
     _ = (arcParams q).step (arcQ (reinPoincare q)) := rfl
 
-/-! ### Theorem 1 of `notes/inv/inv.md`: the image in closed form -/
+/-! ### INV Theorem 1: the image in closed form -/
 
-/-- **(1.4) on a section point** (`notes/inv/inv.md` Theorem 1 (i)): along the `e₂`-arc from a
+/-- **INV (1.4) on a section point** (INV Theorem 1 (i)): along the `e₂`-arc from a
 section point, with `u = e^{-t/ε}`,
 `Λ₁(t) = α (X(t) + P) + β u⁻² V_e(X(t)) + γ u² V_f(X(t))`,
 `α = √3 ε (1 + ε²(Y + Y'A - Y B'))`, `β = -(√3/2) ε³ (Y'² - B')`, `γ = 2√3 ε³ (Y² - B)`
@@ -724,10 +638,10 @@ Route: `iso_vfΛ₁_one_eq` (`SmoothedPolygons/Ch14/ArcCostate.lean`) gives the 
 `Λ₁(0) = Λ̂₀ - (3/2) J = ofFrame (l_h + √3/2) (l_e + 2√3) (l_f - √3/2)` (`frame_controlMatrix`:
 `J = ofFrame (-1/√3) (-4/√3) (1/√3)`); pair with `X₀ + P = ofFrame (-ε - 1/(2ε)) x_e x_f`,
 `V_f`, `V_e` (`traceForm_ofFrame`, `frame_state`, `iso_vfP_one_eq`) and simplify with
-`ε² Y Y' = 1 + ε²` and `√3² = 3` (`field_simp`, `ring`). Equivalently (inv.md):
+`ε² Y Y' = 1 + ε²` and `√3² = 3` (`field_simp`, `ring`). Equivalently (INV §1):
 `⟨Λ̂₀, V_e⟩ = -2√3 ε q`, `⟨Λ̂₀, V_f⟩ = (√3/2) ε p` (definitions of `arcQ`, `arcP`),
-`⟨J, V_e⟩ = -(4ε/√3)(Y² - Y + 1)`, `⟨J, V_f⟩ = (ε/√3)(Y'² - Y' + 1)`. Checked exactly against the
-literal definitions (`notes/n4s2/lit.py`, `lit_exact.py`) and in `notes/inv/verify.py` §1. -/
+`⟨J, V_e⟩ = -(4ε/√3)(Y² - Y + 1)`, `⟨J, V_f⟩ = (ε/√3)(Y'² - Y' + 1)`. Also checked exactly with
+sympy against the literal definitions. -/
 theorem iso_vfΛ₁_one_eq_arcParams (hq : IsArcSectionPt q) (t : ℝ) :
     iso_vfΛ₁ 1 q t =
       (arcParams q).lamAlpha • (iso_vfX 1 q t + iso_vfP 1 q) +
@@ -735,16 +649,16 @@ theorem iso_vfΛ₁_one_eq_arcParams (hq : IsArcSectionPt q) (t : ℝ) :
         ((arcParams q).lamGamma * Real.exp (-2 * t / arcEps q)) • arcVf (iso_vfX 1 q t) :=
   n4f_vfΛ₁ hq t
 
-/-- **inv.md Theorem 1 for `q`, at every time of the arc**: for a section point `q` and `t < T`,
+/-- **INV Theorem 1 for `q`, at every time of the arc**: for a section point `q` and `t < T`,
 with `s = e^{t/ε}` (so `s < Y`), the rotated point `Ad_{R⁻¹} q(t)` has
 `arcQ = Φ(s)/(Y - s)²` (`ArcParams.qNew`). At `t = t_sw` this is `q_new` (`arcQ_reinPoincare`).
 
-Route (inv.md §1 (ii)–(iii)). Put `X_n = R⁻¹ X(t) R`, `Λ_n = R⁻¹ Λ₁(t) R`, `k_s = Y - s`.
+Route (INV §1 (ii)–(iii)). Put `X_n = R⁻¹ X(t) R`, `Λ_n = R⁻¹ Λ₁(t) R`, `k_s = Y - s`.
 1. `R⁻¹ J R = J` (`R = (1/2) I + (√3/2) J`), so `Λ_n + (3/2) J = R⁻¹ Λ̂(t) R`,
    `Λ̂(t) = Λ₁(t) + (3/2) J`; the trace form is conjugation invariant, so
    `⟨Λ_n + (3/2) J, V_e(X_n)⟩ = ⟨Λ̂(t), V_{e,n}⟩` with `V_{e,n} = R V_e(X_n) R⁻¹`.
 2. `ε_n = ρ₁(X_n) = ρ₂(X(t)) = ε k_s/s` (`ρ_adRinv`, `ρ_iso_vfX_one`), nonzero for `t < T`.
-3. The table (1.5) (the frame form of `R` is `S⁻¹ R S = [[0, -2], [1/2, 1]]`; twelve `2 × 2`
+3. The table INV (1.5) (the frame form of `R` is `S⁻¹ R S = [[0, -2], [1/2, 1]]`; twelve `2 × 2`
    products, `ofFrame_mul_sub`-style entrywise computation): the pairings of `V_{e,n}` with
    `X(t) + P`, `V_e(t)`, `V_f(t)`, `J` are `-2s/(ε² k_s)`, `-4s/(ε² k_s)`, `s/(ε² k_s)`,
    `-(4ε/(√3 s k_s))(Y'² s⁴ - 3Y' s³ + (YY' + 3) s² - 3Y s + Y²)`; those of `V_{f,n}` are `0`, `0`,
@@ -754,18 +668,17 @@ Route (inv.md §1 (ii)–(iii)). Put `X_n = R⁻¹ X(t) R`, `Λ_n = R⁻¹ Λ₁
    `⟨Λ̂(t), V_{e,n}⟩ = α(-2s/(ε² k_s)) + β s² (-4s/(ε² k_s)) + γ s⁻² (s/(ε² k_s))
    + (3/2) ⟨J, V_{e,n}⟩ = -(2√3 ε/(s k_s)) Φ(s)` (with `1/ε² = YY' - 1` and `Y B' = Y - Y A'`,
    `A' = 2 - Y' - p`), so `arcQ = -(√3/(6ε_n)) ⟨…⟩ = Φ(s)/k_s²`.
-Checked exactly against the literal definitions (matrix exponentials, `R`, `arcVe`):
-`notes/n4s2/lit.py` (symbolic in `ε, Y, u, Λ₁`) and `lit_exact.py` (with the table, `t` of both
-signs); inv.md `verify.py` §1. -/
+Also checked exactly with sympy against the literal definitions (matrix exponentials, `R`,
+`arcVe`), symbolically in `ε, Y, u, Λ₁` and at exact points (with the table, `t` of both signs). -/
 theorem arcQ_adRinv_vertexFlow (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTime q) :
     arcQ (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       (arcParams q).qNew (Real.exp (t / arcEps q)) :=
   n4f_arcQ_rot hq ht
 
-/-- **inv.md Theorem 1 for `p`, at every time of the arc**: for a section point `q` and `t < T`,
+/-- **INV Theorem 1 for `p`, at every time of the arc**: for a section point `q` and `t < T`,
 with `s = e^{t/ε}`, the rotated point `Ad_{R⁻¹} q(t)` has `arcP = π(s)/(Y - s)²`
 (`ArcParams.pNew`, `π(s) = s² - Y s + B`). At `t = t_sw` this is `p_new` (with
-`ArcParams.step_closed`, `-f'(τ_sw)/k²`), without Lemma 2.3.
+`ArcParams.neg_fDeriv_div_sq_eq_pNew`, `-f'(τ_sw)/k²`), without Lemma 2.3.
 
 Route: as `arcQ_adRinv_vertexFlow` with `V_{f,n}`: only `γ` and `J` pair with it,
 `⟨Λ̂(t), V_{f,n}⟩ = γ s⁻² (-s/(4ε² k_s)) + (3/2)(ε/(√3 s k_s))(s² - Y s + Y²)
@@ -775,7 +688,7 @@ theorem arcP_adRinv_vertexFlow (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcEx
       (arcParams q).pNew (Real.exp (t / arcEps q)) :=
   n4f_arcP_rot hq ht
 
-/-- **inv.md Theorem 1, `q_new` in closed form**: for a section point whose arc switches inside the
+/-- **INV Theorem 1, `q_new` in closed form**: for a section point whose arc switches inside the
 star domain, `q_new = arcQ (F q) = Φ(s)/(Y - s)²` with `s = e^{τ_sw}` (`ArcParams.qNew`). This
 settles which root of the quadric relation (2.1) at the new point `q_new` is; no root is chosen.
 
@@ -794,7 +707,7 @@ theorem arcQ_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit q) :
 theorem radius_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit q) :
     (reinPoincare q).1 0 0 = (ρ₁ q.1 - ρ₁ (reinPoincare q).1) / 2 ∧
       (reinPoincare q).1 0 0 = arcEps q * (1 - (arcParams q).stepK) / 2 := by
-  have hρ := ρ_reinPoincare hq hs
+  have hρ := ρ_reinPoincare hq
   have h00 : ∀ M : Mat2, M 0 0 = (ρ₀ M - ρ₁ M) / 2 := fun M ↦ by
     simp only [ρ₀, ρ₁]
     field_simp

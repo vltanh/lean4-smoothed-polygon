@@ -234,6 +234,13 @@ thm:hyperbolic-out	theorem	1	lem:analytic-extension,lem:eigenvalues
 # Unlabelled Remark 14.3.4 (line 11898): the same at q_in "by time reversal" (no proof). Label of this
 # formalization.
 rem:hyperbolic-in	remark	0	
+# Figure 14.2 (line 11976, label fig:unstable-curve) and the running text around it (lines 11951-11991):
+# the unstable curve of (0, x_out) reaches the boundary of the star domain, the switching sequence staying
+# cyclic (N4), read off a Mathematica computation, with no proof. The proof of Theorem 14.4.1 uses it
+# without citing the figure ("the unstable curve hits the boundary of the star domain", lines 12009-12010).
+# Stated as the named fact UnstableCurveLeavesStarDomain and proved without computer assistance (the
+# user's decision; REPORT.md E88): unstableCurveLeavesStarDomain.
+fig:unstable-curve	figure	0	
 thm:no-return	theorem	1	
 # Equation (15.1.1) (line 12051): x_3 = 2 r_1 r_2 sin(theta_1 - theta_2) = -2 r_1 r_2 sin psi; "the vanishing
 # Hamiltonian condition implies" it (a one-line derivation, no citation).

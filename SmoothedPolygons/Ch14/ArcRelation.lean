@@ -5,23 +5,23 @@ public import SmoothedPolygons.Ch14.ArcNormalForm
 /-!
 # Chapter 14, N4: the parameters of a section point and the quadric relation (2.1)
 
-`notes/n4/proof.md` §2.1: a section point is determined by its arc parameters `(ε, Y, f₀, q, p)`:
+Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
+computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
+computed figure (Figure 14.2, TeX 11951–11991; REPORT.md E88); the formalization proves it from
+the exact structure of the Reinhardt flow along an `e₂`-arc and an invariant region (see
+`SmoothedPolygons/Ch14/ArcParams.lean`, and `SmoothedPolygons/Ch14/ArcRegionInvariant.lean` for
+the numbering of the steps).
+
+This file is §2.1: a section point is determined by its arc parameters `(ε, Y, f₀, q, p)`:
 `X₀` by `(ε, Y)` (Proposition 1.1), `Λ̂₀ = Λ₁(0) + (3/2) J` linearly by `(f₀, q, p)` ((1.5),
 Theorem 1.3; `X₀, V_e, V_f` are a basis of `𝔰𝔩₂(ℝ)`), `Λ_R` by the linear conditions of the
 section (`frame_section_costateR`). The remaining constraint `det Λ₁ = 9/4`, i.e.
 `⟨Λ̂, Λ̂⟩ = 3⟨Λ̂, J⟩`, is the quadric relation `R = 0` (`ArcParams.rel`, (2.1)). So the section is
-parametrized by `(ε, Y, f₀, p)` and a choice of one of the two roots `q` of `R = 0`. Part of the
-reduction of N4 to (INV) (`ArcRegionInvariant`).
+parametrized by `(ε, Y, f₀, p)` and a choice of one of the two roots `q` of `R = 0`.
 
-**Departure from the paper.** The book computes the unstable curve numerically (Figure 14.2,
-TeX 11951–11991); the formalization proves N4 from (INV) by the exact structure of the arcs (see
-`SmoothedPolygons/Ch14/ArcParams.lean`).
-
-**Status of (2.1) in the research notes.** The research found `R` by computer algebra (sympy
-`solve` and `factor`, `notes/n4/relation.py`), not by hand; it is a polynomial identity. Here it
-is split into two identities a proof agent can check with `field_simp` and `ring` /
-`linear_combination` (both re-checked with sympy in `notes/n4f/rel_identity.py`, where they
-simplify to `0`):
+**How (2.1) is proved.** `R` was found by computer algebra (sympy `solve` and `factor`), not by
+hand; it is a polynomial identity. Here it is split into two identities that `field_simp` and
+`ring` / `linear_combination` check (both also checked with sympy, where they simplify to `0`):
 
 * (inversion, `frame_reducedCostate`) with `κ = 1 + ε²`, the frame components of `Λ̂₀` are
   `l_h = √3 (Y²ε²p - κ(2ε² + 1) f₀ + κ q)/(2Y)`, `l_e = 2√3 ε² (q - κ f₀)`,
@@ -38,9 +38,9 @@ simplify to `0`):
   9/4 - (⟨Λ̂, Λ̂⟩ - 3⟨Λ̂, J⟩)/2`, `⟨Λ̂, Λ̂⟩ = 2l_h² + 2l_e l_f`, `⟨Λ̂, J⟩ = (-2l_h + l_e - 4l_f)/√3`
   ((1.2)). Substituting the `l`'s, `R - (4Y²/3)(…)` is `0` modulo `√3² = 3` (see the next item;
   `field_simp; ring` alone does not close it).
-* (the cofactor, the review `notes/briefs/n4_review_report.md`, Documentation 4; computed with
-  sympy, `polys.div` by `s² - 3`) write `s = √3`, `h3 : s ^ 2 = 3`, `Λ̂₀ = ofFrame l_h l_e l_f`,
-  `X₀ = ofFrame (-ε) (-2εY) (εY'/2)`, `Y' = (1 + ε²)/(ε² Y)`. Then (`traceForm_ofFrame`)
+* (the cofactor, found in review; computed with sympy, `polys.div` by `s² - 3`) write `s = √3`,
+  `h3 : s ^ 2 = 3`, `Λ̂₀ = ofFrame l_h l_e l_f`, `X₀ = ofFrame (-ε) (-2εY) (εY'/2)`,
+  `Y' = (1 + ε²)/(ε² Y)`. Then (`traceForm_ofFrame`)
   `f₀(1.5) = -s (-2l_h + Y' l_e/2 - 2Y l_f)/(3ε² Y')`, `q = -(s/6)(-4Y l_h + l_e - 4Y² l_f)`,
   `p = (2/s)(Y' l_h - Y'² l_e/4 + l_f)`,
   `9/4 - det Λ₁ = l_h² + l_e l_f + s l_h - (s/2) l_e + 2s l_f` (`det_ofFrame`, using `s² = 3`
@@ -62,7 +62,7 @@ simplify to `0`):
   `p = (4Y²ε⁴ λ_f + 4Y(ε⁴ + ε²) λ_h - (1 + ε²)² λ_e)/(2Y²ε⁴)`,
   `9/4 - det Λ₁ = 3(λ_h² + λ_e λ_f + λ_h - λ_e/2 + 2λ_f)`, and the identity
   `R(ε, Y, f₀, q, p) = 4Y²(λ_h² + λ_e λ_f + λ_h - λ_e/2 + 2λ_f)` is `field_simp; ring` in
-  `(ε, Y, λ)`. (Both checked with sympy: `notes/n4s2/cofactor.py`.)
+  `(ε, Y, λ)`. (Both checked with sympy.)
 
 ## Statements
 
@@ -89,8 +89,9 @@ simplify to `0`):
    `a, b, c`; in Lean through the frame, `X₀ = ofFrame (-ε) (-2εY) (εY'/2)`, `frame_state`);
    step 1 gives `Λ̂₀` and `Λ₁ = Λ̂₀ - (3/2) J`; `frame_section_costateR` gives `Λ_R` (traceless).
 
-Checked numerically (`notes/n4f/check1.py`: `R = 0` at a chart point near `W^u`, the identity at a
-generic traceless point, the frame of `Λ̂₀`; `notes/n4f/check2.py`: `R = 0` at Poincaré images).
+Also checked numerically, while the statements were written: `R = 0` at a chart point near `W^u`
+and at its Poincaré images, the identity at a generic traceless point, the frame of `Λ̂₀`. The
+proofs do not depend on these checks.
 -/
 
 @[expose] public section
@@ -125,8 +126,8 @@ private lemma n4d_arcY'_eq (hX : IsStarState q.1) :
   rw [← arcParams_Y' hX]
   rfl
 
-/-- **The frame of `Λ̂₀ = Λ₁(0) + (3/2) J` on a section point**, in the parameters (proof.md §2.1;
-`notes/n4/relation.py`): with `κ = 1 + ε²`,
+/-- **The frame of `Λ̂₀ = Λ₁(0) + (3/2) J` on a section point**, in the parameters (§2.1): with
+`κ = 1 + ε²`,
 `l_h = √3 (Y²ε²p - κ(2ε² + 1) f₀ + κ q)/(2Y)`, `l_e = 2√3 ε² (q - κ f₀)`,
 `l_f = -√3 (Y²ε²p - κ² f₀)/(2Y²)`. -/
 theorem frame_reducedCostate (hq : IsArcSectionPt q) :
@@ -149,7 +150,7 @@ theorem frame_reducedCostate (hq : IsArcSectionPt q) :
     ⟨_, _, _, (ofFrame_frame (n4d_trace_reducedCostate hq.1.1.2.1)).symm⟩
   rw [arcF0_eq_reducedHam hq]
   unfold arcQ arcP reducedHam
-  rw [hΛ, n4d_arcVe_eq, n4d_arcVf_eq, hxe, hxf, n4d_state_eq hX]
+  rw [hΛ, n4d_arcVe_eq, n4d_arcVf_eq, hxe, hxf, state_eq_ofFrame hX]
   simp only [traceForm_ofFrame, frameH_ofFrame, frameE_ofFrame, frameF_ofFrame]
   rw [n4d_arcY'_eq hX]
   set e := arcEps q
@@ -169,7 +170,7 @@ theorem frame_reducedCostate (hq : IsArcSectionPt q) :
     field_simp
     ring
 
-/-- **The quadric relation as an identity** (proof.md (2.1), `notes/n4/relation.py`): for a phase
+/-- **The quadric relation as an identity** ((2.1)): for a phase
 point with `X₀` a star state and `Λ₁` traceless, with `f₀` given by (1.5),
 `R(ε, Y, f₀, q, p) = (4Y²/3)(9/4 - det Λ₁)`. The identity needs `√3² = 3`: see the module
 docstring for the `linear_combination` cofactor `K` (with `h3 : √3 ^ 2 = 3`) and for the
@@ -194,7 +195,7 @@ theorem arcParams_rel_identity (hX : IsStarState q.1) (hL : q.2.1.trace = 0) :
   rw [hdet]
   simp only [ArcParams.rel]
   unfold arcQ arcP reducedHam
-  rw [hΛ, n4d_arcVe_eq, n4d_arcVf_eq, hxe, hxf, n4d_state_eq hX]
+  rw [hΛ, n4d_arcVe_eq, n4d_arcVf_eq, hxe, hxf, state_eq_ofFrame hX]
   simp only [traceForm_ofFrame]
   rw [n4d_arcY'_eq hX]
   set e := arcEps q
@@ -216,7 +217,7 @@ theorem arcParams_rel (hq : IsArcSectionPt q) : (arcParams q).rel = 0 := by
   rw [← h]
   simp only [ArcParams.rel, arcParams, arcF0_eq_reducedHam hq]
 
-/-- **A section point is determined by its parameters** (proof.md §2.1): `arcParams` is injective
+/-- **A section point is determined by its parameters** (§2.1): `arcParams` is injective
 on section points. -/
 theorem arcParams_injOn : Set.InjOn arcParams {q | IsArcSectionPt q} := by
   intro q hq q' hq' h
@@ -229,7 +230,7 @@ theorem arcParams_injOn : Set.InjOn arcParams {q | IsArcSectionPt q} := by
     rw [← arcParams_Y' hq.2, ← arcParams_Y' hq'.2, h]
   -- `X₀` by `(ε, Y)` (Proposition 1.1, (1.3))
   have hX : q.1 = q'.1 := by
-    rw [n4d_state_eq hq.2, n4d_state_eq hq'.2, hε, hY, hY']
+    rw [state_eq_ofFrame hq.2, state_eq_ofFrame hq'.2, hε, hY, hY']
   -- `Λ̂₀` by `(ε, Y, f₀, q, p)` (`frame_reducedCostate`)
   have hL : q.2.1 = q'.2.1 := by
     have e1 := frame_reducedCostate hq

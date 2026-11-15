@@ -16,10 +16,12 @@ from computations it did not certify:
 * N4, the unstable curve `W^u(q_out)` reaches the boundary of the star domain (Figure 14.2,
   `SmoothedPolygons/Ch14/UnstableCurve.lean`): `UnstableCurveLeavesStarDomain`.
 
-The three facts of Table 16.1 are now proved (`dOutContracts`, `cellTwoEntersDOut`,
-`boxSubclaims`), so the strongest form, conditional on N4 alone, is
-`theorem16_3_1_of_unstableCurveLeavesStarDomain` (`SmoothedPolygons/Ch16/BasinFacts.lean`), which
-applies the theorem of this file.
+All four are now proved, without computer assistance: the three facts of Table 16.1
+(`dOutContracts`, `cellTwoEntersDOut`, `boxSubclaims`; the form conditional on N4 alone is
+`theorem16_3_1_of_unstableCurveLeavesStarDomain`, `SmoothedPolygons/Ch16/BasinFacts.lean`, which
+applies the theorem of this file) and N4 (`unstableCurveLeavesStarDomain`,
+`SmoothedPolygons/Ch14/ArcRegionInvariant.lean`). So Theorem 16.3.1 holds unconditionally
+(`theorem16_3_1_unconditional`, `SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean`).
 
 Proof (one line): `theorem16_3_1_of_theorem14_4_1 h₁ h₂ h₃ (theorem14_4_1 h₄)`
 (`SmoothedPolygons/Ch16/NoChattering.lean`, `SmoothedPolygons/Ch14/NoReturnProof.lean`).

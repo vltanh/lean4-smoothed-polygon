@@ -17,8 +17,8 @@ packing inequality (*Some packing and covering theorems*, Acta Sci. Math. Szeged
 we follow K. Böröczky Jr., *Finite packing and covering by congruent convex domains*, Discrete
 Comput. Geom. 30 (2003), 185–193, Lemma 5, with an angle count in place of Euler's formula.
 
-The proof is assembled here from four independent lemmas, each left as `sorry` with its argument
-in its docstring:
+The proof is assembled here from four independent lemmas, each proved in its own file (the
+argument in its docstring):
 
 * (A) `PlaneConvex.exists_isMaximalCells`: there are cells `K i ⊆ C i ⊆ Q`, convex polygons,
   non-overlapping, of maximal total area among all non-overlapping families of convex sets

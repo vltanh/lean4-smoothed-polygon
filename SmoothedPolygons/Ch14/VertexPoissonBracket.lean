@@ -7,26 +7,27 @@ import SmoothedPolygons.Ch7.Isolated.Return
 /-!
 # Chapter 14, N4: the Poisson brackets of the vertex Hamiltonians (Lemma 2.3)
 
-`notes/n4/proof.md` Lemma 2.3: for the vertex vector fields `V_u` (`iso_extremalField (vertex u)`,
-`λ_cost = -1`) and the vertex Hamiltonians `H_u` (`phaseHam · (vertex u)`), `L_{V_u} H_u = 0` and
+Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
+computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
+computed figure (Figure 14.2, TeX 11951–11991; REPORT.md E88); the formalization proves it from
+the exact structure of the Reinhardt flow along an `e₂`-arc and an invariant region (see
+`SmoothedPolygons/Ch14/ArcParams.lean`, and `SmoothedPolygons/Ch14/ArcRegionInvariant.lean` for
+the numbering of the steps).
+
+Lemma 2.3: for the vertex vector fields `V_u` (`iso_extremalField (vertex u)`, `λ_cost = -1`) and
+the vertex Hamiltonians `H_u` (`phaseHam · (vertex u)`), `L_{V_u} H_u = 0` and
 `L_{V_u} H_v + L_{V_v} H_u = 0`: the Hamiltonian structure of the maximum principle. Used for
 `SwitchEntersE2` in Proposition 3.4 (1) (`SmoothedPolygons/Ch14/ArcConditions.lean`: the slope of
-`H(e₃) - H(e₂)` along the `e₃`-flow is minus the slope of `χ₂₃` along the `e₂`-flow). proof.md
-also uses it for the slope of `p_new` in Theorem 2.1 (`phaseHamSlope_chi21`: the slope of `χ₂₁`
-is the same along the `e₁`- and the `e₂`-flow), but that is no longer needed: `p_new` follows
-from the closed form (1.4) of `Λ₁(t)` (`arcP_adRinv_vertexFlow`,
-`SmoothedPolygons/Ch14/ArcPoincareMap.lean`, route there, "Simpler route for steps 5–6"). So only
-`phaseHamSlope_e3` (with `hasDerivAt_phaseHam_vertexFlow`) is on the critical path of N4. Part
-of the reduction of N4 to (INV) (`ArcRegionInvariant`).
+`H(e₃) - H(e₂)` along the `e₃`-flow is minus the slope of `χ₂₃` along the `e₂`-flow). It would also
+give the slope of `p_new` in Theorem 2.1 (`phaseHamSlope_chi21`: the slope of `χ₂₁` is the same
+along the `e₁`- and the `e₂`-flow), but that is not needed: `p_new` follows from the closed form
+INV (1.4) of `Λ₁(t)` (`arcP_adRinv_vertexFlow`, `SmoothedPolygons/Ch14/ArcPoincareMap.lean`, route
+there, "Simpler route for steps 5–6"). So only `phaseHamSlope_e3` (with
+`hasDerivAt_phaseHam_vertexFlow`) is on the path to N4.
 
-**Departure from the paper.** The book computes the unstable curve numerically (Figure 14.2,
-TeX 11951–11991); the formalization proves N4 from (INV) by the exact structure of the arcs (see
-`SmoothedPolygons/Ch14/ArcParams.lean`).
-
-**Status in the research notes.** The research checked Lemma 2.3 only with sympy `simplify` on
-generic traceless matrices (`notes/n4/pb.py`). It has a short proof by hand, found while writing
-these statements (and checked numerically on arbitrary, not traceless, matrices,
-`notes/n4f/check_pb.py`): with `P_u = Z_u/⟨X, Z_u⟩` (`controlP`), `Λ̂ = Λ₁ + (3/2) J`,
+**A proof by hand.** Lemma 2.3 was first checked only symbolically (sympy `simplify` on generic
+traceless matrices). It has a short proof by hand (also checked numerically on arbitrary, not
+traceless, matrices): with `P_u = Z_u/⟨X, Z_u⟩` (`controlP`), `Λ̂ = Λ₁ + (3/2) J`,
 `[A, B] = AB - BA`,
 
   `L_{V_u} H_v = ⟨Λ̂, [P_u - P_v, X]⟩ + ⟨Λ_R, [P_u, P_v]⟩`
@@ -54,10 +55,9 @@ trace condition is needed, only `⟨X, Z_u⟩ ≠ 0` and `⟨X, Z_v⟩ ≠ 0`.
    which is `iso_extremalField (vertex u)` at the current point; then the product and quotient
    rules entrywise (as in `irt_chi_hasDerivAt`, `SmoothedPolygons/Ch7/Isolated/Return.lean`, and
    `hamiltonian_vertexFlow`, `SmoothedPolygons/Ch14/VertexFlowAnalytic.lean`). The product rule
-   for the trace form there, `l6d_traceForm_hasDerivAt` (VertexFlowAnalytic.lean:347), is
-   **private**: reprove it here as a private helper (about three lines: from
-   `HasDerivAtEntrywise A A' t` and `HasDerivAtEntrywise B B' t`, `h := hA.mul hB`, then
-   `(h 0 0).add (h 1 1)` and `simp [traceForm, Matrix.trace_fin_two]`, `ring`, giving
+   for the trace form, private in VertexFlowAnalytic.lean, is proved again here
+   (`n4e_traceForm_hasDerivAt`: from `HasDerivAtEntrywise A A' t` and
+   `HasDerivAtEntrywise B B' t`, `h := hA.mul hB`, then `(h 0 0).add (h 1 1)`, giving
    `HasDerivAt (fun s ↦ traceForm (A s) (B s)) (traceForm A' (B t) + traceForm (A t) B') t`).
 2. `phaseHamSlope_eq`: with `X' = [P_u, X]`, `Λ₁' = [Λ₁, X]`,
    `Λ_R' = [P_u, Λ_R] - ⟨Λ_R, P_u⟩[P_u, X] - [Λ̂, X]` (`costateRHS (-1)`): `⟨Λ₁', X⟩ = 0`; the
@@ -65,16 +65,15 @@ trace condition is needed, only `⟨X, Z_u⟩ ≠ 0` and `⟨X, Z_v⟩ ≠ 0`.
    invariance `⟨[A, B], C⟩ = ⟨A, [B, C]⟩` of the trace form gives
    `⟨[P_u, Λ_R], P_v⟩ = -⟨Λ_R, [P_u, P_v]⟩`, `⟨[Λ̂, X], P_v⟩ = -⟨Λ̂, [P_v, X]⟩`,
    `⟨[P_u, X], P_v⟩ = -⟨X, [P_u, P_v]⟩`. Entrywise: `field_simp` (the denominators `⟨X, Z_u⟩`,
-   `⟨X, Z_v⟩`), `ring`. The identity holds for **arbitrary** `2 × 2` matrices `Z_u`, `Z_v` in place
-   of the control matrices (the review, `notes/n4rev/t12_pb_generic.py`, sympy): so the proof can
-   generalize `controlMatrix (vertex u)`, `controlMatrix (vertex v)` to variables `Z`, `W` (with
-   `⟨X, Z⟩ ≠ 0`, `⟨X, W⟩ ≠ 0`) and needs no `√3` arithmetic. As done: `P_u` is generalized to an
-   arbitrary matrix `P` (so `⟨X, Z_u⟩ ≠ 0` is not needed), and `Z_v = c Q` with `c = ⟨X, Z_v⟩`;
-   after cancelling `c`, the identity is polynomial in `X, Λ₁, Λ_R, P, Q` (`n4e_slope_poly`).
+   `⟨X, Z_v⟩`), `ring`. The identity holds for **arbitrary** `2 × 2` matrices in place of the
+   control matrices, so no `√3` arithmetic is needed: the proof generalizes `P_u` to an arbitrary
+   matrix `P` (so `⟨X, Z_u⟩ ≠ 0` is not needed) and writes `Z_v = c Q` with `c = ⟨X, Z_v⟩`;
+   after cancelling `c`, the identity is polynomial in `X, Λ₁, Λ_R, P, Q` (`n4e_slope_poly`),
+   checked entrywise by `ring`.
 3. Lemma 2.3 from step 2: swapping `u, v` changes the sign of each of the three terms.
 
-Checked numerically against the literal flow (`notes/n4f/check2.py` at section points,
-`notes/n4f/check_pb.py` at arbitrary points).
+Also checked numerically, while the statements were written, against the literal flow at section
+points and at arbitrary points; the proofs do not depend on these checks.
 -/
 
 @[expose] public section

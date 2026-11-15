@@ -34,7 +34,10 @@ Python with ball arithmetic) checks `BoxSubclaims`, `F(𝒟_out) ⊆ 𝒟_out` a
 
 This file states the three theorems without the hypotheses, and Mahler's First conjecture
 (Theorem 16.3.1) conditional only on the remaining named fact, `UnstableCurveLeavesStarDomain`
-(Theorem 14.4.1's computation, Figure 14.2, `Ch14/UnstableCurve.lean`).
+(N4, Theorem 14.4.1's computation, Figure 14.2, `Ch14/UnstableCurve.lean`). N4 is proved too,
+without computer assistance (`unstableCurveLeavesStarDomain`, `Ch14/ArcRegionInvariant.lean`), so
+Theorem 16.3.1 holds unconditionally (`theorem16_3_1_unconditional`,
+`Ch16/MahlerFirstArcRegion.lean`).
 -/
 
 @[expose] public section
@@ -76,7 +79,9 @@ theorem theorem16_4_1_unconditional {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X
 /-- **Theorem 16.3.1** (`thm:mahler`, Mahler's First conjecture), **conditional on one named
 numerical fact**, `UnstableCurveLeavesStarDomain`: the global unstable curve over `q_out` reaches
 the boundary of the star domain (the computation behind Theorem 14.4.1, Figure 14.2, which the
-book did not certify). The three facts of Table 16.1 are proved. -/
+book did not certify). The three facts of Table 16.1 are proved. N4 is proved as well
+(`unstableCurveLeavesStarDomain`), and `theorem16_3_1_unconditional`
+(`SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean`) applies this theorem to it. -/
 theorem theorem16_3_1_of_unstableCurveLeavesStarDomain (h₄ : UnstableCurveLeavesStarDomain) :
     (∀ (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2), IsReinhardtMinimizer T u g X →
       IsFiniteBangBang 0 T u) ∧

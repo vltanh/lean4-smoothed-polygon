@@ -6,20 +6,20 @@ import SmoothedPolygons.Ch7.Isolated.VertexFlow
 /-!
 # Chapter 14, N4: the normal form of the cleared switching numerators (Theorem 1.3)
 
-`notes/n4/proof.md` §1.3: along the `e₂`-arc from a phase point with `X₀ ∈ 𝔥*` and `H(e₂) = 0`,
-each cleared switching numerator is an exponential sum with exactly four terms and three
-universal coefficients, in the time `τ = t/ε`:
+Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
+computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
+computed figure (Figure 14.2, TeX 11951–11991; REPORT.md E88); the formalization proves it from
+the exact structure of the Reinhardt flow along an `e₂`-arc and an invariant region (see
+`SmoothedPolygons/Ch14/ArcParams.lean`, and `SmoothedPolygons/Ch14/ArcRegionInvariant.lean` for
+the numbering of the steps).
+
+This file is §1.3: along the `e₂`-arc from a phase point with `X₀ ∈ 𝔥*` and `H(e₂) = 0`, each
+cleared switching numerator is an exponential sum with exactly four terms and three universal
+coefficients, in the time `τ = t/ε`:
 `(√3/(8ε³)) N₂₁(t) = f(τ) = -1 + A e^{-τ} + B e^{-2τ} + Y τ e^{-τ}`,
 `(√3/(8ε³)) N₂₃(t) = g(τ) = -1 + A' e^{τ} + B' e^{2τ} - Y' τ e^{τ}`,
 with `B = Y - 1 + q`, `A = 1 + f₀ - B`, `B' = Y' - 1 + p`, `A' = 1 + g₀ - B'` (`ArcParams.f`,
-`ArcParams.g`). On a section point `g₀ = 0` and `f₀ = -(√3/(3ε³Y')) ⟨Λ̂₀, X₀⟩` (1.5). Part of the
-reduction of N4 to (INV) (`ArcRegionInvariant`).
-
-**Departure from the paper.** The book computes the unstable curve numerically (Figure 14.2,
-TeX 11951–11991); the formalization proves N4 from (INV) by the exact structure of the arcs (see
-`SmoothedPolygons/Ch14/ArcParams.lean`). This sharpens the earlier description of the numerators
-(`SmoothedPolygons/Ch14/UnstableCurve.lean`, module docstring: "exponential polynomials
-`Σ c_{mk} t^m e^{2kωt}`, `m ≤ 2`, `|k| ≤ 3`"): only four terms occur.
+`ArcParams.g`). On a section point `g₀ = 0` and `f₀ = -(√3/(3ε³Y')) ⟨Λ̂₀, X₀⟩` (1.5).
 
 ## Statements
 
@@ -33,7 +33,7 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
   `arcF0_eq_reducedHam`, `arcParams_A'` (`A' = 2 - Y' - p`), `arcF0_pos_iff` (P1, `f₀ > 0`, says
   that the reduced Hamiltonian `⟨Λ₁ + (3/2) J, X⟩` is negative at the section point).
 
-## Proofs (the route, proof.md §1.3)
+## Proofs (the route, §1.3)
 
 1. `arcParams_Y'`: (1.3) (`arcEps_sq_mul_arcY_mul_arcY'`). `arcParams_radius`:
    `X00_eq_arcRadius`.
@@ -52,8 +52,8 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
    coefficient. All coefficient identities are polynomial in `ε, Y, Y', x_e, x_f` modulo
    `x_e = -2εY`, `x_f = εY'/2`, `ε² Y Y' = 1 + ε²` (`linear_combination`). In Lean each of the two
    identities is one `linear_combination` of `√3² = 3` and `u u⁻¹ = 1` with rational cofactors
-   (found by polynomial division, checked by `field_simp; ring`). The hypothesis that `Λ₁(0)` is
-   traceless is not used.
+   (found by polynomial division, checked by `field_simp; ring`). The statement does not assume
+   `Λ₁(0)` traceless: the closed forms of `φ_e`, `φ_f` use only `X₀`, `Λ_R(0)` and `H(e₂) = 0`.
 3. (1.5): on a section point the three linear conditions `⟨X, Λ_R⟩ = 0`,
    `⟨Λ_R, Z_{e₂}⟩ = ⟨X, Z_{e₂}⟩ h₀`, `⟨Λ_R, Z_{e₃}⟩ = ⟨X, Z_{e₃}⟩ h₀` (`H(e₂) = H(e₃) = 0`,
    `hamiltonian_eq_traceForm_sub`; `H(e₂) = H(e₃) - χ₂₃`, `hamiltonian_sub_eq_switchingFn`) read
@@ -62,9 +62,10 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
    (`x_e x_f = -(1 + ε²)`), which is (1.5); `N₂₃(q) = χ₂₃ ⟨X, Z_{e₂}⟩⟨X, Z_{e₃}⟩ = 0`.
    `A' = 1 + g₀ - B' = 2 - Y' - p`.
 
-Checked against a literal model of the Lean definitions (`notes/n4f/check1.py`: the normal form
-to `10⁻¹⁷` at several times on a chart point near `W^u` and on a generic phase point with
-`H(e₂) = 0`; (1.5) and the frame of `Λ_R` on the chart point).
+Also checked numerically, while the statements were written, against a literal model of the Lean
+definitions: the normal form to `10⁻¹⁷` at several times on a chart point near `W^u` and on a
+generic phase point with `H(e₂) = 0`; (1.5) and the frame of `Λ_R` on the chart point. The proofs
+do not depend on these checks.
 -/
 
 @[expose] public section
@@ -87,7 +88,7 @@ noncomputable def arcQ (q : iso_PhasePt) : ℝ :=
 noncomputable def arcP (q : iso_PhasePt) : ℝ :=
   2 / (√3 * arcEps q) * traceForm (q.2.1 + (3 / 2 : ℝ) • J) (arcVf q.1)
 
-/-- **The arc parameters** `(ε, Y, f₀, g₀, q, p)` of a phase point (proof.md §1.3, §2.1). -/
+/-- **The arc parameters** `(ε, Y, f₀, g₀, q, p)` of a phase point (§1.3, §2.1). -/
 noncomputable def arcParams (q : iso_PhasePt) : ArcParams :=
   ⟨arcEps q, arcY q, arcF0 q, arcG0 q, arcQ q, arcP q⟩
 
@@ -107,13 +108,6 @@ private lemma n4d_traceForm_smul_right (A B : Mat2) (c : ℝ) :
 private lemma n4d_traceForm_comm (A B : Mat2) : traceForm A B = traceForm B A := by
   simp only [traceForm]
   exact Matrix.trace_mul_comm A B
-
-/-- The state in the frame: `X₀ = ofFrame (-ε) (-2εY) (εY'/2)` (`frame_state`). -/
-lemma n4d_state_eq (hX : IsStarState q.1) :
-    q.1 = ofFrame (-arcEps q) (-2 * arcEps q * arcY q) (arcEps q * arcY' q / 2) := by
-  obtain ⟨h1, h2, h3, -⟩ := frame_state hX
-  conv_lhs => rw [← ofFrame_frame hX.1]
-  rw [h1, h2, h3]
 
 /-- `⟨J, V_e⟩` in the frame ((1.2)). -/
 private lemma n4d_traceForm_J_arcVe (q : iso_PhasePt) :
@@ -220,22 +214,20 @@ theorem arcParams_Y' (hX : IsStarState q.1) : (arcParams q).Y' = arcY' q := by
 
 /-- The radius of the parameters is the chart radius `r = X₁₁`. -/
 theorem arcParams_radius (hX : IsStarState q.1) : (arcParams q).radius = q.1 0 0 := by
-  rw [X00_eq_arcRadius hX.1 (arcEps_pos hX).ne', ArcParams.radius, arcParams_Y' hX]
+  rw [X00_eq_arcRadius (arcEps_pos hX).ne', ArcParams.radius, arcParams_Y' hX]
   rfl
 
-set_option linter.unusedVariables false in
-/-- **Theorem 1.3** (the normal form). Let `q` be a phase point with `X₀` a star state, `Λ₁(0)`,
-`Λ_R(0)` traceless and `H(e₂)(q) = 0`. Along the `e₂`-flow from `q`, with `τ = t/ε`,
+/-- **Theorem 1.3** (the normal form). Let `q` be a phase point with `X₀` a star state, `Λ_R(0)`
+traceless and `H(e₂)(q) = 0`. Along the `e₂`-flow from `q`, with `τ = t/ε`,
 `(√3/(8ε³)) N₂₁(t) = f(τ) = -1 + A e^{-τ} + B e^{-2τ} + Y τ e^{-τ}` and
 `(√3/(8ε³)) N₂₃(t) = g(τ) = -1 + A' e^{τ} + B' e^{2τ} - Y' τ e^{τ}`, with `B = Y - 1 + q`,
 `A = 1 + f₀ - B`, `B' = Y' - 1 + p`, `A' = 1 + g₀ - B'` (`ArcParams.f`, `ArcParams.g`). -/
-theorem arc_normalForm (hX : IsStarState q.1) (hL : q.2.1.trace = 0) (hR : q.2.2.trace = 0)
+theorem arc_normalForm (hX : IsStarState q.1) (hR : q.2.2.trace = 0)
     (hH : phaseHam q (vertex 1) = 0) (t : ℝ) :
     √3 / (8 * arcEps q ^ 3) * switchingNum 1 0 (iso_vertexFlow 1 q t) =
         (arcParams q).f (t / arcEps q) ∧
       √3 / (8 * arcEps q ^ 3) * switchingNum 1 2 (iso_vertexFlow 1 q t) =
         (arcParams q).g (t / arcEps q) := by
-  -- `hL` is not needed: the closed forms of `φ_e`, `φ_f` use only `X₀`, `Λ_R(0)` and `H(e₂) = 0`
   have he : 0 < arcEps q := arcEps_pos hX
   have hε : arcEps q ≠ 0 := he.ne'
   have hs : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
@@ -284,7 +276,7 @@ theorem arc_normalForm (hX : IsStarState q.1) (hL : q.2.1.trace = 0) (hR : q.2.2
     field_simp
     ring
 
-/-- **`Λ_R` on a section point, in the frame** (proof.md, before (1.5)): with
+/-- **`Λ_R` on a section point, in the frame** (§1.3, before (1.5)): with
 `h₀ = ⟨Λ̂₀, X₀⟩` (`reducedHam`), `m_h = -ε h₀`, `m_f = h₀ x_f`, `m_e = h₀ (1 - ε²)/x_f`. -/
 theorem frame_section_costateR (hq : IsArcSectionPt q) :
     frameH q.2.2 = -arcEps q * reducedHam q.2.1 q.1 ∧
@@ -326,7 +318,7 @@ theorem frame_section_costateR (hq : IsArcSectionPt q) :
   have e1 := hk 1 hd1 hP1
   have e2 := hk 2 hd2 hP2
   -- in the frame
-  have hXf := n4d_state_eq hX
+  have hXf := state_eq_ofFrame hX
   have hRf : q.2.2 = ofFrame (frameH q.2.2) (frameE q.2.2) (frameF q.2.2) :=
     (ofFrame_frame hRt).symm
   obtain ⟨-, hZ1, hZ2, -⟩ := frame_controlMatrix
@@ -368,7 +360,7 @@ theorem arcF0_eq_reducedHam (hq : IsArcSectionPt q) :
   obtain ⟨-, -, hxf, -⟩ := frame_state hX
   rw [hxf] at E2 E3
   set h₀ := reducedHam q.2.1 q.1
-  have hXf := n4d_state_eq hX
+  have hXf := state_eq_ofFrame hX
   have hRf : q.2.2 = ofFrame (frameH q.2.2) (frameE q.2.2) (frameF q.2.2) :=
     (ofFrame_frame hRt).symm
   obtain ⟨hZ0, hZ1, -, -⟩ := frame_controlMatrix

@@ -21,11 +21,13 @@ public import Mathlib.Topology.Instances.ENNReal.Lemmas
 # Challenge: smoothed polygons in the Reinhardt optimal control problem
 
 Statements of record for the formalization of Thomas Hales and Koundinya Vajjha, *Packings of
-Smoothed Polygons*, arXiv:2405.04331v1 (2024), Chapter 7: the smoothed `(6k+2)`-gons are Pontryagin
-extremals of the Reinhardt optimal control problem with bang-bang control (Theorem 7.5.6), and the
-smoothed octagon has Reinhardt's density `(8 - √32 - ln 2)/(√8 - 1)` (the example before
-Theorem 7.5.6). The book's main theorem (Mahler's First conjecture, Theorem 16.3.1) is not part of
-this formalization.
+Smoothed Polygons*, arXiv:2405.04331v1 (2024): the book's main theorem, Mahler's First conjecture
+(Theorem 16.3.1: the global minimizer of the Reinhardt optimal control problem is bang-bang with
+finitely many switches, and the worst disk `K_min` is a smoothed polygon of the sort described by
+Reinhardt and Mahler), and, from Chapter 7, that the smoothed `(6k+2)`-gons are Pontryagin
+extremals of the Reinhardt optimal control problem with bang-bang control (Theorem 7.5.6) and that
+the smoothed octagon has Reinhardt's density `(8 - √32 - ln 2)/(√8 - 1)` (the example before
+Theorem 7.5.6).
 
 ## The control problem
 
@@ -75,6 +77,47 @@ octagon (`k = 1`) with the book's values and states that the cost (the area of t
 octagon in the book's normalization, in which its critical hexagon has area `√12`) is
 `√12 (8 - √32 - ln 2)/(√8 - 1) ≈ 3.126 < π`, so that the density, the area divided by `√12`, is
 Reinhardt's value `(8 - √32 - ln 2)/(√8 - 1) ≈ 0.902414`.
+
+## Mahler's First conjecture
+
+**Global minimizers** (`IsReinhardtAdmissible`, `IsReinhardtMinimizer`; Problem 3.6.2,
+TeX 3203–3237). An admissible trajectory is a state trajectory on `[0, T]`, for some terminal time
+`T > 0` (the terminal time is free), with the boundary conditions `g(0) = I₂`, `g(T) = R` and
+`X(T) = R⁻¹X(0)R`. A global minimizer is an admissible trajectory whose cost
+`-(3/2) ∫₀ᵀ ⟨J, X⟩ dt` (`reinhardtCost`) is at most the cost of every admissible trajectory, with
+any terminal time.
+
+**Bang-bang with finitely many switches** (`IsFiniteBangBang a b u`; Definition 7.3.2,
+TeX 5844–5848, with the finitely many switches of Theorem 16.3.1): there is a finite set `S` of
+times such that every `t ∈ (a, b)` outside `S` has a neighbourhood on which `u` is almost
+everywhere equal to one vertex `e_{i+1}` of `U_T` (`vertex i = Pi.single i 1`). A measurable
+control matters only up to equality almost everywhere, so this is "equal almost everywhere to a
+piecewise constant function with values in the vertices and finitely many switches".
+
+**The worst disks** (`minimaxDensity`, `IsWorstDisk`; §2.1, TeX 1244–1267). The minimax density
+is `δ_min = inf δ(K)` over the centrally symmetric convex disks `K`, with `δ(K)` the greatest
+packing density (`greatestPackingDensity`, Definition 2.1.1); a worst disk `K_min` is a centrally
+symmetric convex disk with `δ(K_min) = δ_min`.
+
+**Smoothed polygons** (`IsSupportLine`, `IsHyperbolicArc`, `IsSmoothedPolygonBoundary`,
+`IsSmoothedPolygon`; Theorem 16.3.1 and its gloss, TeX 12789–12804). A support line of `K`
+(Definition 2.2.3, TeX 1422–1425) is a line `{x | a · x = c}`, `a ≠ 0`, that meets `K` and has
+`K` on one side. A hyperbolic arc (the conclusion of Lemma 3.1.8, TeX 2554) is a continuous
+injective curve on `[α, β]`, `α < β`, on a hyperbola `det(d₁, x - p₁) · det(d₂, x - p₂) = c`,
+`c ≠ 0`, whose asymptotes are the non-parallel lines `p₁ + ℝ d₁` and `p₂ + ℝ d₂`. The book's gloss
+of "a finite-sided smoothed polygon with rounded hyperbolic arcs at each corner of the sort
+described by Reinhardt and Mahler" is "the minimizer `K_min` has no corners and the boundary
+alternates between straight edge segments and hyperbolic arcs, whose asymptotes are lines
+extending the straight edge segments of the boundary". `IsSmoothedPolygon K` reads it as: `K` is
+a centrally symmetric convex disk with a unique support line at every boundary point (no
+corners), and its boundary is the union of finitely many segments `[a_k, b_k]` (`a_k ≠ b_k`) and
+finitely many hyperbolic arcs, each of which begins and ends on a segment ("alternates") and has
+as asymptotes the lines of two of the segments.
+
+`mahler_first_conjecture` states both sentences of Theorem 16.3.1: the control of every global
+minimizer is bang-bang with finitely many switches on `(0, T)`, and every worst disk is a smoothed
+polygon. "The global minimizer" and "the minimizer `K_min`" presuppose uniqueness, which the book
+does not prove; the statement is for every global minimizer and every `K_min` (both exist).
 
 ## Corrections of the printed text
 
@@ -322,6 +365,94 @@ noncomputable def packingDensity (P : Set (Set (Fin 2 → ℝ))) : ℝ :=
 noncomputable def greatestPackingDensity (K : Set (Fin 2 → ℝ)) : ℝ :=
   sSup {d | ∃ P, IsPackingOfCopies K P ∧ HasDensity P ∧ packingDensity P = d}
 
+/-! ### Mahler's First conjecture (Theorem 16.3.1)
+
+The objects of the statement of Theorem 16.3.1: global minimizers of the Reinhardt control problem
+(Problem 3.6.2), bang-bang controls with finitely many switches, the worst disks `K_min` (§2.1),
+support lines (Definition 2.2.3) and smoothed polygons (Theorem 16.3.1). -/
+
+/-- The vertex `e_{i+1}` of the control simplex `U_T`: `vertex 0 = e₁ = (1, 0, 0)`,
+`vertex 1 = e₂ = (0, 1, 0)`, `vertex 2 = e₃ = (0, 0, 1)`. -/
+noncomputable def vertex (i : Fin 3) : Fin 3 → ℝ := Pi.single i 1
+
+/-- **Problem 3.6.2** (`pbm:reinhardt-optimal-control`). An admissible trajectory of the
+Reinhardt control problem: a state trajectory on `[0, t_f]` (`g' = gX`, `X' = [Z_u, X]/⟨Z_u, X⟩`,
+control in `U_T`, `X(t)` satisfying the star conditions with `det X = 1`) with the initial
+condition `g(0) = I₂` and the terminal conditions `g(t_f) = R` and `X(t_f) = R⁻¹X(0)R`.
+
+The problem prints the terminal condition as `X(t_f) = R X₀ R⁻¹`; the derivation that precedes it
+(§3.5), the half-plane form (Problem 4.5.1) and the transversality conditions (§6.6) all give
+`X(t_f) = R⁻¹ X₀ R`, which differs because `Ad_R` has order 3. This is a misprint, corrected
+here. -/
+def IsReinhardtAdmissible (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2) : Prop :=
+  IsStateTrajectory T u g X ∧ g 0 = 1 ∧ g T = R ∧ X T = R⁻¹ * X 0 * R
+
+/-- A global minimizer of the Reinhardt control problem (Problem 3.6.2): an admissible trajectory
+whose cost `-(3/2) ∫ ⟨J, X⟩` is at most the cost of every admissible trajectory. -/
+def IsReinhardtMinimizer (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2) : Prop :=
+  IsReinhardtAdmissible T u g X ∧
+    ∀ (T' : ℝ) (u' : ℝ → Fin 3 → ℝ) (g' X' : ℝ → Mat2), IsReinhardtAdmissible T' u' g' X' →
+      reinhardtCost T X ≤ reinhardtCost T' X'
+
+/-- The control `u` is **bang-bang with finitely many switches on `[a, b]`** (Definition 7.3.2;
+Theorems 8.1.4, 8.3.2, 16.3.1: "equal a.e. to a piecewise constant function … with finitely many
+switches"): off a finite set `S` of times, `u` is almost everywhere constant near each time of
+`(a, b)`, equal to a vertex of `U_T`. (On each interval between consecutive points of `S ∪ {a, b}`
+it is then almost everywhere equal to one vertex.) -/
+def IsFiniteBangBang (a b : ℝ) (u : ℝ → Fin 3 → ℝ) : Prop :=
+  ∃ S : Finset ℝ, ∀ t ∈ Set.Ioo a b, t ∉ S → ∃ i : Fin 3, ∃ ε > 0,
+    ∀ᵐ τ, τ ∈ Set.Ioo (t - ε) (t + ε) → u τ = vertex i
+
+/-- The minimax density `δ_min = inf_{K ∈ 𝔎_ccs} δ(K)` (§2.1): the least greatest packing density
+among all centrally symmetric convex disks. -/
+noncomputable def minimaxDensity : ℝ :=
+  sInf {d | ∃ K, IsCCSDisk K ∧ greatestPackingDensity K = d}
+
+/-- `K` is a worst disk `K_min` (§2.1): a centrally symmetric convex disk with
+`δ(K_min) = δ_min`, the worst greatest packing density. -/
+def IsWorstDisk (K : Set (Fin 2 → ℝ)) : Prop :=
+  IsCCSDisk K ∧ greatestPackingDensity K = minimaxDensity
+
+/-- **Definition 2.2.3** (support line; `def:support`). For a convex disk `K`, a support line is a
+line containing at least one point of `K` that does not separate any two points of `K`. The line
+is `{x | a · x = c}` with `a ≠ 0`; it separates `x` and `y` when they lie strictly on opposite
+sides, `(a · x - c)(a · y - c) < 0`. -/
+def IsSupportLine (K ℓ : Set (Fin 2 → ℝ)) : Prop :=
+  (∃ a : Fin 2 → ℝ, a ≠ 0 ∧ ∃ c : ℝ, ℓ = {x | a ⬝ᵥ x = c} ∧
+    ∀ x ∈ K, ∀ y ∈ K, 0 ≤ (a ⬝ᵥ x - c) * (a ⬝ᵥ y - c)) ∧ (ℓ ∩ K).Nonempty
+
+/-- `γ` traces on `[α, β]` (`α < β`, continuous and injective there) an arc of the hyperbola
+`det(d₁, x - p₁) · det(d₂, x - p₂) = c`, `c ≠ 0`, whose asymptotes are the non-parallel lines
+`p₁ + ℝ d₁` and `p₂ + ℝ d₂`: the form of the conclusion of Lemma 3.1.8 (`lemma3_1_8`). -/
+def IsHyperbolicArc (γ : ℝ → Fin 2 → ℝ) (α β : ℝ) (p₁ d₁ p₂ d₂ : Fin 2 → ℝ) : Prop :=
+  α < β ∧ ContinuousOn γ (Set.Icc α β) ∧ Set.InjOn γ (Set.Icc α β) ∧ d₁ ≠ 0 ∧ d₂ ≠ 0 ∧
+    det2 d₁ d₂ ≠ 0 ∧ ∃ c : ℝ, c ≠ 0 ∧ ∀ t ∈ Set.Icc α β, det2 d₁ (γ t - p₁) * det2 d₂ (γ t - p₂) = c
+
+/-- **The boundary of a smoothed polygon** (Remark 8.3.3; Theorem 16.3.1 and its gloss, TeX
+12789–12804): the boundary of `K` is the union of finitely many straight edges `[a_k, b_k]`
+(`a_k ≠ b_k`) and finitely many hyperbolic arcs `γ_l([α_l, β_l])`; each hyperbolic arc has as
+asymptotes the lines extending two of the edges ("hyperbolic arcs, whose asymptotes are lines
+extending the straight edge segments of the boundary") and begins and ends on edges (the boundary
+alternates between edges and hyperbolic arcs: each hyperbolic arc rounds a corner between two
+edges). -/
+def IsSmoothedPolygonBoundary (K : Set (Fin 2 → ℝ)) : Prop :=
+  ∃ (m n : ℕ) (a b : Fin m → Fin 2 → ℝ) (γ : Fin n → ℝ → Fin 2 → ℝ) (α β : Fin n → ℝ),
+    (∀ k, a k ≠ b k) ∧
+    (∀ l, ∃ k₁ k₂, IsHyperbolicArc (γ l) (α l) (β l) (a k₁) (b k₁ - a k₁) (a k₂) (b k₂ - a k₂)) ∧
+    (∀ l, γ l (α l) ∈ ⋃ k, segment ℝ (a k) (b k)) ∧
+    (∀ l, γ l (β l) ∈ ⋃ k, segment ℝ (a k) (b k)) ∧
+    frontier K = (⋃ k, segment ℝ (a k) (b k)) ∪ ⋃ l, γ l '' Set.Icc (α l) (β l)
+
+/-- **A finite-sided smoothed polygon with rounded hyperbolic arcs at each corner, of the sort
+described by Reinhardt and Mahler** (Theorem 16.3.1, TeX 12792–12804: "the minimizer `K_min` has
+no corners and the boundary alternates between straight edge segments and hyperbolic arcs, whose
+asymptotes are lines extending the straight edge segments of the boundary"): a centrally
+symmetric convex disk with a unique support line at every boundary point (no corners,
+Lemma 2.2.5's form) whose boundary is that of a smoothed polygon (`IsSmoothedPolygonBoundary`). -/
+def IsSmoothedPolygon (K : Set (Fin 2 → ℝ)) : Prop :=
+  IsCCSDisk K ∧ (∀ x ∈ frontier K, ∃! ℓ, IsSupportLine K ℓ ∧ x ∈ ℓ) ∧
+    IsSmoothedPolygonBoundary K
+
 end SmoothedPolygons
 
 -- END SHARED DEFINITIONS
@@ -329,6 +460,16 @@ end SmoothedPolygons
 namespace SmoothedPolygonsChallenge
 
 open SmoothedPolygons
+
+/-- **Theorem 16.3.1** (Mahler's First conjecture; Hales–Vajjha). The global minimizer of the
+Reinhardt optimal control problem is a bang-bang solution with finitely many switches. In
+particular, the minimizer `K_min` of the Reinhardt problem is a finite-sided smoothed polygon with
+rounded hyperbolic arcs at each corner of the sort described by Reinhardt and Mahler. -/
+theorem mahler_first_conjecture :
+    (∀ (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2), IsReinhardtMinimizer T u g X →
+      IsFiniteBangBang 0 T u) ∧
+    ∀ K : Set (Fin 2 → ℝ), IsWorstDisk K → IsSmoothedPolygon K := by
+  sorry
 
 /-- **Theorem 7.5.6** (Hales–Vajjha). For each positive integer `k`, the smoothed `(6k+2)`-gon is a
 Pontryagin extremal of the Reinhardt control problem given by a bang-bang control. -/

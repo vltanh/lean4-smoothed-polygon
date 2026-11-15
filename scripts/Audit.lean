@@ -10,15 +10,15 @@ import all Basic.Algebra.Module.ZLattice.PlaneCritical
 import all Basic.Analysis.Analytic.DivisionByCoordinate
 import all Basic.Analysis.Analytic.MatrixExp
 import all Basic.Analysis.Calculus.DerivInverse
-import all Basic.Analysis.Calculus.MatrixEntrywise
 import all Basic.Analysis.Calculus.MatrixEntrywiseExp
+import all Basic.Analysis.Calculus.MatrixEntrywise
 import all Basic.Analysis.Calculus.MatrixFTC
 import all Basic.Analysis.Calculus.MeanValueImplicit
 import all Basic.Analysis.Complex.UpperHalfPlane.GeneralizedCircle
 import all Basic.Analysis.Convex.BoundaryArc
-import all Basic.Analysis.Convex.CellDecomposition
 import all Basic.Analysis.Convex.CellDecomposition.Defs
 import all Basic.Analysis.Convex.CellDecomposition.HoleStructure
+import all Basic.Analysis.Convex.CellDecomposition
 import all Basic.Analysis.Convex.CellDecomposition.MaximalCells
 import all Basic.Analysis.Convex.CellDecomposition.PinwheelHoles
 import all Basic.Analysis.Convex.CellDecomposition.PolygonOfFrontier
@@ -28,12 +28,13 @@ import all Basic.Analysis.Convex.CircumscribedPolygon
 import all Basic.Analysis.Convex.HexagonLattice
 import all Basic.Analysis.Convex.LatticePacking
 import all Basic.Analysis.Convex.PolygonAngle
-import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.StarCurveConvex
+import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.TietzeNakajima
 import all Basic.Analysis.Polynomial.CubicRoots
 import all Basic.Analysis.Polynomial.LeastPositiveRoot
 import all Basic.Analysis.Polynomial.SignNearZero
+import all Basic.Analysis.SpecialFunctions.Log.Bounds
 import all Basic.Dynamics.HyperbolicBox
 import all Basic.Dynamics.LinearizedStability
 import all Basic.Dynamics.Stability
@@ -59,8 +60,8 @@ import all SmoothedPolygons.Ch13.Blowup
 import all SmoothedPolygons.Ch13.Defs
 import all SmoothedPolygons.Ch13.Extremals
 import all SmoothedPolygons.Ch13.FirstControl
-import all SmoothedPolygons.Ch13.FixedPoints
 import all SmoothedPolygons.Ch13.FixedPointsClassification
+import all SmoothedPolygons.Ch13.FixedPoints
 import all SmoothedPolygons.Ch13.Jacobian
 import all SmoothedPolygons.Ch13.PoincareMap
 import all SmoothedPolygons.Ch13.RScale
@@ -68,6 +69,18 @@ import all SmoothedPolygons.Ch13.SingularLocus
 import all SmoothedPolygons.Ch13.Stability
 import all SmoothedPolygons.Ch13.Symmetry
 import all SmoothedPolygons.Ch14.AnalyticExtension
+import all SmoothedPolygons.Ch14.ArcConditions
+import all SmoothedPolygons.Ch14.ArcCostate
+import all SmoothedPolygons.Ch14.ArcFrame
+import all SmoothedPolygons.Ch14.ArcLocal
+import all SmoothedPolygons.Ch14.ArcNormalForm
+import all SmoothedPolygons.Ch14.ArcParams
+import all SmoothedPolygons.Ch14.ArcPoincareMap
+import all SmoothedPolygons.Ch14.ArcRegionInvariant
+import all SmoothedPolygons.Ch14.ArcRelation
+import all SmoothedPolygons.Ch14.ArcStepClosed
+import all SmoothedPolygons.Ch14.ArcStepExit
+import all SmoothedPolygons.Ch14.ArcStepRegion
 import all SmoothedPolygons.Ch14.Asymptotics
 import all SmoothedPolygons.Ch14.ChartFlow
 import all SmoothedPolygons.Ch14.ExtensionConstruction
@@ -80,6 +93,7 @@ import all SmoothedPolygons.Ch14.NoReturnTools
 import all SmoothedPolygons.Ch14.UnstableCurve
 import all SmoothedPolygons.Ch14.UnstableCurveSwitches
 import all SmoothedPolygons.Ch14.VertexFlowAnalytic
+import all SmoothedPolygons.Ch14.VertexPoissonBracket
 import all SmoothedPolygons.Ch15.CellCoordinates
 import all SmoothedPolygons.Ch15.Continuity
 import all SmoothedPolygons.Ch15.FixedPointCells
@@ -98,12 +112,13 @@ import all SmoothedPolygons.Ch16.CellTwoEntersDOut
 import all SmoothedPolygons.Ch16.CellTwoFlow
 import all SmoothedPolygons.Ch16.ClusterCoordinates
 import all SmoothedPolygons.Ch16.ClusterPoint
-import all SmoothedPolygons.Ch16.DOutContraction
 import all SmoothedPolygons.Ch16.DOutContractionBounds
+import all SmoothedPolygons.Ch16.DOutContraction
 import all SmoothedPolygons.Ch16.DOutFlow
 import all SmoothedPolygons.Ch16.DOutImages
 import all SmoothedPolygons.Ch16.DOutInvariant
 import all SmoothedPolygons.Ch16.GlobalBasin
+import all SmoothedPolygons.Ch16.MahlerFirstArcRegion
 import all SmoothedPolygons.Ch16.MahlerFirst
 import all SmoothedPolygons.Ch16.MahlerFirstNumerical
 import all SmoothedPolygons.Ch16.NextSwitch
@@ -160,23 +175,23 @@ import all SmoothedPolygons.Ch6.WorstDisk
 import all SmoothedPolygons.Ch7.ConstantControl
 import all SmoothedPolygons.Ch7.DiscreteK
 import all SmoothedPolygons.Ch7.Faces
-import all SmoothedPolygons.Ch7.HMax
 import all SmoothedPolygons.Ch7.HMaxInequality
-import all SmoothedPolygons.Ch7.Isolated
+import all SmoothedPolygons.Ch7.HMax
 import all SmoothedPolygons.Ch7.Isolated.Defs
 import all SmoothedPolygons.Ch7.Isolated.FixedPoints
 import all SmoothedPolygons.Ch7.Isolated.Hyperbolic
 import all SmoothedPolygons.Ch7.Isolated.IpcAlgebra
 import all SmoothedPolygons.Ch7.Isolated.IpcFlow
 import all SmoothedPolygons.Ch7.Isolated.IpcOctagon
+import all SmoothedPolygons.Ch7.Isolated
 import all SmoothedPolygons.Ch7.Isolated.Poincare
 import all SmoothedPolygons.Ch7.Isolated.Return
 import all SmoothedPolygons.Ch7.Isolated.Switching
 import all SmoothedPolygons.Ch7.Isolated.VertexFlow
 import all SmoothedPolygons.Ch7.Polygon
 import all SmoothedPolygons.Ch7.Remarks
-import all SmoothedPolygons.Ch7.SmoothedPolygon
 import all SmoothedPolygons.Ch7.SmoothedPolygonDisk
+import all SmoothedPolygons.Ch7.SmoothedPolygon
 import all SmoothedPolygons.Ch7.StrongTransversality
 import all SmoothedPolygons.Ch8.CircleVariation
 import all SmoothedPolygons.Ch8.Defs
@@ -251,12 +266,8 @@ meta def externalResults : List (String × Name) :=
      ``External.pontryagin_maximum_principle),
    ("Irwin, Ch. 6: the stable manifold theorem (Thm A.3.1, from the StableManifold package)",
      ``SmoothedPolygons.theoremA_3_1),
-   ("Hypothesis: Thms 16.4.1 and 14.4.1 (no chattering into 𝒮_sing)",
+   ("Hypothesis of the conditional form of Thm 16.3.1: no chattering into 𝒮_sing (proved)",
      ``SmoothedPolygons.NoChatteringIntoSingularLocus),
-   ("Hypothesis: Thm 14.4.1 (locally finitely bang-bang extremals; proved from N4)",
-     ``SmoothedPolygons.Theorem14_4_1),
-   ("Hypothesis: N4, W^u(q_out) reaches the boundary of the star domain (Fig. 14.2, E88)",
-     ``SmoothedPolygons.UnstableCurveLeavesStarDomain),
    ("Hypothesis of the conditional forms: Table 16.1 row 𝒟_out, the contraction (E78; proved)",
      ``SmoothedPolygons.TriFuller.DOutContracts),
    ("Hypothesis of the conditional forms: Table 16.1 rows 𝒟₂, 𝒟₃ and F²𝒟₃ ⊂ 𝒟₀₀ (proved)",
@@ -418,6 +429,13 @@ meta def paperResults : List (String × Name) :=
      ``SmoothedPolygons.hasStrictFDerivAt_extension),
    ("Thm 14.3.3", ``SmoothedPolygons.theorem14_3_3),
    ("Remark 14.3.4 (mirrored chart, E87)", ``SmoothedPolygons.remark14_3_4),
+   ("§14.4 Fig. 14.2, N4: (INV), the single-step statement of its proof (departure, E88)",
+     ``SmoothedPolygons.arcRegionInvariant),
+   ("§14.4 Fig. 14.2, N4 from (INV) (Theorem 5.2 of the proof of N4)",
+     ``SmoothedPolygons.unstableCurveLeavesStarDomain_of_arcRegionInvariant),
+   ("§14.4 Fig. 14.2: N4, W^u(q_out) reaches the star boundary (proved; departure, E88)",
+     ``SmoothedPolygons.unstableCurveLeavesStarDomain),
+   ("Thm 14.4.1", ``SmoothedPolygons.theorem14_4_1_unconditional),
    ("Thm 14.4.1 (from N4)", ``SmoothedPolygons.theorem14_4_1),
    ("Thm 14.4.1, first statement (from N4)", ``SmoothedPolygons.theorem14_4_1_out),
    ("Thm 14.4.1, second statement (time reversal of the first, from N4)",
@@ -448,6 +466,7 @@ meta def paperResults : List (String × Name) :=
    ("Thm 16.2.1 (conditional on the hypotheses of Thm 16.1.1)",
      ``SmoothedPolygons.theorem16_2_1),
    ("Thm 16.2.1", ``SmoothedPolygons.theorem16_2_1_unconditional),
+   ("Thm 16.3.1", ``SmoothedPolygons.theorem16_3_1_unconditional),
    ("Thm 16.3.1 away from 𝒮_sing (unconditional)",
      ``SmoothedPolygons.isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus),
    ("Thm 16.3.1 (conditional on NoChatteringIntoSingularLocus)",
@@ -476,7 +495,8 @@ meta def paperResults : List (String × Name) :=
 
 /-- The theorems that Palomar's comparator checks (`theorem_names` of `comparator.json`). -/
 meta def solutionResults : List Name :=
-  [``SmoothedPolygonsChallenge.smoothed_polygon_extremal,
+  [``SmoothedPolygonsChallenge.mahler_first_conjecture,
+   ``SmoothedPolygonsChallenge.smoothed_polygon_extremal,
    ``SmoothedPolygonsChallenge.smoothed_octagon_density]
 
 /-- Lean's standard axioms. -/

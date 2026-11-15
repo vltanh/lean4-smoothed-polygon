@@ -12,7 +12,10 @@ Theorem 14.4.1 (`thm:no-return`) of Hales–Vajjha, *Packings of Smoothed Polygo
 11995–12013), as the named proposition `Theorem14_4_1` (`SmoothedPolygons/Ch14/NoReturn.lean`),
 proved from the numerical fact N4 (`UnstableCurveLeavesStarDomain`,
 `SmoothedPolygons/Ch14/UnstableCurve.lean`: the unstable curve `W^u(q_out)` reaches the boundary of
-the star domain, Figure 14.2): `theorem14_4_1`.
+the star domain, Figure 14.2): `theorem14_4_1`. N4 is proved without computer assistance
+(`unstableCurveLeavesStarDomain`, `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`; a departure
+from the paper, by the user's decision, REPORT.md E88), so Theorem 14.4.1 holds unconditionally
+(`theorem14_4_1_unconditional`, `SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean`).
 
 ## The book's proof (TeX 12004–12013), step by step
 

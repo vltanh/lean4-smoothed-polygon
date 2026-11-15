@@ -12,9 +12,13 @@ trajectory of the Reinhardt system that tends to the fixed point `(r, x̃) = (0,
 exceptional divisor did not emanate at an earlier time from the exceptional divisor."
 
 It is stated here as the named proposition `Theorem14_4_1`, a hypothesis of the final assembly of
-Theorem 16.3.1 (`SmoothedPolygons/Ch16/NoChattering.lean`). Layer 7 proves it from the numerical
-fact N4 (`theorem14_4_1`, `SmoothedPolygons/Ch14/NoReturnProof.lean`; N4 is the named hypothesis
-`UnstableCurveLeavesStarDomain`, `SmoothedPolygons/Ch14/UnstableCurve.lean`). The book's proof
+Theorem 16.3.1 (`SmoothedPolygons/Ch16/NoChattering.lean`). It is proved from the numerical fact N4
+(`theorem14_4_1`, `SmoothedPolygons/Ch14/NoReturnProof.lean`; N4 is
+`UnstableCurveLeavesStarDomain`, `SmoothedPolygons/Ch14/UnstableCurve.lean`), and N4 is proved
+without computer assistance (`unstableCurveLeavesStarDomain`,
+`SmoothedPolygons/Ch14/ArcRegionInvariant.lean`; a departure from the paper, by the user's
+decision, REPORT.md E88), so Theorem 14.4.1 holds unconditionally (`theorem14_4_1_unconditional`,
+`SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean`). The book's proof
 rests on a figure: "All switches must be on the unstable curve, which meets that exceptional
 divisor at a single point `(0, x_out)`. Any trajectory that returns to the singular locus must
 chatter … This would require the unstable curve to contain a sequence of forward iterates of points
@@ -59,14 +63,17 @@ Registration name: "Thm 14.4.1 (locally finitely bang-bang extremals)".
    hypothesis of the statement, and no numerical fact. (`theorem16_4_1_reverse` gives the same
    conclusion but takes the three facts of Table 16.1 as hypotheses, which it needs only to prove
    that convergence.)
-2. **The numerical fact N4** (`UnstableCurveLeavesStarDomain`, a named hypothesis): the forward
-   orbit of every point of `W^u_loc(q_out)` with `r > 0` switches cyclically and then reaches the
-   boundary of the star domain before its next switch. The curve reaches the boundary near
-   `(r, x̃₂₁) ≈ (0.21, -3.03)`; once `r ≳ 0.065`, one arc suffices (TeX 11985–11991). Three
+2. **The numerical fact N4** (`UnstableCurveLeavesStarDomain`, the hypothesis of `theorem14_4_1`):
+   the forward orbit of every point of `W^u_loc(q_out)` with `r > 0` switches cyclically and then
+   reaches the boundary of the star domain before its next switch. The book's figure has the curve
+   reach the boundary near `(r, x̃₂₁) ≈ (0.21, -3.03)`, and one arc suffice once `r ≳ 0.065`
+   (TeX 11985–11991); N4 does not state these numbers. Three
    independent numerical models confirm it (module docstring of
    `SmoothedPolygons/Ch14/UnstableCurve.lean`). Following the user's decision (no
-   computer-assisted certificate), N4 is being reduced to the single-step statement
-   `ArcRegionInvariant` (work in progress).
+   computer-assisted certificate), N4 is proved by the exact structure of the `e₂`-arcs and the
+   invariance of an explicit region of section points, the single-step statement (INV)
+   (`unstableCurveLeavesStarDomain`, from `arcRegionInvariant`,
+   `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`).
 3. **A return chatters.** If the lift met the singular locus again, then at the first return `s`
    the extremal is a chattering arc into it (`exists_isChatteringArcInto`, Lemma 8.3.4). A
    switching point of the arc out of `q_out` that lies on `W^u_loc` is also a switching point of

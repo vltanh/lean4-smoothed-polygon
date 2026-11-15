@@ -22,10 +22,13 @@ boundary of the star domain" (TeX 12009–12010).
 
 This file defines the conditions on the orbits (`SwitchEntersE2`, `ArcSwitchesToE1`,
 `ArcLeavesStarDomain`, `ReachesStarBoundary`) and states the fact as the named proposition
-`UnstableCurveLeavesStarDomain` (N4). It proves nothing: N4 is a hypothesis of `theorem14_4_1`
-(`SmoothedPolygons/Ch14/NoReturnProof.lean`) and of Mahler's First conjecture in its strongest
-current form (`theorem16_3_1_of_unstableCurveLeavesStarDomain`,
-`SmoothedPolygons/Ch16/BasinFacts.lean`).
+`UnstableCurveLeavesStarDomain` (N4). N4 is proved, without computer assistance, in
+`SmoothedPolygons/Ch14/ArcRegionInvariant.lean` (`unstableCurveLeavesStarDomain`): a departure
+from the paper, by the user's decision (REPORT.md E88), since the book reads it off Figure 14.2.
+`theorem14_4_1` (`SmoothedPolygons/Ch14/NoReturnProof.lean`) and
+`theorem16_3_1_of_unstableCurveLeavesStarDomain` (`SmoothedPolygons/Ch16/BasinFacts.lean`) take N4
+as a hypothesis; `theorem14_4_1_unconditional` and `theorem16_3_1_unconditional`
+(`SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean`) apply them to the proof.
 
 ## The statement (`UnstableCurveLeavesStarDomain`, N4)
 
@@ -61,6 +64,9 @@ Remarks on the form.
 * The statement is about all of `W^u_loc(e, U) ∩ {r > 0}`, not a fundamental domain: `K` grows like
   `log(1/r)/log r_scale` as `r → 0`. Near the fixed point the conditions are those of the local
   theory (`eventually_isSwitch_reinSwitchTime`, `eventually_switchStructure`).
+* N4 states what the proof of Theorem 14.4.1 uses, and only that: it omits the figure's end point
+  `(r, x̃₂₁) ≈ (0.21, -3.03)`, the threshold `r ≈ 0.065` beyond which one arc suffices, and the
+  geometric claim that the switching points accumulate on the chart boundary.
 * Along the `e₂`-arc `ρ₁` is constant (`⟨Z_{e₂}, X⟩` is constant, Lemma 7.1.1); the arc leaves `𝔥*`
   through `ρ₂ = 0`, where `⟨X, Z_{e₁}⟩ → 0` and `H(e₁) → -∞` (so `e₂` stays the strict maximizer up
   to the boundary). In Lean `phaseHam` at a point with `⟨X, Z_v⟩ = 0` is a junk value (division by
@@ -87,18 +93,24 @@ value is linear in the parameter of the curve; below `r*` the switching point li
 `ε → 0` from the side `ρ₁ = 0` and the next arc runs along it into a cusp of `𝔥*`, with rate
 `ω = 1/(2ε)`, where the margins have positive limits in the natural scales of that arc. So N4 holds
 on both sides of `r*`, but no uniform inequality in the raw variables, and no interval enclosure,
-decides the ordering of the switch and the exit near `r*`: any proof needs a local asymptotic
-argument there.
+decides the ordering of the switch and the exit near `r*`: a numerical certification would need a
+local asymptotic argument there. The proof does not need to decide the order: it treats the switch
+and the exit as the two signs of `F(log Y)` (and, at the next point, of `ψ(s)`), each handled on
+the whole invariant region (`SmoothedPolygons/Ch14/ArcRegionInvariant.lean`), so the threshold
+needs no margin.
 
 ## Status
 
-N4 stays a named hypothesis. Following the user's decision for the book's numerical facts (proofs
-without computer assistance, the computation kept as a Python reference in `numerics/`), N4 is
-being reduced, by the exact structure of the `e₂`-arcs, to a single-step statement about the
-Reinhardt–Poincaré map, `ArcRegionInvariant` (work in progress, `SmoothedPolygons/Ch14/Arc*.lean`).
-Along an `e₂`-arc `⟨Z_{e₂}, X⟩` is constant, `e^{tP}` and `e^{t(X₀ + P)}` are hyperbolic with the
-same rate `ω = 1/(2ρ₁)` (`det(X₀ + P) = det P`, Lemma 7.1.3), so the state, the exit time and the
-cleared switching functions along the arc are explicit exponential polynomials.
+N4 is proved (`unstableCurveLeavesStarDomain`, `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`),
+following the user's decision for the book's numerical facts (proofs without computer assistance;
+REPORT.md E88). The proof does not locate the curve. Along an `e₂`-arc `⟨Z_{e₂}, X⟩` is constant,
+`e^{tP}` and `e^{t(X₀ + P)}` are hyperbolic with the same rate `ω = 1/(2ρ₁)`
+(`det(X₀ + P) = det P`, Lemma 7.1.3), so the state, the exit time and the cleared switching
+functions along the arc are explicit: each cleared switching numerator is an exponential sum with
+four terms (`arc_normalForm`). The Reinhardt–Poincaré map becomes an explicit map of four
+parameters (`arcParams_reinPoincare`), and an explicit region `𝒢*` of section points, which
+contains every chart point near the fixed point, is invariant under it until an arc exits
+(`arcRegionInvariant`, the single-step statement (INV)).
 -/
 
 @[expose] public section
@@ -156,7 +168,9 @@ neighborhood `U` of the fixed point such that the forward orbit of every point `
 unstable curve `W^u_loc(e, U)` with `r > 0` reaches the boundary of the star domain
 (`ReachesStarBoundary (lieChart p)`). With `∃ U`, this is equivalent to the same for every
 extension `e`; `U` must stay existential (module docstring). See the module docstring for the
-reading, the numerical evidence and the threshold. -/
+reading, the numerical evidence and the threshold. N4 is proved (`unstableCurveLeavesStarDomain`,
+`SmoothedPolygons/Ch14/ArcRegionInvariant.lean`), without computer assistance: a departure from the
+paper, by the user's decision (REPORT.md E88). -/
 def UnstableCurveLeavesStarDomain : Prop :=
   ∃ e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ)),
     IsReinhardtPoincareExtension e ∧ ∃ U ∈ 𝓝 chartPtOut,

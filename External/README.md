@@ -27,7 +27,7 @@ Sachkov's text and not compared with their proof; its form with a state constrai
 directly from the package and has no file here. The maximum principle is proved by their proof
 (Chapter 12 of the authors' draft); the package's README lists its readings and departures.
 Theorem 7.5.6 does not need the principle: a *Pontryagin extremal* is defined by the conditions
-that the principle lists ([`IsPontryaginExtremal`](../Challenge.lean#L171)), and Theorem 7.5.6
+that the principle lists ([`IsPontryaginExtremal`](../Challenge.lean#L214)), and Theorem 7.5.6
 shows that the smoothed polygons satisfy them. Only the statement that the global minimizer is an
 extremal (§6.2) uses it (the row above).
 

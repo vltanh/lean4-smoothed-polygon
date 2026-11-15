@@ -5,18 +5,21 @@ public import SmoothedPolygons.Ch14.ArcConditions
 /-!
 # Chapter 14, N4: near the fixed point every chart point lies in `𝒢*` (Lemma 5.1)
 
-`notes/n4/proof.md` §5.1. Near the outward fixed point `(0, x̃_out)` of the extended
+Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
+computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
+computed figure (Figure 14.2, TeX 11951–11991; REPORT.md E88); the formalization proves it from
+the exact structure of the Reinhardt flow along an `e₂`-arc and an invariant region (see
+`SmoothedPolygons/Ch14/ArcParams.lean`, and `SmoothedPolygons/Ch14/ArcRegionInvariant.lean` for
+the numbering of the steps). This lemma replaces the location of the curve near the divisor by a
+neighbourhood of the fixed point.
+
+This file is §5.1. Near the outward fixed point `(0, x̃_out)` of the extended
 Reinhardt–Poincaré map (Lemma 14.3.1), every chart point `p = (r, x̃)` with `r > 0` is mapped by
 the Lie algebra chart (`lieChart`, §14.1) to a point of the region `𝒢*` (`arcRegion`: P1, P2, P4,
 E and `r > 0`). The arc parameters, rescaled by their natural powers of `r`, are rational
 functions of `(r, x̃)` that extend continuously to `r = 0`, where they are linear in `x̃`; at
 `x̃_out` they have the signs that `𝒢*` asks for. This is the first point of the orbit in the
 reduction of N4 to (INV) (Theorem 5.2, `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`).
-
-**Departure from the paper.** The book computes the unstable curve numerically (Figure 14.2,
-TeX 11951–11991); the formalization proves N4 from (INV) by the exact structure of the arcs (see
-`SmoothedPolygons/Ch14/ArcParams.lean`). This lemma replaces the location of the curve near the
-divisor by a neighbourhood of the fixed point.
 
 ## Statements
 
@@ -32,7 +35,7 @@ divisor by a neighbourhood of the fixed point.
   `q/r² → -9.6173`, `p/r² → 2.2528`, `(Y - 2)/r → 8.8986`, `λ_lb → (√3 - 3x̃₂₁)/(2√3) = 2.569`).
 * **Lemma 5.1** (`exists_nhds_lieChart_mem_arcRegion`).
 
-## Proofs (the route, proof.md Lemma 5.1)
+## Proofs (the route, Lemma 5.1)
 
 1. `eventually_isArcSectionPt_lieChart`: for `r > 0` small and `x̃` bounded, `(r, x̃) ∈ H*`
    (`lieChartDomain`: `√3 - 1/r < x̃₂₁`, `ℓ̃₂₁ r² < 3/2`), so `lieChart_spec` gives the blow-up
@@ -42,7 +45,7 @@ divisor by a neighbourhood of the fixed point.
    (`arcF0_eq_reducedHam`), and `ε`, `Y`, `Y'`, `x_e`, `x_f`, `⟨Λ̂, X⟩`, `⟨Λ̂, V_e⟩`, `⟨Λ̂, V_f⟩`
    are explicit rational functions of `(r, x̃)` (`lieX`, `lieΛ₁`). After division by the power of
    `r` they are rational functions with a denominator that does not vanish at `r = 0`
-   (`notes/n4f/local_rational.py`, sympy):
+   (computed with sympy):
    `(Y' - 2)/r = 2√3/(1 + r x̃₂₁ - √3 r)`,
    `(Y - 2)/r = -(3r x̃₂₁² - 2√3 r x̃₂₁ - 3r + 6x̃₂₁ - 2√3)/(2(1 + r x̃₂₁)(1 + r x̃₂₁ - √3 r))`,
    `p/r² = 2 N_p/((2ℓ̃₂₁ r² - 3)(1 + r x̃₂₁ - √3 r)²)` with `N_p(0) = 3ℓ̃₂₁`,
@@ -70,9 +73,8 @@ divisor by a neighbourhood of the fixed point.
    step 1 give the rest. A neighbourhood `V` of `chartPtOut` comes from
    `mem_nhdsWithin` (`{p | 0 < p.1}` is open).
 
-The limits and the values at `x̃_out` were computed in `notes/n4f/local_limits.py`; they agree with
-the research's values along `W^u` (`notes/n4/identities.py`: `6.6342738`, `-9.6173146`,
-`2.2527998`, `8.8986195`, `2√3`).
+The limits and the values at `x̃_out` were also computed with sympy; they agree with the values
+along `W^u` computed numerically (`6.6342738`, `-9.6173146`, `2.2527998`, `8.8986195`, `2√3`).
 -/
 
 @[expose] public section
@@ -332,7 +334,7 @@ private theorem n4g_tendsto_Y' (x : Fin 3 → ℝ) :
   · fun_prop (disch := (simp; try positivity))
   · simp
 
-/-- **The arc parameters at the divisor** (proof.md §5.1): for chart points `p = (r, x̃) → (0, x̃)`
+/-- **The arc parameters at the divisor** (§5.1): for chart points `p = (r, x̃) → (0, x̃)`
 with `r > 0`, `f₀/r³ → -3(ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁)`, `q/r² → √3 ℓ̃₁₁ + ℓ̃₂₁`, `p/r² → -2ℓ̃₂₁`,
 `(Y - 2)/r → √3 - 3x̃₂₁` and `(Y' - 2)/r → 2√3` (`x̃ = (x̃₂₁, ℓ̃₁₁, ℓ̃₂₁)`). -/
 theorem tendsto_arcParams_lieChart (x : Fin 3 → ℝ) :
@@ -348,7 +350,7 @@ theorem tendsto_arcParams_lieChart (x : Fin 3 → ℝ) :
         (𝓝[{p | 0 < p.1}] ((0 : ℝ), x)) (𝓝 (2 * √3)) := by
   exact ⟨n4g_tendsto_f0 x, n4g_tendsto_q x, n4g_tendsto_p x, n4g_tendsto_Y x, n4g_tendsto_Y' x⟩
 
-/-- **The signs at `x̃_out`** (proof.md §5.1): `ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁ < 0` (P1), `√3 ℓ̃₁₁ + ℓ̃₂₁ < 0`
+/-- **The signs at `x̃_out`** (§5.1): `ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁ < 0` (P1), `√3 ℓ̃₁₁ + ℓ̃₂₁ < 0`
 (P2), `ℓ̃₂₁ < 0` (P4), `x̃₂₁ < -√3/3` (E), at `x̃_out ≈ (-2.3889, -4.9022, -1.1264)`. -/
 theorem xTildeOut_arcSigns :
     xTildeOut 1 + xTildeOut 2 * xTildeOut 0 < 0 ∧ √3 * xTildeOut 1 + xTildeOut 2 < 0 ∧
@@ -365,7 +367,7 @@ theorem xTildeOut_arcSigns :
       (by linarith : 0 < -(238 / 100) - xTildeOut 0)]
   · nlinarith [mul_pos hs0 (by linarith : 0 < -xTildeOut 1)]
 
-/-- **Lemma 5.1** (proof.md §5.1). There is a neighbourhood `V` of the fixed point `(0, x̃_out)`
+/-- **Lemma 5.1** (§5.1). There is a neighbourhood `V` of the fixed point `(0, x̃_out)`
 such that every chart point of `V` with `r > 0` is mapped by the chart into the region `𝒢*`. -/
 theorem exists_nhds_lieChart_mem_arcRegion :
     ∃ V ∈ 𝓝 chartPtOut, ∀ p ∈ V, 0 < p.1 → lieChart p ∈ arcRegion := by

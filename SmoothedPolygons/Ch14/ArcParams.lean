@@ -7,20 +7,20 @@ import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 /-!
 # Chapter 14, N4: the parameters of an `e₂`-arc and the one-step map on them
 
-The real-variable part of the exact structure of an `e₂`-arc (`notes/n4/proof.md`, §1.3, §2–§3),
-used to reduce the numerical fact N4 (`UnstableCurveLeavesStarDomain`,
-`SmoothedPolygons/Ch14/UnstableCurve.lean`) to the single-step statement `ArcRegionInvariant`
-(`SmoothedPolygons/Ch14/ArcRegionInvariant.lean`).
+Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`,
+`SmoothedPolygons/Ch14/UnstableCurve.lean`: the unstable curve over `q_out` reaches the boundary of
+the star domain) without computer assistance. **Departure from the paper**, by the user's decision:
+the book reads N4 off a computed figure (Figure 14.2, TeX 11951–11991; not certified, REPORT.md
+E88). The formalization does not follow the curve: it solves the Reinhardt flow along an `e₂`-arc
+in closed form (four-term exponential sums), turns the Reinhardt–Poincaré map into an explicit map
+of the arc parameters below, reduces N4 to the single-step statement (INV)
+(`ArcRegionInvariant`), and proves (INV) (`arcRegionInvariant`). The numbered steps of that proof
+(Proposition 1.1 to Theorem 5.2 for the reduction, INV Theorem 1 to INV Theorem 2 for (INV)) are
+listed in `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`.
 
-**Departure from the paper.** The book computes the global unstable curve `W^u(q_out)` in
-Mathematica and reads off that it reaches the boundary of the star domain (Figure 14.2,
-TeX 11951–11991; not certified, REPORT.md E88). The formalization does not follow the curve: it
-solves the Reinhardt flow along an `e₂`-arc in closed form (four-term exponential sums), turns the
-Reinhardt–Poincaré map into an explicit map of the arc parameters below, and proves N4 from the
-single-step statement (INV) (`ArcRegionInvariant`), which is proved in `notes/inv/inv.md` (Lean
-proof in progress: `arcRegionInvariant`, `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`). This file
-is the part of that argument that involves only real numbers; the real-number part of the proof of
-(INV) is in `SmoothedPolygons/Ch14/ArcStepClosed.lean`, `ArcStepRegion.lean`, `ArcStepExit.lean`.
+This file is the part of the reduction that involves only real numbers; the real-number part of
+the proof of (INV) is in `SmoothedPolygons/Ch14/ArcStepClosed.lean`, `ArcStepRegion.lean`,
+`ArcStepExit.lean`.
 
 ## The parameters
 
@@ -28,22 +28,22 @@ A phase point `q = (X₀, Λ₁, Λ_R)` with `X₀` in the star domain has the a
 (`arcParams`, `SmoothedPolygons/Ch14/ArcNormalForm.lean`): `ε = ρ₁(X₀)`, `Y = 1 + ρ₂(X₀)/ε`,
 `f₀`, `g₀` (the normalized cleared switching numerators `N₂₁`, `N₂₃` at `q`), and `q`, `p` (two
 pairings of `Λ̂ = Λ₁ + (3/2) J` with nilpotent eigenvectors of `ad(X₀ + P)`). Then
-`Y' = 1 + ρ₀(X₀)/ε = (1 + ε²)/(ε² Y)` (proof.md (1.3)), and along the `e₂`-arc, with `τ = t/ε`,
+`Y' = 1 + ρ₀(X₀)/ε = (1 + ε²)/(ε² Y)` ((1.3)), and along the `e₂`-arc, with `τ = t/ε`,
 `(√3/(8ε³)) N₂₁ = f(τ)`, `(√3/(8ε³)) N₂₃ = g(τ)` (Theorem 1.3, `arc_normalForm`):
 * `f(τ) = -1 + A e^{-τ} + B e^{-2τ} + Y τ e^{-τ}`, `B = Y - 1 + q`, `A = 1 + f₀ - B`;
 * `g(τ) = -1 + A' e^{τ} + B' e^{2τ} - Y' τ e^{τ}`, `B' = Y' - 1 + p`, `A' = 1 + g₀ - B'`.
 The coefficients `-1`, `Y`, `-Y'` are universal. On a section point `g₀ = 0`, and `q` is one of
-the two roots of the quadric relation `rel = 0` (proof.md (2.1), `arcParams_rel`); so the section
+the two roots of the quadric relation `rel = 0` ((2.1), `arcParams_rel`); so the section
 is parametrized by `(ε, Y, f₀, p)` and a choice of root, and the Reinhardt–Poincaré map is the
 explicit map `step` (Theorem 2.1, `arcParams_reinPoincare`): with `τ_sw` the switching root of `f`
 (`tauSw`), `u = e^{-τ_sw}` and `k = Y u - 1` (`stepK`),
 `ε_new = k ε`, `Y_new = 1 + (Y' e^{τ_sw} - 1)/k` (equivalently `Y'_new = Y u/k`),
 `f₀,new = g(τ_sw)/k²`, `g₀,new = 0`, `p_new = -f'(τ_sw)/k²`, `q_new` a root of `rel = 0`. Which
-root is settled by Theorem 1 of `notes/inv/inv.md`: with `s = e^{τ_sw}`,
+root is settled by INV Theorem 1: with `s = e^{τ_sw}`,
 `q_new = Φ(s)/(Y - s)²` (`ArcParams.qNew`, `arcQ_reinPoincare`), and the other components are
 rational in `s` as well (`ArcParams.step_closed`).
 
-## Statements (proof.md numbering)
+## Statements
 
 * (1.4): `f_eq`, `g_eq` (`f = b_Y + f₀ e^{-τ} + q (e^{-2τ} - e^{-τ})` and its mirror);
   `f_zero`, `g_zero`, `hasDerivAt_f`, `hasDerivAt_g_zero` (`g'(0) = g₀ + p`), `F_log`
@@ -61,7 +61,7 @@ rational in `s` as well (`ArcParams.step_closed`).
   telescoping `r_new = (ε - ε_new)/2` (Corollary 2.4) and the expansion (3.1)
   `r_new > λ_lb r`, `λ_lb = (Y - 2)/((Y - 1)(Y' - 2))` (`expansionBound`).
 
-## Proofs (the route, proof.md §3)
+## Proofs (the route, §3)
 
 1. (1.4), `f_zero`, `g_zero`, `F_log`: unfold and `ring` (with `Real.exp_neg`, `Real.exp_log`).
    `hasDerivAt_f`: `HasDerivAt.exp`, `HasDerivAt.mul`, then `ring`.
@@ -87,12 +87,11 @@ rational in `s` as well (`ArcParams.step_closed`).
    `p_new = -f'(τ)/k² > 0` by step 3. `ε_new = k ε < ε`. `Y'_new = Y u/k` (`step_Y'`, using
    `ε² Y Y' = 1 + ε²`), so `r_new = ε_new (Y'_new - 2)/2 = ε (Y u - 2k)/2 = ε(1 - k)/2
    = (ε - ε_new)/2 > 0`, and `r_new/r = (1 - k)/(Y' - 2) > (1 - 1/(Y - 1))/(Y' - 2) = λ_lb`
-   (`r = ε(Y' - 2)/2 > 0`). This holds for every `Y > 1` (for `Y ≤ 2`, `λ_lb ≤ 0`); proof.md states
-   it for `Y ≥ 2`.
+   (`r = ε(Y' - 2)/2 > 0`). This holds for every `Y > 1` (for `Y ≤ 2`, `λ_lb ≤ 0`).
 
-Numerical checks of all of this against a literal model of the Lean definitions (matrix
-exponentials and the quadratures of `iso_vfC`, `iso_vfΛR`): `notes/n4f/check1.py`,
-`notes/n4f/check2.py`.
+All of this was also checked numerically, while the statements were written, against a literal
+model of the Lean definitions (matrix exponentials and the quadratures of `iso_vfC`, `iso_vfΛR`);
+the proofs do not depend on these checks.
 -/
 
 @[expose] public section
@@ -101,7 +100,7 @@ namespace SmoothedPolygons
 
 open Set Filter Topology
 
-/-- **The parameters of an `e₂`-arc** (proof.md §1.3, §2.1): `ε = ρ₁(X₀)`, `Y = 1 + ρ₂(X₀)/ε`, the
+/-- **The parameters of an `e₂`-arc** (§1.3, §2.1): `ε = ρ₁(X₀)`, `Y = 1 + ρ₂(X₀)/ε`, the
 normalized cleared switching numerators `f₀ = f(0)`, `g₀ = g(0)` at the initial point, and the
 pairings `q`, `p` of `Λ̂₀ = Λ₁(0) + (3/2) J` with the nilpotent eigenvectors `V_e`, `V_f` of
 `ad(X₀ + P)` (Lemma 1.2). `arcParams` (`SmoothedPolygons/Ch14/ArcNormalForm.lean`) computes them
@@ -124,7 +123,7 @@ namespace ArcParams
 
 variable (a : ArcParams)
 
-/-- `Y' = (1 + ε²)/(ε² Y)`; for a phase point it is `1 + ρ₀(X₀)/ε` (proof.md (1.3),
+/-- `Y' = (1 + ε²)/(ε² Y)`; for a phase point it is `1 + ρ₀(X₀)/ε` ((1.3),
 `arcParams_Y'`). -/
 noncomputable def Y' : ℝ := (1 + a.eps ^ 2) / (a.eps ^ 2 * a.Y)
 
@@ -154,7 +153,7 @@ noncomputable def fDeriv (τ : ℝ) : ℝ :=
 noncomputable def g (τ : ℝ) : ℝ :=
   -1 + a.A' * Real.exp τ + a.B' * Real.exp (2 * τ) - a.Y' * τ * Real.exp τ
 
-/-- `F(τ) = e^{τ} f(τ) = -e^{τ} + A + B e^{-τ} + Y τ` (proof.md §3); the sign of `F(log Y)` decides
+/-- `F(τ) = e^{τ} f(τ) = -e^{τ} + A + B e^{-τ} + Y τ` (§3); the sign of `F(log Y)` decides
 between a switch inside the star domain and an exit (P3). -/
 noncomputable def F (τ : ℝ) : ℝ := Real.exp τ * a.f τ
 
@@ -164,7 +163,7 @@ noncomputable def yPlus : ℝ := (a.Y + √((a.Y - 2) ^ 2 - 4 * a.q)) / 2
 /-- `y₋ = (Y - √((Y - 2)² - 4q))/2`, the smaller root of `y² - Y y + B` (Lemma 3.2). -/
 noncomputable def yMinus : ℝ := (a.Y - √((a.Y - 2) ^ 2 - 4 * a.q)) / 2
 
-/-- **The quadric relation** `R(ε, Y, f₀, q, p)` (proof.md (2.1), `κ = 1 + ε²`):
+/-- **The quadric relation** `R(ε, Y, f₀, q, p)` ((2.1), `κ = 1 + ε²`):
 `R = κ²q² - 2q[κ²f₀ - Y²ε²(1 - ε²)p + 2Y²ε² - κY] + Y⁴ε⁴p² + 2Y²ε²(Y - 2)p - 2Y²ε²κf₀p
 + 4Y²ε²κf₀ - 2(2ε² + 1)κYf₀ + κ²f₀² + 4κ²f₀`.
 It vanishes at every section point (`arcParams_rel`); it is `det Λ₁ = 9/4` in the parameters
@@ -202,8 +201,8 @@ noncomputable def step (qNew : ℝ) : ArcParams where
   q := qNew
   p := -a.fDeriv a.tauSw / a.stepK ^ 2
 
-/-- The lower bound `λ_lb = (Y - 2)/((Y - 1)(Y' - 2))` of the expansion `r_new/r` (proof.md
-(3.1)); `λ_lb ≥ 1` is the condition E of the region `𝒢*`. -/
+/-- The lower bound `λ_lb = (Y - 2)/((Y - 1)(Y' - 2))` of the expansion `r_new/r`
+((3.1)); `λ_lb ≥ 1` is the condition E of the region `𝒢*`. -/
 noncomputable def expansionBound : ℝ := (a.Y - 2) / ((a.Y - 1) * (a.Y' - 2))
 
 /-! ### The normal form (1.4) and elementary identities -/
@@ -273,7 +272,7 @@ private lemma exp_two_mul' (x : ℝ) : Real.exp (2 * x) = Real.exp x ^ 2 := by
 private lemma exp_mul_exp_neg (x : ℝ) : Real.exp x * Real.exp (-x) = 1 := by
   rw [← Real.exp_add, add_neg_cancel, Real.exp_zero]
 
-/-- `F(log Y) = A - Y + B/Y + Y log Y` (proof.md §3). -/
+/-- `F(log Y) = A - Y + B/Y + Y log Y` (§3). -/
 theorem F_log (hY : 0 < a.Y) :
     a.F (Real.log a.Y) = a.A - a.Y + a.B / a.Y + a.Y * Real.log a.Y := by
   have h1 : Real.exp (-Real.log a.Y) = a.Y⁻¹ := by rw [Real.exp_neg, Real.exp_log hY]

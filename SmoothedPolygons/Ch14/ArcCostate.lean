@@ -6,15 +6,19 @@ import SmoothedPolygons.Ch7.Isolated.VertexFlow
 /-!
 # Chapter 14, N4: the costate along an `e₂`-arc (Lemma 1.2 and the quadratures)
 
-`notes/n4/proof.md` §1.3, first half: the nilpotent eigenvectors `V_e`, `V_f` of `ad(X₀ + P)`
+Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
+computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
+computed figure (Figure 14.2, TeX 11951–11991; REPORT.md E88); the formalization proves it from
+the exact structure of the Reinhardt flow along an `e₂`-arc and an invariant region (see
+`SmoothedPolygons/Ch14/ArcParams.lean`, and `SmoothedPolygons/Ch14/ArcRegionInvariant.lean` for
+the numbering of the steps).
+
+This file is §1.3, first half: the nilpotent eigenvectors `V_e`, `V_f` of `ad(X₀ + P)`
 (Lemma 1.2), the closed form of `M(t)` and `c(t)` (`iso_vfM`, `iso_vfC`), and the two scalar
 functions `φ_e`, `φ_f` whose derivatives are pairings of `M(t)` with `V_e`, `V_f`. The normal form
 of the cleared switching numerators (Theorem 1.3, `SmoothedPolygons/Ch14/ArcNormalForm.lean`)
-integrates these. Part of the reduction of N4 to (INV) (`ArcRegionInvariant`).
-
-**Departure from the paper.** The book computes the unstable curve numerically (Figure 14.2,
-TeX 11951–11991); the formalization proves N4 from (INV) by the exact structure of the arcs (see
-`SmoothedPolygons/Ch14/ArcParams.lean`).
+integrates these. It also holds INV (1.4), the costate in a moving eigenbasis
+(`iso_vfΛ₁_one_eq`).
 
 ## Notation
 
@@ -40,23 +44,24 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
 * `traceForm_iso_vfM_arcVe`, `traceForm_iso_vfM_arcVf`:
   `⟨M(t), V_e⟩ = u ⟨Λ₁(0), V_e⟩ - (√3/2)(2x_e + x_e² u/ε + 4ε/u)` and
   `⟨M(t), V_f⟩ = u⁻¹ ⟨Λ₁(0), V_f⟩ + (√3/2)(-2x_f + ε u + 4x_f²/(ε u))`.
-* `iso_vfΛ₁_one_eq` (`notes/inv/inv.md` (1.4), the first step of its Theorem 1): the costate has
+* `iso_vfΛ₁_one_eq` (INV (1.4), the first step of INV Theorem 1): the costate has
   constant coefficients in the moving eigenbasis,
   `Λ₁(t) = α (X(t) + P) + β u⁻² V_e(X(t)) + γ u² V_f(X(t))`, `α = 2ε² ⟨Λ₁(0), X₀ + P⟩`,
   `β = ε² ⟨Λ₁(0), V_f⟩`, `γ = ε² ⟨Λ₁(0), V_e⟩`. On a section point the coefficients are explicit
   in the parameters (`iso_vfΛ₁_one_eq_arcParams`, `SmoothedPolygons/Ch14/ArcPoincareMap.lean`);
   this gives the parameters of the image without the quadratures and without Lemma 2.3.
 
-## Proofs (the route, proof.md §1.3)
+## Proofs (the route, §1.3)
 
 1. Lemma 1.2: `A = -(ε + ω) H + x_e E + x_f F` (`iso_vfP_one_eq`, `frame_state`); by
    `ofFrame_mul_sub` the `H`, `E`, `F` coefficients of `[A, V_e]` are
    `ε x_e + 2ω x_e² x_f = -2ω x_e`,
    `2x_e²(2ω(ε + ω) - 1) = 4ω² x_e²`, `2(x_e x_f + ε(ε + ω)) = -1 = -2ωε`, using
    `x_e x_f = -(1 + ε²)` and `2ωε = 1`; the same for `V_f`. `det = -(h² + e f) = 0`
-   (`det_ofFrame`). The conjugation: `t ↦ e^{tA} V_e e^{-tA}` and `t ↦ u V_e` both solve
-   `Z' = [A, Z]`, `Z(0) = V_e` (uniqueness, e.g. `ivf_eq_of_hasDerivAt`), or expand
-   `e^{tA}` with `lemmaA_6_4` (`det A = det P = -ω² < 0`, `det_iso_vfP_one`).
+   (`det_ofFrame`). The conjugation (`n4c_exp_conj_of_bracket`): if `[A, V] = μ V`, then
+   `t ↦ e^{-tμ} e^{tA} V e^{-tA}` has entrywise derivative `0`, so it is constant
+   (`is_const_of_deriv_eq_zero`) and `e^{tA} V e^{-tA} = e^{tμ} V`; with `μ = ∓2ω = ∓1/ε` this
+   gives `u V_e` and `u⁻¹ V_f`.
 2. `iso_vfM_eq`: `Λ₁(s) = g⁻¹ Λ₁(0) g` with `g = e^{sA} e^{-sP}` (`iso_vfΛ₁`, `iso_vfG`,
    `constControlG`), so `e^{-sP} Λ₁(s) e^{sP} = e^{-sA} Λ₁(0) e^{sA}`
    (`NormedSpace.exp` of `s • B` and `-s • B` are inverse: `Matrix.exp_neg_smul_mul_exp_smul`).
@@ -72,7 +77,7 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
    Likewise `e^{-tP} Z_{e₃} e^{tP} = -(H + 4u⁻¹ E)/√3` and
    `⟨Λ_R, Z_{e₃}⟩ - c⟨X, Z_{e₃}⟩ = -(4u⁻¹/√3) φ_f`. This needs `Λ_R(0)` traceless (so that `Λ̃` is
    `ofFrame` of its components, `ofFrame_frame`); the frame components of a matrix with nonzero
-   trace are not the pairings used here (checked: `notes/n4f/check1.py`, "generic").
+   trace are not the pairings used here (checked numerically at a generic point).
 5. `hasDerivAt_arcPhiE`: `arcLamTilde q t = Λ_R(0) - (∫₀ᵗ c)[P, X₀] - ∫₀ᵗ [M, X₀]` (the
    exponentials in `iso_vfΛR` cancel), so by the fundamental theorem of calculus
    (`intervalIntegral.integral_hasDerivAt_right`, continuity: `ivf_vfC_continuous`,
@@ -87,10 +92,11 @@ TeX 11951–11991); the formalization proves N4 from (INV) by the exact structur
    ⟨Λ₁(0), e^{tA} V_e e^{-tA}⟩ = u ⟨Λ₁(0), V_e⟩`; `e^{tP} V_e e^{-tP} = x_e H - 2ω x_e² u E +
    ε u⁻¹ F` (`exp_conj_ofFrame`), and `⟨J, a H + b E + c F⟩ = (-2a + b - 4c)/√3` ((1.2),
    `traceForm_ofFrame`). The same for `V_f` (`e^{tP} V_f e^{-tP} = x_f H + ε u E - 2ω x_f² u⁻¹ F`).
-7. `iso_vfΛ₁_one_eq` (inv.md Theorem 1 (i)): see its docstring.
+7. `iso_vfΛ₁_one_eq` (INV Theorem 1 (i)): see its docstring.
 
-All of these were checked against a literal model of the Lean definitions (matrix exponentials,
-the quadratures of `iso_vfC` and `iso_vfΛR` by numerical integration): `notes/n4f/check1.py`.
+All of these were also checked numerically, while the statements were written, against a literal
+model of the Lean definitions (matrix exponentials, the quadratures of `iso_vfC` and `iso_vfΛR`
+by numerical integration); the proofs do not depend on these checks.
 -/
 
 @[expose] public section
@@ -122,21 +128,6 @@ noncomputable def arcPhiF (q : iso_PhasePt) (t : ℝ) : ℝ :=
 variable {q : iso_PhasePt}
 
 /-! ### Frame and trace-form helpers -/
-
-private lemma n4c_ofFrame_add (h e f h' e' f' : ℝ) :
-    ofFrame h e f + ofFrame h' e' f' = ofFrame (h + h') (e + e') (f + f') := by
-  ext i j; fin_cases i <;> fin_cases j <;> simp [ofFrame] <;> ring
-
-private lemma n4c_ofFrame_sub (h e f h' e' f' : ℝ) :
-    ofFrame h e f - ofFrame h' e' f' = ofFrame (h - h') (e - e') (f - f') := by
-  ext i j; fin_cases i <;> fin_cases j <;> simp [ofFrame] <;> ring
-
-private lemma n4c_ofFrame_smul (c h e f : ℝ) :
-    c • ofFrame h e f = ofFrame (c * h) (c * e) (c * f) := by
-  ext i j; fin_cases i <;> fin_cases j <;> simp [ofFrame] <;> ring
-
-private lemma n4c_ofFrame_zero : ofFrame 0 0 0 = 0 := by
-  ext i j; fin_cases i <;> fin_cases j <;> simp [ofFrame]
 
 private lemma n4c_traceForm_add_left (A B C : Mat2) :
     traceForm (A + B) C = traceForm A C + traceForm B C := by
@@ -253,7 +244,7 @@ private lemma n4c_A_eq (hX : IsStarState q.1) :
     q.1 + iso_vfP 1 q = ofFrame (-arcEps q - 1 / (2 * arcEps q)) (frameE q.1) (frameF q.1) := by
   rw [iso_vfP_one_eq hX]
   conv_lhs => rw [n4c_state_eq hX]
-  rw [n4c_ofFrame_add]
+  rw [ofFrame_add]
   congr 1 <;> ring
 
 private lemma n4c_arcVe_eq (X : Mat2) :
@@ -302,7 +293,7 @@ private lemma n4c_comm_e {ε xe xf : ℝ} (hε : ε ≠ 0) (hd : xe * xf = -(1 +
       -(1 / ε) • ofFrame xe (-xe ^ 2 / ε) ε := by
   have hxe : xe ≠ 0 := by rintro rfl; nlinarith
   obtain rfl : xf = -(1 + ε ^ 2) / xe := by field_simp; linarith
-  rw [ofFrame_mul_sub, n4c_ofFrame_smul]
+  rw [ofFrame_mul_sub, smul_ofFrame]
   congr 1 <;> field_simp <;> ring
 
 private lemma n4c_comm_f {ε xe xf : ℝ} (hε : ε ≠ 0) (hd : xe * xf = -(1 + ε ^ 2)) :
@@ -311,7 +302,7 @@ private lemma n4c_comm_f {ε xe xf : ℝ} (hε : ε ≠ 0) (hd : xe * xf = -(1 +
       (1 / ε) • ofFrame xf ε (-xf ^ 2 / ε) := by
   have hxe : xe ≠ 0 := by rintro rfl; nlinarith
   obtain rfl : xf = -(1 + ε ^ 2) / xe := by field_simp; linarith
-  rw [ofFrame_mul_sub, n4c_ofFrame_smul]
+  rw [ofFrame_mul_sub, smul_ofFrame]
   congr 1 <;> field_simp <;> ring
 
 /-- **Lemma 1.2**: `[X₀ + P, V_e] = -2ω V_e = -(1/ε) V_e`. -/
@@ -371,8 +362,8 @@ private lemma n4c_vfΛ₁_eq (m : Fin 3) (q : iso_PhasePt) (t : ℝ) :
   unfold iso_vfG constControlG
   simp only [Matrix.mul_assoc]
 
-/-- `M(t) = e^{-tA} Λ₁(0) e^{tA} + (3/2) e^{-tP} J e^{tP}`, `A = X₀ + P` (proof.md §1.3), for every
-vertex control. -/
+/-- `M(t) = e^{-tA} Λ₁(0) e^{tA} + (3/2) e^{-tP} J e^{tP}`, `A = X₀ + P` (§1.3), for every vertex
+control. -/
 theorem iso_vfM_eq (m : Fin 3) (q : iso_PhasePt) (t : ℝ) :
     iso_vfM m q t =
       NormedSpace.exp (-t • (q.1 + iso_vfP m q)) * q.2.1 *
@@ -383,7 +374,7 @@ theorem iso_vfM_eq (m : Fin 3) (q : iso_PhasePt) (t : ℝ) :
     n4c_conj_cancel (Matrix.exp_neg_smul_mul_exp_smul _ t)]
 
 /-- `c(t) = ⟨M(t), X₀⟩ - H(e_m)(q)` along the `e_m`-flow (conservation of `H(e_m)`); on
-`H(e₂) = 0` this is the identity `c = ⟨M, X₀⟩` of proof.md §1.3. -/
+`H(e₂) = 0` this is the identity `c = ⟨M, X₀⟩` of §1.3. -/
 theorem iso_vfC_eq_sub (m : Fin 3) (q : iso_PhasePt) (t : ℝ) :
     iso_vfC m q t = traceForm (iso_vfM m q t) q.1 - phaseHam q (vertex m) := by
   have h := hamiltonian_vertexFlow m q t
@@ -481,7 +472,7 @@ private lemma n4c_phiE_alg (M X : Mat2) {ε xe xf : ℝ} (hε : ε ≠ 0)
   rw [n4c_bracket_add_smul_one]
   simp only [ofFrame_mul_sub, n4c_traceForm_add_smul_one, traceForm_ofFrame, trace_ofFrame,
     mul_zero, add_zero]
-  rw [← n4c_ofFrame_zero, n4c_ofFrame_smul, n4c_ofFrame_sub, n4c_ofFrame_sub, frameE_ofFrame]
+  rw [← ofFrame_zero, smul_ofFrame, ofFrame_sub, ofFrame_sub, frameE_ofFrame]
   field_simp
   ring
 
@@ -497,7 +488,7 @@ private lemma n4c_phiF_alg (M X : Mat2) {ε xe xf : ℝ} (hε : ε ≠ 0)
   rw [n4c_bracket_add_smul_one]
   simp only [ofFrame_mul_sub, n4c_traceForm_add_smul_one, traceForm_ofFrame, trace_ofFrame,
     mul_zero, add_zero]
-  rw [← n4c_ofFrame_zero, n4c_ofFrame_smul, n4c_ofFrame_sub, n4c_ofFrame_sub, frameF_ofFrame]
+  rw [← ofFrame_zero, smul_ofFrame, ofFrame_sub, ofFrame_sub, frameF_ofFrame]
   field_simp
   ring
 
@@ -566,7 +557,7 @@ theorem traceForm_iso_vfM_arcVf (hX : IsStarState q.1) (t : ℝ) :
     exp_conj_ofFrame hX, n4c_J_pair]
   ring
 
-/-! ### The costate in the moving eigenbasis (`notes/inv/inv.md` (1.4)) -/
+/-! ### The costate in the moving eigenbasis (INV (1.4)) -/
 
 /-- A traceless matrix in the basis `A = X₀ + P`, `V_e`, `V_f` (dual to itself up to the pairings
 `⟨A, A⟩ = 1/(2ε²)`, `⟨V_e, V_f⟩ = 1/ε²`, the others `0`). -/
@@ -581,7 +572,7 @@ private lemma n4c_decomp_alg (lh le lf : ℝ) {ε xe xf : ℝ} (hε : ε ≠ 0)
           ofFrame xf ε (-xf ^ 2 / ε) := by
   have hxe : xe ≠ 0 := by rintro rfl; nlinarith
   obtain rfl : xf = -(1 + ε ^ 2) / xe := by field_simp; linarith
-  simp only [traceForm_ofFrame, n4c_ofFrame_smul, n4c_ofFrame_add]
+  simp only [traceForm_ofFrame, smul_ofFrame, ofFrame_add]
   congr 1 <;> field_simp <;> ring
 
 /-- `e^{tB} B e^{-tB} = B`. -/
@@ -590,14 +581,14 @@ private lemma n4c_conj_self' (B : Mat2) (t : ℝ) :
   rw [← (Matrix.commute_exp_smul B t).eq, Matrix.mul_assoc, Matrix.exp_smul_mul_exp_neg_smul,
     Matrix.mul_one]
 
-/-- **(1.4): the costate along the `e₂`-arc in the moving eigenbasis** (`notes/inv/inv.md`
-Theorem 1 (i)). For `X₀` a star state and `Λ₁(0)` traceless, with `u = e^{-t/ε}`, `A = X₀ + P`,
+/-- **INV (1.4): the costate along the `e₂`-arc in the moving eigenbasis** (INV Theorem 1 (i)).
+For `X₀` a star state and `Λ₁(0)` traceless, with `u = e^{-t/ε}`, `A = X₀ + P`,
 `Λ₁(t) = α (X(t) + P) + β u⁻² V_e(X(t)) + γ u² V_f(X(t))`, where `α = 2ε² ⟨Λ₁(0), A⟩`,
 `β = ε² ⟨Λ₁(0), V_f⟩` and `γ = ε² ⟨Λ₁(0), V_e⟩`. No quadrature and no logarithm: the costate is
 an algebraic function of `u`. On a section point `α, β, γ` are explicit in the parameters
 (`iso_vfΛ₁_one_eq_arcParams`, `SmoothedPolygons/Ch14/ArcPoincareMap.lean`).
 
-Route (inv.md §1, proof of Theorem 1 (i)):
+Route (INV §1, proof of INV Theorem 1 (i)):
 1. *The basis.* In the frame `A = ofFrame (-ε - ω) x_e x_f` (`frame_state`, `iso_vfP_one_eq`,
    `ω = 1/(2ε)`), `V_e = ofFrame x_e (-x_e²/ε) ε`, `V_f = ofFrame x_f ε (-x_f²/ε)`; with
    `x_e x_f = -(1 + ε²)` and `traceForm_ofFrame`: `⟨A, A⟩ = 1/(2ε²)`, `⟨V_e, V_f⟩ = 1/ε²`, and
@@ -614,8 +605,8 @@ Route (inv.md §1, proof of Theorem 1 (i)):
    `V_f ↦ ofFrame x_f (u ε) (-u⁻¹ x_f²/ε) = u arcVf (X(t))` (the frame of `X(t)` is
    `(-ε, u x_e, u⁻¹ x_f)` and `ρ₁(X(t)) = ε`, `ρ_iso_vfX_one`).
 5. Collect: `u⁻² = e^{2t/ε}`, `u² = e^{-2t/ε}`.
-Checked exactly against the literal definitions (matrix exponentials `cosh(ωt) I + ω⁻¹ sinh(ωt) M`
-for `M² = ω² I`): `notes/n4s2/lit.py` (symbolic) and `lit_exact.py`; inv.md `verify.py` §1. -/
+Also checked exactly with sympy against the literal definitions (matrix exponentials
+`cosh(ωt) I + ω⁻¹ sinh(ωt) M` for `M² = ω² I`), symbolically and at exact points. -/
 theorem iso_vfΛ₁_one_eq (hX : IsStarState q.1) (hL : q.2.1.trace = 0) (t : ℝ) :
     iso_vfΛ₁ 1 q t =
       (2 * arcEps q ^ 2 * traceForm q.2.1 (q.1 + iso_vfP 1 q)) • (iso_vfX 1 q t + iso_vfP 1 q) +
@@ -651,10 +642,10 @@ theorem iso_vfΛ₁_one_eq (hX : IsStarState q.1) (hL : q.2.1.trace = 0) (t : �
       hVe, hVf, smul_smul]
   -- steps 2 and 4: `Λ₁(t) = e^{tP} (⋯) e^{-tP}` in the frame
   rw [n4c_vfΛ₁_eq, hdec, h3, n4c_A_eq hX, n4c_arcVe_eq' q, n4c_arcVf_eq' q]
-  simp only [n4c_ofFrame_smul, n4c_ofFrame_add]
+  simp only [smul_ofFrame, ofFrame_add]
   rw [exp_conj_ofFrame hX, n4c_arcVe_eq, n4c_arcVf_eq, (ρ_iso_vfX_one hX t).1,
     iso_vfX_one_eq hX t, frameE_ofFrame, frameF_ofFrame, iso_vfP_one_eq hX]
-  simp only [n4c_ofFrame_smul, n4c_ofFrame_add]
+  simp only [smul_ofFrame, ofFrame_add]
   -- step 5: compare the frame components
   have hv : Real.exp (t / arcEps q) ≠ 0 := (Real.exp_pos _).ne'
   have hu : Real.exp (-t / arcEps q) = (Real.exp (t / arcEps q))⁻¹ := by
