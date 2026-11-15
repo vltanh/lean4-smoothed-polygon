@@ -1,0 +1,80 @@
+module
+
+public import SmoothedPolygons.Ch16.MahlerFirstNumerical
+public import SmoothedPolygons.Ch16.OutwardFuller
+public import SmoothedPolygons.Ch16.DOutContraction
+public import SmoothedPolygons.Ch16.BoxSubclaims
+public import SmoothedPolygons.Ch16.CellTwoEntersDOut
+
+/-!
+# Chapter 16: the global basin, outward Fuller and cluster point theorems, unconditionally
+
+Theorems 16.1.1, 16.2.1 and 16.4.1 of Hales–Vajjha, *Packings of Smoothed Polygons*, are proved in
+`GlobalBasin.lean`, `OutwardFuller.lean` and `ClusterPoint.lean` from the three named facts of
+Table 16.1 that the book reads off Mathematica plots (`BasinHypotheses.lean`). The three facts are
+now theorems, proved analytically, without computer assistance:
+
+* `TriFuller.dOutContracts` (`DOutContraction.lean`): the box `𝒟_out` is mapped into itself, and
+  its second image into a box on which the map is a contraction;
+* `TriFuller.cellTwoEntersDOut` (`CellTwoEntersDOut.lean`): the second cell reaches `𝒟_out` within
+  three steps;
+* `TriFuller.boxSubclaims` (`BoxSubclaims.lean`): every other box goes to the second cell or to a
+  smaller box.
+
+**Departure from the paper**, recorded in each of those files: the book reads these facts off
+computer plots (Table 16.1, Figures 16.1–16.4, TeX 12577–12726); the formalization proves them by
+exact structure and a few explicit inequalities. A rigorous computational reference
+(`numerics/`, Python with ball arithmetic) reproduces them; the Lean proofs do not depend on it.
+
+This file states the three theorems without the hypotheses, and Mahler's First conjecture
+(Theorem 16.3.1) conditional only on the remaining named fact, `UnstableCurveLeavesStarDomain`
+(Theorem 14.4.1's computation, Figure 14.2, `Ch14/UnstableCurve.lean`).
+-/
+
+@[expose] public section
+
+namespace SmoothedPolygons
+
+open Set Filter Topology
+open TriFuller
+
+/-- **Theorem 16.1.1** (`thm:basin`, the global basin of the Fuller system), unconditionally: every
+orbit of the Fuller–Poincaré map on `Ξ_{𝒲,0}/V_T` other than `q_in` tends to `q_out`. -/
+theorem theorem16_1_1_unconditional (q : XiW0Quot) (hq : q ≠ qIn0) :
+    Tendsto (fun k : ℕ ↦ poincareAngZero^[k] q) atTop (𝓝 qOut0) :=
+  theorem16_1_1 dOutContracts cellTwoEntersDOut boxSubclaims q hq
+
+/-- **Theorem 16.2.1** (`thm:outward-fuller`), unconditionally: the switching points of a Fuller
+trajectory emanating from the singular locus lie on the outward spiral of `q_out`, and those of
+one tending to it on the inward spiral of `q_in`. -/
+theorem theorem16_2_1_unconditional :
+    (∀ z : ℕ → Fin 3 → ℂ, (∀ k, z k ≠ 0) → (∀ k, poincare (z (k + 1)) = z k) →
+      Tendsto z atTop (𝓝 0) → ∀ k, z k ∈ sectionZero ∧ classOf (z k) = qOut0) ∧
+    ∀ z₀ : Fin 3 → ℂ, z₀ ≠ 0 → z₀ 2 ∈ walls →
+      Tendsto (fun k : ℕ ↦ poincare^[k] z₀) atTop (𝓝 0) →
+      ∀ k, poincare^[k] z₀ ∈ sectionZero ∧ classOf (poincare^[k] z₀) = qIn0 :=
+  theorem16_2_1 dOutContracts cellTwoEntersDOut boxSubclaims
+
+/-- **Theorem 16.4.1** (`thm:no-chatter`, the cluster point theorem), unconditionally: the
+switching points of a chattering arc into the singular locus converge to `q_in` modulo `V_T` and
+eventually lie on its local stable curve. -/
+theorem theorem16_4_1_unconditional {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
+    {τ : ℕ → ℝ} (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) :
+    TendstoModVT (switchAng X Λ₁ ΛR τ) (ang (tau qOutCart)) ∧
+      ∀ e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ)),
+        IsReinhardtPoincareExtension e → ∀ U ∈ 𝓝 chartPtOut, ∀ᶠ n in atTop,
+          ∃ k : ℕ, ∃ p ∈ Function.localUnstableSet e chartPtOut U, 0 < p.1 ∧
+            iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = lieChartIn p :=
+  theorem16_4_1 dOutContracts cellTwoEntersDOut boxSubclaims h
+
+/-- **Theorem 16.3.1** (`thm:mahler`, Mahler's First conjecture), **conditional on one named
+numerical fact**, `UnstableCurveLeavesStarDomain`: the global unstable curve over `q_out` reaches
+the boundary of the star domain (the computation behind Theorem 14.4.1, Figure 14.2, which the
+book did not certify). The three facts of Table 16.1 are proved. -/
+theorem theorem16_3_1_of_unstableCurveLeavesStarDomain (h₄ : UnstableCurveLeavesStarDomain) :
+    (∀ (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2), IsReinhardtMinimizer T u g X →
+      IsFiniteBangBang 0 T u) ∧
+    ∀ K : Set (Fin 2 → ℝ), IsWorstDisk K → IsSmoothedPolygon K :=
+  theorem16_3_1_of_numerical_facts dOutContracts cellTwoEntersDOut boxSubclaims h₄
+
+end SmoothedPolygons
