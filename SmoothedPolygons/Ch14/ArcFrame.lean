@@ -141,38 +141,38 @@ noncomputable def arcExitTime (q : iso_PhasePt) : ℝ := ρ₁ q.1 * Real.log (a
 
 /-! ### Frame identities, (1.1) and (1.2) -/
 
-private lemma n4b_sqrt3_pos : (0 : ℝ) < √3 := Real.sqrt_pos.2 (by norm_num)
-private lemma n4b_sqrt3_ne : (√3 : ℝ) ≠ 0 := n4b_sqrt3_pos.ne'
-private lemma n4b_sqrt3_sq : (√3 : ℝ) ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+private lemma sqrt_three_pos : (0 : ℝ) < √3 := Real.sqrt_pos.2 (by norm_num)
+private lemma sqrt_three_ne_zero : (√3 : ℝ) ≠ 0 := sqrt_three_pos.ne'
+private lemma sq_sqrt_three : (√3 : ℝ) ^ 2 = 3 := Real.sq_sqrt (by norm_num)
 
 /-- `ofFrame h e f = S [[h, e], [f, -h]] S⁻¹`. -/
 theorem ofFrame_eq_conj (h e f : ℝ) :
     ofFrame h e f = arcFrameS * !![h, e; f, -h] * arcFrameS⁻¹ := by
   have hS : arcFrameS * !![1, -(1 / √3); 0, 1 / √3] = 1 := by
-    have := n4b_sqrt3_ne
+    have := sqrt_three_ne_zero
     ext i j; fin_cases i <;> fin_cases j <;>
       simp [arcFrameS, Matrix.mul_apply, Fin.sum_univ_two]
   rw [Matrix.inv_eq_right_inv hS]
-  have := n4b_sqrt3_ne
+  have := sqrt_three_ne_zero
   ext i j; fin_cases i <;> fin_cases j <;>
     simp [arcFrameS, ofFrame, Matrix.mul_apply, Fin.sum_univ_two] <;> field_simp; ring
 
 @[simp] theorem frameH_ofFrame (h e f : ℝ) : frameH (ofFrame h e f) = h := by
-  have := n4b_sqrt3_ne
+  have := sqrt_three_ne_zero
   simp [frameH, ofFrame]
 
 @[simp] theorem frameE_ofFrame (h e f : ℝ) : frameE (ofFrame h e f) = e := by
-  have := n4b_sqrt3_ne
+  have := sqrt_three_ne_zero
   simp [frameE, ofFrame]; field_simp; ring
 
 @[simp] theorem frameF_ofFrame (h e f : ℝ) : frameF (ofFrame h e f) = f := by
-  have := n4b_sqrt3_ne
+  have := sqrt_three_ne_zero
   simp [frameF, ofFrame]
 
 /-- A traceless matrix is `ofFrame` of its components. -/
 theorem ofFrame_frame {M : Mat2} (hM : M.trace = 0) :
     ofFrame (frameH M) (frameE M) (frameF M) = M := by
-  have := n4b_sqrt3_ne
+  have := sqrt_three_ne_zero
   rw [Matrix.trace_fin_two] at hM
   ext i j; fin_cases i <;> fin_cases j <;>
     simp [frameH, frameE, frameF, ofFrame] <;> field_simp
@@ -184,13 +184,13 @@ theorem trace_ofFrame (h e f : ℝ) : (ofFrame h e f).trace = 0 := by
 
 /-- `det(h H + e E + f F) = -(h² + e f)`. -/
 theorem det_ofFrame (h e f : ℝ) : (ofFrame h e f).det = -(h ^ 2 + e * f) := by
-  have := n4b_sqrt3_ne
+  have := sqrt_three_ne_zero
   simp [ofFrame, Matrix.det_fin_two]; field_simp; ring
 
 /-- The trace form in the frame: `⟨M, N⟩ = 2 m_h n_h + m_e n_f + m_f n_e`. -/
 theorem traceForm_ofFrame (h e f h' e' f' : ℝ) :
     traceForm (ofFrame h e f) (ofFrame h' e' f') = 2 * h * h' + e * f' + f * e' := by
-  have := n4b_sqrt3_ne
+  have := sqrt_three_ne_zero
   simp [traceForm, ofFrame, Matrix.trace_fin_two]
   field_simp; ring
 
@@ -199,7 +199,7 @@ theorem traceForm_ofFrame (h e f h' e' f' : ℝ) :
 theorem ofFrame_mul_sub (h e f h' e' f' : ℝ) :
     ofFrame h e f * ofFrame h' e' f' - ofFrame h' e' f' * ofFrame h e f =
       ofFrame (e * f' - f * e') (2 * (h * e' - e * h')) (2 * (f * h' - h * f')) := by
-  have := n4b_sqrt3_ne
+  have := sqrt_three_ne_zero
   ext i j; fin_cases i <;> fin_cases j <;>
     simp [ofFrame] <;> field_simp <;> ring
 
@@ -222,8 +222,8 @@ theorem ofFrame_zero : ofFrame 0 0 0 = 0 := by
 theorem ρ_ofFrame (h e f : ℝ) :
     ρ₁ (ofFrame h e f) = -h ∧ ρ₂ (ofFrame h e f) = h - e / 2 ∧
       ρ₀ (ofFrame h e f) = h + 2 * f := by
-  have := n4b_sqrt3_ne
-  have h3 := n4b_sqrt3_sq
+  have := sqrt_three_ne_zero
+  have h3 := sq_sqrt_three
   refine ⟨?_, ?_, ?_⟩ <;> simp only [ρ₀, ρ₁, ρ₂, ofFrame, Matrix.of_apply, Matrix.cons_val',
     Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.empty_val'] <;>
     field_simp
@@ -238,8 +238,8 @@ theorem frame_controlMatrix :
       controlMatrix (vertex 1) = ofFrame (1 / √3) 0 0 ∧
       controlMatrix (vertex 2) = ofFrame (-(1 / √3)) (-(4 / √3)) 0 ∧
       J = ofFrame (-(1 / √3)) (-(4 / √3)) (1 / √3) := by
-  have := n4b_sqrt3_ne
-  have h3 := n4b_sqrt3_sq
+  have := sqrt_three_ne_zero
+  have h3 := sq_sqrt_three
   refine ⟨?_, ?_, ?_, ?_⟩ <;> ext i j <;> fin_cases i <;> fin_cases j <;>
     simp [controlMatrix, vertex, ofFrame, J] <;> field_simp <;> norm_num [h3]
 
@@ -249,8 +249,8 @@ theorem traceForm_controlMatrix_vertex {X : Mat2} (hX : X.trace = 0) :
     traceForm X (controlMatrix (vertex 0)) = -(2 / √3) * ρ₂ X ∧
       traceForm X (controlMatrix (vertex 1)) = -(2 / √3) * ρ₁ X ∧
       traceForm X (controlMatrix (vertex 2)) = -(2 / √3) * ρ₀ X := by
-  have := n4b_sqrt3_ne
-  have h3 := n4b_sqrt3_sq
+  have := sqrt_three_ne_zero
+  have h3 := sq_sqrt_three
   rw [Matrix.trace_fin_two] at hX
   have h11 : X 1 1 = -X 0 0 := by linarith
   refine ⟨?_, ?_, ?_⟩ <;>
@@ -265,8 +265,8 @@ theorem controlMatrix_vertex_add :
 /-- **(1.1)**: `ρ₀ρ₁ + ρ₁ρ₂ + ρ₂ρ₀ = det X` for traceless `X` (`= 1` on the states). -/
 theorem ρ_mul_add {X : Mat2} (hX : X.trace = 0) :
     ρ₀ X * ρ₁ X + ρ₁ X * ρ₂ X + ρ₂ X * ρ₀ X = X.det := by
-  have := n4b_sqrt3_ne
-  have h3 := n4b_sqrt3_sq
+  have := sqrt_three_ne_zero
+  have h3 := sq_sqrt_three
   rw [Matrix.trace_fin_two] at hX
   have h11 : X 1 1 = -X 0 0 := by linarith
   simp only [ρ₀, ρ₁, ρ₂, Matrix.det_fin_two, h11]
@@ -291,34 +291,37 @@ theorem switchingNum_eq (i j : Fin 3) (q : iso_PhasePt)
   field_simp
 
 /-- In the star domain every pairing `⟨X, Z_{e_k}⟩` is negative (by (1.1)). -/
-private lemma n4b_traceForm_vertex_neg {X : Mat2} (hX : IsStarState X) (k : Fin 3) :
+private lemma traceForm_controlMatrix_vertex_neg {X : Mat2} (hX : IsStarState X) (k : Fin 3) :
     traceForm X (controlMatrix (vertex k)) < 0 := by
   obtain ⟨h0, h1, h2⟩ := traceForm_controlMatrix_vertex hX.1
-  have hs : 0 < 2 / √3 := div_pos two_pos n4b_sqrt3_pos
+  have hs : 0 < 2 / √3 := div_pos two_pos sqrt_three_pos
   obtain ⟨-, -, hρ₀, hρ₁, hρ₂⟩ := hX
   fin_cases k
   · simp only [Fin.zero_eta, h0]; nlinarith
   · simp only [Fin.mk_one, h1]; nlinarith
   · simp only [Fin.reduceFinMk, h2]; nlinarith
 
-private lemma n4b_switchingNum_eq_mul (i j : Fin 3) {q : iso_PhasePt} (hX : IsStarState q.1) :
+private lemma switchingNum_eq_switchingFn_mul_pos (i j : Fin 3) {q : iso_PhasePt}
+    (hX : IsStarState q.1) :
     switchingNum i j q = switchingFn i j q.2.2 q.1 *
       (traceForm q.1 (controlMatrix (vertex i)) * traceForm q.1 (controlMatrix (vertex j))) ∧
     0 < traceForm q.1 (controlMatrix (vertex i)) * traceForm q.1 (controlMatrix (vertex j)) :=
-  ⟨switchingNum_eq i j q (n4b_traceForm_vertex_neg hX i).ne (n4b_traceForm_vertex_neg hX j).ne,
-    mul_pos_of_neg_of_neg (n4b_traceForm_vertex_neg hX i) (n4b_traceForm_vertex_neg hX j)⟩
+  ⟨switchingNum_eq i j q (traceForm_controlMatrix_vertex_neg hX i).ne
+      (traceForm_controlMatrix_vertex_neg hX j).ne,
+    mul_pos_of_neg_of_neg (traceForm_controlMatrix_vertex_neg hX i)
+      (traceForm_controlMatrix_vertex_neg hX j)⟩
 
 /-- In the star domain `χ_ij > 0` iff `N_ij > 0` (the factor `⟨X, Z_i⟩⟨X, Z_j⟩` is positive by
 (1.1)). -/
 theorem switchingFn_pos_iff (i j : Fin 3) {q : iso_PhasePt} (hX : IsStarState q.1) :
     0 < switchingFn i j q.2.2 q.1 ↔ 0 < switchingNum i j q := by
-  obtain ⟨he, hp⟩ := n4b_switchingNum_eq_mul i j hX
+  obtain ⟨he, hp⟩ := switchingNum_eq_switchingFn_mul_pos i j hX
   rw [he, mul_pos_iff_of_pos_right hp]
 
 /-- In the star domain `χ_ij < 0` iff `N_ij < 0`. -/
 theorem switchingFn_neg_iff (i j : Fin 3) {q : iso_PhasePt} (hX : IsStarState q.1) :
     switchingFn i j q.2.2 q.1 < 0 ↔ switchingNum i j q < 0 := by
-  obtain ⟨he, hp⟩ := n4b_switchingNum_eq_mul i j hX
+  obtain ⟨he, hp⟩ := switchingNum_eq_switchingFn_mul_pos i j hX
   rw [he]
   exact ⟨fun h ↦ mul_neg_of_neg_of_pos h hp, fun h ↦ by
     by_contra h'
@@ -327,7 +330,7 @@ theorem switchingFn_neg_iff (i j : Fin 3) {q : iso_PhasePt} (hX : IsStarState q.
 /-- In the star domain `χ_ij = 0` iff `N_ij = 0`. -/
 theorem switchingFn_eq_zero_iff (i j : Fin 3) {q : iso_PhasePt} (hX : IsStarState q.1) :
     switchingFn i j q.2.2 q.1 = 0 ↔ switchingNum i j q = 0 := by
-  obtain ⟨he, hp⟩ := n4b_switchingNum_eq_mul i j hX
+  obtain ⟨he, hp⟩ := switchingNum_eq_switchingFn_mul_pos i j hX
   rw [he, mul_eq_zero, or_iff_left hp.ne']
 
 /-! ### (1.3) and the frame of the initial state -/
@@ -347,7 +350,7 @@ theorem one_lt_arcY' (hX : IsStarState q.1) : 1 < arcY' q := by
   linarith
 
 /-- `ε Y = ε + ρ₂` and `ε Y' = ε + ρ₀`. -/
-private lemma n4b_arcEps_mul (hε : ρ₁ q.1 ≠ 0) :
+private lemma arcEps_mul_arcY_and_arcY' (hε : ρ₁ q.1 ≠ 0) :
     arcEps q * arcY q = arcEps q + ρ₂ q.1 ∧ arcEps q * arcY' q = arcEps q + ρ₀ q.1 := by
   unfold arcEps arcY arcY'
   constructor <;> field_simp
@@ -355,7 +358,7 @@ private lemma n4b_arcEps_mul (hε : ρ₁ q.1 ≠ 0) :
 /-- **(1.3)**: `ε² Y Y' = 1 + ε²`. -/
 theorem arcEps_sq_mul_arcY_mul_arcY' (hX : IsStarState q.1) :
     arcEps q ^ 2 * arcY q * arcY' q = 1 + arcEps q ^ 2 := by
-  obtain ⟨h1, h2⟩ := n4b_arcEps_mul hX.2.2.2.1.ne'
+  obtain ⟨h1, h2⟩ := arcEps_mul_arcY_and_arcY' hX.2.2.2.1.ne'
   have hd := ρ_mul_add hX.1
   rw [hX.2.1] at hd
   have : arcEps q ^ 2 * arcY q * arcY' q = (arcEps q * arcY q) * (arcEps q * arcY' q) := by ring
@@ -368,9 +371,9 @@ theorem arcEps_sq_mul_arcY_mul_arcY' (hX : IsStarState q.1) :
 theorem frame_state (hX : IsStarState q.1) :
     frameH q.1 = -arcEps q ∧ frameE q.1 = -2 * arcEps q * arcY q ∧
       frameF q.1 = arcEps q * arcY' q / 2 ∧ frameE q.1 * frameF q.1 = -(1 + arcEps q ^ 2) := by
-  obtain ⟨h1, h2⟩ := n4b_arcEps_mul hX.2.2.2.1.ne'
-  have := n4b_sqrt3_ne
-  have h3 := n4b_sqrt3_sq
+  obtain ⟨h1, h2⟩ := arcEps_mul_arcY_and_arcY' hX.2.2.2.1.ne'
+  have := sqrt_three_ne_zero
+  have h3 := sq_sqrt_three
   have hH : frameH q.1 = -arcEps q := by
     simp only [frameH, arcEps, ρ₁]; field_simp; ring
   have hE : frameE q.1 = -2 * arcEps q * arcY q := by
@@ -386,8 +389,8 @@ theorem frame_state (hX : IsStarState q.1) :
 `X₀` with `ρ₁(X₀) ≠ 0` (`ρ₀ - ρ₁ = 2 X₁₁` needs no trace condition). -/
 theorem X00_eq_arcRadius (hε : ρ₁ q.1 ≠ 0) :
     q.1 0 0 = arcEps q * (arcY' q - 2) / 2 := by
-  have h2 := (n4b_arcEps_mul hε).2
-  have := n4b_sqrt3_ne
+  have h2 := (arcEps_mul_arcY_and_arcY' hε).2
+  have := sqrt_three_ne_zero
   rw [mul_sub, h2]
   simp only [arcEps, ρ₁, ρ₀]
   field_simp
@@ -405,7 +408,7 @@ theorem state_eq_ofFrame (hX : IsStarState q.1) :
 theorem iso_vfP_one_eq (hX : IsStarState q.1) :
     iso_vfP 1 q = ofFrame (-(1 / (2 * arcEps q))) 0 0 := by
   have hε := (arcEps_pos hX).ne'
-  have := n4b_sqrt3_ne
+  have := sqrt_three_ne_zero
   have hc : traceForm (controlMatrix (vertex 1)) q.1 = -(2 / √3) * arcEps q := by
     rw [traceForm, Matrix.trace_mul_comm, ← traceForm]
     exact (traceForm_controlMatrix_vertex hX.1).2.1
@@ -417,7 +420,7 @@ theorem iso_vfP_one_eq (hX : IsStarState q.1) :
 /-- **Proposition 1.1 (1)**: `P² = ω² I`. -/
 theorem iso_vfP_one_mul_self (hX : IsStarState q.1) :
     iso_vfP 1 q * iso_vfP 1 q = (1 / (2 * arcEps q)) ^ 2 • (1 : Mat2) := by
-  have := n4b_sqrt3_ne
+  have := sqrt_three_ne_zero
   rw [iso_vfP_one_eq hX]
   ext i j; fin_cases i <;> fin_cases j <;> simp [ofFrame, Matrix.mul_apply] <;> ring
 
@@ -454,13 +457,13 @@ theorem exp_smul_iso_vfP_one (hX : IsStarState q.1) (t : ℝ) :
   field_simp
 
 /-- `e^{tP} = [[e^{-ωt}, (e^{ωt} - e^{-ωt})/√3], [0, e^{ωt}]]`, `ω = 1/(2ε)`. -/
-private lemma n4b_exp_smul_eq (hX : IsStarState q.1) (t : ℝ) :
+private lemma exp_smul_iso_vfP_one_eq_entries (hX : IsStarState q.1) (t : ℝ) :
     NormedSpace.exp (t • iso_vfP 1 q) =
       !![Real.exp (-(t / (2 * arcEps q))),
         (Real.exp (t / (2 * arcEps q)) - Real.exp (-(t / (2 * arcEps q)))) / √3;
         0, Real.exp (t / (2 * arcEps q))] := by
   have hε := (arcEps_pos hX).ne'
-  have := n4b_sqrt3_ne
+  have := sqrt_three_ne_zero
   rw [exp_smul_iso_vfP_one hX, iso_vfP_one_eq hX, Real.cosh_eq, Real.sinh_eq]
   ext i j; fin_cases i <;> fin_cases j <;> simp [ofFrame] <;> field_simp <;> ring
 
@@ -470,8 +473,8 @@ theorem exp_conj_ofFrame (hX : IsStarState q.1) (t h e f : ℝ) :
     NormedSpace.exp (t • iso_vfP 1 q) * ofFrame h e f * NormedSpace.exp (-t • iso_vfP 1 q) =
       ofFrame h (Real.exp (-t / arcEps q) * e) (Real.exp (t / arcEps q) * f) := by
   have hε := (arcEps_pos hX).ne'
-  have := n4b_sqrt3_ne
-  rw [n4b_exp_smul_eq hX, n4b_exp_smul_eq hX, neg_div, neg_neg]
+  have := sqrt_three_ne_zero
+  rw [exp_smul_iso_vfP_one_eq_entries hX, exp_smul_iso_vfP_one_eq_entries hX, neg_div, neg_neg]
   have e1 : Real.exp (t / arcEps q) = Real.exp (t / (2 * arcEps q)) ^ 2 := by
     rw [sq, ← Real.exp_add]; congr 1; field_simp; ring
   have e2 : Real.exp (-t / arcEps q) = (Real.exp (t / (2 * arcEps q)) ^ 2)⁻¹ := by
@@ -571,9 +574,9 @@ theorem iso_vfX_one_Φ (hX : IsStarState q.1) {x y : ℝ} (hy : 0 < y) (hq : q.1
     iso_vfX 1 q t = Φ (1 / √3 + Real.exp (-t / arcEps q) * (x - 1 / √3))
       (Real.exp (-t / arcEps q) * y) := by
   have hε := (arcEps_pos hX).ne'
-  obtain ⟨h1, h2⟩ := n4b_arcEps_mul hε
-  have := n4b_sqrt3_ne
-  have h3 := n4b_sqrt3_sq
+  obtain ⟨h1, h2⟩ := arcEps_mul_arcY_and_arcY' hε
+  have := sqrt_three_ne_zero
+  have h3 := sq_sqrt_three
   have hy' := hy.ne'
   rw [iso_vfX_one_eq hX, mul_assoc (-2 : ℝ), h1, h2,
     show Real.exp (t / arcEps q) = (Real.exp (-t / arcEps q))⁻¹ by

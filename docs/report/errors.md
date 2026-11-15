@@ -2130,7 +2130,7 @@ numerical facts of Theorem 16.1.1 suffice (Section 7).
   (TeX 11931–11932).
 - **Here:** the formalization needs neither: N4 is stated on the local curve, for the forward
   orbits of the Reinhardt–Poincaré map, and its proof shows that `r` increases along every orbit in
-  `𝒢*` ([`radius_lt_of_mem_arcRegion`](../../SmoothedPolygons/Ch14/ArcConditions.lean#L408); E88).
+  `𝒢*` ([`radius_lt_of_mem_arcRegion`](../../SmoothedPolygons/Ch14/ArcConditions.lean#L409); E88).
 
 ### E94
 
@@ -2220,5 +2220,5 @@ states them:
 
 The lemmas of the proof of N4 (E88), which are not results of the book, are stated without the
 hypotheses that their proofs turned out not to need: for instance INV Proposition 3
-([`ArcParams.Phi_nonpos`](../../SmoothedPolygons/Ch14/ArcStepRegion.lean#L360)), whose written proof assumes `f₀ ≥ 0`, needs no sign of `f₀`, since the
+([`ArcParams.Phi_nonpos`](../../SmoothedPolygons/Ch14/ArcStepRegion.lean#L361)), whose written proof assumes `f₀ ≥ 0`, needs no sign of `f₀`, since the
 terms in `f₀` cancel in its identity (Section 7).

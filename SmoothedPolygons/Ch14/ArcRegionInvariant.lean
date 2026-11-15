@@ -75,8 +75,8 @@ INV Propositions 2–5, INV Lemma 6 and INV Theorem 2, in that order):
 ## Proofs (the route, Theorem 5.2)
 
 1. `ArcRegionInvariant.reachesStarBoundary`, by induction on a natural number `n > ρ₁(q)/r(q)`
-   (`n4h_reach`: the statement for all `q ∈ 𝒢*` with `ρ₁(q)/r(q) < n`). Let `q ∈ 𝒢*`; it has P1
-   and P4, so `SwitchEntersE2 q` (`switchEntersE2_of_arc`).
+   (`reachesStarBoundary_of_lt_nat`: the statement for all `q ∈ 𝒢*` with `ρ₁(q)/r(q) < n`).
+   Let `q ∈ 𝒢*`; it has P1 and P4, so `SwitchEntersE2 q` (`switchEntersE2_of_arc`).
    * If `F(log Y) ≥ 0`: `ArcLeavesStarDomain q` (`arcLeavesStarDomain_of_arc`); take `K = 0`.
    * If `F(log Y) < 0`: `ArcSwitchesToE1 q` (`arcSwitchesToE1_of_arc`); `F q` is a section point
      with P1, P4, `r > 0` (`arc_propagation`), so `SwitchEntersE2 (F q)`. By (INV), either
@@ -157,7 +157,7 @@ def ArcRegionInvariant : Prop :=
 
 /-- The induction of `ArcRegionInvariant.reachesStarBoundary` (Corollary 2.4): every
 point of `𝒢*` with `ρ₁(q)/r(q) < n` reaches the boundary of the star domain. -/
-private theorem n4h_reach (h : ArcRegionInvariant) :
+private theorem reachesStarBoundary_of_lt_nat (h : ArcRegionInvariant) :
     ∀ n : ℕ, ∀ q ∈ arcRegion, ρ₁ q.1 / q.1 0 0 < n → ReachesStarBoundary q := by
   intro n
   induction n with
@@ -221,7 +221,7 @@ it switches cyclically for finitely many steps (the radii increase and sum to le
 theorem ArcRegionInvariant.reachesStarBoundary (h : ArcRegionInvariant) {q : iso_PhasePt}
     (hq : q ∈ arcRegion) : ReachesStarBoundary q := by
   obtain ⟨n, hn⟩ := exists_nat_gt (ρ₁ q.1 / q.1 0 0)
-  exact n4h_reach h n q hq hn
+  exact reachesStarBoundary_of_lt_nat h n q hq hn
 
 /-- **Theorem 5.2** (§5.2): **(INV) implies N4** (`fig:unstable-curve`), the numerical fact behind
 Theorem 14.4.1 (`UnstableCurveLeavesStarDomain`, Figure 14.2). Departure from the paper (the
@@ -235,7 +235,7 @@ theorem unstableCurveLeavesStarDomain_of_arcRegionInvariant (h : ArcRegionInvari
   obtain ⟨y, hy0, hy, -⟩ := hp
   have hpV : p ∈ V := hy0 ▸ (hy 0).1
   obtain ⟨n, hn⟩ := exists_nat_gt (ρ₁ (lieChart p).1 / (lieChart p).1 0 0)
-  exact n4h_reach h n _ (hVr p hpV hp1) hn
+  exact reachesStarBoundary_of_lt_nat h n _ (hVr p hpV hp1) hn
 
 /-- **(INV), sharp form** (INV Theorem 2). Let `q ∈ 𝒢*` with `F(log Y) < 0` (the
 arc switches inside the star domain) and `s = e^{τ_sw}`. Then `F(q) = reinPoincare q` is a section

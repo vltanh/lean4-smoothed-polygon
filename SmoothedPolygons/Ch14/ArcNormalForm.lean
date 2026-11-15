@@ -96,38 +96,38 @@ variable {q : iso_PhasePt}
 
 /-! ### Helpers: the trace form, the frame of the state, the closed forms of `φ_e`, `φ_f` -/
 
-private lemma n4d_traceForm_add_smul (A B C : Mat2) (c : ℝ) :
+private lemma traceForm_add_smul_left (A B C : Mat2) (c : ℝ) :
     traceForm (A + c • B) C = traceForm A C + c * traceForm B C := by
   simp only [traceForm, Matrix.add_mul, Matrix.smul_mul, Matrix.trace_add, Matrix.trace_smul,
     smul_eq_mul]
 
-private lemma n4d_traceForm_smul_right (A B : Mat2) (c : ℝ) :
+private lemma traceForm_smul_right (A B : Mat2) (c : ℝ) :
     traceForm A (c • B) = c * traceForm A B := by
   simp only [traceForm, Matrix.mul_smul, Matrix.trace_smul, smul_eq_mul]
 
-private lemma n4d_traceForm_comm (A B : Mat2) : traceForm A B = traceForm B A := by
+private lemma traceForm_comm (A B : Mat2) : traceForm A B = traceForm B A := by
   simp only [traceForm]
   exact Matrix.trace_mul_comm A B
 
 /-- `⟨J, V_e⟩` in the frame ((1.2)). -/
-private lemma n4d_traceForm_J_arcVe (q : iso_PhasePt) :
+private lemma traceForm_J_arcVe (q : iso_PhasePt) :
     traceForm J (arcVe q.1) = 2 * -(1 / √3) * frameE q.1 + -(4 / √3) * arcEps q +
       1 / √3 * (-frameE q.1 ^ 2 / arcEps q) := by
   rw [frame_controlMatrix.2.2.2]
   exact traceForm_ofFrame _ _ _ _ _ _
 
 /-- `⟨J, V_f⟩` in the frame ((1.2)). -/
-private lemma n4d_traceForm_J_arcVf (q : iso_PhasePt) :
+private lemma traceForm_J_arcVf (q : iso_PhasePt) :
     traceForm J (arcVf q.1) = 2 * -(1 / √3) * frameF q.1 +
       -(4 / √3) * (-frameF q.1 ^ 2 / arcEps q) + 1 / √3 * arcEps q := by
   rw [frame_controlMatrix.2.2.2]
   exact traceForm_ofFrame _ _ _ _ _ _
 
-private lemma n4d_hasDerivAt_exp_div (ε t : ℝ) :
+private lemma hasDerivAt_exp_div (ε t : ℝ) :
     HasDerivAt (fun t ↦ Real.exp (t / ε)) (Real.exp (t / ε) / ε) t := by
   exact (((hasDerivAt_id' t).div_const ε).exp).congr_deriv (by ring)
 
-private lemma n4d_hasDerivAt_exp_neg_div (ε t : ℝ) :
+private lemma hasDerivAt_exp_neg_div (ε t : ℝ) :
     HasDerivAt (fun t ↦ Real.exp (-t / ε)) (-(Real.exp (-t / ε) / ε)) t := by
   exact (((hasDerivAt_neg' t).div_const ε).exp).congr_deriv (by ring)
 
@@ -135,7 +135,7 @@ private lemma n4d_hasDerivAt_exp_neg_div (ε t : ℝ) :
 `traceForm_iso_vfM_arcVe`, `φ_e(t) = φ_e(0) - 2ε(1 - u) L_e + √3(2x_e t + x_e²(1 - u) +
 4ε²(u⁻¹ - 1))`, `u = e^{-t/ε}`, `L_e = ⟨Λ₁(0), V_e⟩` (the fundamental theorem of calculus: the
 difference has derivative `0`). -/
-private lemma n4d_arcPhiE_eq (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) = 0) (t : ℝ) :
+private lemma arcPhiE_eq (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) = 0) (t : ℝ) :
     arcPhiE q t = arcPhiE q 0 - 2 * arcEps q * (1 - Real.exp (-t / arcEps q)) *
         traceForm q.2.1 (arcVe q.1) +
       √3 * (2 * frameE q.1 * t + frameE q.1 ^ 2 * (1 - Real.exp (-t / arcEps q)) +
@@ -150,8 +150,8 @@ private lemma n4d_arcPhiE_eq (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) 
     intro t
     have h1 := (hasDerivAt_arcPhi hX hH t).1
     rw [traceForm_iso_vfM_arcVe hX t, ← hεdef, ← hL, ← hx] at h1
-    have hu := n4d_hasDerivAt_exp_neg_div ε t
-    have hv := n4d_hasDerivAt_exp_div ε t
+    have hu := hasDerivAt_exp_neg_div ε t
+    have hv := hasDerivAt_exp_div ε t
     have h21 := (hasDerivAt_const t (arcPhiE q 0)).sub
       ((((hasDerivAt_const t (1 : ℝ)).sub hu).const_mul (2 * ε)).mul_const L)
     have h22 := (((hasDerivAt_id' t).const_mul (2 * x)).add
@@ -170,7 +170,7 @@ private lemma n4d_arcPhiE_eq (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) 
 
 /-- **`φ_f` in closed form** (proof of Theorem 1.3): `φ_f(t) = φ_f(0) + 2ε(u⁻¹ - 1) L_f +
 √3(-2x_f t + ε²(1 - u) + 4x_f²(u⁻¹ - 1))`, `L_f = ⟨Λ₁(0), V_f⟩`. -/
-private lemma n4d_arcPhiF_eq (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) = 0) (t : ℝ) :
+private lemma arcPhiF_eq (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) = 0) (t : ℝ) :
     arcPhiF q t = arcPhiF q 0 + 2 * arcEps q * (Real.exp (t / arcEps q) - 1) *
         traceForm q.2.1 (arcVf q.1) +
       √3 * (-2 * frameF q.1 * t + arcEps q ^ 2 * (1 - Real.exp (-t / arcEps q)) +
@@ -185,8 +185,8 @@ private lemma n4d_arcPhiF_eq (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) 
     intro t
     have h1 := (hasDerivAt_arcPhi hX hH t).2
     rw [traceForm_iso_vfM_arcVf hX t, ← hεdef, ← hL, ← hx] at h1
-    have hu := n4d_hasDerivAt_exp_neg_div ε t
-    have hv := n4d_hasDerivAt_exp_div ε t
+    have hu := hasDerivAt_exp_neg_div ε t
+    have hv := hasDerivAt_exp_div ε t
     have h21 := (hasDerivAt_const t (arcPhiF q 0)).add
       (((hv.sub (hasDerivAt_const t (1 : ℝ))).const_mul (2 * ε)).mul_const L)
     have h22 := (((hasDerivAt_id' t).const_mul (-2 * x)).add
@@ -246,9 +246,9 @@ theorem arc_normalForm (hX : IsStarState q.1) (hR : q.2.2.trace = 0)
     rw [sq, ← Real.exp_add]; congr 1; ring
   constructor
   · -- `N₂₁`: the four terms `-1`, `Y τ u`, `B u²`, `A u`
-    rw [hN.1, n4d_arcPhiE_eq hX hH t]
+    rw [hN.1, arcPhiE_eq hX hH t]
     simp only [ArcParams.f, ArcParams.A, ArcParams.B, arcParams, arcF0, arcQ, hN0.1,
-      n4d_traceForm_add_smul, n4d_traceForm_J_arcVe, hu1, hu2, hxe]
+      traceForm_add_smul_left, traceForm_J_arcVe, hu1, hu2, hxe]
     generalize Real.exp (-t / arcEps q) = u at huv ⊢
     generalize Real.exp (t / arcEps q) = v at huv ⊢
     set e := arcEps q
@@ -258,9 +258,9 @@ theorem arc_normalForm (hX : IsStarState q.1) (hR : q.2.2.trace = 0)
     field_simp
     ring
   · -- `N₂₃`: the four terms `-1`, `-Y' τ u⁻¹`, `B' u⁻²`, `A' u⁻¹`
-    rw [hN.2, n4d_arcPhiF_eq hX hH t]
+    rw [hN.2, arcPhiF_eq hX hH t]
     simp only [ArcParams.g, ArcParams.A', ArcParams.B', arcParams_Y' hX]
-    simp only [arcParams, arcG0, arcP, hN0.2, n4d_traceForm_add_smul, n4d_traceForm_J_arcVf, hv2,
+    simp only [arcParams, arcG0, arcP, hN0.2, traceForm_add_smul_left, traceForm_J_arcVf, hv2,
       hxf]
     generalize Real.exp (-t / arcEps q) = u at huv ⊢
     generalize Real.exp (t / arcEps q) = v at huv ⊢
@@ -292,10 +292,10 @@ theorem frame_section_costateR (hq : IsArcSectionPt q) :
   -- the three linear conditions of the section
   have tv := traceForm_controlMatrix_vertex hX.1
   have hd1 : traceForm (controlMatrix (vertex 1)) q.1 ≠ 0 := by
-    rw [n4d_traceForm_comm, tv.2.1]
+    rw [traceForm_comm, tv.2.1]
     exact mul_ne_zero (neg_ne_zero.mpr (by positivity)) hX.2.2.2.1.ne'
   have hd2 : traceForm (controlMatrix (vertex 2)) q.1 ≠ 0 := by
-    rw [n4d_traceForm_comm, tv.2.2]
+    rw [traceForm_comm, tv.2.2]
     exact mul_ne_zero (neg_ne_zero.mpr (by positivity)) hX.2.2.1.ne'
   have hP2 : traceForm q.2.2 (controlP (vertex 2) q.1) = h₀ := by
     have := hamiltonian_eq_traceForm_sub q.2.1 q.2.2 q.1 (vertex 2)
@@ -312,7 +312,7 @@ theorem frame_section_costateR (hq : IsArcSectionPt q) :
       traceForm q.2.2 (controlMatrix (vertex k)) =
         h₀ * traceForm (controlMatrix (vertex k)) q.1 := by
     intro k hd h
-    rw [controlP, n4d_traceForm_smul_right] at h
+    rw [controlP, traceForm_smul_right] at h
     rw [← h]
     field_simp
   have e1 := hk 1 hd1 hP1

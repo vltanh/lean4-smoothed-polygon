@@ -104,24 +104,24 @@ variable {q : iso_PhasePt}
 
 /-! ### Helpers: `Λ̂₀` and `Λ₁` in the frame -/
 
-private lemma n4d_ofFrame_sub_smul (a b c a' b' c' r : ℝ) :
+private lemma ofFrame_sub_smul_ofFrame (a b c a' b' c' r : ℝ) :
     ofFrame a b c - r • ofFrame a' b' c' = ofFrame (a - r * a') (b - r * b') (c - r * c') := by
   ext i j
   fin_cases i <;> fin_cases j <;> simp [ofFrame] <;> ring
 
-private lemma n4d_arcVe_eq (q : iso_PhasePt) :
+private lemma arcVe_eq_ofFrame_arcEps (q : iso_PhasePt) :
     arcVe q.1 = ofFrame (frameE q.1) (-frameE q.1 ^ 2 / arcEps q) (arcEps q) := rfl
 
-private lemma n4d_arcVf_eq (q : iso_PhasePt) :
+private lemma arcVf_eq_ofFrame_arcEps (q : iso_PhasePt) :
     arcVf q.1 = ofFrame (frameF q.1) (arcEps q) (-frameF q.1 ^ 2 / arcEps q) := rfl
 
 /-- `Λ̂₀ = Λ₁(0) + (3/2) J` is traceless when `Λ₁(0)` is. -/
-private lemma n4d_trace_reducedCostate (hL : q.2.1.trace = 0) :
+private lemma trace_add_three_halves_smul_J_eq_zero (hL : q.2.1.trace = 0) :
     (q.2.1 + (3 / 2 : ℝ) • J).trace = 0 := by
   simp [Matrix.trace_add, hL, J, Matrix.trace_fin_two]
 
 /-- `Y' = (1 + ε²)/(ε² Y)` ((1.3)). -/
-private lemma n4d_arcY'_eq (hX : IsStarState q.1) :
+private lemma arcY'_eq_one_add_sq_div (hX : IsStarState q.1) :
     arcY' q = (1 + arcEps q ^ 2) / (arcEps q ^ 2 * arcY q) := by
   rw [← arcParams_Y' hX]
   rfl
@@ -147,12 +147,12 @@ theorem frame_reducedCostate (hq : IsArcSectionPt q) :
   have hs0 : √3 ≠ 0 := by positivity
   obtain ⟨-, hxe, hxf, -⟩ := frame_state hX
   obtain ⟨lh, le, lf, hΛ⟩ : ∃ a b c, q.2.1 + (3 / 2 : ℝ) • J = ofFrame a b c :=
-    ⟨_, _, _, (ofFrame_frame (n4d_trace_reducedCostate hq.1.1.2.1)).symm⟩
+    ⟨_, _, _, (ofFrame_frame (trace_add_three_halves_smul_J_eq_zero hq.1.1.2.1)).symm⟩
   rw [arcF0_eq_reducedHam hq]
   unfold arcQ arcP reducedHam
-  rw [hΛ, n4d_arcVe_eq, n4d_arcVf_eq, hxe, hxf, state_eq_ofFrame hX]
+  rw [hΛ, arcVe_eq_ofFrame_arcEps, arcVf_eq_ofFrame_arcEps, hxe, hxf, state_eq_ofFrame hX]
   simp only [traceForm_ofFrame, frameH_ofFrame, frameE_ofFrame, frameF_ofFrame]
-  rw [n4d_arcY'_eq hX]
+  rw [arcY'_eq_one_add_sq_div hX]
   set e := arcEps q
   set Y := arcY q
   refine ⟨?_, ?_, ?_⟩
@@ -187,17 +187,17 @@ theorem arcParams_rel_identity (hX : IsStarState q.1) (hL : q.2.1.trace = 0) :
   have hs0 : √3 ≠ 0 := by positivity
   obtain ⟨-, hxe, hxf, -⟩ := frame_state hX
   obtain ⟨lh, le, lf, hΛ⟩ : ∃ a b c, q.2.1 + (3 / 2 : ℝ) • J = ofFrame a b c :=
-    ⟨_, _, _, (ofFrame_frame (n4d_trace_reducedCostate hL)).symm⟩
+    ⟨_, _, _, (ofFrame_frame (trace_add_three_halves_smul_J_eq_zero hL)).symm⟩
   -- `Λ₁ = Λ̂₀ - (3/2) J` in the frame
   have hdet : q.2.1.det = -((lh - 3 / 2 * -(1 / √3)) ^ 2 +
       (le - 3 / 2 * -(4 / √3)) * (lf - 3 / 2 * (1 / √3))) := by
-    rw [eq_sub_of_add_eq hΛ, frame_controlMatrix.2.2.2, n4d_ofFrame_sub_smul, det_ofFrame]
+    rw [eq_sub_of_add_eq hΛ, frame_controlMatrix.2.2.2, ofFrame_sub_smul_ofFrame, det_ofFrame]
   rw [hdet]
   simp only [ArcParams.rel]
   unfold arcQ arcP reducedHam
-  rw [hΛ, n4d_arcVe_eq, n4d_arcVf_eq, hxe, hxf, state_eq_ofFrame hX]
+  rw [hΛ, arcVe_eq_ofFrame_arcEps, arcVf_eq_ofFrame_arcEps, hxe, hxf, state_eq_ofFrame hX]
   simp only [traceForm_ofFrame]
-  rw [n4d_arcY'_eq hX]
+  rw [arcY'_eq_one_add_sq_div hX]
   set e := arcEps q
   set Y := arcY q
   -- the cofactor `K/(36ε⁴s²) - (4Y²/3) K₂` of `s² - 3` (module docstring)
@@ -236,9 +236,9 @@ theorem arcParams_injOn : Set.InjOn arcParams {q | IsArcSectionPt q} := by
     have e1 := frame_reducedCostate hq
     have e2 := frame_reducedCostate hq'
     have hΛ : q.2.1 + (3 / 2 : ℝ) • J = q'.2.1 + (3 / 2 : ℝ) • J := by
-      rw [← ofFrame_frame (n4d_trace_reducedCostate hq.1.1.2.1),
-        ← ofFrame_frame (n4d_trace_reducedCostate hq'.1.1.2.1), e1.1, e1.2.1, e1.2.2, e2.1,
-        e2.2.1, e2.2.2, hε, hY, hf, hqq, hp]
+      rw [← ofFrame_frame (trace_add_three_halves_smul_J_eq_zero hq.1.1.2.1),
+        ← ofFrame_frame (trace_add_three_halves_smul_J_eq_zero hq'.1.1.2.1), e1.1, e1.2.1, e1.2.2,
+        e2.1, e2.2.1, e2.2.2, hε, hY, hf, hqq, hp]
     exact add_right_cancel hΛ
   -- `Λ_R` by the linear conditions of the section (`frame_section_costateR`)
   have hR : q.2.2 = q'.2.2 := by

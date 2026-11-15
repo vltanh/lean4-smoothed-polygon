@@ -48,7 +48,8 @@ In `x = Y - 2`, `y = Y' - 2`, `z = s - Y + 1`, `w = 1 - z` (so `Y = 2 + x`, `Y' 
 
 /-- The Bernstein form of `τ_q` in `z, w` (`w = 1 - z`): the lists of `ArcParams.qNew_le_f0New`,
 each coefficient written `C(n, k) * β_k`. -/
-private theorem n4h_bern_tq (x y z w : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z) (hw : 0 ≤ w) :
+private theorem tauQ_bernstein_nonneg (x y z w : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z)
+    (hw : 0 ≤ w) :
     0 ≤
       (2 * w ^ 4 + 4 * 4 * z * w ^ 3 + 6 * 8 * z ^ 2 * w ^ 2 + 4 * 14 * z ^ 3 * w + 18 * z ^ 4) +
       y * (4 * w ^ 4 + 4 * (15 / 2) * z * w ^ 3 + 6 * 13 * z ^ 2 * w ^ 2 + 4 * 20 * z ^ 3 * w +
@@ -67,7 +68,7 @@ private theorem n4h_bern_tq (x y z w : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 
   positivity
 
 /-- The Bernstein form of `U` in `z, w` (`w = 1 - z`), the terms `x^i y^j` with `i ≤ 1`. -/
-private theorem n4h_bern_U₀ (x y z w : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z)
+private theorem U_bernstein_nonneg₀ (x y z w : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z)
     (hw : 0 ≤ w) :
     0 ≤
       (6 * 1 * z * w ^ 5 + 15 * (56 / 15) * z ^ 2 * w ^ 4 + 20 * (48 / 5) * z ^ 3 * w ^ 3 +
@@ -87,7 +88,7 @@ private theorem n4h_bern_U₀ (x y z w : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) (hz 
   positivity
 
 /-- The Bernstein form of `U` in `z, w` (`w = 1 - z`), the terms `x^i y^j` with `i ≥ 2`. -/
-private theorem n4h_bern_U₁ (x y z w : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z)
+private theorem U_bernstein_nonneg₁ (x y z w : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z)
     (hw : 0 ≤ w) :
     0 ≤
       x ^ 2 * (20 * w ^ 4 + 4 * (89 / 2) * z * w ^ 3 + 6 * 83 * z ^ 2 * w ^ 2 +
@@ -111,19 +112,20 @@ private theorem n4h_bern_U₁ (x y z w : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) (hz 
 
 /-- INV §5: `τ_q = -Y' s (s - 1) N_Y + Y (Y' s - 1)(Y' s² - 1) ≥ 0` for `Y, Y' ≥ 2`,
 `Y - 1 ≤ s ≤ Y` (the Bernstein certificate in `z ∈ [0, 1]`). -/
-private theorem n4h_tq_nonneg {Y Y' s : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤ Y' - 2)
+private theorem tauQ_nonneg {Y Y' s : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤ Y' - 2)
     (hs1 : Y - 1 ≤ s) (hs2 : s ≤ Y) :
     0 ≤ -Y' * s * (s - 1) * (Y' * s ^ 2 - 2 * s + Y) + Y * (Y' * s - 1) * (Y' * s ^ 2 - 1) := by
   obtain ⟨x, rfl⟩ : ∃ x, Y = 2 + x := ⟨Y - 2, by ring⟩
   obtain ⟨y, rfl⟩ : ∃ y, Y' = 2 + y := ⟨Y' - 2, by ring⟩
   obtain ⟨z, rfl⟩ : ∃ z, s = 1 + x + z := ⟨s - 1 - x, by ring⟩
-  have := n4h_bern_tq x y z (1 - z) (by linarith) (by linarith) (by linarith) (by linarith)
+  have := tauQ_bernstein_nonneg x y z (1 - z) (by linarith) (by linarith) (by linarith)
+    (by linarith)
   linarith
 
 /-- INV §5: `U = s (s + 1) T₀' + τ_f (s - 1) z - s τ_q z ≥ 0` for `Y, Y' ≥ 2`,
 `Y - 1 ≤ s ≤ Y`, with `T₀' = s (YY' - Y - Y')(s - 1) N_Y - Y (Y' s - 1) φ(s)` and
 `τ_f = Y' s² (Y' s - 2)(s - Y)` (the Bernstein certificate in `z ∈ [0, 1]`). -/
-private theorem n4h_U_nonneg {Y Y' s : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤ Y' - 2)
+private theorem U_nonneg {Y Y' s : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤ Y' - 2)
     (hs1 : Y - 1 ≤ s) (hs2 : s ≤ Y) :
     0 ≤ s * (s + 1) * (s * (Y * Y' - Y - Y') * (s - 1) * (Y' * s ^ 2 - 2 * s + Y) -
         Y * (Y' * s - 1) * ((Y' - 1) * s ^ 3 - (2 * Y' + 1) * s ^ 2 + (2 * Y + 1) * s - (Y - 1))) +
@@ -133,8 +135,8 @@ private theorem n4h_U_nonneg {Y Y' s : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤ Y' - 
   obtain ⟨x, rfl⟩ : ∃ x, Y = 2 + x := ⟨Y - 2, by ring⟩
   obtain ⟨y, rfl⟩ : ∃ y, Y' = 2 + y := ⟨Y' - 2, by ring⟩
   obtain ⟨z, rfl⟩ : ∃ z, s = 1 + x + z := ⟨s - 1 - x, by ring⟩
-  have := n4h_bern_U₀ x y z (1 - z) (by linarith) (by linarith) (by linarith) (by linarith)
-  have := n4h_bern_U₁ x y z (1 - z) (by linarith) (by linarith) (by linarith) (by linarith)
+  have := U_bernstein_nonneg₀ x y z (1 - z) (by linarith) (by linarith) (by linarith) (by linarith)
+  have := U_bernstein_nonneg₁ x y z (1 - z) (by linarith) (by linarith) (by linarith) (by linarith)
   linarith
 
 /-- INV Proposition 5 in the log-free form: `T_b = s Ψ(s) N_Y - Y (Y' s - 1) Φ(s) ≥ 0` (with
@@ -143,7 +145,7 @@ two bounds `s (s + 1) f₀ ≤ (s - 1)² z`, `(s + 1)(-q) ≤ (s - 1) z` (`z = s
 `s (s + 1) T_b - (s - 1) U = τ_f (s (s + 1) f₀ - (s - 1)² z) + s τ_q ((s + 1) q + (s - 1) z)
 + s (s + 1) τ_p p`, a polynomial identity (used by `linarith` after expansion), and every term on
 the right is `≥ 0`. -/
-private theorem n4h_Tb_core {Y Y' s f0 q p : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤ Y' - 2)
+private theorem Tb_nonneg_unfolded {Y Y' s f0 q p : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤ Y' - 2)
     (hs0 : 1 < s) (hs1 : Y - 1 ≤ s) (hs2 : s ≤ Y) (h4 : 0 ≤ p)
     (hb1 : s * (s + 1) * f0 ≤ (s - 1) ^ 2 * (s - Y + 1))
     (hb2 : (s + 1) * (-q) ≤ (s - 1) * (s - Y + 1)) :
@@ -153,8 +155,8 @@ private theorem n4h_Tb_core {Y Y' s f0 q p : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤
       Y * (Y' * s - 1) * ((Y' - 1 + p) * s ^ 4 - 3 * Y' * s ^ 3 +
         (Y' * (1 + f0 - (Y - 1 + q)) + Y * (2 - Y' - p) + 2 * Y * Y' + 2) * s ^ 2 - 3 * Y * s +
         (Y - 1 + q)) := by
-  have htq := n4h_tq_nonneg ha hb hs1 hs2
-  have hU := n4h_U_nonneg ha hb hs1 hs2
+  have htq := tauQ_nonneg ha hb hs1 hs2
+  have hU := U_nonneg ha hb hs1 hs2
   have htf : Y' * s ^ 2 * (Y' * s - 2) * (s - Y) ≤ 0 :=
     mul_nonpos_of_nonneg_of_nonpos (mul_nonneg (mul_nonneg (by linarith) (sq_nonneg s))
       (by nlinarith)) (by linarith)
@@ -173,7 +175,7 @@ private theorem n4h_Tb_core {Y Y' s f0 q p : ℝ} (ha : 0 ≤ Y - 2) (hb : 0 ≤
   linarith [mul_neg_of_pos_of_neg hss h]
 
 /-- `g(Y) ≥ 0` for `Y ≥ 16/5`, cleared of `1/Y`: `Y² log Y ≥ Y (Y - 1) + (Y - 1)²`. -/
-private theorem n4h_g_nonneg {Y : ℝ} (hY : 16 / 5 ≤ Y) :
+private theorem mul_sub_one_add_sub_one_sq_le_sq_mul_log {Y : ℝ} (hY : 16 / 5 ≤ Y) :
     Y * (Y - 1) + (Y - 1) ^ 2 ≤ Y ^ 2 * Real.log Y := by
   have hY0 : 0 < Y := by linarith
   have e : Real.log Y = Real.log (16 / 5) + Real.log (5 * Y / 16) := by
@@ -271,7 +273,7 @@ theorem qNew_le_f0New (ha : 0 ≤ a.Y - 2) (hb : 0 ≤ a.Y' - 2) (h1 : 0 ≤ a.f
       linarith
     exact le_of_mul_le_mul_left h' (by linarith)
   have hT : 0 ≤ s * a.Psi s * (a.Y' * s ^ 2 - 2 * s + a.Y) - a.Y * (a.Y' * s - 1) * a.Phi s :=
-    n4h_Tb_core ha hb hs0 hs1 hs2.le h4 hb1 hb2
+    Tb_nonneg_unfolded ha hb hs0 hs1 hs2.le h4 hb1 hb2
   have e : a.f0New s - a.qNew s * (1 - 1 / a.YNew s) =
       s * (s * a.Psi s * (a.Y' * s ^ 2 - 2 * s + a.Y) - a.Y * (a.Y' * s - 1) * a.Phi s) /
         (a.Y * (a.Y - s) ^ 2 * (a.Y' * s ^ 2 - 2 * s + a.Y)) := by
@@ -349,7 +351,7 @@ theorem f_pos_of_Y_ge (hY : 16 / 5 ≤ a.Y) (h1 : 0 < a.f0) (hq : a.q * (1 - 1 /
         have : (a.Y / y - (a.Y / y)⁻¹) / 2 * (2 * a.Y * y) = a.Y ^ 2 - y ^ 2 := by
           field_simp
         nlinarith [mul_le_mul_of_nonneg_right hsinh (by positivity : (0:ℝ) ≤ 2 * a.Y * y)]
-      have hg := n4h_g_nonneg hY
+      have hg := mul_sub_one_add_sub_one_sq_le_sq_mul_log hY
       have hP : 0 ≤ (a.Y - y) * (a.Y * y - a.Y ^ 2 + 2 * a.Y - 2) :=
         mul_nonneg (by linarith) (by nlinarith)
       -- `2Y b ≥ 2y (Y² log Y - Y(Y - 1) - (Y - 1)²) + (Y - y)(Y y - Y² + 2Y - 2)`

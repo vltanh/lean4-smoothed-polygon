@@ -17,10 +17,11 @@ after their ``rw``/``simp`` steps are rebuilt here, as documented at each check)
   functions (``sqrt3`` a free symbol ``s3``, ``h3 : s3^2 = 3``): ``arcParams_rel_identity``
   (``ArcRelation.lean``), the two halves of ``arc_normalForm`` (``ArcNormalForm.lean``, with
   ``huv : u v = 1``, ``u = e^{-t/eps}``, ``v = e^{t/eps}``), the three components of
-  ``frame_reducedCostate``, and ``n4h_Phi_key`` (``ArcStepRegion.lean``, modulo ``R~ = 0``).
-* **Identities of the (INV) proof**: ``rel_eq`` (``R = Y^2 eps^4 R~``), ``n4h_P1_eq``, the
-  concavity identity of ``n4h_K_nonneg`` and ``K~ = (1 + x)^2 K(x/(1 + x))``, and (5.3) of
-  ``n4h_Tb_core``: ``s(s + 1) T_b - (s - 1) U = tau_f (s(s + 1) f0 - (s - 1)^2 z)
+  ``frame_reducedCostate``, and ``Phi_identity_mod_rel`` (``ArcStepRegion.lean``, modulo
+  ``R~ = 0``).
+* **Identities of the (INV) proof**: ``rel_eq`` (``R = Y^2 eps^4 R~``), ``P1_eq_neg_psi_sub_K``,
+  the concavity identity of ``K_nonneg`` and ``K~ = (1 + x)^2 K(x/(1 + x))``, and (5.3) of
+  ``Tb_nonneg_unfolded``: ``s(s + 1) T_b - (s - 1) U = tau_f (s(s + 1) f0 - (s - 1)^2 z)
   + s tau_q ((s + 1) q + (s - 1) z) + s(s + 1) tau_p p``.
 """
 import os
@@ -147,8 +148,8 @@ def check_bernstein(src):
     out = {}
     S = {}
     # K~ on the triangle
-    _, kt_txt, _ = src.parts('n4h_Kt_nonneg')
-    _, bk_txt, _ = src.parts('n4h_bernK')
+    _, kt_txt, _ = src.parts('Ktilde_nonneg')
+    _, bk_txt, _ = src.parts('Ktilde_bernstein_nonneg')
     l0, x, w, z, y = (S.setdefault(n, sp.Symbol(n)) for n in ('l0', 'x', 'w', 'z', 'y'))
     bern = to_sympy(split_rel(bk_txt)[1], S)
     Kt = to_sympy(split_rel(kt_txt)[1], S)
@@ -164,8 +165,9 @@ def check_bernstein(src):
         expansion_identity=is_zero(bern.subs({l0: 1 - x - 3 * z, w: 3 * z}, simultaneous=True) - Kt))
     # tau_q and U: Bernstein in z, w = 1 - z, coefficients of x^i y^j
     for label, berns, target, docname, key in (
-            ('tau_q', ['n4h_bern_tq'], 'n4h_tq_nonneg', 'qNew_le_f0New', 'τ_q'),
-            ('U', ['n4h_bern_U₀', 'n4h_bern_U₁'], 'n4h_U_nonneg', 'qNew_le_f0New', 'U')):
+            ('tau_q', ['tauQ_bernstein_nonneg'], 'tauQ_nonneg', 'qNew_le_f0New', 'τ_q'),
+            ('U', ['U_bernstein_nonneg₀', 'U_bernstein_nonneg₁'], 'U_nonneg', 'qNew_le_f0New',
+             'U')):
         b = 0
         for nm in berns:
             b += to_sympy(split_rel(src.parts(nm)[1])[1], S)
@@ -240,7 +242,7 @@ def check_cofactors(src):
     for i, g in enumerate(goals):
         ok.append(is_zero(g - _lc(src, 'frame_reducedCostate', i, S, {'hs': hs})))
     out['frame_reducedCostate (3 components)'] = all(ok)
-    # arc_normalForm: after rw [hN, n4d_arcPhiE_eq], simp, generalize u = e^{-t/e}, v = e^{t/e};
+    # arc_normalForm: after rw [hN, arcPhiE_eq], simp, generalize u = e^{-t/e}, v = e^{t/e};
     # P0 = arcPhiE q 0, L = <Lambda_1(0), V_e>; hN0: N21(q) = -(2e/3) P0
     t, u, v, P0, L, Ypp = (S.setdefault(n, sp.Symbol(n)) for n in ('t', 'u', 'v', 'P0', 'L', 'Yp'))
     huv = u * v - 1
@@ -271,13 +273,13 @@ def check_cofactors(src):
     rhs = -1 + Ap * v + Bp * v ** 2 - Ypp * tau * v
     c = _lc(src, 'arc_normalForm', 1, S, {'hs': hs, 'huv': huv})
     out['arc_normalForm (N23)'] = is_zero(lhs - rhs - c)
-    # n4h_Phi_key, modulo R~ = 0
-    binders, concl, _ = src.parts('n4h_Phi_key')
+    # Phi_identity_mod_rel, modulo R~ = 0
+    binders, concl, _ = src.parts('Phi_identity_mod_rel')
     hR = split_rel(binders['hR'], ('=',))
     hRe = to_sympy(hR[0], S) - to_sympy(hR[1], S)
     a_, b_, _ = split_rel(concl, ('=',))
-    c = _lc(src, 'n4h_Phi_key', 0, S, {'hR': hRe})
-    out['n4h_Phi_key (modulo R~ = 0)'] = is_zero(to_sympy(a_, S) - to_sympy(b_, S) - c)
+    c = _lc(src, 'Phi_identity_mod_rel', 0, S, {'hR': hRe})
+    out['Phi_identity_mod_rel (modulo R~ = 0)'] = is_zero(to_sympy(a_, S) - to_sympy(b_, S) - c)
     return out
 
 
@@ -298,27 +300,27 @@ def check_identities(src):
     relT = _def_body(src, 'relT', S)
     sub = {Yp: (1 + eps ** 2) / (eps ** 2 * Y)}
     out['rel_eq: R = Y^2 eps^4 R~'] = is_zero((rel - Y ** 2 * eps ** 4 * relT).subs(sub))
-    a_, b_, _ = split_rel(src.parts('n4h_P1_eq')[1], ('=',))
-    out['n4h_P1_eq'] = is_zero(to_sympy(a_, S) - to_sympy(b_, S))
-    # the concavity identity of n4h_K_nonneg and K~ = (1 + x)^2 K(x/(1 + x))
+    a_, b_, _ = split_rel(src.parts('P1_eq_neg_psi_sub_K')[1], ('=',))
+    out['P1_eq_neg_psi_sub_K'] = is_zero(to_sympy(a_, S) - to_sympy(b_, S))
+    # the concavity identity of K_nonneg and K~ = (1 + x)^2 K(x/(1 + x))
     x, y, z = (S.setdefault(n, sp.Symbol(n)) for n in ('x', 'y', 'z'))
-    K = to_sympy(split_rel(src.parts('n4h_K_nonneg')[1])[1], S)
-    Kt = to_sympy(split_rel(src.parts('n4h_Kt_nonneg')[1])[1], S)
+    K = to_sympy(split_rel(src.parts('K_nonneg')[1])[1], S)
+    Kt = to_sympy(split_rel(src.parts('Ktilde_nonneg')[1])[1], S)
     k0 = sp.Rational(3, 2) * (x + 2 * z) ** 2
     k2 = (1 + (x + z)) ** 2 * (x * (x + z - 1) - 2 * z)
-    out['n4h_K_nonneg: x(1+x)K = (1+x)(x-(1+x)y)k0 + y K~ + x k2 y((1+x)y-x)'] = is_zero(
+    out['K_nonneg: x(1+x)K = (1+x)(x-(1+x)y)k0 + y K~ + x k2 y((1+x)y-x)'] = is_zero(
         x * (1 + x) * K - ((1 + x) * (x - (1 + x) * y) * k0 + y * Kt
                            + x * k2 * y * ((1 + x) * y - x)))
     out['K~ = (1 + x)^2 K(x/(1 + x))'] = is_zero((1 + x) ** 2 * K.subs(y, x / (1 + x)) - Kt)
-    # (5.3) of n4h_Tb_core
+    # (5.3) of Tb_nonneg_unfolded
     s = S.setdefault('s', sp.Symbol('s'))
-    Tb = to_sympy(split_rel(src.parts('n4h_Tb_core')[1])[1], S)
-    U = to_sympy(split_rel(src.parts('n4h_U_nonneg')[1])[1], S)
-    tq = to_sympy(split_rel(src.parts('n4h_tq_nonneg')[1])[1], S)
+    Tb = to_sympy(split_rel(src.parts('Tb_nonneg_unfolded')[1])[1], S)
+    U = to_sympy(split_rel(src.parts('U_nonneg')[1])[1], S)
+    tq = to_sympy(split_rel(src.parts('tauQ_nonneg')[1])[1], S)
     zz = s - Y + 1
     tf = Yp * s ** 2 * (Yp * s - 2) * (s - Y)
     tp = Y * s ** 2 * (Y - s) * ((1 + Yp) * s - 2)
-    out['(5.3) of n4h_Tb_core'] = is_zero(
+    out['(5.3) of Tb_nonneg_unfolded'] = is_zero(
         s * (s + 1) * Tb - (s - 1) * U
         - (tf * (s * (s + 1) * f0 - (s - 1) ** 2 * zz) + s * tq * ((s + 1) * q + (s - 1) * zz)
            + s * (s + 1) * tp * p))

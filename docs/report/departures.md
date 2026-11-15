@@ -187,11 +187,11 @@ proofs. The Lean proofs depart from it in three places, with the same statements
 
 - INV Lemma 6 (an arc with `Y ≥ 16/5` leaves the star domain before it switches) replaces two
   monotonicity arguments by three inequalities for `log`: `log t ≥ 1 - 1/t`,
-  `log y ≥ 2(y - 1)/(y + 1)` and `log t ≤ sinh(log t)` ([`ArcParams.f_pos_of_Y_ge`](../../SmoothedPolygons/Ch14/ArcStepExit.lean#L314)).
+  `log y ≥ 2(y - 1)/(y + 1)` and `log t ≤ sinh(log t)` ([`ArcParams.f_pos_of_Y_ge`](../../SmoothedPolygons/Ch14/ArcStepExit.lean#L316)).
 - Steps 2–4 of INV Proposition 3 are one identity modulo `R̃ = 0`, in which the terms in `f₀`
-  cancel, so that `f₀ ≥ 0` is not needed ([`ArcParams.Phi_nonpos`](../../SmoothedPolygons/Ch14/ArcStepRegion.lean#L360), Section 5).
+  cancel, so that `f₀ ≥ 0` is not needed ([`ArcParams.Phi_nonpos`](../../SmoothedPolygons/Ch14/ArcStepRegion.lean#L361), Section 5).
 - The update rules of Theorem 2.1 for `f₀` and `p` come from the closed form INV (1.4) of the
-  costate along the arc instead of the Poisson brackets of Lemma 2.3 ([`arcParams_reinPoincare`](../../SmoothedPolygons/Ch14/ArcPoincareMap.lean#L578)).
+  costate along the arc instead of the Poisson brackets of Lemma 2.3 ([`arcParams_reinPoincare`](../../SmoothedPolygons/Ch14/ArcPoincareMap.lean#L600)).
   Lemma 2.3 is used only for the first control after a switch ([`SwitchEntersE2`](../../SmoothedPolygons/Ch14/UnstableCurve.lean#L127), Proposition 3.4).
 
 ## The numerical reference

@@ -41,7 +41,8 @@ This module (part 1 of the ``unstable`` check; parts 2 and 3 are ``arc_invariant
    ``Theorem 2.1`` + ``q_new = Phi(s)/(Y - s)^2`` against the flow, and the ``e3``-slope against
    ``-2 sqrt3 p/(Y' - 1)`` (``hasDerivAt_e3_sub_e2``). Rigorous modulo the correctness of this code,
    python-flint, and the Lean theorems that turn these signs into the predicates (Theorem 1.3 and
-   ``n4g_signs``: the switching functions have the signs of ``f``, ``g`` on ``[0, T)``;
+   ``phaseHam_signs_along_arc``: the switching functions have the signs of ``f``, ``g`` on
+   ``[0, T)``;
    ``reinSwitchTime_eq_tauSw``, ``rho_2_iso_vfX_one_arcExitTime``: ``t_sw = eps tau_sw``, the exit at
    ``T``); the seeds being on ``W^u`` is not rigorous.
 4. **The threshold** (mpmath, 60 digits): the seed ``s*`` at which the switch of the last switching

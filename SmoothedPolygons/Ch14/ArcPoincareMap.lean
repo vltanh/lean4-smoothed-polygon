@@ -146,45 +146,45 @@ variable {q : iso_PhasePt}
 
 /-! ### Frame computations (helpers) -/
 
-private lemma n4f_sqrt3_mul_self : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
+private lemma mul_self_sqrt_three : √3 * √3 = 3 := Real.mul_self_sqrt (by norm_num)
 
-private lemma n4f_sqrt3_ne : √3 ≠ 0 := by positivity
+private lemma sqrt_three_ne_zero : √3 ≠ 0 := by positivity
 
-private lemma n4f_sqrt3_sq : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+private lemma sq_sqrt_three : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
 
-private lemma n4f_sqrt3_pow4 : √3 ^ 4 = 9 := by
-  rw [show (4 : ℕ) = 2 * 2 from rfl, pow_mul, n4f_sqrt3_sq]; norm_num
+private lemma sqrt_three_pow_four : √3 ^ 4 = 9 := by
+  rw [show (4 : ℕ) = 2 * 2 from rfl, pow_mul, sq_sqrt_three]; norm_num
 
 /-- `Ad_{R⁻¹}` in the frame (`S⁻¹ R S = [[0, -2], [1/2, 1]]`):
 `R⁻¹ (h H + e E + f F) R = (e/2 - h) H + (e - 4h - 4f) E - (e/4) F`. -/
-private lemma n4f_adRinv_ofFrame (h e f : ℝ) :
+private lemma adRinv_ofFrame (h e f : ℝ) :
     R⁻¹ * ofFrame h e f * R = ofFrame (e / 2 - h) (e - 4 * h - 4 * f) (-e / 4) := by
-  have h3 := n4f_sqrt3_ne
+  have h3 := sqrt_three_ne_zero
   rw [poly_R_inv]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [ofFrame, R, Matrix.mul_apply, Fin.sum_univ_two] <;>
-    field_simp <;> ring_nf <;> simp only [n4f_sqrt3_sq, n4f_sqrt3_pow4] <;> ring_nf
+    field_simp <;> ring_nf <;> simp only [sq_sqrt_three, sqrt_three_pow_four] <;> ring_nf
 
 /-- `(3/2) J = √3 (-(1/2) H - 2E + (1/2) F)` in the frame. -/
-private lemma n4f_three_halves_J :
+private lemma three_halves_smul_J_eq_ofFrame :
     (3 / 2 : ℝ) • J = √3 • ofFrame (-(1 / 2)) (-2) (1 / 2) := by
   ext i j
   fin_cases i <;> fin_cases j <;> simp [ofFrame, J] <;> field_simp
   · ring
-  · simp only [n4f_sqrt3_sq]
+  · simp only [sq_sqrt_three]
 
-private lemma n4f_arcVe_ofFrame (h e f : ℝ) :
+private lemma arcVe_ofFrame (h e f : ℝ) :
     arcVe (ofFrame h e f) = ofFrame e (-e ^ 2 / -h) (-h) := by
   rw [arcVe, frameE_ofFrame, (ρ_ofFrame h e f).1]
 
-private lemma n4f_arcVf_ofFrame (h e f : ℝ) :
+private lemma arcVf_ofFrame (h e f : ℝ) :
     arcVf (ofFrame h e f) = ofFrame f (-h) (-f ^ 2 / -h) := by
   rw [arcVf, frameF_ofFrame, (ρ_ofFrame h e f).1]
 
 /-! ### Section points (helpers) -/
 
 /-- On a section point `H(e₂) = H(e₃) + χ₂₃ = 0`. -/
-private lemma n4f_phaseHam_one (hq : IsArcSectionPt q) : phaseHam q (vertex 1) = 0 := by
+private lemma phaseHam_vertex_one_eq_zero (hq : IsArcSectionPt q) : phaseHam q (vertex 1) = 0 := by
   obtain ⟨⟨⟨-, -, -, -, -, h6, h7⟩, -⟩, -⟩ := hq
   have := hamiltonian_sub_eq_switchingFn q.2.1 q.2.2 q.1 1 2
   rw [h7, h6] at this
@@ -192,11 +192,11 @@ private lemma n4f_phaseHam_one (hq : IsArcSectionPt q) : phaseHam q (vertex 1) =
   linarith
 
 /-- Inside the star domain, `χ₂₁ = 0` along the `e₂`-arc iff `f(t/ε) = 0` (Theorem 1.3). -/
-private lemma n4f_chi21_iff (hq : IsArcSectionPt q) {t : ℝ} (ht0 : 0 ≤ t)
+private lemma switchingFn_one_zero_eq_zero_iff (hq : IsArcSectionPt q) {t : ℝ} (ht0 : 0 ≤ t)
     (ht : t < arcExitTime q) :
     switchingFn 1 0 (iso_vertexFlow 1 q t).2.2 (iso_vertexFlow 1 q t).1 = 0 ↔
       (arcParams q).f (t / arcEps q) = 0 := by
-  have hH := n4f_phaseHam_one hq
+  have hH := phaseHam_vertex_one_eq_zero hq
   obtain ⟨⟨⟨-, -, hR, -⟩, -⟩, hX⟩ := hq
   have hstar : IsStarState (iso_vertexFlow 1 q t).1 :=
     (isStarState_iso_vfX_one_iff hX ht0).2 ht
@@ -211,43 +211,48 @@ private lemma n4f_chi21_iff (hq : IsArcSectionPt q) {t : ℝ} (ht0 : 0 ≤ t)
 
 /-! ### The costate along the arc in closed form (helpers; INV Theorem 1) -/
 
-private lemma n4f_ofFrame_eq {h e f h' e' f' : ℝ} (hh : h = h') (he : e = e') (hf : f = f') :
+private lemma ofFrame_congr {h e f h' e' f' : ℝ} (hh : h = h') (he : e = e') (hf : f = f') :
     ofFrame h e f = ofFrame h' e' f' := by
   rw [hh, he, hf]
 
-private lemma n4f_sqrt3_cancel6 (x y : ℝ) : -(√3 / (6 * x)) * (√3 * y) = -(y / (2 * x)) := by
-  rw [show -(√3 / (6 * x)) * (√3 * y) = -(√3 * √3 * y / (6 * x)) by ring, n4f_sqrt3_mul_self]
+private lemma sqrt_three_div_six_mul_sqrt_three (x y : ℝ) :
+    -(√3 / (6 * x)) * (√3 * y) = -(y / (2 * x)) := by
+  rw [show -(√3 / (6 * x)) * (√3 * y) = -(√3 * √3 * y / (6 * x)) by ring, mul_self_sqrt_three]
   ring
 
-private lemma n4f_sqrt3_cancel2 (x y : ℝ) : 2 / (√3 * x) * (√3 * y) = 2 * y / x := by
+private lemma two_div_sqrt_three_mul_sqrt_three (x y : ℝ) :
+    2 / (√3 * x) * (√3 * y) = 2 * y / x := by
   rcases eq_or_ne x 0 with rfl | hx
   · simp
   · field_simp
 
-private lemma n4f_sqrt3_cancel3 (x z y : ℝ) :
+private lemma sqrt_three_div_three_mul_sqrt_three (x z y : ℝ) :
     -(√3 / (3 * x * z)) * (√3 * y) = -(y / (x * z)) := by
   rw [show -(√3 / (3 * x * z)) * (√3 * y) = -(√3 * √3 * y / (3 * (x * z))) by ring,
-    n4f_sqrt3_mul_self]
+    mul_self_sqrt_three]
   ring
 
 /-- `α/√3` of INV (1.4). -/
-private noncomputable def n4f_al (a : ArcParams) : ℝ :=
+private noncomputable def lamAlphaDivSqrtThree (a : ArcParams) : ℝ :=
   a.eps * (1 + a.eps ^ 2 * (a.Y + a.Y' * a.A - a.Y * a.B'))
 
 /-- `β/√3` of INV (1.4). -/
-private noncomputable def n4f_be (a : ArcParams) : ℝ := -(1 / 2) * a.eps ^ 3 * (a.Y' ^ 2 - a.B')
+private noncomputable def lamBetaDivSqrtThree (a : ArcParams) : ℝ :=
+  -(1 / 2) * a.eps ^ 3 * (a.Y' ^ 2 - a.B')
 
 /-- `γ/√3` of INV (1.4). -/
-private noncomputable def n4f_ga (a : ArcParams) : ℝ := 2 * a.eps ^ 3 * (a.Y ^ 2 - a.B)
+private noncomputable def lamGammaDivSqrtThree (a : ArcParams) : ℝ :=
+  2 * a.eps ^ 3 * (a.Y ^ 2 - a.B)
 
-private lemma n4f_lam (a : ArcParams) :
-    a.lamAlpha = √3 * n4f_al a ∧ a.lamBeta = √3 * n4f_be a ∧ a.lamGamma = √3 * n4f_ga a := by
+private lemma lamAlpha_lamBeta_lamGamma_eq_sqrt_three_mul (a : ArcParams) :
+    a.lamAlpha = √3 * lamAlphaDivSqrtThree a ∧ a.lamBeta = √3 * lamBetaDivSqrtThree a ∧
+      a.lamGamma = √3 * lamGammaDivSqrtThree a := by
   refine ⟨?_, ?_, ?_⟩ <;>
-    simp only [ArcParams.lamAlpha, ArcParams.lamBeta, ArcParams.lamGamma, n4f_al, n4f_be,
-      n4f_ga] <;> ring
+    simp only [ArcParams.lamAlpha, ArcParams.lamBeta, ArcParams.lamGamma, lamAlphaDivSqrtThree,
+      lamBetaDivSqrtThree, lamGammaDivSqrtThree] <;> ring
 
 /-- The coefficients of INV (1.4) on a section point (INV Theorem 1 (i)). -/
-private lemma n4f_coeffs (hq : IsArcSectionPt q) :
+private lemma eigenbasis_coeffs_eq_arcParams (hq : IsArcSectionPt q) :
     2 * arcEps q ^ 2 * traceForm q.2.1 (q.1 + iso_vfP 1 q) = (arcParams q).lamAlpha ∧
       arcEps q ^ 2 * traceForm q.2.1 (arcVf q.1) = (arcParams q).lamBeta ∧
       arcEps q ^ 2 * traceForm q.2.1 (arcVe q.1) = (arcParams q).lamGamma := by
@@ -262,50 +267,54 @@ private lemma n4f_coeffs (hq : IsArcSectionPt q) :
   have hΛ := ofFrame_frame htr
   rw [lh, le, lf] at hΛ
   have hΛ0 := eq_sub_of_add_eq hΛ.symm
-  rw [n4f_three_halves_J] at hΛ0
+  rw [three_halves_smul_J_eq_ofFrame] at hΛ0
   have hX0 := ofFrame_frame hq.1.1.1
   rw [fh, fe, ff, ← arcParams_Y' hX] at hX0
-  rw [hΛ0, ← hX0, iso_vfP_one_eq hX, n4f_arcVe_ofFrame, n4f_arcVf_ofFrame, (n4f_lam _).1,
-    (n4f_lam _).2.1, (n4f_lam _).2.2]
+  rw [hΛ0, ← hX0, iso_vfP_one_eq hX, arcVe_ofFrame, arcVf_ofFrame,
+    (lamAlpha_lamBeta_lamGamma_eq_sqrt_three_mul _).1,
+    (lamAlpha_lamBeta_lamGamma_eq_sqrt_three_mul _).2.1,
+    (lamAlpha_lamBeta_lamGamma_eq_sqrt_three_mul _).2.2]
   simp only [smul_ofFrame, ofFrame_sub, ofFrame_add, traceForm_ofFrame]
   refine ⟨?_, ?_, ?_⟩ <;>
-    simp only [n4f_al, n4f_be, n4f_ga, ArcParams.A, ArcParams.B, ArcParams.B', ArcParams.Y',
-      arcParams] <;>
+    simp only [lamAlphaDivSqrtThree, lamBetaDivSqrtThree, lamGammaDivSqrtThree, ArcParams.A,
+      ArcParams.B, ArcParams.B', ArcParams.Y', arcParams] <;>
     field_simp <;> ring
 
 /-- INV (1.4) on a section point (the content of `iso_vfΛ₁_one_eq_arcParams`). -/
-private lemma n4f_vfΛ₁ (hq : IsArcSectionPt q) (t : ℝ) :
+private lemma iso_vfΛ₁_one_eq_eigenbasis (hq : IsArcSectionPt q) (t : ℝ) :
     iso_vfΛ₁ 1 q t =
       (arcParams q).lamAlpha • (iso_vfX 1 q t + iso_vfP 1 q) +
         ((arcParams q).lamBeta * Real.exp (2 * t / arcEps q)) • arcVe (iso_vfX 1 q t) +
         ((arcParams q).lamGamma * Real.exp (-2 * t / arcEps q)) • arcVf (iso_vfX 1 q t) := by
-  obtain ⟨h1, h2, h3⟩ := n4f_coeffs hq
+  obtain ⟨h1, h2, h3⟩ := eigenbasis_coeffs_eq_arcParams hq
   rw [iso_vfΛ₁_one_eq hq.2 hq.1.1.2.1 t, h1, h2, h3]
 
 /-- The frame of `Λ̂(t)/√3 = (Λ₁(t) + (3/2) J)/√3` along the arc, `s = e^{t/ε}`: `H`-component. -/
-private noncomputable def n4f_Mh (a : ArcParams) (s : ℝ) : ℝ :=
-  n4f_al a * (-a.eps - 1 / (2 * a.eps)) + n4f_be a * s ^ 2 * (-2 * a.eps * a.Y / s) +
-    n4f_ga a / s ^ 2 * (a.eps * a.Y' * s / 2) - 1 / 2
+private noncomputable def lamHatFrameH (a : ArcParams) (s : ℝ) : ℝ :=
+  lamAlphaDivSqrtThree a * (-a.eps - 1 / (2 * a.eps)) +
+    lamBetaDivSqrtThree a * s ^ 2 * (-2 * a.eps * a.Y / s) +
+    lamGammaDivSqrtThree a / s ^ 2 * (a.eps * a.Y' * s / 2) - 1 / 2
 
 /-- The frame of `Λ̂(t)/√3` along the arc: `E`-component. -/
-private noncomputable def n4f_Me (a : ArcParams) (s : ℝ) : ℝ :=
-  n4f_al a * (-2 * a.eps * a.Y / s) + n4f_be a * s ^ 2 * (-(-2 * a.eps * a.Y / s) ^ 2 / a.eps) +
-    n4f_ga a / s ^ 2 * a.eps - 2
+private noncomputable def lamHatFrameE (a : ArcParams) (s : ℝ) : ℝ :=
+  lamAlphaDivSqrtThree a * (-2 * a.eps * a.Y / s) +
+    lamBetaDivSqrtThree a * s ^ 2 * (-(-2 * a.eps * a.Y / s) ^ 2 / a.eps) +
+    lamGammaDivSqrtThree a / s ^ 2 * a.eps - 2
 
 /-- The frame of `Λ̂(t)/√3` along the arc: `F`-component. -/
-private noncomputable def n4f_Mf (a : ArcParams) (s : ℝ) : ℝ :=
-  n4f_al a * (a.eps * a.Y' * s / 2) + n4f_be a * s ^ 2 * a.eps +
-    n4f_ga a / s ^ 2 * (-(a.eps * a.Y' * s / 2) ^ 2 / a.eps) + 1 / 2
+private noncomputable def lamHatFrameF (a : ArcParams) (s : ℝ) : ℝ :=
+  lamAlphaDivSqrtThree a * (a.eps * a.Y' * s / 2) + lamBetaDivSqrtThree a * s ^ 2 * a.eps +
+    lamGammaDivSqrtThree a / s ^ 2 * (-(a.eps * a.Y' * s / 2) ^ 2 / a.eps) + 1 / 2
 
 /-- The state and the reduced costate `Λ̂(t) = Λ₁(t) + (3/2) J` along the arc, in the frame. -/
-private lemma n4f_frame_flow (hq : IsArcSectionPt q) (t : ℝ) :
+private lemma iso_vfX_iso_vfΛ₁_eq_ofFrame (hq : IsArcSectionPt q) (t : ℝ) :
     iso_vfX 1 q t = ofFrame (-(arcParams q).eps)
         (-2 * (arcParams q).eps * (arcParams q).Y / Real.exp (t / arcEps q))
         ((arcParams q).eps * (arcParams q).Y' * Real.exp (t / arcEps q) / 2) ∧
       iso_vfΛ₁ 1 q t + (3 / 2 : ℝ) • J =
-        √3 • ofFrame (n4f_Mh (arcParams q) (Real.exp (t / arcEps q)))
-          (n4f_Me (arcParams q) (Real.exp (t / arcEps q)))
-          (n4f_Mf (arcParams q) (Real.exp (t / arcEps q))) := by
+        √3 • ofFrame (lamHatFrameH (arcParams q) (Real.exp (t / arcEps q)))
+          (lamHatFrameE (arcParams q) (Real.exp (t / arcEps q)))
+          (lamHatFrameF (arcParams q) (Real.exp (t / arcEps q))) := by
   have hX := hq.2
   have hε := (arcEps_pos hX).ne'
   have hs0 : Real.exp (t / arcEps q) ≠ 0 := (Real.exp_pos _).ne'
@@ -324,15 +333,19 @@ private lemma n4f_frame_flow (hq : IsArcSectionPt q) (t : ℝ) :
       (-2 * (arcParams q).eps * (arcParams q).Y / Real.exp (t / arcEps q))
       ((arcParams q).eps * (arcParams q).Y' * Real.exp (t / arcEps q) / 2) := by
     rw [iso_vfX_one_eq hX t, hneg, arcParams_Y' hX]
-    refine n4f_ofFrame_eq rfl ?_ ?_ <;> simp only [arcParams] <;> ring
+    refine ofFrame_congr rfl ?_ ?_ <;> simp only [arcParams] <;> ring
   refine ⟨hXt, ?_⟩
-  rw [n4f_vfΛ₁ hq t, hXt, iso_vfP_one_eq hX, h2, h2', n4f_arcVe_ofFrame, n4f_arcVf_ofFrame,
-    n4f_three_halves_J, (n4f_lam _).1, (n4f_lam _).2.1, (n4f_lam _).2.2]
+  rw [iso_vfΛ₁_one_eq_eigenbasis hq t, hXt, iso_vfP_one_eq hX, h2, h2', arcVe_ofFrame,
+    arcVf_ofFrame, three_halves_smul_J_eq_ofFrame,
+    (lamAlpha_lamBeta_lamGamma_eq_sqrt_three_mul _).1,
+    (lamAlpha_lamBeta_lamGamma_eq_sqrt_three_mul _).2.1,
+    (lamAlpha_lamBeta_lamGamma_eq_sqrt_three_mul _).2.2]
   simp only [smul_ofFrame, ofFrame_add]
-  refine n4f_ofFrame_eq ?_ ?_ ?_ <;> simp only [n4f_Mh, n4f_Me, n4f_Mf, arcParams] <;> ring
+  refine ofFrame_congr ?_ ?_ ?_ <;>
+    simp only [lamHatFrameH, lamHatFrameE, lamHatFrameF, arcParams] <;> ring
 
 /-- The rotated point `Ad_{R⁻¹} q(t)` in the frame: `ε_n = ε (Y - s)/s`. -/
-private lemma n4f_frame_rot (hq : IsArcSectionPt q) (t : ℝ) :
+private lemma adRinv_vertexFlow_eq_ofFrame (hq : IsArcSectionPt q) (t : ℝ) :
     (iso_adRinvPow 1 (iso_vertexFlow 1 q t)).1 =
         ofFrame (-((arcParams q).eps * ((arcParams q).Y - Real.exp (t / arcEps q)) /
             Real.exp (t / arcEps q)))
@@ -342,25 +355,25 @@ private lemma n4f_frame_rot (hq : IsArcSectionPt q) (t : ℝ) :
           ((arcParams q).eps * (arcParams q).Y / (2 * Real.exp (t / arcEps q))) ∧
       (iso_adRinvPow 1 (iso_vertexFlow 1 q t)).2.1 + (3 / 2 : ℝ) • J =
         √3 • ofFrame
-          (n4f_Me (arcParams q) (Real.exp (t / arcEps q)) / 2 -
-            n4f_Mh (arcParams q) (Real.exp (t / arcEps q)))
-          (n4f_Me (arcParams q) (Real.exp (t / arcEps q)) -
-            4 * n4f_Mh (arcParams q) (Real.exp (t / arcEps q)) -
-            4 * n4f_Mf (arcParams q) (Real.exp (t / arcEps q)))
-          (-n4f_Me (arcParams q) (Real.exp (t / arcEps q)) / 4) := by
-  obtain ⟨hXt, hΛt⟩ := n4f_frame_flow hq t
+          (lamHatFrameE (arcParams q) (Real.exp (t / arcEps q)) / 2 -
+            lamHatFrameH (arcParams q) (Real.exp (t / arcEps q)))
+          (lamHatFrameE (arcParams q) (Real.exp (t / arcEps q)) -
+            4 * lamHatFrameH (arcParams q) (Real.exp (t / arcEps q)) -
+            4 * lamHatFrameF (arcParams q) (Real.exp (t / arcEps q)))
+          (-lamHatFrameE (arcParams q) (Real.exp (t / arcEps q)) / 4) := by
+  obtain ⟨hXt, hΛt⟩ := iso_vfX_iso_vfΛ₁_eq_ofFrame hq t
   have hs0 : Real.exp (t / arcEps q) ≠ 0 := (Real.exp_pos _).ne'
   have hJ : R⁻¹ * J * R = J := by simpa using poly_conj_pow_J 1
   simp only [iso_adRinvPow, iso_vertexFlow, pow_one]
   refine ⟨?_, ?_⟩
-  · rw [hXt, n4f_adRinv_ofFrame]
-    refine n4f_ofFrame_eq ?_ ?_ ?_ <;> field_simp <;> ring
+  · rw [hXt, adRinv_ofFrame]
+    refine ofFrame_congr ?_ ?_ ?_ <;> field_simp <;> ring
   · rw [show R⁻¹ * iso_vfΛ₁ 1 q t * R + (3 / 2 : ℝ) • J =
         R⁻¹ * (iso_vfΛ₁ 1 q t + (3 / 2 : ℝ) • J) * R by rw [poly_conj_add, poly_conj_smul, hJ],
-      hΛt, poly_conj_smul, n4f_adRinv_ofFrame]
+      hΛt, poly_conj_smul, adRinv_ofFrame]
 
 /-- `s = e^{t/ε} < Y` before the exit time. -/
-private lemma n4f_exp_lt (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTime q) :
+private lemma exp_div_arcEps_lt_arcY (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTime q) :
     Real.exp (t / arcEps q) < arcY q := by
   have hε := arcEps_pos hq.2
   have hY := one_lt_arcY hq.2
@@ -370,54 +383,58 @@ private lemma n4f_exp_lt (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTime
   exact ht
 
 /-- `arcQ` of the rotated point (the content of `arcQ_adRinv_vertexFlow`). -/
-private lemma n4f_arcQ_rot (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTime q) :
+private lemma arcQ_adRinv_vertexFlow_eq_qNew (hq : IsArcSectionPt q) {t : ℝ}
+    (ht : t < arcExitTime q) :
     arcQ (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       (arcParams q).qNew (Real.exp (t / arcEps q)) := by
   have hε := (arcEps_pos hq.2).ne'
   have hY : arcY q ≠ 0 := (zero_lt_one.trans (one_lt_arcY hq.2)).ne'
-  have hsY := (sub_pos.2 (n4f_exp_lt hq ht)).ne'
+  have hsY := (sub_pos.2 (exp_div_arcEps_lt_arcY hq ht)).ne'
   have hs0 : Real.exp (t / arcEps q) ≠ 0 := (Real.exp_pos _).ne'
-  obtain ⟨hXn, hΛn⟩ := n4f_frame_rot hq t
+  obtain ⟨hXn, hΛn⟩ := adRinv_vertexFlow_eq_ofFrame hq t
   rw [arcQ, show arcEps (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       ρ₁ (iso_adRinvPow 1 (iso_vertexFlow 1 q t)).1 from rfl, hΛn, hXn,
-    ivf_traceForm_smul_left, n4f_sqrt3_cancel6, n4f_arcVe_ofFrame, (ρ_ofFrame _ _ _).1,
-    traceForm_ofFrame]
+    ivf_traceForm_smul_left, sqrt_three_div_six_mul_sqrt_three, arcVe_ofFrame,
+    (ρ_ofFrame _ _ _).1, traceForm_ofFrame]
   generalize Real.exp (t / arcEps q) = s at hsY hs0 ⊢
-  simp only [n4f_Mh, n4f_Me, n4f_Mf, n4f_al, n4f_be, n4f_ga, ArcParams.qNew, ArcParams.Phi,
-    ArcParams.A, ArcParams.B, ArcParams.B', ArcParams.Y', arcParams]
+  simp only [lamHatFrameH, lamHatFrameE, lamHatFrameF, lamAlphaDivSqrtThree, lamBetaDivSqrtThree,
+    lamGammaDivSqrtThree, ArcParams.qNew, ArcParams.Phi, ArcParams.A, ArcParams.B, ArcParams.B',
+    ArcParams.Y', arcParams]
   field_simp
   ring
 
 /-- `arcP` of the rotated point (the content of `arcP_adRinv_vertexFlow`). -/
-private lemma n4f_arcP_rot (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTime q) :
+private lemma arcP_adRinv_vertexFlow_eq_pNew (hq : IsArcSectionPt q) {t : ℝ}
+    (ht : t < arcExitTime q) :
     arcP (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       (arcParams q).pNew (Real.exp (t / arcEps q)) := by
   have hε := (arcEps_pos hq.2).ne'
   have hY : arcY q ≠ 0 := (zero_lt_one.trans (one_lt_arcY hq.2)).ne'
-  have hsY := (sub_pos.2 (n4f_exp_lt hq ht)).ne'
+  have hsY := (sub_pos.2 (exp_div_arcEps_lt_arcY hq ht)).ne'
   have hs0 : Real.exp (t / arcEps q) ≠ 0 := (Real.exp_pos _).ne'
-  obtain ⟨hXn, hΛn⟩ := n4f_frame_rot hq t
+  obtain ⟨hXn, hΛn⟩ := adRinv_vertexFlow_eq_ofFrame hq t
   rw [arcP, show arcEps (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       ρ₁ (iso_adRinvPow 1 (iso_vertexFlow 1 q t)).1 from rfl, hΛn, hXn,
-    ivf_traceForm_smul_left, n4f_sqrt3_cancel2, n4f_arcVf_ofFrame, (ρ_ofFrame _ _ _).1,
-    traceForm_ofFrame]
+    ivf_traceForm_smul_left, two_div_sqrt_three_mul_sqrt_three, arcVf_ofFrame,
+    (ρ_ofFrame _ _ _).1, traceForm_ofFrame]
   generalize Real.exp (t / arcEps q) = s at hsY hs0 ⊢
-  simp only [n4f_Mh, n4f_Me, n4f_Mf, n4f_al, n4f_be, n4f_ga, ArcParams.pNew,
-    ArcParams.A, ArcParams.B, ArcParams.B', ArcParams.Y', arcParams]
+  simp only [lamHatFrameH, lamHatFrameE, lamHatFrameF, lamAlphaDivSqrtThree, lamBetaDivSqrtThree,
+    lamGammaDivSqrtThree, ArcParams.pNew, ArcParams.A, ArcParams.B, ArcParams.B', ArcParams.Y',
+    arcParams]
   field_simp
   ring
 
 /-- `f₀` of the rotated point, when it is a section point ((1.5) and the table INV (1.5)):
 `s² Ψ(s)/(Y (Y - s)²)`. -/
-private lemma n4f_arcF0_rot (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTime q)
-    (hn : IsArcSectionPt (iso_adRinvPow 1 (iso_vertexFlow 1 q t))) :
+private lemma arcF0_adRinv_vertexFlow_eq_f0New (hq : IsArcSectionPt q) {t : ℝ}
+    (ht : t < arcExitTime q) (hn : IsArcSectionPt (iso_adRinvPow 1 (iso_vertexFlow 1 q t))) :
     arcF0 (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       (arcParams q).f0New (Real.exp (t / arcEps q)) := by
   have hε := (arcEps_pos hq.2).ne'
   have hY : arcY q ≠ 0 := (zero_lt_one.trans (one_lt_arcY hq.2)).ne'
-  have hsY := (sub_pos.2 (n4f_exp_lt hq ht)).ne'
+  have hsY := (sub_pos.2 (exp_div_arcEps_lt_arcY hq ht)).ne'
   have hs0 : Real.exp (t / arcEps q) ≠ 0 := (Real.exp_pos _).ne'
-  obtain ⟨hXn, hΛn⟩ := n4f_frame_rot hq t
+  obtain ⟨hXn, hΛn⟩ := adRinv_vertexFlow_eq_ofFrame hq t
   have hY'n : arcY' (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       arcY q / (arcY q - Real.exp (t / arcEps q)) := by
     rw [arcY', hXn, (ρ_ofFrame _ _ _).2.2, (ρ_ofFrame _ _ _).1]
@@ -426,10 +443,12 @@ private lemma n4f_arcF0_rot (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitT
     ring
   rw [arcF0_eq_reducedHam hn, reducedHam, show arcEps (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       ρ₁ (iso_adRinvPow 1 (iso_vertexFlow 1 q t)).1 from rfl, hY'n, hΛn, hXn,
-    ivf_traceForm_smul_left, n4f_sqrt3_cancel3, (ρ_ofFrame _ _ _).1, traceForm_ofFrame]
+    ivf_traceForm_smul_left, sqrt_three_div_three_mul_sqrt_three, (ρ_ofFrame _ _ _).1,
+    traceForm_ofFrame]
   generalize Real.exp (t / arcEps q) = s at hsY hs0 ⊢
-  simp only [n4f_Mh, n4f_Me, n4f_Mf, n4f_al, n4f_be, n4f_ga, ArcParams.f0New, ArcParams.Psi,
-    ArcParams.A, ArcParams.B, ArcParams.B', ArcParams.Y', arcParams]
+  simp only [lamHatFrameH, lamHatFrameE, lamHatFrameF, lamAlphaDivSqrtThree, lamBetaDivSqrtThree,
+    lamGammaDivSqrtThree, ArcParams.f0New, ArcParams.Psi, ArcParams.A, ArcParams.B, ArcParams.B',
+    ArcParams.Y', arcParams]
   field_simp
   ring
 
@@ -477,14 +496,14 @@ theorem reinSwitchTime_eq_tauSw (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit
   have hlow : ∀ τ ∈ S', reinSwitchTime q ≤ arcEps q * τ := by
     rintro τ ⟨hτ, hf⟩
     by_cases hτT : arcEps q * τ < arcExitTime q
-    · refine hglb.1 ⟨by positivity, (n4f_chi21_iff hq (by positivity) hτT).2 ?_⟩
+    · refine hglb.1 ⟨by positivity, (switchingFn_one_zero_eq_zero_iff hq (by positivity) hτT).2 ?_⟩
       rwa [mul_div_cancel_left₀ _ hε.ne']
     · linarith
   have hglb' : IsGLB S' (reinSwitchTime q / arcEps q) := by
     refine ⟨fun τ hτ ↦ by rw [div_le_iff₀ hε, mul_comm]; exact hlow τ hτ, fun b hb ↦ ?_⟩
     have hb' : ∀ t ∈ S, t < arcExitTime q → arcEps q * b ≤ t := by
       rintro t ⟨ht0, hχ⟩ htT
-      have := hb ⟨by positivity, (n4f_chi21_iff hq ht0.le htT).1 hχ⟩
+      have := hb ⟨by positivity, (switchingFn_one_zero_eq_zero_iff hq ht0.le htT).1 hχ⟩
       rwa [le_div_iff₀ hε, mul_comm] at this
     have hb₁ := hb' t₁ ht₁S ht₁lt
     have : arcEps q * b ≤ reinSwitchTime q := hglb.2 fun t ht ↦ by
@@ -493,7 +512,8 @@ theorem reinSwitchTime_eq_tauSw (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit
       · linarith
     rwa [le_div_iff₀ hε, mul_comm]
   have hS'ne : S'.Nonempty :=
-    ⟨t₁ / arcEps q, by positivity [ht₁S.1], (n4f_chi21_iff hq ht₁S.1.le ht₁lt).1 ht₁S.2⟩
+    ⟨t₁ / arcEps q, by positivity [ht₁S.1],
+      (switchingFn_one_zero_eq_zero_iff hq ht₁S.1.le ht₁lt).1 ht₁S.2⟩
   have htau : (arcParams q).tauSw = reinSwitchTime q / arcEps q := hglb'.csInf_eq hS'ne
   refine ⟨by rw [htau]; field_simp, ?_⟩
   have hcont : Continuous (arcParams q).f :=
@@ -504,19 +524,21 @@ theorem reinSwitchTime_eq_tauSw (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit
   exact closure_minimal (fun τ (hτ : τ ∈ S') ↦ hτ.2) hcl hmem
 
 /-- At the switch, `χ₂₁(q(t_sw)) = 0`. -/
-private lemma n4f_chi21_tsw (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit q) :
+private lemma switchingFn_one_zero_reinSwitchTime_eq_zero (hq : IsArcSectionPt q)
+    (hs : SwitchesBeforeExit q) :
     switchingFn 1 0 (iso_vertexFlow 1 q (reinSwitchTime q)).2.2
       (iso_vertexFlow 1 q (reinSwitchTime q)).1 = 0 := by
   obtain ⟨hτ, hf⟩ := reinSwitchTime_eq_tauSw hq hs
-  rw [n4f_chi21_iff hq hs.1.le hs.2, hτ, mul_div_cancel_left₀ _ (arcEps_pos hq.2).ne']
+  rw [switchingFn_one_zero_eq_zero_iff hq hs.1.le hs.2, hτ,
+    mul_div_cancel_left₀ _ (arcEps_pos hq.2).ne']
   exact hf
 
 /-- **Theorem 2.1**: the image of a section point whose arc switches inside the star domain is a
 section point. -/
 theorem isArcSectionPt_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit q) :
     IsArcSectionPt (reinPoincare q) := by
-  have hH := n4f_phaseHam_one hq
-  have hχ := n4f_chi21_tsw hq hs
+  have hH := phaseHam_vertex_one_eq_zero hq
+  have hχ := switchingFn_one_zero_reinSwitchTime_eq_zero hq hs
   obtain ⟨⟨⟨h1, h2, h3, h4, h5, -, -⟩, h8⟩, hX⟩ := hq
   obtain ⟨k1, k2, k3⟩ := irt_vertexFlow_traceless 1 h1 h2 h3 (reinSwitchTime q)
   have hstar : IsStarState (iso_vertexFlow 1 q (reinSwitchTime q)).1 :=
@@ -562,7 +584,7 @@ theorem ρ_reinPoincare (hq : IsArcSectionPt q) :
   exact ⟨a.trans (ρ_iso_vfX_one hX _).1, b, c⟩
 
 /-- `ε_new = ρ₁(F q) = ρ₂(X(t_sw)) = ε k`. -/
-private lemma n4f_ρ₁_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit q) :
+private lemma ρ₁_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit q) :
     ρ₁ (reinPoincare q).1 = arcEps q * (arcParams q).stepK := by
   have hε := arcEps_pos hq.2
   obtain ⟨hτ, -⟩ := reinSwitchTime_eq_tauSw hq hs
@@ -585,14 +607,14 @@ theorem arcParams_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit 
   have hn := isArcSectionPt_reinPoincare hq hs
   have htτ : reinSwitchTime q / arcEps q = (arcParams q).tauSw := by
     rw [hτ, mul_div_cancel_left₀ _ hε.ne']
-  have hsY : Real.exp (arcParams q).tauSw < arcY q := htτ ▸ n4f_exp_lt hq hs.2
+  have hsY : Real.exp (arcParams q).tauSw < arcY q := htτ ▸ exp_div_arcEps_lt_arcY hq hs.2
   have hs0 : 0 < Real.exp (arcParams q).tauSw := Real.exp_pos _
   have hk : 0 < (arcParams q).stepK := by
     simp only [ArcParams.stepK, Real.exp_neg]
     rw [sub_pos, ← div_eq_mul_inv, one_lt_div hs0]
     exact hsY
   refine ⟨hk, ?_⟩
-  have hρ₁ := n4f_ρ₁_reinPoincare hq hs
+  have hρ₁ := ρ₁_reinPoincare hq hs
   have e1 : arcEps (reinPoincare q) = (arcParams q).stepK * (arcParams q).eps := by
     rw [show arcEps (reinPoincare q) = ρ₁ (reinPoincare q).1 from rfl, hρ₁, mul_comm]
     rfl
@@ -602,13 +624,13 @@ theorem arcParams_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit 
       ← arcParams_Y' hX, mul_div_mul_left _ _ hε.ne']
   have e3 : arcF0 (reinPoincare q) = (arcParams q).g (arcParams q).tauSw /
       ((arcParams q).Y * Real.exp (-(arcParams q).tauSw) - 1) ^ 2 := by
-    have h := n4f_arcF0_rot hq hs.2 hn
+    have h := arcF0_adRinv_vertexFlow_eq_f0New hq hs.2 hn
     rw [htτ] at h
     rw [ArcParams.g_div_sq_eq_f0New _ (arcG0_eq_zero hq) hf hY (sub_pos.2 hsY).ne']
     exact h
   have e6 : arcP (reinPoincare q) = -(arcParams q).fDeriv (arcParams q).tauSw /
       ((arcParams q).Y * Real.exp (-(arcParams q).tauSw) - 1) ^ 2 := by
-    have h := n4f_arcP_rot hq hs.2
+    have h := arcP_adRinv_vertexFlow_eq_pNew hq hs.2
     rw [htτ] at h
     rw [ArcParams.neg_fDeriv_div_sq_eq_pNew _ hf (sub_pos.2 hsY).ne']
     exact h
@@ -647,7 +669,7 @@ theorem iso_vfΛ₁_one_eq_arcParams (hq : IsArcSectionPt q) (t : ℝ) :
       (arcParams q).lamAlpha • (iso_vfX 1 q t + iso_vfP 1 q) +
         ((arcParams q).lamBeta * Real.exp (2 * t / arcEps q)) • arcVe (iso_vfX 1 q t) +
         ((arcParams q).lamGamma * Real.exp (-2 * t / arcEps q)) • arcVf (iso_vfX 1 q t) :=
-  n4f_vfΛ₁ hq t
+  iso_vfΛ₁_one_eq_eigenbasis hq t
 
 /-- **INV Theorem 1 for `q`, at every time of the arc**: for a section point `q` and `t < T`,
 with `s = e^{t/ε}` (so `s < Y`), the rotated point `Ad_{R⁻¹} q(t)` has
@@ -673,7 +695,7 @@ Also checked exactly with sympy against the literal definitions (matrix exponent
 theorem arcQ_adRinv_vertexFlow (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTime q) :
     arcQ (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       (arcParams q).qNew (Real.exp (t / arcEps q)) :=
-  n4f_arcQ_rot hq ht
+  arcQ_adRinv_vertexFlow_eq_qNew hq ht
 
 /-- **INV Theorem 1 for `p`, at every time of the arc**: for a section point `q` and `t < T`,
 with `s = e^{t/ε}`, the rotated point `Ad_{R⁻¹} q(t)` has `arcP = π(s)/(Y - s)²`
@@ -686,7 +708,7 @@ Route: as `arcQ_adRinv_vertexFlow` with `V_{f,n}`: only `γ` and `J` pair with i
 theorem arcP_adRinv_vertexFlow (hq : IsArcSectionPt q) {t : ℝ} (ht : t < arcExitTime q) :
     arcP (iso_adRinvPow 1 (iso_vertexFlow 1 q t)) =
       (arcParams q).pNew (Real.exp (t / arcEps q)) :=
-  n4f_arcP_rot hq ht
+  arcP_adRinv_vertexFlow_eq_pNew hq ht
 
 /-- **INV Theorem 1, `q_new` in closed form**: for a section point whose arc switches inside the
 star domain, `q_new = arcQ (F q) = Φ(s)/(Y - s)²` with `s = e^{τ_sw}` (`ArcParams.qNew`). This
@@ -712,7 +734,7 @@ theorem radius_reinPoincare (hq : IsArcSectionPt q) (hs : SwitchesBeforeExit q) 
     simp only [ρ₀, ρ₁]
     field_simp
     ring
-  have hρ₁ := n4f_ρ₁_reinPoincare hq hs
+  have hρ₁ := ρ₁_reinPoincare hq hs
   exact ⟨by rw [h00 (reinPoincare q).1, hρ.1], by
     rw [h00 (reinPoincare q).1, hρ.1, hρ₁, show ρ₁ q.1 = arcEps q from rfl]; ring⟩
 
