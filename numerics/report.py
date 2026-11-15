@@ -10,6 +10,7 @@ from . import regions as rg
 from . import faces
 from .checks import common as cm
 from .checks import dout, subclaims as sc, cell_two as c2, remark, unstable_curve
+from .checks import arc_invariant, arc_certificates
 
 
 def _st(st):
@@ -222,7 +223,19 @@ def run_remark(quick=False):
 
 
 def run_unstable(quick=False):
-    return unstable_curve.run()
+    return unstable_curve.run(quick=quick)
+
+
+def run_wucurve(quick=False):
+    return unstable_curve.run_curve(quick=quick)
+
+
+def run_arcinv(quick=False):
+    return arc_invariant.run(quick=quick)
+
+
+def run_arccert(quick=False):
+    return arc_certificates.run(quick=quick)
 
 
 def _stage(domain, tgt, faces_too, required=0.0, max_depth=40):
@@ -400,4 +413,5 @@ def run_celltwo(quick=False):
 
 
 RUNNERS = {'selftest': run_selftest, 'remark': run_remark, 'dout': run_dout,
-           'subclaims': run_subclaims, 'celltwo': run_celltwo, 'unstable': run_unstable}
+           'subclaims': run_subclaims, 'celltwo': run_celltwo, 'unstable': run_unstable,
+           'wucurve': run_wucurve, 'arcinv': run_arcinv, 'arccert': run_arccert}

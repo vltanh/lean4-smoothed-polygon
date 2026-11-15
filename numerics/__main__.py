@@ -1,7 +1,7 @@
 """Command line: ``python3 -m numerics [check ...] [--jobs N] [--out FILE] [--quick]``.
 
-Checks: ``selftest``, ``remark``, ``dout``, ``subclaims``, ``celltwo``, ``unstable`` (placeholder),
-``all`` (the default). Results are printed and written as JSON to ``--out``
+Checks: ``selftest``, ``remark``, ``dout``, ``subclaims``, ``celltwo``, ``unstable`` (N4: its three
+parts ``wucurve``, ``arcinv``, ``arccert`` can also be run alone), ``all`` (the default). Results are printed and written as JSON to ``--out``
 (default ``notes/ref/results.json`` relative to the repository root).
 """
 import argparse

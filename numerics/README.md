@@ -2,7 +2,8 @@
 
 A Python reference implementation of the Fuller-Poincaré map of Hales-Vajjha, *Packings of
 Smoothed Polygons*, exactly as the Lean definitions say, and rigorous interval checks of the
-numerical facts that the book takes from Mathematica plots.
+numerical facts that the book takes from Mathematica plots. For N4 (Theorem 14.4.1) it does the
+same with the Reinhardt system along `e2`-arcs ([N4 section](#n4-theorem-1441-unstablecurveleavesstardomain-ch14)).
 
 **It is a reference.** The Lean proofs do not depend on it: nothing here is imported or trusted by
 Lean, and only `generators/` wrote Lean code (an interval chain each of whose steps Lean checks). It reproduces the book's numbers, gives the analytic proofs their
@@ -20,7 +21,9 @@ margins and regions, and is an independent check of the Lean statements.
 | `faces.py`, `edges.py` | face points whose first control is not the cell's (canonical representatives); when a box is replaced by a chart |
 | `regions.py` | `basinA`, `basinB`, `cellBox`, the targets |
 | `driver.py` | adaptive subdivision, in parallel |
-| `checks/` | `dout.py`, `subclaims.py`, `cell_two.py`, `remark.py`, `unstable_curve.py` (placeholder), `common.py` |
+| `reinhardt.py` | N4: the Reinhardt system along an `e2`-arc in closed form (exponential polynomials), the chart of Chapter 14, `Ad_{R^-1}`, the arc parameters by their Lean definitions; in mpmath or Arb balls |
+| `arcmap.py` | N4: the arc parameters `(eps, Y, f0, q, p)`, the one-step map `ArcParams.step` and its closed forms, `G*` (`arcRegion`), the exit test |
+| `checks/` | `dout.py`, `subclaims.py`, `cell_two.py`, `remark.py`, `common.py`; for N4 `unstable_curve.py`, `arc_invariant.py`, `arc_certificates.py` |
 | `report.py`, `__main__.py` | the command line |
 | `generators/` | `dout_contraction_bounds.py` (with `contraction_intervals.py`) regenerates the interval chains `lip_*` of `SmoothedPolygons/Ch16/DOutContractionBounds.lean` |
 
@@ -28,15 +31,17 @@ margins and regions, and is an independent check of the Lean statements.
 
 ```sh
 pip install --user python-flint            # python-flint 0.9 (Arb); numpy is used for root guesses
+pip install --user mpmath sympy            # for N4 (mpmath 1.3, sympy 1.14)
 python3 -m numerics selftest remark        # a few seconds
 python3 -m numerics dout subclaims celltwo --jobs 12
 python3 -m numerics all --quick            # without the certified-margin reruns
+python3 -m numerics unstable --jobs 12     # N4 (its parts: wucurve, arcinv, arccert)
 ```
 
 Results are written to `notes/ref/results.json` (`--out FILE`). `NUMERICS_JOBS` sets the number of
 worker processes (default `min(10, cpus)`), `NUMERICS_PROGRESS=1` prints progress. Times with 12
 processes: `selftest` and `remark` seconds, `subclaims` 2 min, `dout` about 40 min (22 of them for the
-Lipschitz bound of the wider witnesses), `celltwo` 30 min (by its time limit).
+Lipschitz bound of the wider witnesses), `celltwo` 30 min (by its time limit), `unstable` 36 s.
 
 ## Results
 
@@ -53,7 +58,7 @@ bound). Coordinates are `(r2, psi, theta2)`.
 | `BoxSubclaims` (seven boxes) | **proved** | 6,392 | 111 s | see below | > 0 |
 | `CellTwoEntersDOut` | **not finished**: proved on 74.2% of the closed cell (volume) | 140,107 | 29 min (time limit 120 s per root box) | 0.789 on the grid; 0.373 in the unproved part; 1.1 - π/3 = 0.0528 is the infimum (a corner limit, earlier report) | > 0 where proved |
 | `remark15_3_1`, `remark15_3_1_segment` | **true**: the 14 numerical claims, and the fixed points | (points) | < 1 s | | |
-| `UnstableCurveLeavesStarDomain` (Ch14) | placeholder | | | | |
+| `UnstableCurveLeavesStarDomain` (Ch14; proved in Lean without computation) | **true** on 500 orbits of `W^u`; (INV) true at 63,530 sampled switching points of `G*`; the certificates hold exactly (see the N4 section) | 500 orbits (4,182 arcs); 68,875 points of `G*` | 36 s | exit arcs on `W^u`: `min F = 1.55e-4` at `r = 0.06497` (next to the threshold); (INV) `0.0417` at the corner `x = y = 1e-9` of `G*` | every sign on the 500 orbits (Arb) |
 
 `DOutContracts`, the second conjunct, for three choices of witnesses (`B = Icc lo hi`; every stage is
 one step `F(X) ⊆ Y` from all of `X`; `κ` bounds the sup-norm row sums of the Jacobian of the branch
@@ -183,8 +188,46 @@ kinds): no disagreement.
   first cell with first control `zeta` (`faces.py`); in `D00` they all have representatives in `D00`
   itself.
 
-## Placeholder: Theorem 14.4.1 (`UnstableCurveLeavesStarDomain`, Ch14)
+## N4: Theorem 14.4.1 (`UnstableCurveLeavesStarDomain`, Ch14)
 
-`checks/unstable_curve.py` documents what a reference computation should provide for the unstable
-curve of Chapter 14 (a different dynamical system, the Reinhardt chart of Chapter 14); nothing is
-computed yet.
+The book reads N4 off Figure 14.2, a Mathematica plot of the unstable curve `W^u(q_out)`. Lean
+proves N4 without computation (`unstableCurveLeavesStarDomain`, through (INV), `Ch14/Arc*.lean`).
+This is the reference for it. The dynamical system is the Reinhardt system in the chart of
+Chapter 14, not the Fuller system, so `boxmap` plays no part: every `e2`-arc is a closed-form
+exponential polynomial (`reinhardt.py`), and the Poincaré map is an explicit map of the arc
+parameters (`arcmap.py`). Run of 2026-11-15, `--jobs 12`, 36 s; the results were written to
+`notes/n4num/results.json` (log `notes/n4num/run_unstable.log`); the default `--out` merges them into
+`notes/ref/results.json`.
+
+| part | arithmetic | what is computed | result |
+| --- | --- | --- | --- |
+| 1 `checks/unstable_curve.py` (`wucurve`, 15 s) | mpmath, 110 digits (the curve), **Arb, 512 bits** (the orbits), mpmath, 60 digits (the threshold) | `W^u` by the graph transform and its Taylor data. 500 seeds on a fundamental domain `[1e-7, 6.27e-7)`, followed to the exit; per arc the switching time, the exit time `eps log Y`, the signs of `SwitchEntersE2`, `ArcSwitchesToE1`, `ArcLeavesStarDomain`, and `K`. The threshold `s*` by bisection | all 500 orbits switch cyclically and then exit, with every sign decided in balls. Rigorous for each seed phase point; the seeds lie on `W^u` only to about `1e-26` (not certified) |
+| 2 `checks/arc_invariant.py` (`arcinv`, 20 s) | mpmath, 60 digits (sampled, not rigorous) | (INV) on 45,760 samples (a grid and random points, down to `r = 3e-10`, and to within `1e-10` to `3e-8` of the faces E, P1, P2, P4 of `G*` in the natural scales), both roots `q` of (2.1); the sharp form, INV Prop. 5, `rel = 0` at the image; 400 images against the closed-form flow | 0 failures among 63,530 switching points: 57,811 images in `G*`, 7,621 exit, 1,902 both |
+| 3 `checks/arc_certificates.py` (`arccert`, 1 s) | sympy, exact | the 3 Bernstein certificates (`K~`: 26 coefficients; `tau_q`: 12 lists; `U`: 18 lists) and 12 identities (7 `linear_combination` cofactors, 5 polynomial identities), read off the Lean source | all hold |
+
+The figure's numbers:
+
+| quantity | book | here |
+| --- | --- | --- |
+| `x~21` at the fixed point | `-2.39` | `-2.388856` (`x~_out`) |
+| end point of the curve of switching points | `(0.21, -3.03)` | `(0.209847, -3.033319)`, on the boundary `x~21 = sqrt3 - 1/r` |
+| threshold: an arc from `r >= r*` exits before switching | "about 0.065" (TeX comment: `0.0641`) | `r* = 0.0649466`; the largest switching point has `r = 0.064764`, the smallest exit point `r = 0.064970` |
+| `K` from `r in [1e-3, 6.21e-3)` | not stated (the Lean docstring: 2 or 3) | `K = 2` for 327 orbits, `K = 3` for 173 (`K = 7` or `8` from the seeds) |
+| `v = gamma'(0)`, `gamma''(0)/2` | | `(-1.0777706, -13.389650, 3.9345535)`, `(-2.601, -35.98, 7.535)` |
+
+Margins. On `W^u`, at `r < 0.01` in the natural scales: `f0/r^3 >= 6.63`, `p/r^2 >= 2.25`,
+`-q/r^2 >= 9.6`, `-F(log Y) >= 0.1137`, `-f'(tau_sw)/r^2 >= 81`, `E/r >= 5.4`. On the exit arcs,
+`min F on [0, log Y] = 1.55e-4`, attained next to the threshold. There the switch and the exit
+coincide, and `F(log Y)` is linear in `log s` with slope `0.3731`. Below `s*` the next arc is a cusp
+arc (`eps = 2.5e-4, 2.5e-9, 2.5e-17` at `s*(1 - delta)`, `delta = 1e-3, 1e-8, 1e-16`) and it exits.
+Each exit arc is also covered by a Lean lemma: Proposition 3.4 (3) (451 of 500), the cusp criterion
+(50), INV Lemma 6 (440). In (INV), the smallest `max(in, exit)` margin is `0.0417`, at the corner
+`x = y = 1e-9`, `f0/y^3 = p/y^2 = 1e-8` (on the smaller root, `q = -1.5 y`). Where `psi(s) < 0`,
+`Y_new >= 3.2853` (`>= 16/5`). INV Prop. 5 holds with `(f0 - q(1 - 1/Y))/f0 >= 0.498` at the image.
+The closed forms agree with `step` and with the flow to `1e-34`.
+
+Findings: no disagreement with the Lean statements. At every sampled image of `G*`, `q_new` is the
+larger root of `R = 0` (63,530 of 63,530, whichever root the point itself was on), as the review
+found on 72 points (`ArcPoincareMap.lean`). The four-term normal form (Theorem 1.3), the section
+conditions at the images, the slope `-2 sqrt3 p/(Y' - 1)` and Theorem 2.1 with
+`q_new = Phi(s)/(Y - s)^2` all hold along the orbits within the balls (radii `<= 4e-65`).
