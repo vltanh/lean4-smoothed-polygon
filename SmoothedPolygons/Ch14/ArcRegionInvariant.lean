@@ -19,7 +19,7 @@ about one step of the Reinhardt–Poincaré map on the explicit region `𝒢*` (
 
 **Departure from the paper**, by the user's decision. The book computes the unstable curve in
 Mathematica and reads off that it reaches the boundary of the star domain (Figure 14.2,
-TeX 11951–11991; the authors did not certify it, TeX 11954–11957, REPORT.md E88). The
+TeX 11951–11991; the authors did not certify it, TeX 11952–11955, REPORT.md E88). The
 formalization does not locate the curve: it proves N4 from (INV) by the exact structure of the
 `e₂`-arcs (closed-form state, four-term switching numerators, an explicit one-step map of four
 parameters, the telescoping of the radii; `SmoothedPolygons/Ch14/ArcParams.lean` …

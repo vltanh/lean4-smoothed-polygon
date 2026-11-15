@@ -454,3 +454,56 @@ that completes the round's REPORT.md (17:53 CST), from the session transcript:
 For the whole project (nine rounds, to the same time): 219.8 hours elapsed (including the stops),
 215 sub-agents (194 on the formalization and its three packages; at most 13 at once), 90.3 hours of
 sub-agent work, 17,119 tool calls by sub-agents and 1,824 by the main session.
+
+## Tenth round (14–15 November 2026)
+
+After publishing the sixth layer (with the user's approval), the round proved the seventh: §14.4,
+Theorem 14.4.1, and the four facts that the book reads off computations. With them Theorem 16.3.1,
+Mahler's First conjecture, is proved with no hypothesis, and the Challenge now states it. The user
+decided four questions:
+- the facts the book reads off Mathematica computations (the three of Table 16.1 and N4, the
+  unstable curve of Figure 14.2) are proved without computer assistance, each recorded as a
+  departure, with the computations kept in Python ([`numerics/`](numerics)) as a reference; this replaced the
+  planned kernel certification, whose pilot was removed;
+- an analytic proof of N4 was attempted, with a research round first, then formalized while a
+  second research round completed the proof of its single-step statement (INV);
+- the scope: formalize what the main results need, with no further layer (Chapters 9–12, the rest
+  of the appendices, Appendix B and the remarks no main result uses stay out);
+- the attempt at Proposition 15.3.2, off the path of the main theorem, was allowed to finish; it
+  is partial.
+
+How it was made:
+
+- **§14.4** (four agents): the statements, an independent review, and the proofs of Theorem 14.4.1
+  from N4 and of Mahler's First from the four named facts.
+- **Kernel certification** (two agents): the first step of `DOutContracts` certified by the
+  pilot's interval arithmetic, then superseded by the analytic proof and removed.
+- **The three facts of Table 16.1** (three agents): analytic proofs, one fact each.
+- **N4** (thirteen agents): two research rounds (the exact structure of the Reinhardt flow along
+  an `e₂`-arc, and the invariant region), two rounds of statements, an independent review that
+  checked the research proof, and eight proof agents (at most four at once).
+- **Python reference** (two agents): [`numerics/`](numerics) for the facts of Chapters 13–16, and its part for
+  N4.
+- **Proposition 15.3.2** (one agent): partial.
+- **Verification and cleanup** (four agents): two independent comparisons with the book (Layer 7a
+  with the Table 16.1 proofs, then N4) found no wrong statement and nothing unsound, and named
+  stale records, which the two cleanups fixed; the second cleanup added Mahler's First to the
+  Challenge.
+- **Audit** (one agent): REPORT.md (E93–E94, E88 rewritten), README.md, formalization.yaml.
+
+Figures, from the end of the ninth round (14 November 2026, 17:53 CST) to just before the commit
+that completes the round's REPORT.md (15 November, 11:30 CST), from the session transcript:
+
+- elapsed time: 17.6 hours, including two stops of 1.7 and 6.9 hours (the second overnight), so
+  about 9.1 hours of work (including the publication of the sixth layer);
+- sub-agents: 32 (30 started in the round), at most 8 running at once, 1 resumption; their total
+  working time 20.0 hours;
+- tool calls: 3,206 by the sub-agents, 180 by the main session;
+- tokens: sub-agents 5.91M output, 14.99M input (uncached input and cache writes), 985M cache
+  reads; main session 0.17M output, 1.95M input, 98M cache reads;
+- model calls: `claude-opus-5-5` only, 3,045 by the sub-agents and 168 by the main session; Claude
+  Code 2.1.323.
+
+For the whole project (ten rounds, to the same time): 237.4 hours elapsed (including the stops),
+245 sub-agents (224 on the formalization and its three packages; at most 13 at once), 110.3 hours
+of sub-agent work, 20,325 tool calls by sub-agents and 2,004 by the main session.
