@@ -35,7 +35,7 @@ on `SL₂(ℝ)` and studies its Pontryagin extremals.
 | Ch. 15, the geometry of the Fuller–Poincaré map: cell coordinates, smaller cells, the involution `τF` | proved (Proposition 15.3.2 in part) |
 | Ch. 16, Theorems 16.1.1 (global basin), 16.2.1, 16.4.1 (cluster point theorem) and 16.3.1 (Mahler's First conjecture) | proved (Table 16.1 without computer assistance) |
 | Appendix A.1 (Corollary A.1.3), A.3 (Theorem A.3.1, local part), A.6, A.11 | proved |
-| Ch. 9–12 (circular control) apart from Lemma 10.1.1; the other appendices; Appendix B | not formalized, not planned |
+| Ch. 9–12 (circular control) apart from Lemma 10.1.1; the other appendices; Appendix B | not formalized (the user's scope decision) |
 
 ## Main results
 
@@ -116,7 +116,8 @@ sketches, or, for the computed facts, by the user's decision, are listed in
   the maximum principle needs.
 - [StableManifold](https://github.com/vltanh/lean4-stable-manifold): the stable manifold theorem
   for maps (Lyapunov–Perron method, `Cⁿ` graphs, `n ≤ ∞`), which Appendix A.3 recalls from Irwin;
-  Mahler's First uses it through Theorem 14.4.1.
+  Mahler's First uses it through Theorem 14.4.1. A shorter route that the proofs record but do not
+  take would avoid it ([REPORT.md, Section 11](REPORT.md#11-simpler-arguments)).
 
 OptimalControl (which requires FixedPoint) and StableManifold are required at pinned commits in
 [`lakefile.toml`](lakefile.toml).
@@ -141,24 +142,9 @@ Lean and Mathlib `v4.36.0-rc2`.
 | [`External/`](External) | cited results, all proved ([External/README.md](External/README.md)) |
 | [`Basic/`](Basic) | general mathematics written for this project ([Basic/README.md](Basic/README.md)) |
 | [`Challenge.lean`](Challenge.lean), [`Solution.lean`](Solution.lean) | Palomar's statement of record and its proof |
-| [`scripts/`](scripts), [`docs/`](docs) | the audit, the route check and its data |
+| [`scripts/`](scripts), [`docs/`](docs) | the audit, the route check and its data; the details of REPORT.md in [`docs/report/`](docs/report) |
 | [`numerics/`](numerics) | a Python reference for the computed facts (not used by the proofs) |
 | [REPORT.md](REPORT.md), [CREDITS.md](CREDITS.md) | the audit of the book; how this was made |
-
-## What's next
-
-The plan's layers are done (details in [REPORT.md, Section 11](REPORT.md#11-whats-next)):
-
-| Layer | Content | Status |
-| --- | --- | --- |
-| 1–4 | the maximum principle; Ch. 5 and a minimizer; Ch. 8; Ch. 13 | done |
-| 5 | Ch. 15 and Theorems 16.1.1, 16.2.1 | done |
-| 6 | Ch. 14 to §14.3, App. A.3, Theorem 16.4.1 | done |
-| 7 | Theorem 14.4.1 and the four computed facts, without computer assistance; with them Mahler's First | done |
-
-By the user's decision (15 November 2026) the formalization goes no further than the main results
-need, and no further layer is planned. REPORT.md lists shorter routes that the proofs do not take, among
-them one that would free Mahler's First from the stable manifold theorem.
 
 ## Related work
 
@@ -174,7 +160,7 @@ them one that would free Mahler's First from the stable manifold theorem.
 - Written by Claude (Opus 5.5, model `claude-opus-5-5`) in Claude Code, with parallel sub-agents,
   at the request of The-Anh Vu-Le, who chose the scope and made the decisions recorded in REPORT.md,
   following the [formalize-math-paper](https://github.com/vltanh/formalize-math-paper) skill.
-- Made on 5–15 November 2026 in ten rounds; [CREDITS.md](CREDITS.md) has the procedure and figures.
+- Made on 5–15 November 2026; [CREDITS.md](CREDITS.md) has the procedure and figures.
 
 ## License
 

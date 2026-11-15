@@ -38,7 +38,11 @@ def git_ignored(path):
 
 # ---- configuration -------------------------------------------------------------------------
 # The Markdown documents to process.
-DOCS = ['README.md', 'REPORT.md', 'CREDITS.md', 'Basic/README.md', 'External/README.md']
+DOCS = ['README.md', 'REPORT.md', 'CREDITS.md', 'Basic/README.md', 'External/README.md',
+        'docs/report/cited-results.md', 'docs/report/departures.md', 'docs/report/dependencies.md',
+        'docs/report/errors.md', 'docs/report/libraries.md', 'docs/report/literature.md',
+        'docs/report/not-formalized.md', 'docs/report/readings.md',
+        'docs/report/simpler-arguments.md']
 # Namespaces in which the documents name declarations without their prefix, most specific last.
 NAMESPACES = ['Matrix', 'UpperHalfPlane', 'SmoothedPolygons', 'SmoothedPolygonsChallenge']
 # Top-level module names of the project: a code span naming such a module links to its file.
