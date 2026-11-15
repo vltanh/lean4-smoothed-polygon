@@ -88,35 +88,67 @@ printed: `{(u₀, u₁, u₂) | 0 ≤ uᵢ ≤ 1, Σuᵢ = 1, Σuᵢ² ≤ ½}`,
 def controlDiskI : Set (Fin 3 → ℝ) :=
   {u | (∀ i, 0 ≤ u i ∧ u i ≤ 1) ∧ u 0 + u 1 + u 2 = 1 ∧ u 0 ^ 2 + u 1 ^ 2 + u 2 ^ 2 ≤ 1 / 2}
 
+/-- On the simplex, `Σuᵢ² = (Σuᵢ)² - 2(u₀u₁ + u₀u₂ + u₁u₂) = 1 - 2(u₀u₁ + u₀u₂ + u₁u₂)`. -/
+private lemma sumSq_eq_of_mem_controlSimplex {u : Fin 3 → ℝ} (hu : u ∈ controlSimplex) :
+    u 0 ^ 2 + u 1 ^ 2 + u 2 ^ 2 = 1 - 2 * (u 0 * u 1 + u 0 * u 2 + u 1 * u 2) := by
+  have hs : (u 0 + u 1 + u 2) ^ 2 = 1 := by rw [hu.2]; norm_num
+  linear_combination hs
+
+/-- On the simplex, `Σuᵢ² ≤ (Σuᵢ)² = 1`, since the cross terms `uᵢuⱼ` are `≥ 0`. -/
+private lemma sumSq_le_one_of_mem_controlSimplex {u : Fin 3 → ℝ} (hu : u ∈ controlSimplex) :
+    u 0 ^ 2 + u 1 ^ 2 + u 2 ^ 2 ≤ 1 := by
+  have h0 := (hu.1 0).1
+  have h1 := (hu.1 1).1
+  have h2 := (hu.1 2).1
+  rw [sumSq_eq_of_mem_controlSimplex hu]
+  nlinarith [mul_nonneg h0 h1, mul_nonneg h0 h2, mul_nonneg h1 h2]
+
 /-- **The printed `U_C` is `U_T`**: on the simplex `Σuᵢ² ≤ (Σuᵢ)² = 1`, since `uᵢ ≥ 0`.
 
-Proof plan (10–15 lines): `ext u`; `⊆` forgets the last condition; `⊇`: `Σuᵢ² ≤ (Σuᵢ)² = 1`
-by `nlinarith` from `0 ≤ uᵢ` (the cross terms `uᵢuⱼ ≥ 0`). -/
+Proof: `⊆` forgets the last condition; `⊇` is `sumSq_le_one_of_mem_controlSimplex` (the cross
+terms `uᵢuⱼ` are `≥ 0`). -/
 theorem controlDiskCAsPrinted_eq_controlSimplex : controlDiskCAsPrinted = controlSimplex := by
-  sorry
+  ext u
+  exact ⟨fun h ↦ ⟨h.1, h.2.1⟩, fun h ↦ ⟨h.1, h.2, sumSq_le_one_of_mem_controlSimplex h⟩⟩
 
 /-- The simplex lies in the circumscribed disk: `U_T ⊆ U_C`.
 
-Proof plan (5–10 lines): as in `controlDiskCAsPrinted_eq_controlSimplex`, `Σuᵢ² ≤ (Σuᵢ)² = 1` on
-`U_T`. -/
-theorem controlSimplex_subset_controlDiskC : controlSimplex ⊆ controlDiskC := by
-  sorry
+Proof: as in `controlDiskCAsPrinted_eq_controlSimplex`, `Σuᵢ² ≤ (Σuᵢ)² = 1` on `U_T`. -/
+theorem controlSimplex_subset_controlDiskC : controlSimplex ⊆ controlDiskC := fun _ hu ↦
+  ⟨hu.2, (sumSq_le_one_of_mem_controlSimplex hu).trans_eq (one_pow 2).symm⟩
 
 /-- **`U_I = U_r` with `r² = ½`**: the printed constraints `0 ≤ uᵢ ≤ 1` of `U_I` follow from
 `Σuᵢ = 1` and `Σuᵢ² ≤ ½` (the inscribed disk lies in `U_T`).
 
-Proof plan (15–25 lines): `ext u`; `(√2/2)² = ½`; for `⊇`, if `u₀ < 0` then `u₁ + u₂ > 1` and
-`u₁² + u₂² ≥ (u₁ + u₂)²/2 > ½`, a contradiction (`nlinarith`), likewise for `u₁`, `u₂`; then
-`uᵢ ≤ 1` since the other two are `≥ 0`. -/
+Proof: `(√2/2)² = ½`. For `⊇`, if `u₀ < 0` then `u₁ + u₂ = 1 - u₀ > 1` and
+`u₀² + u₁² + u₂² ≥ u₀² + (1 - u₀)²/2 > ½` (`nlinarith` with `(u₁ - u₂)² ≥ 0`), a contradiction;
+likewise for `u₁`, `u₂`; then `uᵢ ≤ 1` since the other two are `≥ 0`. -/
 theorem controlDiskI_eq_controlDisk : controlDiskI = controlDisk (√2 / 2) := by
-  sorry
+  have h2 : (√2 / 2) ^ 2 = 1 / 2 := by rw [div_pow, Real.sq_sqrt (by norm_num)]; norm_num
+  ext u
+  simp only [controlDiskI, controlDisk, Set.mem_ofPred_eq, h2]
+  refine ⟨fun h ↦ h.2, fun ⟨hs, hq⟩ ↦ ⟨?_, hs, hq⟩⟩
+  have h0 : 0 ≤ u 0 := by nlinarith [sq_nonneg (u 1 - u 2)]
+  have h1 : 0 ≤ u 1 := by nlinarith [sq_nonneg (u 0 - u 2)]
+  have h2 : 0 ≤ u 2 := by nlinarith [sq_nonneg (u 0 - u 1)]
+  intro i
+  fin_cases i <;> simp <;> constructor <;> linarith
 
 /-- `U_r` is compact.
 
-Proof plan (15–25 lines): closed (preimage of a closed set under continuous maps) and bounded
-(`|uᵢ| ≤ |r|` from `uᵢ² ≤ Σuⱼ² ≤ r²`), `Metric.isCompact_of_isClosed_isBounded`. -/
+Proof: closed (the preimage of a closed set under continuous maps) and contained in the compact
+box `[-|r|, |r|]³` (`uᵢ² ≤ Σuⱼ² ≤ r²`). -/
 theorem isCompact_controlDisk (r : ℝ) : IsCompact (controlDisk r) := by
-  sorry
+  have hc : IsClosed (controlDisk r) := by
+    have h1 : Continuous fun u : Fin 3 → ℝ ↦ u 0 + u 1 + u 2 := by fun_prop
+    have h2 : Continuous fun u : Fin 3 → ℝ ↦ u 0 ^ 2 + u 1 ^ 2 + u 2 ^ 2 := by fun_prop
+    exact (isClosed_eq h1 continuous_const).inter (isClosed_le h2 continuous_const)
+  refine (isCompact_univ_pi fun _ ↦ isCompact_Icc (a := -|r|) (b := |r|)).of_isClosed_subset hc
+    fun u hu i _ ↦ ?_
+  have hsq : u i ^ 2 ≤ |r| ^ 2 := by
+    rw [sq_abs]
+    fin_cases i <;> simp <;> nlinarith [hu.2, sq_nonneg (u 0), sq_nonneg (u 1), sq_nonneg (u 2)]
+  exact abs_le_of_sq_le_sq' hsq (abs_nonneg r)
 
 /-! ### Rotations of the control set -/
 
@@ -127,29 +159,136 @@ def IsRotationClosed (U : Set (Fin 3 → ℝ)) : Prop :=
   ∀ A ∈ Matrix.specialOrthogonalGroup (Fin 2) ℝ, ∀ u ∈ U, ∃ u' ∈ U,
     controlMatrix u' = A * controlMatrix u * A⁻¹
 
+/-- The inverse of `[[a, -c], [c, a]]` with `a² + c² = 1` is `[[a, c], [-c, a]]`. -/
+private lemma inv_rotationForm {a c : ℝ} (h : a ^ 2 + c ^ 2 = 1) :
+    (!![a, -c; c, a] : Mat2)⁻¹ = !![a, c; -c, a] := by
+  refine Matrix.inv_eq_right_inv ?_
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [Matrix.mul_apply, Fin.sum_univ_two] <;> linarith
+
+/-- `[[a, -c], [c, a]]` with `a² + c² = 1` is in `SO₂(ℝ)`. -/
+private lemma rotationForm_mem_specialOrthogonalGroup {a c : ℝ} (h : a ^ 2 + c ^ 2 = 1) :
+    (!![a, -c; c, a] : Mat2) ∈ Matrix.specialOrthogonalGroup (Fin 2) ℝ :=
+  Matrix.of_mem_specialOrthogonalGroup_fin_two_iff.2 ⟨rfl, rfl, by linear_combination h⟩
+
+/-- Every `A ∈ SO₂(ℝ)` is `[[a, -c], [c, a]]` with `a² + c² = 1`. -/
+private lemma exists_rotationForm_of_mem_specialOrthogonalGroup {A : Mat2}
+    (hA : A ∈ Matrix.specialOrthogonalGroup (Fin 2) ℝ) :
+    ∃ a c : ℝ, a ^ 2 + c ^ 2 = 1 ∧ A = !![a, -c; c, a] := by
+  rw [Matrix.eta_fin_two A] at hA
+  obtain ⟨h1, h2, h3⟩ := Matrix.of_mem_specialOrthogonalGroup_fin_two_iff.1 hA
+  refine ⟨A 0 0, A 1 0, by rw [h2] at h3; linear_combination h3, ?_⟩
+  conv_lhs => rw [Matrix.eta_fin_two A]
+  rw [← h1, h2]
+
+/-- The squared Frobenius norm `Σᵢⱼ Mᵢⱼ² = tr(MᵀM)`. -/
+private def frobeniusSq (M : Mat2) : ℝ := M 0 0 ^ 2 + M 0 1 ^ 2 + M 1 0 ^ 2 + M 1 1 ^ 2
+
+/-- Conjugation by a rotation `A ∈ SO₂(ℝ)` preserves `⟨J, M⟩`, the Frobenius norm and the trace
+(`A = [[a, -c], [c, a]]`, `A⁻¹ = Aᵀ`: `AᵀJA = J` and `M ↦ AMAᵀ` is orthogonal). -/
+private lemma conj_invariants_of_mem_specialOrthogonalGroup {A : Mat2}
+    (hA : A ∈ Matrix.specialOrthogonalGroup (Fin 2) ℝ) (M : Mat2) :
+    traceForm J (A * M * A⁻¹) = traceForm J M ∧ frobeniusSq (A * M * A⁻¹) = frobeniusSq M ∧
+      (A * M * A⁻¹).trace = M.trace := by
+  obtain ⟨a, c, h, rfl⟩ := exists_rotationForm_of_mem_specialOrthogonalGroup hA
+  rw [inv_rotationForm h, Matrix.eta_fin_two M]
+  refine ⟨?_, ?_, ?_⟩
+  · simp [traceForm, J, Matrix.trace_fin_two]
+    linear_combination (M 0 1 - M 1 0) * h
+  · simp [frobeniusSq]
+    linear_combination (a ^ 2 + c ^ 2 + 1) *
+      (M 0 0 ^ 2 + M 0 1 ^ 2 + M 1 0 ^ 2 + M 1 1 ^ 2) * h
+  · simp [Matrix.trace_fin_two]
+    linear_combination (M 0 0 + M 1 1) * h
+
+/-- `Σuᵢ = -(3/2) ⟨J, Z_u⟩`. -/
+private lemma sum_eq_traceForm_J_controlMatrix (u : Fin 3 → ℝ) :
+    u 0 + u 1 + u 2 = -(3 / 2) * traceForm J (controlMatrix u) := by
+  simp [traceForm, J, controlMatrix, Matrix.trace_fin_two]
+  ring
+
+/-- `Σuᵢ² = (3/4) tr(Z_uᵀZ_u) + (3/8) ⟨J, Z_u⟩²`. -/
+private lemma sumSq_eq_frobeniusSq_controlMatrix (u : Fin 3 → ℝ) :
+    u 0 ^ 2 + u 1 ^ 2 + u 2 ^ 2 =
+      3 / 4 * frobeniusSq (controlMatrix u) + 3 / 8 * traceForm J (controlMatrix u) ^ 2 := by
+  have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  simp [frobeniusSq, traceForm, J, controlMatrix, Matrix.trace_fin_two, div_pow, h3]
+  ring
+
+/-- `u ↦ Z_u` maps onto `𝔰𝔩₂(ℝ)`: the traceless `M` is `Z_u` for
+`u = (M₁₀, ((M₁₀ - 3M₀₁)/2 + √3 M₀₀)/2, ((M₁₀ - 3M₀₁)/2 - √3 M₀₀)/2)`. -/
+private lemma exists_controlMatrix_eq_of_trace_eq_zero {M : Mat2} (hM : M.trace = 0) :
+    ∃ u : Fin 3 → ℝ, controlMatrix u = M := by
+  have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have h3' : √3 ≠ 0 := by positivity
+  rw [Matrix.trace_fin_two] at hM
+  refine ⟨![M 1 0, ((M 1 0 - 3 * M 0 1) / 2 + √3 * M 0 0) / 2,
+    ((M 1 0 - 3 * M 0 1) / 2 - √3 * M 0 0) / 2], ?_⟩
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [controlMatrix] <;> field_simp <;>
+    first | linear_combination | linear_combination (-4 * √3) * hM
+
+/-- If `Z_{u'} = A Z_u A⁻¹` with `A ∈ SO₂(ℝ)`, then `Σu'ᵢ = Σuᵢ` and `Σu'ᵢ² = Σuᵢ²`. -/
+private lemma sum_eq_and_sumSq_eq_of_controlMatrix_eq_conj {A : Mat2}
+    (hA : A ∈ Matrix.specialOrthogonalGroup (Fin 2) ℝ) {u u' : Fin 3 → ℝ}
+    (hu : controlMatrix u' = A * controlMatrix u * A⁻¹) :
+    u' 0 + u' 1 + u' 2 = u 0 + u 1 + u 2 ∧
+      u' 0 ^ 2 + u' 1 ^ 2 + u' 2 ^ 2 = u 0 ^ 2 + u 1 ^ 2 + u 2 ^ 2 := by
+  obtain ⟨hJ, hF, -⟩ := conj_invariants_of_mem_specialOrthogonalGroup hA (controlMatrix u)
+  rw [sum_eq_traceForm_J_controlMatrix, sum_eq_traceForm_J_controlMatrix u,
+    sumSq_eq_frobeniusSq_controlMatrix, sumSq_eq_frobeniusSq_controlMatrix u, hu, hJ, hF]
+  exact ⟨rfl, rfl⟩
+
 /-- **The disks `U_r` are closed under rotations** (TeX 7733–7734: "the disk control set is
 invariant under rotations by the circle group `S¹`"; the proof of Theorem 9.1.6, TeX 7922–7925:
 "`Z_u ↦ Ad_{exp(Jθ)} Z_u ∈ U_C`"; Remark 9.1.7 for `U_r`).
 
-Proof plan (60–100 lines):
-1. `u ↦ Z_u` is a linear isomorphism `ℝ³ ≅ 𝔰𝔩₂(ℝ)`, with inverse
-   `Z ↦ (Z₁₀, ((Z₁₀ - 3Z₀₁)/2 + √3 Z₀₀)/2, ((Z₁₀ - 3Z₀₁)/2 - √3 Z₀₀)/2)` (check by `ext; ring`
-   with `√3² = 3`); set `u' := ` this inverse applied to `A Z_u A⁻¹` (traceless).
-2. `Σu = -(3/2)⟨J, Z_u⟩` and `Σuᵢ² = (Σuᵢ)²/3 - (3/2) det(Z_u - (Σu/3) J)` (the matrix
-   `Z_u - (Σu/3) J` is symmetric and traceless; `ring` with `√3² = 3`).
-3. For `A ∈ SO₂(ℝ)`: `A⁻¹ = Aᵀ`, `A J A⁻¹ = J` (`A = [[a, -c], [c, a]]` by
-   `Matrix.of_mem_specialOrthogonalGroup_fin_two_iff`), `⟨J, A Z A⁻¹⟩ = ⟨J, Z⟩` and
-   `det(A M A⁻¹) = det M`; so `Σu' = Σu = 1` and `Σu'ᵢ² = Σuᵢ² ≤ r²`. -/
+Proof:
+1. `u ↦ Z_u` maps onto `𝔰𝔩₂(ℝ)`, with the explicit preimage
+   `Z ↦ (Z₁₀, ((Z₁₀ - 3Z₀₁)/2 + √3 Z₀₀)/2, ((Z₁₀ - 3Z₀₁)/2 - √3 Z₀₀)/2)`; `u'` is the preimage of
+   the traceless `A Z_u A⁻¹`.
+2. `Σuᵢ = -(3/2)⟨J, Z_u⟩` and `Σuᵢ² = (3/4) tr(Z_uᵀZ_u) + (3/8)⟨J, Z_u⟩²`.
+3. For `A = [[a, -c], [c, a]] ∈ SO₂(ℝ)` (`Matrix.of_mem_specialOrthogonalGroup_fin_two_iff`),
+   `A⁻¹ = Aᵀ`, and `⟨J, AMA⁻¹⟩ = ⟨J, M⟩`, `tr((AMA⁻¹)ᵀ AMA⁻¹) = tr(MᵀM)`; so `Σu' = Σu = 1` and
+   `Σu'ᵢ² = Σuᵢ² ≤ r²`. -/
 theorem isRotationClosed_controlDisk (r : ℝ) : IsRotationClosed (controlDisk r) := by
-  sorry
+  intro A hA u hu
+  have htr : (A * controlMatrix u * A⁻¹).trace = 0 := by
+    rw [(conj_invariants_of_mem_specialOrthogonalGroup hA _).2.2, Matrix.trace_fin_two]
+    simp [controlMatrix]
+    ring
+  obtain ⟨u', hu'⟩ := exists_controlMatrix_eq_of_trace_eq_zero htr
+  obtain ⟨h1, h2⟩ := sum_eq_and_sumSq_eq_of_controlMatrix_eq_conj hA hu'
+  exact ⟨u', ⟨h1.trans hu.1, h2.trans_le hu.2⟩, hu'⟩
 
 /-! ### Theorem 9.0.3: the rotation invariance of the Hamiltonian -/
+
+/-- `A J A⁻¹ = J` for `A ∈ SO₂(ℝ)`. -/
+private lemma conj_J_of_mem_specialOrthogonalGroup {A : Mat2}
+    (hA : A ∈ Matrix.specialOrthogonalGroup (Fin 2) ℝ) : A * J * A⁻¹ = J := by
+  obtain ⟨a, c, h, rfl⟩ := exists_rotationForm_of_mem_specialOrthogonalGroup hA
+  rw [inv_rotationForm h]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [J] <;> linarith
+
+/-- The trace form is invariant under conjugation by `A ∈ SO₂(ℝ)`:
+`⟨AMA⁻¹, ANA⁻¹⟩ = tr(A M N A⁻¹) = ⟨M, N⟩`. -/
+private lemma traceForm_conj_of_mem_specialOrthogonalGroup {A : Mat2}
+    (hA : A ∈ Matrix.specialOrthogonalGroup (Fin 2) ℝ) (M N : Mat2) :
+    traceForm (A * M * A⁻¹) (A * N * A⁻¹) = traceForm M N := by
+  have hdet : IsUnit A.det := by
+    rw [(Matrix.mem_specialOrthogonalGroup_iff.1 hA).2]
+    exact isUnit_one
+  unfold traceForm
+  rw [show A * M * A⁻¹ * (A * N * A⁻¹) = A * (M * N) * A⁻¹ by
+    simp only [Matrix.mul_assoc, Matrix.nonsing_inv_mul_cancel_left _ _ hdet],
+    Matrix.trace_mul_cycle, Matrix.nonsing_inv_mul _ hdet, Matrix.one_mul]
 
 /-- **The Hamiltonian is invariant under rotations** (the "simple computation" of the proof of
 Theorem 9.0.3, TeX 7780–7784): for `A ∈ SO₂(ℝ)` and controls `u, u'` with `Z_{u'} = A Z_u A⁻¹`,
 `H(AΛ₁A⁻¹, AΛ_RA⁻¹, AXA⁻¹; Z_{u'}) = H(Λ₁, Λ_R, X; Z_u)`, with `H` of `eqn:full-hamiltonian`.
 
-Proof plan (25–40 lines): the trace form is invariant under conjugation,
+Proof: the trace form is invariant under conjugation,
 `⟨AMA⁻¹, ANA⁻¹⟩ = tr(A M N A⁻¹) = ⟨M, N⟩` (`Matrix.trace_mul_cycle`, `A` invertible since
 `det A = 1`), and `A J A⁻¹ = J` for `A ∈ SO₂(ℝ)` (`A = [[a, -c], [c, a]]`); so each of
 `⟨Λ₁ - (3/2) λ_cost J, X⟩`, `⟨Λ_R, Z_u⟩` and `⟨X, Z_u⟩` is unchanged (`A(Λ₁ - (3/2)λJ)A⁻¹ =
@@ -158,7 +297,12 @@ theorem hamiltonian_conj {A : Mat2} (hA : A ∈ Matrix.specialOrthogonalGroup (F
     (Λ₁ ΛR X : Mat2) {u u' : Fin 3 → ℝ} (hu : controlMatrix u' = A * controlMatrix u * A⁻¹) :
     hamiltonian lam (A * Λ₁ * A⁻¹) (A * ΛR * A⁻¹) (A * X * A⁻¹) u' =
       hamiltonian lam Λ₁ ΛR X u := by
-  sorry
+  have hsub : A * Λ₁ * A⁻¹ - (3 / 2 * lam) • J = A * (Λ₁ - (3 / 2 * lam) • J) * A⁻¹ := by
+    rw [Matrix.mul_sub, Matrix.sub_mul, Matrix.mul_smul, Matrix.smul_mul,
+      conj_J_of_mem_specialOrthogonalGroup hA]
+  unfold hamiltonian
+  simp only [hsub, hu, traceForm_conj_of_mem_specialOrthogonalGroup hA]
+
 
 /-- **Theorem 9.0.3** (`thm:symmetries`, TeX 7751–7784). Let `H` be the Hamiltonian of the
 Reinhardt optimal control problem (`eqn:full-hamiltonian`) and suppose that the control set `U` is
@@ -180,39 +324,210 @@ theorem theorem9_0_3 {U : Set (Fin 3 → ℝ)} (hU : IsRotationClosed U) {A : Ma
 
 /-! ### Remark 9.0.4: `U_T` has only a discrete symmetry -/
 
+/-- `R = [[½, -√3/2], [√3/2, ½]]` has the form `[[a, -c], [c, a]]`. -/
+private lemma R_eq_rotationForm : R = !![1 / 2, -(√3 / 2); √3 / 2, 1 / 2] := rfl
+
+private lemma R_rotationForm_sq_add_sq : (1 / 2 : ℝ) ^ 2 + (√3 / 2) ^ 2 = 1 := by
+  linear_combination (Real.sq_sqrt (show (0 : ℝ) ≤ 3 by norm_num)) / 4
+
+/-- `R² = [[-½, -√3/2], [√3/2, -½]]`, the rotation by `2π/3`. -/
+private lemma R_sq_eq : R ^ 2 = !![-1 / 2, -(√3 / 2); √3 / 2, -1 / 2] := by
+  have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  rw [sq]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [R] <;> linarith
+
+/-- `R³ = -I`. -/
+private lemma R_pow_three_eq : R ^ 3 = -1 := by
+  have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  rw [pow_succ, R_sq_eq]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [R] <;> linarith
+
+/-- The property of Remark 9.0.4: `Ad_A` maps the control matrices of `U_T` to control matrices
+of `U_T`. -/
+private def ConjPreservesSimplex (A : Mat2) : Prop :=
+  ∀ u ∈ controlSimplex, ∃ u' ∈ controlSimplex, controlMatrix u' = A * controlMatrix u * A⁻¹
+
+private lemma conjPreservesSimplex_one : ConjPreservesSimplex 1 := fun u hu ↦ ⟨u, hu, by simp⟩
+
+/-- The rotations preserving `U_T` are closed under products (`(AB)⁻¹ = B⁻¹A⁻¹`). -/
+private lemma ConjPreservesSimplex.mul {A B : Mat2} (hA : ConjPreservesSimplex A)
+    (hB : ConjPreservesSimplex B) : ConjPreservesSimplex (A * B) := by
+  intro u hu
+  obtain ⟨u₁, hu₁, h₁⟩ := hB u hu
+  obtain ⟨u₂, hu₂, h₂⟩ := hA u₁ hu₁
+  refine ⟨u₂, hu₂, ?_⟩
+  rw [h₂, h₁, Matrix.mul_inv_rev]
+  simp only [Matrix.mul_assoc]
+
+/-- `Ad_R` permutes the coordinates of the controls cyclically: `R Z_u R⁻¹ = Z_{(u₁, u₂, u₀)}`
+(on the vertices, `R Z_{e_m} R⁻¹ = Z_{e_{m-1}}`, indices mod 3). -/
+private lemma conjPreservesSimplex_R : ConjPreservesSimplex R := by
+  have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have h3' : √3 ≠ 0 := by positivity
+  intro u ⟨hi, hs⟩
+  refine ⟨![u 1, u 2, u 0], ⟨fun i ↦ ?_, ?_⟩, ?_⟩
+  · fin_cases i
+    exacts [hi 1, hi 2, hi 0]
+  · simp only [Matrix.cons_val]
+    linarith
+  · rw [R_eq_rotationForm, inv_rotationForm R_rotationForm_sq_add_sq]
+    ext i j
+    fin_cases i <;> fin_cases j <;> simp [controlMatrix] <;> field_simp <;> ring_nf <;>
+      simp only [h3] <;> ring_nf
+
+private lemma conjPreservesSimplex_R_pow (k : ℕ) : ConjPreservesSimplex (R ^ k) := by
+  induction k with
+  | zero => simpa using conjPreservesSimplex_one
+  | succ k ih => rw [pow_succ]; exact ih.mul conjPreservesSimplex_R
+
+/-- The vertex step of Remark 9.0.4 (`⇒`): if the rotation `A = [[a, -c], [c, a]]` maps the
+control matrices of `U_T` to control matrices of `U_T`, then `Ad_A Z_{e₀} = Z_{u'}` with
+`u' ∈ U_T` and `Σu'ᵢ² = Σ(e₀)ᵢ² = 1` (`sum_eq_and_sumSq_eq_of_controlMatrix_eq_conj`), so `u'` is
+a vertex `e_m` (on `U_T`, `Σuᵢ² = 1` forces the cross terms `uᵢuⱼ ≥ 0` to vanish); comparing the
+entries `(0, 0)` and `(1, 0)` of `Ad_A Z_{e₀} = [[-4ac/3, ⋯], [a² - c²/3, ⋯]]` with those of
+`Z_{e_m}` leaves the six rotations by multiples of `π/3`. -/
+private lemma rotationForm_cases_of_conjPreservesSimplex {a c : ℝ} (h : a ^ 2 + c ^ 2 = 1)
+    (hP : ConjPreservesSimplex !![a, -c; c, a]) :
+    (a = 1 ∧ c = 0) ∨ (a = -1 ∧ c = 0) ∨ (a = 1 / 2 ∧ c = √3 / 2) ∨
+      (a = -1 / 2 ∧ c = -(√3 / 2)) ∨ (a = -1 / 2 ∧ c = √3 / 2) ∨
+        (a = 1 / 2 ∧ c = -(√3 / 2)) := by
+  have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have h3' : √3 ≠ 0 := by positivity
+  have hv : vertex 0 ∈ controlSimplex := by
+    refine ⟨fun i ↦ ?_, ?_⟩ <;> (try fin_cases i) <;> simp [vertex]
+  obtain ⟨u, hu, hZ⟩ := hP _ hv
+  have hsq : u 0 ^ 2 + u 1 ^ 2 + u 2 ^ 2 = 1 := by
+    simpa [vertex] using
+      (sum_eq_and_sumSq_eq_of_controlMatrix_eq_conj (rotationForm_mem_specialOrthogonalGroup h)
+        hZ).2
+  rw [inv_rotationForm h] at hZ
+  -- the entries `(0, 0)` and `(1, 0)` of `Ad_A Z_{e₀}`
+  have e00 : u 1 - u 2 = -(4 / 3) * (a * c) * √3 := by
+    have e : (u 1 - u 2) / √3 = -(4 / 3) * (a * c) := by
+      have e := congrFun (congrFun hZ 0) 0
+      simp [controlMatrix, vertex] at e
+      linarith
+    rwa [div_eq_iff h3'] at e
+  have e10 : u 0 = a ^ 2 - c ^ 2 / 3 := by
+    have e := congrFun (congrFun hZ 1) 0
+    simp [controlMatrix, vertex] at e
+    linarith
+  -- the image of `e₀` is a vertex: the cross terms vanish
+  have hp := sumSq_eq_of_mem_controlSimplex hu
+  obtain ⟨hi, hs⟩ := hu
+  have h0 := (hi 0).1
+  have h1 := (hi 1).1
+  have h2 := (hi 2).1
+  have h01 : u 0 * u 1 = 0 := by nlinarith [mul_nonneg h0 h1, mul_nonneg h0 h2, mul_nonneg h1 h2]
+  have h02 : u 0 * u 2 = 0 := by nlinarith [mul_nonneg h0 h1, mul_nonneg h0 h2, mul_nonneg h1 h2]
+  have h12 : u 1 * u 2 = 0 := by nlinarith [mul_nonneg h0 h1, mul_nonneg h0 h2, mul_nonneg h1 h2]
+  -- `a² = ¼` and `ac = s√3/4` give `(a, c) = ±(½, s√3/2)`
+  have hhalf : ∀ s : ℝ, a * c = s * (√3 / 4) → a ^ 2 = 1 / 4 →
+      (a = 1 / 2 ∧ c = s * (√3 / 2)) ∨ (a = -1 / 2 ∧ c = -(s * (√3 / 2))) := by
+    intro s hac ha
+    have : (a - 1 / 2) * (a + 1 / 2) = 0 := by linear_combination ha
+    rcases mul_eq_zero.1 this with ha | ha
+    · refine Or.inl ⟨by linarith, ?_⟩
+      rw [show a = 1 / 2 by linarith] at hac
+      linear_combination 2 * hac
+    · refine Or.inr ⟨by linarith, ?_⟩
+      rw [show a = -1 / 2 by linarith] at hac
+      linear_combination -2 * hac
+  by_cases hu0 : u 0 = 0
+  · by_cases hu1 : u 1 = 0
+    · -- `Ad_A Z_{e₀} = Z_{e₂}`: `A = R` or `R⁴`
+      have hu2 : u 2 = 1 := by linarith
+      rw [hu1, hu2] at e00
+      rw [hu0] at e10
+      have hac : a * c = 1 * (√3 / 4) := by
+        linear_combination (√3 / 4) * e00 - (a * c / 3) * h3
+      rcases hhalf 1 hac (by linear_combination (1 / 4) * h - (3 / 4) * e10) with h' | h'
+      · exact Or.inr (Or.inr (Or.inl (by simpa using h')))
+      · exact Or.inr (Or.inr (Or.inr (Or.inl (by simpa using h'))))
+    · -- `Ad_A Z_{e₀} = Z_{e₁}`: `A = R²` or `R⁵`
+      have hu2 : u 2 = 0 := (mul_eq_zero.1 h12).resolve_left hu1
+      have hu1' : u 1 = 1 := by linarith
+      rw [hu1', hu2] at e00
+      rw [hu0] at e10
+      have hac : a * c = -1 * (√3 / 4) := by
+        linear_combination (√3 / 4) * e00 - (a * c / 3) * h3
+      rcases hhalf (-1) hac (by linear_combination (1 / 4) * h - (3 / 4) * e10) with h' | h'
+      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (by simpa using h')))))
+      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (by simpa using h')))))
+  · -- `Ad_A Z_{e₀} = Z_{e₀}`: `A = ±I`
+    have hu0' : u 0 = 1 := by
+      have hu1 : u 1 = 0 := (mul_eq_zero.1 h01).resolve_left hu0
+      have hu2 : u 2 = 0 := (mul_eq_zero.1 h02).resolve_left hu0
+      linarith
+    rw [hu0'] at e10
+    have hc : c ^ 2 = 0 := by linear_combination (3 / 4) * h + (3 / 4) * e10
+    obtain rfl : c = 0 := pow_eq_zero_iff two_ne_zero |>.1 hc
+    have : (a - 1) * (a + 1) = 0 := by linear_combination h
+    rcases mul_eq_zero.1 this with ha | ha
+    · exact Or.inl ⟨by linarith, rfl⟩
+    · exact Or.inr (Or.inl ⟨by linarith, rfl⟩)
+
 /-- **Remark 9.0.4** (TeX 7786–7790): "the control set `U_T` is only symmetric by discrete
 `ℤ/3ℤ`-rotations and not under general `SO₂` rotations". A rotation `A ∈ SO₂(ℝ)` maps the control
 matrices of `U_T` to control matrices of `U_T` exactly when `A` is a power of `R = exp(Jπ/3)`.
 Since `R³ = -I`, `Ad_{Rᵏ}` depends on `k mod 3`: the symmetry group of `U_T` acting by `Ad` is
 `ℤ/3ℤ`, and `Ad_R` permutes the vertices cyclically (`R⁻¹ Z_{e_m} R = Z_{e_{m+1}}`).
 
-Proof plan (100–150 lines):
-1. (`⇐`) `R Z_{e_m} R⁻¹ = Z_{e_{m-1}}` (inverse of `poly_Rinv_conj_vertex`,
-   `SmoothedPolygons/Ch7/DiscreteK.lean`, conjugated), extended to `U_T` by linearity of `u ↦ Z_u`
-   (the permuted control is in `U_T`); induction on `k`.
+Proof (the book gives none):
+1. (`⇐`) `R Z_u R⁻¹ = Z_{(u₁, u₂, u₀)}` (on the vertices `R Z_{e_m} R⁻¹ = Z_{e_{m-1}}`, as in
+   `R_conj_controlMatrix_vertex`, `SmoothedPolygons/Ch4/StarDomain.lean`), and the rotations
+   preserving `U_T` are closed under products; induction on `k`.
 2. (`⇒`) `A = [[a, -c], [c, a]]` with `a² + c² = 1`
-   (`Matrix.of_mem_specialOrthogonalGroup_fin_two_iff`). `Ad_A` is affine on the plane of the
-   control matrices and maps the vertex set `{Z_{e_m}}` of `U_T` onto itself (the extreme points of
-   the triangle; `Ad_A` is a bijection of the plane preserving the triangle). Writing
-   `Z_{e_m} = J/3 + S_m` with `S_m` symmetric traceless, `Ad_A S` rotates `(S₀₀, S₀₁)` by `2θ`
-   (`a = cos θ`, `c = sin θ`), so `Ad_A S₀ = S_m` forces `2θ ∈ 2πm/3 + 2πℤ`, hence
-   `(a, c) = (cos(kπ/3), sin(kπ/3))` for some `k ∈ {0, …, 5}`, i.e. `A = Rᵏ` (`R = [[½, -√3/2],
-   [√3/2, ½]]`; the six cases by `cos`/`sin` of multiples of `π/3`, or algebraically: `(a, c)` with
-   `a² + c² = 1` solving the two linear equations of `Ad_A S₀ = S_m`). -/
+   (`Matrix.of_mem_specialOrthogonalGroup_fin_two_iff`). `Ad_A` preserves `Σuᵢ²` (as in
+   `isRotationClosed_controlDisk`), and the vertices are the only points of `U_T` with
+   `Σuᵢ² = 1`, so `Ad_A Z_{e₀} = Z_{e_m}` for some vertex `e_m`. Comparing two entries gives
+   `(a, c) = ±(1, 0)` (`m = 0`), `±(½, √3/2)` (`m = 2`) or `±(-½, √3/2)` (`m = 1`), i.e.
+   `A = Rᵏ` with `k = 0, 3`, `1, 4` or `2, 5` (`R³ = -I`). -/
 theorem remark9_0_4 {A : Mat2} (hA : A ∈ Matrix.specialOrthogonalGroup (Fin 2) ℝ) :
     (∀ u ∈ controlSimplex, ∃ u' ∈ controlSimplex, controlMatrix u' = A * controlMatrix u * A⁻¹) ↔
       ∃ k : ℕ, A = R ^ k := by
-  sorry
+  refine ⟨fun hP ↦ ?_, ?_⟩
+  · obtain ⟨a, c, h, rfl⟩ := exists_rotationForm_of_mem_specialOrthogonalGroup hA
+    have hR4 : R ^ 4 = -R := by rw [pow_succ, R_pow_three_eq, neg_one_mul]
+    have hR5 : R ^ 5 = -R ^ 2 := by
+      rw [show 5 = 3 + 2 from rfl, pow_add, R_pow_three_eq, neg_one_mul]
+    rcases rotationForm_cases_of_conjPreservesSimplex h hP with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
+      ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+    · exact ⟨0, by ext i j; fin_cases i <;> fin_cases j <;> simp⟩
+    · exact ⟨3, by rw [R_pow_three_eq]; ext i j; fin_cases i <;> fin_cases j <;> simp⟩
+    · exact ⟨1, by rw [pow_one]; rfl⟩
+    · exact ⟨4, by rw [hR4, R_eq_rotationForm]; ext i j; fin_cases i <;> fin_cases j <;> norm_num⟩
+    · exact ⟨2, by rw [R_sq_eq]⟩
+    · exact ⟨5, by rw [hR5, R_sq_eq]; ext i j; fin_cases i <;> fin_cases j <;> norm_num⟩
+  · rintro ⟨k, rfl⟩
+    exact conjPreservesSimplex_R_pow k
+
+/-- The `(0, 0)` entry of `Rᵏ` is `1`, `½`, `-½` or `-1` (`Rᵏ = (-1)^⌊k/3⌋ R^(k mod 3)`). -/
+private lemma R_pow_apply_zero_zero (k : ℕ) :
+    (R ^ k) 0 0 = 1 ∨ (R ^ k) 0 0 = 1 / 2 ∨ (R ^ k) 0 0 = -1 / 2 ∨ (R ^ k) 0 0 = -1 := by
+  rw [← Nat.div_add_mod k 3, pow_add, pow_mul, R_pow_three_eq]
+  have hr : k % 3 = 0 ∨ k % 3 = 1 ∨ k % 3 = 2 := by omega
+  rcases neg_one_pow_eq_or Mat2 (k / 3) with hs | hs <;> rw [hs] <;>
+    rcases hr with hr | hr | hr <;> rw [hr] <;> simp only [pow_zero, pow_one, R_sq_eq] <;>
+    norm_num [R]
 
 /-- **`U_T` is not closed under rotations** (Remark 9.0.4, "not under general `SO₂` rotations").
 
-Proof plan (20–30 lines): the rotation `A = exp(Jπ/6) = [[√3/2, -½], [½, √3/2]] ∈ SO₂(ℝ)` is not
-a power of `R` (the powers `Rᵏ`, `k < 6`, have `(0, 0)` entry in `{1, ½, -½, -1}`, and `R⁶ = I`),
-so `remark9_0_4` excludes it. Directly: `Ad_A` rotates the plane of control matrices by `π/3`
-about `Z_{centroid} = J/3`, so `Ad_A Z_{e₀} = Z_{u'}` with `u' = (⅔, ⅔, ⅔) - e_m` for some `m` (the
-reflection of a vertex through the centroid), which has the coordinate `-⅓ < 0`; `u ↦ Z_u` is
-injective, so no `u' ∈ U_T` works. -/
+Proof: the rotation `A = exp(Jπ/6) = [[√3/2, -½], [½, √3/2]] ∈ SO₂(ℝ)` is not a power of `R`
+(the powers `Rᵏ` have `(0, 0)` entry in `{1, ½, -½, -1}`, since `R³ = -I`), so `remark9_0_4`
+excludes it. -/
 theorem not_isRotationClosed_controlSimplex : ¬ IsRotationClosed controlSimplex := by
-  sorry
+  intro hU
+  have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+  have h : (√3 / 2) ^ 2 + (1 / 2 : ℝ) ^ 2 = 1 := by linear_combination h3 / 4
+  obtain ⟨k, hk⟩ := (remark9_0_4 (rotationForm_mem_specialOrthogonalGroup h)).1
+    (hU _ (rotationForm_mem_specialOrthogonalGroup h))
+  have h00 := congrFun (congrFun hk 0) 0
+  simp only [Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero, Matrix.empty_val',
+    Matrix.cons_val_fin_one] at h00
+  rcases R_pow_apply_zero_zero k with h' | h' | h' | h' <;> rw [h'] at h00 <;>
+    nlinarith [Real.sqrt_nonneg 3]
 
 end SmoothedPolygons
