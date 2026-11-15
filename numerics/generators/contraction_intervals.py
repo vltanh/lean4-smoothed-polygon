@@ -1,4 +1,6 @@
 """Generate the Lean interval chains for the Lipschitz bound on B (mirrors hand2.py).
+
+No longer used by the Lean proof (see `dout_contraction_bounds.py`); kept as a reference.
 Every endpoint is a rational with denominator 10^6, outward rounded; every step is one interval
 lemma whose numeric side conditions are closed by `norm_num`."""
 from fractions import Fraction as Fr

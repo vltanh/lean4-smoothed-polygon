@@ -6,7 +6,7 @@ numerical facts that the book takes from Mathematica plots. For N4 (Theorem 14.4
 same with the Reinhardt system along `e2`-arcs ([N4 section](#n4-theorem-1441-unstablecurveleavesstardomain-ch14)).
 
 **It is a reference.** The Lean proofs do not depend on it: nothing here is imported or trusted by
-Lean, and only `generators/` wrote Lean code (an interval chain each of whose steps Lean checks). It reproduces the book's numbers, gives the analytic proofs their
+Lean, and none of its output is used by a Lean proof. It reproduces the book's numbers, gives the analytic proofs their
 margins and regions, and is an independent check of the Lean statements.
 
 ## Layout
@@ -25,7 +25,7 @@ margins and regions, and is an independent check of the Lean statements.
 | `arcmap.py` | N4: the arc parameters `(eps, Y, f0, q, p)`, the one-step map `ArcParams.step` and its closed forms, `G*` (`arcRegion`), the exit test |
 | `checks/` | `dout.py`, `subclaims.py`, `cell_two.py`, `remark.py`, `common.py`; for N4 `unstable_curve.py`, `arc_invariant.py`, `arc_certificates.py` |
 | `report.py`, `__main__.py` | the command line |
-| `generators/` | `dout_contraction_bounds.py` (with `contraction_intervals.py`) regenerates the interval chains `lip_*` of `SmoothedPolygons/Ch16/DOutContractionBounds.lean` |
+| `generators/` | `dout_contraction_bounds.py` (with `contraction_intervals.py`) generated the interval chain that once bounded the derivatives in the Lipschitz part of `DOutContracts`; the Lean proof now bounds them by hand (`SmoothedPolygons/Ch16/DOutDerivativeBounds.lean`), and the generator stays as a reference |
 
 ## Running
 

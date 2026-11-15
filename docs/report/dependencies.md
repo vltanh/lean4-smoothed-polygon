@@ -32,7 +32,7 @@ The audit's row for Theorem 16.3.1 ([`theorem16_3_1_unconditional`](../../Smooth
   [`theoremA_3_1`](../../SmoothedPolygons/AppA/StableManifold.lean#L186), and no hypothesis;
 - as axioms, [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound).
 
-The rows for [`theorem14_4_1_unconditional`](../../SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean#L51), [`theorem16_4_1_unconditional`](../../SmoothedPolygons/Ch16/BasinFacts.lean#L70) and N4 likewise list no
+The rows for [`theorem14_4_1_unconditional`](../../SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean#L51), [`theorem16_4_1_unconditional`](../../SmoothedPolygons/Ch16/BasinFacts.lean#L71) and N4 likewise list no
 hypothesis.
 
 The conditional forms list their hypotheses among the results they use, for they are part of their
@@ -66,7 +66,7 @@ Every declaration depends only on [`propext`](https://leanprover-community.githu
 
 - it imports every module of the library with `import all`, so that the proofs of module files are
   visible;
-- it reports "Checked 10734 declarations of the library: all use only the standard axioms";
+- it reports "Checked 10675 declarations of the library: all use only the standard axioms";
 - it checks the axioms of each numbered result, through the packages it uses, and of the three
   Challenge theorems.
 

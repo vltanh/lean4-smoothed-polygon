@@ -33,8 +33,8 @@ project:
     without computer assistance, by the exact structure of the maps and a few explicit
     inequalities (for the curve, a closed form of the Reinhardt flow along an arc and an explicit
     region that one step of the Poincare map keeps until an arc leaves the star domain). The
-    certificates that a computer found (Bernstein coefficients, polynomial cofactors, one interval
-    chain written out by a script) are checked by Lean tactics, with no enumeration of boxes. A
+    certificates that a computer found (Bernstein coefficients, polynomial cofactors) are checked by
+    Lean tactics, with no enumeration of boxes. A
     Python reference in ball arithmetic checks the facts numerically.
 
 
@@ -829,8 +829,8 @@ fidelity:
     facts that the book reads off Mathematica computations are proved without computer assistance,
     by the user's decision (E77, E78, E88): DOutContracts by identities at the root of a switching
     function, polynomial inequalities on a polytope of rescaled variables, and the mean value
-    inequality, with the partial derivatives bounded by an interval chain of about 330 steps on one
-    box, written out by a script and checked step by step by norm_num (B ~ [0.22, 0.30] x [0.080,
+    inequality, with the partial derivatives bounded by a one-page argument by hand on one box
+    (47 products of two intervals and sums, checked by norm_num) (B ~ [0.22, 0.30] x [0.080,
     0.199] x [2.688, 3.009], N = 2, kappa = 3/4); CellTwoEntersDOut by identities and the signs of
     the two switching functions along the first control, without the parts D2, D3 of Proposition
     15.3.2 and without the involution; BoxSubclaims by one identity at the switching root for each
@@ -841,7 +841,7 @@ fidelity:
     the star domain ((INV), by polynomial identities, three Bernstein certificates with nonnegative
     rational coefficients and inequalities for the logarithm). No proof enumerates boxes; the
     certificates found by computer (Bernstein coefficients, cofactors for linear_combination,
-    products for nlinarith chosen by a linear program, the interval chain) are checked by Lean
+    products for nlinarith chosen by a linear program) are checked by Lean
     tactics. The Lean proof of N4 departs from its written proof in three places with the same
     statements (one lemma by inequalities for the logarithm instead of monotonicity, three steps as
     one identity, and the update rules of the map from a closed form of the costate instead of

@@ -1690,7 +1690,7 @@ continuous on `𝒞₂^A`" (TeX 12415–12416). Two things are left out.
   - By the user's decision, it proves them without computer assistance, by the exact structure of
     the map, which needs neither injectivity nor the curved faces (Section 7).
   - Theorems 16.1.1 and 16.2.1 are proved from them ([`theorem16_1_1`](../../SmoothedPolygons/Ch16/GlobalBasin.lean#L599), [`theorem16_2_1`](../../SmoothedPolygons/Ch16/OutwardFuller.lean#L567)), and
-    so with no hypothesis ([`theorem16_1_1_unconditional`](../../SmoothedPolygons/Ch16/BasinFacts.lean#L52), [`theorem16_2_1_unconditional`](../../SmoothedPolygons/Ch16/BasinFacts.lean#L59)).
+    so with no hypothesis ([`theorem16_1_1_unconditional`](../../SmoothedPolygons/Ch16/BasinFacts.lean#L53), [`theorem16_2_1_unconditional`](../../SmoothedPolygons/Ch16/BasinFacts.lean#L60)).
 
 ### E78
 
@@ -1706,7 +1706,7 @@ continuous on `𝒞₂^A`" (TeX 12415–12416). Two things are left out.
 - **Here:** the formalization adds a contraction to the first named fact: an iterate `F^N` maps
   `𝒟₀₀` into a box `B` of the open first cell on which `F`, in coordinates, is a self-map with
   Lipschitz constant `κ < 1` ([`TriFuller.DOutContracts`](../../SmoothedPolygons/Ch16/BasinHypotheses.lean#L236); proved with `N = 2`, `κ = 3/4` and
-  `B ≈ [0.22, 0.30] × [0.080, 0.199] × [2.688, 3.009]`, [`TriFuller.dOutContracts`](../../SmoothedPolygons/Ch16/DOutContraction.lean#L1006)).
+  `B ≈ [0.22, 0.30] × [0.080, 0.199] × [2.688, 3.009]`, [`TriFuller.dOutContracts`](../../SmoothedPolygons/Ch16/DOutContraction.lean#L912)).
   - One step does not suffice: `𝒟₀₀` contains the edge `r₂ = 0`, `θ₁ = θ₂ - ψ ∈ [0.9944, π/3)`,
     where the first control is `1`; at nearby points the switching time tends to `0` and the image
     has `r₂` near `0`, so `F(𝒟₀₀)` lies in no compact box of the open cell.
@@ -1762,7 +1762,7 @@ continuous on `𝒞₂^A`" (TeX 12415–12416). Two things are left out.
   `q ≠ q_in`.
 - The proof calls the theorem "the lemma" (TeX 12764).
 - **Here:** the theorem is proved from the three named facts of Theorem 16.1.1
-  ([`theorem16_2_1`](../../SmoothedPolygons/Ch16/OutwardFuller.lean#L567)), which are proved ([`theorem16_2_1_unconditional`](../../SmoothedPolygons/Ch16/BasinFacts.lean#L59)).
+  ([`theorem16_2_1`](../../SmoothedPolygons/Ch16/OutwardFuller.lean#L567)), which are proved ([`theorem16_2_1_unconditional`](../../SmoothedPolygons/Ch16/BasinFacts.lean#L60)).
 
 ### E81
 

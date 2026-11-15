@@ -1,14 +1,18 @@
-"""Generate the interval chains `lip_*` of `SmoothedPolygons/Ch16/DOutContractionBounds.lean`.
+"""Generate the interval chains `lip_*` of the former `Ch16/DOutContractionBounds.lean`.
 
-The Lipschitz bound of `DOutContracts` (`lipschitzOnWith_gmap`, `DOutContraction.lean`) rests on
-bounds of the partial derivatives of the map on the single box `B x [371/2000, 441/2000]`. This
-script writes them out step by step: every step is one elementary interval lemma (`iadd`,
-`isub`, `imul`, `idiv`, ...) with rational endpoints of denominator 10^6, rounded outward, whose
-numeric side conditions Lean closes by `norm_num`. Lean trusts nothing here: it checks every step.
+The Lean proof no longer uses this script: the derivative bounds of the Lipschitz bound of
+`DOutContracts` (`lipschitzOnWith_gmap`, `DOutContraction.lean`) are now a short argument written
+out by hand (`SmoothedPolygons/Ch16/DOutDerivativeBounds.lean`), and `DOutContractionBounds.lean` was
+deleted. The script is kept as a reference for the former proof.
+
+That proof bounded the partial derivatives of the map on the single box
+`B x [371/2000, 441/2000]`. This script writes those bounds out step by step: every step is one
+elementary interval lemma (`iadd`, `isub`, `imul`, `idiv`, ...) with rational endpoints of
+denominator 10^6, rounded outward, whose numeric side conditions Lean closed by `norm_num`.
 
     cd numerics/generators && python3 dout_contraction_bounds.py
 
-writes `gen_out.lean` (the lemmas `lip_coef` ... `lip_combor2`, pasted into
+writes `gen_out.lean` (the lemmas `lip_coef` ... `lip_combor2`, which were pasted into
 `DOutContractionBounds.lean` after its interval lemmas) and the endpoints in `gen_R.json`,
 `gen_L.json`; it prints the row sums of the Lipschitz matrix.
 """
