@@ -18,7 +18,7 @@ equation numbers are the book's; TeX line numbers refer to its source file `chap
 - **Build:** `lake build` succeeds; the only `sorry`s are the three statements of [`Challenge.lean`](Challenge.lean);
   no `axiom`, `admit`, `native_decide` or `decide +kernel`.
 - **Axioms:** [`scripts/Audit.lean`](scripts/Audit.lean), with `import all`, finds only [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and
-  [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound) in all 10,734 declarations of the library and in the three Challenge theorems.
+  [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound) in all 10,675 declarations of the library and in the three Challenge theorems.
 - **Routes:** the route check compares 140 results with the book's proofs: 185 differences, all
   recorded with reasons (Section 8). Comparator accepts the Solution under Lean's kernel and NanoDa.
 - **Review:** independent agents reviewed the statements and the proofs; no person has reviewed the
@@ -279,7 +279,7 @@ error or gap of the book or by mathematics that Mathlib lacks.
 | §15.3, `𝔦 = τF` and `F_A` | the involution at switching points; `F_A` as a root-based map | forced ([E73](docs/report/errors.md#e73), [E74](docs/report/errors.md#e74)) |
 | Remark 15.3.1 | the labels swapped back; the crossings certified exactly | forced ([E75](docs/report/errors.md#e75)) |
 | Proposition 15.3.2, second clause | an exact deformation | the user's decision ([E72](docs/report/errors.md#e72)) |
-| Theorem 16.1.1, Table 16.1 | three named facts about whole boxes, proved by identities at the switching root and signs, with one interval chain | forced ([E77](docs/report/errors.md#e77)); the proofs of the facts, the user's decision ([E78](docs/report/errors.md#e78)) |
+| Theorem 16.1.1, Table 16.1 | three named facts about whole boxes, proved by identities at the switching root and signs, with derivative bounds by hand on one box | forced ([E77](docs/report/errors.md#e77)); the proofs of the facts, the user's decision ([E78](docs/report/errors.md#e78)) |
 | Theorem 16.1.1, steps (a), (d) and the last row | a contraction and Banach's theorem; a descent with no re-entry | forced ([E78](docs/report/errors.md#e78), [E79](docs/report/errors.md#e79)) |
 | Theorem 16.2.1 | the radial factor in the chart of Lemma 13.5.5 | forced ([E80](docs/report/errors.md#e80)) |
 | Theorem 16.3.1, the last step | the meeting set handled; the contradiction made precise | forced ([E60](docs/report/errors.md#e60), [E89](docs/report/errors.md#e89)) |

@@ -56,7 +56,7 @@ trace condition is needed, only `⟨X, Z_u⟩ ≠ 0` and `⟨X, Z_v⟩ ≠ 0`.
    rules entrywise (as in `irt_chi_hasDerivAt`, `SmoothedPolygons/Ch7/Isolated/Return.lean`, and
    `hamiltonian_vertexFlow`, `SmoothedPolygons/Ch14/VertexFlowAnalytic.lean`). The product rule
    for the trace form, private in VertexFlowAnalytic.lean, is proved again here
-   (`n4e_traceForm_hasDerivAt`: from `HasDerivAtEntrywise A A' t` and
+   (`hasDerivAt_traceForm`: from `HasDerivAtEntrywise A A' t` and
    `HasDerivAtEntrywise B B' t`, `h := hA.mul hB`, then `(h 0 0).add (h 1 1)`, giving
    `HasDerivAt (fun s ↦ traceForm (A s) (B s)) (traceForm A' (B t) + traceForm (A t) B') t`).
 2. `phaseHamSlope_eq`: with `X' = [P_u, X]`, `Λ₁' = [Λ₁, X]`,
@@ -68,8 +68,8 @@ trace condition is needed, only `⟨X, Z_u⟩ ≠ 0` and `⟨X, Z_v⟩ ≠ 0`.
    `⟨X, Z_v⟩`), `ring`. The identity holds for **arbitrary** `2 × 2` matrices in place of the
    control matrices, so no `√3` arithmetic is needed: the proof generalizes `P_u` to an arbitrary
    matrix `P` (so `⟨X, Z_u⟩ ≠ 0` is not needed) and writes `Z_v = c Q` with `c = ⟨X, Z_v⟩`;
-   after cancelling `c`, the identity is polynomial in `X, Λ₁, Λ_R, P, Q` (`n4e_slope_poly`),
-   checked entrywise by `ring`.
+   after cancelling `c`, the identity is polynomial in `X, Λ₁, Λ_R, P, Q`
+   (`phaseHamSlope_poly_identity`), checked entrywise by `ring`.
 3. Lemma 2.3 from step 2: swapping `u, v` changes the sign of each of the three terms.
 
 Also checked numerically, while the statements were written, against the literal flow at section
@@ -83,7 +83,7 @@ namespace SmoothedPolygons
 open Set Filter Topology
 
 /-- The product rule for the trace form along entrywise-differentiable curves of matrices. -/
-private lemma n4e_traceForm_hasDerivAt {A B : ℝ → Mat2} {A' B' : Mat2} {t : ℝ}
+private lemma hasDerivAt_traceForm {A B : ℝ → Mat2} {A' B' : Mat2} {t : ℝ}
     (hA : Matrix.HasDerivAtEntrywise A A' t) (hB : Matrix.HasDerivAtEntrywise B B' t) :
     HasDerivAt (fun s ↦ traceForm (A s) (B s)) (traceForm A' (B t) + traceForm (A t) B') t := by
   have h := hA.mul hB
@@ -94,14 +94,14 @@ private lemma n4e_traceForm_hasDerivAt {A B : ℝ → Mat2} {A' B' : Mat2} {t : 
   · simp [traceForm, Matrix.trace_fin_two]; ring
 
 /-- The product rule for `s ↦ ⟨A(s), B⟩` with `B` constant. -/
-private lemma n4e_traceForm_hasDerivAt_const {A : ℝ → Mat2} {A' : Mat2} {t : ℝ} (B : Mat2)
+private lemma hasDerivAt_traceForm_const {A : ℝ → Mat2} {A' : Mat2} {t : ℝ} (B : Mat2)
     (hA : Matrix.HasDerivAtEntrywise A A' t) :
     HasDerivAt (fun s ↦ traceForm (A s) B) (traceForm A' B) t := by
-  have h := n4e_traceForm_hasDerivAt hA (Matrix.hasDerivAtEntrywise_const B t)
+  have h := hasDerivAt_traceForm hA (Matrix.hasDerivAtEntrywise_const B t)
   simpa [traceForm] using h
 
 /-- `⟨A, c • B⟩ = c ⟨A, B⟩`. -/
-private lemma n4e_traceForm_smul_right (A B : Mat2) (c : ℝ) :
+private lemma traceForm_smul_right (A B : Mat2) (c : ℝ) :
     traceForm A (c • B) = c * traceForm A B := by
   simp [traceForm, Matrix.trace_smul]
 
@@ -111,7 +111,7 @@ private lemma n4e_traceForm_smul_right (A B : Mat2) (c : ℝ) :
 `⟨[Λ₁, X], X⟩ + ⟨Λ̂, [P, X]⟩ - (⟨Λ_R', Q⟩ - ⟨Λ_R, Q⟩⟨[P, X], Q⟩)` equals
 `⟨Λ̂, [P - Q, X]⟩ + ⟨Λ_R, [P, Q]⟩ - (⟨Λ_R, P⟩ + ⟨Λ_R, Q⟩)⟨X, [P, Q]⟩` (the invariance
 `⟨[A, B], C⟩ = ⟨A, [B, C]⟩` of the trace form; checked entrywise). -/
-private lemma n4e_slope_poly (X L₁ LR P Q : Mat2) :
+private lemma phaseHamSlope_poly_identity (X L₁ LR P Q : Mat2) :
     traceForm (L₁ * X - X * L₁) X + traceForm (L₁ + (3 / 2 : ℝ) • J) (P * X - X * P) -
         (traceForm ((P * LR - LR * P) - traceForm LR P • (P * X - X * P) +
             ((-L₁ + (3 / 2 * -1 : ℝ) • J) * X - X * (-L₁ + (3 / 2 * -1 : ℝ) • J))) Q -
@@ -143,9 +143,9 @@ theorem hasDerivAt_phaseHam_vertexFlow (u v : Fin 3) (q : iso_PhasePt) (t : ℝ)
     HasDerivAt (fun s ↦ phaseHam (iso_vertexFlow u q s) (vertex v))
       (phaseHamSlope u v (iso_vertexFlow u q t)) t := by
   obtain ⟨h1, h2, h3, -⟩ := iso_vertexFlow_solution u q t
-  have hA := n4e_traceForm_hasDerivAt (h2.add_const ((3 / 2 : ℝ) • J)) h1
-  have hN := n4e_traceForm_hasDerivAt_const (controlMatrix (vertex v)) h3
-  have hD := n4e_traceForm_hasDerivAt_const (controlMatrix (vertex v)) h1
+  have hA := hasDerivAt_traceForm (h2.add_const ((3 / 2 : ℝ) • J)) h1
+  have hN := hasDerivAt_traceForm_const (controlMatrix (vertex v)) h3
+  have hD := hasDerivAt_traceForm_const (controlMatrix (vertex v)) h1
   convert hA.sub (hN.div hD hv) using 1
   · funext s
     simp only [phaseHam, hamiltonian, Pi.sub_apply, Pi.div_apply]
@@ -176,8 +176,8 @@ theorem phaseHamSlope_eq (u v : Fin 3) (q : iso_PhasePt)
   generalize controlMatrix (vertex v) = Z at hv ⊢
   generalize hc : traceForm q.1 Z = c at hv ⊢
   obtain ⟨Q, rfl⟩ : ∃ Q, Z = c • Q := ⟨c⁻¹ • Z, by rw [smul_smul, mul_inv_cancel₀ hv, one_smul]⟩
-  rw [smul_smul, inv_mul_cancel₀ hv, one_smul, ← n4e_slope_poly]
-  simp only [n4e_traceForm_smul_right]
+  rw [smul_smul, inv_mul_cancel₀ hv, one_smul, ← phaseHamSlope_poly_identity]
+  simp only [traceForm_smul_right]
   field_simp
 
 /-- **Lemma 2.3**: `L_{V_u} H_u = 0` (`H_u` is conserved along its own flow). -/

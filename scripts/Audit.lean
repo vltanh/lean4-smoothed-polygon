@@ -112,8 +112,8 @@ import all SmoothedPolygons.Ch16.CellTwoEntersDOut
 import all SmoothedPolygons.Ch16.CellTwoFlow
 import all SmoothedPolygons.Ch16.ClusterCoordinates
 import all SmoothedPolygons.Ch16.ClusterPoint
-import all SmoothedPolygons.Ch16.DOutContractionBounds
 import all SmoothedPolygons.Ch16.DOutContraction
+import all SmoothedPolygons.Ch16.DOutDerivativeBounds
 import all SmoothedPolygons.Ch16.DOutFlow
 import all SmoothedPolygons.Ch16.DOutImages
 import all SmoothedPolygons.Ch16.DOutInvariant

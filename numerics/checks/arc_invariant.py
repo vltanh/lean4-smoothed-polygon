@@ -11,8 +11,8 @@ On the parameters (``ArcParams.lean``, ``ArcStepClosed.lean``): a point of ``G*`
 ``r = eps (Y' - 2)/2 > 0``, P1 ``f0 > 0``, P2 ``q <= 0``, P4 ``p > 0``, E
 ``(Y - 1)(Y' - 2) <= Y - 2``. The image is ``step (qNew s)`` (Theorem 2.1 and
 ``arcQ_reinPoincare``: ``q_new = Phi(s)/(Y - s)^2``, ``s = e^{tauSw}``); it exits iff ``f > 0`` and
-``g > 0`` on ``(0, log Y_new)`` (``n4g_signs``), decided here from the monotone pieces of
-``F = e^tau f`` and ``G = e^{-tau} g``.
+``g > 0`` on ``(0, log Y_new)`` (``phaseHam_signs_along_arc``), decided here from the monotone
+pieces of ``F = e^tau f`` and ``G = e^{-tau} g``.
 
 Sampling, in ``x = Y - 2``, ``y = Y' - 2`` (``eps^2 = 1/(Y Y' - 1)``), ``f0``, ``p`` and both roots
 ``q`` of ``rel = 0`` (every point of ``G*`` is one of them): ``y`` log-uniform in ``[1e-9, 0.45]``

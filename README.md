@@ -48,8 +48,8 @@ on `SL₂(ℝ)` and studies its Pontryagin extremals.
 | §6.1, §6.2 and `K_min` | [`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250) | a global minimizer exists, is an extremal, and bounds a worst disk `K_min` |
 | Lemma 13.5.5 | [`lemma13_5_5`](SmoothedPolygons/Ch13/Stability.lean#L281) | the fixed point `q_out` of the Fuller–Poincaré map (Lemma 13.5.2) is asymptotically stable, and `q_in = τ(q_out)` is unstable |
 | Theorem 14.4.1 | [`theorem14_4_1_unconditional`](SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean#L51) | a trajectory that emanates from the fixed point over `q_out` on the exceptional divisor does not return to it |
-| Theorem 16.1.1 | [`theorem16_1_1_unconditional`](SmoothedPolygons/Ch16/BasinFacts.lean#L52) | every orbit of the Fuller–Poincaré map on `Ξ_{𝒲,0}/V_T` other than `q_in` tends to `q_out` |
-| Theorem 16.4.1 | [`theorem16_4_1_unconditional`](SmoothedPolygons/Ch16/BasinFacts.lean#L70) | switching points that accumulate on the singular locus converge to `q_in`, along its stable curve |
+| Theorem 16.1.1 | [`theorem16_1_1_unconditional`](SmoothedPolygons/Ch16/BasinFacts.lean#L53) | every orbit of the Fuller–Poincaré map on `Ξ_{𝒲,0}/V_T` other than `q_in` tends to `q_out` |
+| Theorem 16.4.1 | [`theorem16_4_1_unconditional`](SmoothedPolygons/Ch16/BasinFacts.lean#L71) | switching points that accumulate on the singular locus converge to `q_in`, along its stable curve |
 
 The first three are the Palomar Challenge ([`Challenge.lean`](Challenge.lean));
 [`theorem16_3_1_unconditional`](SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean#L94) proves the first.
@@ -59,12 +59,12 @@ The first three are the Palomar Challenge ([`Challenge.lean`](Challenge.lean));
 The book reads four facts off Mathematica computations that it did not certify. By the user's
 decision they are proved without computer assistance, by exact structure and a few explicit
 inequalities, with no enumeration of boxes; the few certificates found by computer (Bernstein
-coefficients, polynomial cofactors, one interval chain written out by a script) are checked by Lean.
+coefficients, polynomial cofactors) are checked by Lean.
 
 | Fact | What it says | How it is proved |
 | --- | --- | --- |
 | [`UnstableCurveLeavesStarDomain`](SmoothedPolygons/Ch14/UnstableCurve.lean#L174) (N4, Figure 14.2) | the orbit of every point of the unstable curve over `q_out` switches cyclically, then leaves the star domain (E88) | the Reinhardt flow along an arc in closed form, and a region that one step keeps until an arc leaves |
-| [`TriFuller.DOutContracts`](SmoothedPolygons/Ch16/BasinHypotheses.lean#L236) (Table 16.1) | the map sends the box `𝒟_out` into itself, and its square into a box where it is a `3/4`-contraction (the contraction is missing from the book, E78) | identities at the switching root; one interval chain on one box |
+| [`TriFuller.DOutContracts`](SmoothedPolygons/Ch16/BasinHypotheses.lean#L236) (Table 16.1) | the map sends the box `𝒟_out` into itself, and its square into a box where it is a `3/4`-contraction (the contraction is missing from the book, E78) | identities at the switching root; derivative bounds by hand on one box |
 | [`TriFuller.CellTwoEntersDOut`](SmoothedPolygons/Ch16/BasinHypotheses.lean#L260) | every point of the second big cell reaches `𝒟_out` within three steps | identities and signs of switching functions |
 | [`TriFuller.BoxSubclaims`](SmoothedPolygons/Ch16/BasinHypotheses.lean#L278) | every other box except `𝒟₂₂` goes to the second cell or to a smaller box | the same |
 
@@ -101,7 +101,7 @@ sketches, or, for the computed facts, by the user's decision, are listed in
 ## Trust
 
 - No `sorry` outside the statements of [`Challenge.lean`](Challenge.lean); no `axiom`, `native_decide` or `decide +kernel`.
-- `lake env lean scripts/Audit.lean` checks, with `import all`, that every declaration (10,734) depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext),
+- `lake env lean scripts/Audit.lean` checks, with `import all`, that every declaration (10,675) depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext),
   [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound).
 - A route check compares each proof with the results the book's proof cites; every difference is
   recorded in [`docs/route_differences.tsv`](docs/route_differences.tsv).

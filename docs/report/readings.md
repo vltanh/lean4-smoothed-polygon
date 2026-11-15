@@ -489,7 +489,7 @@ Part of the [audit report](../../REPORT.md).
   `𝒟₂₂`.
   - The theorem is stated as printed, for the Poincaré map `F_ang` of `Ξ_{𝒲,0}/V_T`: for every
     `q ≠ q_in`, `F^k(q) → q_out` ([`theorem16_1_1`](../../SmoothedPolygons/Ch16/GlobalBasin.lean#L599)), from the three named facts, which are proved
-    ([`theorem16_1_1_unconditional`](../../SmoothedPolygons/Ch16/BasinFacts.lean#L52); Section 2).
+    ([`theorem16_1_1_unconditional`](../../SmoothedPolygons/Ch16/BasinFacts.lean#L53); Section 2).
 - **Theorem 16.2.1.** The Fuller–Poincaré dynamical system is the Poincaré map `F` on `ℂ³ ∖ 0`
   (TeX 12749–12752).
   - An outward trajectory that emanates from the singular locus is a backward orbit, `z_k ≠ 0` with

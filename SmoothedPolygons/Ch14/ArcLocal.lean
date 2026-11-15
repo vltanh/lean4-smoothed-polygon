@@ -86,7 +86,7 @@ open Set Filter Topology
 /-! ### The chart near the divisor in coordinates -/
 
 /-- The star functions of `lieX r x̃₂₁`. -/
-private theorem n4g_ρ_lieX (r a : ℝ) :
+private theorem ρ_lieX (r a : ℝ) :
     ρ₀ (lieX r a) = (1 + r * a + √3 * r) / √3 ∧ ρ₁ (lieX r a) = (1 + r * a - √3 * r) / √3 ∧
       ρ₂ (lieX r a) = (3 * (1 + r ^ 2) / (1 + r * a) - (1 + r * a)) / (2 * √3) := by
   refine ⟨by simp [ρ₀, lieX], by simp [ρ₁, lieX], ?_⟩
@@ -96,7 +96,7 @@ private theorem n4g_ρ_lieX (r a : ℝ) :
 /-- The three local conditions near `(0, x̃)`: `1 + r x̃₂₁ - √3 r > 0` (`ρ₁ > 0` and
 `x̃₂₁ > √3 - 1/r`), `ℓ̃₂₁ r² < 3/2` and `(1 + r x̃₂₁)² < 3 (1 + r²)` (`ρ₂ > 0`); each holds at
 `r = 0`. -/
-private theorem n4g_eventually_local (x : Fin 3 → ℝ) :
+private theorem eventually_section_conditions (x : Fin 3 → ℝ) :
     ∀ᶠ p in 𝓝 ((0 : ℝ), x), 0 < 1 + p.1 * p.2 0 - √3 * p.1 ∧ p.2 2 * p.1 ^ 2 < 3 / 2 ∧
       (1 + p.1 * p.2 0) ^ 2 < 3 * (1 + p.1 ^ 2) := by
   have c1 : ContinuousAt (fun p : ℝ × (Fin 3 → ℝ) ↦ 1 + p.1 * p.2 0 - √3 * p.1) ((0 : ℝ), x) := by
@@ -114,15 +114,16 @@ private theorem n4g_eventually_local (x : Fin 3 → ℝ) :
   exact ⟨h1, h2, by linarith⟩
 
 /-- The local conditions, with `r > 0`, in the punctured neighbourhood `r > 0`. -/
-private theorem n4g_eventually_within (x : Fin 3 → ℝ) :
+private theorem eventually_nhdsWithin_section_conditions (x : Fin 3 → ℝ) :
     ∀ᶠ p in 𝓝[{p : ℝ × (Fin 3 → ℝ) | 0 < p.1}] ((0 : ℝ), x), 0 < p.1 ∧
       0 < 1 + p.1 * p.2 0 - √3 * p.1 ∧ p.2 2 * p.1 ^ 2 < 3 / 2 ∧
       (1 + p.1 * p.2 0) ^ 2 < 3 * (1 + p.1 ^ 2) := by
-  filter_upwards [self_mem_nhdsWithin, nhdsWithin_le_nhds (n4g_eventually_local x)] with p hp h
+  filter_upwards [self_mem_nhdsWithin, nhdsWithin_le_nhds (eventually_section_conditions x)]
+    with p hp h
   exact ⟨hp, h⟩
 
 /-- Under the local conditions, the chart point is a section point (step 1 of the route). -/
-private theorem n4g_isArcSectionPt {p : ℝ × (Fin 3 → ℝ)} (hr : 0 < p.1)
+private theorem isArcSectionPt_lieChart_of_conditions {p : ℝ × (Fin 3 → ℝ)} (hr : 0 < p.1)
     (h1 : 0 < 1 + p.1 * p.2 0 - √3 * p.1) (h2 : p.2 2 * p.1 ^ 2 < 3 / 2)
     (h3 : (1 + p.1 * p.2 0) ^ 2 < 3 * (1 + p.1 ^ 2)) : IsArcSectionPt (lieChart p) := by
   have hs3 : 0 < √3 := by positivity
@@ -135,7 +136,7 @@ private theorem n4g_isArcSectionPt {p : ℝ × (Fin 3 → ℝ)} (hr : 0 < p.1)
   have hH3 : hamiltonian (-1) (lieChart p).2.1 (lieChart p).2.2 (lieChart p).1 (vertex 2) = 0 := by
     have := hamiltonian_sub_eq_switchingFn (lieChart p).2.1 (lieChart p).2.2 (lieChart p).1 1 2
     linarith
-  obtain ⟨e0, e1, e2⟩ := n4g_ρ_lieX p.1 (p.2 0)
+  obtain ⟨e0, e1, e2⟩ := ρ_lieX p.1 (p.2 0)
   have hc : 0 < 1 + p.1 * p.2 0 := by nlinarith
   refine ⟨⟨⟨trX, trL, trR, detX, tfXR, hH3, hχ⟩, detL⟩, trX, detX, ?_, ?_, ?_⟩
   · change 0 < ρ₀ (lieX p.1 (p.2 0))
@@ -151,45 +152,47 @@ private theorem n4g_isArcSectionPt {p : ℝ × (Fin 3 → ℝ)} (hr : 0 < p.1)
     nlinarith
 
 /-- `Λ̃₁` with `Λ₁ + (3/2) J = r² Λ̃₁` in the chart (`Λ̃₁(0) = [[ℓ̃₁₁, ℓ̃₂₁], [ℓ̃₂₁, -ℓ̃₁₁]]`). -/
-private noncomputable def n4g_lamT (r l m : ℝ) : Mat2 :=
+private noncomputable def lieLamTilde (r l m : ℝ) : Mat2 :=
   !![l, (2 * r ^ 2 * l ^ 2 + 3 * m) / (3 - 2 * r ^ 2 * m); m, -l]
 
 /-- `Λ̂ = Λ₁ + (3/2) J = r² Λ̃₁` (`det Λ₁ = 9/4`). -/
-private theorem n4g_lieΛ₁_add {r l m : ℝ} (hd : 3 - 2 * r ^ 2 * m ≠ 0) :
-    lieΛ₁ r l m + (3 / 2 : ℝ) • J = r ^ 2 • n4g_lamT r l m := by
+private theorem lieΛ₁_add_three_halves_smul_J {r l m : ℝ} (hd : 3 - 2 * r ^ 2 * m ≠ 0) :
+    lieΛ₁ r l m + (3 / 2 : ℝ) • J = r ^ 2 • lieLamTilde r l m := by
   have hd' : 3 - r ^ 2 * 2 * m ≠ 0 := fun h ↦ hd (by linarith)
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp only [lieΛ₁, n4g_lamT, J, Matrix.add_apply, Matrix.smul_apply, Matrix.of_apply,
+    simp only [lieΛ₁, lieLamTilde, J, Matrix.add_apply, Matrix.smul_apply, Matrix.of_apply,
       Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.empty_val',
       Matrix.cons_val_fin_one, smul_eq_mul, Fin.zero_eta, Fin.mk_one] <;>
     field_simp <;> ring
 
-private theorem n4g_traceForm_smul (c : ℝ) (A B : Mat2) :
+private theorem traceForm_smul_left (c : ℝ) (A B : Mat2) :
     traceForm (c • A) B = c * traceForm A B := by
   simp [traceForm, Matrix.trace_smul]
 
 /-- The cancellation behind `f₀ = O(r³)`: `⟨Λ̃₁, X⟩ = r K` with `K` regular at `r = 0`,
 `K(0) = 2 (ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁)`. -/
-private noncomputable def n4g_K (r a l m : ℝ) : ℝ :=
+private noncomputable def lieLamTildePairingDivR (r a l m : ℝ) : ℝ :=
   2 * l + (6 * m * a + r * (3 * m * a ^ 2 + 2 * l ^ 2 * (1 + r * a) ^ 2 + 2 * m ^ 2 - 3 * m +
     2 * r ^ 2 * m ^ 2)) / ((1 + r * a) * (3 - 2 * r ^ 2 * m))
 
-private theorem n4g_traceForm_lamT_lieX {r a l m : ℝ} (hc : 1 + r * a ≠ 0)
-    (hd : 3 - 2 * r ^ 2 * m ≠ 0) : traceForm (n4g_lamT r l m) (lieX r a) = r * n4g_K r a l m := by
-  simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, n4g_lamT, lieX,
-    n4g_K, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
-    Matrix.empty_val', Matrix.cons_val_fin_one]
+private theorem traceForm_lieLamTilde_lieX {r a l m : ℝ} (hc : 1 + r * a ≠ 0)
+    (hd : 3 - 2 * r ^ 2 * m ≠ 0) :
+    traceForm (lieLamTilde r l m) (lieX r a) = r * lieLamTildePairingDivR r a l m := by
+  simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, lieLamTilde, lieX,
+    lieLamTildePairingDivR, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
+    Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
   have hd' : 3 - r ^ 2 * 2 * m ≠ 0 := fun h ↦ hd (by linarith)
   field_simp
   ring
 
-private theorem n4g_sqrt3_pow : √3 ^ 2 = 3 ∧ √3 ^ 3 = 3 * √3 ∧ √3 ^ 4 = 9 := by
+private theorem sqrt_three_pow_two_three_four : √3 ^ 2 = 3 ∧ √3 ^ 3 = 3 * √3 ∧ √3 ^ 4 = 9 := by
   have h : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
   exact ⟨h, by rw [pow_succ, h], by rw [show (4 : ℕ) = 2 * 2 from rfl, pow_mul, h]; norm_num⟩
 
 /-- A limit along `r > 0` from an eventual identity with a function continuous at `(0, x̃)`. -/
-private theorem n4g_tendsto_of_eq {x : Fin 3 → ℝ} {Q G : ℝ × (Fin 3 → ℝ) → ℝ} {L : ℝ}
+private theorem tendsto_of_eventuallyEq_of_continuousAt {x : Fin 3 → ℝ}
+    {Q G : ℝ × (Fin 3 → ℝ) → ℝ} {L : ℝ}
     (hQ : ∀ᶠ p in 𝓝[{p : ℝ × (Fin 3 → ℝ) | 0 < p.1}] ((0 : ℝ), x), G p = Q p)
     (hG : ContinuousAt G ((0 : ℝ), x)) (hL : G ((0 : ℝ), x) = L) :
     Tendsto Q (𝓝[{p : ℝ × (Fin 3 → ℝ) | 0 < p.1}] ((0 : ℝ), x)) (𝓝 L) := by
@@ -199,65 +202,66 @@ private theorem n4g_tendsto_of_eq {x : Fin 3 → ℝ} {Q G : ℝ × (Fin 3 → �
 /-- Near `(0, x̃)`, chart points with `r > 0` are section points. -/
 theorem eventually_isArcSectionPt_lieChart (x : Fin 3 → ℝ) :
     ∀ᶠ p in 𝓝 ((0 : ℝ), x), 0 < p.1 → IsArcSectionPt (lieChart p) := by
-  filter_upwards [n4g_eventually_local x] with p ⟨h1, h2, h3⟩ hr
-  exact n4g_isArcSectionPt hr h1 h2 h3
+  filter_upwards [eventually_section_conditions x] with p ⟨h1, h2, h3⟩ hr
+  exact isArcSectionPt_lieChart_of_conditions hr h1 h2 h3
 
 /-! ### The five limits (step 2 of the route) -/
 
 /-- `f₀/r³ → -3(ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁)`: on section points `f₀ = -(√3/(3ε³Y')) ⟨Λ̂, X⟩` (1.5),
 `⟨Λ̂, X⟩ = r² ⟨Λ̃₁, X⟩ = r³ K`. -/
-private theorem n4g_tendsto_f0 (x : Fin 3 → ℝ) :
+private theorem tendsto_arcF0_lieChart_div_pow_three (x : Fin 3 → ℝ) :
     Tendsto (fun p : ℝ × (Fin 3 → ℝ) ↦ arcF0 (lieChart p) / p.1 ^ 3)
       (𝓝[{p | 0 < p.1}] ((0 : ℝ), x)) (𝓝 (-3 * (x 1 + x 2 * x 0))) := by
-  refine n4g_tendsto_of_eq (G := fun p : ℝ × (Fin 3 → ℝ) ↦
+  refine tendsto_of_eventuallyEq_of_continuousAt (G := fun p : ℝ × (Fin 3 → ℝ) ↦
     -(√3 / (3 * ρ₁ (lieX p.1 (p.2 0)) ^ 3 * (1 + ρ₀ (lieX p.1 (p.2 0)) / ρ₁ (lieX p.1 (p.2 0))))) *
-      n4g_K p.1 (p.2 0) (p.2 1) (p.2 2)) ?_ ?_ ?_
-  · filter_upwards [n4g_eventually_within x] with p ⟨hr, h1, h2, h3⟩
+      lieLamTildePairingDivR p.1 (p.2 0) (p.2 1) (p.2 2)) ?_ ?_ ?_
+  · filter_upwards [eventually_nhdsWithin_section_conditions x] with p ⟨hr, h1, h2, h3⟩
     have hd : 3 - 2 * p.1 ^ 2 * p.2 2 ≠ 0 := by
       have : 0 < 3 - 2 * p.1 ^ 2 * p.2 2 := by linarith
       exact this.ne'
     have hc : 1 + p.1 * p.2 0 ≠ 0 := by
       have : 0 < 1 + p.1 * p.2 0 := by nlinarith [Real.sqrt_nonneg 3]
       exact this.ne'
-    rw [arcF0_eq_reducedHam (n4g_isArcSectionPt hr h1 h2 h3)]
+    rw [arcF0_eq_reducedHam (isArcSectionPt_lieChart_of_conditions hr h1 h2 h3)]
     change _ = -(√3 / (3 * ρ₁ (lieX p.1 (p.2 0)) ^ 3 * (1 + ρ₀ (lieX p.1 (p.2 0)) /
       ρ₁ (lieX p.1 (p.2 0))))) * traceForm (lieΛ₁ p.1 (p.2 1) (p.2 2) + (3 / 2 : ℝ) • J)
         (lieX p.1 (p.2 0)) / p.1 ^ 3
-    rw [n4g_lieΛ₁_add hd, n4g_traceForm_smul, n4g_traceForm_lamT_lieX hc hd]
+    rw [lieΛ₁_add_three_halves_smul_J hd, traceForm_smul_left, traceForm_lieLamTilde_lieX hc hd]
     have hr' : p.1 ≠ 0 := hr.ne'
     field_simp
-  · simp only [n4g_K, lieX, ρ₀, ρ₁, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
+  · simp only [lieLamTildePairingDivR, lieX, ρ₀, ρ₁, Matrix.of_apply, Matrix.cons_val',
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
     fun_prop (disch := (simp; try positivity))
-  · obtain ⟨-, -, h4⟩ := n4g_sqrt3_pow
-    simp only [n4g_K, lieX, ρ₀, ρ₁, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
-      Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
+  · obtain ⟨-, -, h4⟩ := sqrt_three_pow_two_three_four
+    simp only [lieLamTildePairingDivR, lieX, ρ₀, ρ₁, Matrix.of_apply, Matrix.cons_val',
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
     field_simp
     ring_nf
     rw [h4]
     ring
 
 /-- `q/r² → √3 ℓ̃₁₁ + ℓ̃₂₁`: `q/r² = -(√3/(6ε)) ⟨Λ̃₁, V_e⟩`. -/
-private theorem n4g_tendsto_q (x : Fin 3 → ℝ) :
+private theorem tendsto_arcQ_lieChart_div_sq (x : Fin 3 → ℝ) :
     Tendsto (fun p : ℝ × (Fin 3 → ℝ) ↦ arcQ (lieChart p) / p.1 ^ 2)
       (𝓝[{p | 0 < p.1}] ((0 : ℝ), x)) (𝓝 (√3 * x 1 + x 2)) := by
-  refine n4g_tendsto_of_eq (G := fun p : ℝ × (Fin 3 → ℝ) ↦ -(√3 / (6 * ρ₁ (lieX p.1 (p.2 0)))) *
-      traceForm (n4g_lamT p.1 (p.2 1) (p.2 2)) (arcVe (lieX p.1 (p.2 0)))) ?_ ?_ ?_
-  · filter_upwards [n4g_eventually_within x] with p ⟨hr, _, h2, _⟩
+  refine tendsto_of_eventuallyEq_of_continuousAt
+    (G := fun p : ℝ × (Fin 3 → ℝ) ↦ -(√3 / (6 * ρ₁ (lieX p.1 (p.2 0)))) *
+      traceForm (lieLamTilde p.1 (p.2 1) (p.2 2)) (arcVe (lieX p.1 (p.2 0)))) ?_ ?_ ?_
+  · filter_upwards [eventually_nhdsWithin_section_conditions x] with p ⟨hr, _, h2, _⟩
     have hd : 3 - 2 * p.1 ^ 2 * p.2 2 ≠ 0 := by
       have : 0 < 3 - 2 * p.1 ^ 2 * p.2 2 := by linarith
       exact this.ne'
     change _ = -(√3 / (6 * ρ₁ (lieX p.1 (p.2 0)))) * traceForm (lieΛ₁ p.1 (p.2 1) (p.2 2) +
       (3 / 2 : ℝ) • J) (arcVe (lieX p.1 (p.2 0))) / p.1 ^ 2
-    rw [n4g_lieΛ₁_add hd, n4g_traceForm_smul]
+    rw [lieΛ₁_add_three_halves_smul_J hd, traceForm_smul_left]
     have hr' : p.1 ≠ 0 := hr.ne'
     field_simp
-  · simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, n4g_lamT,
+  · simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, lieLamTilde,
       lieX, arcVe, ofFrame, frameE, ρ₁, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
       Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
     fun_prop (disch := (simp; try positivity))
-  · obtain ⟨h2, h3, h4⟩ := n4g_sqrt3_pow
-    simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, n4g_lamT,
+  · obtain ⟨h2, h3, h4⟩ := sqrt_three_pow_two_three_four
+    simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, lieLamTilde,
       lieX, arcVe, ofFrame, frameE, ρ₁, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
       Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
     field_simp
@@ -266,38 +270,39 @@ private theorem n4g_tendsto_q (x : Fin 3 → ℝ) :
     ring
 
 /-- `p/r² → -2ℓ̃₂₁`: `p/r² = (2/(√3 ε)) ⟨Λ̃₁, V_f⟩`. -/
-private theorem n4g_tendsto_p (x : Fin 3 → ℝ) :
+private theorem tendsto_arcP_lieChart_div_sq (x : Fin 3 → ℝ) :
     Tendsto (fun p : ℝ × (Fin 3 → ℝ) ↦ arcP (lieChart p) / p.1 ^ 2)
       (𝓝[{p | 0 < p.1}] ((0 : ℝ), x)) (𝓝 (-2 * x 2)) := by
-  refine n4g_tendsto_of_eq (G := fun p : ℝ × (Fin 3 → ℝ) ↦ 2 / (√3 * ρ₁ (lieX p.1 (p.2 0))) *
-      traceForm (n4g_lamT p.1 (p.2 1) (p.2 2)) (arcVf (lieX p.1 (p.2 0)))) ?_ ?_ ?_
-  · filter_upwards [n4g_eventually_within x] with p ⟨hr, _, h2, _⟩
+  refine tendsto_of_eventuallyEq_of_continuousAt
+    (G := fun p : ℝ × (Fin 3 → ℝ) ↦ 2 / (√3 * ρ₁ (lieX p.1 (p.2 0))) *
+      traceForm (lieLamTilde p.1 (p.2 1) (p.2 2)) (arcVf (lieX p.1 (p.2 0)))) ?_ ?_ ?_
+  · filter_upwards [eventually_nhdsWithin_section_conditions x] with p ⟨hr, _, h2, _⟩
     have hd : 3 - 2 * p.1 ^ 2 * p.2 2 ≠ 0 := by
       have : 0 < 3 - 2 * p.1 ^ 2 * p.2 2 := by linarith
       exact this.ne'
     change _ = 2 / (√3 * ρ₁ (lieX p.1 (p.2 0))) * traceForm (lieΛ₁ p.1 (p.2 1) (p.2 2) +
       (3 / 2 : ℝ) • J) (arcVf (lieX p.1 (p.2 0))) / p.1 ^ 2
-    rw [n4g_lieΛ₁_add hd, n4g_traceForm_smul]
+    rw [lieΛ₁_add_three_halves_smul_J hd, traceForm_smul_left]
     have hr' : p.1 ≠ 0 := hr.ne'
     field_simp
-  · simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, n4g_lamT,
+  · simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, lieLamTilde,
       lieX, arcVf, ofFrame, frameF, ρ₁, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
       Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
     fun_prop (disch := (simp; try positivity))
-  · simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, n4g_lamT,
+  · simp only [traceForm, Matrix.trace_fin_two, Matrix.mul_apply, Fin.sum_univ_two, lieLamTilde,
       lieX, arcVf, ofFrame, frameF, ρ₁, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
       Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
     field_simp
     ring
 
 /-- `(Y - 2)/r → √3 - 3x̃₂₁`. -/
-private theorem n4g_tendsto_Y (x : Fin 3 → ℝ) :
+private theorem tendsto_arcY_lieChart_sub_two_div (x : Fin 3 → ℝ) :
     Tendsto (fun p : ℝ × (Fin 3 → ℝ) ↦ (arcY (lieChart p) - 2) / p.1)
       (𝓝[{p | 0 < p.1}] ((0 : ℝ), x)) (𝓝 (√3 - 3 * x 0)) := by
-  refine n4g_tendsto_of_eq (G := fun p : ℝ × (Fin 3 → ℝ) ↦
+  refine tendsto_of_eventuallyEq_of_continuousAt (G := fun p : ℝ × (Fin 3 → ℝ) ↦
     (3 * p.1 - 3 * p.2 0 * (2 + p.1 * p.2 0) + 2 * √3 * (1 + p.1 * p.2 0)) /
       (2 * (1 + p.1 * p.2 0) * (1 + p.1 * p.2 0 - √3 * p.1))) ?_ ?_ ?_
-  · filter_upwards [n4g_eventually_within x] with p ⟨hr, h1, _, _⟩
+  · filter_upwards [eventually_nhdsWithin_section_conditions x] with p ⟨hr, h1, _, _⟩
     have hc : 1 + p.1 * p.2 0 ≠ 0 := by
       have : 0 < 1 + p.1 * p.2 0 := by nlinarith [Real.sqrt_nonneg 3]
       exact this.ne'
@@ -316,12 +321,12 @@ private theorem n4g_tendsto_Y (x : Fin 3 → ℝ) :
     ring
 
 /-- `(Y' - 2)/r → 2√3`. -/
-private theorem n4g_tendsto_Y' (x : Fin 3 → ℝ) :
+private theorem tendsto_arcY'_lieChart_sub_two_div (x : Fin 3 → ℝ) :
     Tendsto (fun p : ℝ × (Fin 3 → ℝ) ↦ (arcY' (lieChart p) - 2) / p.1)
       (𝓝[{p | 0 < p.1}] ((0 : ℝ), x)) (𝓝 (2 * √3)) := by
-  refine n4g_tendsto_of_eq (G := fun p : ℝ × (Fin 3 → ℝ) ↦
+  refine tendsto_of_eventuallyEq_of_continuousAt (G := fun p : ℝ × (Fin 3 → ℝ) ↦
     2 * √3 / (1 + p.1 * p.2 0 - √3 * p.1)) ?_ ?_ ?_
-  · filter_upwards [n4g_eventually_within x] with p ⟨hr, h1, _, _⟩
+  · filter_upwards [eventually_nhdsWithin_section_conditions x] with p ⟨hr, h1, _, _⟩
     change _ = (1 + ρ₀ (lieX p.1 (p.2 0)) / ρ₁ (lieX p.1 (p.2 0)) - 2) / p.1
     simp only [ρ₀, ρ₁, lieX, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
       Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one]
@@ -348,7 +353,9 @@ theorem tendsto_arcParams_lieChart (x : Fin 3 → ℝ) :
         (𝓝[{p | 0 < p.1}] ((0 : ℝ), x)) (𝓝 (√3 - 3 * x 0)) ∧
       Tendsto (fun p : ℝ × (Fin 3 → ℝ) ↦ (arcY' (lieChart p) - 2) / p.1)
         (𝓝[{p | 0 < p.1}] ((0 : ℝ), x)) (𝓝 (2 * √3)) := by
-  exact ⟨n4g_tendsto_f0 x, n4g_tendsto_q x, n4g_tendsto_p x, n4g_tendsto_Y x, n4g_tendsto_Y' x⟩
+  exact ⟨tendsto_arcF0_lieChart_div_pow_three x, tendsto_arcQ_lieChart_div_sq x,
+    tendsto_arcP_lieChart_div_sq x, tendsto_arcY_lieChart_sub_two_div x,
+    tendsto_arcY'_lieChart_sub_two_div x⟩
 
 /-- **The signs at `x̃_out`** (§5.1): `ℓ̃₁₁ + ℓ̃₂₁ x̃₂₁ < 0` (P1), `√3 ℓ̃₁₁ + ℓ̃₂₁ < 0`
 (P2), `ℓ̃₂₁ < 0` (P4), `x̃₂₁ < -√3/3` (E), at `x̃_out ≈ (-2.3889, -4.9022, -1.1264)`. -/

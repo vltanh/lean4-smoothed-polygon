@@ -42,7 +42,7 @@ INV Proposition 3 is proved in the variables `x = Y - 2`, `y = Y' - 2`, `z = s -
 
 /-- The Bernstein form of `K̃` on the triangle `T`, in `λ₀ = l0`, `λ₁ = x`, `λ₂ = w`
 (all `≥ 0`; `λ₀ + λ₁ + λ₂ = 1` on `T`). -/
-private theorem n4h_bernK (l0 x w : ℝ) (h0 : 0 ≤ l0) (hx : 0 ≤ x) (hw : 0 ≤ w) :
+private theorem Ktilde_bernstein_nonneg (l0 x w : ℝ) (h0 : 0 ≤ l0) (hx : 0 ≤ x) (hw : 0 ≤ w) :
     0 ≤ 2 / 3 * w ^ 6 + 6 * x * w ^ 5 + 1069 / 54 * x ^ 2 * w ^ 4 + 841 / 27 * x ^ 3 * w ^ 3 +
       479 / 18 * x ^ 4 * w ^ 2 + 46 / 3 * x ^ 5 * w + 6 * x ^ 6 + 8 / 3 * l0 * w ^ 5 +
       68 / 3 * l0 * x * w ^ 4 + 1862 / 27 * l0 * x ^ 2 * w ^ 3 + 883 / 9 * l0 * x ^ 3 * w ^ 2 +
@@ -55,18 +55,18 @@ private theorem n4h_bernK (l0 x w : ℝ) (h0 : 0 ≤ l0) (hx : 0 ≤ x) (hw : 0 
 
 /-- INV §3 step 7: `K̃(x, z) ≥ 0` on the triangle `T = {x ≥ 0, z ≥ 0, x + 3z ≤ 1}` (the
 Bernstein form with `λ₀ = 1 - x - 3z`, `λ₁ = x`, `λ₂ = 3z`). -/
-private theorem n4h_Kt_nonneg {x z : ℝ} (hx : 0 ≤ x) (hz : 0 ≤ z) (hl0 : 0 ≤ 1 - x - 3 * z) :
+private theorem Ktilde_nonneg {x z : ℝ} (hx : 0 ≤ x) (hz : 0 ≤ z) (hl0 : 0 ≤ 1 - x - 3 * z) :
     0 ≤ 2 * x ^ 6 + 6 * x ^ 5 * z + x ^ 5 / 2 + 6 * x ^ 4 * z ^ 2 - 13 / 2 * x ^ 4 * z -
       7 / 2 * x ^ 4 + 2 * x ^ 3 * z ^ 3 - 25 / 2 * x ^ 3 * z ^ 2 - 41 / 2 * x ^ 3 * z + x ^ 3 -
       11 / 2 * x ^ 2 * z ^ 3 - 18 * x ^ 2 * z ^ 2 - 7 / 2 * x ^ 2 * z + 9 / 2 * x ^ 2 -
       9 / 2 * x * z ^ 3 + 9 / 2 * x * z ^ 2 + 9 / 2 * x * z + 3 / 2 * x + 6 * z ^ 2 := by
-  have := n4h_bernK (1 - x - 3 * z) x (3 * z) hl0 hx (by linarith)
+  have := Ktilde_bernstein_nonneg (1 - x - 3 * z) x (3 * z) hl0 hx (by linarith)
   linarith
 
 /-- INV §3 step 6: `K = k₀ + k₁ y + k₂ y² ≥ 0` for `0 ≤ y ≤ x/(1 + x)` on `T`, with
 `k₀ = (3/2)(x + 2z)²`, `k₁ = (1/2)(1 + σ) L₁`, `k₂ = (1 + σ)² L₂ ≤ 0`, `σ = x + z`. By concavity
 in `y`: `x (1 + x) K = (1 + x)(x - (1 + x) y) k₀ + y K̃ + x k₂ y ((1 + x) y - x)`. -/
-private theorem n4h_K_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 ≤ y) (hz : 0 ≤ z)
+private theorem K_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 ≤ y) (hz : 0 ≤ z)
     (hl0 : 0 ≤ 1 - x - 3 * z) (hE : (1 + x) * y ≤ x) :
     0 ≤ 3 / 2 * (x + 2 * z) ^ 2 + 1 / 2 * (1 + (x + z)) *
         (2 * x ^ 3 + 4 * x ^ 2 * z - 5 * x ^ 2 + 2 * x * z ^ 2 - 18 * x * z - 9 * z ^ 2 - 6 * z +
@@ -75,7 +75,7 @@ private theorem n4h_K_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 ≤ y) (hz : 0 �
   have hL2 : x * (x + z - 1) - 2 * z ≤ 0 := by nlinarith
   have hk2 : (1 + (x + z)) ^ 2 * (x * (x + z - 1) - 2 * z) ≤ 0 :=
     mul_nonpos_of_nonneg_of_nonpos (sq_nonneg _) hL2
-  have hKt := n4h_Kt_nonneg hx.le hz hl0
+  have hKt := Ktilde_nonneg hx.le hz hl0
   have t1 : 0 ≤ (1 + x) * (x - (1 + x) * y) * (3 / 2 * (x + 2 * z) ^ 2) :=
     mul_nonneg (mul_nonneg (by linarith) (by linarith)) (by positivity)
   have t2 := mul_nonneg hy hKt
@@ -92,7 +92,7 @@ private theorem n4h_K_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 ≤ y) (hz : 0 �
 `(s - 1) P₁ - (3 - xy) Φ(s) = C π(s) + (s²/2) W + s² p D` with
 `C = (3 - xy)(Y' s² - 1) + s² y (YY' - 1)` (the coefficient of `-q`),
 `W = (Y'(f₀ - q) - Y p)² - 4pq` and `D = (YY' - 1) x - (3 - xy)(s² - Y)`. -/
-private theorem n4h_Phi_key {x y z f0 q p : ℝ}
+private theorem Phi_identity_mod_rel {x y z f0 q p : ℝ}
     (hR : ((2 + y) * (f0 - q) - (2 + x) * p) ^ 2 - 4 * p * q +
       2 * ((2 + x) * (2 + y) - 1) * ((2 + y - 2) * q + (2 + x - 2) * p) +
       2 * (2 + y) * (3 - (2 + x - 2) * (2 + y - 2)) * f0 = 0) :
@@ -112,7 +112,7 @@ private theorem n4h_Phi_key {x y z f0 q p : ℝ}
   linear_combination (-(1 + x + z) ^ 2 / 2) * hR
 
 /-- INV (3.4)–(3.5): `P₁ = (3 - xy) s Q(s) + s² y z (YY' - 1) = -(3/2) ψ(s) - K`. -/
-private theorem n4h_P1_eq (x y z : ℝ) :
+private theorem P1_eq_neg_psi_sub_K (x y z : ℝ) :
     (3 - x * y) * (1 + x + z) * ((2 * (2 + y) - 1) * (1 + x + z) ^ 2 -
         ((2 + x) * (2 + y) + (2 + y) + 1) * (1 + x + z) + 2 * (2 + x)) +
         (1 + x + z) ^ 2 * y * z * ((2 + x) * (2 + y) - 1) =
@@ -126,7 +126,8 @@ private theorem n4h_P1_eq (x y z : ℝ) :
 
 /-- INV §3 step 1 (the range): `ψ(s) ≥ 0` forces `2Y - 3s = 1 - x - 3z > 0`, by
 `ψ(s) + (Y - s)² = s (Y' s - 1)(2Y - 3s)`. -/
-private theorem n4h_range {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 ≤ z) (hz1 : z < 1)
+private theorem one_sub_x_sub_three_z_pos_of_psi_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 < y)
+    (hz : 0 ≤ z) (hz1 : z < 1)
     (hpsi : 0 ≤ -3 * (2 + y) * (1 + x + z) ^ 3 + (2 * (2 + x) * (2 + y) + 2) * (1 + x + z) ^ 2 -
         (2 + x) ^ 2) : 0 < 1 - x - 3 * z := by
   have hid : (-3 * (2 + y) * (1 + x + z) ^ 3 + (2 * (2 + x) * (2 + y) + 2) * (1 + x + z) ^ 2 -
@@ -142,8 +143,8 @@ private theorem n4h_range {x y z : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 ≤ z)
   nlinarith [mul_nonpos_of_nonneg_of_nonpos hpos.le h]
 
 /-- INV Proposition 3 on real numbers (`Phi_nonpos` with the definitions unfolded). `f₀ ≥ 0`
-is not needed: in the identity `n4h_Phi_key` the `f₀`-terms of the budget cancel. -/
-private theorem n4h_Phi_core {Y Y' f0 q p s : ℝ} (ha : 0 < Y - 2) (hb : 0 < Y' - 2)
+is not needed: in the identity `Phi_identity_mod_rel` the `f₀`-terms of the budget cancel. -/
+private theorem Phi_nonpos_unfolded {Y Y' f0 q p s : ℝ} (ha : 0 < Y - 2) (hb : 0 < Y' - 2)
     (hE : (Y - 1) * (Y' - 2) ≤ Y - 2) (h2 : q ≤ 0) (h4 : 0 ≤ p)
     (hR : (Y' * (f0 - q) - Y * p) ^ 2 - 4 * p * q +
       2 * (Y * Y' - 1) * ((Y' - 2) * q + (Y - 2) * p) +
@@ -162,15 +163,15 @@ private theorem n4h_Phi_core {Y Y' f0 q p s : ℝ} (ha : 0 < Y - 2) (hb : 0 < Y'
   have hz1 : z < 1 := by linarith
   have hE' : (1 + x) * y ≤ x := by linarith
   -- step 1, the range: `(x, z) ∈ T`, `s² - Y < x`, `y < 1/2`, `3 - xy > 0`
-  have hl0 := n4h_range hx hy hz hz1 hpsi
+  have hl0 := one_sub_x_sub_three_z_pos_of_psi_nonneg hx hy hz hz1 hpsi
   have hx1 : x < 1 := by linarith
   have hy2 : 2 * y < 1 := by nlinarith only [hE', hx1, hx, hy]
   have hxy : x * y < 1 / 2 := by nlinarith only [mul_lt_mul_of_pos_right hx1 hy, hy2]
   have h3xy : 0 < 3 - x * y := by linarith
   have hsY : (1 + x + z) ^ 2 - (2 + x) < x := by nlinarith only [hl0, hz, hx, hx1]
   -- steps 6–7: `K ≥ 0`
-  have hK := n4h_K_nonneg hx hy.le hz hl0.le hE'
-  -- steps 2–4: the terms of `n4h_Phi_key` are `≥ 0`
+  have hK := K_nonneg hx hy.le hz hl0.le hE'
+  -- steps 2–4: the terms of `Phi_identity_mod_rel` are `≥ 0`
   have hC : 0 ≤ (3 - x * y) * ((2 + y) * (1 + x + z) ^ 2 - 1) +
       (1 + x + z) ^ 2 * y * ((2 + x) * (2 + y) - 1) := by
     have : 0 ≤ (2 + y) * (1 + x + z) ^ 2 - 1 := by nlinarith only [hx, hy, hz]
@@ -181,8 +182,8 @@ private theorem n4h_Phi_core {Y Y' f0 q p s : ℝ} (ha : 0 < Y - 2) (hb : 0 < Y'
   have hD : 0 ≤ ((2 + x) * (2 + y) - 1) * x - (3 - x * y) * ((1 + x + z) ^ 2 - (2 + x)) := by
     nlinarith only [mul_lt_mul_of_pos_left hsY h3xy,
       mul_nonneg hx.le (by positivity : (0:ℝ) ≤ 2 * x + 2 * y + 2 * x * y)]
-  have key := n4h_Phi_key (z := z) hR
-  rw [n4h_P1_eq] at key
+  have key := Phi_identity_mod_rel (z := z) hR
+  rw [P1_eq_neg_psi_sub_K] at key
   have t1 := mul_nonneg hC hpi
   have t2 := mul_nonneg (by positivity : (0:ℝ) ≤ (1 + x + z) ^ 2 / 2) hW
   have t3 := mul_nonneg (mul_nonneg (sq_nonneg (1 + x + z)) h4) hD
@@ -200,7 +201,7 @@ private theorem n4h_Phi_core {Y Y' f0 q p s : ℝ} (ha : 0 < Y - 2) (hb : 0 < Y'
 
 /-- A cubic `-3Y' t³ + C t² - K` with `Y' > 0` increases and then decreases on `(0, ∞)`, so on
 `[u, v] ⊂ (0, ∞)` it is at least the smaller of its values at the ends. -/
-private theorem n4h_cubic_between {Y' C K u s v : ℝ} (hY' : 0 < Y') (hu : 0 < u) (hus : u ≤ s)
+private theorem cubic_nonneg_between {Y' C K u s v : ℝ} (hY' : 0 < Y') (hu : 0 < u) (hus : u ≤ s)
     (hsv : s ≤ v) (h1 : 0 ≤ -3 * Y' * u ^ 3 + C * u ^ 2 - K)
     (h2 : 0 ≤ -3 * Y' * v ^ 3 + C * v ^ 2 - K) : 0 ≤ -3 * Y' * s ^ 3 + C * s ^ 2 - K := by
   by_cases hc : 3 * Y' * (s ^ 2 + s * u + u ^ 2) ≤ C * (s + u)
@@ -234,7 +235,7 @@ private theorem n4h_cubic_between {Y' C K u s v : ℝ} (hY' : 0 < Y') (hu : 0 < 
     linarith
 
 /-- INV Proposition 4 on real numbers. -/
-private theorem n4h_YNew_core {Y Y' s : ℝ} (hY : 2 < Y) (hY' : 2 < Y') (hs1 : Y - 1 ≤ s)
+private theorem YNew_ge_unfolded {Y Y' s : ℝ} (hY : 2 < Y) (hY' : 2 < Y') (hs1 : Y - 1 ≤ s)
     (hs2 : s < Y)
     (hpsi : -3 * Y' * s ^ 3 + (2 * Y * Y' + 2) * s ^ 2 - Y ^ 2 < 0) :
     16 / 5 ≤ (Y' * s ^ 2 - 2 * s + Y) / (Y - s) := by
@@ -296,7 +297,7 @@ private theorem n4h_YNew_core {Y Y' s : ℝ} (hY : 2 < Y) (hY' : 2 < Y') (hs1 : 
     have : 0 ≤ (Y' - 2) * (Y - 1) ^ 2 * (1 - (Y - 2)) :=
       mul_nonneg (mul_nonneg (by linarith) (sq_nonneg _)) (by linarith)
     linarith
-  have := n4h_cubic_between (by linarith : (0:ℝ) < Y') (by linarith : (0:ℝ) < Y - 1) hs1 hst
+  have := cubic_nonneg_between (by linarith : (0:ℝ) < Y') (by linarith : (0:ℝ) < Y - 1) hs1 hst
     hψ1 hψt
   linarith
 
@@ -352,7 +353,7 @@ Route (INV §3; `x = Y - 2`, `y = Y' - 2`, `z = s - Y + 1`, `σ = s - 1 = x + z`
 Margins (numerical, for orientation): `-P₁ ≥ 0.80 (x + y + z)` on the region; the bound is within
 20% of `q_new` at images.
 
-In Lean (`n4h_Phi_core`), steps 2–4 are one identity modulo `R̃ = 0` (`linear_combination`):
+In Lean (`Phi_nonpos_unfolded`), steps 2–4 are one identity modulo `R̃ = 0` (`linear_combination`):
 `(s - 1) P₁ - (3 - xy) Φ(s) = C π(s) + (s²/2)((Y'(f₀ - q) - Y p)² - 4pq)
 + s² p ((YY' - 1) x - (3 - xy)(s² - Y))`, `C = (3 - xy)(Y' s² - 1) + s² y (YY' - 1)`, and each term
 on the right is `≥ 0` by step 1. The `f₀`-terms of the budget cancel in it, so `f₀ ≥ 0` (P1,
@@ -361,7 +362,7 @@ theorem Phi_nonpos (ha : 0 < a.Y - 2) (hb : 0 < a.Y' - 2) (hE : (a.Y - 1) * (a.Y
     (h2 : a.q ≤ 0) (h4 : 0 ≤ a.p) (hR : a.relT = 0) {s : ℝ}
     (hs1 : a.Y - 1 ≤ s) (hs2 : s < a.Y) (hpi : 0 ≤ s ^ 2 - a.Y * s + a.B)
     (hpsi : 0 ≤ a.psiE s) : a.Phi s ≤ 0 :=
-  n4h_Phi_core ha hb hE h2 h4 hR hs1 hs2 hpi hpsi
+  Phi_nonpos_unfolded ha hb hE h2 h4 hR hs1 hs2 hpi hpsi
 
 /-- **INV Proposition 4** (E fails at the image implies `Y_new ≥ 16/5`). If `Y > 2`, `Y' > 2`,
 `Y - 1 ≤ s < Y` and `ψ(s) < 0`, then `Y_new = (Y' s² - 2s + Y)/(Y - s) ≥ 16/5`.
@@ -388,14 +389,14 @@ Margin (numerical): the infimum of `Y_new` over `{ψ(s) < 0, s ≥ Y - 1}` is `3
 `Y = Y' = 2`, `s = (1 + √7)/3`); `16/5` is used because it exceeds the root `Y_* = 3.16258` of
 `g(Y) = Y log Y - (Y - 1) - (Y - 1)²/Y` (INV Lemma 6).
 
-In Lean (`n4h_YNew_core`), step 1 is used through `χ` only: `χ` increases on `[0, ∞)`
+In Lean (`YNew_ge_unfolded`), step 1 is used through `χ` only: `χ` increases on `[0, ∞)`
 (`χ(v) - χ(u) = (v - u)(Y'(u + v) + 6/5)`), so `χ(Y - 1) ≤ χ(s) < 0` in step 5. The root
 `s_χ ∈ [s, Y]` comes from the intermediate value theorem, and step 4 uses the direct form
 `ψ(s_χ) = (2Y - 3s_χ) χ(s_χ) + (1/5)(17Y - 28 s_χ)(Y - s_χ)` with `s_χ ≤ (17/28) Y`. Step 2 is
-`n4h_cubic_between`. -/
+`cubic_nonneg_between`. -/
 theorem YNew_ge (hY : 2 < a.Y) (hY' : 2 < a.Y') {s : ℝ} (hs1 : a.Y - 1 ≤ s) (hs2 : s < a.Y)
     (hpsi : a.psiE s < 0) : 16 / 5 ≤ a.YNew s :=
-  n4h_YNew_core hY hY' hs1 hs2 hpsi
+  YNew_ge_unfolded hY hY' hs1 hs2 hpsi
 
 end ArcParams
 

@@ -71,8 +71,8 @@ inequalities, with no local or asymptotic expansion at the faces where the switc
 to `0`:
 * `dOutContracts` (`SmoothedPolygons/Ch16/DOutContraction.lean`), with the witnesses
   `B = Icc boxLo boxHi ≈ [0.22, 0.30] × [0.080, 0.199] × [2.688, 3.009]`, `N = 2`, `κ = 3/4`
-  and `g = gmap`; its Lipschitz bound rests on an interval chain on the single box `B`, written
-  out step by step and checked by `norm_num` (`SmoothedPolygons/Ch16/DOutContractionBounds.lean`);
+  and `g = gmap`; its Lipschitz bound rests on bounds of the derivatives on the single box `B`,
+  by a short argument written out by hand (`SmoothedPolygons/Ch16/DOutDerivativeBounds.lean`);
 * `cellTwoEntersDOut` (`SmoothedPolygons/Ch16/CellTwoEntersDOut.lean`);
 * `boxSubclaims` (`SmoothedPolygons/Ch16/BoxSubclaims.lean`).
 -/
