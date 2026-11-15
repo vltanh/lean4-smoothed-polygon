@@ -9,13 +9,13 @@ import Mathlib.Topology.OpenPartialHomeomorph.Continuity
 /-!
 # Stable and unstable manifolds (Appendix A.3)
 
-Appendix A.3 of Hales–Vajjha, *Packings of Smoothed Polygons* (`sec:stable-manifold`,
-TeX 13176–13211) recalls from Irwin (*Smooth Dynamical Systems*, Academic Press 1980,
-reprinted World Scientific 2001, Chapter 6) the local and global stable sets of a fixed point of
-a diffeomorphism, hyperbolic fixed points and their stable and unstable summands, and Theorem
-A.3.1 (Irwin): at a hyperbolic fixed point of a `C^r` diffeomorphism (`r ≥ 1`), the local stable set of `f|_U`, for some open
-neighborhood `U` of `p`, is a `C^r` embedded submanifold tangent at `p` to the stable summand, and
-the global stable set is a `C^r` immersed submanifold; "There are corresponding statements for
+Appendix A.3 of Hales–Vajjha, *Packings of Smoothed Polygons* (`sec:stable-manifold`, TeX
+13176–13211) recalls from Irwin (*Smooth Dynamical Systems*, Academic Press 1980, reprinted World
+Scientific 2001, Chapter 6) the local and global stable sets of a fixed point of a diffeomorphism,
+hyperbolic fixed points and their stable and unstable summands, and Theorem A.3.1 (Irwin): at a
+hyperbolic fixed point of a `C^r` diffeomorphism (`r ≥ 1`), the local stable set of `f|_U`, for some
+open neighborhood `U` of `p`, is a `C^r` embedded submanifold tangent at `p` to the stable summand,
+and the global stable set is a `C^r` immersed submanifold; "There are corresponding statements for
 local and global unstable manifolds".
 
 The definitions are `Function.localStableSet`, `Function.localUnstableSet`,
