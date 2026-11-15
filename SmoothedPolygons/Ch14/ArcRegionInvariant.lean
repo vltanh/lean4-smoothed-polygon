@@ -56,8 +56,7 @@ it Mahler's First conjecture (`theorem16_3_1_unconditional`,
 2. Theorem 5.2: take `e` from `lemma14_3_1` and `U = V` from Lemma 5.1
    (`exists_nhds_lieChart_mem_arcRegion`). A point `p` of `Function.localUnstableSet e chartPtOut U`
    lies in `U` (its backward orbit starts at `p`), so for `r > 0`, `lieChart p ∈ 𝒢*`, and step 1
-   gives `ReachesStarBoundary (lieChart p)`. (Steps 1–2 are written out and compile in
-   `notes/n4rev/Thm52Check.lean`.)
+   gives `ReachesStarBoundary (lieChart p)`.
 3. `arcRegionInvariant_sharp` (inv.md §7, the proof of Theorem 2): see its docstring; it assembles
    Theorem 1 (`ArcParams.step_closed`, `arcQ_reinPoincare`), Proposition 2 (`ArcParams.rel_eq`),
    Corollary 1.2 (`ArcParams.E_new_iff`), Propositions 3–5 (`ArcParams.Phi_nonpos`,
@@ -75,9 +74,10 @@ it Mahler's First conjecture (`theorem16_3_1_unconditional`,
 * *Proved* (research round 2, `notes/inv/inv.md` Theorem 2; confirmed by the independent review,
   `notes/briefs/n4_review_report.md`, which re-derived Theorem 1, recomputed all three Bernstein
   certificates and assembled (INV) in Lean from the statements now in this library,
-  `notes/n4rev/InvAssemblyCheck.lean`). **The Lean proof is in progress**: the statements are here
-  and in `ArcStepClosed.lean`, `ArcStepRegion.lean`, `ArcStepExit.lean`, `ArcPoincareMap.lean`
-  (`arcQ_reinPoincare`), `ArcConditions.lean` (`arcLeavesStarDomain_of_Y_ge`), with `sorry`. The
+  `notes/n4rev/InvAssemblyCheck.lean`). **Proved in Lean**: `arcRegionInvariant`, from
+  `arcRegionInvariant_sharp`, with the real-number lemmas of `ArcStepClosed.lean`,
+  `ArcStepRegion.lean`, `ArcStepExit.lean` and the flow lemmas `arcQ_reinPoincare`
+  (`ArcPoincareMap.lean`) and `arcLeavesStarDomain_of_Y_ge` (`ArcConditions.lean`). The
   proof uses no computer: every step is a polynomial identity, a finite list of nonnegative
   rationals, `log s ≥ 2(s - 1)/(s + 1)` or `log(16/5) > 297/256`. Three facts make it work:
   1. `q_new` is explicit, `q_new = Φ(s)/(Y - s)²` with `s = e^{τ_sw}` (Theorem 1: the costate has
@@ -111,18 +111,79 @@ open Set Filter Topology
 star domain (`F(log Y) < 0`), its image `F(q) = reinPoincare q` is again in `𝒢*`, or the `e₂`-arc
 from `F(q)` leaves the star domain before switching. A single-step statement about an explicit map
 of four real parameters (Theorem 2.1). Status: **proved** in `notes/inv/inv.md` (Theorem 2;
-confirmed by the review, `notes/briefs/n4_review_report.md`); Lean proof in progress
-(`arcRegionInvariant`, from `arcRegionInvariant_sharp`). See the module docstring. -/
+confirmed by the review, `notes/briefs/n4_review_report.md`); proved in Lean as
+`arcRegionInvariant`, from `arcRegionInvariant_sharp`. See the module docstring. -/
 def ArcRegionInvariant : Prop :=
   ∀ q ∈ arcRegion, (arcParams q).F (Real.log (arcY q)) < 0 →
     reinPoincare q ∈ arcRegion ∨ ArcLeavesStarDomain (reinPoincare q)
+
+/-- The induction of `ArcRegionInvariant.reachesStarBoundary` (proof.md Corollary 2.4): every
+point of `𝒢*` with `ρ₁(q)/r(q) < n` reaches the boundary of the star domain. -/
+private theorem n4h_reach (h : ArcRegionInvariant) :
+    ∀ n : ℕ, ∀ q ∈ arcRegion, ρ₁ q.1 / q.1 0 0 < n → ReachesStarBoundary q := by
+  intro n
+  induction n with
+  | zero =>
+    intro q hq hn
+    obtain ⟨hs, hr, -⟩ := hq
+    have : 0 < ρ₁ q.1 / q.1 0 0 := div_pos hs.2.2.2.2.1 hr
+    simp only [Nat.cast_zero] at hn
+    linarith
+  | succ n ih =>
+    intro q hq hn
+    have hq' := hq
+    obtain ⟨hs, hr, h1, h2, h4, -⟩ := hq'
+    have hE2 : SwitchEntersE2 q := switchEntersE2_of_arc hs h1 h4
+    by_cases hF : (arcParams q).F (Real.log (arcY q)) < 0
+    · have hsw := arcSwitchesToE1_of_arc hs hr h1 h2 h4 hF
+      obtain ⟨hFs, hF1, hF4, -, hFr, -⟩ := arc_propagation hs hr h1 h2 h4 hF
+      have hFE2 : SwitchEntersE2 (reinPoincare q) := switchEntersE2_of_arc hFs hF1 hF4
+      rcases h q hq hF with hin | hout
+      · have hlt := radius_lt_of_mem_arcRegion hq hF
+        have hrad := (radius_reinPoincare hs (switchesBeforeExit_of_arc hs h1 h2 hF).1).1
+        have hρ : 0 < ρ₁ q.1 := hs.2.2.2.2.1
+        have hm : ρ₁ (reinPoincare q).1 / (reinPoincare q).1 0 0 < n := by
+          have e1 : ρ₁ (reinPoincare q).1 = ρ₁ q.1 - 2 * (reinPoincare q).1 0 0 := by linarith
+          have h3 : ρ₁ q.1 / (reinPoincare q).1 0 0 < ρ₁ q.1 / q.1 0 0 := by
+            rw [div_lt_div_iff₀ hFr hr]; nlinarith
+          rw [e1, sub_div, mul_div_assoc, div_self hFr.ne', mul_one]
+          push_cast at hn
+          linarith
+        obtain ⟨K, hK1, hK2, hK3⟩ := ih _ hin hm
+        refine ⟨K + 1, ?_, ?_, ?_⟩
+        · intro j hj
+          rcases j with _ | j
+          · simpa using hE2
+          · rw [Function.iterate_succ_apply]; exact hK1 j (by omega)
+        · intro j hj
+          rcases j with _ | j
+          · simpa using hsw
+          · rw [Function.iterate_succ_apply]; exact hK2 j (by omega)
+        · rw [Function.iterate_succ_apply]; exact hK3
+      · refine ⟨1, ?_, ?_, ?_⟩
+        · intro j hj
+          interval_cases j
+          · simpa using hE2
+          · simpa using hFE2
+        · intro j hj
+          interval_cases j
+          simpa using hsw
+        · simpa using hout
+    · refine ⟨0, ?_, ?_, ?_⟩
+      · intro j hj
+        interval_cases j
+        simpa using hE2
+      · intro j hj
+        omega
+      · simpa using arcLeavesStarDomain_of_arc hs hr h1 h2 h4 (not_lt.1 hF)
 
 /-- Under (INV), the forward orbit of every point of `𝒢*` reaches the boundary of the star domain:
 it switches cyclically for finitely many steps (the radii increase and sum to less than
 `ρ₁(q)/2`) and then an arc exits. -/
 theorem ArcRegionInvariant.reachesStarBoundary (h : ArcRegionInvariant) {q : iso_PhasePt}
     (hq : q ∈ arcRegion) : ReachesStarBoundary q := by
-  sorry
+  obtain ⟨n, hn⟩ := exists_nat_gt (ρ₁ q.1 / q.1 0 0)
+  exact n4h_reach h n q hq hn
 
 /-- **Theorem 5.2** (proof.md §5.2): **(INV) implies N4**, the numerical fact behind
 Theorem 14.4.1 (`UnstableCurveLeavesStarDomain`, Figure 14.2). Departure from the paper: the book
@@ -130,7 +191,13 @@ computes the unstable curve numerically; here N4 follows from (INV) by the exact
 arcs, without locating the curve. -/
 theorem unstableCurveLeavesStarDomain_of_arcRegionInvariant (h : ArcRegionInvariant) :
     UnstableCurveLeavesStarDomain := by
-  sorry
+  obtain ⟨e, he⟩ := lemma14_3_1
+  obtain ⟨V, hV, hVr⟩ := exists_nhds_lieChart_mem_arcRegion
+  refine ⟨e, he, V, hV, fun p hp hp1 => ?_⟩
+  obtain ⟨y, hy0, hy, -⟩ := hp
+  have hpV : p ∈ V := hy0 ▸ (hy 0).1
+  obtain ⟨n, hn⟩ := exists_nat_gt (ρ₁ (lieChart p).1 / (lieChart p).1 0 0)
+  exact n4h_reach h n _ (hVr p hpV hp1) hn
 
 /-- **(INV), sharp form** (`notes/inv/inv.md` Theorem 2). Let `q ∈ 𝒢*` with `F(log Y) < 0` (the
 arc switches inside the star domain) and `s = e^{τ_sw}`. Then `F(q) = reinPoincare q` is a section
@@ -141,9 +208,7 @@ point with `r > 0`, P1 and P4 (so `SwitchEntersE2 (F q)`), and `f₀ ≥ q (1 - 
   switching.
 Equivalently, `F(q)`'s arc exits whenever `Y_new ≥ 16/5`, and `F(q) ∈ 𝒢*` whenever `Y_new < 16/5`.
 
-Route (inv.md §7; the Lean assembly is `rv_arcRegionInvariant` of
-`notes/n4rev/InvAssemblyCheck.lean`, which compiles against these statements up to the forms of
-the hypotheses). Write `a = arcParams q`, `s = e^{τ_sw}`.
+Route (inv.md §7). Write `a = arcParams q`, `s = e^{τ_sw}`.
 1. From `q ∈ 𝒢*`: a section point, `r > 0`, P1, P2, P4, E. `switchesBeforeExit_of_arc`:
    `SwitchesBeforeExit q`. `arc_propagation`: `F q` is a section point with P1, P4, `r(F q) > 0`;
    `switchEntersE2_of_arc` at `F q`.
@@ -171,7 +236,50 @@ theorem arcRegionInvariant_sharp {q : iso_PhasePt} (hq : q ∈ arcRegion)
       (0 ≤ (arcParams q).psiE (Real.exp (arcParams q).tauSw) → reinPoincare q ∈ arcRegion) ∧
       ((arcParams q).psiE (Real.exp (arcParams q).tauSw) < 0 →
         16 / 5 ≤ arcY (reinPoincare q) ∧ ArcLeavesStarDomain (reinPoincare q)) := by
-  sorry
+  obtain ⟨hs, hr, h1, h2, h4, hE⟩ := hq
+  set a := arcParams q with ha_def
+  have hsw := (switchesBeforeExit_of_arc hs h1 h2 hF).1
+  obtain ⟨-, hpar⟩ := arcParams_reinPoincare hs hsw
+  have hQ := arcQ_reinPoincare hs hsw
+  obtain ⟨hFs, hF1, hF4, -, hFr, -⟩ := arc_propagation hs hr h1 h2 h4 hF
+  have hSE := switchEntersE2_of_arc hFs hF1 hF4
+  have he : 0 < a.eps := arcEps_pos hs.2
+  have hY1 : 1 < a.Y := one_lt_arcY hs.2
+  have hY' : a.Y' = arcY' q := arcParams_Y' hs.2
+  have hg0 : a.g0 = 0 := arcG0_eq_zero hs
+  have hrad : a.radius = q.1 0 0 := arcParams_radius hs.2
+  have hb : 0 < a.Y' - 2 := by
+    have h0 : 0 < a.radius := by rw [hrad]; exact hr
+    simp only [ArcParams.radius] at h0
+    by_contra hh
+    have : a.eps * (a.Y' - 2) ≤ 0 := mul_nonpos_of_nonneg_of_nonpos he.le (not_lt.1 hh)
+    linarith
+  have hE' : (a.Y - 1) * (a.Y' - 2) ≤ a.Y - 2 := by rw [hY']; exact hE
+  have ha : 0 < a.Y - 2 := by nlinarith
+  have hR : a.relT = 0 := by
+    have h0 := a.rel_eq he.ne' (by linarith)
+    rw [arcParams_rel hs] at h0
+    have : a.Y ^ 2 * a.eps ^ 4 ≠ 0 := by positivity
+    exact (mul_eq_zero.1 h0.symm).resolve_left this
+  obtain ⟨hsY1, hs1, hsY, hpi, hFs0⟩ := a.exp_tauSw_spec h1 h2 hY1.le hF
+  set s := Real.exp a.tauSw with hs_def
+  obtain ⟨hcY, hcY', hcf, -⟩ := a.step_closed he hY1 hg0 h1 h2 hF (arcQ (reinPoincare q))
+  have hYn : arcY (reinPoincare q) = a.YNew s := (congrArg ArcParams.Y hpar).trans hcY
+  have hYn' : arcY' (reinPoincare q) = a.YNew' s :=
+    (arcParams_Y' hFs.2).symm.trans ((congrArg ArcParams.Y' hpar).trans hcY')
+  have hfn : arcF0 (reinPoincare q) = a.f0New s := (congrArg ArcParams.f0 hpar).trans hcf
+  have h5 := a.qNew_le_f0New ha.le hb.le h1.le h2 h4.le hs1 hsY1.le hsY hFs0
+  have h5' : arcQ (reinPoincare q) * (1 - 1 / arcY (reinPoincare q)) ≤ arcF0 (reinPoincare q) := by
+    rw [hQ, hYn, hfn]; exact h5
+  refine ⟨hFs, hFr, hF1, hF4, hSE, h5', fun hpsi ↦ ?_, fun hpsi ↦ ?_⟩
+  · refine ⟨hFs, hFr, hF1, ?_, hF4, ?_⟩
+    · rw [hQ]
+      exact div_nonpos_of_nonpos_of_nonneg
+        (a.Phi_nonpos ha hb hE' h1.le h2 h4.le hR hsY1.le hsY hpi.le hpsi) (sq_nonneg _)
+    · rw [hYn, hYn']
+      exact (a.E_new_iff hsY.ne).2 hpsi
+  · have hYge := a.YNew_ge (by linarith) (by linarith) hsY1.le hsY hpsi
+    exact ⟨hYn ▸ hYge, arcLeavesStarDomain_of_Y_ge hFs hFr hF1 hF4 (hYn ▸ hYge) h5'⟩
 
 /-- **(INV)** (`notes/inv/inv.md` Theorem 2): the region `𝒢*` is invariant under the
 Reinhardt–Poincaré map until the exit. From the sharp form `arcRegionInvariant_sharp`, by cases on

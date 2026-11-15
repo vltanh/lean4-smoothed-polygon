@@ -131,7 +131,9 @@ Route: substitute `Y' = (1 + ε²)/(ε² Y)` (so `YY' - 1 = 1/ε²` and `ε² Y 
 basis of (1.4): `α² + 4βγ + 9ε² = 3ε² R̃/(YY' - 1)²` (`lamAlpha`, `lamBeta`, `lamGamma`); it is
 not needed here. -/
 theorem rel_eq (he : a.eps ≠ 0) (hY : a.Y ≠ 0) : a.rel = a.Y ^ 2 * a.eps ^ 4 * a.relT := by
-  sorry
+  unfold rel relT Y'
+  field_simp
+  ring
 
 /-- **proof.md Lemma 3.2 in the variable `s = e^{τ_sw}`** (inv.md §1, "Switching"). Under P1
 (`f₀ > 0`), P2 (`q ≤ 0`), `Y ≥ 1` and `F(log Y) < 0`, the switch `s = e^{τ_sw}` satisfies
@@ -140,7 +142,7 @@ theorem rel_eq (he : a.eps ≠ 0) (hY : a.Y ≠ 0) : a.rel = a.Y ^ 2 * a.eps ^ 4
 Route: `tauSw_spec` (`τ_sw > 0`, `τ_sw > log y₊`, `f(τ_sw) = 0`), `yMinus_le_one`
 (`y₋ ≤ 1 ≤ y₊`, `max(Y - 1, 1) ≤ y₊`) and `tauSw_lt_log_iff` (`τ_sw < log Y`). Then
 `s > y₊ ≥ Y - 1` (`Real.exp_lt_exp`, `Real.exp_log` with `y₊ ≥ 1 > 0`), `s > 1`
-(`Real.one_lt_exp`), `s < Y`. For `π(s) > 0`: `π(y) = (y - y₊)(y - y₋)` (`y₊ + y₋ = Y`,
+(`Real.one_lt_exp_iff`), `s < Y`. For `π(s) > 0`: `π(y) = (y - y₊)(y - y₋)` (`y₊ + y₋ = Y`,
 `y₊ y₋ = B` from `√((Y - 2)² - 4q)² = Y² - 4B`, `Real.sq_sqrt`, the radicand is `≥ 0` as `q ≤ 0`),
 and `s > y₊ ≥ 1 ≥ y₋`. `F(log s) = F(τ_sw) = e^{τ_sw} f(τ_sw) = 0` (`Real.log_exp`). -/
 theorem exp_tauSw_spec (h1 : 0 < a.f0) (h2 : a.q ≤ 0) (hY : 1 ≤ a.Y)
@@ -148,7 +150,28 @@ theorem exp_tauSw_spec (h1 : 0 < a.f0) (h2 : a.q ≤ 0) (hY : 1 ≤ a.Y)
     a.Y - 1 < Real.exp a.tauSw ∧ 1 < Real.exp a.tauSw ∧ Real.exp a.tauSw < a.Y ∧
       0 < Real.exp a.tauSw ^ 2 - a.Y * Real.exp a.tauSw + a.B ∧
       a.F (Real.log (Real.exp a.tauSw)) = 0 := by
-  sorry
+  obtain ⟨hτ0, hτp, hfτ, -, -, -⟩ := a.tauSw_spec h1 h2
+  obtain ⟨hm1, hp1, hpY⟩ := a.yMinus_le_one h2
+  have hτY := (a.tauSw_lt_log_iff h1 h2 hY).2 hF
+  have hyp0 : 0 < a.yPlus := by linarith
+  have hsp : a.yPlus < Real.exp a.tauSw := by
+    rw [← Real.exp_log hyp0]; exact Real.exp_lt_exp.2 hτp
+  have hsY : Real.exp a.tauSw < a.Y := by
+    rw [← Real.exp_log (by linarith : (0:ℝ) < a.Y)]; exact Real.exp_lt_exp.2 hτY
+  have hs1 : 1 < Real.exp a.tauSw := Real.one_lt_exp_iff.2 hτ0
+  refine ⟨lt_of_le_of_lt ((le_max_left _ _).trans hpY) hsp, hs1, hsY, ?_, ?_⟩
+  · -- `π(y) = (y - y₊)(y - y₋)`
+    have hrad : 0 ≤ (a.Y - 2) ^ 2 - 4 * a.q := by nlinarith [sq_nonneg (a.Y - 2)]
+    have hsq := Real.sq_sqrt hrad
+    have e : Real.exp a.tauSw ^ 2 - a.Y * Real.exp a.tauSw + a.B =
+        (Real.exp a.tauSw - a.yPlus) * (Real.exp a.tauSw - a.yMinus) := by
+      unfold yPlus yMinus B
+      linear_combination (1 / 4 : ℝ) * hsq
+    rw [e]
+    exact mul_pos (by linarith) (by linarith)
+  · rw [Real.log_exp]
+    unfold F
+    rw [hfτ, mul_zero]
 
 /-- **inv.md Theorem 1 on the parameters**: the one-step map `step` (Theorem 2.1 of proof.md) in
 closed form, with `s = e^{τ_sw}`: `Y_new = (Y' s² - 2s + Y)/(Y - s)`, `Y'_new = Y/(Y - s)`,
@@ -180,7 +203,70 @@ theorem step_closed (he : 0 < a.eps) (hY : 1 < a.Y) (hg0 : a.g0 = 0) (h1 : 0 < a
     (a.step x).Y = a.YNew (Real.exp a.tauSw) ∧ (a.step x).Y' = a.YNew' (Real.exp a.tauSw) ∧
       (a.step x).f0 = a.f0New (Real.exp a.tauSw) ∧ (a.step x).p = a.pNew (Real.exp a.tauSw) ∧
       (a.step x).eps = a.eps * (a.Y - Real.exp a.tauSw) / Real.exp a.tauSw := by
-  sorry
+  obtain ⟨-, hs1, hsY, -, -⟩ := a.exp_tauSw_spec h1 h2 hY.le hF
+  have hfτ := (a.tauSw_spec h1 h2).2.2.1
+  set τ := a.tauSw with hτdef
+  set s := Real.exp τ with hsdef
+  have hs0 : 0 < s := by positivity
+  have hYs : 0 < a.Y - s := by linarith
+  have hY0 : 0 < a.Y := by linarith
+  have em1 : Real.exp (-τ) = s⁻¹ := Real.exp_neg τ
+  have e2 : Real.exp (2 * τ) = s ^ 2 := by rw [two_mul, Real.exp_add]; ring
+  have em2 : Real.exp (-2 * τ) = (s ^ 2)⁻¹ := by
+    rw [show -2 * τ = -(2 * τ) by ring, Real.exp_neg, e2]
+  have hk : a.stepK = (a.Y - s) / s := by
+    unfold stepK; rw [em1]; field_simp
+  -- `f(τ) = 0` reads `Y τ s = s² - A s - B`
+  have hτ : a.Y * τ * s = s ^ 2 - a.A * s - a.B := by
+    unfold f at hfτ
+    rw [em1, em2] at hfτ
+    field_simp at hfτ
+    linear_combination hfτ
+  have hεn : (a.step x).eps = a.eps * (a.Y - s) / s := by
+    change a.stepK * a.eps = _
+    rw [hk]; ring
+  have hYn : (a.step x).Y = a.YNew s := by
+    change 1 + (a.Y' * Real.exp a.tauSw - 1) / a.stepK = _
+    rw [hk]; unfold YNew
+    field_simp
+    ring
+  refine ⟨hYn, ?_, ?_, ?_, hεn⟩
+  · -- `Y'_new = Y/(Y - s)`, from `ε² Y Y' = 1 + ε²`
+    have hYY : a.eps ^ 2 * a.Y * a.Y' = 1 + a.eps ^ 2 := by
+      unfold Y'; field_simp
+    have hN : 0 < a.Y' * s ^ 2 - 2 * s + a.Y := by
+      have hY'0 : 0 < a.Y' := by unfold Y'; positivity
+      have hYY1 : 0 < a.Y * a.Y' - 1 := by
+        have : a.eps ^ 2 * (a.Y * a.Y' - 1) = 1 := by linear_combination hYY
+        have he2 : 0 < a.eps ^ 2 := by positivity
+        by_contra h; push Not at h; nlinarith
+      have : a.Y' * (a.Y' * s ^ 2 - 2 * s + a.Y) = (a.Y' * s - 1) ^ 2 + (a.Y * a.Y' - 1) := by ring
+      have : 0 < a.Y' * (a.Y' * s ^ 2 - 2 * s + a.Y) := by nlinarith [sq_nonneg (a.Y' * s - 1)]
+      exact pos_of_mul_pos_right this hY'0.le
+    change (1 + (a.step x).eps ^ 2) / ((a.step x).eps ^ 2 * (a.step x).Y) = _
+    rw [hεn, hYn]; unfold YNew YNew'
+    rw [div_eq_div_iff (by positivity) hYs.ne']
+    field_simp
+    linear_combination (-s ^ 2) * hYY
+  · change a.g τ / a.stepK ^ 2 = _
+    have hg : a.g τ = a.Psi s / a.Y := by
+      rw [eq_div_iff hY0.ne']
+      unfold g Psi A'
+      rw [e2, hg0]
+      unfold B'
+      linear_combination (-a.Y') * hτ
+    rw [hg, hk]; unfold f0New
+    field_simp
+  · change -a.fDeriv τ / a.stepK ^ 2 = _
+    have hd : a.fDeriv τ = (a.Y * s - s ^ 2 - a.B) / s ^ 2 := by
+      rw [eq_div_iff (by positivity)]
+      unfold fDeriv
+      rw [em1, em2]
+      field_simp
+      linear_combination (-1 : ℝ) * hτ
+    rw [hd, hk]; unfold pNew
+    field_simp
+    ring
 
 /-- **inv.md Corollary 1.2** (E at the image): for `s ≠ Y`,
 `(Y_new - 1)(Y'_new - 2) ≤ Y_new - 2` iff `ψ(s) ≥ 0`.
@@ -192,7 +278,12 @@ psiE`, `field_simp`, `ring`; `notes/inv/verify.py` §1), and `(Y - s)² > 0`
 `s < 2Y/3`. -/
 theorem E_new_iff {s : ℝ} (hs : s ≠ a.Y) :
     (a.YNew s - 1) * (a.YNew' s - 2) ≤ a.YNew s - 2 ↔ 0 ≤ a.psiE s := by
-  sorry
+  have hYs : a.Y - s ≠ 0 := sub_ne_zero.2 (Ne.symm hs)
+  have e : a.psiE s = (a.Y - s) ^ 2 * ((a.YNew s - 2) - (a.YNew s - 1) * (a.YNew' s - 2)) := by
+    unfold psiE YNew YNew'
+    field_simp
+    ring
+  rw [e, mul_nonneg_iff_of_pos_left (by positivity), sub_nonneg]
 
 end ArcParams
 
