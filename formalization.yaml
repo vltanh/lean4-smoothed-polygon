@@ -427,7 +427,7 @@ automation:
       tool_setup: >-
         The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, local copy
         dated 2026-10-17, versions 3.0.1 to 3.2.5 of its repository in the fourth round, and 3.3.0
-        and 3.4.0 in the seventh) in one Claude Code session, in ten rounds, with 224 sub-agents
+        and 3.4.0 in the seventh) in one Claude Code session, in eleven rounds, with 240 sub-agents
         of the same model on the formalization and its three packages (at most 13 sub-agents at once): statement reviews against the TeX
         source and the cited sources, parallel proofs by chapter and by part, proof reviews,
         verification of the audit and of its literature section, and an exploration of follow-up
@@ -436,12 +436,12 @@ automation:
         Comparator were run locally.
       cost:
         wall_time: >-
-          237.4 hours elapsed from the start to the completed audit report of the tenth round
+          243.8 hours elapsed from the start to the completed audit report of the eleventh round
           (5-15 November 2026), including three nights, about 15 hours stopped by a usage limit and
           154 hours stopped by a reboot (7-14 November); the rounds took 3.2, 15.5, 21.5, 5.6, 2.4,
-          3.4, 2.0, 2.9, 6.2 and 17.6 hours (the last with about 9.1 hours of work); 110.3 hours of
+          3.4, 2.0, 2.9, 6.2, 17.6 (about 9.1 hours of work) and 6.4 hours; 116.1 hours of
           sub-agent working time in all (1.5 of them evaluating the skill, 3.2 on the
-          StableManifold package)
+          StableManifold package, 1.4 on Noether's theorem in the OptimalControl package)
         spend_usd: "not tracked"
         hardware: "local machine (Linux) for Lean builds; models via API"
       prompting_notes: >-
@@ -471,10 +471,14 @@ automation:
         in the tenth round, proofs without computer assistance of the facts that the book reads off
         Mathematica computations, with the computations kept in another language as a reference and
         each proof recorded as a departure, an attempt at such a proof of the unstable-curve fact N4
-        (a research round first), and the scope: formalize what the main results need.
+        (a research round first), and the scope: formalize what the main results need; in the
+        eleventh round, a short audit report with its details in separate files and no plan
+        language, the derivative bounds of DOutContracts by hand, and, from Chapters 9-12, the
+        control-theoretic Noether theorem (Sussmann's, in the OptimalControl package) with its
+        instance, Theorem 9.1.6.
   spend_usd: "not tracked"
   notes: >-
-    The-Anh Vu-Le requested the formalization, chose its scope in ten rounds (first the
+    The-Anh Vu-Le requested the formalization, chose its scope in eleven rounds (first the
     control-theoretic core, then Chapter 2 with every cited theorem proved, then the rest of the
     formalized chapters, then the first layer of a plan for Chapters 5 and 8-16: the maximum
     principle and the lift of every minimizer to an extremal, then the second layer: Chapter 5, the
@@ -483,8 +487,8 @@ automation:
     layer: Chapter 15 and Theorems 16.1.1 and 16.2.1, conditional on three named numerical facts,
     then the sixth layer: Chapter 14 to section 14.3, Appendix A.3 and Theorem 16.4.1, with Theorem
     16.3.1 conditional on Theorem 14.4.1 and those facts, then the seventh layer: Theorem 14.4.1 and
-    the four computed facts proved without computer assistance, and with them Theorem 16.3.1) and
-    made the decisions it needed
+    the four computed facts proved without computer assistance, and with them Theorem 16.3.1, then
+    the control-theoretic Noether theorem and Theorem 9.1.6) and made the decisions it needed
     (the proof of Jacobi's formula, the hypothesis of Theorem 3.1.4(3), the routes for Lemmas
     2.2.1 and 2.2.5 and for Mahler's Lemma 3 (along Mahler's 1946 paper), the corrected form of
     the false Lemma 2.2.1, the hypothesis of Lemma 3.1.8, the statement of Filippov's theorem, the
@@ -494,7 +498,8 @@ automation:
     minimizer; in the fifth round, including the identification with K_min; in the sixth round,
     the named hypothesis of Theorem 16.3.1, the one-sided form of the false Theorem 8.3.1, and the
     authors' reading of Theorem 8.2.7; in the tenth round, proofs without computer assistance of the
-    computed facts, and the scope of what the main results need). Claude Opus 5.5 wrote the
+    computed facts, and the scope of what the main results need; in the eleventh round, Sussmann's
+    form of the misquoted Noether theorem). Claude Opus 5.5 wrote the
     statements, the proofs, the three packages, the audit report and the packaging; independent
     agents reviewed the statements, the proofs and the report. No person has reviewed the proofs.
     Details and token counts in CREDITS.md.
