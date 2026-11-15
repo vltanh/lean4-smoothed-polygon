@@ -2866,7 +2866,9 @@ are used); and irreducibility is tested against symmetric convex subdomains, whe
 all star domains (paper A's Lemma 13 bridges the two; Section 6).
 
 The maximum principle is otherwise proved by Agrachev and Sachkov's argument (Section 2). The
-README of the OptimalControl package lists the departures, D1–D11, to which its docstrings refer:
+OptimalControl package's
+[`docs/AGRACHEV_SACHKOV.md`](https://github.com/vltanh/lean4-optimal-control/blob/main/docs/AGRACHEV_SACHKOV.md)
+lists the departures, D1–D11, to which its docstrings refer:
 D1, the manifold is an open subset of a finite-dimensional real normed space; D2, the
 chronological calculus is read pointwise along trajectories, in coordinates; D3, the system and
 the cost are `C¹` in the state instead of `C^∞`; D4, the control set is compact (the source tacitly
