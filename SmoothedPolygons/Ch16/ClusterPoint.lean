@@ -86,7 +86,11 @@ lines, with an ω-limit and hyperbolic-box argument):
    representative, and the continuity of `e⁻¹` at the fixed point, which keeps
    `reinChartMapIn p_n = e⁻¹ p_n` in the region where the representative is unique); so
    `(p_n, p_{n+1}, …)` is a backward `e`-orbit in `U` tending to the fixed point, and `p_n` lies in
-   the local unstable set of `e` (by definition).
+   the local unstable set of `e` (by definition). This step uses the first part only through the
+   convergence modulo `V_T`, and no numerical fact
+   (`IsChatteringArcInto.eventually_mem_localUnstableSet`; time reversed,
+   `IsChatteringArcOutOf.eventually_mem_localUnstableSet`, the form that the proof of
+   Theorem 14.4.1 uses).
 
 **The switching structure at a chart point** (the book's own claim, stated without proof: "the
 first control … is `u = e₂` for all sufficiently small `r > 0`", TeX 11706–11718, and "These
@@ -804,46 +808,29 @@ private lemma l6h_lieChartIn_inj {p₁ p₂ : ℝ × (Fin 3 → ℝ)} (h₁ : p�
     exact congrArg reinTau h
   rw [← (lieChart_spec h₁).2.2.2.2.2, this, (lieChart_spec h₂).2.2.2.2.2]
 
-/-- **Theorem 16.4.1, first part** (`thm:no-chatter`: the cluster point is `q_in`), conditional on
-`ClusterSetForwardInvariant` and the three named numerical facts of Theorem 16.1.1: `Ω` is closed
-and forward invariant; a class `ω ≠ q_in` of `Ω` has `F^k ω → q_out` (Theorem 16.1.1), so
-`q_out ∈ Ω`, against the hyperbolic box (`qOut0_not_mem_switchClusterSet`); hence every cluster
-point is `q_in` and the angular components converge to `q_in` modulo `V_T`. (This part does not
-use Remark 14.3.4; it is the part the assembly of Theorem 16.3.1 uses.) -/
-theorem tendstoModVT_switchAng_of_clusterSetForwardInvariant (h₁ : DOutContracts)
-    (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims) (hN5 : ClusterSetForwardInvariant) {a b : ℝ}
-    {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
-    (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) :
-    TendstoModVT (switchAng X Λ₁ ΛR τ) (ang (tau qOutCart)) := by
-  set ξs := switchAng X Λ₁ ΛR τ with hξs
-  refine tendstoModVT_of_forall_mapClusterPt h.switchPoints.2.2.2.2 fun ξ hξ ↦ ?_
-  have hsec := mapClusterPt_switchAng_mem_sectionZero h hξ
-  refine ⟨hsec, ?_⟩
-  by_contra hne
-  have hΩ : classOf ξ ∈ switchClusterSet ξs := ⟨ξ, hsec, rfl, hξ⟩
-  have hit : ∀ k, poincareAngZero^[k] (classOf ξ) ∈ switchClusterSet ξs :=
-    fun k ↦ (hN5 a b u g X Λ₁ ΛR τ h).iterate k hΩ
-  exact qOut0_not_mem_switchClusterSet h ((l6h_isClosed_switchClusterSet h).mem_of_tendsto
-    (theorem16_1_1 h₁ h₂ h₃ _ hne) (Eventually.of_forall hit))
+/-- **Theorem 16.4.1, second part from the first** (step 5 of the module docstring): along a
+chattering arc into the singular locus whose switching points converge to `q_in` modulo `V_T`, for
+every analytic extension `e` of the Reinhardt–Poincaré map at `q_out` and every neighborhood `U` of
+the fixed point, eventually each switching point, rotated onto the section `χ₂₃ = 0`, is
+`lieChartIn p` with `p` on the local unstable set of `e` in `U` (the stable curve `W^s(q_in)` of
+`e⁻¹` in the mirrored chart) and `r > 0`. No numerical fact is used.
 
-/-- **Theorem 16.4.1, conditional on the forward invariance of the cluster set**
-(`ClusterSetForwardInvariant`) and on the three named numerical facts of Theorem 16.1.1. See
-`theorem16_4_1`. -/
-theorem theorem16_4_1_of_clusterSetForwardInvariant (h₁ : DOutContracts)
-    (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims) (hN5 : ClusterSetForwardInvariant)
-    {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
-    (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) :
-    TendstoModVT (switchAng X Λ₁ ΛR τ) (ang (tau qOutCart)) ∧
-      ∀ e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ)),
-        IsReinhardtPoincareExtension e → ∀ U ∈ 𝓝 chartPtOut, ∀ᶠ n in atTop,
-          ∃ k : ℕ, ∃ p ∈ Function.localUnstableSet e chartPtOut U, 0 < p.1 ∧
-            iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = lieChartIn p := by
+Proof: rotations `ζ^{k_n}` bring `ξ_n` to `ang q_in`; the rotated switching points are then points
+`p_n` of the mirrored chart tending to `(0, x̃_out)` (`l6h_tendsto_chart_in`), consecutive ones
+satisfy `e(p_{n+1}) = p_n` (`IsChatteringArcInto.eventually_follows_in`, Remark 14.3.4, the
+uniqueness of the representative `l6h_rep_unique`, and the continuity of `e⁻¹` at the fixed point),
+so `(p_n, p_{n+1}, …)` is a backward `e`-orbit in `U` tending to the fixed point. -/
+theorem IsChatteringArcInto.eventually_mem_localUnstableSet {a b : ℝ} {u : ℝ → Fin 3 → ℝ}
+    {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ} (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ)
+    (hconv : TendstoModVT (switchAng X Λ₁ ΛR τ) (ang (tau qOutCart)))
+    {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ))}
+    (he : IsReinhardtPoincareExtension e) {U : Set (ℝ × (Fin 3 → ℝ))} (hU : U ∈ 𝓝 chartPtOut) :
+    ∀ᶠ n in atTop, ∃ k : ℕ, ∃ p ∈ Function.localUnstableSet e chartPtOut U, 0 < p.1 ∧
+      iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = lieChartIn p := by
   set ξs := switchAng X Λ₁ ΛR τ with hξs
   set ξin := ang (tau qOutCart) with hξin
-  have hmod : TendstoModVT ξs ξin := tendstoModVT_switchAng_of_clusterSetForwardInvariant h₁ h₂ h₃
-      hN5 h
-  refine ⟨hmod, fun e he U hU ↦ ?_⟩
-  -- **(2) the stable curve**: rotations `ζ^{k_n}` bringing `ξ_n` to `ang q_in`
+  have hmod : TendstoModVT ξs ξin := hconv
+  -- rotations `ζ^{k_n}` bringing `ξ_n` to `ang q_in`
   have hO : ξin ∈ vtOrbit ξin := ⟨1, one_mem_VT, (one_smul _ _).symm⟩
   have hk : ∀ n, ∃ k : ℕ, dist (ζ ^ k • ξs n) ξin <
       Metric.infDist (ξs n) (vtOrbit ξin) + 1 / ((n : ℝ) + 1) := by
@@ -919,6 +906,97 @@ theorem theorem16_4_1_of_clusterSetForwardInvariant (h₁ : DOutContracts)
   exact hlim.comp (tendsto_atTop_atTop_of_monotone (fun i j hij ↦ by omega) fun i ↦
     ⟨i, by omega⟩)
 
+/-- **All switches are on the unstable curve** (Theorem 16.4.1, second part, time reversed; the form
+used by the proof of Theorem 14.4.1, TeX 12004–12005): along a chattering arc out of the singular
+locus whose switching points converge backward to `q_out` modulo `V_T`, for every analytic
+extension `e` and every neighborhood `U` of the fixed point, eventually (`τ n ↓ a`) each switching
+point, rotated onto the section `χ₂₃ = 0`, is `lieChart p` with `p` on the local unstable curve
+`W^u_loc(e, U)` and `r > 0`. No numerical fact is used.
+
+Proof: the time reversal `IsChatteringArcOutOf.reverse` is a chattering arc into the singular locus
+whose angular components are `τ` of the original ones (`switchAng_reverse`), so they converge to
+`τ (ang q_out) = ang (τ q_out)` (`TendstoModVT.tau`, `tau_ang`); apply
+`IsChatteringArcInto.eventually_mem_localUnstableSet` and rotate back
+(`Ad_{R⁻ᵏ} ∘ τ = τ ∘ Ad_{R^{-2k}}`, `reinTau_spec`, `lieChartIn = τ ∘ lieChart`). -/
+theorem IsChatteringArcOutOf.eventually_mem_localUnstableSet {a b : ℝ} {u : ℝ → Fin 3 → ℝ}
+    {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ} (h : IsChatteringArcOutOf a b u g X Λ₁ ΛR τ)
+    (hconv : TendstoModVT (switchAng X Λ₁ ΛR τ) (ang qOutCart))
+    {e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ))}
+    (he : IsReinhardtPoincareExtension e) {U : Set (ℝ × (Fin 3 → ℝ))} (hU : U ∈ 𝓝 chartPtOut) :
+    ∀ᶠ n in atTop, ∃ k : ℕ, ∃ p ∈ Function.localUnstableSet e chartPtOut U, 0 < p.1 ∧
+      iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = lieChart p := by
+  -- the reversed switching points are `τ` of the switching points
+  have hang : switchAng (fun t ↦ matTau (X (a + b - t))) (fun t ↦ matTau (Λ₁ (a + b - t)))
+      (fun t ↦ matTau (ΛR (a + b - t))) (fun n ↦ a + b - τ n) =
+        fun n ↦ tau (switchAng X Λ₁ ΛR τ n) := funext (switchAng_reverse (a + b) X Λ₁ ΛR τ)
+  have hconv' := hconv.tau
+  rw [tau_ang] at hconv'
+  have hpt : ∀ n, phaseAt (fun t ↦ matTau (X (a + b - t))) (fun t ↦ matTau (Λ₁ (a + b - t)))
+      (fun t ↦ matTau (ΛR (a + b - t))) (a + b - τ n) = reinTau (phaseAt X Λ₁ ΛR (τ n)) := by
+    intro n
+    simp only [phaseAt, reinTau, show a + b - (a + b - τ n) = τ n by ring]
+  -- `Ad_{R⁻ᵏ} ∘ τ = τ ∘ Ad_{R^{-2k}}`
+  have hrot : ∀ (j : ℕ) (q : iso_PhasePt),
+      iso_adRinvPow j (reinTau q) = reinTau (iso_adRinvPow (2 * j) q) := by
+    have hadR : ∀ q, iso_adR q = iso_adRinvPow 2 q := by
+      intro q
+      have := congrArg (iso_adRinvPow 2) (irt_adRinvPow_one_adR q)
+      rwa [irt_adRinvPow_add, show 2 + 1 = 3 * 1 by norm_num, irt_adRinvPow_three_mul] at this
+    intro j
+    induction j with
+    | zero => intro q; simp [irt_adRinvPow_zero]
+    | succ j ih =>
+      intro q
+      rw [show j + 1 = 1 + j by ring, ← irt_adRinvPow_add, ih, ← reinTau_spec.2.2.2, hadR,
+        irt_adRinvPow_add]
+      congr 2
+      ring
+  filter_upwards [h.reverse.eventually_mem_localUnstableSet (by rw [hang]; exact hconv') he hU]
+    with n ⟨k, p, hp, hp0, hk⟩
+  refine ⟨2 * k, p, hp, hp0, ?_⟩
+  rw [hpt, hrot] at hk
+  rw [← reinTau_spec.1 (iso_adRinvPow (2 * k) (phaseAt X Λ₁ ΛR (τ n))), hk]
+  exact reinTau_spec.1 _
+
+/-- **Theorem 16.4.1, first part** (`thm:no-chatter`: the cluster point is `q_in`), conditional on
+`ClusterSetForwardInvariant` and the three named numerical facts of Theorem 16.1.1: `Ω` is closed
+and forward invariant; a class `ω ≠ q_in` of `Ω` has `F^k ω → q_out` (Theorem 16.1.1), so
+`q_out ∈ Ω`, against the hyperbolic box (`qOut0_not_mem_switchClusterSet`); hence every cluster
+point is `q_in` and the angular components converge to `q_in` modulo `V_T`. (This part does not
+use Remark 14.3.4; it is the part the assembly of Theorem 16.3.1 uses.) -/
+theorem tendstoModVT_switchAng_of_clusterSetForwardInvariant (h₁ : DOutContracts)
+    (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims) (hN5 : ClusterSetForwardInvariant) {a b : ℝ}
+    {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
+    (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) :
+    TendstoModVT (switchAng X Λ₁ ΛR τ) (ang (tau qOutCart)) := by
+  set ξs := switchAng X Λ₁ ΛR τ with hξs
+  refine tendstoModVT_of_forall_mapClusterPt h.switchPoints.2.2.2.2 fun ξ hξ ↦ ?_
+  have hsec := mapClusterPt_switchAng_mem_sectionZero h hξ
+  refine ⟨hsec, ?_⟩
+  by_contra hne
+  have hΩ : classOf ξ ∈ switchClusterSet ξs := ⟨ξ, hsec, rfl, hξ⟩
+  have hit : ∀ k, poincareAngZero^[k] (classOf ξ) ∈ switchClusterSet ξs :=
+    fun k ↦ (hN5 a b u g X Λ₁ ΛR τ h).iterate k hΩ
+  exact qOut0_not_mem_switchClusterSet h ((l6h_isClosed_switchClusterSet h).mem_of_tendsto
+    (theorem16_1_1 h₁ h₂ h₃ _ hne) (Eventually.of_forall hit))
+
+/-- **Theorem 16.4.1, conditional on the forward invariance of the cluster set**
+(`ClusterSetForwardInvariant`) and on the three named numerical facts of Theorem 16.1.1. See
+`theorem16_4_1`. The first part is `tendstoModVT_switchAng_of_clusterSetForwardInvariant`; the
+second follows from it (`IsChatteringArcInto.eventually_mem_localUnstableSet`, step 5). -/
+theorem theorem16_4_1_of_clusterSetForwardInvariant (h₁ : DOutContracts)
+    (h₂ : CellTwoEntersDOut) (h₃ : BoxSubclaims) (hN5 : ClusterSetForwardInvariant)
+    {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
+    (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) :
+    TendstoModVT (switchAng X Λ₁ ΛR τ) (ang (tau qOutCart)) ∧
+      ∀ e : OpenPartialHomeomorph (ℝ × (Fin 3 → ℝ)) (ℝ × (Fin 3 → ℝ)),
+        IsReinhardtPoincareExtension e → ∀ U ∈ 𝓝 chartPtOut, ∀ᶠ n in atTop,
+          ∃ k : ℕ, ∃ p ∈ Function.localUnstableSet e chartPtOut U, 0 < p.1 ∧
+            iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = lieChartIn p := by
+  have hmod : TendstoModVT (switchAng X Λ₁ ΛR τ) (ang (tau qOutCart)) :=
+    tendstoModVT_switchAng_of_clusterSetForwardInvariant h₁ h₂ h₃ hN5 h
+  exact ⟨hmod, fun e he U hU ↦ h.eventually_mem_localUnstableSet hmod he hU⟩
+
 /-- **Theorem 16.4.1** (`thm:no-chatter`, the cluster point theorem; TeX 12840–12846), with the
 three named numerical facts of Theorem 16.1.1 as hypotheses. Let `(u, g, X, Λ₁, Λ_R)` be a
 Pontryagin extremal Reinhardt trajectory on `[a, b]` (normalized by `λ_cost = -1`, which
@@ -957,8 +1035,10 @@ points converge to `q_out` modulo `V_T`, and eventually each switching point, ro
 section `χ₂₃ = 0`, is `lieChart p` with `p` on the local unstable manifold of `e` (the unstable
 curve `W^u(q_out)`).
 
-Proof: `IsChatteringArcOutOf.reverse` and `theorem16_4_1`, with `fullerCoords_reinTau`
-(`τ` maps `q_in` to `q_out`) and `lieChartIn = τ ∘ lieChart`. -/
+Proof: the first part is that of `theorem16_4_1` for the time reversal
+`IsChatteringArcOutOf.reverse`, transported by `τ` (`switchAng_reverse`, `TendstoModVT.tau`; `τ`
+maps `q_in` to `q_out`); the second follows from the first
+(`IsChatteringArcOutOf.eventually_mem_localUnstableSet`, with `lieChartIn = τ ∘ lieChart`). -/
 theorem theorem16_4_1_reverse (h₁ : DOutContracts) (h₂ : CellTwoEntersDOut)
     (h₃ : BoxSubclaims) {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
     (h : IsChatteringArcOutOf a b u g X Λ₁ ΛR τ) :
@@ -967,70 +1047,13 @@ theorem theorem16_4_1_reverse (h₁ : DOutContracts) (h₂ : CellTwoEntersDOut)
         IsReinhardtPoincareExtension e → ∀ U ∈ 𝓝 chartPtOut, ∀ᶠ n in atTop,
           ∃ k : ℕ, ∃ p ∈ Function.localUnstableSet e chartPtOut U, 0 < p.1 ∧
             iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = lieChart p := by
-  obtain ⟨h1, h2⟩ := theorem16_4_1 h₁ h₂ h₃ h.reverse
-  -- the reversed switching points are `τ` of the switching points
-  have hpt : ∀ n, phaseAt (fun t ↦ matTau (X (a + b - t))) (fun t ↦ matTau (Λ₁ (a + b - t)))
-      (fun t ↦ matTau (ΛR (a + b - t))) (a + b - τ n) = reinTau (phaseAt X Λ₁ ΛR (τ n)) := by
-    intro n
-    simp only [phaseAt, reinTau, show a + b - (a + b - τ n) = τ n by ring]
-  have hang : ∀ n, switchAng (fun t ↦ matTau (X (a + b - t))) (fun t ↦ matTau (Λ₁ (a + b - t)))
-      (fun t ↦ matTau (ΛR (a + b - t))) (fun n ↦ a + b - τ n) n =
-        tau (switchAng X Λ₁ ΛR τ n) := by
-    intro n
-    simp only [switchAng]
-    rw [hpt, fullerCoords_reinTau, tau_ang]
-  -- `τ` is an isometry mapping the orbit of `ang q_out` to that of `ang q_in`
-  have hc : ∀ (z w : Fin 3 → ℂ) (i : Fin 3), dist (tau z i) (tau w i) = dist (z i) (w i) := by
-    intro z w i
-    fin_cases i <;> simp [tau, dist_neg_neg, Complex.dist_conj_conj]
-  have hle : ∀ z w : Fin 3 → ℂ, dist (tau z) (tau w) ≤ dist z w := fun z w ↦
-    (dist_pi_le_iff dist_nonneg).2 fun i ↦ (hc z w i).le.trans (dist_le_pi_dist z w i)
-  have hiso : Isometry tau := Isometry.of_dist_eq fun z w ↦ le_antisymm (hle z w) (by
-    have := hle (tau z) (tau w); rwa [tau_tau, tau_tau] at this)
-  have horb : vtOrbit (ang (tau qOutCart)) = tau '' vtOrbit (ang qOutCart) := by
-    have hτv : ∀ (v : ℂ) (w : Fin 3 → ℂ), tau (v • w) = starRingEnd ℂ v • tau w := by
-      intro v w
-      ext i; fin_cases i <;> simp [tau]
-    ext η
-    constructor
-    · rintro ⟨v, hv, rfl⟩
-      refine ⟨starRingEnd ℂ v • ang qOutCart, ⟨starRingEnd ℂ v, ?_, rfl⟩, ?_⟩
-      · rcases hv with rfl | rfl | rfl
-        · simp [VT]
-        · rw [conj_ζ]; exact ζ_sq_mem_VT
-        · rw [conj_ζ_sq]; exact ζ_mem_VT
-      · rw [hτv, Complex.conj_conj, tau_ang]
-    · rintro ⟨w, ⟨v, hv, rfl⟩, rfl⟩
-      refine ⟨starRingEnd ℂ v, ?_, by rw [hτv, tau_ang]⟩
-      rcases hv with rfl | rfl | rfl
-      · simp [VT]
-      · rw [conj_ζ]; exact ζ_sq_mem_VT
-      · rw [conj_ζ_sq]; exact ζ_mem_VT
-  refine ⟨?_, fun e he U hU ↦ ?_⟩
-  · have := h1
-    unfold TendstoModVT at this ⊢
-    simp only [hang, horb, Metric.infDist_image hiso] at this
+  obtain ⟨h1, -⟩ := theorem16_4_1 h₁ h₂ h₃ h.reverse
+  -- the reversed angular components are `τ` of the angular components (`switchAng_reverse`)
+  rw [funext (switchAng_reverse (a + b) X Λ₁ ΛR τ)] at h1
+  have hconv : TendstoModVT (switchAng X Λ₁ ΛR τ) (ang qOutCart) := by
+    have := h1.tau
+    simp only [tau_tau, tau_ang] at this
     exact this
-  · filter_upwards [h2 e he U hU] with n ⟨k, p, hp, hp0, hk⟩
-    -- `Ad_{R⁻ᵏ} ∘ τ = τ ∘ Ad_{R^{-2k}}`
-    have hrot : ∀ (j : ℕ) (q : iso_PhasePt),
-        iso_adRinvPow j (reinTau q) = reinTau (iso_adRinvPow (2 * j) q) := by
-      have hadR : ∀ q, iso_adR q = iso_adRinvPow 2 q := by
-        intro q
-        have := congrArg (iso_adRinvPow 2) (irt_adRinvPow_one_adR q)
-        rwa [irt_adRinvPow_add, show 2 + 1 = 3 * 1 by norm_num, irt_adRinvPow_three_mul] at this
-      intro j
-      induction j with
-      | zero => intro q; simp [irt_adRinvPow_zero]
-      | succ j ih =>
-        intro q
-        rw [show j + 1 = 1 + j by ring, ← irt_adRinvPow_add, ih, ← reinTau_spec.2.2.2, hadR,
-          irt_adRinvPow_add]
-        congr 2
-        ring
-    refine ⟨2 * k, p, hp, hp0, ?_⟩
-    rw [hpt, hrot] at hk
-    rw [← reinTau_spec.1 (iso_adRinvPow (2 * k) (phaseAt X Λ₁ ΛR (τ n))), hk]
-    exact reinTau_spec.1 _
+  exact ⟨hconv, fun e he U hU ↦ h.eventually_mem_localUnstableSet hconv he hU⟩
 
 end SmoothedPolygons

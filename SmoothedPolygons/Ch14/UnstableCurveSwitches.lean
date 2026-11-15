@@ -22,9 +22,10 @@ forward orbit under the Reinhardt–Poincaré map reaches the boundary of the st
 1. `IsChatteringArcInto.iterate_reinPoincare`: while the orbit switches cyclically, the switching
    points `τ (n + j)`, rotated by `Ad_{R^{-(k+j)}}`, are the iterates `F^j q₀`
    (`IsChatteringArcInto.next_switchPoint_eq_reinPoincare`, by induction on `j`);
-2. `IsChatteringArcInto.arc_eq_vertexFlow`: from a switching point where the control after the
-   switch is `e₂` (`SwitchEntersE2`), the extremal is the `e₂`-flow up to the next switching time,
-   at which some other vertex reaches the Hamiltonian of `e₂`;
+2. `IsChatteringArcInto.arc_eq_vertexFlow` (`SmoothedPolygons/Ch16/NextSwitch.lean`): from a
+   switching point where the control after the switch is `e₂` (`SwitchEntersE2`), the extremal is
+   the `e₂`-flow up to the next switching time, at which some other vertex reaches the Hamiltonian
+   of `e₂`;
 3. `IsChatteringArcInto.false_of_arcLeavesStarDomain`: if the `e₂`-flow from the switching point
    leaves the star domain at a time `T` before any vertex reaches `e₂` (`ArcLeavesStarDomain`), the
    next switching time is not in `(0, T)` (step 2), so the extremal follows the flow up to `T` and
@@ -33,20 +34,16 @@ forward orbit under the Reinhardt–Poincaré map reaches the boundary of the st
    the Reinhardt–Poincaré map is no longer defined" (TeX 11985–11986), read for an extremal: an
    extremal that switches infinitely often cannot pass through such a point.
 
-## Proofs (planned)
+## Proofs
 
-Step 2 is the first half of the proof of `IsChatteringArcInto.next_switchPoint_eq_reinPoincare`
-(`SmoothedPolygons/Ch16/NextSwitch.lean`): the parts (i)–(ii) (the control after `τ n` is neither
-`e₁` nor `e₃`, from the two conditions of `SwitchEntersE2`) give the vertex flow on
-`[τ n, τ (n + 1)]` (`l6h_arc`), and part (v) gives the vertex `j₁ + k` used right after
-`τ (n + 1)`, which differs from `e₂` and maximizes the Hamiltonian there, so that by continuity its
-Hamiltonian at `τ (n + 1)` is at least that of `e₂`. The helpers `l6h_conj`,
-`l6h_isExtremalOn_conj`, `l6h_arc_core`, `l6h_arc`, `l6h_ae_vertex_between` of NextSwitch.lean are
-private: copy them with a new prefix (about 250 lines), or make them public there (no statement
-changes). Step 3: with `s = τ (n + 1) - τ n > 0`, `s < T` contradicts the strict maximality of `e₂`
-at `s`; `s ≥ T` gives `R⁻ᵏ X(τ n + T) Rᵏ = iso_vfX 1 q₀ T`, a star state by
-`poly_isStarState_conj_pow` and the state constraint of `IsExtremalOn`. Step 1: induction on `j`,
-`Function.iterate_succ_apply'`. Size: 350–500 lines (about 250 of them the copied helpers).
+Step 2 is `IsChatteringArcInto.arc_eq_vertexFlow` of `SmoothedPolygons/Ch16/NextSwitch.lean`, the
+first half of the proof of `IsChatteringArcInto.next_switchPoint_eq_reinPoincare` there (its parts
+(i), (ii) and (v)): the control after `τ n` is neither `e₁` nor `e₃` (the two conditions of
+`SwitchEntersE2`), so the extremal is the `e₂`-flow on `[τ n, τ (n + 1)]`, and the vertex used
+right after `τ (n + 1)` differs from `e₂` and maximizes the Hamiltonian there. Step 3: with
+`s = τ (n + 1) - τ n > 0`, `s < T` contradicts the strict maximality of `e₂` at `s`; `s ≥ T` gives
+`R⁻ᵏ X(τ n + T) Rᵏ = iso_vfX 1 q₀ T`, a star state by `poly_isStarState_conj_pow` and the state
+constraint of `IsExtremalOn`. Step 1: induction on `j`, `Function.iterate_succ_apply'`.
 -/
 
 @[expose] public section
@@ -56,27 +53,29 @@ namespace SmoothedPolygons
 open Set Filter Topology
 open TriFuller
 
-/-- **From a switching point where the control after the switch is `e₂`, the extremal is the
-`e₂`-flow up to the next switching time**, at which some other vertex reaches the Hamiltonian of
-`e₂` (in the frame rotated by `Ad_{R⁻ᵏ}`). -/
-theorem IsChatteringArcInto.arc_eq_vertexFlow {a b : ℝ} {u : ℝ → Fin 3 → ℝ}
-    {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ} (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) (n k : ℕ)
-    {q₀ : iso_PhasePt} (hq : iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = q₀)
-    (he : SwitchEntersE2 q₀) :
-    (∀ t ∈ Icc (τ n) (τ (n + 1)),
-      iso_adRinvPow k (phaseAt X Λ₁ ΛR t) = iso_vertexFlow 1 q₀ (t - τ n)) ∧
-      ∃ j : Fin 3, j ≠ 1 ∧
-        phaseHam (iso_vertexFlow 1 q₀ (τ (n + 1) - τ n)) (vertex 1) ≤
-          phaseHam (iso_vertexFlow 1 q₀ (τ (n + 1) - τ n)) (vertex j) := by
-  sorry
-
 /-- **A chattering arc cannot pass through a switching point whose `e₂`-arc leaves the star domain
 before any switch**: the extremal would follow the arc out of the star domain. -/
 theorem IsChatteringArcInto.false_of_arcLeavesStarDomain {a b : ℝ} {u : ℝ → Fin 3 → ℝ}
     {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ} (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) (n k : ℕ)
     {q₀ : iso_PhasePt} (hq : iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = q₀)
     (he : SwitchEntersE2 q₀) (hl : ArcLeavesStarDomain q₀) : False := by
-  sorry
+  obtain ⟨harc, j, hj, hle⟩ := h.arc_eq_vertexFlow n k hq he
+  obtain ⟨T, hT, hns, hmax⟩ := hl
+  obtain ⟨hmono, hτI, -, -⟩ := h.2.2.2.2
+  have hlt : τ n < τ (n + 1) := hmono (Nat.lt_succ_self n)
+  rcases lt_or_ge (τ (n + 1) - τ n) T with hsT | hsT
+  · -- the next switch comes before `T`: `e₂` is still the strict maximizer there
+    exact absurd hle (not_le.2 (hmax _ ⟨by linarith, hsT⟩ j hj))
+  · -- the extremal follows the `e₂`-flow up to `T`, where the state is not a star state
+    apply hns
+    have h1 := congrArg Prod.fst (harc (τ n + T) ⟨by linarith, by linarith⟩)
+    simp only [add_sub_cancel_left] at h1
+    change R⁻¹ ^ k * X (τ n + T) * R ^ k = iso_vfX 1 q₀ T at h1
+    rw [← h1]
+    have hst := (h.1.1.2.2.2.1 (τ n + T - a) ⟨by linarith [(hτI n).1], by
+      linarith [(hτI (n + 1)).2]⟩).2
+    simp only [add_sub_cancel] at hst
+    exact poly_isStarState_conj_pow k hst
 
 /-- **The switching points follow the Reinhardt–Poincaré map while the orbit switches cyclically**:
 if the `n`-th switching point, rotated by `Ad_{R⁻ᵏ}`, is `q₀`, and the iterates `F^j q₀`, `j < K`,
@@ -88,7 +87,17 @@ theorem IsChatteringArcInto.iterate_reinPoincare {a b : ℝ} {u : ℝ → Fin 3 
     (he : ∀ j < K, SwitchEntersE2 (reinPoincare^[j] q₀))
     (hs : ∀ j < K, ArcSwitchesToE1 (reinPoincare^[j] q₀)) :
     ∀ j ≤ K, iso_adRinvPow (k + j) (phaseAt X Λ₁ ΛR (τ (n + j))) = reinPoincare^[j] q₀ := by
-  sorry
+  intro j hj
+  induction j with
+  | zero => simpa using hq
+  | succ j ih =>
+    obtain ⟨h0, h2⟩ := he j (by omega)
+    obtain ⟨hpos, hmax, hbeat⟩ := hs j (by omega)
+    have := h.next_switchPoint_eq_reinPoincare (n + j) (k + j) (ih (by omega)) h0 h2 hpos hmax
+      hbeat
+    rw [Function.iterate_succ_apply', show k + (j + 1) = k + j + 1 by ring,
+      show n + (j + 1) = n + j + 1 by ring]
+    exact this
 
 /-- **No switching point of a chattering arc into the singular locus has a forward orbit reaching
 the boundary of the star domain** (TeX 12005–12008: "This would require the unstable curve to
@@ -100,6 +109,8 @@ theorem IsChatteringArcInto.not_reachesStarBoundary {a b : ℝ} {u : ℝ → Fin
     {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ} (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) (n k : ℕ)
     {q₀ : iso_PhasePt} (hq : iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = q₀) :
     ¬ ReachesStarBoundary q₀ := by
-  sorry
+  rintro ⟨K, he, hs, hl⟩
+  have hit := h.iterate_reinPoincare n k hq (fun j hj ↦ he j hj.le) hs K le_rfl
+  exact h.false_of_arcLeavesStarDomain (n + K) (k + K) hit (he K le_rfl) hl
 
 end SmoothedPolygons

@@ -2,6 +2,7 @@ module
 
 public import SmoothedPolygons.Ch16.ClusterCoordinates
 public import SmoothedPolygons.Ch7.Isolated.Return
+public import SmoothedPolygons.Ch14.UnstableCurve
 
 /-!
 # Theorem 16.4.1, helper: the next switching point along a chattering arc
@@ -20,6 +21,13 @@ This is the claim "These functions give the value of the Reinhardt–Poincaré m
 form the proof of Theorem 16.4.1 needs: the extremal follows the vertex flow of its control between
 two switches (`iso_arc_eq_vertexFlow`, here `l6h_arc` for `IsExtremalOn`), and the maximum condition
 decides the control after `τ_n` and the time of the next switch.
+
+The first half of the argument is public, for the proof of Theorem 14.4.1
+(`SmoothedPolygons/Ch14/UnstableCurveSwitches.lean`): from a switching point where the control after
+the switch is `e₂` (`SwitchEntersE2`, the first two conditions above, defined in
+`SmoothedPolygons/Ch14/UnstableCurve.lean`), the extremal is the `e₂`-flow up to the next switching
+time, at which some other vertex reaches the Hamiltonian of `e₂`
+(`IsChatteringArcInto.arc_eq_vertexFlow`).
 
 The rotation of a solution by `R⁻ᵏ` (with the controls relabelled, `iso_rotControl`) is
 `l6h_isExtremalOn_conj`, the analogue of `irt_conj` of Chapter 7 for solutions without boundary
@@ -234,25 +242,27 @@ private theorem l6h_ae_vertex_between {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g
       + b) / 2) (by linarith [hn.1])
     (by linarith [hn1.2])) ⟨by linarith [hn.1, ht.1], by linarith [hn1.2, ht.2]⟩ hnot
 
-/-! ### The next switching point -/
+/-! ### The arc after a switch into `e₂`, and the next switching point -/
 
-/-- **The next switching point** (module docstring): if the `n`-th switching point, rotated by
-`Ad_{R⁻ᵏ}`, is `q₀`, where `e₁` is strictly below `e₂`, the `e₃`-flow has `H(e₃) < H(e₂)` right
-after `q₀`, and the `e₂`-flow has the switching structure of `eventually_isSwitch_reinSwitchTime`,
-then the `(n + 1)`-st switching point, rotated by `Ad_{R^{-(k+1)}}`, is `reinPoincare q₀`. -/
-theorem IsChatteringArcInto.next_switchPoint_eq_reinPoincare {a b : ℝ} {u :
-    ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
+/-- **The arc after a switch into `e₂`**: parts (i), (ii) and (v) of the proof of
+`IsChatteringArcInto.next_switchPoint_eq_reinPoincare`. If the `n`-th switching point, rotated by
+`Ad_{R⁻ᵏ}`, is `q₀`, where `e₁` is strictly below `e₂` and the `e₃`-flow has `H(e₃) < H(e₂)` right
+after `q₀`, then the control (rotated) is `e₂` almost everywhere on `(τ n, τ (n + 1))` (it is one
+vertex there, `l6h_ae_vertex_between`, neither `e₁` (i) nor `e₃` (ii)), the extremal is the
+`e₂`-flow on `[τ n, τ (n + 1)]` (`l6h_arc`), and some vertex other than `e₂`, the one used right
+after `τ (n + 1)`, has at least the Hamiltonian of `e₂` at `τ (n + 1)` (from (v)). -/
+private lemma l6h_arc_two {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
     (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) (n k : ℕ) {q₀ : iso_PhasePt}
     (hq : iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = q₀)
     (h0 : phaseHam q₀ (vertex 0) < phaseHam q₀ (vertex 1))
     (h2 : ∃ ε > 0, ∀ t ∈ Ioo 0 ε,
-      phaseHam (iso_vertexFlow 2 q₀ t) (vertex 2) < phaseHam (iso_vertexFlow 2 q₀ t) (vertex 1))
-    (hpos : 0 < reinSwitchTime q₀)
-    (hmax : ∀ t ∈ Ioo 0 (reinSwitchTime q₀), ∀ j : Fin 3, j ≠ 1 →
-      phaseHam (iso_vertexFlow 1 q₀ t) (vertex j) < phaseHam (iso_vertexFlow 1 q₀ t) (vertex 1))
-    (hbeat : ∀ ε > 0, ∃ t ∈ Ioo (reinSwitchTime q₀) (reinSwitchTime q₀ + ε),
-      phaseHam (iso_vertexFlow 1 q₀ t) (vertex 1) < phaseHam (iso_vertexFlow 1 q₀ t) (vertex 0)) :
-    iso_adRinvPow (k + 1) (phaseAt X Λ₁ ΛR (τ (n + 1))) = reinPoincare q₀ := by
+      phaseHam (iso_vertexFlow 2 q₀ t) (vertex 2) < phaseHam (iso_vertexFlow 2 q₀ t) (vertex 1)) :
+    (∀ᵐ t, t ∈ Ioo (τ n) (τ (n + 1)) → iso_rotControl k (u t) = vertex 1) ∧
+      (∀ t ∈ Icc (τ n) (τ (n + 1)),
+        iso_adRinvPow k (phaseAt X Λ₁ ΛR t) = iso_vertexFlow 1 q₀ (t - τ n)) ∧
+      ∃ j : Fin 3, j ≠ 1 ∧
+        phaseHam (iso_vertexFlow 1 q₀ (τ (n + 1) - τ n)) (vertex 1) ≤
+          phaseHam (iso_vertexFlow 1 q₀ (τ (n + 1) - τ n)) (vertex j) := by
   have hext := h.1
   obtain ⟨hmono, hτI, -, hsw⟩ := h.2.2.2.2
   have hext' := l6h_isExtremalOn_conj hext k
@@ -313,7 +323,104 @@ theorem IsChatteringArcInto.next_switchPoint_eq_reinPoincare {a b : ℝ} {u :
     have h0' : (j + kk).val ≠ 0 := fun h' ↦ hj0 (Fin.ext h')
     have h2' : (j + kk).val ≠ 2 := fun h' ↦ hj2 (Fin.ext h')
     exact Fin.ext (by omega)
-  rw [hj1] at harc hMj
+  rw [hj1] at harc hj'
+  refine ⟨hj', harc, ?_⟩
+  -- (v) the vertex used right after `τ (n + 1)` differs from `e₂` and maximizes there
+  obtain ⟨i₁, j₁, hij, ε₁, hε₁, hl, hr⟩ := (hsw (τ (n + 1)) hn1).2 ⟨n + 1, rfl⟩
+  -- the vertex on the left of `τ (n + 1)` is `e_j`
+  have hi₁ : i₁ = j := by
+    set c := max (τ (n + 1) - ε₁) (τ n) with hc
+    have hc1 : c < τ (n + 1) := max_lt (by linarith) hlt
+    obtain ⟨t, -, h1, h2⟩ := exists_mem_Ioo_of_ae
+      (P := fun t ↦ u t = vertex i₁ ∧ u t = vertex j) hc1 (by
+        filter_upwards [hl, hj] with t h1 h2 htI
+        exact ⟨h1 ⟨lt_of_le_of_lt (le_max_left _ _) htI.1, htI.2⟩,
+          h2 ⟨lt_of_le_of_lt (le_max_right _ _) htI.1, htI.2⟩⟩)
+    exact vertex_injective (h1.symm.trans h2)
+  have hne : j₁ + kk ≠ 1 := by
+    intro h'
+    apply hij
+    rw [hi₁]
+    exact (add_right_cancel (h'.trans hj1.symm)).symm
+  set d := min (τ (n + 1) + ε₁) b with hd
+  have hd1 : τ (n + 1) < d := lt_min (by linarith) hn1.2
+  have hsub' : Icc (τ (n + 1)) d ⊆ Icc a b :=
+    Icc_subset_Icc (hn1.1.le) (min_le_right _ _)
+  have := mem_of_ae_of_continuousOn (C := Ici 0) isClosed_Ici ((hcont (j₁ + kk)).sub (hcont 1))
+      hd1 hsub'
+    ⟨le_rfl, hd1.le⟩ (by
+      filter_upwards [hM, hr] with t h1 h2 htI
+      have hu1 : u' t = vertex (j₁ + kk) := by
+        simp only [hu', h2 ⟨htI.1, htI.2.trans_le (min_le_left _ _)⟩, iso_rotControl_vertex]
+        rfl
+      have := (h1 ⟨hn1.1.trans htI.1, htI.2.trans_le (min_le_right _ _)⟩).2 (vertex 1)
+        (poly_vertex_mem 1)
+      rw [hu1] at this
+      exact sub_nonneg.2 this)
+  simp only [mem_Ici, Pi.sub_apply, sub_nonneg] at this
+  rw [harc _ ⟨hlt.le, le_rfl⟩] at this
+  exact ⟨j₁ + kk, hne, this⟩
+
+/-- **From a switching point where the control after the switch is `e₂`, the extremal is the
+`e₂`-flow up to the next switching time**, at which some other vertex reaches the Hamiltonian of
+`e₂` (in the frame rotated by `Ad_{R⁻ᵏ}`): parts (i), (ii) and (v) of the proof of
+`IsChatteringArcInto.next_switchPoint_eq_reinPoincare` (`l6h_arc_two`). -/
+theorem IsChatteringArcInto.arc_eq_vertexFlow {a b : ℝ} {u : ℝ → Fin 3 → ℝ}
+    {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ} (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) (n k : ℕ)
+    {q₀ : iso_PhasePt} (hq : iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = q₀)
+    (he : SwitchEntersE2 q₀) :
+    (∀ t ∈ Icc (τ n) (τ (n + 1)),
+      iso_adRinvPow k (phaseAt X Λ₁ ΛR t) = iso_vertexFlow 1 q₀ (t - τ n)) ∧
+      ∃ j : Fin 3, j ≠ 1 ∧
+        phaseHam (iso_vertexFlow 1 q₀ (τ (n + 1) - τ n)) (vertex 1) ≤
+          phaseHam (iso_vertexFlow 1 q₀ (τ (n + 1) - τ n)) (vertex j) :=
+  (l6h_arc_two h n k hq he.1 he.2).2
+
+/-- **The next switching point** (module docstring): if the `n`-th switching point, rotated by
+`Ad_{R⁻ᵏ}`, is `q₀`, where `e₁` is strictly below `e₂`, the `e₃`-flow has `H(e₃) < H(e₂)` right
+after `q₀`, and the `e₂`-flow has the switching structure of `eventually_isSwitch_reinSwitchTime`,
+then the `(n + 1)`-st switching point, rotated by `Ad_{R^{-(k+1)}}`, is `reinPoincare q₀`.
+
+Proof: (i), (ii) the control after `τ n` is `e₂` and the extremal is the `e₂`-flow up to
+`τ (n + 1)` (`l6h_arc_two`); (iv) the next switch is not later than `t_sw` (`e₁` beats `e₂` right
+after `t_sw`, while `e₂` maximizes on the arc); (v) nor earlier (a vertex other than `e₂` reaches
+`H(e₂)` at `τ (n + 1)`, `l6h_arc_two`, while `e₂` is the strict maximizer before `t_sw`). -/
+theorem IsChatteringArcInto.next_switchPoint_eq_reinPoincare {a b : ℝ} {u :
+    ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2} {τ : ℕ → ℝ}
+    (h : IsChatteringArcInto a b u g X Λ₁ ΛR τ) (n k : ℕ) {q₀ : iso_PhasePt}
+    (hq : iso_adRinvPow k (phaseAt X Λ₁ ΛR (τ n)) = q₀)
+    (h0 : phaseHam q₀ (vertex 0) < phaseHam q₀ (vertex 1))
+    (h2 : ∃ ε > 0, ∀ t ∈ Ioo 0 ε,
+      phaseHam (iso_vertexFlow 2 q₀ t) (vertex 2) < phaseHam (iso_vertexFlow 2 q₀ t) (vertex 1))
+    (hpos : 0 < reinSwitchTime q₀)
+    (hmax : ∀ t ∈ Ioo 0 (reinSwitchTime q₀), ∀ j : Fin 3, j ≠ 1 →
+      phaseHam (iso_vertexFlow 1 q₀ t) (vertex j) < phaseHam (iso_vertexFlow 1 q₀ t) (vertex 1))
+    (hbeat : ∀ ε > 0, ∃ t ∈ Ioo (reinSwitchTime q₀) (reinSwitchTime q₀ + ε),
+      phaseHam (iso_vertexFlow 1 q₀ t) (vertex 1) < phaseHam (iso_vertexFlow 1 q₀ t) (vertex 0)) :
+    iso_adRinvPow (k + 1) (phaseAt X Λ₁ ΛR (τ (n + 1))) = reinPoincare q₀ := by
+  have hext := h.1
+  obtain ⟨hmono, hτI, -, -⟩ := h.2.2.2.2
+  have hext' := l6h_isExtremalOn_conj hext k
+  set X' : ℝ → Mat2 := fun t ↦ R⁻¹ ^ k * X t * R ^ k with hX'
+  set L' : ℝ → Mat2 := fun t ↦ R⁻¹ ^ k * Λ₁ t * R ^ k with hL'
+  set Q' : ℝ → Mat2 := fun t ↦ R⁻¹ ^ k * ΛR t * R ^ k with hQ'
+  have hQ : ∀ t, phaseAt X' L' Q' t = iso_adRinvPow k (phaseAt X Λ₁ ΛR t) := fun t ↦ rfl
+  have hn := hτI n
+  have hn1 := hτI (n + 1)
+  have hlt : τ n < τ (n + 1) := hmono (Nat.lt_succ_self n)
+  have hcont := IsExtremalOn.continuousOn_phaseHam hext'
+  have hM := IsExtremalOn.ae_phaseHam hext'
+  -- (i), (ii), (v): the control is `e₂` on `(τ n, τ (n + 1))`, the arc is the `e₂`-flow
+  obtain ⟨hj', harc, j₁, hne, hle₁⟩ := l6h_arc_two h n k hq h0 h2
+  have harc' : ∀ t ∈ Icc (τ n) (τ (n + 1)),
+      phaseAt X' L' Q' t = iso_vertexFlow 1 q₀ (t - τ n) := harc
+  -- the maximum condition on `(τ n, τ (n + 1))`, with the control `e₂`
+  have hMj : ∀ᵐ t, t ∈ Ioo (τ n) (τ (n + 1)) → ∀ i : Fin 3,
+      phaseHam (phaseAt X' L' Q' t) (vertex i) ≤ phaseHam (phaseAt X' L' Q' t) (vertex 1) := by
+    filter_upwards [hM, hj'] with t h1 h2 htI i
+    have h1 := (h1 ⟨hn.1.trans htI.1, htI.2.trans hn1.2⟩).2 (vertex i) (poly_vertex_mem i)
+    rwa [h2 htI] at h1
+  have hsubn : Icc (τ n) (τ (n + 1)) ⊆ Icc a b := Icc_subset_Icc hn.1.le hn1.2.le
   set T := reinSwitchTime q₀ with hT
   -- (iv) the next switch is not later than `t_sw`
   have hle : τ (n + 1) - τ n ≤ T := by
@@ -327,51 +434,17 @@ theorem IsChatteringArcInto.next_switchPoint_eq_reinPoincare {a b : ℝ} {u :
       filter_upwards [hMj] with t' ht' ht'I
       exact sub_nonpos.2 (ht' ht'I 0))
     simp only [mem_Iic, Pi.sub_apply, sub_nonpos] at this
-    rw [harc _ hs, add_sub_cancel_left] at this
+    rw [harc' _ hs, add_sub_cancel_left] at this
     linarith
   -- (v) the next switch is not earlier than `t_sw`
   have hge : T ≤ τ (n + 1) - τ n := by
     by_contra hlt'
     push Not at hlt'
-    obtain ⟨i₁, j₁, hij, ε₁, hε₁, hl, hr⟩ :=
-      (hsw (τ (n + 1)) hn1).2 ⟨n + 1, rfl⟩
-    -- the vertex on the left of `τ (n + 1)` is `e_j`
-    have hi₁ : i₁ = j := by
-      set c := max (τ (n + 1) - ε₁) (τ n) with hc
-      have hc1 : c < τ (n + 1) := max_lt (by linarith) hlt
-      obtain ⟨t, -, h1, h2⟩ := exists_mem_Ioo_of_ae
-        (P := fun t ↦ u t = vertex i₁ ∧ u t = vertex j) hc1 (by
-          filter_upwards [hl, hj] with t h1 h2 htI
-          exact ⟨h1 ⟨lt_of_le_of_lt (le_max_left _ _) htI.1, htI.2⟩,
-            h2 ⟨lt_of_le_of_lt (le_max_right _ _) htI.1, htI.2⟩⟩)
-      exact vertex_injective (h1.symm.trans h2)
-    have hne : j₁ + kk ≠ 1 := by
-      intro h'
-      apply hij
-      rw [hi₁]
-      exact (add_right_cancel (h'.trans hj1.symm)).symm
-    set d := min (τ (n + 1) + ε₁) b with hd
-    have hd1 : τ (n + 1) < d := lt_min (by linarith) hn1.2
-    have hsub' : Icc (τ (n + 1)) d ⊆ Icc a b :=
-      Icc_subset_Icc (hn1.1.le) (min_le_right _ _)
-    have := mem_of_ae_of_continuousOn (C := Ici 0) isClosed_Ici ((hcont (j₁ + kk)).sub (hcont 1))
-        hd1 hsub'
-      ⟨le_rfl, hd1.le⟩ (by
-        filter_upwards [hM, hr] with t h1 h2 htI
-        have hu1 : u' t = vertex (j₁ + kk) := by
-          simp only [hu', h2 ⟨htI.1, htI.2.trans_le (min_le_left _ _)⟩, iso_rotControl_vertex]
-          rfl
-        have := (h1 ⟨hn1.1.trans htI.1, htI.2.trans_le (min_le_right _ _)⟩).2 (vertex 1)
-          (poly_vertex_mem 1)
-        rw [hu1] at this
-        exact sub_nonneg.2 this)
-    simp only [mem_Ici, Pi.sub_apply, sub_nonneg] at this
-    rw [harc _ ⟨hlt.le, le_rfl⟩] at this
-    have := hmax (τ (n + 1) - τ n) ⟨by linarith, hlt'⟩ (j₁ + kk) hne
+    have := hmax (τ (n + 1) - τ n) ⟨by linarith, hlt'⟩ j₁ hne
     linarith
   have hgap : τ (n + 1) - τ n = T := le_antisymm hle hge
   have hend := harc (τ (n + 1)) ⟨hlt.le, le_rfl⟩
-  rw [hgap, hQ] at hend
+  rw [hgap] at hend
   rw [show k + 1 = 1 + k by ring, ← irt_adRinvPow_add, hend]
   rfl
 

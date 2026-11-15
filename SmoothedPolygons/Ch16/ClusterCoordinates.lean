@@ -64,8 +64,13 @@ with `s = T - t`, `g ↦ DgD` and `M ↦ -DMD` on `X, Λ₁, Λ_R`, every equati
 `(-DAD)(-DBD) = -(-D(AB)D)`, `⟨-DAD, -DBD⟩ = ⟨A, B⟩`, `-DJD = J` and `-D Z_u D = Z_{u ∘ τ}`
 (`e₂ ↔ e₃`); the Hamiltonian is unchanged, the integral equations reverse by the substitution
 `σ ↦ T - σ` (`l6e_isIntegralCurve_reverse`) and the almost-everywhere conditions by the
-measure-preserving reflection. The switching times, finite bang-bang control and the singular
-locus are reflected likewise.
+measure-preserving reflection; on an interval `[a, c]` this is `IsExtremalOn.reverse`. The
+switching times, finite bang-bang control and the singular locus are reflected likewise
+(`isSwitchingTime_reverseControl_iff`, `IsFiniteBangBang.reverseControl`,
+`reverse_mem_singularLocus_iff`). The angular components of the reversed switching points are the
+Fuller `τ` of the original ones (`switchAng_reverse`), and `τ`, an isometry permuting the
+`V_T`-orbits, preserves convergence modulo `V_T` (`TendstoModVT.tau`); these are also used by the
+proof of Theorem 14.4.1 (`SmoothedPolygons/Ch14/NoReturnTools.lean`).
 
 `tendstoModVT_of_forall_mapClusterPt`: every cluster point lies in the orbit of `ang (τ q_out)`
 (`mk_eq_mk_iff_exists_mem_VT`); a subsequence staying away from the orbit would have a cluster
@@ -695,6 +700,22 @@ private lemma l6e_isStateCostateSolution_reverse {T : ℝ} {u : ℝ → Fin 3 �
 def reverseControl (a b : ℝ) (u : ℝ → Fin 3 → ℝ) (t : ℝ) : Fin 3 → ℝ :=
   fun j ↦ u (a + b - t) (vertexSwap j)
 
+/-- **Time reversal of an extremal on `[a, c]`** (Remark 10.2.3, `eqn:wbc-reverse`; "by time
+reversal", TeX 12012–12013): reflected by `t ↦ a + c - t`, with `g ↦ D g D`, `M ↦ -D M D` on
+`X, Λ₁, Λ_R` and the controls relabelled `e₂ ↔ e₃`, an extremal on `[a, c]` is an extremal on
+`[a, c]` with the same `λ_cost` (`l6e_isStateCostateSolution_reverse` on `[0, c - a]`, with
+`a + c - (a + t) = a + (c - a - t)`). -/
+theorem IsExtremalOn.reverse {a c lam : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ → Mat2}
+    (h : IsExtremalOn a c u g X Λ₁ ΛR lam) :
+    IsExtremalOn a c (reverseControl a c u) (fun t ↦ diagD * g (a + c - t) * diagD)
+      (fun t ↦ matTau (X (a + c - t))) (fun t ↦ matTau (Λ₁ (a + c - t)))
+      (fun t ↦ matTau (ΛR (a + c - t))) lam := by
+  have e : ∀ t, a + c - (a + t) = a + (c - a - t) := fun t ↦ by ring
+  have := l6e_isStateCostateSolution_reverse h
+  unfold IsExtremalOn reverseControl
+  simp only [e]
+  exact this
+
 /-- The reversal of the control is an involution. -/
 private lemma l6e_reverseControl_reverseControl (a b : ℝ) (u : ℝ → Fin 3 → ℝ) :
     reverseControl a b (reverseControl a b u) = u := by
@@ -720,7 +741,9 @@ private lemma l6e_isSwitchingTime_reverse {u : ℝ → Fin 3 → ℝ} {a b s : �
     rw [hu]
     exact l6e_vertex_swap i
 
-private lemma l6e_isSwitchingTime_reverse_iff {u : ℝ → Fin 3 → ℝ} {a b t : ℝ} :
+/-- **The switching times of the reversed control** are the reflections `a + b - t` of those of
+the control. -/
+theorem isSwitchingTime_reverseControl_iff {u : ℝ → Fin 3 → ℝ} {a b t : ℝ} :
     IsSwitchingTime (reverseControl a b u) t ↔ IsSwitchingTime u (a + b - t) := by
   constructor
   · intro h
@@ -730,28 +753,30 @@ private lemma l6e_isSwitchingTime_reverse_iff {u : ℝ → Fin 3 → ℝ} {a b t
     have := l6e_isSwitchingTime_reverse (a := a) (b := b) h
     rwa [sub_sub_cancel] at this
 
-/-- Finite bang-bang control is preserved by the reversal (the exceptional set is reflected). -/
-private lemma l6e_isFiniteBangBang_reverse {u : ℝ → Fin 3 → ℝ} {a b α β : ℝ}
-    (h : IsFiniteBangBang (a + b - β) (a + b - α) u) :
-    IsFiniteBangBang α β (reverseControl a b u) := by
+/-- **Finite bang-bang control under the time reversal**: the exceptional set is reflected and the
+vertices are relabelled (`reverseControl a c u` reflects about `(a + c)/2`). -/
+theorem IsFiniteBangBang.reverseControl {a c α β : ℝ} {u : ℝ → Fin 3 → ℝ}
+    (h : IsFiniteBangBang (a + c - β) (a + c - α) u) :
+    IsFiniteBangBang α β (SmoothedPolygons.reverseControl a c u) := by
   obtain ⟨S, hS⟩ := h
   classical
-  refine ⟨S.image (fun x ↦ a + b - x), fun t ht htS ↦ ?_⟩
-  have hs : a + b - t ∈ Ioo (a + b - β) (a + b - α) := ⟨by linarith [ht.2], by linarith [ht.1]⟩
-  have hsS : a + b - t ∉ S := fun h ↦ htS (Finset.mem_image.2 ⟨_, h, by ring⟩)
+  refine ⟨S.image (fun x ↦ a + c - x), fun t ht htS ↦ ?_⟩
+  have hs : a + c - t ∈ Ioo (a + c - β) (a + c - α) := ⟨by linarith [ht.2], by linarith [ht.1]⟩
+  have hsS : a + c - t ∉ S := fun h ↦ htS (Finset.mem_image.2 ⟨_, h, by ring⟩)
   obtain ⟨i, ε, hε, hi⟩ := hS _ hs hsS
-  have hmp := (Measure.measurePreserving_sub_left volume (a + b)).quasiMeasurePreserving
+  have hmp := (Measure.measurePreserving_sub_left volume (a + c)).quasiMeasurePreserving
   refine ⟨vertexSwap i, ε, hε, ?_⟩
   filter_upwards [hmp.ae hi] with σ hσ hσI
   have hu := hσ ⟨by linarith [hσI.2], by linarith [hσI.1]⟩
-  change (fun k ↦ u (a + b - σ) (vertexSwap k)) = _
+  change (fun k ↦ u (a + c - σ) (vertexSwap k)) = _
   rw [hu]
   exact l6e_vertex_swap i
 
-/-- The singular locus is invariant under the time reversal (`-DJD = J`, `det(DgD) = det g`). -/
-private lemma l6e_mem_singularLocus_reverse {g Λ₁ X ΛR : Mat2} :
-    (diagD * g * diagD, matTau Λ₁, matTau X, matTau ΛR) ∈ singularLocus ↔
-      (g, Λ₁, X, ΛR) ∈ singularLocus := by
+/-- **The singular locus is invariant under the time reversal** (`-DJD = J`,
+`det(DgD) = det g`). -/
+theorem reverse_mem_singularLocus_iff {G A B C : Mat2} :
+    (diagD * G * diagD, matTau A, matTau B, matTau C) ∈ singularLocus ↔
+      (G, A, B, C) ∈ singularLocus := by
   have key : ∀ M N : Mat2, matTau M = matTau N → M = N := fun M N h ↦ by
     rw [← matTau_matTau M, h, matTau_matTau]
   have hJ : ∀ c : ℝ, matTau (c • J) = c • J := fun c ↦ by rw [matTau_smul, matTau_J]
@@ -773,29 +798,72 @@ theorem IsChatteringArcOutOf.reverse {a b : ℝ} {u : ℝ → Fin 3 → ℝ} {g 
       (fun t ↦ matTau (X (a + b - t))) (fun t ↦ matTau (Λ₁ (a + b - t)))
       (fun t ↦ matTau (ΛR (a + b - t))) (fun n ↦ a + b - τ n) := by
   obtain ⟨hext, ha, hoff, hbb, hmono, hτI, hlim, hsw⟩ := h
-  have e : ∀ t, a + b - (a + t) = a + (b - a - t) := fun t ↦ by ring
-  refine ⟨?_, ?_, fun t ht ↦ ?_, fun α β hα hβ ↦
-    l6e_isFiniteBangBang_reverse (hbb _ _ (by linarith) (by linarith)), fun m n hmn ↦ ?_,
+  refine ⟨hext.reverse, ?_, fun t ht ↦ ?_, fun α β hα hβ ↦
+    IsFiniteBangBang.reverseControl (hbb _ _ (by linarith) (by linarith)), fun m n hmn ↦ ?_,
     fun n ↦ ⟨by linarith [(hτI n).2], by linarith [(hτI n).1]⟩, ?_, fun t ht ↦ ?_⟩
-  · have := l6e_isStateCostateSolution_reverse hext
-    unfold IsExtremalOn reverseControl
-    simp only [e]
-    exact this
   · simp only [show a + b - b = a by ring]
-    exact l6e_mem_singularLocus_reverse.2 ha
-  · simp only [l6e_mem_singularLocus_reverse]
+    exact reverse_mem_singularLocus_iff.2 ha
+  · rw [reverse_mem_singularLocus_iff]
     exact hoff _ ⟨by linarith [ht.2], by linarith [ht.1]⟩
   · have := hmono hmn
     dsimp only
     linarith
   · have := (tendsto_const_nhds (x := a + b)).sub hlim
     rwa [show a + b - a = b by ring] at this
-  · rw [l6e_isSwitchingTime_reverse_iff, hsw _ ⟨by linarith [ht.2], by linarith [ht.1]⟩]
+  · rw [isSwitchingTime_reverseControl_iff, hsw _ ⟨by linarith [ht.2], by linarith [ht.1]⟩]
     constructor
     · rintro ⟨n, hn⟩
       exact ⟨n, by linarith⟩
     · rintro ⟨n, hn⟩
       exact ⟨n, by linarith⟩
+
+/-- **The angular components of the reversed switching points** are the Fuller `τ` of those of the
+switching points: the reversed phase point at `m - τ n` is `reinTau` of the phase point at `τ n`
+(`fullerCoords_reinTau`, `tau_ang`). -/
+theorem switchAng_reverse (m : ℝ) (X Λ₁ ΛR : ℝ → Mat2) (τ : ℕ → ℝ) (n : ℕ) :
+    switchAng (fun t ↦ matTau (X (m - t))) (fun t ↦ matTau (Λ₁ (m - t)))
+        (fun t ↦ matTau (ΛR (m - t))) (fun n ↦ m - τ n) n =
+      tau (switchAng X Λ₁ ΛR τ n) := by
+  have hpt : phaseAt (fun t ↦ matTau (X (m - t))) (fun t ↦ matTau (Λ₁ (m - t)))
+      (fun t ↦ matTau (ΛR (m - t))) (m - τ n) = reinTau (phaseAt X Λ₁ ΛR (τ n)) := by
+    simp only [phaseAt, reinTau, sub_sub_cancel]
+  simp only [switchAng]
+  rw [hpt, fullerCoords_reinTau, tau_ang]
+
+/-- **Convergence modulo `V_T` is preserved by the Fuller `τ`**: `τ` is an isometry of `ℂ³` (sup
+metric) mapping the `V_T`-orbit of `ξ` onto that of `τ ξ` (`τ (v • w) = v̄ • τ w`, and `V_T` is
+closed under conjugation), so `infDist (τ ξ_n) (orbit (τ ξ)) = infDist ξ_n (orbit ξ)`. -/
+theorem TendstoModVT.tau {ξs : ℕ → Fin 3 → ℂ} {ξ : Fin 3 → ℂ} (h : TendstoModVT ξs ξ) :
+    TendstoModVT (fun n ↦ TriFuller.tau (ξs n)) (TriFuller.tau ξ) := by
+  have hc : ∀ (z w : Fin 3 → ℂ) (i : Fin 3),
+      dist (TriFuller.tau z i) (TriFuller.tau w i) = dist (z i) (w i) := by
+    intro z w i
+    fin_cases i <;> simp [TriFuller.tau, dist_neg_neg, Complex.dist_conj_conj]
+  have hle : ∀ z w : Fin 3 → ℂ, dist (TriFuller.tau z) (TriFuller.tau w) ≤ dist z w :=
+    fun z w ↦ (dist_pi_le_iff dist_nonneg).2 fun i ↦ (hc z w i).le.trans (dist_le_pi_dist z w i)
+  have hiso : Isometry TriFuller.tau := Isometry.of_dist_eq fun z w ↦ le_antisymm (hle z w) (by
+    have := hle (TriFuller.tau z) (TriFuller.tau w); rwa [tau_tau, tau_tau] at this)
+  have hτv : ∀ (v : ℂ) (w : Fin 3 → ℂ),
+      TriFuller.tau (v • w) = starRingEnd ℂ v • TriFuller.tau w := by
+    intro v w
+    ext i; fin_cases i <;> simp [TriFuller.tau]
+  have hVT : ∀ v ∈ VT, starRingEnd ℂ v ∈ VT := by
+    intro v hv
+    rcases hv with rfl | rfl | rfl
+    · simp [VT]
+    · rw [conj_ζ]; exact ζ_sq_mem_VT
+    · rw [conj_ζ_sq]; exact ζ_mem_VT
+  have horb : vtOrbit (TriFuller.tau ξ) = TriFuller.tau '' vtOrbit ξ := by
+    ext η
+    constructor
+    · rintro ⟨v, hv, rfl⟩
+      refine ⟨starRingEnd ℂ v • ξ, ⟨starRingEnd ℂ v, hVT v hv, rfl⟩, ?_⟩
+      rw [hτv, Complex.conj_conj]
+    · rintro ⟨w, ⟨v, hv, rfl⟩, rfl⟩
+      exact ⟨starRingEnd ℂ v, hVT v hv, hτv v ξ⟩
+  unfold TendstoModVT at h ⊢
+  simp only [horb, Metric.infDist_image hiso]
+  exact h
 
 /-- **Convergence modulo `V_T` from the cluster points** (compactness of `Ξ`; the step "the set
 of cluster points … `q_in` is the only cluster point" of TeX 13006–13014): if `ξ_n ∈ Ξ` and every
