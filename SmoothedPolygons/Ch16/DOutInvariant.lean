@@ -30,8 +30,11 @@ Departure from the paper: the book reads the containment `F₁(𝒟_out) ⊂ �
 calculation by the boundary method (Figure 16.1, TeX 12592–12607); the formalization proves it
 analytically, by the root structure of the switching cubic and the two identities above (the
 multiplier `10` of `D` makes every coefficient of `√3 C₁ + 10 D` sign-definite on `𝒟₀₀`). This
-replaces the interval certificate of `SmoothedPolygons/Ch16/Certificates/DOutMapsTo.lean`
-(248 kernel-checked boxes).
+replaced an earlier kernel-checked interval certificate (248 boxes, since removed).
+
+The file also proves the root structure of `D` on the other boxes and on the second cell's image
+region (`exists_root_of_signs`: a unique positive root when `y₂ ≤ 0 ≤ κ` or `y₁, y₂ ≥ 0 < κ`),
+used by `BoxFlow.lean` and `CellOneToDOut.lean`.
 -/
 
 @[expose] public section
@@ -97,19 +100,23 @@ theorem C₁_eq (p : Fin 3 → ℝ) (t : ℝ) :
 
 /-! ### The switch -/
 
-/-- `D(7) > 0` on `𝒟₀₀` (`|y_j| ≤ r_j`, `κ ≤ 1/4`). -/
-theorem V₂_seven_pos {p : Fin 3 → ℝ} (hp : p ∈ cellBox 0 0) : 0 < V₂ p 7 := by
-  obtain ⟨⟨h0, h0'⟩, -, -⟩ := mem_cellBox_zero_zero.1 hp
+/-- `|y₁| ≤ r₁`, `|y₂| ≤ r₂` and `κ ≤ 1/4` for `r₂ ∈ [0, 1]`. -/
+theorem coeff_bounds {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1) :
+    -(1 - p 0) ≤ cy₁ p ∧ cy₁ p ≤ 1 - p 0 ∧ -p 0 ≤ cy₂ p ∧ cκ p ≤ 1 / 4 := by
   have hr1 : 0 ≤ 1 - p 0 := by linarith
-  have a1 : -(1 - p 0) ≤ cy₁ p := by
-    unfold cy₁; nlinarith [Real.neg_one_le_sin (p 2 - p 1 + 2 / 3 * Real.pi)]
-  have a2 : -p 0 ≤ cy₂ p := by
-    unfold cy₂; nlinarith [Real.neg_one_le_sin (p 2 + 2 / 3 * Real.pi)]
-  have a3 : cκ p ≤ 1 / 4 := by
-    unfold cκ
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · unfold cy₁; nlinarith [Real.neg_one_le_sin (p 2 - p 1 + 2 / 3 * Real.pi)]
+  · unfold cy₁; nlinarith [Real.sin_le_one (p 2 - p 1 + 2 / 3 * Real.pi)]
+  · unfold cy₂; nlinarith [Real.neg_one_le_sin (p 2 + 2 / 3 * Real.pi)]
+  · unfold cκ
     have := Real.sin_le_one (p 1)
+    have := Real.neg_one_le_sin (p 1)
     have : 0 ≤ (1 - p 0) * p 0 := mul_nonneg hr1 h0
     nlinarith [sq_nonneg (p 0 - 1 / 2)]
+
+/-- `D(7) > 0` for `r₂ ∈ [0, 1]` (`|y_j| ≤ r_j`, `κ ≤ 1/4`). -/
+theorem V₂_seven_pos {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1) : 0 < V₂ p 7 := by
+  obtain ⟨a1, -, a2, a3⟩ := coeff_bounds h0 h0'
   have h3 : √3 < 2 := by
     rw [Real.sqrt_lt' (by norm_num)]; norm_num
   have h3' : 0 ≤ √3 := Real.sqrt_nonneg 3
@@ -123,7 +130,8 @@ theorem exists_root {p : Fin 3 → ℝ} (hp : p ∈ cellBox 0 0)
     ∃ τ, 0 < τ ∧ V₂ p τ = 0 ∧ (∀ t, 0 < t → t < τ → V₂ p t < 0) ∧ ∀ t, τ < t → 0 < V₂ p t := by
   obtain ⟨hy, hk, -, -, -⟩ := cellBox_facts hp
   obtain ⟨s, hs, hVs⟩ := exists_V₂_neg hp hB
-  have h7 := V₂_seven_pos hp
+  obtain ⟨⟨h0, h0'⟩, -, -⟩ := mem_cellBox_zero_zero.1 hp
+  have h7 := V₂_seven_pos h0 h0'
   have hs7 : s < 7 := by
     by_contra hc
     push Not at hc
@@ -136,6 +144,94 @@ theorem exists_root {p : Fin 3 → ℝ} (hp : p ∈ cellBox 0 0)
   have hτ0 : 0 < τ := hs.trans hτ.1
   exact ⟨τ, hτ0, h0, fun t ht htτ ↦ V₂_neg_of_nonpos hy hk ht htτ h0.le,
     fun t htτ ↦ V₂_pos_of_nonneg hy hk hτ0 htτ h0.ge⟩
+
+theorem continuous_V₂ (p : Fin 3 → ℝ) : Continuous (V₂ p) := by
+  unfold V₂; fun_prop
+
+/-- `D < 0` at some `t > 0` when `y₂ < 0 ≤ κ` (`r₂ ∈ [0, 1]`). -/
+theorem exists_V₂_neg_of_cy₂ {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1)
+    (hy : cy₂ p < 0) (hk : 0 ≤ cκ p) : ∃ s, 0 < s ∧ V₂ p s < 0 := by
+  obtain ⟨a1, a1', -, -⟩ := coeff_bounds h0 h0'
+  have h3 : 0 ≤ √3 := Real.sqrt_nonneg 3
+  refine ⟨min 1 (-cy₂ p), lt_min one_pos (by linarith), ?_⟩
+  set s := min 1 (-cy₂ p)
+  have hs1 : s ≤ 1 := min_le_left _ _
+  have hs2 : s ≤ -cy₂ p := min_le_right _ _
+  have hs0 : 0 < s := lt_min one_pos (by linarith)
+  have e1 : cy₁ p * s ^ 2 / 2 ≤ s ^ 2 / 2 := by nlinarith [sq_nonneg s]
+  have e2 : s ^ 3 / 12 ≤ s ^ 2 / 12 := by nlinarith [sq_nonneg s]
+  have e3 : 0 ≤ √3 * cκ p := mul_nonneg h3 hk
+  have e4 : s ^ 2 * (7 / 12) + cy₂ p * s ≤ s * (5 / 12 * cy₂ p) := by nlinarith
+  unfold V₂
+  nlinarith
+
+/-- `D < 0` at some `t > 0` when `κ > 0` (`D(0) = -√3 κ`). -/
+theorem exists_V₂_neg_of_cκ {p : Fin 3 → ℝ} (hk : 0 < cκ p) : ∃ s, 0 < s ∧ V₂ p s < 0 := by
+  have hc := (continuous_V₂ p).continuousAt (x := 0)
+  have h00 : V₂ p 0 < 0 := by
+    have e : V₂ p 0 = -(√3 * cκ p) := by unfold V₂; ring
+    rw [e]
+    have : 0 < √3 * cκ p := mul_pos (Real.sqrt_pos.2 (by norm_num)) hk
+    linarith
+  obtain ⟨ε, hε, hball⟩ := Metric.eventually_nhds_iff.1 (hc.eventually (gt_mem_nhds h00))
+  refine ⟨ε / 2, by linarith, hball ?_⟩
+  rw [Real.dist_eq, sub_zero, abs_of_pos (by linarith)]
+  linarith
+
+/-- `D` is strictly increasing on `[0, ∞)` when `y₁, y₂ ≥ 0`. -/
+theorem V₂_lt_of_cy_nonneg {p : Fin 3 → ℝ} (hy2 : 0 ≤ cy₂ p) (hy1 : 0 ≤ cy₁ p) {s t : ℝ}
+    (hs : 0 ≤ s) (hst : s < t) : V₂ p s < V₂ p t := by
+  have e : V₂ p t - V₂ p s =
+      (t - s) * (cy₂ p + cy₁ p * (t + s) / 2 + (t ^ 2 + t * s + s ^ 2) / 12) := by
+    unfold V₂; ring
+  have ht : 0 < t := lt_of_le_of_lt hs hst
+  have : 0 < (t - s) * (cy₂ p + cy₁ p * (t + s) / 2 + (t ^ 2 + t * s + s ^ 2) / 12) := by
+    apply mul_pos (by linarith)
+    have : 0 ≤ cy₁ p * (t + s) / 2 := by positivity
+    have : 0 < t ^ 2 := by positivity
+    nlinarith
+  linarith
+
+/-- **The switching time to `1` from the signs of the coefficients**: when `y₂ ≤ 0 ≤ κ` (and
+`κ > 0` or `y₂ < 0`) or `y₁, y₂ ≥ 0 < κ`, `D` has a positive root `τ`, with `D < 0` on `(0, τ)`
+and `D > 0` after it, and `V₁ = D' > 0` at `τ`: in the first case `D/t²` is increasing
+(`V₂_mul_sq_lt`), in the second `D` itself (`V₂_lt_of_cy_nonneg`). -/
+theorem exists_root_of_signs {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1)
+    (h : (cy₂ p ≤ 0 ∧ 0 ≤ cκ p ∧ (0 < cκ p ∨ cy₂ p < 0)) ∨
+      (0 ≤ cy₂ p ∧ 0 ≤ cy₁ p ∧ 0 < cκ p)) :
+    ∃ τ, 0 < τ ∧ V₂ p τ = 0 ∧ (∀ t, 0 < t → t < τ → V₂ p t < 0) ∧
+      (∀ t, τ < t → 0 < V₂ p t) ∧ 0 < V₁ p τ := by
+  have h7 := V₂_seven_pos h0 h0'
+  have hcont : ContinuousOn (V₂ p) (Icc 0 7) := (continuous_V₂ p).continuousOn
+  rcases h with ⟨hy, hk, hk'⟩ | ⟨hy2, hy1, hk⟩
+  · obtain ⟨s, hs, hVs⟩ : ∃ s, 0 < s ∧ V₂ p s < 0 := by
+      rcases hk' with hk' | hk'
+      · exact exists_V₂_neg_of_cκ hk'
+      · exact exists_V₂_neg_of_cy₂ h0 h0' hk' hk
+    have hs7 : s < 7 := by
+      by_contra hc
+      push Not at hc
+      rcases hc.lt_or_eq with h | h
+      · linarith [V₂_pos_of_nonneg hy hk (by norm_num) h h7.le]
+      · rw [← h] at hVs; linarith
+    obtain ⟨τ, hτ, hτ0⟩ := intermediate_value_Ioo hs7.le
+      ((continuous_V₂ p).continuousOn) ⟨hVs, h7⟩
+    have hτ0' : 0 < τ := hs.trans hτ.1
+    exact ⟨τ, hτ0', hτ0, fun t ht htτ ↦ V₂_neg_of_nonpos hy hk ht htτ hτ0.le,
+      fun t htτ ↦ V₂_pos_of_nonneg hy hk hτ0' htτ hτ0.ge, V₁_pos_of_root hy hk hτ0' hτ0⟩
+  · have h00 : V₂ p 0 < 0 := by
+      have e : V₂ p 0 = -(√3 * cκ p) := by unfold V₂; ring
+      rw [e]
+      have : 0 < √3 * cκ p := mul_pos (Real.sqrt_pos.2 (by norm_num)) hk
+      linarith
+    obtain ⟨τ, hτ, hτ0⟩ := intermediate_value_Ioo (by norm_num : (0 : ℝ) ≤ 7) hcont ⟨h00, h7⟩
+    refine ⟨τ, hτ.1, hτ0, fun t ht htτ ↦ ?_, fun t htτ ↦ ?_, ?_⟩
+    · have := V₂_lt_of_cy_nonneg hy2 hy1 ht.le htτ; linarith
+    · have := V₂_lt_of_cy_nonneg hy2 hy1 hτ.1.le htτ; linarith
+    · unfold V₁
+      have := hτ.1
+      have : 0 ≤ cy₁ p * τ := by positivity
+      nlinarith
 
 /-! ### The image -/
 
@@ -191,7 +287,7 @@ theorem poincareAngZero_mem_of_not_face {p : Fin 3 → ℝ} (hp : p ∈ cellBox 
   refine ⟨⟨c0.1.le, c0.2.le⟩, ⟨by rw [h1]; exact c1.1.le, ?_⟩, ⟨?_, by
     rw [h2]; exact Complex.arg_le_pi _⟩⟩
   · -- `ψ < π/3`
-    have := toIcoMod_lt_pi_div_three (w₀ := w 0) (w₁ := w 1) c1
+    have := toIcoMod_lt_pi_div_three (w₀ := w 0) (w₁ := w 1) (Ioo_subset_Icc_self c1)
       (by rw [e0r, e0i, e1r, e1i]; exact hC1)
     rw [h1]
     exact this.le
@@ -207,7 +303,7 @@ theorem poincareAngZero_mem_of_not_face {p : Fin 3 → ℝ} (hp : p ∈ cellBox 
 (`SmoothedPolygons/Ch16/BasinHypotheses.lean`), without computer assistance.
 
 Departure from the paper: the book reads this off a Mathematica computation by the boundary method
-(Figure 16.1, TeX 12592–12597); the formalization proves it analytically, by the root structure of
+(Figure 16.1, TeX 12592–12598); the formalization proves it analytically, by the root structure of
 the switching cubic (`exists_root`, `image_spec`) and the identities `C₂_eq`, `C₁_eq` (signs of
 explicit polynomials in `τ`, `r₂` and the sines and cosines of the cell angles). -/
 theorem mapsTo_boxSet_zero_zero : MapsTo poincareAngZero (boxSet 0 0) (boxSet 0 0) := by

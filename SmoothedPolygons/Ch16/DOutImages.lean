@@ -609,7 +609,7 @@ theorem box_subset_openBoxOne : Icc boxLo boxHi ⊆ openBoxOne := by
 image class.
 
 Departure from the paper: the book states that the forward iterates of `𝒟_out` shrink toward
-`q_out` from a Mathematica computation (TeX 12592–12597); the formalization proves the step
+`q_out` from a Mathematica computation (TeX 12592–12598); the formalization proves the step
 `F(D₁) ⊆ B` analytically: in the normalisation `τ = 1` (`normalized_eqs`) the image is an affine
 function of `(W₁, W₃, X₁, X₂)`, which lie in an explicit polytope on `D₁` (`omega_facts`, signs of
 sines and cosines), and the six inequalities of `B` are polynomial inequalities on that polytope

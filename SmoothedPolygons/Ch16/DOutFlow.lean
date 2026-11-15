@@ -9,10 +9,10 @@ import Mathlib.Analysis.Real.Pi.Bounds
 Exact (non-numerical) facts about the Fuller–Poincaré map `poincareAngZero` on the box
 `𝒟₀₀ = 𝒟_out` of cell coordinates `p = (r₂, ψ, θ₂)` (`cellBox 0 0`, TeX 12526–12537), used by the
 analytic proofs of `DOutContracts` (`SmoothedPolygons/Ch16/BasinHypotheses.lean`) in
-`SmoothedPolygons/Ch16/DOutInvariant.lean`, `DOutImages.lean` and `DOutContraction.lean`. The
-statements and proofs are those of the certification step (`DOutMaps`, `ContractionBox`,
-`DOutIter` in `SmoothedPolygons/Ch16/Certificates/`), collected here without the interval
-certificates so that the analytic proofs import no kernel computation.
+`SmoothedPolygons/Ch16/DOutInvariant.lean`, `DOutImages.lean` and `DOutContraction.lean`, and by
+those of `BoxSubclaims` and `CellTwoEntersDOut` (`BoxFlow.lean`, `CellOneToDOut.lean`). The
+statements and proofs are those of an earlier certification step, whose kernel-checked interval
+certificates are no longer used (the computation is kept as a Python reference, `numerics/`).
 
 * **The flow along `ζ`, rotated by `ζ`** (`zeta_flow`): with `ζ z₁ = x₁ + i y₁ = r₁ e^{iφ₁}`,
   `ζ z₂ = x₂ + i y₂ = r₂ e^{iφ₂}` (`φ₁ = θ₂ - ψ + 2π/3`, `φ₂ = θ₂ + 2π/3`) and
@@ -22,12 +22,13 @@ certificates so that the analytic proofs import no kernel computation.
 * **The switch** (`V₂_mul_sq_lt`, `firstControl_firstSwitchTime`): on `𝒟₀₀`, `y₂ ≤ 0 ≤ κ`, so
   `D(t)/t²` is strictly increasing on `t > 0`; off the face piece `{r₂ = 0, θ₁ ≤ π/3}` the root
   `τ` of `D` exists (`exists_V₂_neg`), the first control is `ζ` and the first switch is `τ`.
-* **The image** (`image_spec`): `ζ F(z)` lies on the wall `𝒲₀` with `x₃ < 0` and `V₁ > 0`, and
-  the class of the image is the class of the cell coordinates of `w = ζ F(z)`, with
-  `w₁ = U₀ + i V₀`, `w₂ = U₁ + i V₁` at `τ`.
+* **The image** (`image_spec_of_root`, on `𝒟₀₀` `image_spec`): `ζ F(z)` lies on the wall `𝒲₀` with
+  `x₃ < 0` and `V₁ > 0`, and the class of the image is the class of the cell coordinates of
+  `w = ζ F(z)`, with `w₁ = U₀ + i V₀`, `w₂ = U₁ + i V₁` at `τ`.
 * **The face piece** (`cellClass_face`): the `V_T`-equivariance.
 * **The cell coordinates of `w` from polynomial conditions**: the angles (`toIcoMod_lt_arctan`,
-  `arctan_lt_toIcoMod`, `pi_sub_arctan_lt_arg`, `arg_lt_pi_sub_arctan`) and the radius
+  `arctan_lt_toIcoMod`, `pi_sub_arctan_lt_arg`, `arg_lt_pi_sub_arctan`, `arg_mem_Ioo_of_im_pos`)
+  and the radius
   (`cellCoords_zero_mul`: `r₂ |w₁|² = |w₂| (1 - r₂)²`, Lemma 15.1.1).
 -/
 
@@ -146,6 +147,20 @@ theorem flow_two_im (p : Fin 3 → ℝ) (t : ℝ) :
   simp only [← Complex.ofReal_pow, Complex.mul_re, Complex.mul_im, Complex.sub_im, Complex.add_im,
     Complex.div_im, Complex.I_re, Complex.I_im, Complex.ofReal_re,
     Complex.ofReal_im, ζ_re, ζ_im, c0, c1, c2, c3, c5]
+  norm_num
+  ring
+
+/-- `Im z₂(t) = r₂ sin θ₂ + r₁ sin θ₁ t + t²/4`, the derivative of `Im z₃(t)`. -/
+theorem flow_one_im (p : Fin 3 → ℝ) (t : ℝ) :
+    (flow t (cellPoint p) ζ 1).im =
+      p 0 * Real.sin (p 2) + (1 - p 0) * Real.sin (p 2 - p 1) * t + t ^ 2 / 4 := by
+  obtain ⟨c0, c1, c2, c3, -, -⟩ := cellPoint_reim p
+  have f1 : flow t (cellPoint p) ζ 1 = cellPoint p 1 + cellPoint p 0 * t - I * t ^ 2 * ζ / 2 :=
+    rfl
+  rw [f1]
+  simp only [← Complex.ofReal_pow, Complex.mul_re, Complex.mul_im, Complex.sub_im, Complex.add_im,
+    Complex.div_im, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im, ζ_re, ζ_im,
+    c0, c1, c3]
   norm_num
   ring
 
@@ -268,10 +283,16 @@ theorem two_pi_div_three_lt_arg {w : ℂ} (h1 : 0 < w.im) (h2 : w.im + √3 * w.
   rw [Real.arctan_neg, harc] at this
   linarith
 
-/-- `ψ' < π/3` for the angle `ψ' ∈ (0, π)` from `w₀` to `w₁` when
+/-- `arg w ∈ (0, π)` when `Im w > 0`. -/
+theorem arg_mem_Ioo_of_im_pos {z : ℂ} (h : 0 < z.im) : Complex.arg z ∈ Ioo 0 Real.pi :=
+  ⟨lt_of_le_of_ne (Complex.arg_nonneg_iff.2 h.le) fun e ↦ by
+      have := (Complex.arg_eq_zero_iff.1 e.symm).2; linarith,
+    Complex.arg_lt_pi_iff.2 (Or.inr h.ne')⟩
+
+/-- `ψ' < π/3` for the angle `ψ' ∈ [0, π]` from `w₀` to `w₁` when
 `(Re w₀ Im w₁ - Im w₀ Re w₁) - √3 (Re w₀ Re w₁ + Im w₀ Im w₁) < 0`. -/
 theorem toIcoMod_lt_pi_div_three {w₀ w₁ : ℂ}
-    (hψ : toIcoMod Real.two_pi_pos 0 (Complex.arg w₁ - Complex.arg w₀) ∈ Ioo 0 Real.pi)
+    (hψ : toIcoMod Real.two_pi_pos 0 (Complex.arg w₁ - Complex.arg w₀) ∈ Icc 0 Real.pi)
     (h : w₀.re * (w₁.im - √3 * w₁.re) - w₀.im * (w₁.re + √3 * w₁.im) < 0) :
     toIcoMod Real.two_pi_pos 0 (Complex.arg w₁ - Complex.arg w₀) < Real.pi / 3 := by
   set ψ := toIcoMod Real.two_pi_pos 0 (Complex.arg w₁ - Complex.arg w₀) with hψdef
@@ -438,46 +459,32 @@ theorem firstControl_firstSwitchTime {p : Fin 3 → ℝ} (hz : cellPoint p ≠ 0
     exact ⟨(τ + w) / 2, ⟨by linarith, (key _ (by linarith)).2 (hpos _ (by linarith))⟩,
       by linarith⟩
 
-/-- **The image of a point of `𝒟₀₀` at a positive root `τ` of `D`** (the switching cubic of
-`ζ → 1`): `D < 0` on `(0, τ)` and `D > 0` after `τ` (`V₂_mul_sq_lt`), `Im z₃ > 0`, so the first
-control is `ζ` and the first switch is at `τ` (`firstControl_firstSwitchTime`); the rotated image
-`w = ζ F(z)` has `ζ z₁(τ) = U₀ + i V₀`, `ζ z₂(τ) = U₁ + i V₁` with `V₁ > 0`, lies on the wall
-`𝒲₀` with `x₃ < 0`, and the class of `p`'s image is the class of the cell coordinates of `w`. (A
-point of the face piece `r₂ = 0, θ₁ ≤ π/3` has no positive root.) -/
-theorem image_spec {p : Fin 3 → ℝ} (hp : p ∈ cellBox 0 0) {τ : ℝ} (hτ0 : 0 < τ)
+/-- **The image of a point at a simple switch `ζ → 1`**, for any point of the closed cells at
+which `ζ²` never beats `ζ` (`Im z₃ > 0`) and `D < 0` on `(0, τ)`, `D > 0` after the root `τ`: the
+first control is `ζ` and the first switch is at `τ` (`firstControl_firstSwitchTime`); the rotated
+image `w = ζ F(z)` has `ζ z₁(τ) = U₀ + i V₀`, `ζ z₂(τ) = U₁ + i V₁`, lies on the wall `𝒲₀` with
+`x₃ < 0`, and the class of `p`'s image is the class of the cell coordinates of `w`. -/
+theorem image_spec_of_root {p : Fin 3 → ℝ} (hdom : p ∈ cellDomain) (hk : 0 ≤ cκ p)
+    (hY : ∀ t, 0 < t → 0 < (flow t (cellPoint p) ζ 2).im) {τ : ℝ} (hτ0 : 0 < τ)
+    (hneg : ∀ t, 0 < t → t < τ → V₂ p t < 0) (hpos : ∀ t, τ < t → 0 < V₂ p t)
     (h0 : V₂ p τ = 0) :
-    0 < V₁ p τ ∧ ∃ w : Fin 3 → ℂ, w = ζ • poincare (cellPoint p) ∧
+    ∃ w : Fin 3 → ℂ, w = ζ • poincare (cellPoint p) ∧
       poincareAngZero (cellClass p) = cellClass (cellCoords w) ∧
       (w 0).re = U₀ p τ ∧ (w 0).im = V₀ p τ ∧ (w 1).re = U₁ p τ ∧ (w 1).im = V₁ p τ ∧
       cellCoords w 0 ∈ Ioo 0 1 ∧
       toIcoMod Real.two_pi_pos 0 (Complex.arg (w 1) - Complex.arg (w 0)) ∈ Ioo 0 Real.pi ∧
       cellCoords w 1 = toIcoMod Real.two_pi_pos 0 (Complex.arg (w 1) - Complex.arg (w 0)) ∧
       cellCoords w 2 = Complex.arg (w 1) := by
-  obtain ⟨hy, hk, hs2, hs21, hdom⟩ := cellBox_facts hp
-  obtain ⟨hr, -, -⟩ := mem_cellBox_zero_zero.1 hp
-  have hs3 : 0 < √3 := Real.sqrt_pos.2 (by norm_num)
-  have hneg : ∀ t, 0 < t → t < τ → V₂ p t < 0 := fun t ht htτ ↦
-    V₂_neg_of_nonpos hy hk ht htτ h0.le
-  have hpos : ∀ t, τ < t → 0 < V₂ p t := fun t htτ ↦ V₂_pos_of_nonneg hy hk hτ0 htτ h0.ge
-  -- the first control and the first switch
-  have hY : ∀ t, 0 < t → 0 < (flow t (cellPoint p) ζ 2).im := by
-    intro t ht
-    rw [flow_two_im]
-    have : 0 ≤ 1 - p 0 := by linarith [hr.2]
-    have : 0 ≤ p 0 * Real.sin (p 2) * t := by have := hr.1; positivity
-    have : 0 ≤ (1 - p 0) * Real.sin (p 2 - p 1) * t ^ 2 / 2 := by positivity
-    have : 0 < t ^ 3 / 12 := by positivity
-    linarith
   have hz := cellPoint_mem_sectionZero hdom
   obtain ⟨hfc, hτe⟩ := firstControl_firstSwitchTime hz.1 hk hY hτ0 hneg hpos h0
   have hw := poincare_mem_sectionZero hz
   have hpw : poincare (cellPoint p) = flow τ (cellPoint p) ζ := by rw [poincare, hfc, hτe]
   obtain ⟨e0r, e0i, e1r, e1i, e2r, e2i⟩ := zeta_flow p τ
-  have hV₁ := V₁_pos_of_root hy hk hτ0 h0
   have hU₂ : U₂ p τ < 0 := by
     have e := flow_two_im_eq (p := p) τ
     rw [h0] at e
     have := hY τ hτ0
+    have h3 : 0 < √3 := Real.sqrt_pos.2 (by norm_num)
     nlinarith
   -- the rotated image `w = ζ F(z)`, on the wall `𝒲₀`
   set w := ζ • poincare (cellPoint p) with hw_def
@@ -505,8 +512,37 @@ theorem image_spec {p : Fin 3 → ℝ} (hp : p ∈ cellBox 0 0) {τ : ℝ} (hτ0
   have himage : poincareAngZero (cellClass p) = cellClass (cellCoords w) := by
     change poincareAngZero (classOf (cellPoint p)) = _
     rw [poincareAngZero_classOf hz, hcl, hw_def, hcls]
-  exact ⟨hV₁, w, hw_def, himage, by rw [hw0, e0r], by rw [hw0, e0i], by rw [hw1, e1r],
+  exact ⟨w, hw_def, himage, by rw [hw0, e0r], by rw [hw0, e0i], by rw [hw1, e1r],
     by rw [hw1, e1i], c0, c1, rfl, rfl⟩
+
+/-- **The image of a point of `𝒟₀₀` at a positive root `τ` of `D`** (the switching cubic of
+`ζ → 1`): `D < 0` on `(0, τ)` and `D > 0` after `τ` (`V₂_mul_sq_lt`), `Im z₃ > 0`, so the first
+control is `ζ` and the first switch is at `τ`, and the rotated image `w = ζ F(z)` is that of
+`image_spec_of_root`, with `V₁ > 0`. (A point of the face piece `r₂ = 0, θ₁ ≤ π/3` has no
+positive root.) -/
+theorem image_spec {p : Fin 3 → ℝ} (hp : p ∈ cellBox 0 0) {τ : ℝ} (hτ0 : 0 < τ)
+    (h0 : V₂ p τ = 0) :
+    0 < V₁ p τ ∧ ∃ w : Fin 3 → ℂ, w = ζ • poincare (cellPoint p) ∧
+      poincareAngZero (cellClass p) = cellClass (cellCoords w) ∧
+      (w 0).re = U₀ p τ ∧ (w 0).im = V₀ p τ ∧ (w 1).re = U₁ p τ ∧ (w 1).im = V₁ p τ ∧
+      cellCoords w 0 ∈ Ioo 0 1 ∧
+      toIcoMod Real.two_pi_pos 0 (Complex.arg (w 1) - Complex.arg (w 0)) ∈ Ioo 0 Real.pi ∧
+      cellCoords w 1 = toIcoMod Real.two_pi_pos 0 (Complex.arg (w 1) - Complex.arg (w 0)) ∧
+      cellCoords w 2 = Complex.arg (w 1) := by
+  obtain ⟨hy, hk, hs2, hs21, hdom⟩ := cellBox_facts hp
+  obtain ⟨hr, -, -⟩ := mem_cellBox_zero_zero.1 hp
+  have hneg : ∀ t, 0 < t → t < τ → V₂ p t < 0 := fun t ht htτ ↦
+    V₂_neg_of_nonpos hy hk ht htτ h0.le
+  have hpos : ∀ t, τ < t → 0 < V₂ p t := fun t htτ ↦ V₂_pos_of_nonneg hy hk hτ0 htτ h0.ge
+  have hY : ∀ t, 0 < t → 0 < (flow t (cellPoint p) ζ 2).im := by
+    intro t ht
+    rw [flow_two_im]
+    have : 0 ≤ 1 - p 0 := by linarith [hr.2]
+    have : 0 ≤ p 0 * Real.sin (p 2) * t := by have := hr.1; positivity
+    have : 0 ≤ (1 - p 0) * Real.sin (p 2 - p 1) * t ^ 2 / 2 := by positivity
+    have : 0 < t ^ 3 / 12 := by positivity
+    linarith
+  exact ⟨V₁_pos_of_root hy hk hτ0 h0, image_spec_of_root hdom hk hY hτ0 hneg hpos h0⟩
 
 /-- On the face piece `r₂ = 0`, `θ₁ = θ₂ - ψ ≤ π/3` (first control `1`), the point
 `(e^{iθ₁}, 0, 0)` has the same class as its rotation `ζ (e^{iθ₁}, 0, 0) = (e^{i(θ₁ + 2π/3)}, 0, 0)`

@@ -33,7 +33,7 @@ switching points converge to `q_in`; "emanated at an earlier time from the divis
 singular locus at an earlier time. The trajectories are extremals that are bang-bang with finitely
 many switches on compact subintervals away from the singular locus (as Chapter 8 gives for the
 minimizer, Theorem 8.3.2). The two parts are time reversals of each other
-(`IsChatteringArcOutOf.reverse`).
+(`IsChatteringArcInto.reverse`).
 
 **A reading, and why it is no restriction.** The hypothesis "finitely bang-bang on compact
 subintervals of `(a, c)`" is not in the book's statement ("A trajectory of the Reinhardt system");
@@ -54,19 +54,19 @@ Registration name: "Thm 14.4.1 (locally finitely bang-bang extremals)".
 1. **All switches are on the unstable curve.** The switching points of a trajectory emanating from
    `q_out` lie, eventually backward, on the local unstable curve `W^u_loc(q_out)` (`theorem14_3_3`):
    `IsChatteringArcOutOf.eventually_mem_localUnstableSet`
-   (`SmoothedPolygons/Ch14/SwitchingPointsOnCurve.lean`), the second part of Theorem 16.4.1 time
+   (`SmoothedPolygons/Ch16/ClusterPoint.lean`), the second part of Theorem 16.4.1 time
    reversed (the book cites neither; E88). It uses only the convergence to `q_out`, which is a
    hypothesis of the statement, and no numerical fact. (`theorem16_4_1_reverse` gives the same
-   conclusion but takes the three numerical facts of Layer 5, which it needs only to prove that
-   convergence.)
+   conclusion but takes the three facts of Table 16.1 as hypotheses, which it needs only to prove
+   that convergence.)
 2. **The numerical fact N4** (`UnstableCurveLeavesStarDomain`, a named hypothesis): the forward
    orbit of every point of `W^u_loc(q_out)` with `r > 0` switches cyclically and then reaches the
    boundary of the star domain before its next switch. The curve reaches the boundary near
-   `(r, x̃₂₁) ≈ (0.21, -3.03)`; once `r ≳ 0.065`, one arc suffices (TeX 11975–11991). Two
-   independent numerical models confirm it (`notes/l7st/`, `notes/l7rev/`). Following the user's
-   decision (no computer-assisted certificate), an analytic proof is being researched; the module
-   docstring of `SmoothedPolygons/Ch14/UnstableCurve.lean` describes the route and its
-   difficulties.
+   `(r, x̃₂₁) ≈ (0.21, -3.03)`; once `r ≳ 0.065`, one arc suffices (TeX 11985–11991). Three
+   independent numerical models confirm it (module docstring of
+   `SmoothedPolygons/Ch14/UnstableCurve.lean`). Following the user's decision (no
+   computer-assisted certificate), N4 is being reduced to the single-step statement
+   `ArcRegionInvariant` (work in progress).
 3. **A return chatters.** If the lift met the singular locus again, then at the first return `s`
    the extremal is a chattering arc into it (`exists_isChatteringArcInto`, Lemma 8.3.4). A
    switching point of the arc out of `q_out` that lies on `W^u_loc` is also a switching point of
@@ -76,8 +76,9 @@ Registration name: "Thm 14.4.1 (locally finitely bang-bang extremals)".
    in `IsExtremalOn`; `IsChatteringArcInto.not_reachesStarBoundary`,
    `SmoothedPolygons/Ch14/UnstableCurveSwitches.lean`).
 4. **The second statement** follows by time reversal: it is the first statement applied to the
-   reflected extremal (`theorem14_4_1_in`; `IsChatteringArcInto.reverse`, `switchAng_reverse`,
-   `SmoothedPolygons/Ch14/NoReturnTools.lean`).
+   reflected extremal (`theorem14_4_1_in`; `IsChatteringArcInto.reverse`,
+   `SmoothedPolygons/Ch14/NoReturnTools.lean`, and `switchAng_reverse`,
+   `SmoothedPolygons/Ch16/ClusterCoordinates.lean`).
 -/
 
 @[expose] public section

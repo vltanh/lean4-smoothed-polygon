@@ -8,23 +8,23 @@ import Mathlib.Analysis.Real.Pi.Bounds
 
 At the switch to `1` (the root `τ` of `D = V₂`, `SmoothedPolygons/Ch16/BoxFlow.lean`) the rotated
 image `w = ζ F(z)` has `w₁ = U₀ + i V₀`, `w₂ = U₁ + i V₁`; its angle `ψ' < π/3` exactly when
-`C₁ = U₀ (V₁ - √3 U₁) - V₀ (U₁ + √3 V₁) < 0` (`an2_toIcoMod_lt_pi_div_three`). The inequalities
+`C₁ = U₀ (V₁ - √3 U₁) - V₀ (U₁ + √3 V₁) < 0` (`toIcoMod_lt_pi_div_three`). The inequalities
 `C₁ < 0` needed by `BoxSubclaims` are proved by **exact identities**: a multiple of `C₁` plus a
 multiple of `D` (which vanishes at `τ`) is a sum of terms of fixed sign on the box, a quadratic
 form in `(r₁, τ)` being bounded by the discriminant.
 
-* `an2_C₁_eq_three`: `√3 C₁ + 3 D = -r₁ r₂ (3 cos ψ + 2√3 sin ψ) - √3 r₂ τ sin(θ₂ + π/6)
+* `C₁_eq_three`: `√3 C₁ + 3 D = -r₁ r₂ (3 cos ψ + 2√3 sin ψ) - √3 r₂ τ sin(θ₂ + π/6)
   + τ (-3 r₁² + e r₁ τ - (5/4) τ²)` with `e = -(7√3 cos θ₁ + 9 sin θ₁)/4`; since `e² ≤ 57/4 <
   15`, `C₁ < 0` whenever `3 cos ψ + 2√3 sin ψ ≥ 0` and `sin(θ₂ + π/6) ≥ 0`
-  (`an2_C₁_neg_of_three`): the boxes `𝒟₀₁`, `𝒟₀₂`, `𝒟₁₁`, `𝒟₁₂`.
-* `an2_C₁_eq_four`: `τ √3 C₁ + (5 τ + (9/2) r₁) D = τ² (γ τ² + β r₁ τ + α r₁²)
+  (`C₁_neg_of_three`): the boxes `𝒟₀₁`, `𝒟₀₂`, `𝒟₁₁`, `𝒟₁₂`.
+* `C₁_eq_four`: `τ √3 C₁ + (5 τ + (9/2) r₁) D = τ² (γ τ² + β r₁ τ + α r₁²)
   + r₂ (e τ² + m r₁ τ + n r₁²)`, with `γ = -13/12`, `α = -3 + (9/8)(√3 cos θ₁ - sin θ₁)`,
   `β = -(5√3/4) cos θ₁ - (11/4) sin θ₁ + 3/8`, `e = (√3/2) cos θ₂ - (5/2) sin θ₂`,
   `m = -3 cos ψ - 4√3 sin ψ + (9/4)(√3 cos θ₂ - sin θ₂)`, `n = -(9/2)√3 sin ψ`
-  (`an2_C₁_neg_of_four`): the boxes `𝒟₁₀`, `𝒟₂₀` (`θ₂ ∈ [π - 1.1, π]`), where `ψ` reaches `π`
+  (`C₁_neg_of_four`): the boxes `𝒟₁₀`, `𝒟₂₀` (`θ₂ ∈ [π - 1.1, π]`), where `ψ` reaches `π`
   and no identity of the first kind exists (the coefficient of `r₁ r₂` in `√3 C₁ + λ D` is `3` at
   `ψ = π` for every `λ`).
-* `an2_T_eq`: `τ (2 U₁ - V₁) + 2 Y = -(√3/2 + 1/12) τ³ - r₂ τ ((1 + √3/2) cos θ₂ - (5/2 - √3)
+* `twoU₁_sub_V₁_eq`: `τ (2 U₁ - V₁) + 2 Y = -(√3/2 + 1/12) τ³ - r₂ τ ((1 + √3/2) cos θ₂ - (5/2 - √3)
   sin θ₂) - r₁ τ² ((1 + √3/2) cos θ₁ + (√3 - 3/2) sin θ₁)`: on `𝒟₀₂`, where `Y(τ) ≥ 0` (no switch
   to `ζ²` before `τ`), `2 U₁ < V₁`, so `θ₂' > π/2 - arctan(1/2) > 1.1`.
 * `C₂_eq` (`DOutInvariant.lean`) gives `θ₂' > 2π/3` on `𝒟₀₁`.
@@ -41,7 +41,7 @@ open Set DOutAnalytic
 
 /-! ### Numerical constants -/
 
-theorem an2_cos_eleven_tenths : 9 / 20 < Real.cos 1.1 := by
+theorem lt_cos_eleven_tenths : 9 / 20 < Real.cos 1.1 := by
   have hpi := Real.pi_gt_d4
   have h3 : √3 < 1.7321 := by
     rw [Real.sqrt_lt' (by norm_num)]; norm_num
@@ -59,7 +59,7 @@ theorem an2_cos_eleven_tenths : 9 / 20 < Real.cos 1.1 := by
   norm_num at this hδ1 ⊢
   nlinarith
 
-theorem an2_sin_eleven_tenths : Real.sin 1.1 < 9 / 10 := by
+private theorem sin_eleven_tenths_lt : Real.sin 1.1 < 9 / 10 := by
   have hpi := Real.pi_gt_d4
   have h3 : √3 < 1.7321 := by
     rw [Real.sqrt_lt' (by norm_num)]; norm_num
@@ -79,11 +79,11 @@ theorem an2_sin_eleven_tenths : Real.sin 1.1 < 9 / 10 := by
   nlinarith
 
 /-- `cos x ≥ cos 1.1 > 9/20` and `sin x ≥ -sin 1.1 > -9/10` for `x ∈ [-1.1, 0]`. -/
-theorem an2_trig_of_mem_neg {x : ℝ} (h1 : -1.1 ≤ x) (h2 : x ≤ 0) :
+theorem cos_sin_bounds_of_mem_neg {x : ℝ} (h1 : -1.1 ≤ x) (h2 : x ≤ 0) :
     9 / 20 < Real.cos x ∧ -(9 / 10) < Real.sin x := by
   have hpi := Real.pi_gt_three
-  have hc := an2_cos_eleven_tenths
-  have hs := an2_sin_eleven_tenths
+  have hc := lt_cos_eleven_tenths
+  have hs := sin_eleven_tenths_lt
   constructor
   · rw [← Real.cos_neg x]
     have : Real.cos 1.1 ≤ Real.cos (-x) :=
@@ -95,7 +95,7 @@ theorem an2_trig_of_mem_neg {x : ℝ} (h1 : -1.1 ≤ x) (h2 : x ≤ 0) :
     linarith
 
 /-- `cos(θ + π/6) ≤ -3/4` on `θ ∈ [π - 1.1, π]`, as `√3 cos θ - sin θ ≤ -3/2`. -/
-theorem an2_cB_le {θ : ℝ} (h1 : Real.pi - 1.1 ≤ θ) (h2 : θ ≤ Real.pi) :
+theorem sqrt_three_mul_cos_sub_sin_le {θ : ℝ} (h1 : Real.pi - 1.1 ≤ θ) (h2 : θ ≤ Real.pi) :
     √3 * Real.cos θ - Real.sin θ ≤ -(3 / 2) := by
   have hpi := Real.pi_gt_d4
   have hpi' := Real.pi_lt_d4
@@ -120,7 +120,7 @@ theorem an2_cB_le {θ : ℝ} (h1 : Real.pi - 1.1 ≤ θ) (h2 : θ ≤ Real.pi) :
 /-! ### `C₁ < 0` by the multiplier `3` -/
 
 /-- **The identity for `C₁` with the multiplier `3`.** -/
-theorem an2_C₁_eq_three (p : Fin 3 → ℝ) (t : ℝ) :
+private theorem C₁_eq_three (p : Fin 3 → ℝ) (t : ℝ) :
     √3 * (U₀ p t * (V₁ p t - √3 * U₁ p t) - V₀ p t * (U₁ p t + √3 * V₁ p t)) + 3 * V₂ p t =
       -((1 - p 0) * p 0 * (3 * Real.cos (p 1) + 2 * √3 * Real.sin (p 1))) -
         √3 * p 0 * t * (Real.cos (p 2) / 2 + √3 * Real.sin (p 2) / 2) +
@@ -147,13 +147,13 @@ theorem an2_C₁_eq_three (p : Fin 3 → ℝ) (t : ℝ) :
 
 /-- **`C₁ < 0` at a positive root of `D`** when `3 cos ψ + 2√3 sin ψ ≥ 0` and
 `cos θ₂ + √3 sin θ₂ ≥ 0` (`r₂ ∈ [0, 1]`). -/
-theorem an2_C₁_neg_of_three {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1)
+theorem C₁_neg_of_three {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1)
     (hψ : 0 ≤ 3 * Real.cos (p 1) + 2 * √3 * Real.sin (p 1))
     (hθ : 0 ≤ Real.cos (p 2) + √3 * Real.sin (p 2)) {τ : ℝ} (hτ : 0 < τ) (h : V₂ p τ = 0) :
     U₀ p τ * (V₁ p τ - √3 * U₁ p τ) - V₀ p τ * (U₁ p τ + √3 * V₁ p τ) < 0 := by
   have hq : 0 < √3 := Real.sqrt_pos.2 (by norm_num)
   have hq2 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
-  have e := an2_C₁_eq_three p τ
+  have e := C₁_eq_three p τ
   rw [h, mul_zero, add_zero] at e
   have hr1 : 0 ≤ 1 - p 0 := by linarith
   set e1 := -(7 * √3 * Real.cos (p 2 - p 1) + 9 * Real.sin (p 2 - p 1)) / 4 with he1
@@ -179,7 +179,7 @@ theorem an2_C₁_neg_of_three {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 �
 /-! ### `C₁ < 0` by a multiplier of weight one -/
 
 /-- **The identity for `C₁` with the multiplier `5 τ + (9/2) r₁`.** -/
-theorem an2_C₁_eq_four (p : Fin 3 → ℝ) (t : ℝ) :
+private theorem C₁_eq_four (p : Fin 3 → ℝ) (t : ℝ) :
     t * √3 * (U₀ p t * (V₁ p t - √3 * U₁ p t) - V₀ p t * (U₁ p t + √3 * V₁ p t)) +
         (5 * t + 9 / 2 * (1 - p 0)) * V₂ p t =
       t ^ 2 * (-(13 / 12) * t ^ 2 +
@@ -208,10 +208,10 @@ theorem an2_C₁_eq_four (p : Fin 3 → ℝ) (t : ℝ) :
     3*q^2*s1*t^3/8 - q^2*t^4/8 - r^2*s1^2*t^2 + r^2*s1*s2*t + 2*r*s1^2*t^2 - r*s1*s2*t +
     r*s1*t^3/2 - s1^2*t^2 - s1*t^3/2 - t^4/2) * hq + (-3*r^2*t^2 + 6*r*t^2 - 3*t^2) * hs
 
-/-- The quadratic form `γ τ² + β r₁ τ + α r₁²` of `an2_C₁_eq_four` is negative for `τ > 0` when
+/-- The quadratic form `γ τ² + β r₁ τ + α r₁²` of `C₁_eq_four` is negative for `τ > 0` when
 `θ₁ ∈ [-1.1, 2π/3]`: for `sin θ₁ ≥ 0` all its coefficients are `≤ 0`; for `sin θ₁ < 0`
 (`cos θ₁ > 9/20`, `sin θ₁ > -9/10`) its discriminant is negative. -/
-theorem an2_quad_neg {c s r t : ℝ} (hcs : c ^ 2 + s ^ 2 = 1) (hc : -(1 / 2) ≤ c)
+private theorem quad_neg {c s r t : ℝ} (hcs : c ^ 2 + s ^ 2 = 1) (hc : -(1 / 2) ≤ c)
     (hneg : s < 0 → 9 / 20 < c ∧ -(9 / 10) < s) (hr : 0 ≤ r) (ht : 0 < t) :
     -(13 / 12) * t ^ 2 + (-(5 * √3 / 4) * c - 11 / 4 * s + 3 / 8) * r * t +
       (-3 + 9 / 8 * (√3 * c - s)) * r ^ 2 < 0 := by
@@ -256,10 +256,10 @@ theorem an2_quad_neg {c s r t : ℝ} (hcs : c ^ 2 + s ^ 2 = 1) (hc : -(1 / 2) �
     nlinarith
 
 /-- **`C₁ < 0` at a positive root of `D` on `θ₂ ∈ [π - 1.1, π]`, `ψ ∈ [π/3, π]`** (the boxes
-`𝒟₁₀`, `𝒟₂₀`), from `an2_C₁_eq_four`: `e, m, n ≤ 0` (`sin θ₂ ≥ 0`,
-`cos(θ₂ + π/6) ≤ -3/4`, `sin ψ ≥ 0`) and the quadratic form of `an2_quad_neg`
+`𝒟₁₀`, `𝒟₂₀`), from `C₁_eq_four`: `e, m, n ≤ 0` (`sin θ₂ ≥ 0`,
+`cos(θ₂ + π/6) ≤ -3/4`, `sin ψ ≥ 0`) and the quadratic form of `quad_neg`
 (`θ₁ ∈ [-1.1, 2π/3]`). -/
-theorem an2_C₁_neg_of_four {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1)
+theorem C₁_neg_of_four {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1)
     (hs2 : 0 ≤ Real.sin (p 2))
     (hcB : √3 * Real.cos (p 2) - Real.sin (p 2) ≤ -(3 / 2)) (hsψ : 0 ≤ Real.sin (p 1))
     (hc1 : -(1 / 2) ≤ Real.cos (p 2 - p 1))
@@ -268,10 +268,10 @@ theorem an2_C₁_neg_of_four {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤
     {τ : ℝ} (hτ : 0 < τ) (h : V₂ p τ = 0) :
     U₀ p τ * (V₁ p τ - √3 * U₁ p τ) - V₀ p τ * (U₁ p τ + √3 * V₁ p τ) < 0 := by
   have hq : 0 < √3 := Real.sqrt_pos.2 (by norm_num)
-  have e := an2_C₁_eq_four p τ
+  have e := C₁_eq_four p τ
   rw [h, mul_zero, add_zero] at e
   have hr1 : 0 ≤ 1 - p 0 := by linarith
-  have hQ := an2_quad_neg (Real.cos_sq_add_sin_sq (p 2 - p 1)) hc1 hneg hr1 hτ
+  have hQ := quad_neg (Real.cos_sq_add_sin_sq (p 2 - p 1)) hc1 hneg hr1 hτ
   have hcψ := Real.neg_one_le_cos (p 1)
   have he : √3 / 2 * Real.cos (p 2) - 5 / 2 * Real.sin (p 2) ≤ 0 := by nlinarith
   have hm : -3 * Real.cos (p 1) - 4 * √3 * Real.sin (p 1) +
@@ -291,23 +291,23 @@ theorem an2_C₁_neg_of_four {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤
 
 /-! ### `θ₂' > 1.1` on `𝒟₀₂` -/
 
-theorem an2_T_eq (p : Fin 3 → ℝ) (t : ℝ) :
-    t * (2 * U₁ p t - V₁ p t) + 2 * an2_Y p t =
+private theorem twoU₁_sub_V₁_eq (p : Fin 3 → ℝ) (t : ℝ) :
+    t * (2 * U₁ p t - V₁ p t) + 2 * imZ₃ p t =
       -(√3 / 2 + 1 / 12) * t ^ 3 -
         p 0 * t * ((1 + √3 / 2) * Real.cos (p 2) - (5 / 2 - √3) * Real.sin (p 2)) -
         (1 - p 0) * t ^ 2 * ((1 + √3 / 2) * Real.cos (p 2 - p 1) +
           (√3 - 3 / 2) * Real.sin (p 2 - p 1)) := by
-  simp only [U₁, V₁, an2_Y, cx₁, cy₁, cx₂, cy₂, cos_add_two_thirds_pi, sin_add_two_thirds_pi]
+  simp only [U₁, V₁, imZ₃, cx₁, cy₁, cx₂, cy₂, cos_add_two_thirds_pi, sin_add_two_thirds_pi]
   ring
 
-/-- **`2 U₁ < V₁` at the switch to `1`** when `Y(τ) ≥ 0` and the coefficients of `an2_T_eq` are
-`≥ 0`. -/
-theorem an2_T_neg {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1)
+/-- **`2 U₁ < V₁` at the switch to `1`** when `Y(τ) ≥ 0` and the coefficients of
+`twoU₁_sub_V₁_eq` are `≥ 0`. -/
+theorem twoU₁_sub_V₁_neg {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1)
     (h2 : 0 ≤ (1 + √3 / 2) * Real.cos (p 2) - (5 / 2 - √3) * Real.sin (p 2))
     (h1 : 0 ≤ (1 + √3 / 2) * Real.cos (p 2 - p 1) + (√3 - 3 / 2) * Real.sin (p 2 - p 1))
-    {τ : ℝ} (hτ : 0 < τ) (hY : 0 ≤ an2_Y p τ) : 2 * U₁ p τ - V₁ p τ < 0 := by
+    {τ : ℝ} (hτ : 0 < τ) (hY : 0 ≤ imZ₃ p τ) : 2 * U₁ p τ - V₁ p τ < 0 := by
   have hq : 0 < √3 := Real.sqrt_pos.2 (by norm_num)
-  have e := an2_T_eq p τ
+  have e := twoU₁_sub_V₁_eq p τ
   have hr1 : 0 ≤ 1 - p 0 := by linarith
   have t1 : 0 ≤ p 0 * τ * ((1 + √3 / 2) * Real.cos (p 2) - (5 / 2 - √3) * Real.sin (p 2)) := by
     positivity
@@ -318,17 +318,17 @@ theorem an2_T_neg {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1)
   exact neg_of_mul_neg_right this hτ.le
 
 /-- `θ₂' = arg w ≥ 1.1` when `Im w > 0` and `2 Re w < Im w` (`cot 1.1 > 1/2`). -/
-theorem an2_eleven_tenths_le_arg {w : ℂ} (him : 0 < w.im) (h : 2 * w.re - w.im < 0) :
+theorem eleven_tenths_le_arg {w : ℂ} (him : 0 < w.im) (h : 2 * w.re - w.im < 0) :
     1.1 ≤ Complex.arg w := by
-  have hc := an2_cos_eleven_tenths
-  have hs := an2_sin_eleven_tenths
+  have hc := lt_cos_eleven_tenths
+  have hs := sin_eleven_tenths_lt
   have hs0 : 0 < Real.sin 1.1 :=
     Real.sin_pos_of_pos_of_lt_pi (by norm_num) (by linarith [Real.pi_gt_three])
-  refine an2_le_arg him (by linarith [Real.pi_gt_three]) ?_
+  refine le_arg_of_im_pos him (by linarith [Real.pi_gt_three]) ?_
   nlinarith
 
 /-- `C₂ = V₁ + √3 U₁ < 0` for `t > 0` when `sin θ₁, sin θ₂ ≥ 0` (`C₂_eq`). -/
-theorem an2_C₂_neg {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1)
+theorem C₂_neg_of_sin_nonneg {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1)
     (hs1 : 0 ≤ Real.sin (p 2 - p 1)) (hs2 : 0 ≤ Real.sin (p 2)) {t : ℝ} (ht : 0 < t) :
     V₁ p t + √3 * U₁ p t < 0 := by
   rw [C₂_eq]

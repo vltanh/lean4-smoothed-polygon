@@ -4,8 +4,8 @@ A Python reference implementation of the Fuller-Poincaré map of Hales-Vajjha, *
 Smoothed Polygons*, exactly as the Lean definitions say, and rigorous interval checks of the
 numerical facts that the book takes from Mathematica plots.
 
-**It is a reference.** The Lean proofs do not depend on it: nothing here is imported, generated
-into Lean, or trusted by Lean. It reproduces the book's numbers, gives the analytic proofs their
+**It is a reference.** The Lean proofs do not depend on it: nothing here is imported or trusted by
+Lean, and only `generators/` wrote Lean code (an interval chain each of whose steps Lean checks). It reproduces the book's numbers, gives the analytic proofs their
 margins and regions, and is an independent check of the Lean statements.
 
 ## Layout
@@ -22,6 +22,7 @@ margins and regions, and is an independent check of the Lean statements.
 | `driver.py` | adaptive subdivision, in parallel |
 | `checks/` | `dout.py`, `subclaims.py`, `cell_two.py`, `remark.py`, `unstable_curve.py` (placeholder), `common.py` |
 | `report.py`, `__main__.py` | the command line |
+| `generators/` | `dout_contraction_bounds.py` (with `contraction_intervals.py`) regenerates the interval chains `lip_*` of `SmoothedPolygons/Ch16/DOutContractionBounds.lean` |
 
 ## Running
 

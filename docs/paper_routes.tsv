@@ -258,7 +258,14 @@ rem:qin-juncture	remark	0
 # proposition", whose summary cites Lemma 13.2.4; read off Figures 15.2-15.3 (REPORT.md, E72). Stated as the
 # named proposition Proposition15_3_2, not proved. Label of this formalization.
 prop:partition	proposition	1	lem:switch-reversal
-thm:basin	theorem	1	
+# Table 16.1 (line 12556, label tab:diag), "Upper triangular structure of the Fuller-Poincare map on
+# the two big cells": its rows are read off Mathematica plots (Figures 16.1-16.4), with no proof.
+# Stated as the named facts DOutContracts, CellTwoEntersDOut and BoxSubclaims, proved analytically
+# (the user's decision).
+tab:diag	table	0	
+# The proof of Theorem 16.1.1 cites Table 16.1 ("Let D, D* run over the sets in
+# Table~\ref{tab:diag}", lines 12542 and 12550), which the extraction drops (not a statement).
+thm:basin	theorem	1	tab:diag
 thm:outward-fuller	theorem	1	
 thm:mahler	theorem	1	lem:constant-not-singular,prop:edge-extremal,thm:finite-bang-bang,thm:no-chatter,thm:no-return,thm:no-singular-arcs
 # The part of Theorem 16.3.1 that does not use Theorems 16.4.1 and 14.4.1 (lines 12811-12815): a global minimizer is

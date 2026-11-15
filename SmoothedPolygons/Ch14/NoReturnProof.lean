@@ -2,7 +2,8 @@ module
 
 public import SmoothedPolygons.Ch14.NoReturn
 public import SmoothedPolygons.Ch14.UnstableCurveSwitches
-public import SmoothedPolygons.Ch14.SwitchingPointsOnCurve
+public import SmoothedPolygons.Ch14.NoReturnTools
+public import SmoothedPolygons.Ch16.ClusterPoint
 
 /-!
 # Chapter 14: Theorem 14.4.1 (no return) from the numerical fact N4
@@ -13,7 +14,7 @@ proved from the numerical fact N4 (`UnstableCurveLeavesStarDomain`,
 `SmoothedPolygons/Ch14/UnstableCurve.lean`: the unstable curve `W^u(q_out)` reaches the boundary of
 the star domain, Figure 14.2): `theorem14_4_1`.
 
-## The book's proof (TeX 12003–12013), step by step
+## The book's proof (TeX 12004–12013), step by step
 
 "All switches must be on the unstable curve, which meets that exceptional divisor at a single point
 `(0, x_out)`. Any trajectory that returns to the singular locus must chatter (that is, must use
@@ -69,8 +70,11 @@ it is equivalent (`theorem14_4_1_iff_unrestricted`, `SmoothedPolygons/Ch14/NoRet
 `τ N` in `σ` from the two enumerations: `τ N ∈ (a', s)` is a switching time, so `τ N = σ n₀` by
 `IsSwitchingSeqInto`; the bookkeeping of intervals). `theorem14_4_1_in`: the reflection, an instance
 of `theorem14_4_1_out`. `theorem14_4_1`: the two together. The helpers are in
-`SmoothedPolygons/Ch14/NoReturnTools.lean`, `UnstableCurveSwitches.lean` and
-`SwitchingPointsOnCurve.lean`.
+`SmoothedPolygons/Ch14/NoReturnTools.lean` (`IsChatteringArcInto.reverse`, the first meeting time),
+`UnstableCurveSwitches.lean`, `SmoothedPolygons/Ch16/ClusterCoordinates.lean` (the time reversal:
+`IsExtremalOn.reverse`, `IsFiniteBangBang.reverseControl`, `switchAng_reverse`,
+`TendstoModVT.tau`, `reverse_mem_singularLocus_iff`) and `SmoothedPolygons/Ch16/ClusterPoint.lean`
+(`IsChatteringArcOutOf.eventually_mem_localUnstableSet`).
 -/
 
 @[expose] public section

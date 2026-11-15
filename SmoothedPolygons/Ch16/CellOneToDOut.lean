@@ -18,8 +18,10 @@ region:
 
 * **The switch** (`regionR0_root`): `Im z₃(t) > 0` along `ζ` (`sin θ₁ > 0`, `sin θ₂ ≥ 0`), so
   `ζ²` never beats `ζ`; the switching function `D = V₂` of `ζ → 1` has exactly one positive root
-  `τ`: for `θ₂ ≥ π/3`, `y₂ ≤ 0 ≤ κ` and `D/t²` is increasing (`V₂_mul_sq_lt`); for `θ₂ < π/3`,
-  `y₁, y₂ ≥ 0` and `D` itself is increasing. In both cases `V₁(τ) = D'(τ) > 0`.
+  `τ` (`exists_root_of_signs`): for `θ₂ ≥ π/3`, `y₂ ≤ 0 ≤ κ` and `D/t²` is increasing
+  (`V₂_mul_sq_lt`); for `θ₂ < π/3`, `y₁, y₂ ≥ 0` and `D` itself is increasing. In both cases
+  `V₁(τ) = D'(τ) > 0`. The image is then that of `image_spec_of_root`
+  (`SmoothedPolygons/Ch16/DOutFlow.lean`).
 * **`θ₂' > 2π/3`**: `C₂ = V₁ + √3 U₁ = -2 Im z₂(τ) < 0` (`C₂_eq`).
 * **`ψ' < π/3`**: `C₁ < 0` at the root, by one of two identities: for `θ₁ ≥ π/2`, the identity
   `C₁_eq` of `DOutInvariant.lean` (`√3 C₁ + 10 D` is a sum of terms `≤ 0`: there `cos ψ ≥ 0`,
@@ -73,24 +75,6 @@ theorem regionR0_flow_im {p : Fin 3 → ℝ} (hp : p ∈ regionR0) :
   have : 0 < t ^ 3 / 12 := by positivity
   linarith
 
-/-- `D(7) > 0` for `r₂ ∈ [0, 1]` (`|y_j| ≤ r_j`, `κ ≤ 1/4`). -/
-theorem V₂_seven_pos' {p : Fin 3 → ℝ} (h0 : 0 ≤ p 0) (h0' : p 0 ≤ 1) : 0 < V₂ p 7 := by
-  have hr1 : 0 ≤ 1 - p 0 := by linarith
-  have a1 : -(1 - p 0) ≤ cy₁ p := by
-    unfold cy₁; nlinarith [Real.neg_one_le_sin (p 2 - p 1 + 2 / 3 * Real.pi)]
-  have a2 : -p 0 ≤ cy₂ p := by
-    unfold cy₂; nlinarith [Real.neg_one_le_sin (p 2 + 2 / 3 * Real.pi)]
-  have a3 : cκ p ≤ 1 / 4 := by
-    unfold cκ
-    have := Real.sin_le_one (p 1)
-    have : 0 ≤ (1 - p 0) * p 0 := mul_nonneg hr1 h0
-    nlinarith [sq_nonneg (p 0 - 1 / 2)]
-  have h3 : √3 < 2 := by
-    rw [Real.sqrt_lt' (by norm_num)]; norm_num
-  have h3' : 0 ≤ √3 := Real.sqrt_nonneg 3
-  unfold V₂
-  nlinarith [mul_le_mul_of_nonneg_left a3 h3']
-
 /-- **The switch on `R₀`**: `D` has exactly one positive root `τ`, `D < 0` before it, `D > 0` after
 it, and `V₁(τ) > 0`. -/
 theorem regionR0_root {p : Fin 3 → ℝ} (hp : p ∈ regionR0) :
@@ -99,24 +83,18 @@ theorem regionR0_root {p : Fin 3 → ℝ} (hp : p ∈ regionR0) :
   obtain ⟨hs1, hs2, hk, -⟩ := regionR0_facts hp
   obtain ⟨⟨h0, h0'⟩, ⟨h1, h1'⟩, h2, h21⟩ := hp
   have hpi := Real.pi_gt_three
-  have h3 : 0 < √3 := Real.sqrt_pos.2 (by norm_num)
-  have hV0 : V₂ p 0 < 0 := by
-    have : V₂ p 0 = -(√3 * cκ p) := by unfold V₂; ring
-    rw [this]; nlinarith [mul_pos h3 hk]
-  have h7 := V₂_seven_pos' h0.le h0'.le
-  have hcont : ContinuousOn (V₂ p) (Icc 0 7) := by unfold V₂; fun_prop
-  obtain ⟨τ, hτ, hτ0⟩ := intermediate_value_Ioo (by norm_num : (0 : ℝ) ≤ 7) hcont ⟨hV0, h7⟩
-  refine ⟨τ, hτ.1, hτ0, ?_⟩
+  refine exists_root_of_signs h0.le h0'.le ?_
   rcases le_or_gt (Real.pi / 3) (p 2) with hθ | hθ
   · -- `y₂ ≤ 0`: `D(t)/t²` is increasing
+    left
     have hy : cy₂ p ≤ 0 := by
       have : 0 ≤ Real.sin (p 2 + 2 / 3 * Real.pi - Real.pi) :=
         Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
       rw [Real.sin_sub_pi] at this
       unfold cy₂; nlinarith
-    exact ⟨fun t ht htτ ↦ V₂_neg_of_nonpos hy hk.le ht htτ hτ0.le,
-      fun t htτ ↦ V₂_pos_of_nonneg hy hk.le hτ.1 htτ hτ0.ge, V₁_pos_of_root hy hk.le hτ.1 hτ0⟩
+    exact ⟨hy, hk.le, Or.inl hk⟩
   · -- `θ₁ < θ₂ < π/3`: `y₁, y₂ ≥ 0`, and `D` is increasing
+    right
     have hy2 : 0 ≤ cy₂ p := by
       unfold cy₂
       exact mul_nonneg h0.le (Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith))
@@ -124,24 +102,7 @@ theorem regionR0_root {p : Fin 3 → ℝ} (hp : p ∈ regionR0) :
       have : 0 < 1 - p 0 := by linarith
       unfold cy₁
       exact mul_nonneg this.le (Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith))
-    have hmono : ∀ s t, 0 ≤ s → s < t → V₂ p s < V₂ p t := by
-      intro s t hs hst
-      have e : V₂ p t - V₂ p s =
-          (t - s) * (cy₂ p + cy₁ p * (t + s) / 2 + (t ^ 2 + t * s + s ^ 2) / 12) := by
-        unfold V₂; ring
-      have : 0 < (t - s) * (cy₂ p + cy₁ p * (t + s) / 2 + (t ^ 2 + t * s + s ^ 2) / 12) := by
-        apply mul_pos (by linarith)
-        have : 0 ≤ cy₁ p * (t + s) / 2 := div_nonneg (mul_nonneg hy1 (by linarith)) (by norm_num)
-        have : 0 < (t ^ 2 + t * s + s ^ 2) / 12 := by nlinarith
-        linarith
-      linarith
-    refine ⟨fun t ht htτ ↦ ?_, fun t htτ ↦ ?_, ?_⟩
-    · have := hmono t τ ht.le htτ; rwa [hτ0] at this
-    · have := hmono τ t hτ.1.le htτ; rwa [hτ0] at this
-    · unfold V₁
-      have : 0 ≤ cy₁ p * τ := mul_nonneg hy1 hτ.1.le
-      have : 0 < τ ^ 2 / 4 := by have := hτ.1; positivity
-      linarith
+    exact ⟨hy2, hy1, hk⟩
 
 /-- **The second identity for `C₁`**: `τ √3 C₁ + (4τ + 2√3 r₁) D` is a sum of terms of fixed sign
 on `R₀ ∩ {θ₁ ≤ π/2}`. -/
@@ -247,59 +208,6 @@ theorem C₁_neg_R0 {p : Fin 3 → ℝ} (hp : p ∈ regionR0) {τ : ℝ} (hτ : 
         0 < f → X < 0 := by intros; linarith
     exact neg_of_mul_neg_right (key _ _ _ _ _ _ e t1 t2 t3 t4 t5) hq.le
 
-/-- **The image of a point at a simple switch `ζ → 1`**, for any point of the closed cells at
-which `ζ²` never beats `ζ` and `D` has a unique positive root `τ` (the proof of `image_spec`,
-`SmoothedPolygons/Ch16/DOutFlow.lean`, without the box): the class of the image is the class of
-the cell coordinates of `w = ζ F(z)`, with `w₁ = U₀ + i V₀`, `w₂ = U₁ + i V₁` at `τ`. -/
-theorem image_spec_gen {p : Fin 3 → ℝ} (hdom : p ∈ cellDomain) (hk : 0 ≤ cκ p)
-    (hY : ∀ t, 0 < t → 0 < (flow t (cellPoint p) ζ 2).im) {τ : ℝ} (hτ0 : 0 < τ)
-    (hneg : ∀ t, 0 < t → t < τ → V₂ p t < 0) (hpos : ∀ t, τ < t → 0 < V₂ p t)
-    (h0 : V₂ p τ = 0) :
-    ∃ w : Fin 3 → ℂ, poincareAngZero (cellClass p) = cellClass (cellCoords w) ∧
-      (w 0).re = U₀ p τ ∧ (w 0).im = V₀ p τ ∧ (w 1).re = U₁ p τ ∧ (w 1).im = V₁ p τ ∧
-      cellCoords w 0 ∈ Ioo 0 1 ∧
-      toIcoMod Real.two_pi_pos 0 (Complex.arg (w 1) - Complex.arg (w 0)) ∈ Ioo 0 Real.pi ∧
-      cellCoords w 1 = toIcoMod Real.two_pi_pos 0 (Complex.arg (w 1) - Complex.arg (w 0)) ∧
-      cellCoords w 2 = Complex.arg (w 1) := by
-  have hz := cellPoint_mem_sectionZero hdom
-  obtain ⟨hfc, hτe⟩ := firstControl_firstSwitchTime hz.1 hk hY hτ0 hneg hpos h0
-  have hw := poincare_mem_sectionZero hz
-  have hpw : poincare (cellPoint p) = flow τ (cellPoint p) ζ := by rw [poincare, hfc, hτe]
-  obtain ⟨e0r, e0i, e1r, e1i, e2r, e2i⟩ := zeta_flow p τ
-  have hU₂ : U₂ p τ < 0 := by
-    have e := flow_two_im_eq (p := p) τ
-    rw [h0] at e
-    have := hY τ hτ0
-    have h3 : 0 < √3 := Real.sqrt_pos.2 (by norm_num)
-    nlinarith
-  set w := ζ • poincare (cellPoint p) with hw_def
-  have hζw : w ∈ sectionZero := by
-    refine ⟨fun h ↦ hw.1 ?_, ?_, ?_⟩
-    · have := congrArg (fun z ↦ ζ⁻¹ • z) h
-      simp only [hw_def, smul_zero, inv_smul_smul₀ (show ζ ≠ 0 from fun h ↦ by
-        simpa [h] using norm_ζ)] at this
-      exact this
-    · exact mul_mem_walls ζ_mem_VT hw.2.1
-    · have := (hamMax_smul_scale_and_tau ζ_mem_VT one_pos (poincare (cellPoint p))).1
-      rw [scale_one, one_pow, one_mul] at this
-      rw [hw_def, this, hw.2.2]
-  have hw0 : w 0 = ζ * flow τ (cellPoint p) ζ 0 := by
-    rw [hw_def, Pi.smul_apply, smul_eq_mul, hpw]
-  have hw1 : w 1 = ζ * flow τ (cellPoint p) ζ 1 := by
-    rw [hw_def, Pi.smul_apply, smul_eq_mul, hpw]
-  have hw2 : w 2 = ζ * flow τ (cellPoint p) ζ 2 := by
-    rw [hw_def, Pi.smul_apply, smul_eq_mul, hpw]
-  have him : (w 2).im = 0 := by rw [hw2, e2i, h0]
-  have hre : (w 2).re < 0 := by rw [hw2, e2r]; exact hU₂
-  obtain ⟨⟨c0, c1, -⟩, hcl⟩ := cellClass_cellCoords hζw him hre
-  have hcls := classOf_smul_scale ζ_mem_VT one_pos hw
-  rw [scale_one] at hcls
-  have himage : poincareAngZero (cellClass p) = cellClass (cellCoords w) := by
-    change poincareAngZero (classOf (cellPoint p)) = _
-    rw [poincareAngZero_classOf hz, hcl, hw_def, hcls]
-  exact ⟨w, himage, by rw [hw0, e0r], by rw [hw0, e0i], by rw [hw1, e1r], by rw [hw1, e1i], c0,
-    c1, rfl, rfl⟩
-
 /-- **`F(R₀) ⊆ 𝒟₀₀`**: the image of a point of `R₀` has `ψ' < π/3` and `θ₂' > 2π/3 > π - 1.1`.
 
 Departure from the paper: the book obtains the last step of the orbits of the second big cell from
@@ -312,8 +220,8 @@ theorem poincareAngZero_mem_of_regionR0 {p : Fin 3 → ℝ} (hp : p ∈ regionR0
     poincareAngZero (cellClass p) ∈ boxSet 0 0 := by
   obtain ⟨hs1, hs2, hk, hdom⟩ := regionR0_facts hp
   obtain ⟨τ, hτ0, h0, hneg, hpos, hV₁⟩ := regionR0_root hp
-  obtain ⟨w, himage, e0r, e0i, e1r, e1i, c0, c1, h1, h2⟩ :=
-    image_spec_gen hdom hk.le (regionR0_flow_im hp) hτ0 hneg hpos h0
+  obtain ⟨w, -, himage, e0r, e0i, e1r, e1i, c0, c1, h1, h2⟩ :=
+    image_spec_of_root hdom hk.le (regionR0_flow_im hp) hτ0 hneg hpos h0
   have hC2 : V₁ p τ + √3 * U₁ p τ < 0 := by
     obtain ⟨⟨h0r, h0r'⟩, -, -, -⟩ := hp
     rw [C₂_eq]
@@ -328,7 +236,7 @@ theorem poincareAngZero_mem_of_regionR0 {p : Fin 3 → ℝ} (hp : p ∈ regionR0
   refine ⟨⟨c0.1.le, c0.2.le⟩, ⟨by rw [h1]; exact c1.1.le, ?_⟩, ⟨?_, by
     rw [h2]; exact Complex.arg_le_pi _⟩⟩
   · -- `ψ' < π/3`
-    have := toIcoMod_lt_pi_div_three (w₀ := w 0) (w₁ := w 1) c1
+    have := toIcoMod_lt_pi_div_three (w₀ := w 0) (w₁ := w 1) (Ioo_subset_Icc_self c1)
       (by rw [e0r, e0i, e1r, e1i]; exact hC1)
     rw [h1]
     exact this.le

@@ -25,7 +25,7 @@ Let `p ∈ cellTwoDomain` (first control `ζ²`). Along `ζ²` the switching fun
   the first sign change `T_A < T` of `A`, where `A' ≥ 0`; the image `w = ζ² z(T_A)` is on `𝒲₀`
   with `Im w₂ = -A'(T_A) ≤ 0` and `Re w₂ < 0` (`E_eq`), so `θ₂' ∈ (-π, -π/2)` or `θ₂' = π`. In the
   second case the image lies in `R₀` (two steps); in the first it lies in the second cell with
-  `θ₂' ≤ -π/2`, where `A < 0` on `(0, T)` (`acub_neg_of_le`), so the next step is the first case.
+  `θ₂' ≤ -π/2`, where `A ≤ 0` on `(0, T)` (`acub_neg_of_le`), so the next step is the first case.
   Three steps.
 
 ## The inequalities
@@ -33,7 +33,7 @@ Let `p ∈ cellTwoDomain` (first control `ζ²`). Along `ζ²` the switching fun
 All are exact: identities of polynomials in `t`, `r₂` and the sines and cosines of the cell angles
 (certified by `linear_combination` with `√3² = 3`), and signs.
 
-* `acub_neg_of_le` (`θ₂ ≤ -π/2 ⇒ A < 0` on `(0, T)`): `-y₂ A(t) = -√3 κ (t²/4 - y₂)
+* `acub_neg_of_le` (`θ₂ ≤ -π/2 ⇒ A ≤ 0` on `(0, T)`): `-y₂ A(t) = -√3 κ (t²/4 - y₂)
   - (√3/2) x₂ t (q(t) - t²/12) - y₂ (t/2)(q(t) - t²/4)` (`L2_identity`), every term `< 0` or `≤ 0`
   when `x₂ ≤ 0 > y₂` and `q(t) ≤ 0`.
 * `S3_no_tie` (`A(T) < 0` when `A ≤ 0` on `(0, T)`): at a common root `T` of `q` and `A` (then
@@ -50,7 +50,7 @@ All are exact: identities of polynomials in `t`, `r₂` and the sines and cosine
 
 Departure from the paper: the book takes the rows `𝒟₂`, `𝒟₃` of Table 16.1 from the involution
 (`F₂(𝒟₂) = τ(𝒟₂) ⊂ 𝒟₃` with `θ₂ ∈ [-π/3, 0]` on `𝒟₂`, `F₃(𝒟₃) = τ(𝒟₄)` in the first cell, TeX
-12616–12638) and the containment `F²𝒟₃ ⊂ 𝒟₀₀` from a Mathematica plot (Figure 16.2, TeX
+12614–12638) and the containment `F²𝒟₃ ⊂ 𝒟₀₀` from a Mathematica plot (Figure 16.2, TeX
 12640–12665); the formalization proves the three-step statement analytically, by the sign
 structure of the switching functions above and the one-step map `R₀ → 𝒟₀₀`, without the partition
 `𝒟₂ | 𝒟₃` along `∂_{A,ζ²}` and without the involution.
@@ -62,7 +62,7 @@ namespace SmoothedPolygons.TriFuller.CellTwoAnalytic
 
 open Set Filter Topology
 open Complex (I)
-open DOutAnalytic (cκ)
+open DOutAnalytic (cκ arg_mem_Ioo_of_im_pos)
 
 /-! ### Exact identities -/
 
@@ -130,7 +130,7 @@ theorem E_eq (p : Fin 3 → ℝ) (t : ℝ) :
 
 /-! ### The two cases on the second cell -/
 
-/-- **For `θ₂ ≤ -π/2`, `A < 0` on `(0, T)`**: `x₂ ≤ 0`, `y₂ < 0` and `L2_identity`. -/
+/-- **For `θ₂ ≤ -π/2`, `A ≤ 0` on `(0, T)`**: `x₂ ≤ 0`, `y₂ < 0` and `L2_identity`. -/
 theorem acub_neg_of_le {p : Fin 3 → ℝ} (hp : p ∈ cellTwoDomain) (h2 : p 2 ≤ -(Real.pi / 2)) :
     ∀ t ∈ Ioo 0 (rootT p), Acub p t ≤ 0 := by
   obtain ⟨-, hk, -, -⟩ := cellTwo_facts hp
@@ -192,13 +192,6 @@ theorem S3_no_tie {p : Fin 3 → ℝ} (hp : p ∈ cellTwoDomain) {T : ℝ} (hT :
   have h4 : Q₀ p T * -(√3 * cκ p) < 0 :=
     mul_neg_of_pos_of_neg hQ0 (by nlinarith [mul_pos hs3 hk])
   linarith
-
-/-- The argument of a point of the open upper half plane lies in `(0, π)`. -/
-theorem arg_mem_Ioo_of_im_pos {z : ℂ} (h : 0 < z.im) :
-    0 < Complex.arg z ∧ Complex.arg z < Real.pi :=
-  ⟨lt_of_le_of_ne (Complex.arg_nonneg_iff.2 h.le) fun e ↦ by
-      have := (Complex.arg_eq_zero_iff.1 e.symm).2; linarith,
-    Complex.arg_lt_pi_iff.2 (Or.inr h.ne')⟩
 
 /-- **The case `A ≤ 0` on `(0, T)`** (the book's `𝒟₃`): the first switch is `ζ² → ζ` at `T`, and
 the image lies in `R₀ = {0 < θ₁ < θ₂ ≤ π}`. -/
@@ -278,7 +271,7 @@ theorem S3_image {p : Fin 3 → ℝ} (hp : p ∈ cellTwoDomain)
 
 /-- **The case `A > 0` somewhere on `(0, T)`** (the book's `𝒟₂`): the first switch is `ζ² → 1` at
 the first sign change `T_A` of `A`, and the image has `θ₂' = π` (it lies in `R₀`) or lies in the
-second cell with `θ₂' < -π/2`. -/
+second cell with `θ₂' ≤ -π/2`. -/
 theorem S2_image {p : Fin 3 → ℝ} (hp : p ∈ cellTwoDomain)
     (hA : ∃ t ∈ Ioo 0 (rootT p), 0 < Acub p t) :
     ∃ q, poincareAngZero (cellClass p) = cellClass q ∧
@@ -433,7 +426,7 @@ for the others (`S2_image`, `acub_neg_of_le`, `S3_image`), the last step by
 `poincareAngZero_mem_of_regionR0`.
 
 Departure from the paper: the book reads `F²𝒟₃ ⊂ 𝒟₀₀` off a Mathematica plot (Figure 16.2, TeX
-12640–12665) and the rows `𝒟₂`, `𝒟₃` from the involution (TeX 12616–12638); the formalization
+12640–12665) and the rows `𝒟₂`, `𝒟₃` from the involution (TeX 12614–12638); the formalization
 proves the statement analytically (module docstring). -/
 theorem cellTwoEntersDOut : CellTwoEntersDOut := by
   rintro x ⟨p, hp, rfl⟩
@@ -457,7 +450,8 @@ end SmoothedPolygons.TriFuller.CellTwoAnalytic
 
 namespace SmoothedPolygons.TriFuller
 
-/-- **`CellTwoEntersDOut`** (`SmoothedPolygons/Ch16/BasinHypotheses.lean`), without computer
+/-- **Table 16.1, rows `𝒟₂` and `𝒟₃`, with `F²𝒟₃ ⊂ 𝒟₀₀`** (`tab:diag`, Figure 16.2):
+`CellTwoEntersDOut` (`SmoothedPolygons/Ch16/BasinHypotheses.lean`) holds, without computer
 assistance (`CellTwoAnalytic.cellTwoEntersDOut`). -/
 theorem cellTwoEntersDOut : CellTwoEntersDOut := CellTwoAnalytic.cellTwoEntersDOut
 

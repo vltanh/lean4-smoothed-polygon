@@ -7,7 +7,7 @@ public import SmoothedPolygons.Ch16.NextSwitch
 # Chapter 14: a chattering arc has no switching point whose orbit reaches the star boundary
 
 The dynamical half of the proof of Theorem 14.4.1 (`thm:no-return`, Hales–Vajjha, *Packings of
-Smoothed Polygons*, TeX 12003–12008): "Any trajectory that returns to the singular locus must
+Smoothed Polygons*, TeX 12005–12010): "Any trajectory that returns to the singular locus must
 chatter (that is, must use infinitely many switches to arrive). This would require the unstable
 curve to contain a sequence of forward iterates of points tending to the exceptional divisor. This
 does not happen, because the unstable curve hits the boundary of the star domain."
@@ -30,8 +30,8 @@ forward orbit under the Reinhardt–Poincaré map reaches the boundary of the st
    leaves the star domain at a time `T` before any vertex reaches `e₂` (`ArcLeavesStarDomain`), the
    next switching time is not in `(0, T)` (step 2), so the extremal follows the flow up to `T` and
    its state at `τ n + T` is not a star state — but the extremal's states are star states (the state
-   constraint, `IsStateTrajectory`; Theorem 4.4.1): a contradiction. This is "the forward step of
-   the Reinhardt–Poincaré map is no longer defined" (TeX 11985–11986), read for an extremal: an
+   constraint of `IsStateTrajectory`): a contradiction. This is "the forward step of the
+   Reinhardt–Poincaré map is no longer defined" (TeX 11989–11991), read for an extremal: an
    extremal that switches infinitely often cannot pass through such a point.
 
 ## Proofs
@@ -100,7 +100,7 @@ theorem IsChatteringArcInto.iterate_reinPoincare {a b : ℝ} {u : ℝ → Fin 3 
     exact this
 
 /-- **No switching point of a chattering arc into the singular locus has a forward orbit reaching
-the boundary of the star domain** (TeX 12005–12008: "This would require the unstable curve to
+the boundary of the star domain** (TeX 12007–12010: "This would require the unstable curve to
 contain a sequence of forward iterates of points tending to the exceptional divisor. This does not
 happen, because the unstable curve hits the boundary of the star domain"): the switching points
 after `τ n` follow the orbit (`iterate_reinPoincare`) until its arc leaves the star domain, which

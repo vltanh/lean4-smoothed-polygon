@@ -3,7 +3,7 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
-# The derivative bounds of the contraction, by interval arithmetic by hand
+# The derivative bounds of the contraction, an interval chain written out step by step
 
 Bounds on the partial derivatives of the Fuller–Poincaré map near `q_out`, used by
 `SmoothedPolygons/Ch16/DOutContraction.lean` for the Lipschitz bound of `DOutContracts` on the box
@@ -17,11 +17,12 @@ angles of the image are `arctan (v₁/u₁)` and `arctan (v₁/u₁) - arctan (v
 are `angD` (`(u v' - v u')/(u² + v²)`); the radius enters through `(u₁² + v₁²)/(u₀² + v₀²)²`,
 whose derivative is `radD`.
 
-The lemmas `lip_*` are interval arithmetic carried out by hand: each step is one of the elementary
-interval lemmas `iadd`, `isub`, `ineg`, `imul`, `idiv`, `ipow`, `isq_nonpos`, with rational
-endpoints (denominator `10⁶`, rounded outward) and side conditions closed by `norm_num`; no kernel
-computation is involved. The chains were written by a script (`notes/an/gen_lip2.py`) that mirrors
-them step by step, on the single box `B × [σlo, σhi]`:
+The lemmas `lip_*` are an interval evaluation written out step by step (about 330 steps, generated
+by a script), each step checked by `norm_num`: each step is one of the elementary interval lemmas
+`iadd`, `isub`, `ineg`, `imul`, `idiv`, `ipow`, `isq_nonpos`, with rational endpoints (denominator
+`10⁶`, rounded outward) and side conditions closed by `norm_num`; no kernel computation (no
+`decide`) and no enumeration of boxes is involved. The script that wrote them is
+`numerics/generators/dout_contraction_bounds.py`, on the single box `B × [σlo, σhi]`:
 
 * `lip_coef`: the coefficients from the intervals of `r₂` and of `sin`, `cos` of the angles;
 * `lip_uv`: `u₀, v₀, u₁, v₁`;
@@ -29,7 +30,7 @@ them step by step, on the single box `B × [σlo, σhi]`:
   radius function and of `nF` in the directions `r₂, ψ, θ₂` and `σ`;
 * `lip_bracket`: `nF < 0` at `σlo = 371/2000` and `nF > 0` at `σhi = 441/2000`;
 * `lip_combo*`: the combinations `|q - e α/β|` of the implicit mean value theorem
-  (`DyadicInterval.abs_sub_le_sum_of_implicit`), whose row sums are `≤ 0.652` (`θ₂`), `≤ 0.514`
+  (`abs_sub_le_sum_of_implicit`), whose row sums are `≤ 0.652` (`θ₂`), `≤ 0.514`
   (`ψ`) and `≤ 0.910` (the radius function; `≤ 0.52` for `r₂` after dividing by `7/4`).
 -/
 

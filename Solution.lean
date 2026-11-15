@@ -24,11 +24,14 @@ public import SmoothedPolygons.Ch13.RScale
 public import SmoothedPolygons.Ch13.SingularLocus
 public import SmoothedPolygons.Ch13.Stability
 public import SmoothedPolygons.Ch13.Symmetry
+public import SmoothedPolygons.Ch14.NoReturnReading
 public import SmoothedPolygons.Ch15.CellCoordinates
 public import SmoothedPolygons.Ch15.Continuity
 public import SmoothedPolygons.Ch15.FixedPointCells
 public import SmoothedPolygons.Ch15.Involution
+public import SmoothedPolygons.Ch15.PartitionCellTwo
 public import SmoothedPolygons.Ch15.SmallerCells
+public import SmoothedPolygons.Ch16.BasinFacts
 public import SmoothedPolygons.Ch16.BasinHypotheses
 public import SmoothedPolygons.Ch16.GlobalBasin
 public import SmoothedPolygons.Ch16.MahlerFirst
