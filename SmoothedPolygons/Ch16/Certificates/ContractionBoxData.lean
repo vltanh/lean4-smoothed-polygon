@@ -1,6 +1,6 @@
 module
 
-public import Basic.Interval.Program
+public import Basic.Interval.Fast
 
 /-!
 # The contraction on `B`: programs, certificate data and the Bool-valued check
@@ -27,8 +27,9 @@ and the Bool-valued checks `checkBox`, `checkCenter`, `checkRows` (evaluated by 
 
 On a box `B_k × [tl, th]` the check verifies: `D < 0` on `B_k × [0, tl]`, `D > 0` on
 `B_k × {th}`; on each of `nPieces` pieces of `[tl, th]`: `U₀, U₁, U₂ < 0 < V₀, V₁, G₁`, and
-enclosures of the partial derivatives of `D`, `G₀`, `G₁`, `G₂` in `(r₂, ψ, θ₂, t)` (forward-mode
-differentiation, through `progA` for the cell coordinates); `∂_t D > 0`; and the entries
+enclosures of the partial derivatives of `D`, `G₀`, `G₁`, `G₂` in `(r₂, ψ, θ₂, t)` (vector-mode
+differentiation `evalV` of `Basic/Interval/Fast.lean`, the four directions in one pass, through
+`progA` for the cell coordinates); `∂_t D > 0`; and the entries
 `∂_j G_i - ∂_t G_i ∂_j D / ∂_t D` of the Jacobian of `g` bounded by `L_{ij}`, with the
 derivatives taken anywhere in `B_k × [tl, th]` (hulls over the pieces). At the center `c` of `B`:
 a tight enclosure of the switching time and of `g(c)`, with `g(c) ± Σ_j L_{ij} |p_j - c_j| ⊆ B`;
@@ -98,31 +99,32 @@ def boxEnv (m₀ m₁ m₂ : ℕ) : List DyadicInterval :=
   [ival (gridPt 0 m₀) (gridPt 0 (m₀ + 1)), ival (gridPt 1 m₁) (gridPt 1 (m₁ + 1)),
     ival (gridPt 2 m₂) (gridPt 2 (m₂ + 1))]
 
-/-- The inputs of `progB`: the results `aOut` of `progA`, and the time interval `T`. -/
-def envB (LA : List DyadicInterval) (T : DyadicInterval) : List DyadicInterval :=
-  aOut.map (fun i ↦ (lookup LA i).getD zero) ++ [T]
+/-- The results of `progA` with their derivatives in the three cell coordinates
+(`evalV`, vector mode; `seedV`: the input `k` moves along the direction `k`). -/
+def passA (env : List DyadicInterval) : List DualV × Bool := evalV prec 3 env (seedV prec 3 3) progA
 
-/-- The derivative seeds of `progB` along an input of `progA`: the derivatives of the results
-`aOut` of `progA`, and `0` for the time. -/
-def denvB (DA : List (DyadicInterval × DyadicInterval)) : List DyadicInterval :=
-  aOut.map (fun i ↦ ((lookup DA i).getD (zero, zero)).2) ++ [zero]
+/-- The value and derivatives of the result `i` of `progA`. -/
+def resA' (RA : List DualV) (i : ℕ) : DualV := resV RA 22 i
 
-/-- The derivative seeds of `progB` in the direction `j` (`0, 1, 2`: the cell coordinates through
-`progA`; `3`: the time). -/
-def dens (DAs : List (List (DyadicInterval × DyadicInterval))) (j : ℕ) : List DyadicInterval :=
-  if j < 3 then denvB (DAs.getD j []) else seed prec 6 5
+/-- The inputs of `progB`: the values `va` of the results `aOut` of `progA`, and the time
+interval `T`. -/
+def envB (va : ℕ → DyadicInterval) (T : DyadicInterval) : List DyadicInterval :=
+  aOut.map va ++ [T]
 
-/-- `D < 0` on the box times `[a, b]`. -/
-def negOn (LA : List DyadicInterval) (a b : ℚ) : Bool :=
-  match valueAt prec (envB LA (ival a b)) progD 17 with
-  | some I => hiNeg I
-  | none => false
+/-- The derivative seeds of `progB` in the four directions (the three cell coordinates, through
+`progA`, and the time). -/
+def denvB (RA : List DualV) : List (List DyadicInterval) :=
+  aOut.map (fun i ↦ (resA' RA i).2 ++ [zero]) ++ [[zero, zero, zero, one prec]]
+
+/-- `D < 0` on the box times `[a, b]` (`va`: the values of the results of `progA`). -/
+def negOn (va : ℕ → DyadicInterval) (a b : ℚ) : Bool :=
+  let r := evalT prec (envB va (ival a b)) progD
+  r.2 && hiNeg (resT r.1 18 17)
 
 /-- `D > 0` on the box times `{a}`. -/
-def posAt (LA : List DyadicInterval) (a : ℚ) : Bool :=
-  match valueAt prec (envB LA (ival a a)) progD 17 with
-  | some I => loPos I
-  | none => false
+def posAt (va : ℕ → DyadicInterval) (a : ℚ) : Bool :=
+  let r := evalT prec (envB va (ival a a)) progD
+  r.2 && loPos (resT r.1 18 17)
 
 /-- The number of pieces of `[tl, th]` for the derivative bounds. -/
 def nPieces : ℕ := 3
@@ -131,49 +133,38 @@ def nPieces : ℕ := 3
 def piece (tl th : ℚ) (m : ℕ) : DyadicInterval :=
   ival (tl + m * (th - tl) / nPieces) (tl + (m + 1) * (th - tl) / nPieces)
 
-/-- The derivative pass of `progB` on one piece, in the direction `j`. -/
-def dualB (LA : List DyadicInterval) (DAs : List (List (DyadicInterval × DyadicInterval)))
-    (T : DyadicInterval) (j : ℕ) : Option (List (DyadicInterval × DyadicInterval)) :=
-  evalDual prec (envB LA T) (dens DAs j) progB
+/-- The pass of `progB` on one piece, with the derivatives in the four directions. -/
+def passB (RA : List DualV) (T : DyadicInterval) : List DualV × Bool :=
+  evalV prec 4 (envB (fun i ↦ (resA' RA i).1) T) (denvB RA) progB
 
-/-- The value of the result `o` on one piece (from the derivative pass in the time direction,
-which computes the values too). -/
-def pv (LA : List DyadicInterval) (DAs : List (List (DyadicInterval × DyadicInterval)))
-    (T : DyadicInterval) (o : ℕ) : Option DyadicInterval :=
-  ((dualB LA DAs T 3).bind fun L ↦ lookup L o).map Prod.fst
+/-- The value of the result `o` on one piece. -/
+def pv (RA : List DualV) (T : DyadicInterval) (o : ℕ) : DyadicInterval :=
+  (resV (passB RA T).1 64 o).1
 
-/-- The value checks on one piece: `U₀, U₁, U₂ < 0 < V₀, V₁, G₁`. -/
-def valuesOk (LA : List DyadicInterval) (DAs : List (List (DyadicInterval × DyadicInterval)))
-    (T : DyadicInterval) : Bool :=
-  (pv LA DAs T 13).any hiNeg && (pv LA DAs T 15).any loPos && (pv LA DAs T 22).any hiNeg &&
-    (pv LA DAs T 25).any loPos && (pv LA DAs T 37).any hiNeg && (pv LA DAs T 61).any loPos
+/-- The value checks on one piece: the domain flag and `U₀, U₁, U₂ < 0 < V₀, V₁, G₁`. -/
+def valuesOk (RA : List DualV) (T : DyadicInterval) : Bool :=
+  (passB RA T).2 && hiNeg (pv RA T 13) && loPos (pv RA T 15) && hiNeg (pv RA T 22) &&
+    loPos (pv RA T 25) && hiNeg (pv RA T 37) && loPos (pv RA T 61)
 
 /-- The derivative of the result `o` in the direction `j` on one piece. -/
-def pd (LA : List DyadicInterval) (DAs : List (List (DyadicInterval × DyadicInterval)))
-    (T : DyadicInterval) (j o : ℕ) : Option DyadicInterval :=
-  ((dualB LA DAs T j).bind fun L ↦ lookup L o).map Prod.snd
+def pd (RA : List DualV) (T : DyadicInterval) (j o : ℕ) : DyadicInterval :=
+  nth (resV (passB RA T).1 64 o).2 j zero
 
-/-- The hull of a list of optional intervals (`none` if one is missing). -/
-def hullAll : List (Option DyadicInterval) → Option DyadicInterval
-  | [] => none
+/-- The hull of a list of intervals. -/
+def hullL : List DyadicInterval → DyadicInterval
+  | [] => zero
   | [a] => a
-  | a :: l => match a, hullAll l with
-    | some I, some J => some (hull I J)
-    | _, _ => none
+  | a :: l => hull a (hullL l)
 
 /-- The derivative of the result `o` in the direction `j` on the box times `[tl, th]`. -/
-def hd (LA : List DyadicInterval) (DAs : List (List (DyadicInterval × DyadicInterval)))
-    (tl th : ℚ) (j o : ℕ) : Option DyadicInterval :=
-  hullAll ((List.range nPieces).map fun m ↦ pd LA DAs (piece tl th m) j o)
+def hd (RA : List DualV) (tl th : ℚ) (j o : ℕ) : DyadicInterval :=
+  hullL ((List.range nPieces).map fun m ↦ pd RA (piece tl th m) j o)
 
 /-- The entry `(i, j)` of the Jacobian of `g`: `∂_j G_i - ∂_t G_i ∂_j D / ∂_t D`. -/
-def combo (LA : List DyadicInterval) (DAs : List (List (DyadicInterval × DyadicInterval)))
-    (tl th : ℚ) (i j : ℕ) : Option DyadicInterval :=
-  (hd LA DAs tl th j (outs.getD (i + 1) 0)).bind fun Q ↦
-    (hd LA DAs tl th 3 (outs.getD (i + 1) 0)).bind fun Qt ↦
-      (hd LA DAs tl th j 41).bind fun P ↦
-        (hd LA DAs tl th 3 41).bind fun Pt ↦
-          (div? prec (DyadicInterval.mul prec Qt P) Pt).map fun R ↦ DyadicInterval.sub Q R
+def combo (RA : List DualV) (tl th : ℚ) (i j : ℕ) : DyadicInterval :=
+  DyadicInterval.sub (hd RA tl th j (outs.getD (i + 1) 0))
+    (divT prec (DyadicInterval.mul prec (hd RA tl th 3 (outs.getD (i + 1) 0)) (hd RA tl th j 41))
+      (hd RA tl th 3 41))
 
 /-- The bounds `L_{ij}` on the entries of the Jacobian. -/
 def lBound : List (List ℚ) :=
@@ -187,26 +178,19 @@ structure BoxCert where
   /-- the upper end -/
   th : ℚ
 
-/-- The checks on one box, given the results `LA` of `progA` and its derivatives `DAs`. -/
-def checkBoxWith (LA : List DyadicInterval) (DAs : List (List (DyadicInterval × DyadicInterval)))
-    (c : BoxCert) : Bool :=
-  (decide (0 < c.tl) && decide (c.tl < c.th) && negOn LA 0 c.tl && posAt LA c.th) &&
-    ((List.range nPieces).all fun m ↦ valuesOk LA DAs (piece c.tl c.th m)) &&
-    (match hd LA DAs c.tl c.th 3 41 with
-      | some Pt => loPos Pt
-      | none => false) &&
+/-- The checks on one box, given the results `RA` of `progA` with their derivatives. -/
+def checkBoxWith (RA : List DualV) (c : BoxCert) : Bool :=
+  (decide (0 < c.tl) && decide (c.tl < c.th) && negOn (fun i ↦ (resA' RA i).1) 0 c.tl &&
+      posAt (fun i ↦ (resA' RA i).1) c.th) &&
+    ((List.range nPieces).all fun m ↦ valuesOk RA (piece c.tl c.th m)) &&
+    loPos (hd RA c.tl c.th 3 41) &&
     ([0, 1, 2].all fun i ↦ [0, 1, 2].all fun j ↦
-      match combo LA DAs c.tl c.th i j with
-      | some I => magLe prec I ((lBound.getD i []).getD j 0)
-      | none => false)
+      magLe prec (combo RA c.tl c.th i j) ((lBound.getD i []).getD j 0))
 
 /-- The check of one box. -/
 def checkBox (m₀ m₁ m₂ : ℕ) (c : BoxCert) : Bool :=
-  match evalI prec (boxEnv m₀ m₁ m₂) progA, evalDual prec (boxEnv m₀ m₁ m₂) (seed prec 3 0) progA,
-    evalDual prec (boxEnv m₀ m₁ m₂) (seed prec 3 1) progA,
-    evalDual prec (boxEnv m₀ m₁ m₂) (seed prec 3 2) progA with
-  | some LA, some D₀, some D₁, some D₂ => checkBoxWith LA [D₀, D₁, D₂] c
-  | _, _, _, _ => false
+  let RA := passA (boxEnv m₀ m₁ m₂)
+  RA.2 && checkBoxWith RA.1 c
 
 set_option maxRecDepth 10000 in
 /-- The certificates of the boxes, in the lexicographic order of `(m₀, m₁, m₂)`. -/
@@ -294,16 +278,15 @@ def checkCenter : Bool :=
   decide (gridPt 1 cBox.2.1 ≤ cPt.getD 1 0 ∧ cPt.getD 1 0 ≤ gridPt 1 (cBox.2.1 + 1)) &&
   decide (gridPt 2 cBox.2.2 ≤ cPt.getD 2 0 ∧ cPt.getD 2 0 ≤ gridPt 2 (cBox.2.2 + 1)) &&
   decide (ck.tl ≤ cCert.tl ∧ cCert.tl < cCert.th ∧ cCert.th ≤ ck.th) &&
-  match evalI prec [ival (cPt.getD 0 0) (cPt.getD 0 0), ival (cPt.getD 1 0) (cPt.getD 1 0),
-      ival (cPt.getD 2 0) (cPt.getD 2 0)] progA with
-  | none => false
-  | some LA =>
-    negOn LA cCert.tl cCert.tl && posAt LA cCert.th &&
+  let LA := evalT prec [ival (cPt.getD 0 0) (cPt.getD 0 0), ival (cPt.getD 1 0) (cPt.getD 1 0),
+      ival (cPt.getD 2 0) (cPt.getD 2 0)] progA
+  let va := fun i ↦ resT LA.1 22 i
+  let LB := evalT prec (envB va (ival cCert.tl cCert.th)) progB
+  LA.2 && negOn va cCert.tl cCert.tl && posAt va cCert.th && LB.2 &&
     ([0, 1, 2].all fun i ↦
-      match valueAt prec (envB LA (ival cCert.tl cCert.th)) progB (outs.getD (i + 1) 0) with
-      | some I => decide (bLo.getD i 0 ≤ (I.lo : ℚ) / 2 ^ prec - spread i ∧
-          (I.hi : ℚ) / 2 ^ prec + spread i ≤ bHi.getD i 0)
-      | none => false)
+      let I := resT LB.1 64 (outs.getD (i + 1) 0)
+      decide (bLo.getD i 0 ≤ (I.lo : ℚ) / 2 ^ prec - spread i ∧
+        (I.hi : ℚ) / 2 ^ prec + spread i ≤ bHi.getD i 0))
 
 /-- The row sums of `L`: `Σ_j L_{ij} ≤ 1/2`. -/
 def checkRows : Bool :=

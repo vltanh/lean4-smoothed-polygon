@@ -37,7 +37,8 @@ The straight-line programs `progA`, `progB`, `progD` and the Bool-valued checks 
   `B_k × [0, tl]`, `D > 0` on `B_k × {th}`, the signs of `U₀, V₀, U₁, V₁, U₂, G₁` on
   `B_k × [tl, th]`, and enclosures of all the partial derivatives of `D, G₀, G₁, G₂` there, with
   `∂_t D > 0` and `|∂_j G_i - ∂_t G_i ∂_j D / ∂_t D| ≤ L_{ij}` for every choice of the four points
-  (interval forward-mode differentiation, `evalDual_sound`);
+  (interval vector-mode differentiation along the curves `curveB`, `evalV_sound`,
+  `passA_sound`, `passB_sound`);
 * the entries of the Jacobian of `g`, without differentiating the root `τ`: the mean value theorem
   along `(p, τ p) → (q, τ p) → (q, τ q)` (`abs_sub_le_of_implicit`), glued along the grid in each
   coordinate (`abs_sub_le_of_grid`, `coord_lip`) and summed over the coordinates
@@ -515,34 +516,35 @@ theorem mem_ival {a b : ℚ} {x : ℝ} (h1 : (a : ℝ) ≤ x) (h2 : x ≤ b) : M
   ⟨(mem_ofRat prec a).1.trans h1, h2.trans (mem_ofRat prec b).2⟩
 
 theorem boxEnv_encl {m : Fin 3 → ℕ} {p : Fin 3 → ℝ} (hp : p ∈ cellSet m) :
-    ∀ k I, lookup (boxEnv (m 0) (m 1) (m 2)) k = some I → Mem prec I (inA p k) := by
-  intro k I h
+    ∀ k, Mem prec (nth (boxEnv (m 0) (m 1) (m 2)) k zero) (inA p k) := by
+  intro k
   rcases k with _ | _ | _ | k
-  · cases h; exact mem_ival (hp 0).1 (hp 0).2
-  · cases h; exact mem_ival (hp 1).1 (hp 1).2
-  · cases h; exact mem_ival (hp 2).1 (hp 2).2
-  · simp [boxEnv, lookup] at h
+  · exact mem_ival (hp 0).1 (hp 0).2
+  · exact mem_ival (hp 1).1 (hp 1).2
+  · exact mem_ival (hp 2).1 (hp 2).2
+  · have : inA p (k + 3) = 0 := by simp [inA]
+    rw [this]; exact mem_zero prec
 
 /-- The inputs of `progB` are enclosed by `envB`. -/
-theorem envB_encl {LA : List DyadicInterval} {p : Fin 3 → ℝ} (hLA : Encl prec (resA p) LA)
-    {T : DyadicInterval} {t : ℝ} (ht : Mem prec T t) :
-    ∀ k I, lookup (envB LA T) k = some I → Mem prec I (inB p t k) := by
-  have hlen : LA.length = 22 := by rw [← hLA.1, resA, length_evalR]; rfl
-  have key : ∀ i, i < 22 → ∀ I, (lookup LA i).getD zero = I → Mem prec I (getR (resA p) i) := by
-    intro i hi I hI
-    obtain ⟨J, hJ⟩ := exists_lookup (l := LA) (i := i) (by omega)
-    rw [hJ, Option.getD_some] at hI
-    subst hI
-    exact hLA.2 i J hJ
-  intro k I h
+theorem envB_encl {va : ℕ → DyadicInterval} {p : Fin 3 → ℝ}
+    (hva : ∀ i < 22, Mem prec (va i) (getR (resA p) i)) {T : DyadicInterval} {t : ℝ}
+    (ht : Mem prec T t) : ∀ k, Mem prec (nth (envB va T) k zero) (inB p t k) := by
+  intro k
   rcases k with _ | _ | _ | _ | _ | _ | k
-  · cases h; exact key 16 (by norm_num) _ rfl
-  · cases h; exact key 17 (by norm_num) _ rfl
-  · cases h; exact key 18 (by norm_num) _ rfl
-  · cases h; exact key 19 (by norm_num) _ rfl
-  · cases h; exact key 21 (by norm_num) _ rfl
-  · cases h; exact ht
-  · simp [envB, aOut, lookup] at h
+  · exact hva 16 (by norm_num)
+  · exact hva 17 (by norm_num)
+  · exact hva 18 (by norm_num)
+  · exact hva 19 (by norm_num)
+  · exact hva 21 (by norm_num)
+  · exact ht
+  · have : inB p t (k + 6) = 0 := by simp [inB]
+    rw [this]; exact mem_zero prec
+
+theorem wf_progA : wfFrom 0 progA = true := by decide +kernel
+
+theorem wf_progB : wfFrom 0 progB = true := by decide +kernel
+
+theorem wf_progD : wfFrom 0 progD = true := by decide +kernel
 
 theorem inA_update (p : Fin 3 → ℝ) (j : Fin 3) (s : ℝ) :
     inA (Function.update p j s) = Function.update (inA p) j s := by
@@ -565,91 +567,173 @@ theorem inB_update (p : Fin 3 → ℝ) (t s : ℝ) : Function.update (inB p t) 5
   · rw [Function.update_of_ne hk]
     simp [inB, hk]
 
-/-- **The derivative in a cell coordinate**: the results of `progB` along `s ↦ update p j s`,
-through `progA`. -/
-theorem dualB_sound_coord {m : Fin 3 → ℕ} {p : Fin 3 → ℝ} (hp : p ∈ cellSet m) (j : Fin 3)
-    {DA : List (DyadicInterval × DyadicInterval)}
-    (hDA : evalDual prec (boxEnv (m 0) (m 1) (m 2)) (seed prec 3 j) progA = some DA)
-    {LA : List DyadicInterval} (hLA : Encl prec (resA p) LA) {T : DyadicInterval} {t : ℝ}
-    (ht : Mem prec T t) {L : List (DyadicInterval × DyadicInterval)}
-    (hL : evalDual prec (envB LA T) (denvB DA) progB = some L) {o : ℕ}
-    {I : DyadicInterval × DyadicInterval} (ho : lookup L o = some I) :
-    Mem prec I.1 (getR (resB p t) o) ∧
-      ∃ d, HasDerivAt (fun s ↦ getR (resB (Function.update p j s) t) o) d (p j) ∧
-        Mem prec I.2 d := by
-  have henvA := boxEnv_encl hp
-  have hA : ∀ i < 22, ∃ J : DyadicInterval × DyadicInterval, lookup DA i = some J ∧
-      ∃ d, HasDerivAt (fun s ↦ getR (resA (Function.update p j s)) i) d (p j) ∧
-        Mem prec J.2 d := by
-    intro i hi
-    obtain ⟨J, hJ⟩ := exists_lookup (l := DA) (i := i) (by rw [length_evalDual hDA]; exact hi)
-    have hd : dualAt prec (boxEnv (m 0) (m 1) (m 2)) (seed prec 3 j) progA i = some J := by
-      rw [dualAt, hDA, Option.bind_some, hJ]
-    obtain ⟨-, d, hd1, hd2⟩ := hasDerivAt_update_of_dualAt hd henvA
-    refine ⟨J, hJ, d, ?_, hd2⟩
-    have e : inA p j = p j := by simp [inA]
-    rw [e] at hd1
-    simpa only [resA, inA_update] using hd1
-  have hk : ∀ k, ∃ d : ℝ, HasDerivAt (fun s ↦ inB (Function.update p j s) t k) d (p j) ∧
-      ∀ I, lookup (denvB DA) k = some I → Mem prec I d := by
-    intro k
-    have hcoord : ∀ k i, k < 5 → aOut.getD k 0 = i → i < 22 → ∃ d : ℝ,
-        HasDerivAt (fun s ↦ inB (Function.update p j s) t k) d (p j) ∧
-          ∀ I, lookup (denvB DA) k = some I → Mem prec I d := by
-      intro k i hk5 hki hi
-      obtain ⟨J, hJ, d, hd, hm⟩ := hA i hi
-      refine ⟨d, ?_, fun I hI ↦ ?_⟩
-      · have e : (fun s ↦ inB (Function.update p j s) t k) =
-            fun s ↦ getR (resA (Function.update p j s)) i := by
-          funext s
-          change (if k < 5 then getR (resA (Function.update p j s)) (aOut.getD k 0)
-            else if k = 5 then t else 0) = _
-          rw [ite_eq_left hk5, hki]
-        rw [e]; exact hd
-      · have e : lookup (denvB DA) k = some ((lookup DA (aOut.getD k 0)).getD (zero, zero)).2 := by
-          rcases k with _ | _ | _ | _ | _ | k
-          all_goals first | rfl | omega
-        rw [e, hki, hJ] at hI
-        cases hI; exact hm
-    rcases k with _ | _ | _ | _ | _ | _ | k
-    · exact hcoord 0 16 (by norm_num) rfl (by norm_num)
-    · exact hcoord 1 17 (by norm_num) rfl (by norm_num)
-    · exact hcoord 2 18 (by norm_num) rfl (by norm_num)
-    · exact hcoord 3 19 (by norm_num) rfl (by norm_num)
-    · exact hcoord 4 21 (by norm_num) rfl (by norm_num)
-    · refine ⟨0, ?_, fun I hI ↦ ?_⟩
-      · simp only [inB]; exact hasDerivAt_const _ _
-      · cases hI; exact mem_zero prec
-    · refine ⟨0, ?_, fun I hI ↦ ?_⟩
-      · have e : (fun s ↦ inB (Function.update p j s) t (k + 6)) = fun _ ↦ 0 := by
-          funext s; simp [inB]
+/-- **The results of `progA` on a box**, with their derivatives in the cell coordinates
+(`hasDerivAt_update_of_evalV`). -/
+theorem passA_sound {m : Fin 3 → ℕ} {p : Fin 3 → ℝ} (hp : p ∈ cellSet m)
+    (hok : (passA (boxEnv (m 0) (m 1) (m 2))).2 = true) {i : ℕ} (hi : i < 22) :
+    Mem prec (resA' (passA (boxEnv (m 0) (m 1) (m 2))).1 i).1 (getR (resA p) i) ∧
+      (resA' (passA (boxEnv (m 0) (m 1) (m 2))).1 i).2.length = 3 ∧
+      ∀ j : Fin 3, ∃ d, HasDerivAt (fun s ↦ getR (resA (Function.update p j s)) i) d (p j) ∧
+        Mem prec (nth (resA' (passA (boxEnv (m 0) (m 1) (m 2))).1 i).2 j zero) d := by
+  obtain ⟨h1, h2, h3⟩ := hasDerivAt_update_of_evalV (x := inA p) (le_refl 3) (boxEnv_encl hp)
+    wf_progA hok i hi
+  refine ⟨h1, h2, fun j ↦ ?_⟩
+  obtain ⟨d, hd, hm⟩ := h3 j j.2
+  refine ⟨d, ?_, hm⟩
+  have e : inA p j = p j := by simp [inA]
+  rw [e] at hd
+  simpa only [resA, inA_update] using hd
+
+/-- The facts on the results of `progA` used by `progB`. -/
+def AFacts (p : Fin 3 → ℝ) (RA : List DualV) : Prop :=
+  ∀ i < 22, Mem prec (resA' RA i).1 (getR (resA p) i) ∧ (resA' RA i).2.length = 3 ∧
+    ∀ j : Fin 3, ∃ d, HasDerivAt (fun s ↦ getR (resA (Function.update p j s)) i) d (p j) ∧
+      Mem prec (nth (resA' RA i).2 j zero) d
+
+theorem nth_append_lt {α : Type*} {l : List α} {i : ℕ} (h : i < l.length) (l' : List α) (d : α) :
+    nth (l ++ l') i d = nth l i d := by
+  induction l generalizing i with
+  | nil => simp at h
+  | cons b l ih => cases i <;> simp_all [nth]
+
+theorem nth_append_length {α : Type*} (l : List α) (a : α) (d : α) :
+    nth (l ++ [a]) l.length d = a := by
+  induction l with
+  | nil => rfl
+  | cons b l ih => simpa [nth] using ih
+
+/-- The curves of the inputs of `progB`: `j < 3`, the cell coordinate `j` moves; `j = 3`, the
+time. -/
+noncomputable def curveB (p : Fin 3 → ℝ) (t : ℝ) (j : ℕ) (s : ℝ) : ℕ → ℝ :=
+  if h : j < 3 then inB (Function.update p ⟨j, h⟩ s) t else inB p s
+
+/-- The base points of the curves. -/
+noncomputable def baseB (p : Fin 3 → ℝ) (t : ℝ) (j : ℕ) : ℝ := if h : j < 3 then p ⟨j, h⟩ else t
+
+theorem denvB_eq (RA : List DualV) : denvB RA = [(resA' RA 16).2 ++ [zero],
+    (resA' RA 17).2 ++ [zero], (resA' RA 18).2 ++ [zero], (resA' RA 19).2 ++ [zero],
+    (resA' RA 21).2 ++ [zero], [zero, zero, zero, one prec]] := rfl
+
+/-- The derivatives of the inputs of `progB` along the four curves, enclosed by `denvB`. -/
+theorem exists_derivB {p : Fin 3 → ℝ} {RA : List DualV} (hRA : AFacts p RA) (t : ℝ) (j k : ℕ) :
+    ∃ d : ℝ, j < 4 → HasDerivAt (fun s ↦ curveB p t j s k) d (baseB p t j) ∧
+      Mem prec (nth (nth (denvB RA) k (zeros 4)) j zero) d := by
+  -- the inputs `k < 5`: results of `progA`
+  have hA : ∀ k i, k < 5 → aOut.getD k 0 = i → i < 22 →
+      nth (denvB RA) k (zeros 4) = (resA' RA i).2 ++ [zero] := by
+    intro k i hk hki _
+    rcases k with _ | _ | _ | _ | _ | k
+    all_goals first | (subst hki; rfl) | omega
+  have hin : ∀ k i, k < 5 → aOut.getD k 0 = i → ∀ (q : Fin 3 → ℝ) (t' : ℝ),
+      inB q t' k = getR (resA q) i := by
+    intro k i hk hki q t'
+    simp only [inB, ite_eq_left hk, hki]
+  have hcoord : ∀ k i, k < 5 → aOut.getD k 0 = i → i < 22 → ∃ d : ℝ, j < 4 →
+      HasDerivAt (fun s ↦ curveB p t j s k) d (baseB p t j) ∧
+        Mem prec (nth (nth (denvB RA) k (zeros 4)) j zero) d := by
+    intro k i hk hki hi
+    obtain ⟨-, hl, hd⟩ := hRA i hi
+    rw [hA k i hk hki hi]
+    by_cases hj : j < 3
+    · obtain ⟨d, hd1, hd2⟩ := hd ⟨j, hj⟩
+      refine ⟨d, fun _ ↦ ⟨?_, ?_⟩⟩
+      · simp only [curveB, baseB, dite_eq_left hj, hin k i hk hki]
+        exact hd1
+      · rw [nth_append_lt (by rw [hl]; exact hj)]
+        exact hd2
+    · refine ⟨0, fun hj4 ↦ ⟨?_, ?_⟩⟩
+      · simp only [curveB, baseB, dite_eq_right hj, hin k i hk hki]
+        exact hasDerivAt_const _ _
+      · have : j = 3 := by omega
+        subst this
+        rw [← hl, nth_append_length]
+        exact mem_zero prec
+  rcases k with _ | _ | _ | _ | _ | _ | k
+  · exact hcoord 0 16 (by norm_num) rfl (by norm_num)
+  · exact hcoord 1 17 (by norm_num) rfl (by norm_num)
+  · exact hcoord 2 18 (by norm_num) rfl (by norm_num)
+  · exact hcoord 3 19 (by norm_num) rfl (by norm_num)
+  · exact hcoord 4 21 (by norm_num) rfl (by norm_num)
+  · -- the time
+    rw [denvB_eq]
+    by_cases hj : j < 3
+    · refine ⟨0, fun _ ↦ ⟨?_, ?_⟩⟩
+      · have e : (fun s ↦ curveB p t j s 5) = fun _ ↦ t := by
+          funext s; simp [curveB, dite_eq_left hj, inB]
         rw [e]; exact hasDerivAt_const _ _
-      · simp [denvB, aOut, lookup] at hI
-  choose γ' hγ' using hk
-  have henv : ∀ k I, lookup (envB LA T) k = some I →
-      Mem prec I ((fun s ↦ inB (Function.update p j s) t) (p j) k) := by
-    intro k I hI
-    simp only [Function.update_eq_self]
-    exact envB_encl hLA ht k I hI
-  have := (evalDual_sound (fun k ↦ (hγ' k).1) henv (fun k ↦ (hγ' k).2) progB hL).2 o I ho
-  simp only [Function.update_eq_self] at this
-  exact this
+      · rcases j with _ | _ | _ | j
+        · exact mem_zero prec
+        · exact mem_zero prec
+        · exact mem_zero prec
+        · omega
+    · refine ⟨1, fun hj4 ↦ ⟨?_, ?_⟩⟩
+      · have e : (fun s ↦ curveB p t j s 5) = fun s ↦ s := by
+          funext s; simp [curveB, dite_eq_right hj, inB]
+        rw [e]; simp only [baseB, dite_eq_right hj]; exact hasDerivAt_id _
+      · have : j = 3 := by omega
+        subst this
+        exact mem_one prec
+  · refine ⟨0, fun _ ↦ ⟨?_, ?_⟩⟩
+    · have e : (fun s ↦ curveB p t j s (k + 6)) = fun _ ↦ 0 := by
+        funext s; by_cases hj : j < 3 <;> simp [curveB, hj, inB]
+      rw [e]; exact hasDerivAt_const _ _
+    · have e : nth (denvB RA) (k + 6) (zeros 4) = zeros 4 := by rw [denvB_eq]; rfl
+      rw [e]
+      by_cases hj : j < 4
+      · rw [zeros, nth_replicate hj]; exact mem_zero prec
+      · have e2 : ∀ (l : List DyadicInterval) (i : ℕ), l.length ≤ i → nth l i zero = zero := by
+          intro l i hi
+          induction l generalizing i with
+          | nil => rfl
+          | cons b l ih' => cases i <;> simp_all
+        rw [e2 _ _ (by simp [zeros]; omega)]; exact mem_zero prec
 
+/-- **The results of `progB` on a piece**, with their derivatives in the cell coordinates
+(through `progA`) and in the time (`evalV_sound` along `curveB`). -/
+theorem passB_sound {p : Fin 3 → ℝ} {RA : List DualV} (hRA : AFacts p RA) {T : DyadicInterval}
+    {t : ℝ} (ht : Mem prec T t) (hok : (passB RA T).2 = true) {o : ℕ} (ho : o < 64) :
+    Mem prec (pv RA T o) (getR (resB p t) o) ∧
+      (∀ j : Fin 3, ∃ d, HasDerivAt (fun s ↦ getR (resB (Function.update p j s) t) o) d (p j) ∧
+        Mem prec (pd RA T j o) d) ∧
+      ∃ d, HasDerivAt (fun s ↦ getR (resB p s) o) d t ∧ Mem prec (pd RA T 3 o) d := by
+  choose γ' hγ' using exists_derivB hRA t
+  have hx : ∀ j < 4, curveB p t j (baseB p t j) = inB p t := by
+    intro j _
+    by_cases hj : j < 3
+    · simp only [curveB, baseB, dite_eq_left hj, Function.update_eq_self]
+    · simp only [curveB, baseB, dite_eq_right hj]
+  have hdenv : ∀ k, (nth (denvB RA) k (zeros 4)).length = 4 ∧
+      ∀ j < 4, Mem prec (nth (nth (denvB RA) k (zeros 4)) j zero) (γ' j k) := by
+    intro k
+    refine ⟨?_, fun j hj ↦ (hγ' j k hj).2⟩
+    have hl : ∀ i < 22, ((resA' RA i).2 ++ [zero]).length = 4 := fun i hi ↦ by
+      rw [List.length_append, (hRA i hi).2.1]; rfl
+    rw [denvB_eq]
+    rcases k with _ | _ | _ | _ | _ | _ | k
+    · exact hl 16 (by norm_num)
+    · exact hl 17 (by norm_num)
+    · exact hl 18 (by norm_num)
+    · exact hl 19 (by norm_num)
+    · exact hl 21 (by norm_num)
+    · rfl
+    · rfl
+  have hva : ∀ i < 22, Mem prec ((fun i ↦ (resA' RA i).1) i) (getR (resA p) i) :=
+    fun i hi ↦ (hRA i hi).1
+  obtain ⟨h1, -, h3⟩ := evalV_sound (m := 4) (γ := curveB p t) (s₀ := baseB p t) hx
+    (fun j hj k ↦ (hγ' j k hj).1) (envB_encl hva ht) hdenv wf_progB hok o ho
+  refine ⟨h1, fun j ↦ ?_, ?_⟩
+  · obtain ⟨d, hd, hm⟩ := h3 j (by omega)
+    refine ⟨d, ?_, hm⟩
+    have e : ∀ s, curveB p t j s = inB (Function.update p j s) t := fun s ↦ by
+      simp only [curveB, dite_eq_left j.2]
+    simp only [e, baseB, dite_eq_left j.2] at hd
+    exact hd
+  · obtain ⟨d, hd, hm⟩ := h3 3 (by omega)
+    refine ⟨d, ?_, hm⟩
+    have e : ∀ s, curveB p t 3 s = inB p s := fun s ↦ by simp [curveB]
+    simp only [e, baseB, show ¬ (3 < 3) by omega, dite_eq_right, not_false_eq_true] at hd
+    exact hd
 
-/-- **The derivative in the time**. -/
-theorem dualB_sound_time {LA : List DyadicInterval} {p : Fin 3 → ℝ}
-    (hLA : Encl prec (resA p) LA) {T : DyadicInterval} {t : ℝ} (ht : Mem prec T t)
-    {L : List (DyadicInterval × DyadicInterval)}
-    (hL : evalDual prec (envB LA T) (seed prec 6 5) progB = some L) {o : ℕ}
-    {I : DyadicInterval × DyadicInterval} (ho : lookup L o = some I) :
-    Mem prec I.1 (getR (resB p t) o) ∧
-      ∃ d, HasDerivAt (fun s ↦ getR (resB p s) o) d t ∧ Mem prec I.2 d := by
-  have hd : dualAt prec (envB LA T) (seed prec 6 5) progB o = some I := by
-    rw [dualAt, hL, Option.bind_some, ho]
-  have := hasDerivAt_update_of_dualAt hd (envB_encl hLA ht)
-  have e : inB p t 5 = t := by simp [inB]
-  simp only [inB_update, e] at this
-  exact this
 
 /-! ### Soundness of the box check -/
 
@@ -682,24 +766,17 @@ structure BoxFacts (S : Set (Fin 3 → ℝ)) (tl th : ℝ) : Prop where
     DerivTimeIn S tl th 41 Pt ∧ (∀ q ∈ Qu, ∀ e ∈ Qt, ∀ α ∈ Pu, ∀ β ∈ Pt, |q - e * α / β| ≤ lB i j) ∧
     ∀ β ∈ Pt, 0 < β
 
-theorem mem_of_hullAll {p : ℕ} :
-    ∀ {l : List (Option DyadicInterval)} {H : DyadicInterval}, hullAll l = some H →
-      ∀ a ∈ l, ∃ I, a = some I ∧ ∀ x, Mem p I x → Mem p H x
-  | [], _, h, _, _ => by simp [hullAll] at h
-  | [b], H, h, a, ha => by
-    simp only [List.mem_singleton] at ha
-    subst ha
-    exact ⟨H, h, fun x hx ↦ hx⟩
-  | b :: c :: l, H, h, a, ha => by
-    unfold hullAll at h
-    split at h
-    next _ _ I J hl =>
-      cases h
-      rcases List.mem_cons.1 ha with rfl | ha
-      · exact ⟨I, rfl, fun x hx ↦ mem_hull_left J hx⟩
-      · obtain ⟨K, hK, hKJ⟩ := mem_of_hullAll hl a ha
-        exact ⟨K, hK, fun x hx ↦ mem_hull_right I (hKJ x hx)⟩
-    next => simp at h
+theorem mem_hullL {p : ℕ} :
+    ∀ {l : List DyadicInterval} {a : DyadicInterval}, a ∈ l → ∀ x, Mem p a x → Mem p (hullL l) x
+  | [], _, h, _, _ => by simp at h
+  | [b], a, h, x, hx => by
+    simp only [List.mem_singleton] at h
+    subst h; exact hx
+  | b :: c :: l, a, h, x, hx => by
+    change Mem p (hull b (hullL (c :: l))) x
+    rcases List.mem_cons.1 h with rfl | h
+    · exact mem_hull_left _ hx
+    · exact mem_hull_right _ (mem_hullL h x hx)
 
 /-- A time of `[tl, th]` lies in one of the pieces. -/
 theorem exists_piece {tl th : ℚ} {t : ℝ} (ht : t ∈ Icc (tl : ℝ) th) :
@@ -707,137 +784,112 @@ theorem exists_piece {tl th : ℚ} {t : ℝ} (ht : t ∈ Icc (tl : ℝ) th) :
   obtain ⟨m, hm, h1, h2⟩ := exists_mem_uniform_cell ht (n := nPieces) (by decide)
   refine ⟨m, hm, mem_ival ?_ ?_⟩ <;> push_cast <;> assumption
 
-/-- The hull of the time derivatives over the pieces. -/
-theorem hd_sound_time {LA : List DyadicInterval}
-    {DAs : List (List (DyadicInterval × DyadicInterval))} {S : Set (Fin 3 → ℝ)}
-    (hLA : ∀ p ∈ S, Encl prec (resA p) LA) {tl th : ℚ} {o : ℕ} {H : DyadicInterval}
-    (h : hd LA DAs tl th 3 o = some H) : DerivTimeIn S tl th o {d | Mem prec H d} := by
-  intro p hp t ht
-  obtain ⟨m, hm, htm⟩ := exists_piece ht
-  obtain ⟨I, hI, hIH⟩ := mem_of_hullAll (p := prec) h _
-    (List.mem_map.2 ⟨m, List.mem_range.2 hm, rfl⟩)
-  simp only [pd, Option.map_eq_some_iff, Option.bind_eq_some_iff] at hI
-  obtain ⟨J, ⟨L, hL, hJ⟩, rfl⟩ := hI
-  obtain ⟨-, d, hd, hdm⟩ := dualB_sound_time (hLA p hp) htm hL hJ
-  exact ⟨d, hd, hIH d hdm⟩
+theorem negOn_sound {va : ℕ → DyadicInterval} {p : Fin 3 → ℝ}
+    (hva : ∀ i < 22, Mem prec (va i) (getR (resA p) i)) {a b : ℚ} (h : negOn va a b = true)
+    {t : ℝ} (ht1 : (a : ℝ) ≤ t) (ht2 : t ≤ b) : V₂ p t < 0 := by
+  unfold negOn at h
+  simp only [Bool.and_eq_true] at h
+  have := evalT_sound (envB_encl hva (mem_ival ht1 ht2)) wf_progD h.1 17 (by decide)
+  rw [resD_eq] at this
+  exact neg_of_hiNeg h.2 this
 
-/-- The hull of the derivatives in the cell coordinate `j` over the pieces. -/
-theorem hd_sound_coord {m : Fin 3 → ℕ} {LA : List DyadicInterval}
-    {DAs : List (List (DyadicInterval × DyadicInterval))}
-    (hLA : ∀ p ∈ cellSet m, Encl prec (resA p) LA) (j : Fin 3)
-    (hDA : evalDual prec (boxEnv (m 0) (m 1) (m 2)) (seed prec 3 j) progA = some (DAs.getD j []))
-    {tl th : ℚ} {o : ℕ} {H : DyadicInterval} (h : hd LA DAs tl th j o = some H) :
-    DerivIn (cellSet m) tl th o j {d | Mem prec H d} := by
-  intro p hp t ht
-  obtain ⟨k, hk, htk⟩ := exists_piece ht
-  obtain ⟨I, hI, hIH⟩ := mem_of_hullAll (p := prec) h _
-    (List.mem_map.2 ⟨k, List.mem_range.2 hk, rfl⟩)
-  simp only [pd, dualB, dens, ite_eq_left j.2, Option.map_eq_some_iff,
-    Option.bind_eq_some_iff] at hI
-  obtain ⟨J, ⟨L, hL, hJ⟩, rfl⟩ := hI
-  obtain ⟨-, d, hd, hdm⟩ := dualB_sound_coord hp j hDA (hLA p hp) htk hL hJ
-  exact ⟨d, hd, hIH d hdm⟩
-
-
-theorem pv_sound {LA : List DyadicInterval} {p : Fin 3 → ℝ} (hLA : Encl prec (resA p) LA)
-    {DAs : List (List (DyadicInterval × DyadicInterval))} {T : DyadicInterval} {t : ℝ}
-    (ht : Mem prec T t) {o : ℕ} {a : DyadicInterval} (h : pv LA DAs T o = some a) :
-    Mem prec a (getR (resB p t) o) := by
-  simp only [pv, Option.map_eq_some_iff, Option.bind_eq_some_iff] at h
-  obtain ⟨J, ⟨L, hL, hJ⟩, rfl⟩ := h
-  exact (dualB_sound_time hLA ht hL hJ).1
-
-theorem any_spec {o : Option DyadicInterval} {f : DyadicInterval → Bool} (h : o.any f = true) :
-    ∃ a, o = some a ∧ f a = true := by
-  cases o with
-  | none => simp at h
-  | some a => exact ⟨a, rfl, h⟩
+theorem posAt_sound {va : ℕ → DyadicInterval} {p : Fin 3 → ℝ}
+    (hva : ∀ i < 22, Mem prec (va i) (getR (resA p) i)) {a : ℚ} (h : posAt va a = true) :
+    0 < V₂ p a := by
+  unfold posAt at h
+  simp only [Bool.and_eq_true] at h
+  have := evalT_sound (envB_encl hva (mem_ival le_rfl le_rfl)) wf_progD h.1 17 (by decide)
+  rw [resD_eq] at this
+  exact pos_of_loPos h.2 this
 
 /-- **Soundness of the box check.** -/
 theorem boxFacts {m : Fin 3 → ℕ} {c : BoxCert} (h : checkBox (m 0) (m 1) (m 2) c = true) :
     BoxFacts (cellSet m) c.tl c.th := by
   unfold checkBox at h
-  rcases hA : evalI prec (boxEnv (m 0) (m 1) (m 2)) progA with _ | LA
-  · simp [hA] at h
-  rcases hD0 : evalDual prec (boxEnv (m 0) (m 1) (m 2)) (seed prec 3 0) progA with _ | D0
-  · simp [hA, hD0] at h
-  rcases hD1 : evalDual prec (boxEnv (m 0) (m 1) (m 2)) (seed prec 3 1) progA with _ | D1
-  · simp [hA, hD0, hD1] at h
-  rcases hD2 : evalDual prec (boxEnv (m 0) (m 1) (m 2)) (seed prec 3 2) progA with _ | D2
-  · simp [hA, hD0, hD1, hD2] at h
-  simp only [hA, hD0, hD1, hD2] at h
-  have hLA : ∀ p ∈ cellSet m, Encl prec (resA p) LA :=
-    fun p hp ↦ evalI_sound (boxEnv_encl hp) progA hA
-  have hDA : ∀ j : Fin 3, evalDual prec (boxEnv (m 0) (m 1) (m 2)) (seed prec 3 j) progA =
-      some ([D0, D1, D2].getD j []) := by
-    intro j; fin_cases j
-    exacts [hD0, hD1, hD2]
+  simp only [Bool.and_eq_true] at h
+  obtain ⟨hA, h⟩ := h
+  set RA := (passA (boxEnv (m 0) (m 1) (m 2))).1 with hRAdef
+  have hRA : ∀ p ∈ cellSet m, AFacts p RA := fun p hp i hi ↦ passA_sound hp hA hi
+  have hva : ∀ p ∈ cellSet m, ∀ i < 22, Mem prec ((fun i ↦ (resA' RA i).1) i)
+      (getR (resA p) i) := fun p hp i hi ↦ (hRA p hp i hi).1
   simp only [checkBoxWith, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at h
   obtain ⟨⟨⟨⟨⟨⟨htl, htlth⟩, hneg⟩, hpos⟩, hvals⟩, hdt⟩, hcombo⟩ := h
-  rcases hPt : hd LA [D0, D1, D2] c.tl c.th 3 41 with _ | Pt
-  · simp [hPt] at hdt
-  simp only [hPt] at hdt
-  have htime := hd_sound_time hLA hPt
-  refine ⟨by exact_mod_cast htl, by exact_mod_cast htlth, ?_, ?_, ?_, ?_, ?_⟩
-  · -- `D < 0` on `[0, tl]`
-    intro p hp t ht
-    unfold negOn at hneg
-    rcases hv : valueAt prec (envB LA (ival 0 c.tl)) progD 17 with _ | I <;> rw [hv] at hneg
-    · simp at hneg
-    · have hm := mem_valueAt hv (envB_encl (hLA p hp) (mem_ival (by simpa using ht.1) ht.2))
-      rw [resD_eq] at hm
-      exact neg_of_hiNeg hneg hm
-  · -- `D > 0` at `th`
-    intro p hp
-    unfold posAt at hpos
-    rcases hv : valueAt prec (envB LA (ival c.th c.th)) progD 17 with _ | I <;> rw [hv] at hpos
-    · simp at hpos
-    · have hm := mem_valueAt hv (envB_encl (hLA p hp) (mem_ival le_rfl le_rfl))
-      rw [resD_eq] at hm
-      exact pos_of_loPos hpos hm
-  · -- the signs on `[tl, th]`
+  -- the facts of `progB` on the pieces
+  have hB : ∀ p ∈ cellSet m, ∀ t ∈ Icc (c.tl : ℝ) c.th, ∃ k < nPieces,
+      valuesOk RA (piece c.tl c.th k) = true ∧ ∀ o < 64,
+      Mem prec (pv RA (piece c.tl c.th k) o) (getR (resB p t) o) ∧
+      (∀ j : Fin 3, ∃ d, HasDerivAt (fun s ↦ getR (resB (Function.update p j s) t) o) d (p j) ∧
+        Mem prec (pd RA (piece c.tl c.th k) j o) d) ∧
+      ∃ d, HasDerivAt (fun s ↦ getR (resB p s) o) d t ∧
+        Mem prec (pd RA (piece c.tl c.th k) 3 o) d := by
     intro p hp t ht
     obtain ⟨k, hk, htk⟩ := exists_piece ht
     have hv := hvals k (List.mem_range.2 hk)
+    refine ⟨k, hk, hv, fun o ho ↦ ?_⟩
+    have hok : (passB RA (piece c.tl c.th k)).2 = true := by
+      simp only [valuesOk, Bool.and_eq_true] at hv
+      exact hv.1.1.1.1.1.1
+    exact passB_sound (hRA p hp) htk hok ho
+  have hmem : ∀ j o (k : ℕ), k < nPieces →
+      ∀ x, Mem prec (pd RA (piece c.tl c.th k) j o) x → Mem prec (hd RA c.tl c.th j o) x :=
+    fun j o k hk x hx ↦ mem_hullL (List.mem_map.2 ⟨k, List.mem_range.2 hk, rfl⟩) x hx
+  have htime : ∀ o < 64, DerivTimeIn (cellSet m) c.tl c.th o
+      {d | Mem prec (hd RA c.tl c.th 3 o) d} := by
+    intro o ho p hp t ht
+    obtain ⟨k, hk, -, hf⟩ := hB p hp t ht
+    obtain ⟨-, -, d, hd1, hd2⟩ := hf o ho
+    exact ⟨d, hd1, hmem 3 o k hk d hd2⟩
+  have hcoord : ∀ o < 64, ∀ j : Fin 3, DerivIn (cellSet m) c.tl c.th o j
+      {d | Mem prec (hd RA c.tl c.th j o) d} := by
+    intro o ho j p hp t ht
+    obtain ⟨k, hk, -, hf⟩ := hB p hp t ht
+    obtain ⟨-, hj, -⟩ := hf o ho
+    obtain ⟨d, hd1, hd2⟩ := hj j
+    exact ⟨d, hd1, hmem j o k hk d hd2⟩
+  have hdt' := htime 41 (by norm_num)
+  refine ⟨by exact_mod_cast htl, by exact_mod_cast htlth, ?_, ?_, ?_, ?_, ?_⟩
+  · -- `D < 0` on `[0, tl]`
+    intro p hp t ht
+    exact negOn_sound (hva p hp) hneg (by simpa using ht.1) ht.2
+  · -- `D > 0` at `th`
+    intro p hp
+    exact posAt_sound (hva p hp) hpos
+  · -- the signs on `[tl, th]`
+    intro p hp t ht
+    obtain ⟨k, -, hv, hf⟩ := hB p hp t ht
     simp only [valuesOk, Bool.and_eq_true] at hv
-    obtain ⟨⟨⟨⟨⟨h13, h15⟩, h22⟩, h25⟩, h37⟩, h61⟩ := hv
-    obtain ⟨a, ha, ha'⟩ := any_spec h13
-    obtain ⟨b, hb, hb'⟩ := any_spec h15
-    obtain ⟨c', hc, hc'⟩ := any_spec h22
-    obtain ⟨d, hd, hd'⟩ := any_spec h25
-    obtain ⟨e, he, he'⟩ := any_spec h37
-    obtain ⟨f, hf, hf'⟩ := any_spec h61
+    obtain ⟨⟨⟨⟨⟨⟨-, h13⟩, h15⟩, h22⟩, h25⟩, h37⟩, h61⟩ := hv
     obtain ⟨r13, r15, r22, r25, r37, -⟩ := resB_vals p t
-    have m13 := pv_sound (hLA p hp) htk ha
-    have m15 := pv_sound (hLA p hp) htk hb
-    have m22 := pv_sound (hLA p hp) htk hc
-    have m25 := pv_sound (hLA p hp) htk hd
-    have m37 := pv_sound (hLA p hp) htk he
-    have m61 := pv_sound (hLA p hp) htk hf
+    have m13 := (hf 13 (by norm_num)).1
+    have m15 := (hf 15 (by norm_num)).1
+    have m22 := (hf 22 (by norm_num)).1
+    have m25 := (hf 25 (by norm_num)).1
+    have m37 := (hf 37 (by norm_num)).1
+    have m61 := (hf 61 (by norm_num)).1
     rw [r13] at m13
     rw [r15] at m15
     rw [r22] at m22
     rw [r25] at m25
     rw [r37] at m37
-    exact ⟨neg_of_hiNeg ha' m13, pos_of_loPos hb' m15, neg_of_hiNeg hc' m22, pos_of_loPos hd' m25,
-      neg_of_hiNeg he' m37, pos_of_loPos hf' m61⟩
+    exact ⟨neg_of_hiNeg h13 m13, pos_of_loPos h15 m15, neg_of_hiNeg h22 m22, pos_of_loPos h25 m25,
+      neg_of_hiNeg h37 m37, pos_of_loPos h61 m61⟩
   · -- `∂_t D > 0`
     intro p hp t ht
-    obtain ⟨d, hd, hdm⟩ := htime p hp t ht
+    obtain ⟨d, hd, hdm⟩ := hdt' p hp t ht
     exact ⟨d, hd, pos_of_loPos hdt hdm⟩
   · -- the Jacobian bounds
     intro i j
     have hij := hcombo i (by fin_cases i <;> simp) j (by fin_cases j <;> simp)
-    rcases hK : combo LA [D0, D1, D2] c.tl c.th i j with _ | K <;> rw [hK] at hij
-    · simp at hij
-    simp only [combo, Option.bind_eq_some_iff, Option.map_eq_some_iff] at hK
-    obtain ⟨Q, hQ, Qt, hQt, P, hP, Pt', hPt', R, hR, rfl⟩ := hK
-    rw [hPt] at hPt'
-    cases hPt'
-    refine ⟨{d | Mem prec Q d}, {d | Mem prec Qt d}, {d | Mem prec P d}, {d | Mem prec Pt d},
-      hd_sound_coord hLA j (hDA j) hQ, hd_sound_time hLA hQt, hd_sound_coord hLA j (hDA j) hP,
-      htime, fun q hq e he α hα β hβ ↦ ?_, fun β hβ ↦ pos_of_loPos hdt hβ⟩
-    exact abs_le_of_magLe hij (mem_sub hq (mem_div? hR (mem_mul he hα) hβ))
+    have ho : outs.getD ((i : ℕ) + 1) 0 < 64 := by fin_cases i <;> decide
+    have hnz : nz (hd RA c.tl c.th 3 41) = true := by
+      unfold nz; rw [Bool.or_eq_true]; exact Or.inl hdt
+    refine ⟨{d | Mem prec (hd RA c.tl c.th j (outs.getD ((i : ℕ) + 1) 0)) d},
+      {d | Mem prec (hd RA c.tl c.th 3 (outs.getD ((i : ℕ) + 1) 0)) d},
+      {d | Mem prec (hd RA c.tl c.th j 41) d}, {d | Mem prec (hd RA c.tl c.th 3 41) d},
+      hcoord _ ho j, htime _ ho, hcoord 41 (by norm_num) j, hdt',
+      fun q hq e he α hα β hβ ↦ ?_, fun β hβ ↦ pos_of_loPos hdt hβ⟩
+    exact abs_le_of_magLe hij (mem_sub hq (mem_divT hnz (mem_mul he hα) hβ))
+
 
 /-! ### The switching time on a box -/
 
@@ -1304,14 +1356,8 @@ theorem center_facts (i : Fin 3) : ∃ I : DyadicInterval, Mem prec I (g cR i) �
     ((bLo.getD i 0 : ℚ) : ℝ) ≤ (I.lo : ℝ) / 2 ^ prec - (spread i : ℝ) ∧
     (I.hi : ℝ) / 2 ^ prec + (spread i : ℝ) ≤ ((bHi.getD i 0 : ℚ) : ℝ) := by
   have h := checkCenter_eq_true
-  simp only [checkCenter, Bool.and_eq_true, decide_eq_true_eq] at h
-  obtain ⟨⟨⟨⟨⟨-, -⟩, -⟩, -⟩, ⟨hk1, hk2, hk3⟩⟩, hrest⟩ := h
-  rcases hA : evalI prec [ival (cPt.getD 0 0) (cPt.getD 0 0), ival (cPt.getD 1 0) (cPt.getD 1 0),
-      ival (cPt.getD 2 0) (cPt.getD 2 0)] progA with _ | LA
-  · rw [hA] at hrest; simp at hrest
-  rw [hA] at hrest
-  simp only [Bool.and_eq_true, List.all_eq_true] at hrest
-  obtain ⟨⟨hneg, hpos⟩, hG⟩ := hrest
+  simp only [checkCenter, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at h
+  obtain ⟨⟨⟨⟨⟨-, -⟩, -⟩, -⟩, ⟨hk1, hk2, hk3⟩⟩, ⟨⟨⟨⟨hLA, hneg⟩, hpos⟩, hLB⟩, hG⟩⟩ := h
   -- the box of the center and its switching time
   have hm : ∀ i', (![1, 1, 2] : Fin 3 → ℕ) i' < nGrid.getD i' 1 := by
     intro i'; fin_cases i' <;> decide
@@ -1326,30 +1372,23 @@ theorem center_facts (i : Fin 3) : ∃ I : DyadicInterval, Mem prec I (g cR i) �
   have hck : ck = certs.getD (boxIndex cBox.1 cBox.2.1 cBox.2.2) ⟨0, 0⟩ := rfl
   rw [← hck] at hk1 hk3
   -- `progA` at the center
-  have hLA : Encl prec (resA cR) LA := by
-    refine evalI_sound (fun k I hI ↦ ?_) progA hA
+  have henvA : ∀ k, Mem prec (nth [ival (cPt.getD 0 0) (cPt.getD 0 0),
+      ival (cPt.getD 1 0) (cPt.getD 1 0), ival (cPt.getD 2 0) (cPt.getD 2 0)] k zero)
+      (inA cR k) := by
+    intro k
     rcases k with _ | _ | _ | k
-    · cases hI; exact mem_ival (le_of_eq (cR_eq 0).symm) (le_of_eq (cR_eq 0))
-    · cases hI; exact mem_ival (le_of_eq (cR_eq 1).symm) (le_of_eq (cR_eq 1))
-    · cases hI; exact mem_ival (le_of_eq (cR_eq 2).symm) (le_of_eq (cR_eq 2))
-    · simp [lookup] at hI
+    · exact mem_ival (le_of_eq (cR_eq 0).symm) (le_of_eq (cR_eq 0))
+    · exact mem_ival (le_of_eq (cR_eq 1).symm) (le_of_eq (cR_eq 1))
+    · exact mem_ival (le_of_eq (cR_eq 2).symm) (le_of_eq (cR_eq 2))
+    · have : inA cR (k + 3) = 0 := by simp [inA]
+      rw [this]; exact mem_zero prec
+  have hva := evalT_sound henvA wf_progA hLA
+  have hva' : ∀ i < 22, Mem prec ((fun i ↦ resT (evalT prec [ival (cPt.getD 0 0) (cPt.getD 0 0),
+      ival (cPt.getD 1 0) (cPt.getD 1 0), ival (cPt.getD 2 0) (cPt.getD 2 0)] progA).1 22 i) i)
+      (getR (resA cR) i) := fun i hi ↦ hva i hi
   -- the sign of `D` at the ends of `[tl_c, th_c]`
-  have hneg' : V₂ cR cCert.tl < 0 := by
-    unfold negOn at hneg
-    rcases hv : valueAt prec (envB LA (ival cCert.tl cCert.tl)) progD 17 with _ | I <;>
-      rw [hv] at hneg
-    · simp at hneg
-    · have hm' := mem_valueAt hv (envB_encl hLA (mem_ival le_rfl le_rfl))
-      rw [resD_eq] at hm'
-      exact neg_of_hiNeg hneg hm'
-  have hpos' : 0 < V₂ cR cCert.th := by
-    unfold posAt at hpos
-    rcases hv : valueAt prec (envB LA (ival cCert.th cCert.th)) progD 17 with _ | I <;>
-      rw [hv] at hpos
-    · simp at hpos
-    · have hm' := mem_valueAt hv (envB_encl hLA (mem_ival le_rfl le_rfl))
-      rw [resD_eq] at hm'
-      exact pos_of_loPos hpos hm'
+  have hneg' : V₂ cR cCert.tl < 0 := negOn_sound hva' hneg le_rfl le_rfl
+  have hpos' : 0 < V₂ cR cCert.th := posAt_sound hva' hpos
   have hk1' : (ck.tl : ℝ) ≤ cCert.tl := by exact_mod_cast hk1
   have hk2' : (cCert.tl : ℝ) < cCert.th := by exact_mod_cast hk2
   have hk3' : (cCert.th : ℝ) ≤ ck.th := by exact_mod_cast hk3
@@ -1365,13 +1404,13 @@ theorem center_facts (i : Fin 3) : ∃ I : DyadicInterval, Mem prec I (g cR i) �
       have := hF.lt_of_lt cR_cell ⟨hk1'.trans hk2'.le, hk3'⟩ ⟨hτ.1.le, hτ.2.le⟩ hc
       linarith
   have hGi := hG i (by fin_cases i <;> simp)
-  rcases hv : valueAt prec (envB LA (ival cCert.tl cCert.th)) progB (outs.getD (i + 1) 0)
-    with _ | I <;> rw [hv] at hGi
-  · simp at hGi
-  simp only [decide_eq_true_eq] at hGi
+  have ho : outs.getD ((i : ℕ) + 1) 0 < 64 := by fin_cases i <;> decide
+  set I := resT (evalT prec (envB (fun i ↦ resT (evalT prec [ival (cPt.getD 0 0) (cPt.getD 0 0),
+    ival (cPt.getD 1 0) (cPt.getD 1 0), ival (cPt.getD 2 0) (cPt.getD 2 0)] progA).1 22 i)
+    (ival cCert.tl cCert.th)) progB).1 64 (outs.getD ((i : ℕ) + 1) 0) with hI
   refine ⟨I, ?_, ?_, ?_⟩
   · rw [hg i]
-    exact mem_valueAt hv (envB_encl hLA (mem_ival hτc.1 hτc.2))
+    exact evalT_sound (envB_encl hva' (mem_ival hτc.1 hτc.2)) wf_progB hLB _ ho
   · have := hGi.1
     have h' : ((bLo.getD i 0 : ℚ) : ℝ) ≤ (((I.lo : ℚ) / 2 ^ prec - spread i : ℚ) : ℝ) := by
       exact_mod_cast this
