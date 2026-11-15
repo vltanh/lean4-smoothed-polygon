@@ -108,11 +108,12 @@ private lemma invFunOn_add_const (c : ℝ) :
   have := Function.invFunOn_eq (f := fun x : ℝ ↦ x + c) (s := univ) ⟨y - c, mem_univ _, by ring⟩
   linarith
 
-/-- **The Noether–Sussmann theorem as printed is false** (Theorem 9.1.4, TeX 7871–7880, with
-Definitions 9.1.1–9.1.3 as printed). The printed statement: for an optimal control system
-`𝒬 = (M, U, f, φ)` with the regularity of §6.2 (here: `Ω` open, `U` compact, `f` and `φ` of class
-`C¹` in the sense of `ControlSystem.IsC1On`, and `f(·, u)`, `φ(·, u)` smooth) and a cost `φ`
-independent of the control (TeX 7816–7818), an infinitesimal group of symmetries `τ`
+/-- **The Noether–Sussmann theorem as printed is false** (Theorem 9.1.4, `thm:noether-sussmann`,
+label of this formalization; unlabelled, TeX 7871–7880, with Definitions 9.1.1–9.1.3 as
+printed). The printed statement: for an optimal control system `𝒬 = (M, U, f, φ)` with the
+regularity of §6.2 (here: `Ω` open, `U` compact, `f` and `φ` of class `C¹` in the sense of
+`ControlSystem.IsC1On`, and `f(·, u)`, `φ(·, u)` smooth) and a cost `φ` independent of the
+control (TeX 7816–7818), an infinitesimal group of symmetries `τ`
 (Definition 9.1.2 as printed, with smooth fields `τ(X)` and smooth flows `exp(tτ(X))` with smooth
 inverses) and a lifted controlled trajectory `p` satisfying the Pontryagin maximum principle (here
 all the conclusions of `External.pontryagin_maximum_principle` for a problem with fixed endpoints,

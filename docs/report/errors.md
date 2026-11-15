@@ -18,6 +18,7 @@ The items come in groups, each in the book's order:
 | E70–E80 | Chapter 15 and §16.1–16.2 |
 | E81–E92 | Chapter 14, §16.3–16.4 and Appendix A.3 |
 | E93–E94 | §14.4 |
+| E95–E97 | Chapter 9 (§9.0–9.1) |
 
 [REPORT.md, Section 3](../../REPORT.md#3-errors-and-gaps-in-the-paper) indexes them by chapter.
 "Section N" refers to the sections of [REPORT.md](../../REPORT.md), whose details are in the
@@ -2147,6 +2148,93 @@ numerical facts of Theorem 16.1.1 suffice (Section 7).
   "exit" as the two signs of an explicit function of the arc's parameters, `F(log Y)`, each case
   proved on the whole region `𝒢*`, so the threshold needs no margin.
 
+### E95
+
+**E95. §9.1 (TeX 7812–7880): the Noether–Sussmann theorem is misquoted, and false as printed.**
+
+- **The book:** Definition 9.1.1 (TeX 7822–7830) calls a diffeomorphism `ψ : V₁ → V₂` a symmetry
+  of `(M, U, f, φ)` when, for every `u`, there are `u₁, u₂` with `dψ(f_u) = f_{u₁} ∘ ψ` and
+  `dψ(f_{u₂}) = f_u ∘ ψ` on `V₁`.
+  - The text before it assumes only that `φ` does not depend on the control (TeX 7816–7818), and
+    says the definitions "are all from Sussmann" (TeX 7819–7820).
+  - Theorem 9.1.4 (TeX 7871–7880) asserts that the momentum map of an infinitesimal group of such
+    symmetries is constant along every lifted trajectory satisfying the maximum principle.
+- **The source:** Sussmann's definition (p. 389) also requires (ii), `f⁰_{u₁} ∘ σ = f⁰_u` and
+  `f⁰_u ∘ σ = f⁰_{u₂}`: the symmetry must preserve the cost. For a control-independent cost this
+  reads `φ ∘ ψ = φ`. The book drops it.
+- **Counterexample:** `M = ℝ`, `U = [-1, 1]`, `f_u(x) = u`, `φ(x) = x`, and `𝔤 = ℝ` acting by
+  `τ(a) = a ∂ₓ`.
+  - The translations satisfy the book's condition with `u₁ = u₂ = u`, and do not preserve `φ`.
+  - On `[0, 2]`, `x(t) = |1 - t|` with `u = -1` for `t ≤ 1` and `u = 1` after is optimal for
+    `∫₀² x dt` with `x(0) = x(2) = 1`, since every admissible `x` has `x ≥ |1 - t|`.
+  - It lifts with `λ_cost = -1` and `p(t) = t - 1`. Then `H = (t - 1)u - |1 - t|` is maximal at
+    the chosen `u`, `H ≡ 0`, and every condition of the maximum principle holds.
+  - `𝐉^τ(q, p)(1) = t - 1` is not constant.
+- **Here:**
+  - The cited theorem is formalized in Sussmann's form ([`External.noether_sussmann`](../../External/NoetherSussmann.lean#L105),
+    [`External.noether_sussmann_one_parameter`](../../External/NoetherSussmann.lean#L119), [`External.sussmann_theorem4_1`](../../External/NoetherSussmann.lean#L87), from the OptimalControl
+    package).
+  - The printed form is refuted ([`noetherSussmann_false_as_printed`](../../SmoothedPolygons/Ch9/NoetherAsPrinted.lean#L147)), with the book's smoothness
+    assumed as analyticity.
+  - Theorem 9.1.6 is unaffected. Its proof checks the rotations "by the proof of Theorem 9.0.3"
+    (TeX 7921–7922), whose computation includes the cost term `-(3/2)λ_cost⟨J, X⟩`, and the cost
+    is rotation-invariant ([`matrixCost_rotateState`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L601)).
+
+### E96
+
+**E96. Definition 9.0.1 (TeX 7693–7699): the printed `U_C` is `U_T`.**
+
+- **The book:** `U_C := {0 ≤ uᵢ ≤ 1, Σuᵢ = 1, Σuᵢ² ≤ 1}`, "the circumscribing disk of the
+  two-simplex".
+- **The error:** on the simplex, `Σuᵢ² ≤ (Σuᵢ)² = 1` because `uᵢuⱼ ≥ 0`, so the set is `U_T`
+  itself. This contradicts the rest of the book:
+  - Remark 9.0.2 (TeX 7721–7727) speaks of controls in `U_C ∖ U_T`.
+  - The text says the disk control set is invariant under `S¹` (TeX 7731–7734), while `U_T` has
+    only the `ℤ/3` symmetry (Remark 9.0.4, TeX 7786–7790).
+  - Table 9.1 (TeX 8123) gives `r² = 1` and `det Z_u = -⅓` on `∂U_C`.
+  - The introduction calls `U_C` the circumscribing circle (TeX 906–907).
+- **Correction:** drop `0 ≤ uᵢ ≤ 1`. Then `U_C = U_1 = {Σuᵢ = 1, Σuᵢ² ≤ 1}`, whose boundary circle
+  passes through the vertices of `U_T`.
+  - The same constraints in `U_I` (TeX 7704–7706) are harmless: `U_I ⊆ U_T`, so
+    `U_I = U_{√2/2}`.
+- **Here:** [`controlDiskCAsPrinted_eq_controlSimplex`](../../SmoothedPolygons/Ch9/ControlSets.lean#L111). The formalization uses
+  `controlDiskC := controlDisk 1` ([`controlSimplex_subset_controlDiskC`](../../SmoothedPolygons/Ch9/ControlSets.lean#L118)), and
+  [`controlDiskI_eq_controlDisk`](../../SmoothedPolygons/Ch9/ControlSets.lean#L127).
+
+### E97
+
+**E97. Problem 9.1.5 and Theorem 9.1.6 (TeX 7882–7898, 7963–7965): no state space, and "the
+optimal trajectory".**
+
+- **No state space:** Problem 9.1.5 (TeX 7882–7885) replaces `U_T` by `U_C` in Problem 6.7.1 but
+  gives no domain for `X`.
+  - On the star domain of Problem 3.6.2, `⟨Z_u, X⟩` vanishes for some `u ∈ U_C` unless `X` lies in
+    a smaller set. There `P = Z_u/⟨Z_u, X⟩` is undefined, and the maximum of `H` over `U_C` is in
+    general `+∞`.
+  - The introduction's footnote (TeX 912–919) says the relaxed problem "is defined on a smaller
+    domain", but the book never specifies that domain.
+  - Chapter 10 (TeX 8531–8547) instead imposes the star condition only at the optimal control,
+    `⟨X, Z*⟩ < 0`, "on a region slightly larger than the star domain". That is the opposite of the
+    footnote.
+- **"The optimal trajectory":** Theorem 9.1.6 says `𝒜` is conserved "along the optimal
+  trajectory" (TeX 7896, 7965), while the introduction says "each Pontryagin extremal"
+  (TeX 948–952).
+  - The proof uses only the maximum principle.
+  - The existence of an optimal control for `U_C` is not established: the footnote says the
+    compactification of Chapter 5 is not extended to the relaxed problem.
+- **Here:**
+  - The state space of the circular problem is the set of star states for `U_C`: `det X = 1` and
+    `⟨Z_u, X⟩ < 0` for all `u ∈ U_C` ([`IsStarStateFor`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L164) [`controlDiskC`](../../SmoothedPolygons/Ch9/ControlSets.lean#L85)).
+  - In the upper half-plane it is the hyperbolic disk `cosh d(z, i) < 2/√3`
+    ([`isStarStateFor_controlDiskC_Φ`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L196)), strictly inside the star domain ([`IsStarStateFor.isStarState`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L182);
+    `Φ(2i)` is a star state of Problem 3.6.2 and not one for `U_C`).
+  - Theorem 9.1.6 is stated for every Pontryagin extremal of the circular problem
+    ([`theorem9_1_6`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L1689)). The conservation law is proved for every solution of the state–costate
+    equations with the maximum condition over a compact rotation-closed `U`
+    ([`angularMomentum_conserved`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L1633)).
+  - Chapter 10's convention is not taken, because the Noether–Sussmann theorem needs every
+    `f(·, u)`, `u ∈ U_C`, to be `C¹` on an open domain.
+
 ## Missing hypotheses
 
 | Where | Missing hypothesis | Counterexample without it | In the formalization |
@@ -2176,6 +2264,8 @@ than the book's. The Challenge statements keep the book's hypotheses.
 | Theorem 6.8.2 ([`theorem6_8_2`](../../SmoothedPolygons/Ch6/HalfPlane.lean#L164)) | `Λ_R` traceless | `Λ_R` enters only through its trace form with traceless matrices |
 | Lemma 7.1.2 ([`lemma7_1_2`](../../SmoothedPolygons/Ch7/ConstantControl.lean#L82)) | `u ∈ U_T` | the proof uses only that `P` is constant along the trajectory (Lemma 7.1.1), which holds for every constant `u` |
 | Lemma 7.3.1 ([`lemma7_3_1`](../../SmoothedPolygons/Ch7/Faces.lean#L49)) | the control set lies in the plane `u₀ + u₁ + u₂ = 1` | `Z_u` is linear in `u`, so `H` is a linear-fractional function of `u` on any compact convex set on which `⟨X, Z_u⟩ ≠ 0` (hypothesis `hden`, E26) |
+| Theorem 9.1.6, in its generic form ([`angularMomentum_conserved`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L1633)) | optimality ("along the optimal trajectory"), and of the conditions of an extremal the transversality conditions, `g(0) = I`, `H = 0`, `λ_cost ≤ 0` and nontriviality | the proof uses only the state–costate equations, `Λ₁, Λ_R ∈ 𝔰𝔩₂(ℝ)`, `Λ_R ⊥ X` and the maximum condition; [`theorem9_1_6`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L1689) keeps the conditions of an extremal and drops optimality (E97) |
+| Remark 9.1.7, third item ([`remark9_1_7`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L1703)) | `r² > ⅓` (TeX 7981; Definition 9.0.1 has `⅓ ≤ r²`, TeX 7711) | the proof of Theorem 9.1.6 needs only a compact control set closed under rotations; for `r² < ⅓` the disk `U_r` is empty and there is no extremal, for `r² = ⅓` it is the centroid |
 | Gruber, Cor. 30.1 ([`External.gruber_corollary_30_1`](../../External/Gruber.lean#L320), cited in Definition 2.1.2) | the translates form a packing | the lattice-point count bounds the sums of the areas of the translates meeting a disk, overlaps counted with multiplicity |
 
 Eleven Lean statements keep hypotheses that their proofs do not use, because the book or the source

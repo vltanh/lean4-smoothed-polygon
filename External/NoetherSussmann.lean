@@ -9,9 +9,8 @@ Cited in Hales–Vajjha, *Packings of Smoothed Polygons*, §9.1 (TeX 7812–7880
 "Noether–Sussmann theorem", from the bibliography entry `sussman`: H. J. Sussmann, *Symmetries and
 integrals of motion in optimal control*, in *Geometry in Nonlinear Control and Differential
 Inclusions*, Banach Center Publications 32, Institute of Mathematics, Polish Academy of Sciences,
-Warszawa, 1995, pp. 379–393 (the book's entry gives 1996), Theorem 4.1 (p. 389). The book applies it
-in the proof of Theorem 9.1.6 (`thm:angular-momentum`), to the rotations of the circular control
-problem.
+Warszawa, 1995, pp. 379–393, Theorem 4.1 (p. 389). The book applies it in the proof of
+Theorem 9.1.6 (`thm:angular-momentum`), to the rotations of the circular control problem.
 
 ## Sussmann's statement and the book's quotation
 
@@ -36,7 +35,7 @@ Noether–Sussmann theorem as printed (TeX 7871–7880) is false: on `M = ℝ` w
 which `μ^τ = ζ` is not constant (`SmoothedPolygons.noetherSussmann_false_as_printed`,
 `SmoothedPolygons/Ch9/NoetherAsPrinted.lean`). The book's application is not affected: the proof of
 Theorem 9.1.6 checks that the rotations preserve the whole Hamiltonian, cost included ("by the proof
-of Theorem 9.0.3", TeX 7921), and the cost `-(3/2)⟨J, X⟩` of the circular problem is invariant
+of Theorem 9.0.3", TeX 7921–7922), and the cost `-(3/2)⟨J, X⟩` of the circular problem is invariant
 under them. The results here are Sussmann's, with condition (ii).
 
 ## Forms

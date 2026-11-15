@@ -185,3 +185,7 @@ thm:outward-fuller	+tab:diag	the unconditional form discharges the hypotheses of
 # N4: the analytic proof of the unstable curve
 thm:no-return	+fig:unstable-curve	"This does not happen, because the unstable curve hits the boundary of the star domain" (TeX 12009-12010) is N4, read off Figure 14.2 without citing it; theorem14_4_1_unconditional applies the book's proof (theorem14_4_1) to N4, which is proved without computer assistance (unstableCurveLeavesStarDomain; the user's decision, E88)
 thm:mahler	+fig:unstable-curve	the book reaches N4 through Theorem 14.4.1, whose proof uses Figure 14.2 without citing it; theorem16_3_1_unconditional discharges the hypothesis N4 of theorem16_3_1_of_unstableCurveLeavesStarDomain with its proof without computer assistance (unstableCurveLeavesStarDomain; the user's decision, E88)
+#
+# Section 9.1: the angular momentum
+thm:angular-momentum	-thm:noether-sussmann	the book applies the Noether-Sussmann theorem as it prints it, which is false (E95); the formal proof applies Sussmann's form, with the invariance of the cost, External.noether_sussmann_one_parameter, a result from prior work (momentum_rotationField_eq)
+thm:angular-momentum	-thm:symmetries	the proof uses "the proof of Theorem 9.0.3" (TeX 7921-7922), not its statement: Sussmann's symmetries must preserve the dynamics and the cost, which the formal proof shows directly (matrixField_rotateState, matrixCost_rotateState: the proof's remark that the transformed quantities satisfy the same equations); the invariance of H is not used

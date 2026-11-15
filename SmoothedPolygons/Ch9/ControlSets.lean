@@ -48,8 +48,9 @@ and the motivation (TeX 7729–7747) are not formalized.
   `eqn:full-hamiltonian` (`hamiltonian`), the function the proof computes with: the action
   `(Λ₁, Λ_R, X, Z_u) ↦ Ad_A(Λ₁, Λ_R, X, Z_u)` maps the controls of `U` to controls of `U` and leaves
   `H` unchanged. The proof's remarks that the transformed `Λ₁`, `Λ_R` satisfy the same equations
-  are the equivariance of the dynamics, used in §9.1 (`matrixField_rotateState`,
-  `SmoothedPolygons/Ch9/AngularMomentum.lean`).
+  are not formalized here: §9.1 realizes them as the equivariance of the state equations
+  (`matrixField_rotateState`, `SmoothedPolygons/Ch9/AngularMomentum.lean`) and the invariance of
+  the cost (`matrixCost_rotateState`), the costates then following by the cotangent lift.
 -/
 
 @[expose] public section
@@ -469,9 +470,10 @@ private lemma rotationForm_cases_of_conjPreservesSimplex {a c : ℝ} (h : a ^ 2 
     · exact Or.inl ⟨by linarith, rfl⟩
     · exact Or.inr (Or.inl ⟨by linarith, rfl⟩)
 
-/-- **Remark 9.0.4** (TeX 7786–7790): "the control set `U_T` is only symmetric by discrete
-`ℤ/3ℤ`-rotations and not under general `SO₂` rotations". A rotation `A ∈ SO₂(ℝ)` maps the control
-matrices of `U_T` to control matrices of `U_T` exactly when `A` is a power of `R = exp(Jπ/3)`.
+/-- **Remark 9.0.4** (`rem:simplex-rotations`, label of this formalization; unlabelled,
+TeX 7786–7790): "the control set `U_T` is only symmetric by discrete `ℤ/3ℤ`-rotations and not
+under general `SO₂` rotations". A rotation `A ∈ SO₂(ℝ)` maps the control matrices of `U_T` to
+control matrices of `U_T` exactly when `A` is a power of `R = exp(Jπ/3)`.
 Since `R³ = -I`, `Ad_{Rᵏ}` depends on `k mod 3`: the symmetry group of `U_T` acting by `Ad` is
 `ℤ/3ℤ`, and `Ad_R` permutes the vertices cyclically (`R⁻¹ Z_{e_m} R = Z_{e_{m+1}}`).
 

@@ -9,7 +9,7 @@ public import External.NoetherSussmann
 # §9.1: the circular control problem and the conservation of angular momentum
 
 Hales–Vajjha, *Packings of Smoothed Polygons*, §9.1 "Conserved Quantity for the Circular Control
-Set" (TeX 7792–7999), and the introduction's restatement (theorem*, TeX 940–953: "In the control
+Set" (TeX 7792–7999), and the introduction's restatement (theorem*, TeX 948–952: "In the control
 problem with the circular disk control set, each Pontryagin extremal satisfies a conservation law
 (which we call the angular momentum)").
 
@@ -68,7 +68,7 @@ action is `τ(J)(g, X) = (Jg - gJ, [J, X])`, and the momentum map is
 * **`U_C`** is the disk `U_1` (`controlDiskC`; the printed formula is `U_T`,
   `SmoothedPolygons/Ch9/ControlSets.lean`).
 * **The state space of the circular problem.** Problem 9.1.5 does not say where the dynamics are
-  defined. The introduction's footnote (TeX 913–920) says that the relaxed problem "is defined on
+  defined. The introduction's footnote (TeX 912–919) says that the relaxed problem "is defined on
   a smaller domain" than Problem 3.6.2, but the book never specifies that domain.
   `P = Z_u/⟨Z_u, X⟩` must be defined for every `u ∈ U_C` (the Hamiltonian is maximized over all
   of `U_C`, and the regularity of §6.2 that the Noether–Sussmann theorem assumes needs it), so the
@@ -88,10 +88,11 @@ action is `τ(J)(g, X) = (Jg - gJ, [J, X])`, and the momentum map is
 * **"Along the optimal trajectory"** (TeX 7896) is read as "along every Pontryagin extremal", as
   the proof gives and the introduction states (TeX 948–952). Optimality is not used, and the
   existence of an optimal control for `U_C` is not established in the book: the introduction's
-  footnote (TeX 913–920) says that the compactification of Chapter 5 is not extended to the
+  footnote (TeX 912–919) says that the compactification of Chapter 5 is not extended to the
   relaxed problem. (Convexity is not the obstacle: `u ↦ Z_u/⟨Z_u, X⟩` is a perspective map, so it
   keeps the disk convex, and the velocity sets of the circular problem are convex.) The stronger
-  form is stated.
+  form is stated; it is stronger than the book's given the maximum principle for `U_C`, which
+  makes optimal trajectories extremals and is not formalized for `U_C`.
 * **The extremals of the circular problem** are those of Problem 6.7.1, the reduced costate
   `(Λ₁, Λ_R)` with the conditions of the maximum principle and the transversality conditions,
   with `U_T` replaced by `U_C` throughout (the maximum condition over `U_C`, the controls in
@@ -100,7 +101,7 @@ action is `τ(J)(g, X) = (Jg - gJ, [J, X])`, and the momentum map is
   proof uses: the state trajectory, the two costate equations, `Λ₁, Λ_R ∈ 𝔰𝔩₂(ℝ)`, `Λ_R ⊥ X` and
   the maximum condition; not the transversality conditions, `g(0) = I`, `H = 0`, `λ_cost ≤ 0` or
   nontriviality. §9.3 (TeX 8136–8295: the derivative of `𝒜`, TeX 8183–8196, and the constraint on
-  the optimal control, TeX 8285–8295) and Chapter 10 (TeX 8681–8689, 8945–8946) apply the
+  the optimal control, TeX 8285–8295) and Chapter 10 (TeX 8684–8689, 8945–8946) apply the
   conservation along such local solutions of the state–costate equations with `U = U_r`.
   Theorem 9.1.6 and Remark 9.1.7 are its corollaries for the extremals of Problem 9.1.5
   (`theorem9_1_6`, `remark9_1_7`).
@@ -113,8 +114,8 @@ action is `τ(J)(g, X) = (Jg - gJ, [J, X])`, and the momentum map is
 * **The Noether–Sussmann theorem** is applied in Sussmann's form, whose symmetries preserve the
   cost (`External.noether_sussmann_one_parameter`), not in the printed form, which is false
   (`noetherSussmann_false_as_printed`). The rotations preserve the cost `-(3/2)⟨J, X⟩`
-  (`matrixCost_rotateState`), as the book's appeal to "the proof of Theorem 9.0.3" (TeX 7921)
-  checks for the whole Hamiltonian.
+  (`matrixCost_rotateState`), as the book's appeal to "the proof of Theorem 9.0.3"
+  (TeX 7921–7922) checks for the whole Hamiltonian.
 * **Remark 9.1.7**, third item: "whenever `r² > ⅓`". The conservation holds for every `r`
   (`remark9_1_7` has no hypothesis on `r`); for `r² < ⅓` the disk is empty and there are no
   extremals, for `r² = ⅓` it is the centroid.
@@ -502,7 +503,7 @@ theorem IsStateTrajectoryFor.isAdmissibleIn_matrix {U : Set (Fin 3 → ℝ)} {T 
 
 /-! ### The rotation symmetry -/
 
-/-- The action of a rotation `A` on the state space: `(g, X) ↦ (A g A⁻¹, A X A⁻¹)` (TeX 7911–7917:
+/-- The action of a rotation `A` on the state space: `(g, X) ↦ (A g A⁻¹, A X A⁻¹)` (TeX 7918–7919:
 "the action on `g` is by inner automorphisms and the rest are given by the adjoint action"). It is
 a linear map of `MatrixState`. -/
 noncomputable def rotateState (A : Mat2) (q : MatrixState) : MatrixState :=
@@ -593,7 +594,7 @@ theorem matrixField_rotateState {A : Mat2} (hA : A ∈ Matrix.specialOrthogonalG
 
 /-- **The cost is invariant under rotations**: `⟨J, AXA⁻¹⟩ = ⟨A⁻¹JA, X⟩ = ⟨J, X⟩` for
 `A ∈ SO₂(ℝ)` (Sussmann's condition (ii); the book's Definition 9.1.1 omits it, but its proof of
-Theorem 9.1.6 checks the whole Hamiltonian, TeX 7921).
+Theorem 9.1.6 checks the whole Hamiltonian, TeX 7921–7922).
 
 Proof: `am_matrixCost_conj`: `A` commutes with `J`, and the trace form is invariant under
 conjugation. -/
@@ -1614,7 +1615,7 @@ momentum `𝒜 = ⟨J, Λ₁ + Λ_R⟩` is constant along every solution of the 
 Problem 6.7.1 with control set `U` (a state trajectory for `U`, `Λ₁, Λ_R ∈ 𝔰𝔩₂(ℝ)`, `Λ_R ⊥ X`,
 `Λ₁' = [Λ₁, X]`, `eqn:lamR`) with the maximum condition over `U`. The transversality conditions,
 `g(0) = I`, `H = 0`, `λ_cost ≤ 0` and nontriviality are not assumed: §9.3 (TeX 8136–8295) and
-Chapter 10 (TeX 8681–8689, 8945–8946) apply the conservation along such local solutions with
+Chapter 10 (TeX 8684–8689, 8945–8946) apply the conservation along such local solutions with
 `U = U_r`.
 
 Proof (the book's proof, TeX 7902–7966, with the lift):
@@ -1692,9 +1693,10 @@ theorem theorem9_1_6 {T : ℝ} {u : ℝ → Fin 3 → ℝ} {g X Λ₁ ΛR : ℝ 
 
 /-! ### Remark 9.1.7 -/
 
-/-- **Remark 9.1.7**, third item (TeX 7979–7984): "We also obtain the same conserved quantity for
-a control set `U_r` which is a disk of any radius `r` whenever `r² > ⅓`." The hypothesis
-`r² > ⅓` is not needed (module docstring).
+/-- **Remark 9.1.7** (`rem:angular-momentum-disks`, label of this formalization; unlabelled),
+third item (TeX 7979–7984): "We also obtain the same conserved quantity for a control set `U_r`
+which is a disk of any radius `r` whenever `r² > ⅓`." The hypothesis `r² > ⅓` is not needed
+(module docstring).
 
 Proof: `angularMomentum_conserved` for `U_r` (`isRotationClosed_controlDisk`,
 `isCompact_controlDisk`), the same argument as Theorem 9.1.6. -/

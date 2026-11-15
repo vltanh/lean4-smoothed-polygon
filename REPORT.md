@@ -9,17 +9,19 @@ equation numbers are the book's; TeX line numbers refer to its source file `chap
 
 - **Proved:** Mahler's First conjecture (Theorem 16.3.1) with no hypothesis; the Challenge's three
   statements, Theorems 16.3.1 and 7.5.6 and the octagon's density `(8 - √32 - ln 2)/(√8 - 1)`.
-- **Formalized:** every numbered result of Chapters 2–8, 13–16, Lemma 10.1.1, Corollary A.1.3 and
-  A.3, A.6, A.11, except a few remarks and Proposition 15.3.2, proved in part (Section 9).
-- **Not formalized,** by the user's scope decision: Chapter 1, Chapters 9–12 apart from Lemma
-  10.1.1, the other appendices, and the remarks that no main result uses (Section 9).
+- **Formalized:** every numbered result of Chapters 2–8, §9.0–9.1, Chapters 13–16, Lemma 10.1.1,
+  Corollary A.1.3 and A.3, A.6, A.11, except a few remarks and Proposition 15.3.2, proved in part
+  (Section 9).
+- **Not formalized,** by the user's scope decision: Chapter 1, the rest of Chapters 9–12 (§9.2 on,
+  apart from Lemma 10.1.1), the other appendices, and the remarks that no main result uses
+  (Section 9).
 - **Nothing assumed:** every cited result is proved (Section 2), and the four facts that the book
   reads off computations are proved without computer assistance (Section 7).
 - **Build:** `lake build` succeeds; the only `sorry`s are the three statements of [`Challenge.lean`](Challenge.lean);
   no `axiom`, `admit`, `native_decide` or `decide +kernel`.
 - **Axioms:** [`scripts/Audit.lean`](scripts/Audit.lean), with `import all`, finds only [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and
-  [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound) in all 10,675 declarations of the library and in the three Challenge theorems.
-- **Routes:** the route check compares 140 results with the book's proofs: 185 differences, all
+  [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound) in all 10,888 declarations of the library and in the three Challenge theorems.
+- **Routes:** the route check compares 145 results with the book's proofs: 187 differences, all
   recorded with reasons (Section 8). Comparator accepts the Solution under Lean's kernel and NanoDa.
 - **Review:** independent agents reviewed the statements and the proofs; no person has reviewed the
   proofs. [CREDITS.md](CREDITS.md) says how this was made.
@@ -32,6 +34,7 @@ equation numbers are the book's; TeX line numbers refer to its source file `chap
 | The converse of Problem 3.6.2 that §6.1 uses is false; it holds for winding number one, so below cost `7π/2`. | [E15](docs/report/errors.md#e15) |
 | Nontriviality on the full costate makes every admissible trajectory an extremal; it belongs on the reduced costate. | [E21](docs/report/errors.md#e21) |
 | Theorem 7.7.1 is false read literally and Theorem 8.3.1 false as printed; corrected forms are proved. | [E32](docs/report/errors.md#e32), [E56](docs/report/errors.md#e56) |
+| The Noether–Sussmann theorem as quoted (Theorem 9.1.4) drops the invariance of the cost and is false (refuted in Lean); Sussmann's form, which Theorem 9.1.6 needs, is proved. | [E95](docs/report/errors.md#e95) |
 | Theorem 3.1.4(3), Lemma 3.1.8 and the existence claim of Filippov's theorem each lack a hypothesis. | [E13](docs/report/errors.md#e13), [E34](docs/report/errors.md#e34), [E35](docs/report/errors.md#e35) |
 | §6.1's existence argument fails as written, and minimizers are identified with `K_min` without proof; both are proved. | [E46](docs/report/errors.md#e46), [E47](docs/report/errors.md#e47) |
 | The proof of Theorem 8.2.7 covers part of its statement; proved in the authors' reading, open for abnormal lifts. | [E55](docs/report/errors.md#e55) |
@@ -51,6 +54,7 @@ equation numbers are the book's; TeX line numbers refer to its source file `chap
 | The Euler–Arnold equation (Proposition 6.5.1) | [`External.euler_arnold`](External/EulerArnold.lean#L72) |
 | Filippov's theorem (Theorem 6.1.1; §6.1 needs a form with a state constraint) | [`External.filippov`](External/Filippov.lean#L153); the OptimalControl package |
 | The Pontryagin maximum principle (§6.2, Proposition 8.1.3) | [`External.pontryagin_maximum_principle`](External/Pontryagin.lean#L80), from the OptimalControl package |
+| Sussmann's Noether theorem (Theorem 9.1.4; Theorem 9.1.6, Remark 9.1.7) | [`External.noether_sussmann`](External/NoetherSussmann.lean#L105), from the OptimalControl package |
 | Brouwer's fixed-point theorem (in the proof of the maximum principle) | the FixedPoint package |
 | Gronwall's inequality (§6.1, Corollary A.1.3), the case of constant coefficients | the OptimalControl package |
 | Irwin's stable manifold theorem (Theorem A.3.1; §14.3) | [`theoremA_3_1`](SmoothedPolygons/AppA/StableManifold.lean#L186), from the StableManifold package |
@@ -60,6 +64,8 @@ equation numbers are the book's; TeX line numbers refer to its source file `chap
   except Filippov's theorem and the stable manifold theorem, which are proved by standard arguments.
 - The book applies Filippov's theorem to a problem that it does not cover ([E46](docs/report/errors.md#e46)), and the maximum
   principle with a nontriviality condition that every trajectory meets ([E21](docs/report/errors.md#e21)).
+- Its quotation of Sussmann's Noether theorem drops the invariance of the cost and is false; its
+  application in Theorem 9.1.6 satisfies Sussmann's hypotheses ([E95](docs/report/errors.md#e95)).
 - The standard facts that the book uses without citation are proved, in Mathlib, or not needed.
 - Details: [docs/report/cited-results.md](docs/report/cited-results.md). The general mathematics
   that the formalization built ([`Basic/`](Basic), the three packages, what Mathlib lacks) is in
@@ -67,7 +73,7 @@ equation numbers are the book's; TeX line numbers refer to its source file `chap
 
 ## 3. Errors and gaps in the paper
 
-94 findings, indexed here by chapter; each number links to its entry in
+97 findings, indexed here by chapter; each number links to its entry in
 [docs/report/errors.md](docs/report/errors.md), which says how the formalization repairs it.
 
 ### Chapters 2–4
@@ -143,6 +149,14 @@ equation numbers are the book's; TeX line numbers refer to its source file `chap
 | [E58](docs/report/errors.md#e58) | Remark 8.3.3, §8.3 (7610–7616) | The balanced disk need not exist; no proof. |
 | [E59](docs/report/errors.md#e59) | Lemma 8.3.4, §8.3 (7619–7670) | A sign and a garbled display; the conclusion stands. |
 
+### Chapter 9
+
+| E | Where (book §, TeX lines) | Finding, one line |
+| --- | --- | --- |
+| [E96](docs/report/errors.md#e96) | Definition 9.0.1 (7693–7699) | `U_C` as printed is `U_T`; read as the disk `U_1`. |
+| [E95](docs/report/errors.md#e95) | Theorem 9.1.4, §9.1 (7812–7880) | The Noether–Sussmann theorem drops the invariance of the cost: false as printed, refuted in Lean. |
+| [E97](docs/report/errors.md#e97) | Problem 9.1.5, Theorem 9.1.6, §9.1 (7882–7898, 7963–7965) | No state space is given; "the optimal trajectory" where the proof gives every extremal. |
+
 ### Chapters 13 and 14
 
 | E | Where (book §, TeX lines) | Finding, one line |
@@ -212,9 +226,10 @@ Details and counterexamples: [docs/report/errors.md](docs/report/errors.md#missi
 
 ## 5. Redundant hypotheses
 
-- Ten statements hold without some of their hypotheses, and the Lean statements omit them:
+- Twelve statements hold without some of their hypotheses, and the Lean statements omit them:
   Theorem 3.1.4 (1)–(2), Proposition 3.1.9, Corollary 3.1.10, Lemma 3.3.1, Theorem 5.0.2,
-  Corollary 6.5.4, Theorem 6.8.2, Lemmas 7.1.2 and 7.3.1, and Gruber's Corollary 30.1.
+  Corollary 6.5.4, Theorem 6.8.2, Lemmas 7.1.2 and 7.3.1, Theorem 9.1.6 (in its generic form),
+  Remark 9.1.7 and Gruber's Corollary 30.1.
 - Eleven Lean statements keep, as printed, a hypothesis that their proofs do not use: Lemma 3.1.8,
   Proposition 6.4.1, Lemma 8.1.5, Theorem 8.3.1, Lemmas 13.2.8, 13.3.1 and 13.3.2, the continuity
   claim of §15.1, the case `(m_A, m_B) = (0, 3)` of §15.2, Corollary A.1.3 and Filippov's theorem.
@@ -235,6 +250,9 @@ Details and counterexamples: [docs/report/errors.md](docs/report/errors.md#missi
   `K_min`; one of each exists ([E47](docs/report/errors.md#e47)).
 - Theorem 7.7.1 is read up to time translation, in a conic neighbourhood and for terminal times
   near `t_f` ([E32](docs/report/errors.md#e32)); Theorems 8.2.7 and 8.3.1 as [E55](docs/report/errors.md#e55) and [E56](docs/report/errors.md#e56) say.
+- In Chapter 9, `U_C` is the disk `U_1` ([E96](docs/report/errors.md#e96)); the circular problem lives on the star states for
+  `U_C`, and Theorem 9.1.6 holds along every Pontryagin extremal ([E97](docs/report/errors.md#e97)); the Noether–Sussmann
+  theorem is applied in Sussmann's form ([E95](docs/report/errors.md#e95)).
 - The first control of the Fuller system is the vertex control that is optimal on some `[0, ε]`,
   so a tangency is not a switch ([E62](docs/report/errors.md#e62)).
 - Theorem 14.4.1 is stated for extremals that are finitely bang-bang on compact subintervals, which
@@ -266,6 +284,7 @@ error or gap of the book or by mathematics that Mathlib lacks.
 | Theorem 8.1.4, two steps | the derivative of `λ₂` at its zeros only; a continuation past an end | forced ([E49](docs/report/errors.md#e49)) |
 | Theorem 8.2.7 | the authors' reading, through the edge problem | forced; the reading is the user's decision ([E55](docs/report/errors.md#e55)) |
 | Theorem 8.3.1 | a one-sided form, with the form about the control as a corollary | forced; the form is the user's decision ([E56](docs/report/errors.md#e56)) |
+| Theorem 9.1.6 | the reduced costate `(Λ₁, Λ_R)` lifted to a covector curve, to which the Noether–Sussmann theorem applies | forced: Problem 9.1.5 is posed on Problem 6.7.1's reduced variables (TeX 7883), while the book's proof uses the full costate |
 | Lemma 13.2.5; the descent of `F` | the substitutions redone for constant controls | forced ([E63](docs/report/errors.md#e63)) |
 | Lemma 13.2.6 | the sufficient direction, by the same expansion | forced ([E62](docs/report/errors.md#e62)) |
 | Lemma 13.3.2 | a maximizing face that may vary, reduced to the book's cases | forced ([E65](docs/report/errors.md#e65)) |
@@ -289,6 +308,7 @@ error or gap of the book or by mathematics that Mathlib lacks.
 | Mahler 1947, Lemma 3 | `Δ` of a parallelogram by Mahler's own example; two results of Mahler's Part I proved in the plane | the sources quote them from other works |
 | Fejes Tóth's theorem | Dowker's theorem by a merge of normal angles; side counts by angle sums | forced: Mathlib lacks Euler's formula and the Jordan curve theorem |
 | The maximum principle | Agrachev and Sachkov's argument in coordinates (D1–D11) | forced: Mathlib lacks the chronological calculus and Carathéodory theory |
+| Sussmann's Noether theorem | Sussmann's steps applied to the cotangent lift of a symmetry directly | his route through Theorems 3.1–3.2 needs a second flow, of a field only continuous in the `C¹` reading |
 
 The errors and gaps of Mahler's papers and of Agrachev and Sachkov's proof, all repaired, and the
 details of the four computed facts are in [docs/report/departures.md](docs/report/departures.md).
@@ -300,18 +320,22 @@ details of the four computed facts are in [docs/report/departures.md](docs/repor
   proved; it has no hypothesis and uses only the three standard axioms.
 - The stable manifold theorem enters through Theorem 14.4.1. Chapters 13 and 15 and the four
   computed facts use no result from prior work.
-- The route check finds 140 results of the book in the Lean code and 185 differences from the
+- Theorem 9.1.6 and Remark 9.1.7 use, from prior work, only Sussmann's Noether theorem, in its
+  form for one infinitesimal symmetry.
+- The route check finds 145 results of the book in the Lean code and 187 differences from the
   book's citations, each recorded with its reason in [`docs/route_differences.tsv`](docs/route_differences.tsv).
 - Details: [docs/report/dependencies.md](docs/report/dependencies.md).
 
 ## 9. Not formalized
 
 - By the user's decision (15 November 2026: formalize what the main results need): Chapter 1,
-  Chapters 9–12 apart from Lemma 10.1.1, Appendix A apart from A.1.3, A.3, A.6 and A.11, Appendix B,
-  and the remarks and claims of the running text that no main result uses.
+  Chapters 9–12 apart from Lemma 10.1.1 and §9.0–9.1 (added at the user's request), Appendix A apart
+  from A.1.3, A.3, A.6 and A.11, Appendix B, and the remarks and claims of the running text that no
+  main result uses.
 - Open: the printed Theorem 8.2.7 for abnormal lifts, neither proved nor refuted ([E55](docs/report/errors.md#e55)).
-- Within the formalized chapters: the conjectural Remarks 7.6.1 and 7.6.3; the interpretation in
-  Remark 13.5.4 ([E69](docs/report/errors.md#e69)); the rest of Proposition 15.3.2, which no proof uses ([E72](docs/report/errors.md#e72)).
+- Within the formalized chapters: the conjectural Remarks 7.6.1 and 7.6.3; Remark 9.0.2, and the
+  existence of optimal controls for `U_C`, which the book does not establish ([E97](docs/report/errors.md#e97)); the
+  interpretation in Remark 13.5.4 ([E69](docs/report/errors.md#e69)); the rest of Proposition 15.3.2, which no proof uses ([E72](docs/report/errors.md#e72)).
 - Also: claims of Chapters 15–16 read off figures that no proof uses; Remarks 14.2.2 and 14.3.2;
   the numbers of Figure 14.2 and the global curve ([E93](docs/report/errors.md#e93)); the cells of §16.4.2 ([E90](docs/report/errors.md#e90)); the global
   part of Theorem A.3.1.
@@ -348,6 +372,8 @@ route; they use only the three marked "taken".
 | Lemma 8.2.1 | the matrices `Z_{e_i}` span `𝔰𝔩₂(ℝ)` |
 | Theorem 8.1.4 | finiteness from the isolation of the zeros, with no count |
 | Theorem 8.3.1, claim (a) | Lemma 8.2.2 gives the derivative of `Λ_R`, without the Gronwall step |
+| Theorem 9.1.6 | `𝒜' = -d/dθ H(Ad_{e^{θJ}} Z_u)` vanishes at a maximizer: no Noether theorem and no lift (§9.3's own computation) |
+| Theorem 9.1.6 | the right action of Remark 9.1.7 has momentum `-𝒜`, without Corollary 6.5.3 |
 | Straight edges in Remark 8.3.3 | a proof without angle functions (taken) |
 | The first control of `q_out` | Lemma 13.2.6 at once |
 | Convergence in `𝒟_out` | the contraction alone, without the existence part of Banach's theorem |

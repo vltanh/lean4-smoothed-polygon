@@ -10,13 +10,14 @@ on `SL₂(ℝ)` and studies its Pontryagin extremals.
 - **Mahler's First conjecture** (Theorem 16.3.1, the book's main theorem) is proved with no
   hypothesis: every global minimizer is bang-bang with finitely many switches, and every worst
   disk `K_min` is a smoothed polygon.
-- Chapters 2–8 and 13–16 and Appendices A.3, A.6 and A.11 are formalized: every numbered result is
-  proved, some in corrected form (see below), except two conjectural remarks, the Mathematica-based
-  part of Remark 13.5.4 and Proposition 15.3.2 (read off figures, used by no proof, proved in part).
+- Chapters 2–8, §9.0–9.1, Chapters 13–16 and Appendices A.3, A.6 and A.11 are formalized: every
+  numbered result is proved, some in corrected form (see below), except two conjectural remarks, the
+  Mathematica-based part of Remark 13.5.4 and Proposition 15.3.2 (read off figures, used by no proof,
+  proved in part).
 - The four facts that the book reads off Mathematica computations are proved without computer
   assistance, a departure from the book by the user's decision (below).
-- Not formalized, by the user's decision: Chapters 1 and 9–12 (apart from Lemma 10.1.1), the other
-  appendices, Appendix B, and the remarks that no main result uses.
+- Not formalized, by the user's decision: Chapter 1, the rest of Chapters 9–12 (apart from Lemma
+  10.1.1), the other appendices, Appendix B, and the remarks that no main result uses.
 - The Reinhardt conjecture itself (that the smoothed octagon is the worst disk) is open and not
   claimed.
 
@@ -30,12 +31,13 @@ on `SL₂(ℝ)` and studies its Pontryagin extremals.
 | Ch. 6, Hamiltonians; existence of a minimizer (§6.1); every minimizer is an extremal (§6.2) | proved |
 | Ch. 7, the smoothed `(6k+2)`-gons are extremals; the octagon is an isolated extremal | proved |
 | Ch. 8, edge problems, singular locus, finite bang-bang | proved (two theorems restated, see below) |
+| Ch. 9, §9.0–9.1, circular control: rotation invariance (Theorem 9.0.3), conservation of angular momentum (Theorem 9.1.6) | proved (the Noether–Sussmann theorem in Sussmann's form; as printed it is false, E95) |
 | Ch. 13, the triangular Fuller system: blow-up, Poincaré map, fixed points `q_out`, `q_in` and their stability | proved |
 | Ch. 14, the analytic extension of the Reinhardt–Poincaré map across the singular locus, its stable and unstable manifolds, Theorem 14.4.1 (no return) | proved (the unstable curve of Figure 14.2 without computer assistance) |
 | Ch. 15, the geometry of the Fuller–Poincaré map: cell coordinates, smaller cells, the involution `τF` | proved (Proposition 15.3.2 in part) |
 | Ch. 16, Theorems 16.1.1 (global basin), 16.2.1, 16.4.1 (cluster point theorem) and 16.3.1 (Mahler's First conjecture) | proved (Table 16.1 without computer assistance) |
 | Appendix A.1 (Corollary A.1.3), A.3 (Theorem A.3.1, local part), A.6, A.11 | proved |
-| Ch. 9–12 (circular control) apart from Lemma 10.1.1; the other appendices; Appendix B | not formalized (the user's scope decision) |
+| Ch. 9 from §9.2, Ch. 10–12 apart from Lemma 10.1.1; the other appendices; Appendix B | not formalized (the user's scope decision) |
 
 ## Main results
 
@@ -46,6 +48,7 @@ on `SL₂(ℝ)` and studies its Pontryagin extremals.
 | Example before 7.5.6 | [`SmoothedPolygonsChallenge.smoothed_octagon_density`](Challenge.lean#L492) | the smoothed octagon's greatest packing density is `(8 - √32 - ln 2)/(√8 - 1) ≈ 0.902414` |
 | Theorem 7.7.1 | [`theorem7_7_1`](SmoothedPolygons/Ch7/Isolated.lean#L508) | the octagon is an isolated extremal, up to time translation (E32) |
 | §6.1, §6.2 and `K_min` | [`exists_isReinhardtMinimizer_isPontryaginExtremal_isWorstDisk`](SmoothedPolygons/Ch6/WorstDisk.lean#L250) | a global minimizer exists, is an extremal, and bounds a worst disk `K_min` |
+| Theorem 9.1.6 | [`theorem9_1_6`](SmoothedPolygons/Ch9/AngularMomentum.lean#L1689) | the angular momentum `⟨J, Λ₁ + Λ_R⟩` is conserved along every Pontryagin extremal of the circular control problem (E97) |
 | Lemma 13.5.5 | [`lemma13_5_5`](SmoothedPolygons/Ch13/Stability.lean#L281) | the fixed point `q_out` of the Fuller–Poincaré map (Lemma 13.5.2) is asymptotically stable, and `q_in = τ(q_out)` is unstable |
 | Theorem 14.4.1 | [`theorem14_4_1_unconditional`](SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean#L51) | a trajectory that emanates from the fixed point over `q_out` on the exceptional divisor does not return to it |
 | Theorem 16.1.1 | [`theorem16_1_1_unconditional`](SmoothedPolygons/Ch16/BasinFacts.lean#L53) | every orbit of the Fuller–Poincaré map on `Ξ_{𝒲,0}/V_T` other than `q_in` tends to `q_out` |
@@ -74,7 +77,7 @@ numerically and guided the proofs; the Lean proofs do not depend on it
 
 ## What the audit found
 
-[REPORT.md](REPORT.md) checks the book against the formalization; 94 findings (E1–E94). The main
+[REPORT.md](REPORT.md) checks the book against the formalization; 97 findings (E1–E97). The main
 ones:
 
 | | Finding |
@@ -87,6 +90,7 @@ ones:
 | E47 | The book identifies the control minimizers with Reinhardt's `K_min` without proof; proved here. |
 | E55 | Theorem 8.2.7's proof covers only part of its statement. By the user's decision it is proved in the authors' reading; the printed form is proved for normal lifts and open for abnormal ones. |
 | E56 | Theorem 8.3.1 is false as printed; by the user's decision it is proved in a one-sided form, which suffices for Theorem 8.3.2. |
+| E95 | The Noether–Sussmann theorem as the book quotes it drops the invariance of the cost and is false (refuted in Lean); Theorem 9.1.6 needs only Sussmann's form, which is proved. |
 | E65 | The proof of Lemma 13.3.2 assumes the maximizing face constant in time; repaired along its lines. |
 | E68 | Lemma 13.5.5 (stability of `q_out`) rests on a Mathematica computation; proved here with an exact Jacobian and certified eigenvalue bounds. |
 | E73, E75 | §15.3 uses `F⁻¹ = τFτ` where it fails (on the top faces of the cells), and Remark 15.3.1 swaps `q_in` and `q_out`. |
@@ -101,7 +105,7 @@ sketches, or, for the computed facts, by the user's decision, are listed in
 ## Trust
 
 - No `sorry` outside the statements of [`Challenge.lean`](Challenge.lean); no `axiom`, `native_decide` or `decide +kernel`.
-- `lake env lean scripts/Audit.lean` checks, with `import all`, that every declaration (10,675) depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext),
+- `lake env lean scripts/Audit.lean` checks, with `import all`, that every declaration (10,888) depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext),
   [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound).
 - A route check compares each proof with the results the book's proof cites; every difference is
   recorded in [`docs/route_differences.tsv`](docs/route_differences.tsv).
@@ -111,7 +115,8 @@ sketches, or, for the computed facts, by the user's decision, are listed in
 ## Dependencies
 
 - [OptimalControl](https://github.com/vltanh/lean4-optimal-control): Filippov's theorem (also under
-  a state constraint) and the Pontryagin maximum principle, by Agrachev and Sachkov's proof.
+  a state constraint), the Pontryagin maximum principle, by Agrachev and Sachkov's proof, and
+  Sussmann's Noether theorem for optimal control.
 - [FixedPoint](https://github.com/vltanh/lean4-fixed-point): Brouwer's fixed-point theorem, which
   the maximum principle needs.
 - [StableManifold](https://github.com/vltanh/lean4-stable-manifold): the stable manifold theorem
@@ -138,7 +143,7 @@ Lean and Mathlib `v4.36.0-rc2`.
 
 | Path | Content |
 | --- | --- |
-| [`SmoothedPolygons/`](SmoothedPolygons) | the book, one directory per chapter (`Ch2`–`Ch8`, `Ch13`–`Ch16`, `AppA`); the proof of N4 is `Ch14/Arc*` |
+| [`SmoothedPolygons/`](SmoothedPolygons) | the book, one directory per chapter (`Ch2`–`Ch9`, `Ch13`–`Ch16`, `AppA`); the proof of N4 is `Ch14/Arc*` |
 | [`External/`](External) | cited results, all proved ([External/README.md](External/README.md)) |
 | [`Basic/`](Basic) | general mathematics written for this project ([Basic/README.md](Basic/README.md)) |
 | [`Challenge.lean`](Challenge.lean), [`Solution.lean`](Solution.lean) | Palomar's statement of record and its proof |

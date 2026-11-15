@@ -313,6 +313,49 @@ Part of the [audit report](../../REPORT.md).
     beginning and ending on a segment.
   - "Defines a balanced disk `K(g, X)`" in Remark 8.3.3 is read as a hypothesis: a balanced pair
     `(K, σ)` with `σ_j = g s_j*` and `σ_j(t + t_f) = σ_{j+1}(t)` (E58).
+- **The control sets of Chapter 9 (Definition 9.0.1).** `U_C` is read as the disk `U_1`
+  ([`controlDiskC`](../../SmoothedPolygons/Ch9/ControlSets.lean#L85)): the printed formula gives `U_T` (E96).
+  - `U_I` keeps its printed constraints `0 ≤ uᵢ ≤ 1`, which the others imply: it is `U_r` with
+    `r² = ½` ([`controlDiskI_eq_controlDisk`](../../SmoothedPolygons/Ch9/ControlSets.lean#L127)).
+  - `U_r` is defined for every `r`: empty for `r² < ⅓`, the centroid for `r² = ⅓`. Definition
+    9.0.1 prints `⅓ ≤ r²` (TeX 7711), Remark 9.1.7 `r² > ⅓` (TeX 7981); neither is needed.
+- **Rotations (Theorem 9.0.3, Remark 9.0.4).** "The control set" is the set `{Z_u | u ∈ U}` of
+  control matrices, `SO₂` is `Matrix.specialOrthogonalGroup (Fin 2) ℝ`, and `Ad_A M = A M A⁻¹`
+  ([`IsRotationClosed`](../../SmoothedPolygons/Ch9/ControlSets.lean#L159)).
+  - Theorem 9.0.3 is stated for the control-dependent Hamiltonian `H(Λ₁, Λ_R, X; Z_u)` of
+    `eqn:full-hamiltonian`, under the joint action of `Ad_A` on `Λ₁`, `Λ_R`, `X` and `Z_u`
+    ([`theorem9_0_3`](../../SmoothedPolygons/Ch9/ControlSets.lean#L317)).
+  - The proof's remarks that the transformed costates satisfy the same equations are realized in
+    §9.1 as the equivariance of the state equations ([`matrixField_rotateState`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L590)) and the
+    invariance of the cost; the costates follow by the cotangent lift.
+- **The circular control problem (Problem 9.1.5).** Problem 6.7.1 is posed for any control set `U`
+  ([`IsPontryaginExtremalFor`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L310), which for `U_T` is [`IsPontryaginExtremal`](../../Challenge.lean#L214)), and the circular problem is
+  `U = U_C`; Remark 9.1.7 takes `U = U_r`.
+  - Its extremals carry the reduced costate `(Λ₁, Λ_R)`, with `U_T` replaced by `U` throughout: the
+    controls, the maximum condition and the state space.
+  - The state space, which the book does not give, is the set of star states for `U`: `det X = 1`
+    and `⟨Z_u, X⟩ < 0` for every `u ∈ U` ([`IsStarStateFor`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L164); E97).
+  - Chapter 10's convention, the star condition only at the optimal control, is not taken: the
+    Noether–Sussmann theorem needs every `f(·, u)` to be `C¹` on an open domain (E97).
+  - `SL₂(ℝ)` is replaced by the open set `GL₂⁺(ℝ)`, as in Chapter 6.
+- **Theorem 9.1.6 and Remark 9.1.7.** "Along the optimal trajectory" is read as along every
+  Pontryagin extremal, as the proof gives and the introduction states (E97).
+  - This is stronger than the book's form given the maximum principle for `U_C`, which makes optimal
+    trajectories extremals and is not formalized for `U_C`.
+  - The generic form ([`angularMomentum_conserved`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L1633)) assumes only the state–costate equations and
+    the maximum condition, for a compact control set closed under rotations: §9.3 and Chapter 10
+    apply the conservation along such local solutions.
+  - Remark 9.1.7's "whenever `r² > ⅓`" is not needed ([`remark9_1_7`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L1703); Section 5).
+- **The Noether–Sussmann theorem (§9.1).** It is applied in Sussmann's form, whose symmetries
+  preserve the cost ([`External.noether_sussmann_one_parameter`](../../External/NoetherSussmann.lean#L119)); as printed it is false (E95).
+  - `𝔰𝔬₂(ℝ) = ℝJ` is one-dimensional, so the momentum map is constant exactly when the momentum of
+    the one field `τ(J)` is; the one-parameter form is applied.
+  - It is formalized in the coordinates of the OptimalControl package: an open subset of a
+    finite-dimensional space, with `C¹` in place of smooth (its readings S1–S8).
+  - Definitions 9.1.1–9.1.2 as printed ([`IsSymmetryAsPrinted`](../../SmoothedPolygons/Ch9/NoetherAsPrinted.lean#L65),
+    [`IsInfinitesimalGroupOfSymmetriesAsPrinted`](../../SmoothedPolygons/Ch9/NoetherAsPrinted.lean#L82)) are the package's without condition (ii); "Let `G` be a
+    Lie group" (TeX 7823) plays no role and is dropped.
+  - The refuted claim assumes analytic data (`ContDiffOn ℝ ⊤`), which is smooth in every sense.
 - **The Fuller system (§13.2).** A point of `ℂ³` is `Fin 3 → ℂ` with `z 0 = z₁`, `z 1 = z₂`,
   `z 2 = z₃`.
   - Trajectories with a measurable control are solved in Carathéodory's sense
@@ -577,5 +620,8 @@ Part of the [audit report](../../REPORT.md).
 | E82 | the domain of `ξ(x̃)` |
 | E87 | Remark 14.3.4 in a mirrored chart, and the second statement of Theorem 14.4.1 without the chart |
 | E92 | the local stable set, with its orbit in `U` |
+| E95 | the Noether–Sussmann theorem in Sussmann's form, with the invariance of the cost |
+| E96 | `U_C` as the disk `U_1` |
+| E97 | the star states for `U_C` as the state space; Theorem 9.1.6 along every Pontryagin extremal |
 
 Corrections in proofs: E14, E24, E44, E50, E59, E64, E65, E67, E74, E79, E80, E83, E85 and E88–E91.

@@ -16,6 +16,7 @@ They are used as follows.
 | the Euler–Arnold equation | Proposition 6.5.1 and the proof that minimizers are extremals |
 | the Pontryagin maximum principle, proved in the OptimalControl package with Brouwer's theorem from the FixedPoint package | that proof; through it and the maximum principle for the edge control problem, Proposition 8.1.3, Theorem 8.2.7 and Theorem 16.3.1 |
 | the stable manifold theorem, proved in the StableManifold package and stated as Theorem A.3.1 ([`theoremA_3_1`](../../SmoothedPolygons/AppA/StableManifold.lean#L186)) | Theorem 14.3.3 and Remark 14.3.4; through them, Theorem 16.4.1 and its time reversal and Theorem 14.4.1; and so Mahler's First conjecture, as the import-all audit confirms |
+| Sussmann's Noether theorem, proved in the OptimalControl package, in its form for one infinitesimal symmetry ([`External.noether_sussmann_one_parameter`](../../External/NoetherSussmann.lean#L119)) | Theorem 9.1.6 and Remark 9.1.7 (both items); no result on the path of Mahler's First conjecture |
 | Filippov's theorem, proved as Theorem 6.1.1 | no other result |
 | Filippov's theorem with a state constraint, and Gronwall's inequality, both from the OptimalControl package | the existence of a minimizer (§6.1) |
 | Gronwall's inequality | also Corollary A.1.3, in Lemma 8.1.5 and Theorem 8.3.1 |
@@ -66,7 +67,7 @@ Every declaration depends only on [`propext`](https://leanprover-community.githu
 
 - it imports every module of the library with `import all`, so that the proofs of module files are
   visible;
-- it reports "Checked 10675 declarations of the library: all use only the standard axioms";
+- it reports "Checked 10888 declarations of the library: all use only the standard axioms";
 - it checks the axioms of each numbered result, through the packages it uses, and of the three
   Challenge theorems.
 
@@ -74,11 +75,11 @@ Every declaration depends only on [`propext`](https://leanprover-community.githu
 
 The route check
 (`python3 scripts/route_check.py check docs/paper_routes.tsv --accept docs/route_differences.tsv`)
-compares, for each of the 140 results of the book found in the Lean code, the numbered results that
+compares, for each of the 145 results of the book found in the Lean code, the numbered results that
 the Lean proof uses with those that the book's proof cites.
 
-It passes: every difference is recorded in [`docs/route_differences.tsv`](../../docs/route_differences.tsv) with its reason ("185 route
-differences, 185 of them recorded"). Nine more, which the other route explains, are shown by
+It passes: every difference is recorded in [`docs/route_differences.tsv`](../../docs/route_differences.tsv) with its reason ("187 route
+differences, 187 of them recorded"). Nine more, which the other route explains, are shown by
 `--all`: a result that the Lean proof uses directly where the book reaches it through a cited
 result, or conversely.
 
@@ -175,6 +176,16 @@ Three basic facts are used throughout: Lemma 7.1.1, Lemma A.6.4 and Lemma 3.3.4.
   the trace computed in the proof of Theorem 7.5.1.
 - The last sentence of the proof of Theorem 7.5.1 ("Lemma 7.5.3 supplements the proof") concerns the
   maximum property, which belongs to Theorem 7.5.6.
+
+### Section 9.1
+
+In the block "Section 9.1: the angular momentum" of the file, two forced differences of Theorem
+9.1.6:
+
+- the book applies the Noether–Sussmann theorem as printed, which is false; the formal proof
+  applies Sussmann's form, a result from prior work (E95);
+- the book uses "the proof of Theorem 9.0.3", not its statement: Sussmann's symmetries must
+  preserve the dynamics and the cost, which the formal proof checks directly.
 
 ### Chapters 15–16
 
