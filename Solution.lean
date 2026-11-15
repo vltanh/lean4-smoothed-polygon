@@ -24,14 +24,18 @@ public import SmoothedPolygons.Ch13.RScale
 public import SmoothedPolygons.Ch13.SingularLocus
 public import SmoothedPolygons.Ch13.Stability
 public import SmoothedPolygons.Ch13.Symmetry
+public import SmoothedPolygons.Ch14.NoReturnReading
 public import SmoothedPolygons.Ch15.CellCoordinates
 public import SmoothedPolygons.Ch15.Continuity
 public import SmoothedPolygons.Ch15.FixedPointCells
 public import SmoothedPolygons.Ch15.Involution
+public import SmoothedPolygons.Ch15.PartitionCellTwo
 public import SmoothedPolygons.Ch15.SmallerCells
+public import SmoothedPolygons.Ch16.BasinFacts
 public import SmoothedPolygons.Ch16.BasinHypotheses
 public import SmoothedPolygons.Ch16.GlobalBasin
 public import SmoothedPolygons.Ch16.MahlerFirst
+public import SmoothedPolygons.Ch16.MahlerFirstArcRegion
 public import SmoothedPolygons.Ch16.NoChattering
 public import SmoothedPolygons.Ch16.OutwardFuller
 public import SmoothedPolygons.Ch2.BalancedCircle
@@ -116,10 +120,10 @@ public import SmoothedPolygons.Defs
 /-!
 # Solution
 
-Entry point of the library: it imports every module, and restates the two theorems of
-`Challenge.lean` word for word, with their proofs from the library (`theorem7_5_6`,
-`example7_5_smoothedOctagon`). Palomar's Comparator checks that these are the Challenge's
-statements and that their proofs use only the standard axioms (`comparator.json`).
+Entry point of the library: it imports every module, and restates the three theorems of
+`Challenge.lean` word for word, with their proofs from the library (`theorem16_3_1_unconditional`,
+`theorem7_5_6`, `example7_5_smoothedOctagon`). Palomar's Comparator checks that these are the
+Challenge's statements and that their proofs use only the standard axioms (`comparator.json`).
 -/
 
 @[expose] public section
@@ -127,6 +131,16 @@ statements and that their proofs use only the standard axioms (`comparator.json`
 namespace SmoothedPolygonsChallenge
 
 open SmoothedPolygons
+
+/-- **Theorem 16.3.1** (Mahler's First conjecture; Hales–Vajjha). The global minimizer of the
+Reinhardt optimal control problem is a bang-bang solution with finitely many switches. In
+particular, the minimizer `K_min` of the Reinhardt problem is a finite-sided smoothed polygon with
+rounded hyperbolic arcs at each corner of the sort described by Reinhardt and Mahler. -/
+theorem mahler_first_conjecture :
+    (∀ (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2), IsReinhardtMinimizer T u g X →
+      IsFiniteBangBang 0 T u) ∧
+    ∀ K : Set (Fin 2 → ℝ), IsWorstDisk K → IsSmoothedPolygon K :=
+  theorem16_3_1_unconditional
 
 /-- **Theorem 7.5.6** (Hales–Vajjha). For each positive integer `k`, the smoothed `(6k+2)`-gon is a
 Pontryagin extremal of the Reinhardt control problem given by a bang-bang control. -/

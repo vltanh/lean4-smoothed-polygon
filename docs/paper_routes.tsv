@@ -234,6 +234,13 @@ thm:hyperbolic-out	theorem	1	lem:analytic-extension,lem:eigenvalues
 # Unlabelled Remark 14.3.4 (line 11898): the same at q_in "by time reversal" (no proof). Label of this
 # formalization.
 rem:hyperbolic-in	remark	0	
+# Figure 14.2 (line 11976, label fig:unstable-curve) and the running text around it (lines 11951-11991):
+# the unstable curve of (0, x_out) reaches the boundary of the star domain, the switching sequence staying
+# cyclic (N4), read off a Mathematica computation, with no proof. The proof of Theorem 14.4.1 uses it
+# without citing the figure ("the unstable curve hits the boundary of the star domain", lines 12009-12010).
+# Stated as the named fact UnstableCurveLeavesStarDomain and proved without computer assistance (the
+# user's decision; REPORT.md E88): unstableCurveLeavesStarDomain.
+fig:unstable-curve	figure	0	
 thm:no-return	theorem	1	
 # Equation (15.1.1) (line 12051): x_3 = 2 r_1 r_2 sin(theta_1 - theta_2) = -2 r_1 r_2 sin psi; "the vanishing
 # Hamiltonian condition implies" it (a one-line derivation, no citation).
@@ -258,7 +265,14 @@ rem:qin-juncture	remark	0
 # proposition", whose summary cites Lemma 13.2.4; read off Figures 15.2-15.3 (REPORT.md, E72). Stated as the
 # named proposition Proposition15_3_2, not proved. Label of this formalization.
 prop:partition	proposition	1	lem:switch-reversal
-thm:basin	theorem	1	
+# Table 16.1 (line 12556, label tab:diag), "Upper triangular structure of the Fuller-Poincare map on
+# the two big cells": its rows are read off Mathematica plots (Figures 16.1-16.4), with no proof.
+# Stated as the named facts DOutContracts, CellTwoEntersDOut and BoxSubclaims, proved analytically
+# (the user's decision).
+tab:diag	table	0	
+# The proof of Theorem 16.1.1 cites Table 16.1 ("Let D, D* run over the sets in
+# Table~\ref{tab:diag}", lines 12542 and 12550), which the extraction drops (not a statement).
+thm:basin	theorem	1	tab:diag
 thm:outward-fuller	theorem	1	
 thm:mahler	theorem	1	lem:constant-not-singular,prop:edge-extremal,thm:finite-bang-bang,thm:no-chatter,thm:no-return,thm:no-singular-arcs
 # The part of Theorem 16.3.1 that does not use Theorems 16.4.1 and 14.4.1 (lines 12811-12815): a global minimizer is

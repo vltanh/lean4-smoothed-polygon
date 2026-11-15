@@ -2,6 +2,7 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
+    "SmoothedPolygonsChallenge.mahler_first_conjecture",
     "SmoothedPolygonsChallenge.smoothed_polygon_extremal",
     "SmoothedPolygonsChallenge.smoothed_octagon_density"
   ],

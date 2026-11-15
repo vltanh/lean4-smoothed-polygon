@@ -11,16 +11,17 @@ The proof of Theorem 16.1.1 (`thm:basin`) of Hales–Vajjha, *Packings of Smooth
 (TeX 12511–12744) rests on containments of the Fuller–Poincaré map that the book computes
 numerically in Mathematica and shows in Figures 16.1–16.4 (Table 16.1, "Upper triangular structure
 of the Fuller–Poincaré map on the two big cells"). This file states them as three named
-propositions, the explicit hypotheses of `theorem16_1_1` (`SmoothedPolygons/Ch16/GlobalBasin.lean`),
-to be certified later (layer 5b):
+propositions, the explicit hypotheses of `theorem16_1_1` (`SmoothedPolygons/Ch16/GlobalBasin.lean`).
+All three are proved, without computer assistance (`dOutContracts`, `cellTwoEntersDOut`,
+`boxSubclaims`; the unconditional theorems are in `SmoothedPolygons/Ch16/BasinFacts.lean`):
 
 * `DOutContracts`: `F(𝒟_out) ⊆ 𝒟_out` (the row `𝒟_out` of Table 16.1, Figure 16.1, TeX 12592–12607)
   and a contraction to `q_out` inside `𝒟_out` (the book: "The forward iterates `F₁^k(𝒟_out)` quickly
   shrink toward `q_out`", unproved; REPORT.md, E78);
 * `CellTwoEntersDOut`: every point of the second big cell enters `𝒟_out` within three steps (the
-  rows `𝒟₂` and `𝒟₃`, TeX 12616–12620, 12629–12638, and `F²𝒟₃ ⊂ 𝒟₀₀`, Figure 16.2, TeX
+  rows `𝒟₂` and `𝒟₃`, TeX 12614–12620, 12629–12638, and `F²𝒟₃ ⊂ 𝒟₀₀`, Figure 16.2, TeX
   12640–12665);
-* `BoxSubclaims`: the subclaims `subclaim_{ij}` (TeX 12677–12726, Figures 16.3–16.4), with the row
+* `BoxSubclaims`: the subclaims `subclaim_{ij}` (TeX 12680–12726, Figures 16.3–16.4), with the row
   `𝒟₄` (TeX 12612–12615) merged in: from a box `𝒟_{ij}`, `(i, j) ∉ {(0,0), (2,2)}`, the map goes to
   the second big cell or to a lexicographically smaller box.
 
@@ -57,20 +58,23 @@ switching time as the least positive sign change of the switching cubics, includ
 within `10⁻⁹` of every face (an earlier sampling of the book's regions and new runs for this
 formulation; no violation).
 
-## Certification (layer 5b): direct enclosure instead of the boundary method
+## The proofs
 
 The book's "boundary method" (TeX 12577–12587: `F_i(∂𝒟) ⊂ 𝒟̃` convex suffices when `𝒟` is a closed
 ball) needs `F_i` injective on `𝒟` and invariance of domain (REPORT.md, E77), and the images of the
-curved faces. The facts here are stated so that they can be certified by **direct enclosure**:
-subdivide the domain box into small boxes; on each, decide the first control by the signs of `y₂`,
-`y₁`; enclose the switching time as a root of the explicit switching cubics (`chiA_chiB_eq`;
-coefficients affine in `x_j, y_j`, which are `r_j cos θ_j`, `r_j sin θ_j`) by sign changes at the
-ends of an interval and a sign of the derivative (interval Newton), and the positivity of the other
-switching cubic up to it; enclose `z(t)` (polynomial in `t`), the rotation onto `𝒲₀` (a fixed power
-of `ζ` for each switch), the rescaling to `r₁ + r₂ = 1` (a quadratic root) and the arguments; check
-the inclusion in the target boxes. No ODE is solved. Near the faces where the switching time tends
-to `0`, a local expansion replaces the root enclosure. The transcendental functions need verified
-bounds (Taylor models for `sin`, `cos`, `arctan`, `√`; Mathlib has no interval arithmetic).
+curved faces. The facts here are stated pointwise, at every point of the closed boxes, and are
+proved without it. **Departure from the paper** (the user's decision: proofs without computer
+assistance, the computation kept as a Python reference in `numerics/`): the book reads the facts
+off computer plots; the formalization proves them analytically, from the root structure of the
+explicit switching cubics, exact identities with sign-definite terms and explicit
+inequalities, with no local or asymptotic expansion at the faces where the switching time tends
+to `0`:
+* `dOutContracts` (`SmoothedPolygons/Ch16/DOutContraction.lean`), with the witnesses
+  `B = Icc boxLo boxHi ≈ [0.22, 0.30] × [0.080, 0.199] × [2.688, 3.009]`, `N = 2`, `κ = 3/4`
+  and `g = gmap`; its Lipschitz bound rests on an interval chain on the single box `B`, written
+  out step by step and checked by `norm_num` (`SmoothedPolygons/Ch16/DOutContractionBounds.lean`);
+* `cellTwoEntersDOut` (`SmoothedPolygons/Ch16/CellTwoEntersDOut.lean`);
+* `boxSubclaims` (`SmoothedPolygons/Ch16/BoxSubclaims.lean`).
 -/
 
 @[expose] public section
@@ -219,31 +223,16 @@ every point of `𝒟_out` (REPORT.md, E78); the contraction repairs this:
   map `g` of `B` into itself, `κ`-Lipschitz (sup norm of the coordinates `(r₂, ψ, θ₂)`), which is
   `F` in coordinates on `B`.
 
-Recommended witnesses: `lo = (0.25, 0.15, 2.85)`, `hi = (0.29, 0.19, 2.98)`, `N = 2`, `κ = 1/2`.
-Sampling (20,000 points of `𝒟₀₀`, a fifth of them within `10⁻⁸` of the faces, and the exact faces):
-the sampled hull of `F(𝒟₀₀)` is `[0.0245, 0.2737] × [0.0064, 0.1939] × [2.7329, 3.1389]`, but the
-true image comes arbitrarily close to `r₂ = 0`, `ψ = 0`, `θ₂ = π`: `𝒟₀₀` contains the edge
-`r₂ = 0`, `θ₁ = θ₂ - ψ ∈ [0.9944, π/3)`, where the first control is `1`, and at interior points near
-it the switching time tends to `0` and the image has `r₂` near `0`. So `F(𝒟₀₀)` lies in no compact
-box of the open cell, and `N ≥ 2` is forced. The second step is the delicate one near the corner
-`r₂ = 0`, `θ₁ = π/3`: there `F(q)` tends to the class of `(-1, 0, 0)`, where `F_ang` is
-discontinuous (from the second cell's side the switching time tends to `0`), and `F²(q) ∈ B`
-holds because `F(q)` approaches from `θ₂ < π` (to first order `θ₂ ≈ π - 2δ`; the image has
-`ψ → 0`, so `θ₁ ≈ θ₂` there); a certificate must treat this corner separately. Then
-`F²(𝒟₀₀) ⊆ [0.2654, 0.2697] × [0.1652, 0.1742] × [2.8964, 2.9296]` (margin `0.0152` in `B`),
-`F(B) ⊆ [0.26668, 0.26897] × [0.16801, 0.17253] × [2.90549, 2.92458]` (margin `0.0167`), and the
-Jacobian of `g` on `B` has sup-operator norm `≤ 0.32` (eigenvalues at `q_out`: `-0.0800, -0.0081,
-0.00065`, as in Lemma 13.5.5). One step fails broadly, not only near `r₂ = 0`: about half of `𝒟₀₀`
-maps outside `B` (for instance `F(1, 1/2, 5/2)` has `θ₂ ≈ 2.7817 < 2.85`). An independent
-mpmath check (about 1.1 million evaluations) confirmed these figures. In it, the cell of an image
-with `z₃ ≠ 0` was always decided by the control that beats the first control, so the walls between
-the cells need no metric margin; the margin of `F(𝒟₀₀) ⊆ 𝒟₀₀` to the inner edges of the box is
-`0.69`.
+Proved: `dOutContracts` (`SmoothedPolygons/Ch16/DOutContraction.lean`), with
+`B = Icc boxLo boxHi ≈ [0.22, 0.30] × [0.080, 0.199] × [2.688, 3.009]`, `N = 2`, `κ = 3/4` and
+`g = gmap` (the cell coordinates of `ζ F(z)`). `N ≥ 2` is forced: `F(𝒟₀₀)` lies in no compact box
+of the open cell, because `𝒟₀₀` contains the edge `r₂ = 0`, `θ₁ = θ₂ - ψ ∈ [0.9944, π/3)`, where
+the first control is `1`, and at interior points near it the switching time tends to `0` and the
+image has `r₂` near `0`; one step fails broadly (for instance `F(1, 1/2, 5/2)` has `θ₂ ≈ 2.7817`).
 
-Certification: direct enclosure of `F` and `F²` on a subdivision of `𝒟₀₀` (module docstring);
-for `g`: on `B` the first control is `ζ`, the switch is the simple root of `χ_A` near `t ≈ 5.0`
-(`χ_B > 0` before it), and `g` is explicit; bound the row sums of `Dg` (implicit differentiation of
-the root) by interval evaluation, then the mean value inequality on the convex box. -/
+Departure from the paper: the book reads the containment off a computer calculation by the boundary
+method and the shrinking of the iterates off Figure 16.1; the formalization proves both
+analytically (`mapsTo_boxSet_zero_zero`, `iterate_two_mem`, `lipschitzOnWith_gmap`). -/
 def DOutContracts : Prop :=
   MapsTo poincareAngZero (boxSet 0 0) (boxSet 0 0) ∧
     ∃ (lo hi : Fin 3 → ℝ) (N : ℕ) (κ : ℝ≥0), κ < 1 ∧ Icc lo hi ⊆ openBoxOne ∧
@@ -253,27 +242,25 @@ def DOutContracts : Prop :=
         ∀ p ∈ Icc lo hi, poincareAngZero (cellClass p) = cellClass (g p)
 
 /-- **Every point of the second big cell enters `𝒟_out` within three steps** (Table 16.1, rows `𝒟₂`
-and `𝒟₃`, and Figure 16.2). The book: "`F₂(𝒟₂) = τ(𝔦(𝒟₂)) = τ(𝒟₂) ⊂ 𝒟₃`" (TeX 12616–12620; "`θ₂ ∈
+and `𝒟₃`, and Figure 16.2). The book: "`F₂(𝒟₂) = τ(𝔦(𝒟₂)) = τ(𝒟₂) ⊂ 𝒟₃`" (TeX 12614–12620; "`θ₂ ∈
 [-π/3, 0]` holds on `𝒟₂`"), "`F₃(𝒟₃) = τ(𝔦(𝒟₃)) = τ(𝒟₄)`, which is a subset of the first cell"
 (TeX 12629–12638), and "We have that `F²𝒟₃ ⊂ 𝒟₀₀`, as shown by the calculation in Figure 16.2"
 (TeX 12640–12665). Hence a point of `𝒟₂` reaches `𝒟₀₀` after three steps and a point of `𝒟₃` after
 two; this is the form used here, for every point of the second big cell (open cell and top face
 `𝒞₂(ζ², 0, 2)`), without the split `𝒟₂ | 𝒟₃` along `∂_{A,ζ²}`.
 
-Sampling (30,000 points of the second cell, including its top face and points within `10⁻⁹` of
-every face): no point needs more than three steps; the shares of `n = 1, 2, 3` depend on the
-sampling weights (64/34/2% here, 70/28/1.6% in an independent check of about 150,000 points).
-The smallest margin, `1.1 - π/3 ≈ 0.053` to the inner edge `θ₂ = 1.1` of `𝒟₀₀`, is approached as
-`r₂ → 0`, `ψ → π`, `θ₂ ↓ -π/3`, where all three steps are changes of representative
-(`t_sw → 0`) near the class of `(1, 0, 0)`; a certificate needs an asymptotic expansion there.
+Proved: `cellTwoEntersDOut` (`SmoothedPolygons/Ch16/CellTwoEntersDOut.lean`). The smallest
+margin, `1.1 - π/3 ≈ 0.053` to the inner edge `θ₂ = 1.1` of `𝒟₀₀`, is approached as `r₂ → 0`,
+`ψ → π`, `θ₂ ↓ -π/3`, where all three steps are changes of representative (`t_sw → 0`); the proof
+decides every case by the signs of the switching functions, not by margins.
 
-Certification: direct enclosure of `F`, `F²`, `F³` on a subdivision of the cell; the switch of each
-piece (to `1`, staying in the second cell, or to `ζ`, entering the first) from the signs of the
-switching cubics; near `θ₂ = -π` the first step is a change of representative (`t_sw → 0`). -/
+Departure from the paper: the book reads `F²𝒟₃ ⊂ 𝒟₀₀` off a Mathematica plot and the rows `𝒟₂`,
+`𝒟₃` from the involution; the formalization proves the statement analytically, without the split
+`𝒟₂ | 𝒟₃` and without the involution. -/
 def CellTwoEntersDOut : Prop :=
   ∀ x ∈ cellTwoSet, ∃ n ≤ 3, poincareAngZero^[n] x ∈ boxSet 0 0
 
-/-- **The subclaims** `subclaim_{ij}` (TeX 12677–12726, Figures 16.3–16.4: "`F₁(𝒟_{1,ij}) ⊂
+/-- **The subclaims** `subclaim_{ij}` (TeX 12680–12726, Figures 16.3–16.4: "`F₁(𝒟_{1,ij}) ⊂
 ∪_{k,ℓ} 𝒟_{kℓ}`, where the union runs over `(k, ℓ) ≺ (i, j)`"), merged with the row `𝒟₄` of Table
 16.1 (TeX 12612–12615: "`F₄(𝒟₄) = τ(𝔦(𝒟₄)) = τ(𝒟₃)`, which is contained in the second big cell"):
 for `(i, j) ∉ {(0, 0), (2, 2)}`, every point of the box `𝒟_{ij}` that is not in the second big cell
@@ -281,19 +268,13 @@ is mapped into the second big cell (it lies in `𝒟₄`) or into a box `𝒟_{k
 (it lies in `𝒟_{1,ij}` or on a face). The book's subclaims are about `𝒟_{1,ij} = 𝒟₁ ∩ 𝒟_{ij}`;
 here the box is the whole `𝒟_{ij}`, so that the curved part `𝒟₁` is not needed.
 
-Sampling (8,000 points per box, a third of them on or within `10⁻⁹` of a face): no violation
-(an earlier sampling: 4,000 points per box of `𝒟_{1,ij}`).
+Proved: `boxSubclaims` (`SmoothedPolygons/Ch16/BoxSubclaims.lean`). The target "second cell or a
+smaller box" is not a closed set; the proof decides it pointwise, by the sign of `Im z₃` before the
+switch to `1`.
 
-Certification: direct enclosure of `F` on a subdivision of each box. Near the surfaces where the
-switch changes (`∂_res`, `∂_B`, where the target changes from a smaller box to the second cell) both
-candidate switches are enclosed and both images checked. An independent check found that `∂_A`
-(three positive roots of `χ_{A,0}`) meets only the excluded box `𝒟₂₂`, so no other box needs it,
-and that the smallest margin is `2.2 - 2π/3 ≈ 0.106`, in the box `𝒟₀₁` near the corner
-`r₂ → 0`, `ψ → π/3`, `θ₂ → 1.1` (where `t_sw → 0`; a local expansion is needed there). The target
-"second cell or a smaller box" is not a closed set, so near `∂_res` an enclosure must switch
-between the charts of the two targets. (Theorem 16.4.1, in a later layer, needs the table for the
-branch maps and cluster points; this pointwise statement about the honest map may then need a
-version with closed targets or branch maps.) -/
+Departure from the paper: the book reads the subclaims off computer plots by the boundary method
+(Figures 16.3–16.4); the formalization proves them analytically, by the root structure of the
+switching cubics and exact identities with sign-definite terms. -/
 def BoxSubclaims : Prop :=
   ∀ i j : Fin 3, (i, j) ≠ (0, 0) → (i, j) ≠ (2, 2) → ∀ x ∈ boxSet i j, x ∉ cellTwoSet →
     poincareAngZero x ∈ cellTwoSet ∨

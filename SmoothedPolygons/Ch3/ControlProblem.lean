@@ -9,8 +9,10 @@ public import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 # The Reinhardt optimal control problem (§3.6)
 
 The trivialization of the tangent and cotangent bundles of a Lie group by left translation
-(Proposition 3.6.1), and the Reinhardt control problem (Problem 3.6.2): admissible trajectories,
-their cost, and global minimizers.
+(Proposition 3.6.1), and `R⁻¹ J R = J`. The Reinhardt control problem (Problem 3.6.2), its
+admissible trajectories (`IsReinhardtAdmissible`), their cost (`reinhardtCost`) and its global
+minimizers (`IsReinhardtMinimizer`), is defined in `SmoothedPolygons/Defs.lean`, shared with the
+Challenge's statement of Mahler's First conjecture.
 -/
 
 @[expose] public section
@@ -97,24 +99,5 @@ theorem R_inv_mul_J_mul_R : R⁻¹ * J * R = J := by
     linear_combination (1 / 4 : ℝ) * this
   rw [Matrix.mul_assoc, hRJ, ← Matrix.mul_assoc,
     Matrix.nonsing_inv_mul R (by rw [hdet]; exact isUnit_one), Matrix.one_mul]
-
-/-- **Problem 3.6.2** (`pbm:reinhardt-optimal-control`). An admissible trajectory of the
-Reinhardt control problem: a state trajectory on `[0, t_f]` (`g' = gX`, `X' = [Z_u, X]/⟨Z_u, X⟩`,
-control in `U_T`, `X(t)` satisfying the star conditions with `det X = 1`) with the initial
-condition `g(0) = I₂` and the terminal conditions `g(t_f) = R` and `X(t_f) = R⁻¹X(0)R`.
-
-The problem prints the terminal condition as `X(t_f) = R X₀ R⁻¹`; the derivation that precedes it
-(§3.5), the half-plane form (Problem 4.5.1) and the transversality conditions (§6.6) all give
-`X(t_f) = R⁻¹ X₀ R`, which differs because `Ad_R` has order 3. This is a misprint, corrected
-here. -/
-def IsReinhardtAdmissible (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2) : Prop :=
-  IsStateTrajectory T u g X ∧ g 0 = 1 ∧ g T = R ∧ X T = R⁻¹ * X 0 * R
-
-/-- A global minimizer of the Reinhardt control problem (Problem 3.6.2): an admissible trajectory
-whose cost `-(3/2) ∫ ⟨J, X⟩` is at most the cost of every admissible trajectory. -/
-def IsReinhardtMinimizer (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2) : Prop :=
-  IsReinhardtAdmissible T u g X ∧
-    ∀ (T' : ℝ) (u' : ℝ → Fin 3 → ℝ) (g' X' : ℝ → Mat2), IsReinhardtAdmissible T' u' g' X' →
-      reinhardtCost T X ≤ reinhardtCost T' X'
 
 end SmoothedPolygons

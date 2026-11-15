@@ -10,14 +10,15 @@ import all Basic.Algebra.Module.ZLattice.PlaneCritical
 import all Basic.Analysis.Analytic.DivisionByCoordinate
 import all Basic.Analysis.Analytic.MatrixExp
 import all Basic.Analysis.Calculus.DerivInverse
-import all Basic.Analysis.Calculus.MatrixEntrywise
 import all Basic.Analysis.Calculus.MatrixEntrywiseExp
+import all Basic.Analysis.Calculus.MatrixEntrywise
 import all Basic.Analysis.Calculus.MatrixFTC
+import all Basic.Analysis.Calculus.MeanValueImplicit
 import all Basic.Analysis.Complex.UpperHalfPlane.GeneralizedCircle
 import all Basic.Analysis.Convex.BoundaryArc
-import all Basic.Analysis.Convex.CellDecomposition
 import all Basic.Analysis.Convex.CellDecomposition.Defs
 import all Basic.Analysis.Convex.CellDecomposition.HoleStructure
+import all Basic.Analysis.Convex.CellDecomposition
 import all Basic.Analysis.Convex.CellDecomposition.MaximalCells
 import all Basic.Analysis.Convex.CellDecomposition.PinwheelHoles
 import all Basic.Analysis.Convex.CellDecomposition.PolygonOfFrontier
@@ -27,20 +28,16 @@ import all Basic.Analysis.Convex.CircumscribedPolygon
 import all Basic.Analysis.Convex.HexagonLattice
 import all Basic.Analysis.Convex.LatticePacking
 import all Basic.Analysis.Convex.PolygonAngle
-import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.StarCurveConvex
+import all Basic.Analysis.Convex.StarCurve
 import all Basic.Analysis.Convex.TietzeNakajima
 import all Basic.Analysis.Polynomial.CubicRoots
 import all Basic.Analysis.Polynomial.LeastPositiveRoot
 import all Basic.Analysis.Polynomial.SignNearZero
+import all Basic.Analysis.SpecialFunctions.Log.Bounds
 import all Basic.Dynamics.HyperbolicBox
 import all Basic.Dynamics.LinearizedStability
 import all Basic.Dynamics.Stability
-import all Basic.Interval.Dyadic
-import all Basic.Interval.Elementary
-import all Basic.Interval.Lipschitz
-import all Basic.Interval.Program
-import all Basic.Interval.ProgramEval
 import all Basic.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
 import all Basic.MeasureTheory.SpecificCodomains.Pi
 import all External.EulerArnold
@@ -63,8 +60,8 @@ import all SmoothedPolygons.Ch13.Blowup
 import all SmoothedPolygons.Ch13.Defs
 import all SmoothedPolygons.Ch13.Extremals
 import all SmoothedPolygons.Ch13.FirstControl
-import all SmoothedPolygons.Ch13.FixedPoints
 import all SmoothedPolygons.Ch13.FixedPointsClassification
+import all SmoothedPolygons.Ch13.FixedPoints
 import all SmoothedPolygons.Ch13.Jacobian
 import all SmoothedPolygons.Ch13.PoincareMap
 import all SmoothedPolygons.Ch13.RScale
@@ -72,26 +69,58 @@ import all SmoothedPolygons.Ch13.SingularLocus
 import all SmoothedPolygons.Ch13.Stability
 import all SmoothedPolygons.Ch13.Symmetry
 import all SmoothedPolygons.Ch14.AnalyticExtension
+import all SmoothedPolygons.Ch14.ArcConditions
+import all SmoothedPolygons.Ch14.ArcCostate
+import all SmoothedPolygons.Ch14.ArcFrame
+import all SmoothedPolygons.Ch14.ArcLocal
+import all SmoothedPolygons.Ch14.ArcNormalForm
+import all SmoothedPolygons.Ch14.ArcParams
+import all SmoothedPolygons.Ch14.ArcPoincareMap
+import all SmoothedPolygons.Ch14.ArcRegionInvariant
+import all SmoothedPolygons.Ch14.ArcRelation
+import all SmoothedPolygons.Ch14.ArcStepClosed
+import all SmoothedPolygons.Ch14.ArcStepExit
+import all SmoothedPolygons.Ch14.ArcStepRegion
 import all SmoothedPolygons.Ch14.Asymptotics
 import all SmoothedPolygons.Ch14.ChartFlow
 import all SmoothedPolygons.Ch14.ExtensionConstruction
 import all SmoothedPolygons.Ch14.FixedPointManifolds
 import all SmoothedPolygons.Ch14.LieChart
 import all SmoothedPolygons.Ch14.NoReturn
+import all SmoothedPolygons.Ch14.NoReturnProof
+import all SmoothedPolygons.Ch14.NoReturnReading
+import all SmoothedPolygons.Ch14.NoReturnTools
+import all SmoothedPolygons.Ch14.UnstableCurve
+import all SmoothedPolygons.Ch14.UnstableCurveSwitches
 import all SmoothedPolygons.Ch14.VertexFlowAnalytic
+import all SmoothedPolygons.Ch14.VertexPoissonBracket
 import all SmoothedPolygons.Ch15.CellCoordinates
 import all SmoothedPolygons.Ch15.Continuity
 import all SmoothedPolygons.Ch15.FixedPointCells
 import all SmoothedPolygons.Ch15.Involution
+import all SmoothedPolygons.Ch15.PartExtensions
+import all SmoothedPolygons.Ch15.PartitionCellTwo
+import all SmoothedPolygons.Ch15.PartitionTopology
 import all SmoothedPolygons.Ch15.SmallerCells
+import all SmoothedPolygons.Ch16.BasinFacts
 import all SmoothedPolygons.Ch16.BasinHypotheses
-import all SmoothedPolygons.Ch16.Certificates.ContractionBox
-import all SmoothedPolygons.Ch16.Certificates.ContractionBoxCheck
-import all SmoothedPolygons.Ch16.Certificates.ContractionBoxData
+import all SmoothedPolygons.Ch16.BoxFlow
+import all SmoothedPolygons.Ch16.BoxInequalities
+import all SmoothedPolygons.Ch16.BoxSubclaims
+import all SmoothedPolygons.Ch16.CellOneToDOut
+import all SmoothedPolygons.Ch16.CellTwoEntersDOut
+import all SmoothedPolygons.Ch16.CellTwoFlow
 import all SmoothedPolygons.Ch16.ClusterCoordinates
 import all SmoothedPolygons.Ch16.ClusterPoint
+import all SmoothedPolygons.Ch16.DOutContractionBounds
+import all SmoothedPolygons.Ch16.DOutContraction
+import all SmoothedPolygons.Ch16.DOutFlow
+import all SmoothedPolygons.Ch16.DOutImages
+import all SmoothedPolygons.Ch16.DOutInvariant
 import all SmoothedPolygons.Ch16.GlobalBasin
+import all SmoothedPolygons.Ch16.MahlerFirstArcRegion
 import all SmoothedPolygons.Ch16.MahlerFirst
+import all SmoothedPolygons.Ch16.MahlerFirstNumerical
 import all SmoothedPolygons.Ch16.NextSwitch
 import all SmoothedPolygons.Ch16.NoChattering
 import all SmoothedPolygons.Ch16.OutwardFuller
@@ -146,23 +175,23 @@ import all SmoothedPolygons.Ch6.WorstDisk
 import all SmoothedPolygons.Ch7.ConstantControl
 import all SmoothedPolygons.Ch7.DiscreteK
 import all SmoothedPolygons.Ch7.Faces
-import all SmoothedPolygons.Ch7.HMax
 import all SmoothedPolygons.Ch7.HMaxInequality
-import all SmoothedPolygons.Ch7.Isolated
+import all SmoothedPolygons.Ch7.HMax
 import all SmoothedPolygons.Ch7.Isolated.Defs
 import all SmoothedPolygons.Ch7.Isolated.FixedPoints
 import all SmoothedPolygons.Ch7.Isolated.Hyperbolic
 import all SmoothedPolygons.Ch7.Isolated.IpcAlgebra
 import all SmoothedPolygons.Ch7.Isolated.IpcFlow
 import all SmoothedPolygons.Ch7.Isolated.IpcOctagon
+import all SmoothedPolygons.Ch7.Isolated
 import all SmoothedPolygons.Ch7.Isolated.Poincare
 import all SmoothedPolygons.Ch7.Isolated.Return
 import all SmoothedPolygons.Ch7.Isolated.Switching
 import all SmoothedPolygons.Ch7.Isolated.VertexFlow
 import all SmoothedPolygons.Ch7.Polygon
 import all SmoothedPolygons.Ch7.Remarks
-import all SmoothedPolygons.Ch7.SmoothedPolygon
 import all SmoothedPolygons.Ch7.SmoothedPolygonDisk
+import all SmoothedPolygons.Ch7.SmoothedPolygon
 import all SmoothedPolygons.Ch7.StrongTransversality
 import all SmoothedPolygons.Ch8.CircleVariation
 import all SmoothedPolygons.Ch8.Defs
@@ -237,15 +266,13 @@ meta def externalResults : List (String × Name) :=
      ``External.pontryagin_maximum_principle),
    ("Irwin, Ch. 6: the stable manifold theorem (Thm A.3.1, from the StableManifold package)",
      ``SmoothedPolygons.theoremA_3_1),
-   ("Hypothesis: Thms 16.4.1 and 14.4.1 (no chattering into 𝒮_sing)",
+   ("Hypothesis of the conditional form of Thm 16.3.1: no chattering into 𝒮_sing (proved)",
      ``SmoothedPolygons.NoChatteringIntoSingularLocus),
-   ("Hypothesis: Thm 14.4.1 (locally finitely bang-bang extremals; Layer 7; its global step is numerical, E88)",
-     ``SmoothedPolygons.Theorem14_4_1),
-   ("Hypothesis: Table 16.1 row 𝒟_out and the contraction on 𝒟_out (E78)",
+   ("Hypothesis of the conditional forms: Table 16.1 row 𝒟_out, the contraction (E78; proved)",
      ``SmoothedPolygons.TriFuller.DOutContracts),
-   ("Hypothesis: Table 16.1 rows 𝒟₂, 𝒟₃ and F²𝒟₃ ⊂ 𝒟₀₀ (Fig. 16.2)",
+   ("Hypothesis of the conditional forms: Table 16.1 rows 𝒟₂, 𝒟₃ and F²𝒟₃ ⊂ 𝒟₀₀ (proved)",
      ``SmoothedPolygons.TriFuller.CellTwoEntersDOut),
-   ("Hypothesis: Table 16.1 subclaims_ij with the row 𝒟₄ (Figs. 16.3–16.4)",
+   ("Hypothesis of the conditional forms: Table 16.1 subclaims_ij with the row 𝒟₄ (proved)",
      ``SmoothedPolygons.TriFuller.BoxSubclaims)]
 
 /-- The numbered results of the paper, in the order of the paper. -/
@@ -402,6 +429,19 @@ meta def paperResults : List (String × Name) :=
      ``SmoothedPolygons.hasStrictFDerivAt_extension),
    ("Thm 14.3.3", ``SmoothedPolygons.theorem14_3_3),
    ("Remark 14.3.4 (mirrored chart, E87)", ``SmoothedPolygons.remark14_3_4),
+   ("§14.4 Fig. 14.2, N4: (INV), the single-step statement of its proof (departure, E88)",
+     ``SmoothedPolygons.arcRegionInvariant),
+   ("§14.4 Fig. 14.2, N4 from (INV) (Theorem 5.2 of the proof of N4)",
+     ``SmoothedPolygons.unstableCurveLeavesStarDomain_of_arcRegionInvariant),
+   ("§14.4 Fig. 14.2: N4, W^u(q_out) reaches the star boundary (proved; departure, E88)",
+     ``SmoothedPolygons.unstableCurveLeavesStarDomain),
+   ("Thm 14.4.1", ``SmoothedPolygons.theorem14_4_1_unconditional),
+   ("Thm 14.4.1, the book's proof with N4 as a hypothesis", ``SmoothedPolygons.theorem14_4_1),
+   ("Thm 14.4.1, first statement (N4 as a hypothesis)", ``SmoothedPolygons.theorem14_4_1_out),
+   ("Thm 14.4.1, second statement (time reversal; N4 as a hypothesis)",
+     ``SmoothedPolygons.theorem14_4_1_in),
+   ("Thm 14.4.1: the reading of \"trajectory\" is no restriction",
+     ``SmoothedPolygons.theorem14_4_1_iff_unrestricted),
    ("eqn:x3 (15.1.1)", ``SmoothedPolygons.eqn15_1_1),
    ("Lemma 15.1.1", ``SmoothedPolygons.lemma15_1_1),
    ("Def 15.1.2 (big open cells) and the facts after it", ``SmoothedPolygons.definition15_1_2),
@@ -410,18 +450,34 @@ meta def paperResults : List (String × Name) :=
    ("Remark 15.3.1 (q_in/q_out corrected, E75)", ``SmoothedPolygons.remark15_3_1),
    ("Remark 15.3.1, the segment through q_in (corrected)",
      ``SmoothedPolygons.remark15_3_1_segment),
+   ("Prop 15.3.2, second clause: 𝒟₂, 𝒟₃ partition the second cell (partial result)",
+     ``SmoothedPolygons.TriFuller.isGeometricPartition_closedBoxTwo),
+   ("Prop 15.3.2 from its remaining clauses (partial result; Prop 15.3.2 is not proved)",
+     ``SmoothedPolygons.TriFuller.proposition15_3_2_of_remaining),
+   ("Table 16.1 row 𝒟_out and the contraction on 𝒟_out (E78; proved analytically)",
+     ``SmoothedPolygons.TriFuller.dOutContracts),
+   ("Table 16.1 rows 𝒟₂, 𝒟₃ and F²𝒟₃ ⊂ 𝒟₀₀ (Fig. 16.2; proved analytically)",
+     ``SmoothedPolygons.TriFuller.cellTwoEntersDOut),
+   ("Table 16.1 subclaims_ij with the row 𝒟₄ (Figs. 16.3–16.4; proved analytically)",
+     ``SmoothedPolygons.TriFuller.boxSubclaims),
+   ("Thm 16.1.1", ``SmoothedPolygons.theorem16_1_1_unconditional),
    ("Thm 16.1.1 (conditional on DOutContracts, CellTwoEntersDOut, BoxSubclaims)",
      ``SmoothedPolygons.theorem16_1_1),
    ("Thm 16.2.1 (conditional on the hypotheses of Thm 16.1.1)",
      ``SmoothedPolygons.theorem16_2_1),
+   ("Thm 16.2.1", ``SmoothedPolygons.theorem16_2_1_unconditional),
+   ("Thm 16.3.1", ``SmoothedPolygons.theorem16_3_1_unconditional),
    ("Thm 16.3.1 away from 𝒮_sing (unconditional)",
      ``SmoothedPolygons.isFiniteBangBang_of_isReinhardtMinimizer_of_not_mem_singularLocus),
    ("Thm 16.3.1 (conditional on NoChatteringIntoSingularLocus)",
      ``SmoothedPolygons.theorem16_3_1),
    ("Thm 16.3.1 (conditional on Thm 14.4.1 and the hypotheses of Thm 16.1.1)",
      ``SmoothedPolygons.theorem16_3_1_of_theorem14_4_1),
+   ("Thm 16.3.1 with N4 as its only hypothesis (N4 is proved)",
+     ``SmoothedPolygons.theorem16_3_1_of_unstableCurveLeavesStarDomain),
    ("Thm 16.4.1 (conditional on DOutContracts, CellTwoEntersDOut, BoxSubclaims)",
      ``SmoothedPolygons.theorem16_4_1),
+   ("Thm 16.4.1", ``SmoothedPolygons.theorem16_4_1_unconditional),
    ("Thm 16.4.1, first part (the cluster point; the part Thm 16.3.1 uses)",
      ``SmoothedPolygons.tendstoModVT_switchAng_of_clusterSetForwardInvariant),
    ("Thm 16.4.1, §16.4.2 repaired: the cluster set is F_ang-invariant (E90)",
@@ -437,16 +493,10 @@ meta def paperResults : List (String × Name) :=
    ("Lemma A.6.4", ``SmoothedPolygons.lemmaA_6_4),
    ("Lemma A.11.1", ``SmoothedPolygons.lemmaA_11_1)]
 
-/-- Certified pieces of the named numerical facts (`BasinHypotheses`), proved by kernel-checked
-interval arithmetic (`decide +kernel`): not results of the paper, listed so that the audit shows
-their axioms. -/
-meta def certificates : List (String × Name) :=
-  [("Certificate: the contraction on B of DOutContracts (Table 16.1, row 𝒟_out)",
-     ``SmoothedPolygons.TriFuller.ContractionBox.contraction_on_B)]
-
 /-- The theorems that Palomar's comparator checks (`theorem_names` of `comparator.json`). -/
 meta def solutionResults : List Name :=
-  [``SmoothedPolygonsChallenge.smoothed_polygon_extremal,
+  [``SmoothedPolygonsChallenge.mahler_first_conjecture,
+   ``SmoothedPolygonsChallenge.smoothed_polygon_extremal,
    ``SmoothedPolygonsChallenge.smoothed_octagon_density]
 
 /-- Lean's standard axioms. -/
@@ -464,6 +514,11 @@ meta def libraryConstants (env : Environment) : NameSet := Id.run do
       for c in d.constNames do
         s := s.insert c
   return s
+
+/-- The constants in the hypotheses of a statement: the types of its leading `∀` binders. -/
+meta def hypothesisConstants : Expr → Array Name
+  | .forallE _ d b _ => d.getUsedConstants ++ hypothesisConstants b
+  | _ => #[]
 
 /-- The constants used by the type and the value of `c`. -/
 meta def usedConstants (env : Environment) (c : Name) : Array Name :=
@@ -553,10 +608,12 @@ elab "#audit" : command => do
     if axs.any (!standardAxioms.contains ·) then bad := bad.push n
     let (uses, deps') := externalUses env library deps n
     deps := deps'
-    -- A named hypothesis (a `Prop`-valued definition) is assumed only if the statement takes it:
-    -- one that a proof derives (`NoChatteringIntoSingularLocus` from `Theorem14_4_1`) is not shown.
+    -- A named hypothesis (a `Prop`-valued definition) is assumed only if the statement takes it as
+    -- a hypothesis: one that a proof derives (`NoChatteringIntoSingularLocus` from
+    -- `Theorem14_4_1`), or that the statement concludes (`Theorem14_4_1` for `theorem14_4_1`), is
+    -- not shown.
     let typeConsts := match env.find? n with
-      | some ci => ci.type.getUsedConstants
+      | some ci => hypothesisConstants ci.type
       | none => #[]
     let uses := uses.filter fun u => match env.find? u with
       | some (.defnInfo _) => typeConsts.contains u
@@ -564,11 +621,6 @@ elab "#audit" : command => do
     let usesStr := if uses.isEmpty then "–" else ", ".intercalate (uses.map fun u => s!"`{u}`")
     let axStr := ", ".intercalate (axs.toList.map toString)
     rows := rows.push s!"| {label} | `{n}` | {usesStr} | {axStr} |"
-  for (label, n) in certificates do
-    let axs ← liftCoreM <| collectAxioms n
-    if axs.any (!standardAxioms.contains ·) then bad := bad.push n
-    let axStr := ", ".intercalate (axs.toList.map toString)
-    rows := rows.push s!"| {label} | `{n}` | – | {axStr} |"
   for n in solutionResults ++ externalResults.map (·.2) do
     let axs ← liftCoreM <| collectAxioms n
     if axs.any (!standardAxioms.contains ·) then bad := bad.push n

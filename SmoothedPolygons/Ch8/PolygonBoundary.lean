@@ -20,8 +20,9 @@ Lemma 3.1.8 the third pair moves along hyperbolic arcs whose asymptotes are thos
 sentence is the first line of the proof of Theorem 16.3.1: "A bang-bang trajectory with finitely
 many switches is a polygon with rounded corners of the sort described by Reinhardt".
 
-Definitions: `IsHyperbolicArc` (the conclusion of Lemma 3.1.8), `IsSmoothedPolygonBoundary` (the
-boundary is the union of finitely many straight edges and hyperbolic arcs, each hyperbolic arc
+Definitions (in `SmoothedPolygons/Defs.lean`, shared with the Challenge's statement of Mahler's
+First conjecture): `IsHyperbolicArc` (the conclusion of Lemma 3.1.8), `IsSmoothedPolygonBoundary`
+(the boundary is the union of finitely many straight edges and hyperbolic arcs, each hyperbolic arc
 joining two edges and having as asymptotes lines that extend edges of the boundary), and
 `IsSmoothedPolygon` (the gloss of Theorem 16.3.1, TeX 12800–12804: in addition, a centrally
 symmetric convex disk with no corners).
@@ -40,38 +41,6 @@ trajectories without winding number one exist, `exists_isReinhardtAdmissible_not
 namespace SmoothedPolygons
 
 open Set MeasureTheory Filter Topology Matrix
-
-/-- `γ` traces on `[α, β]` (`α < β`, continuous and injective there) an arc of the hyperbola
-`det(d₁, x - p₁) · det(d₂, x - p₂) = c`, `c ≠ 0`, whose asymptotes are the non-parallel lines
-`p₁ + ℝ d₁` and `p₂ + ℝ d₂`: the form of the conclusion of Lemma 3.1.8 (`lemma3_1_8`). -/
-def IsHyperbolicArc (γ : ℝ → Fin 2 → ℝ) (α β : ℝ) (p₁ d₁ p₂ d₂ : Fin 2 → ℝ) : Prop :=
-  α < β ∧ ContinuousOn γ (Icc α β) ∧ InjOn γ (Icc α β) ∧ d₁ ≠ 0 ∧ d₂ ≠ 0 ∧ det2 d₁ d₂ ≠ 0 ∧
-    ∃ c : ℝ, c ≠ 0 ∧ ∀ t ∈ Icc α β, det2 d₁ (γ t - p₁) * det2 d₂ (γ t - p₂) = c
-
-/-- **The boundary of a smoothed polygon** (Remark 8.3.3; Theorem 16.3.1 and its gloss, TeX
-12789–12804): the boundary of `K` is the union of finitely many straight edges `[a_k, b_k]`
-(`a_k ≠ b_k`) and finitely many hyperbolic arcs `γ_l([α_l, β_l])`; each hyperbolic arc has as
-asymptotes the lines extending two of the edges ("hyperbolic arcs, whose asymptotes are lines
-extending the straight edge segments of the boundary") and begins and ends on edges (the boundary
-alternates between edges and hyperbolic arcs: each hyperbolic arc rounds a corner between two
-edges). -/
-def IsSmoothedPolygonBoundary (K : Set (Fin 2 → ℝ)) : Prop :=
-  ∃ (m n : ℕ) (a b : Fin m → Fin 2 → ℝ) (γ : Fin n → ℝ → Fin 2 → ℝ) (α β : Fin n → ℝ),
-    (∀ k, a k ≠ b k) ∧
-    (∀ l, ∃ k₁ k₂, IsHyperbolicArc (γ l) (α l) (β l) (a k₁) (b k₁ - a k₁) (a k₂) (b k₂ - a k₂)) ∧
-    (∀ l, γ l (α l) ∈ ⋃ k, segment ℝ (a k) (b k)) ∧
-    (∀ l, γ l (β l) ∈ ⋃ k, segment ℝ (a k) (b k)) ∧
-    frontier K = (⋃ k, segment ℝ (a k) (b k)) ∪ ⋃ l, γ l '' Icc (α l) (β l)
-
-/-- **A finite-sided smoothed polygon with rounded hyperbolic arcs at each corner, of the sort
-described by Reinhardt and Mahler** (Theorem 16.3.1, TeX 12792–12804: "the minimizer `K_min` has
-no corners and the boundary alternates between straight edge segments and hyperbolic arcs, whose
-asymptotes are lines extending the straight edge segments of the boundary"): a centrally
-symmetric convex disk with a unique support line at every boundary point (no corners,
-Lemma 2.2.5's form) whose boundary is that of a smoothed polygon (`IsSmoothedPolygonBoundary`). -/
-def IsSmoothedPolygon (K : Set (Fin 2 → ℝ)) : Prop :=
-  IsCCSDisk K ∧ (∀ x ∈ frontier K, ∃! ℓ, IsSupportLine K ℓ ∧ x ∈ ℓ) ∧
-    IsSmoothedPolygonBoundary K
 
 /-! ### Plane geometry and curves of the plane -/
 

@@ -22,7 +22,9 @@ The last step excludes switching times accumulating at a time where the lift mee
 locus, by Theorem 16.4.1 (cluster point, with §16.4.2) and Theorem 14.4.1 (no return) and their
 time reversals, with the periodicity of the extremal. Those theorems (Chapters 13–16) are proved in
 later layers; here their consequence, in the form the last step uses, is the named hypothesis
-`NoChatteringIntoSingularLocus`, a hypothesis of `theorem16_3_1`.
+`NoChatteringIntoSingularLocus`, a hypothesis of `theorem16_3_1`. It is proved
+(`noChatteringIntoSingularLocus`, `SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean`), and
+Theorem 16.3.1 holds unconditionally (`theorem16_3_1_unconditional`, same file).
 
 * `NoChatteringIntoSingularLocus`: no Pontryagin extremal of the Reinhardt problem (with its
   boundary conditions) has switching times accumulating, from the left, at a time where its lift
@@ -99,7 +101,8 @@ proves. It concerns only extremals with their boundary conditions (locally, chat
 **Why it is not an axiom.** It is a `Prop`, a hypothesis of `theorem16_3_1`, visible in its
 statement; nothing in the library assumes it. `theorem16_3_1` reads "`NoChatteringIntoSingularLocus`
 implies Mahler's First conjecture", and its axioms are Lean's standard ones once its proof is
-complete. The later layers replace the hypothesis by a proof (Theorems 16.4.1 and 14.4.1).
+complete. The later layers replace the hypothesis by a proof (Theorems 16.4.1 and 14.4.1):
+`noChatteringIntoSingularLocus` (`SmoothedPolygons/Ch16/MahlerFirstArcRegion.lean`).
 
 **Why it suffices** (`l3st_forall_not_mem_singularLocus`): with Chapters 2–8 it rules out every
 meeting of the minimizer's lift with `𝒮_sing`; the minimizer is then bang-bang with finitely many

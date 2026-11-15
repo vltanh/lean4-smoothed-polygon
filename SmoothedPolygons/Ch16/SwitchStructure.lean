@@ -31,8 +31,8 @@ The mirrored chart `lieChartIn = reinTau ∘ lieChart` is reduced to the chart b
 (`iso_vertexFlow_reinTau`, `switchingFn_reinTau`): the `e₃`-flow from `τ q` is the reversed
 `e₂`-flow from `q`, so the second fact at `τ q` is the slope of `χ₃₂` along the `e₂`-field at `q`.
 
-The result is `eventually_switchStructure`. Everything is exact algebra on `2 × 2` matrices
-(checked with sympy: `notes/l6h_/dchi3.py`) and continuity at `r = 0`.
+The result is `eventually_switchStructure`. Everything is exact algebra on `2 × 2` matrices (the
+identities were also checked with sympy) and continuity at `r = 0`.
 -/
 
 @[expose] public section

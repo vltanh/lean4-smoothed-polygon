@@ -37,8 +37,8 @@ normed space (D1: for the Reinhardt problem, the book's `SL₂(ℝ) × 𝔰𝔩�
 `GL₂⁺(ℝ) × C` of `Mat₂(ℝ) × 𝔰𝔩₂(ℝ)`, in the coordinates `(Fin 2 → Fin 2 → ℝ) × (Fin 3 → ℝ)`,
 with `C` the open cone of `𝔰𝔩₂(ℝ)` cut out by the star inequalities and with `g(0) = I₂` and
 `det X(0) = 1` among the boundary conditions); optimality as strong local minimality (D5).
-The departures D1–D11 from Agrachev–Sachkov are listed in the README of the OptimalControl
-package.
+The departures D1–D11 from Agrachev–Sachkov are listed in the OptimalControl package's
+`docs/AGRACHEV_SACHKOV.md`.
 
 ## Proof
 

@@ -314,17 +314,10 @@ theorem theorem2_1_3 {K : Set (Fin 2 → ℝ)} (hK : IsCCSDisk K) :
   rw [External.fejes_toth ⟨hconv, hcomp, hint⟩ hsymm] at h1
   exact le_antisymm (h1.trans h2) h3
 
-/-! ### The minimax density and the worst disks -/
+/-! ### The minimax density and the worst disks
 
-/-- The minimax density `δ_min = inf_{K ∈ 𝔎_ccs} δ(K)` (§2.1): the least greatest packing density
-among all centrally symmetric convex disks. -/
-noncomputable def minimaxDensity : ℝ :=
-  sInf {d | ∃ K, IsCCSDisk K ∧ greatestPackingDensity K = d}
-
-/-- `K` is a worst disk `K_min` (§2.1): a centrally symmetric convex disk with
-`δ(K_min) = δ_min`, the worst greatest packing density. -/
-def IsWorstDisk (K : Set (Fin 2 → ℝ)) : Prop :=
-  IsCCSDisk K ∧ greatestPackingDensity K = minimaxDensity
+`minimaxDensity` and `IsWorstDisk` are defined in `SmoothedPolygons/Defs.lean` (shared with the
+Challenge). -/
 
 /-- `K` has the worst greatest density lattice packing (Lemma 2.2.5): a centrally symmetric convex
 disk whose greatest lattice packing density is least among all centrally symmetric convex disks.

@@ -26,7 +26,8 @@ The objects of Chapter 8 (Singular Locus, TeX 6631–7674) and the vocabulary it
   `(T*O_J)_I`), the edges of `U_T` (`controlEdge`);
 * the singular locus (Definition 8.2.4, `singularLocus`);
 * bang-bang controls with finitely many switches (`IsFiniteBangBang`; Definition 7.3.2 with the
-  finiteness of Theorems 8.1.4, 8.3.2 and 16.3.1).
+  finiteness of Theorems 8.1.4, 8.3.2 and 16.3.1), defined in `SmoothedPolygons/Defs.lean`
+  (shared with the Challenge).
 
 Conventions. Controls `u = (u₀, u₁, u₂)` are `Fin 3 → ℝ`, `vertex i` is the vertex `e_{i+1}`
 (`Pi.single i 1`). The edge `{u_k = 0}` of `U_T` is the segment from `vertex (k + 1)` to
@@ -184,17 +185,6 @@ noncomputable def expJ (t : ℝ) : Mat2 := !![Real.cos t, -Real.sin t; Real.sin 
 
 /-- The centre `(⅓, ⅓, ⅓)` of the control simplex `U_T` (Theorem 8.2.3), with `Z_u = J/3`. -/
 noncomputable def controlCentre : Fin 3 → ℝ := ![1 / 3, 1 / 3, 1 / 3]
-
-/-! ### Bang-bang controls with finitely many switches -/
-
-/-- The control `u` is **bang-bang with finitely many switches on `[a, b]`** (Definition 7.3.2;
-Theorems 8.1.4, 8.3.2, 16.3.1: "equal a.e. to a piecewise constant function … with finitely many
-switches"): off a finite set `S` of times, `u` is almost everywhere constant near each time of
-`(a, b)`, equal to a vertex of `U_T`. (On each interval between consecutive points of `S ∪ {a, b}`
-it is then almost everywhere equal to one vertex.) -/
-def IsFiniteBangBang (a b : ℝ) (u : ℝ → Fin 3 → ℝ) : Prop :=
-  ∃ S : Finset ℝ, ∀ t ∈ Ioo a b, t ∉ S → ∃ i : Fin 3, ∃ ε > 0,
-    ∀ᵐ τ, τ ∈ Ioo (t - ε) (t + ε) → u τ = vertex i
 
 /-! ### Basic facts about extremals on intervals -/
 
