@@ -50,6 +50,7 @@ import all External.Mahler1947
 import all External.MahlerIrreducible
 import all External.MahlerIrreducible.Lemma3
 import all External.MinkowskiMahler
+import all External.NoetherSussmann
 import all External.Pontryagin
 import all SmoothedPolygons.AppA.FunctionalDerivative
 import all SmoothedPolygons.AppA.Gronwall
@@ -206,6 +207,9 @@ import all SmoothedPolygons.Ch8.NoSingularArcs
 import all SmoothedPolygons.Ch8.PolygonBoundary
 import all SmoothedPolygons.Ch8.SingularLocus
 import all SmoothedPolygons.Ch8.VertexControl
+import all SmoothedPolygons.Ch9.AngularMomentum
+import all SmoothedPolygons.Ch9.ControlSets
+import all SmoothedPolygons.Ch9.NoetherAsPrinted
 import all SmoothedPolygons.Defs
 import all Solution
 -- The OptimalControl and StableManifold packages need no `import all`: the traversal stays inside
@@ -264,6 +268,10 @@ meta def externalResults : List (String × Name) :=
    ("Filippov (Agrachev–Sachkov, Th. 10.1)", ``External.filippov),
    ("Pontryagin maximum principle (Agrachev–Sachkov, Ch. 12)",
      ``External.pontryagin_maximum_principle),
+   ("Noether–Sussmann (Sussmann 1995, Thm 4.1; Thm 9.1.4 with cost invariance; OptimalControl)",
+     ``External.noether_sussmann),
+   ("Noether–Sussmann for one infinitesimal symmetry (the form §9.1 applies; OptimalControl)",
+     ``External.noether_sussmann_one_parameter),
    ("Irwin, Ch. 6: the stable manifold theorem (Thm A.3.1, from the StableManifold package)",
      ``SmoothedPolygons.theoremA_3_1),
    ("Hypothesis of the conditional form of Thm 16.3.1: no chattering into 𝒮_sing (proved)",
@@ -387,6 +395,15 @@ meta def paperResults : List (String × Name) :=
    ("Thm 8.3.2", ``SmoothedPolygons.theorem8_3_2),
    ("Remark 8.3.3", ``SmoothedPolygons.remark8_3_3),
    ("Lemma 8.3.4", ``SmoothedPolygons.lemma8_3_4),
+   ("Thm 9.0.3", ``SmoothedPolygons.theorem9_0_3),
+   ("Remark 9.0.4", ``SmoothedPolygons.remark9_0_4),
+   ("Remark 9.0.4: U_T is not closed under rotations",
+     ``SmoothedPolygons.not_isRotationClosed_controlSimplex),
+   ("Thm 9.1.4 (Noether–Sussmann) as printed is false (E95)",
+     ``SmoothedPolygons.noetherSussmann_false_as_printed),
+   ("Thm 9.1.6", ``SmoothedPolygons.theorem9_1_6),
+   ("Remark 9.1.7", ``SmoothedPolygons.remark9_1_7),
+   ("Remark 9.1.7, the right action", ``SmoothedPolygons.remark9_1_7_rightAction),
    ("Lemma 10.1.1 (Cayley transform)", ``SmoothedPolygons.lemma10_1_1),
    ("eqn:z1z2z3 (13.2.2)", ``SmoothedPolygons.eqn_z1z2z3),
    ("Lemma 13.2.1", ``SmoothedPolygons.lemma13_2_1),

@@ -19,17 +19,23 @@ OptimalControl package (`https://github.com/vltanh/lean4-optimal-control`, at th
 | `EulerArnold.lean` | the Euler–Arnold equation `μ' = [μ, δh/δμ]` for the left-trivialized momentum `μ = pg` of a left-invariant Hamiltonian `H(g, p) = h(pg)` on the cotangent bundle of a matrix group ([`External.euler_arnold`](EulerArnold.lean#L72)) | R. H. Cushman and L. M. Bates, *Global Aspects of Classical Integrable Systems*, Birkhäuser, 1997 | Proposition 6.5.1 |
 | `Filippov.lean` | for a control system `q' = f(q, u)` on `ℝⁿ` with compact control set, convex velocity sets and `f` of compact support, the attainable sets (at time `T` and up to time `T`) are compact, and optimal controls exist for integral costs, with fixed or free terminal time, when the velocity sets extended by the cost are convex (without this the book's statement is false, [`REPORT.md`](../REPORT.md), E35) ([`External.filippov`](Filippov.lean#L153)) | A. A. Agrachev and Yu. L. Sachkov, *Control Theory from the Geometric Viewpoint*, Springer, 2004, Thm 10.1 (the book cites no source; its entry `zelikin2004control` is this book); proved here from the general theory of the OptimalControl package: measurable selection (`OptimalControl.MeasureTheory.MeasurableSelection`) and compactness of trajectories and existence of optimal controls (`OptimalControl.ODE.ControlSystem`) | Theorem 6.1.1. §6.1 applies the package's form with a closed state constraint, a compact set of initial points, a closed endpoint relation and a window of terminal times (`ControlSystem.exists_optimal_constrained`, in `OptimalControl.ODE.StateConstraint`, proved by the same argument), which the book's cut-off, free initial point and coupled endpoints need ([`REPORT.md`](../REPORT.md), E46), to prove that a global minimizer exists ([`SmoothedPolygons.exists_isReinhardtMinimizer`](../SmoothedPolygons/Ch6/Existence.lean#L436)) |
 | `Pontryagin.lean` | the Pontryagin maximum principle on an open subset of a finite-dimensional space: free terminal time, integral cost, mixed boundary conditions given by a `C¹` submersion, for strong local minimizers; `ν ≤ 0`, a Lipschitz costate with `(ν, p(t)) ≠ 0`, the adjoint equation, the maximum condition and `H = 0` a.e., transversality ([`External.pontryagin_maximum_principle`](Pontryagin.lean#L80)) | A. A. Agrachev and Yu. L. Sachkov, *Control Theory from the Geometric Viewpoint*, Springer, 2004, Ch. 12, Thm 12.5 with its remarks on free time, read in the authors' draft (the book's entry `zelikin2004control`, which also names M. I. Zelikin, E33); proved in the published OptimalControl package, at the commit pinned in [`lakefile.toml`](../lakefile.toml) (`Pontryagin.maximum_principle`, by Agrachev and Sachkov's proof, with Brouwer's theorem from the FixedPoint package) | §6.2 and §6.6: the global minimizer is a Pontryagin extremal ([`SmoothedPolygons.exists_isPontryaginExtremal_of_isReinhardtMinimizer`](../SmoothedPolygons/Ch6/MatrixExtremal.lean#L564)); not Theorem 7.5.6 |
+| `NoetherSussmann.lean` | Sussmann's Noether theorem for optimal control: for a system of class `C¹` and an infinitesimal group of symmetries that preserve the dynamics and the cost, the momentum map is constant along every lifted trajectory with the adjoint equation and the maximum condition ([`External.noether_sussmann`](NoetherSussmann.lean#L105)); Sussmann's own statement, for biextremals ([`External.sussmann_theorem4_1`](NoetherSussmann.lean#L87)), and the form for one infinitesimal symmetry ([`External.noether_sussmann_one_parameter`](NoetherSussmann.lean#L119)) | H. J. Sussmann, *Symmetries and integrals of motion in optimal control*, Banach Center Publications 32 (1995), 379–393, Theorem 4.1 (the book's entry `sussman`); proved in the OptimalControl package (`Pontryagin.noether`, by Sussmann's argument). The book's quotation (Theorem 9.1.4) drops the invariance of the cost and is false as printed ([`REPORT.md`](../REPORT.md), E95) | Theorem 9.1.6 and Remark 9.1.7 (the one-parameter form) |
 
 Where a proof departs from its source's argument (for instance where the source quotes a lemma
 from another paper), the file's docstring says so, and [`REPORT.md`](../REPORT.md), Section 7, lists it.
-Filippov's theorem is proved by the standard argument, written before we had Agrachev and
-Sachkov's text and not compared with their proof; its form with a state constraint is applied
-directly from the package and has no file here. The maximum principle is proved by their proof
-(Chapter 12 of the authors' draft); the package's README lists its readings and departures.
-Theorem 7.5.6 does not need the principle: a *Pontryagin extremal* is defined by the conditions
-that the principle lists ([`IsPontryaginExtremal`](../Challenge.lean#L214)), and Theorem 7.5.6
-shows that the smoothed polygons satisfy them. Only the statement that the global minimizer is an
-extremal (§6.2) uses it (the row above).
+
+- Filippov's theorem is proved by the standard argument, written before we had Agrachev and
+  Sachkov's text and not compared with their proof; its form with a state constraint is applied
+  directly from the package and has no file here.
+- The maximum principle is proved by their proof (Chapter 12 of the authors' draft); the package's
+  README lists its readings and departures.
+  - Theorem 7.5.6 does not need the principle: a *Pontryagin extremal* is defined by the conditions
+    that the principle lists ([`IsPontryaginExtremal`](../Challenge.lean#L214)), and Theorem 7.5.6 shows that the
+    smoothed polygons satisfy them.
+  - Only the statement that the global minimizer is an extremal (§6.2) uses it (the row of
+    `Pontryagin.lean`).
+- Sussmann's Noether theorem is proved by Sussmann's steps, applied to the cotangent lift of a
+  symmetry directly; the package's `docs/SUSSMANN.md` lists its readings and departures (S1–S8).
 
 Other citations need no file here:
 

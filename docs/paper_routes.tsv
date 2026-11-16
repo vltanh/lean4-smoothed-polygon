@@ -166,7 +166,19 @@ thm:finite-bang-bang	theorem	1	thm:edge
 rem:smoothed-polygon	remark	0	
 lem:constant-not-singular	lemma	1	
 thm:symmetries	theorem	1	
-thm:angular-momentum	theorem	1	cor:lam1-gen-sol,thm:symmetries
+# Unlabelled Remark 9.0.4 (line 7786): U_T is symmetric only under the discrete Z/3Z-rotations, not under general
+# SO2 rotations (stated without proof). Label of this formalization.
+rem:simplex-rotations	remark	0	
+# Unlabelled Theorem 9.1.4 (line 7871): the Noether-Sussmann theorem, cited from sussman without proof. As printed it
+# is false (E95); the label names its refutation, and Sussmann's form is External.noether_sussmann. Label of this
+# formalization.
+thm:noether-sussmann	theorem	0	
+# thm:angular-momentum: the proof also applies thm:noether-sussmann by name ("by the Noether-Sussmann theorem",
+# line 7963), without \ref.
+thm:angular-momentum	theorem	1	cor:lam1-gen-sol,thm:noether-sussmann,thm:symmetries
+# Unlabelled Remark 9.1.7 (line 7968): the right action g -> g exp(-J theta) gives a conserved quantity, and every
+# disk U_r with r^2 > 1/3 has the same conserved quantity (no proof). Label of this formalization.
+rem:angular-momentum-disks	remark	0	
 lem:circle-plane-bijection	lemma	1	
 lem:boundary-circle-control	lemma	1	lem:control-face-lemma
 eqn:opt-control-constraint	proposition	1	prop:trace-quotient-sub

@@ -13,8 +13,8 @@ project:
     The book's main theorem, Mahler's First conjecture (Theorem 16.3.1: the global minimizer is
     bang-bang with finitely many switches, and every K_min is a smoothed polygon), is proved with
     no hypothesis (SmoothedPolygons.theorem16_3_1_unconditional; in the Challenge,
-    mahler_first_conjecture). Formalized and proved: Chapters 2-8 and 13-16, Lemma 10.1.1,
-    Appendices A.3, A.6 and A.11, and Corollary A.1.3. Among the results: Theorem 7.5.6, that every
+    mahler_first_conjecture). Formalized and proved: Chapters 2-8, Sections 9.0-9.1, Chapters
+    13-16, Lemma 10.1.1, Appendices A.3, A.6 and A.11, and Corollary A.1.3. Among the results: Theorem 7.5.6, that every
     smoothed (6k+2)-gon is a Pontryagin extremal with bang-bang control; the smoothed octagon's
     packing density (8 - sqrt(32) - ln 2)/(sqrt(8) - 1); the isolation of the octagon among
     extremals (Theorem 7.7.1, up to time translation); the existence of a minimizer, its lift to an
@@ -22,9 +22,11 @@ project:
     away from the singular locus; the Fuller system and the stability of its fixed point q_out
     (Chapter 13); the analytic extension of the Reinhardt-Poincare map across the exceptional
     divisor, with its stable and unstable manifolds (Chapter 14); the global basin theorem 16.1.1,
-    the cluster point theorem 16.4.1 and Theorem 14.4.1 (no return). Not formalized, by the user's
-    decision: Chapters 1 and 9-12 (apart from Lemma 10.1.1), the other appendices, Appendix B and
-    the remarks that no main result uses. Proposition 15.3.2, read off figures and used by no
+    the cluster point theorem 16.4.1 and Theorem 14.4.1 (no return); and, for the circular control
+    set, the conservation of angular momentum along every Pontryagin extremal (Theorem 9.1.6), by
+    Sussmann's Noether theorem. Not formalized, by the user's decision: Chapter 1, the rest of
+    Chapters 9-12 (apart from Lemma 10.1.1), the other appendices, Appendix B and the remarks that
+    no main result uses. Proposition 15.3.2, read off figures and used by no
     proof, is proved in part.
 
 
@@ -38,8 +40,9 @@ project:
     Python reference in ball arithmetic checks the facts numerically.
 
 
-    The audit (REPORT.md, 94 findings) records results false as printed and proved in corrected
-    form (Lemmas 2.2.1 and 3.1.8, Filippov's theorem, Theorems 7.7.1 and 8.3.1), the converse of
+    The audit (REPORT.md, 97 findings) records results false as printed and proved in corrected
+    form (Lemmas 2.2.1 and 3.1.8, Filippov's theorem, Theorems 7.7.1 and 8.3.1, and the
+    Noether-Sussmann theorem as the book quotes it, without the invariance of the cost), the converse of
     the control problem used in Section 6.1 (false; true for winding number one), Theorem 8.2.7
     proved in the authors' reading, swapped labels in Remark 15.3.1, and gaps repaired along the
     book's lines, among them the identification of minimizers with K_min, the convergence and last
@@ -50,8 +53,8 @@ project:
 
 
     The results the book cites are proved: Fejes Toth's theorem and Mahler's theorems on
-    critical lattices in this repository, the Pontryagin maximum principle and Filippov's
-    theorem (also under a state constraint) in the package OptimalControl, Brouwer's fixed-point
+    critical lattices in this repository, the Pontryagin maximum principle, Filippov's theorem
+    (also under a state constraint) and Sussmann's Noether theorem in the package OptimalControl, Brouwer's fixed-point
     theorem in FixedPoint, and the stable manifold theorem in StableManifold, all by their
     sources' arguments.
   authors:
@@ -357,12 +360,22 @@ status:
     hypothesis (above); and part of Proposition 15.3.2 (its second clause,
     SmoothedPolygons.TriFuller.isGeometricPartition_closedBoxTwo, the continuous extensions to two
     of the parts, the clauses that follow from the definitions, and a reduction of the rest to four
-    statements, TriFuller.proposition15_3_2_of_remaining). Not formalized, by the user's decision
+    statements, TriFuller.proposition15_3_2_of_remaining). Also proved, at the user's request:
+    Sections 9.0-9.1, the circular control set, with Theorem 9.0.3 (the Hamiltonian is invariant
+    under rotations when the control set is closed under them, SmoothedPolygons.theorem9_0_3),
+    Remark 9.0.4 (U_T has only the Z/3 symmetry), Theorem 9.1.6 (the angular momentum
+    <J, Lambda_1 + Lambda_R> is conserved along every Pontryagin extremal of the circular control
+    problem, SmoothedPolygons.theorem9_1_6, by the book's route through the Noether-Sussmann
+    theorem, with the reduced costate lifted to a covector curve; its generic form
+    angularMomentum_conserved for local solutions with a compact rotation-closed control set) and
+    Remark 9.1.7; the cited Noether-Sussmann theorem (Theorem 9.1.4) is false as printed (refuted,
+    SmoothedPolygons.noetherSussmann_false_as_printed, E95) and is proved in Sussmann's form
+    (External.noether_sussmann). Not formalized, by the user's decision
     (15 November 2026: formalize what the main results need): Chapter 1; Chapters 9-12
-    apart from Lemma 10.1.1; Appendix A.1 apart from Corollary A.1.3, Appendices A.2, A.4, A.5,
+    from Section 9.2 on, apart from Lemma 10.1.1; Appendix A.1 apart from Corollary A.1.3, Appendices A.2, A.4, A.5,
     A.7-A.10 and B, and the global part of Theorem A.3.1, which no proof uses; within the formalized
     chapters, the
-    conjectural Remarks 7.6.1 and 7.6.3, the printed Theorem 8.2.7 for abnormal lifts, which is
+    conjectural Remarks 7.6.1 and 7.6.3, Remark 9.0.2, the printed Theorem 8.2.7 for abnormal lifts, which is
     open, the interpretation in Remark 13.5.4 of a fixed point as a limit of the extremals of
     Section 7.5 (Mathematica and a forward reference to Section 14.2), the informal corollary after
     Lemma 13.2.8, which is not used later, the rest of Proposition 15.3.2 (stated as a named
@@ -379,8 +392,8 @@ status:
     Toth's theorem, Gruber's density formula, the theorems of Minkowski and Mahler on critical
     lattices and circumscribed hexagons, Mahler's Lemma 3 on irreducible domains (in full, along the
     two earlier papers of Mahler on which it rests), the Euler-Arnold equation and the Pontryagin
-    maximum principle are proved, and so is Filippov's theorem; the last two are stated in External/
-    and proved in the OptimalControl package (github.com/vltanh/lean4-optimal-control, at a pinned
+    maximum principle are proved, and so are Filippov's theorem and Sussmann's Noether theorem; the
+    last three are stated in External/ and proved in the OptimalControl package (github.com/vltanh/lean4-optimal-control, at a pinned
     commit), which takes Brouwer's fixed-point theorem from the FixedPoint package
     (github.com/vltanh/lean4-fixed-point); the form of Filippov's theorem with a state constraint
     that Section 6.1 applies is proved in OptimalControl too; and Irwin's stable manifold theorem,
@@ -398,7 +411,10 @@ status:
     index of the boxes of Section 16.1), E81 (the matrix printed as X-tilde in Section 14.1 is X),
     E82 (the claim that xi(x) lies in the zero set of the Hamiltonian holds on one side of a
     hyperplane), E87 (Remark 14.3.4, stated at a point outside the book's chart, in a mirrored
-    chart, and the second statement of Theorem 14.4.1 without the chart), E92 (the local stable set of Appendix A.3, with its orbit in the neighbourhood).
+    chart, and the second statement of Theorem 14.4.1 without the chart), E92 (the local stable set of Appendix A.3, with its orbit in the neighbourhood), E95 (the
+    Noether-Sussmann theorem in Sussmann's form, with the invariance of the cost; false as printed),
+    E96 (U_C as the disk U_1; as printed it is U_T), E97 (the state space of the circular problem,
+    which the book does not give, and Theorem 9.1.6 along every Pontryagin extremal).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -411,7 +427,7 @@ automation:
       tool_setup: >-
         The formalize-math-paper skill (https://github.com/vltanh/formalize-math-paper, local copy
         dated 2026-10-17, versions 3.0.1 to 3.2.5 of its repository in the fourth round, and 3.3.0
-        and 3.4.0 in the seventh) in one Claude Code session, in ten rounds, with 224 sub-agents
+        and 3.4.0 in the seventh) in one Claude Code session, in eleven rounds, with 240 sub-agents
         of the same model on the formalization and its three packages (at most 13 sub-agents at once): statement reviews against the TeX
         source and the cited sources, parallel proofs by chapter and by part, proof reviews,
         verification of the audit and of its literature section, and an exploration of follow-up
@@ -420,12 +436,12 @@ automation:
         Comparator were run locally.
       cost:
         wall_time: >-
-          237.4 hours elapsed from the start to the completed audit report of the tenth round
+          243.8 hours elapsed from the start to the completed audit report of the eleventh round
           (5-15 November 2026), including three nights, about 15 hours stopped by a usage limit and
           154 hours stopped by a reboot (7-14 November); the rounds took 3.2, 15.5, 21.5, 5.6, 2.4,
-          3.4, 2.0, 2.9, 6.2 and 17.6 hours (the last with about 9.1 hours of work); 110.3 hours of
+          3.4, 2.0, 2.9, 6.2, 17.6 (about 9.1 hours of work) and 6.4 hours; 116.1 hours of
           sub-agent working time in all (1.5 of them evaluating the skill, 3.2 on the
-          StableManifold package)
+          StableManifold package, 1.4 on Noether's theorem in the OptimalControl package)
         spend_usd: "not tracked"
         hardware: "local machine (Linux) for Lean builds; models via API"
       prompting_notes: >-
@@ -455,10 +471,14 @@ automation:
         in the tenth round, proofs without computer assistance of the facts that the book reads off
         Mathematica computations, with the computations kept in another language as a reference and
         each proof recorded as a departure, an attempt at such a proof of the unstable-curve fact N4
-        (a research round first), and the scope: formalize what the main results need.
+        (a research round first), and the scope: formalize what the main results need; in the
+        eleventh round, a short audit report with its details in separate files and no plan
+        language, the derivative bounds of DOutContracts by hand, and, from Chapters 9-12, the
+        control-theoretic Noether theorem (Sussmann's, in the OptimalControl package) with its
+        instance, Theorem 9.1.6.
   spend_usd: "not tracked"
   notes: >-
-    The-Anh Vu-Le requested the formalization, chose its scope in ten rounds (first the
+    The-Anh Vu-Le requested the formalization, chose its scope in eleven rounds (first the
     control-theoretic core, then Chapter 2 with every cited theorem proved, then the rest of the
     formalized chapters, then the first layer of a plan for Chapters 5 and 8-16: the maximum
     principle and the lift of every minimizer to an extremal, then the second layer: Chapter 5, the
@@ -467,8 +487,8 @@ automation:
     layer: Chapter 15 and Theorems 16.1.1 and 16.2.1, conditional on three named numerical facts,
     then the sixth layer: Chapter 14 to section 14.3, Appendix A.3 and Theorem 16.4.1, with Theorem
     16.3.1 conditional on Theorem 14.4.1 and those facts, then the seventh layer: Theorem 14.4.1 and
-    the four computed facts proved without computer assistance, and with them Theorem 16.3.1) and
-    made the decisions it needed
+    the four computed facts proved without computer assistance, and with them Theorem 16.3.1, then
+    the control-theoretic Noether theorem and Theorem 9.1.6) and made the decisions it needed
     (the proof of Jacobi's formula, the hypothesis of Theorem 3.1.4(3), the routes for Lemmas
     2.2.1 and 2.2.5 and for Mahler's Lemma 3 (along Mahler's 1946 paper), the corrected form of
     the false Lemma 2.2.1, the hypothesis of Lemma 3.1.8, the statement of Filippov's theorem, the
@@ -478,7 +498,8 @@ automation:
     minimizer; in the fifth round, including the identification with K_min; in the sixth round,
     the named hypothesis of Theorem 16.3.1, the one-sided form of the false Theorem 8.3.1, and the
     authors' reading of Theorem 8.2.7; in the tenth round, proofs without computer assistance of the
-    computed facts, and the scope of what the main results need). Claude Opus 5.5 wrote the
+    computed facts, and the scope of what the main results need; in the eleventh round, Sussmann's
+    form of the misquoted Noether theorem). Claude Opus 5.5 wrote the
     statements, the proofs, the three packages, the audit report and the packaging; independent
     agents reviewed the statements, the proofs and the report. No person has reviewed the proofs.
     Details and token counts in CREDITS.md.
@@ -550,7 +571,13 @@ fidelity:
     "xi(x) lies in the zero set of the Hamiltonian on the walls" holds only when
     l11 + l21 x21 <= 0; E87, Remark 14.3.4 places q_in at a point (0, x_in) of a chart that does not
     contain it, and is proved in a mirrored chart; E92, the local stable set of Appendix A.3 omits
-    that the orbit stays in the neighbourhood U; Theorem 16.4.1 is proved from the three facts, and
+    that the orbit stays in the neighbourhood U; E95, the Noether-Sussmann theorem as the book
+    quotes it (Theorem 9.1.4) drops Sussmann's invariance of the cost and is false (translations of
+    R with the cost x; refuted in Lean for analytic data), and is formalized in Sussmann's form;
+    E96, U_C as printed is U_T and is read as the disk U_1; E97, the book gives no state space for
+    the circular control problem, which is read as the star states for U_C, and Theorem 9.1.6
+    says "along the optimal trajectory", whose existence the book does not establish, and is stated
+    along every Pontryagin extremal; Theorem 16.4.1 is proved from the three facts, and
     Theorem 16.3.1 from Theorem 14.4.1 and the three facts (E89), all of them proved; the second
     statement of Theorem 14.4.1, which also places q_in in the chart, is stated without it (E87). Slips corrected where they occur: E8, E14, E24, E44 (a
     region in the proof of Lemma 5.0.7 (3)), E50 (the constant of Lemma 8.1.5), E59 (a sign in the proof of
@@ -565,7 +592,9 @@ fidelity:
     Redundant hypotheses omitted from the Lean statements (REPORT.md, Section 5): Theorem 3.1.4
     (1)-(2), Proposition 3.1.9, Corollary 3.1.10, Lemma 3.3.1, Theorem 5.0.2 (circle
     representation: the proof re-centers the disk), Corollary 6.5.4, Theorem 6.8.2, Lemma 7.1.2,
-    Lemma 7.3.1, and the packing hypothesis of Gruber's Cor. 30.1. The Challenge keeps
+    Lemma 7.3.1, Theorem 9.1.6 in its generic form (optimality, the transversality conditions,
+    g(0) = I, H = 0, lambda_cost <= 0 and nontriviality), Remark 9.1.7 (r^2 > 1/3), and the packing
+    hypothesis of Gruber's Cor. 30.1. The Challenge keeps
     the book's hypotheses. Kept although the proofs do not use them, because the book or the source
     states them: the covering hypothesis of Lemma 3.1.8, the properties of the bilinear form in
     Proposition 6.4.1, the state-space condition of Lemma 8.1.5 on all of (-t1, t1), the edge
@@ -713,7 +742,11 @@ fidelity:
     being a meeting with the singular locus at the end of the interval, its conclusions being the
     convergence of the angular components of the switching points to q_in modulo the virial group
     and, for every extension of Lemma 14.3.1, their eventual membership, rotated onto the section,
-    in the local stable curve at q_in; and Theorem A.3.1 is stated in its local part, for an open
+    in the local stable curve at q_in; in Chapter 9 the control set is the set of its control
+    matrices, SO2 acts by conjugation, Problem 6.7.1 is posed for any control set, with its star
+    states as the state space and the reduced costate, U_r is defined for every r, and the
+    Noether-Sussmann theorem is applied in its one-parameter form (so2 = RJ) on the open set
+    GL2+(R) x {star states}; and Theorem A.3.1 is stated in its local part, for an open
     partial homeomorphism of a finite-dimensional space, with the submanifolds as graphs over the
     summands.
 
@@ -818,7 +851,10 @@ fidelity:
     Fuller-Poincare map, from relaxed limits of the rescaled controls, after which Theorem 16.1.1
     and the closedness of the cluster set conclude as in the book; E91: the passage from a cluster
     point to a limit, which the book's epsilon/r_scale argument does not show, replaced by a
-    hyperbolic box at q_out that uses only the derivative of the extended map); and Theorem A.3.1
+    hyperbolic box at q_out that uses only the derivative of the extended map); Theorem 9.1.6
+    (the reduced costate of Problem 6.7.1, on which Problem 9.1.5 is posed, lifted to a covector
+    curve, Lambda_2 = [X, Lambda_R]/4 + cX with an explicit quadrature c, since the book's proof
+    applies the Noether-Sussmann theorem to the full costate); and Theorem A.3.1
     (E92: the package's theorem applied to the map cut off outside its source, to get a
     neighbourhood inside the source; the package's later form for every small neighbourhood makes
     this unnecessary). Lemma 14.3.1 follows the book step by step, its last step included (the
@@ -899,7 +935,10 @@ fidelity:
     Three gaps of the source are repaired: the proof of Remark (1) after Lemma 12.1 (any convex
     cone) uses interior points, which a cone may lack; a needle variation placed at the final time
     t1 varies nothing (such times are moved); and the Lipschitz property and derivative of the
-    end-point map of the needle variations (p. 172) are stated without proof.
+    end-point map of the needle variations (p. 172) are stated without proof. Sussmann's Noether
+    theorem (in the OptimalControl package) follows Sussmann's steps, applied to the cotangent lift
+    of a symmetry directly rather than through his Theorems 3.1-3.2 on Hamiltonian families, with
+    C1 in place of smooth (the package's readings S1-S8).
 
 review:
   status: "agent-reviewed"
@@ -927,7 +966,11 @@ review:
     16.1 with the book and found an interval chain described as written by hand (corrected); and
     another checked the proof of N4: it re-derived every certificate exactly with sympy, checked the
     axioms with every module imported with import all, and found no wrong statement and nothing
-    unsound or vacuous. No person has reviewed the proofs.
+    unsound or vacuous. For Sections 9.0-9.1, one agent reviewed the statements against the TeX
+    source and Sussmann's paper, with its own numerical model of the dynamics, the lift of the
+    costate and the conservation law, and another compared the finished proofs with the book's,
+    step by step, and found every difference recorded and no false statement. No person has
+    reviewed the proofs.
 
 alignment:
   namespace: "SmoothedPolygonsChallenge"

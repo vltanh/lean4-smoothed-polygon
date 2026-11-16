@@ -9,9 +9,10 @@ with no hypothesis, the four facts that the book reads off computations included
   need):
   - Chapter 1 (its restatements of results of the later chapters among them; the restatement of
     Theorem 8.3.2 is false, E57);
-  - Chapters 9–12 (circular control, off the path to the main theorem; Chapter 13 uses only the
-    form `RR` of Chapter 10, and Chapters 14 and 16 only Lemma 10.1.1 and the coordinates of
-    Chapters 10–11, which are formalized);
+  - Chapters 9–12 from §9.2 on (circular control, off the path to the main theorem; Chapter 13
+    uses only the form `RR` of Chapter 10, and Chapters 14 and 16 only Lemma 10.1.1 and the
+    coordinates of Chapters 10–11, which are formalized). §9.0–9.1 were formalized at the user's
+    request (below);
   - Appendix A.1 apart from Corollary A.1.3 (Lemmas A.1.1 and A.1.2, cited from Amann and Clarke,
     are not stated; the case of Lemma A.1.1 that §6.1 and Corollary A.1.3 use is proved in the
     OptimalControl package);
@@ -41,6 +42,17 @@ with no hypothesis, the four facts that the book reads off computations included
       with a figure, is not formalized.
     - The explicit solutions with constant edge control after Lemma 8.1.5, computed "in
       Mathematica" and not recorded, are not stated.
+  - In §9.0–9.1, every numbered result but Remark 9.0.2 is formalized: Theorems 9.0.3 and 9.1.6,
+    Remarks 9.0.4 and 9.1.7, and the cited Theorem 9.1.4, in Sussmann's form and refuted as
+    printed (E95).
+    - Not formalized: Remark 9.0.2 (the controls of `U_C ∖ U_T` give boundary curves that fail to
+      be convex) and the motivation of TeX 7729–7747.
+    - Definitions 9.1.1–9.1.2 are stated as printed, Definition 9.1.3 is the package's momentum
+      map, and Problem 9.1.5 is the predicate
+      [`IsPontryaginExtremalFor`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L310) [`controlDiskC`](../../SmoothedPolygons/Ch9/ControlSets.lean#L85).
+    - Theorem 9.1.6 is stated for every Pontryagin extremal. Its literal form, "along the optimal
+      trajectory", would also need the maximum principle and the existence of optimal controls
+      for `U_C`, which the book does not establish (E97).
   - In Chapter 13, Remark 13.5.3 and the verifiable part of Remark 13.5.4 are proved, and Remark
     13.5.1 fixes notation. Not formalized, and none of these is used later in the chapter:
     - the interpretation in Remark 13.5.4 of the fixed point `q_fix` as a limit of the extremals of

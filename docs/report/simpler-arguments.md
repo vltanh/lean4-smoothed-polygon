@@ -74,6 +74,19 @@ Part of the [audit report](../../REPORT.md).
   - `det(w(c), w)²/|w|²` has derivative `2 det(w(c), w)⟨w(c), w⟩ det(w, w')/|w|⁴ = 0`, so
     `det(w(c), w) = 0`, and then `det(w(c), σ - σ(c))` has derivative `0`.
   - The formal proof uses it.
+- **Theorem 9.1.6 without Noether's theorem or the lift.** By the costate equations,
+  `𝒜' = ⟨J, [P, Λ_R] - ⟨Λ_R, P⟩[P, X]⟩` almost everywhere (`⟨J, [J, X]⟩ = 0`, and the `[Λ₁, X]`
+  terms cancel), and this is `-d/dθ H(Λ₁, Λ_R, X; Ad_{e^{θJ}} Z_u)` at `θ = 0`.
+  - At a maximizer `u` of `H` over a rotation-closed `U` it vanishes, since the rotated controls
+    stay in `U` (Theorem 9.0.3); `𝒜` is absolutely continuous, hence constant.
+  - It is the book's own computation in §9.3 (TeX 8183–8196): about 100–150 Lean lines, against
+    about 700 for the lift and 200 for the symmetry machinery.
+  - The formal proof follows the book's route through the Noether–Sussmann theorem.
+- **Theorem 9.1.6 without Corollary 6.5.3.** The action `g ↦ g e^{-θJ}`, `X ↦ Ad_{e^{θJ}} X` of
+  Remark 9.1.7 has momentum exactly `-𝒜`, with no term `⟨Λ₁, Ad_{g⁻¹}J⟩`
+  ([`momentum_rightRotationField`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L1719)).
+  - The formalization proves the conservation that way in covector form
+    ([`remark9_1_7_rightAction`](../../SmoothedPolygons/Ch9/AngularMomentum.lean#L1759)); the proof of Theorem 9.1.6 keeps the book's conjugation action.
 - **The first control of `q_out` (Lemma 13.5.2).** Lemma 13.2.6 gives it at once.
   - At (13.5.1) `z₃⁰ < 0`, so `RR(z₃⁰, ζ) = RR(z₃⁰, ζ²) = -z₃⁰/2 > z₃⁰ = RR(z₃⁰, 1)`, and the tie is
     broken by `RR(z₂⁰, ζ) - RR(z₂⁰, ζ²) = √3 Im z₂⁰ > 0`, so `V_{T,max} = {ζ}`.

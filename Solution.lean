@@ -8,6 +8,7 @@ public import External.MahlerIrreducible
 public import External.MahlerIrreducible.Lemma3
 public import External.Filippov
 public import External.Pontryagin
+public import External.NoetherSussmann
 public import SmoothedPolygons.AppA.FunctionalDerivative
 public import SmoothedPolygons.AppA.Gronwall
 public import SmoothedPolygons.AppA.MatrixIdentities
@@ -115,6 +116,9 @@ public import SmoothedPolygons.Ch8.NoSingularArcs
 public import SmoothedPolygons.Ch8.PolygonBoundary
 public import SmoothedPolygons.Ch8.SingularLocus
 public import SmoothedPolygons.Ch8.VertexControl
+public import SmoothedPolygons.Ch9.AngularMomentum
+public import SmoothedPolygons.Ch9.ControlSets
+public import SmoothedPolygons.Ch9.NoetherAsPrinted
 public import SmoothedPolygons.Defs
 
 /-!

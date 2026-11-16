@@ -507,3 +507,47 @@ that completes the round's REPORT.md (15 November, 11:30 CST), from the session 
 For the whole project (ten rounds, to the same time): 237.4 hours elapsed (including the stops),
 245 sub-agents (224 on the formalization and its three packages; at most 13 at once), 110.3 hours
 of sub-agent work, 20,325 tool calls by sub-agents and 2,004 by the main session.
+
+## Eleventh round (15 November 2026)
+
+After publishing Mahler's First conjecture with no hypothesis (with the user's approval), the
+round reworked the documents and took one piece of Chapters 9–12. The user decided:
+- the audit report is short, with its details in separate files and short paragraphs, and the public
+  documents carry no "What's next" or plan language (the history stays here);
+- the last script-written certificate (the interval chain behind the derivative bounds of
+  `DOutContracts`) is replaced by an argument checked by hand;
+- from Chapters 9–12, the control-theoretic Noether theorem, which the book cites from Sussmann, is
+  proved as a new result of the OptimalControl package, and its instance in the book, the
+  conservation of the angular momentum (Theorem 9.1.6), is formalized; the circular Fuller system
+  of Chapter 11 is not;
+- Palomar's preflight is still not run.
+
+How it was made:
+
+- **Documents** (five agents): the short report and its detail files (one agent, the sections moved
+  word for word by a script), then three agents shortening the detail files' paragraphs, each
+  rewrite checked by a script that every code name, link, E-number, TeX line and number survives.
+- **Derivative bounds by hand and helper names** (two agents).
+- **Noether's theorem in the OptimalControl package** (four agents): the source and the statements,
+  an independent review (it applied the theorem to rotations of the plane in Lean), the proofs, and
+  the package's documents and Palomar files. The book's statement drops Sussmann's cost condition
+  and is false as printed (E95).
+- **§9.0–9.1** (six agents): the statements, an independent review with its own numerical model of
+  the lift of the costate, two proof agents, an independent comparison with the book, and the
+  registration and documents.
+
+Figures, from the end of the tenth round (15 November 2026, 11:30 CST) to just before the commit
+that completes this round's documents (17:56 CST), from the session transcript:
+
+- elapsed time: 6.4 hours (including the publication of two releases and of the website entry);
+- sub-agents: 17 (16 started in the round, 4 of them on the OptimalControl package), at most 3
+  running at once; their total working time 5.8 hours (1.4 on the package);
+- tool calls: 1,203 by the sub-agents, 177 by the main session;
+- tokens: sub-agents 2.21M output, 5.39M input (uncached input and cache writes), 252M cache
+  reads; main session 0.14M output, 0.65M input, 60M cache reads;
+- model calls: `claude-opus-5-5` only, 1,134 by the sub-agents and 175 by the main session; Claude
+  Code 2.1.323.
+
+For the whole project (eleven rounds, to the same time): 243.8 hours elapsed (including the
+stops), 261 sub-agents (240 on the formalization and its three packages; at most 13 at once), 116.1
+hours of sub-agent work, 21,528 tool calls by sub-agents and 2,181 by the main session.
