@@ -348,6 +348,8 @@ details of the four computed facts are in [docs/report/departures.md](docs/repor
 - To our knowledge this is the first formalization of Theorems 7.5.6 and 7.7.1, of Chapters 6–8
   and of Mahler's First conjecture, and the packages give the first complete formal proofs of the
   maximum principle and of the stable manifold theorem for maps.
+- The Reinhardt conjecture, with its equality case, is proved in Lean in [lean4-smoothed-octagon](https://github.com/vltanh/lean4-smoothed-octagon)
+  (Palomar entry PALOMAR-2026-11-09-000008), which builds on this formalization and on OptimalControl.
 - M. Ho's independent Lean repository formalizes parts of Chapters 2, 3 and 5; this work did not use it.
 - Details, with the search of 5 November 2026: [docs/report/literature.md](docs/report/literature.md).
 

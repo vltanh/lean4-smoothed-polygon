@@ -18,8 +18,9 @@ on `SL₂(ℝ)` and studies its Pontryagin extremals.
   assistance, a departure from the book by the user's decision (below).
 - Not formalized, by the user's decision: Chapter 1, the rest of Chapters 9–12 (apart from Lemma
   10.1.1), the other appendices, Appendix B, and the remarks that no main result uses.
-- The Reinhardt conjecture itself (that the smoothed octagon is the worst disk) is open and not
-  claimed.
+- The Reinhardt conjecture itself (the smoothed octagon is the worst disk, uniquely up to affine
+  maps) is proved in a separate Lean project that builds on this one,
+  [lean4-smoothed-octagon](https://github.com/vltanh/lean4-smoothed-octagon) (Palomar-verified).
 
 ## Status
 
@@ -155,6 +156,8 @@ Lean and Mathlib `v4.36.0-rc2`.
 
 - Hales's 2017 preprint ([arXiv:1703.01352](https://arxiv.org/abs/1703.01352)) introduced the
   control formulation and sketched the octagon's isolation.
+- [lean4-smoothed-octagon](https://github.com/vltanh/lean4-smoothed-octagon) proves the Reinhardt conjecture with its equality case, building on
+  this formalization's packing definitions and extremal lift and on OptimalControl.
 - M. Ho's independent Lean development
   ([sunfishho/reinhardt-density-bound](https://github.com/sunfishho/reinhardt-density-bound))
   formalizes parts of Chapters 2, 3 and 5; this work did not use it.
