@@ -222,6 +222,13 @@ sources:
       stays in the neighbourhood (REPORT.md, E92).
 
 related_formalizations:
+  - id: "https://github.com/vltanh/lean4-smoothed-octagon"
+    relationship: "extended-by"
+    note: >-
+      A Lean 4 proof of the Reinhardt conjecture and its equality case, by the same maintainer,
+      verified by Palomar (PALOMAR-2026-11-09-000008). Its Challenge copies this formalization's
+      packing definitions, and its proof uses the lift of a global minimizer to a Pontryagin
+      extremal proved here and the maximum principle of OptimalControl.
   - id: "https://github.com/sunfishho/reinhardt-density-bound"
     relationship: "independent"
     note: >-

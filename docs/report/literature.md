@@ -69,7 +69,10 @@ reference and no erratum.
 - Hales's blog post (13 May 2024) states that the Reinhardt conjecture remains open.
 - A Quanta Magazine article (28 June 2024) reports that the work had yet to be peer reviewed and
   that H. Cohn and G. Kuperberg, who read it informally, were confident in it.
-- No paper claims progress on the Reinhardt conjecture since. The only claim we found is M. Ho's
+- The Reinhardt conjecture, with its equality case, is proved in Lean in
+  [vltanh/lean4-smoothed-octagon](https://github.com/vltanh/lean4-smoothed-octagon) (Palomar entry PALOMAR-2026-11-09-000008), by the same
+  maintainer; it builds on this formalization and on OptimalControl (below).
+- No paper claims progress on the conjecture otherwise. The only other claim we found is M. Ho's
   unreviewed Lean repository below (lower bound `0.8950112`, above Tammela's `0.892656`).
 - OpenAlex lists one work citing the book (B. Grechuk, *One Hundred Open Problems*, in *Landscape
   of 21st Century Mathematics*, Springer 2026, pp. 565–607), which we did not read; Semantic
@@ -95,6 +98,13 @@ reference and no erratum.
     - an explicit region that this step keeps until an arc leaves the star domain.
   - The state dynamics and the cost of Chapter 3 were formalized independently, three days
     earlier, in M. Ho's repository below.
+- [vltanh/lean4-smoothed-octagon](https://github.com/vltanh/lean4-smoothed-octagon), by the same maintainer: a Lean 4 proof of the Reinhardt
+  conjecture and its equality case (every centrally symmetric convex disk has greatest packing
+  density at least that of the smoothed octagon, with equality exactly for its affine images),
+  verified by Palomar (entry PALOMAR-2026-11-09-000008).
+  - Its Challenge copies this formalization's packing definitions, and its proof uses the lift of
+    a global minimizer to a Pontryagin extremal proved here and the maximum principle of
+    OptimalControl.
 - M. Ho, [github.com/sunfishho/reinhardt-density-bound](https://github.com/sunfishho/reinhardt-density-bound)
   (created 2 November 2026, three days before this search): an unreviewed, AI-assisted Lean 4
   development.
