@@ -3,201 +3,112 @@ module
 public import SmoothedPolygons.Ch14.ArcStepClosed
 
 /-!
-# Chapter 14, N4: E at the image decides the next point (the proof of (INV), II)
+# Chapter 14, the unstable curve: one step from the region `𝒢*` (§6 of the note)
 
-Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
-computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
-computed figure (Figure 14.2, TeX 11951–11991; REPORT.md E88); the formalization proves it from
-the exact structure of the Reinhardt flow along an `e₂`-arc (see
-`SmoothedPolygons/Ch14/ArcParams.lean`) and the invariance of a region, the single-step statement
-(INV) (`arcRegionInvariant`, `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`, where the numbering
-of the steps is listed).
+Part of the formalization's proof, without computer assistance, of the fact behind Figure 14.2
+(`UnstableCurveLeavesStarDomain`, `SmoothedPolygons/Ch14/UnstableCurve.lean`). **Departure from
+the paper**, by the user's decision: the book reads the fact off a computed figure (Figure 14.2,
+TeX 11951–11991; REPORT.md E88). The proof is written up in `docs/unstable-curve.pdf` (the
+note); this file holds the real-number lemmas of its §6, statements about real numbers only (no
+flows). With `s = e^{τ_sw}` the switch of a point of `𝒢*` and `F(q)` the next point:
 
-This file holds INV Propositions 3 and 4: statements about real numbers only (no flows). With
-`s = e^{τ_sw}` the switch of a point of `𝒢*` and `ψ(s)` the cubic of INV Corollary 1.2 (`psiE`,
-`E_new_iff`):
-* if `ψ(s) ≥ 0` (E holds at the image), then `Φ(s) ≤ 0`, i.e. P2 holds at the image
-  (`Phi_nonpos`, INV Proposition 3), so the image is again in `𝒢*`;
-* if `ψ(s) < 0` (E fails at the image), then `Y_new ≥ 16/5` (`YNew_ge`, INV Proposition 4), and
-  the next arc exits (INV Lemma 6, `SmoothedPolygons/Ch14/ArcStepExit.lean`).
+* **Lemma 6.1** (`q_nonpos_of_relT`, `f0_ge_of_relT`): the relation `R̃ = 0` (`relT`, Proposition
+  3.1 of the note) is a sign test. At a section point with `Y ≥ 2`, `Y' > 2`, `f₀ ≥ 0`, `p ≥ 0`
+  and `2p < (2Y' - 1)(Y' - 2)`, (i) `(Y - 2)(Y' - 2) ≤ 3` forces `q ≤ 0`, and (ii)
+  `f₀ ≥ q (1 - 1/Y)` always.
+* **Lemma 6.2** (`pNew_lt`, `two_lt_YNew`): `p` is small at the next point,
+  `2p_new < (2Y'_new - 1)(Y'_new - 2)`, and `Y_new > 2`; so Lemma 6.1 applies at `F(q)`.
+* **Lemma 6.3** (`YNew_ge`, with `E_new_iff`): if `ψ(s) < 0`, i.e. the expansion condition fails at
+  `F(q)`, then `Y_new ≥ 16/5`.
+
+The three are assembled in `arcRegionInvariant_sharp`
+(`SmoothedPolygons/Ch14/ArcRegionInvariant.lean`, Theorem 6.5 of the note); Lemma 6.4 (the exit
+criterion) is `arcLeavesStarDomain_of_Y_ge` (`SmoothedPolygons/Ch14/ArcConditions.lean`).
 
 ## Notation
 
-As in `SmoothedPolygons/Ch14/ArcStepClosed.lean`; the real variables are `x = Y - 2`, `y = Y' - 2`,
-`z = s - Y + 1` (the structure is `a`), and `σ = s - 1 = x + z`.
-`φ(s) = (Y' - 1) s³ - (2Y' + 1) s² + (2Y + 1) s - (Y - 1)`,
-`Q(s) = (2Y' - 1) s² - (YY' + Y' + 1) s + 2Y`. Every identity below is a polynomial identity
-(`ring` or `linear_combination`); all were also checked exactly with sympy, twice independently
-and once as written here (with the certificate).
+As in `SmoothedPolygons/Ch14/ArcStepClosed.lean`: `a : ArcParams`, `Y' = (1 + ε²)/(ε² Y)`,
+`B = Y - 1 + q`, `p_new = (s² - Y s + B)/(Y - s)²` (`pNew`), `Y'_new = Y/(Y - s)` (`YNew'`),
+`Y_new = (Y' s² - 2s + Y)/(Y - s)` (`YNew`), `ψ(s) = -3Y' s³ + (2YY' + 2) s² - Y²` (`psiE`).
+Every identity below is a polynomial identity (`ring` or `linear_combination`).
 -/
 
 @[expose] public section
 
 namespace SmoothedPolygons
 
-/-! ### Real-number lemmas (INV §3–§4)
+/-! ### Lemma 6.1 on real numbers -/
 
-INV Proposition 3 is proved in the variables `x = Y - 2`, `y = Y' - 2`, `z = s - Y + 1` (so
-`Y = 2 + x`, `Y' = 2 + y`, `s = 1 + x + z`). -/
+/-- **Lemma 6.1 on real numbers** (the relation as a sign test). Let `W` stand for `Y'`, and let
+`R̃ = (W(f₀ - q) - Y p)² - 4pq + 2(YW - 1)((W - 2) q + (Y - 2) p) + 2W(3 - (Y - 2)(W - 2)) f₀ = 0`.
+If `Y ≥ 2`, `W > 2`, `f₀ ≥ 0`, `p ≥ 0` and `2p < (2W - 1)(W - 2)`, then
+(i) `(Y - 2)(W - 2) ≤ 3` implies `q ≤ 0`, and (ii) `q (1 - 1/Y) ≤ f₀`.
 
-/-- The Bernstein form of `K̃` on the triangle `T`, in `λ₀ = l0`, `λ₁ = x`, `λ₂ = w`
-(all `≥ 0`; `λ₀ + λ₁ + λ₂ = 1` on `T`). -/
-private theorem Ktilde_bernstein_nonneg (l0 x w : ℝ) (h0 : 0 ≤ l0) (hx : 0 ≤ x) (hw : 0 ≤ w) :
-    0 ≤ 2 / 3 * w ^ 6 + 6 * x * w ^ 5 + 1069 / 54 * x ^ 2 * w ^ 4 + 841 / 27 * x ^ 3 * w ^ 3 +
-      479 / 18 * x ^ 4 * w ^ 2 + 46 / 3 * x ^ 5 * w + 6 * x ^ 6 + 8 / 3 * l0 * w ^ 5 +
-      68 / 3 * l0 * x * w ^ 4 + 1862 / 27 * l0 * x ^ 2 * w ^ 3 + 883 / 9 * l0 * x ^ 3 * w ^ 2 +
-      209 / 3 * l0 * x ^ 4 * w + 22 * l0 * x ^ 5 + 4 * l0 ^ 2 * w ^ 4 +
-      100 / 3 * l0 ^ 2 * x * w ^ 3 + 90 * l0 ^ 2 * x ^ 2 * w ^ 2 + 302 / 3 * l0 ^ 2 * x ^ 3 * w +
-      83 / 2 * l0 ^ 2 * x ^ 4 + 8 / 3 * l0 ^ 3 * w ^ 3 + 145 / 6 * l0 ^ 3 * x * w ^ 2 +
-      317 / 6 * l0 ^ 3 * x ^ 2 * w + 34 * l0 ^ 3 * x ^ 3 + 2 / 3 * l0 ^ 4 * w ^ 2 +
-      9 * l0 ^ 4 * x * w + 12 * l0 ^ 4 * x ^ 2 + 3 / 2 * l0 ^ 5 * x := by
-  positivity
-
-/-- INV §3 step 7: `K̃(x, z) ≥ 0` on the triangle `T = {x ≥ 0, z ≥ 0, x + 3z ≤ 1}` (the
-Bernstein form with `λ₀ = 1 - x - 3z`, `λ₁ = x`, `λ₂ = 3z`). -/
-private theorem Ktilde_nonneg {x z : ℝ} (hx : 0 ≤ x) (hz : 0 ≤ z) (hl0 : 0 ≤ 1 - x - 3 * z) :
-    0 ≤ 2 * x ^ 6 + 6 * x ^ 5 * z + x ^ 5 / 2 + 6 * x ^ 4 * z ^ 2 - 13 / 2 * x ^ 4 * z -
-      7 / 2 * x ^ 4 + 2 * x ^ 3 * z ^ 3 - 25 / 2 * x ^ 3 * z ^ 2 - 41 / 2 * x ^ 3 * z + x ^ 3 -
-      11 / 2 * x ^ 2 * z ^ 3 - 18 * x ^ 2 * z ^ 2 - 7 / 2 * x ^ 2 * z + 9 / 2 * x ^ 2 -
-      9 / 2 * x * z ^ 3 + 9 / 2 * x * z ^ 2 + 9 / 2 * x * z + 3 / 2 * x + 6 * z ^ 2 := by
-  have := Ktilde_bernstein_nonneg (1 - x - 3 * z) x (3 * z) hl0 hx (by linarith)
-  linarith
-
-/-- INV §3 step 6: `K = k₀ + k₁ y + k₂ y² ≥ 0` for `0 ≤ y ≤ x/(1 + x)` on `T`, with
-`k₀ = (3/2)(x + 2z)²`, `k₁ = (1/2)(1 + σ) L₁`, `k₂ = (1 + σ)² L₂ ≤ 0`, `σ = x + z`. By concavity
-in `y`: `x (1 + x) K = (1 + x)(x - (1 + x) y) k₀ + y K̃ + x k₂ y ((1 + x) y - x)`. -/
-private theorem K_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 ≤ y) (hz : 0 ≤ z)
-    (hl0 : 0 ≤ 1 - x - 3 * z) (hE : (1 + x) * y ≤ x) :
-    0 ≤ 3 / 2 * (x + 2 * z) ^ 2 + 1 / 2 * (1 + (x + z)) *
-        (2 * x ^ 3 + 4 * x ^ 2 * z - 5 * x ^ 2 + 2 * x * z ^ 2 - 18 * x * z - 9 * z ^ 2 - 6 * z +
-          3) * y +
-      (1 + (x + z)) ^ 2 * (x * (x + z - 1) - 2 * z) * y ^ 2 := by
-  have hL2 : x * (x + z - 1) - 2 * z ≤ 0 := by nlinarith
-  have hk2 : (1 + (x + z)) ^ 2 * (x * (x + z - 1) - 2 * z) ≤ 0 :=
-    mul_nonpos_of_nonneg_of_nonpos (sq_nonneg _) hL2
-  have hKt := Ktilde_nonneg hx.le hz hl0
-  have t1 : 0 ≤ (1 + x) * (x - (1 + x) * y) * (3 / 2 * (x + 2 * z) ^ 2) :=
-    mul_nonneg (mul_nonneg (by linarith) (by linarith)) (by positivity)
-  have t2 := mul_nonneg hy hKt
-  have t3 : 0 ≤ x * ((1 + (x + z)) ^ 2 * (x * (x + z - 1) - 2 * z) * (y * ((1 + x) * y - x))) :=
-    mul_nonneg hx.le (mul_nonneg_of_nonpos_of_nonpos hk2
-      (mul_nonpos_of_nonneg_of_nonpos hy (by linarith)))
-  have hxx : 0 < x * (1 + x) := by positivity
-  by_contra h
-  push Not at h
-  -- `x (1 + x) K = t₁ + t₂ + t₃` is a polynomial identity, used by `linarith` after expansion
-  linarith [mul_neg_of_pos_of_neg hxx h]
-
-/-- INV §3 steps 2–4 as one identity, modulo `R̃ = 0`:
-`(s - 1) P₁ - (3 - xy) Φ(s) = C π(s) + (s²/2) W + s² p D` with
-`C = (3 - xy)(Y' s² - 1) + s² y (YY' - 1)` (the coefficient of `-q`),
-`W = (Y'(f₀ - q) - Y p)² - 4pq` and `D = (YY' - 1) x - (3 - xy)(s² - Y)`. -/
-private theorem Phi_identity_mod_rel {x y z f0 q p : ℝ}
-    (hR : ((2 + y) * (f0 - q) - (2 + x) * p) ^ 2 - 4 * p * q +
-      2 * ((2 + x) * (2 + y) - 1) * ((2 + y - 2) * q + (2 + x - 2) * p) +
-      2 * (2 + y) * (3 - (2 + x - 2) * (2 + y - 2)) * f0 = 0) :
-    (x + z) * ((3 - x * y) * (1 + x + z) * ((2 * (2 + y) - 1) * (1 + x + z) ^ 2 -
-        ((2 + x) * (2 + y) + (2 + y) + 1) * (1 + x + z) + 2 * (2 + x)) +
-        (1 + x + z) ^ 2 * y * z * ((2 + x) * (2 + y) - 1)) -
-      (3 - x * y) * ((2 + y - 1 + p) * (1 + x + z) ^ 4 - 3 * (2 + y) * (1 + x + z) ^ 3 +
-        ((2 + y) * (1 + f0 - (2 + x - 1 + q)) + (2 + x) * (2 - (2 + y) - p) +
-          2 * (2 + x) * (2 + y) + 2) * (1 + x + z) ^ 2 - 3 * (2 + x) * (1 + x + z) +
-        (2 + x - 1 + q)) =
-      ((3 - x * y) * ((2 + y) * (1 + x + z) ^ 2 - 1) +
-        (1 + x + z) ^ 2 * y * ((2 + x) * (2 + y) - 1)) *
-        ((1 + x + z) ^ 2 - (2 + x) * (1 + x + z) + (2 + x - 1 + q)) +
-      (1 + x + z) ^ 2 / 2 * (((2 + y) * (f0 - q) - (2 + x) * p) ^ 2 - 4 * p * q) +
-      (1 + x + z) ^ 2 * p * (((2 + x) * (2 + y) - 1) * x -
-        (3 - x * y) * ((1 + x + z) ^ 2 - (2 + x))) := by
-  linear_combination (-(1 + x + z) ^ 2 / 2) * hR
-
-/-- INV (3.4)–(3.5): `P₁ = (3 - xy) s Q(s) + s² y z (YY' - 1) = -(3/2) ψ(s) - K`. -/
-private theorem P1_eq_neg_psi_sub_K (x y z : ℝ) :
-    (3 - x * y) * (1 + x + z) * ((2 * (2 + y) - 1) * (1 + x + z) ^ 2 -
-        ((2 + x) * (2 + y) + (2 + y) + 1) * (1 + x + z) + 2 * (2 + x)) +
-        (1 + x + z) ^ 2 * y * z * ((2 + x) * (2 + y) - 1) =
-      -(3 / 2) * (-3 * (2 + y) * (1 + x + z) ^ 3 + (2 * (2 + x) * (2 + y) + 2) * (1 + x + z) ^ 2 -
-        (2 + x) ^ 2) -
-      (3 / 2 * (x + 2 * z) ^ 2 + 1 / 2 * (1 + (x + z)) *
-        (2 * x ^ 3 + 4 * x ^ 2 * z - 5 * x ^ 2 + 2 * x * z ^ 2 - 18 * x * z - 9 * z ^ 2 - 6 * z +
-          3) * y +
-      (1 + (x + z)) ^ 2 * (x * (x + z - 1) - 2 * z) * y ^ 2) := by
-  ring
-
-/-- INV §3 step 1 (the range): `ψ(s) ≥ 0` forces `2Y - 3s = 1 - x - 3z > 0`, by
-`ψ(s) + (Y - s)² = s (Y' s - 1)(2Y - 3s)`. -/
-private theorem one_sub_x_sub_three_z_pos_of_psi_nonneg {x y z : ℝ} (hx : 0 < x) (hy : 0 < y)
-    (hz : 0 ≤ z) (hz1 : z < 1)
-    (hpsi : 0 ≤ -3 * (2 + y) * (1 + x + z) ^ 3 + (2 * (2 + x) * (2 + y) + 2) * (1 + x + z) ^ 2 -
-        (2 + x) ^ 2) : 0 < 1 - x - 3 * z := by
-  have hid : (-3 * (2 + y) * (1 + x + z) ^ 3 + (2 * (2 + x) * (2 + y) + 2) * (1 + x + z) ^ 2 -
-        (2 + x) ^ 2) + (1 - z) ^ 2 =
-      (1 + x + z) * ((2 + y) * (1 + x + z) - 1) * (1 - x - 3 * z) := by ring
-  have hpos : 0 < (1 + x + z) * ((2 + y) * (1 + x + z) - 1) := by
-    apply mul_pos (by linarith); nlinarith
-  have hsq : 0 < (1 - z) ^ 2 := by
-    have : 0 < 1 - z := by linarith
-    positivity
-  by_contra h
-  push Not at h
-  nlinarith [mul_nonpos_of_nonneg_of_nonpos hpos.le h]
-
-/-- INV Proposition 3 on real numbers (`Phi_nonpos` with the definitions unfolded). `f₀ ≥ 0`
-is not needed: in the identity `Phi_identity_mod_rel` the `f₀`-terms of the budget cancel. -/
-private theorem Phi_nonpos_unfolded {Y Y' f0 q p s : ℝ} (ha : 0 < Y - 2) (hb : 0 < Y' - 2)
-    (hE : (Y - 1) * (Y' - 2) ≤ Y - 2) (h2 : q ≤ 0) (h4 : 0 ≤ p)
-    (hR : (Y' * (f0 - q) - Y * p) ^ 2 - 4 * p * q +
-      2 * (Y * Y' - 1) * ((Y' - 2) * q + (Y - 2) * p) +
-      2 * Y' * (3 - (Y - 2) * (Y' - 2)) * f0 = 0)
-    (hs1 : Y - 1 ≤ s) (hs2 : s < Y) (hpi : 0 ≤ s ^ 2 - Y * s + (Y - 1 + q))
-    (hpsi : 0 ≤ -3 * Y' * s ^ 3 + (2 * Y * Y' + 2) * s ^ 2 - Y ^ 2) :
-    (Y' - 1 + p) * s ^ 4 - 3 * Y' * s ^ 3 +
-      (Y' * (1 + f0 - (Y - 1 + q)) + Y * (2 - Y' - p) + 2 * Y * Y' + 2) * s ^ 2 -
-      3 * Y * s + (Y - 1 + q) ≤ 0 := by
-  obtain ⟨x, rfl⟩ : ∃ x, Y = 2 + x := ⟨Y - 2, by ring⟩
-  obtain ⟨y, rfl⟩ : ∃ y, Y' = 2 + y := ⟨Y' - 2, by ring⟩
-  obtain ⟨z, rfl⟩ : ∃ z, s = 1 + x + z := ⟨s - 1 - x, by ring⟩
-  have hx : 0 < x := by linarith
-  have hy : 0 < y := by linarith
-  have hz : 0 ≤ z := by linarith
-  have hz1 : z < 1 := by linarith
-  have hE' : (1 + x) * y ≤ x := by linarith
-  -- step 1, the range: `(x, z) ∈ T`, `s² - Y < x`, `y < 1/2`, `3 - xy > 0`
-  have hl0 := one_sub_x_sub_three_z_pos_of_psi_nonneg hx hy hz hz1 hpsi
-  have hx1 : x < 1 := by linarith
-  have hy2 : 2 * y < 1 := by nlinarith only [hE', hx1, hx, hy]
-  have hxy : x * y < 1 / 2 := by nlinarith only [mul_lt_mul_of_pos_right hx1 hy, hy2]
-  have h3xy : 0 < 3 - x * y := by linarith
-  have hsY : (1 + x + z) ^ 2 - (2 + x) < x := by nlinarith only [hl0, hz, hx, hx1]
-  -- steps 6–7: `K ≥ 0`
-  have hK := K_nonneg hx hy.le hz hl0.le hE'
-  -- steps 2–4: the terms of `Phi_identity_mod_rel` are `≥ 0`
-  have hC : 0 ≤ (3 - x * y) * ((2 + y) * (1 + x + z) ^ 2 - 1) +
-      (1 + x + z) ^ 2 * y * ((2 + x) * (2 + y) - 1) := by
-    have : 0 ≤ (2 + y) * (1 + x + z) ^ 2 - 1 := by nlinarith only [hx, hy, hz]
-    have : 0 ≤ (2 + x) * (2 + y) - 1 := by nlinarith only [hx, hy]
-    positivity
-  have hW : 0 ≤ ((2 + y) * (f0 - q) - (2 + x) * p) ^ 2 - 4 * p * q := by
-    linarith [sq_nonneg ((2 + y) * (f0 - q) - (2 + x) * p), mul_nonneg h4 (neg_nonneg.2 h2)]
-  have hD : 0 ≤ ((2 + x) * (2 + y) - 1) * x - (3 - x * y) * ((1 + x + z) ^ 2 - (2 + x)) := by
-    nlinarith only [mul_lt_mul_of_pos_left hsY h3xy,
-      mul_nonneg hx.le (by positivity : (0:ℝ) ≤ 2 * x + 2 * y + 2 * x * y)]
-  have key := Phi_identity_mod_rel (z := z) hR
-  rw [P1_eq_neg_psi_sub_K] at key
-  have t1 := mul_nonneg hC hpi
-  have t2 := mul_nonneg (by positivity : (0:ℝ) ≤ (1 + x + z) ^ 2 / 2) hW
-  have t3 := mul_nonneg (mul_nonneg (sq_nonneg (1 + x + z)) h4) hD
-  have t4 := mul_nonneg (by linarith : (0:ℝ) ≤ x + z)
-    (add_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ 3 / 2) hpsi) hK)
-  -- step 8: `(3 - xy) Φ(s) ≤ (s - 1) P₁ = -(s - 1)((3/2) ψ(s) + K) ≤ 0`
-  have hfin : (3 - x * y) * ((2 + y - 1 + p) * (1 + x + z) ^ 4 - 3 * (2 + y) * (1 + x + z) ^ 3 +
-      ((2 + y) * (1 + f0 - (2 + x - 1 + q)) + (2 + x) * (2 - (2 + y) - p) +
-        2 * (2 + x) * (2 + y) + 2) * (1 + x + z) ^ 2 - 3 * (2 + x) * (1 + x + z) +
-      (2 + x - 1 + q)) ≤ 0 := by
+Route (the note, Lemma 6.1). Write `a = Y - 2`, `b = W - 2`, `M = (YW - 1) b - 2p`.
+1. `M > 0`: `(YW - 1) b - (2W - 1) b = (Y - 2) W b ≥ 0`, and `(2W - 1) b > 2p`.
+2. `R̃ = 0` rearranged: `2W(ab - 3) f₀ = 2qM + (W(f₀ - q) - Yp)² + 2(YW - 1) a p`.
+3. If `q > 0`, the right side is `> 0`, so `ab > 3` (this is (i)) and `W(ab - 3) f₀ ≥ qM`. Then
+   `W(ab - 3)(Y f₀ - (Y - 1) q) ≥ q D` with
+   `D = Y M - W(Y - 1)(ab - 3) = Y((2W - 1) b - 2p) + abW + 3W(Y - 1) > 0`, so
+   `(Y - 1) q ≤ Y f₀`, which is (ii). If `q ≤ 0`, (ii) is clear. -/
+private theorem relation_sign_test {Y W f0 q p : ℝ}
+    (hR : (W * (f0 - q) - Y * p) ^ 2 - 4 * p * q +
+      2 * (Y * W - 1) * ((W - 2) * q + (Y - 2) * p) + 2 * W * (3 - (Y - 2) * (W - 2)) * f0 = 0)
+    (hY : 2 ≤ Y) (hW : 2 < W) (h1 : 0 ≤ f0) (h4 : 0 ≤ p) (hp : 2 * p < (2 * W - 1) * (W - 2)) :
+    ((Y - 2) * (W - 2) ≤ 3 → q ≤ 0) ∧ q * (1 - 1 / Y) ≤ f0 := by
+  have hWb : 0 ≤ W * (W - 2) := mul_nonneg (by linarith) (by linarith)
+  -- step 1: `M = (YW - 1)(W - 2) - 2p > 0`
+  have hM : 0 < (Y * W - 1) * (W - 2) - 2 * p := by
+    nlinarith [mul_nonneg (sub_nonneg.2 hY) hWb]
+  -- step 2: the relation rearranged
+  have key : 2 * W * ((Y - 2) * (W - 2) - 3) * f0 =
+      2 * q * ((Y * W - 1) * (W - 2) - 2 * p) + (W * (f0 - q) - Y * p) ^ 2 +
+        2 * (Y * W - 1) * (Y - 2) * p := by
+    linear_combination (-1 : ℝ) * hR
+  have hYW : 0 ≤ Y * W - 1 := by nlinarith
+  have hS := sq_nonneg (W * (f0 - q) - Y * p)
+  have hA : 0 ≤ 2 * (Y * W - 1) * (Y - 2) * p :=
+    mul_nonneg (mul_nonneg (mul_nonneg zero_le_two hYW) (sub_nonneg.2 hY)) h4
+  -- step 3: a positive `q` forces `W (ab - 3) f₀ ≥ q M > 0`
+  have hk : ∀ _ : 0 < q, q * ((Y * W - 1) * (W - 2) - 2 * p) ≤
+      W * ((Y - 2) * (W - 2) - 3) * f0 := fun _ ↦ by nlinarith
+  have hpos : ∀ _ : 0 < q, 0 < (Y - 2) * (W - 2) - 3 := by
+    intro hq
+    have h0 : 0 < W * ((Y - 2) * (W - 2) - 3) * f0 := lt_of_lt_of_le (mul_pos hq hM) (hk hq)
+    by_contra h
+    push Not at h
+    have : W * ((Y - 2) * (W - 2) - 3) * f0 ≤ 0 :=
+      mul_nonpos_of_nonpos_of_nonneg (mul_nonpos_of_nonneg_of_nonpos (by linarith) (by linarith)) h1
     linarith
-  by_contra h
-  push Not at h
-  linarith [mul_pos h3xy h]
+  refine ⟨fun hab ↦ ?_, ?_⟩
+  · by_contra hq
+    push Not at hq
+    linarith [hpos hq]
+  · have hY0 : 0 < Y := by linarith
+    have e : q * (1 - 1 / Y) = q * (Y - 1) / Y := by field_simp
+    rw [e, div_le_iff₀ hY0]
+    rcases le_or_gt q 0 with hq | hq
+    · nlinarith
+    · have hab := hpos hq
+      have hD : 0 < Y * ((Y * W - 1) * (W - 2) - 2 * p) -
+          W * (Y - 1) * ((Y - 2) * (W - 2) - 3) := by
+        have e2 : Y * ((Y * W - 1) * (W - 2) - 2 * p) - W * (Y - 1) * ((Y - 2) * (W - 2) - 3) =
+            Y * ((2 * W - 1) * (W - 2) - 2 * p) + (Y - 2) * (W - 2) * W + 3 * W * (Y - 1) := by
+          ring
+        rw [e2]
+        have : 0 < Y * ((2 * W - 1) * (W - 2) - 2 * p) := mul_pos hY0 (by linarith)
+        have : 0 ≤ (Y - 2) * (W - 2) * W :=
+          mul_nonneg (mul_nonneg (sub_nonneg.2 hY) (by linarith)) (by linarith)
+        have : 0 < 3 * W * (Y - 1) := mul_pos (by linarith) (by linarith)
+        linarith
+      have hYk := mul_le_mul_of_nonneg_left (hk hq) hY0.le
+      have h3 : 0 < W * ((Y - 2) * (W - 2) - 3) * (Y * f0 - q * (Y - 1)) := by
+        nlinarith [mul_pos hq hD]
+      have h4' : 0 < Y * f0 - q * (Y - 1) :=
+        pos_of_mul_pos_right h3 (mul_pos (by linarith) hab).le
+      linarith
+
+/-! ### Lemma 6.3 on real numbers -/
 
 /-- A cubic `-3Y' t³ + C t² - K` with `Y' > 0` increases and then decreases on `(0, ∞)`, so on
 `[u, v] ⊂ (0, ∞)` it is at least the smaller of its values at the ends. -/
@@ -234,7 +145,7 @@ private theorem cubic_nonneg_between {Y' C K u s v : ℝ} (hY' : 0 < Y') (hu : 0
     have := mul_nonneg (sub_nonneg.2 hsv) hg
     linarith
 
-/-- INV Proposition 4 on real numbers. -/
+/-- Lemma 6.3 of the note on real numbers. -/
 private theorem YNew_ge_unfolded {Y Y' s : ℝ} (hY : 2 < Y) (hY' : 2 < Y') (hs1 : Y - 1 ≤ s)
     (hs2 : s < Y)
     (hpsi : -3 * Y' * s ^ 3 + (2 * Y * Y' + 2) * s ^ 2 - Y ^ 2 < 0) :
@@ -301,73 +212,73 @@ private theorem YNew_ge_unfolded {Y Y' s : ℝ} (hY : 2 < Y) (hY' : 2 < Y') (hs1
     hψ1 hψt
   linarith
 
+
 namespace ArcParams
 
 variable (a : ArcParams)
 
-/-- **INV Proposition 3** (E at the image implies P2 at the image). Let `Y - 2 > 0`,
-`Y' - 2 > 0`, E (`(Y - 1)(Y' - 2) ≤ Y - 2`), P2 and P4 in the weak form (`q ≤ 0`, `p ≥ 0`), the
-relation `R̃ = 0`, `Y - 1 ≤ s < Y`, `π(s) = s² - Y s + B ≥ 0` and `ψ(s) ≥ 0`. Then
-`Φ(s) ≤ 0`; sharper, `(3 - xy) Φ(s) ≤ (s - 1) P₁ ≤ -(3/2)(s - 1) ψ(s) ≤ 0` with
-`P₁ = (3 - xy) s Q(s) + s² y z (YY' - 1)`.
+/-- **Lemma 6.1 (i)** of the note (the relation as a sign test). At parameters with `R̃ = 0`
+(`relT`; at a section point, `arcParams_rel` and `rel_eq`), `Y ≥ 2`, `Y' > 2`, `f₀ ≥ 0`,
+`p ≥ 0`, `2p < (2Y' - 1)(Y' - 2)` and `(Y - 2)(Y' - 2) ≤ 3`: `q ≤ 0`. With `p` small, the relation
+leaves no room for `q > 0`. See `relation_sign_test` for the route. -/
+theorem q_nonpos_of_relT (hR : a.relT = 0) (hY : 2 ≤ a.Y) (hY' : 2 < a.Y') (h1 : 0 ≤ a.f0)
+    (h4 : 0 ≤ a.p) (hp : 2 * a.p < (2 * a.Y' - 1) * (a.Y' - 2))
+    (hab : (a.Y - 2) * (a.Y' - 2) ≤ 3) : a.q ≤ 0 :=
+  (relation_sign_test (by unfold relT at hR; linear_combination hR) hY hY' h1 h4 hp).1 hab
 
-Route (INV §3; `x = Y - 2`, `y = Y' - 2`, `z = s - Y + 1`, `σ = s - 1 = x + z`):
-1. **Range.** `x > 0`, `y > 0`, `(1 + x) y ≤ x` (E). From `ψ(s) + (Y - s)² = s (Y' s - 1)(2Y - 3s)`
-   and `ψ(s) ≥ 0`, `s ≥ Y - 1 > 1`, `Y' s > 1`: `3s < 2Y`. With `s ≥ Y - 1`: `Y < 3`, so `x < 1`,
-   and `z ≥ 0`, `x + 3z < 1` (`3z = 3s - 3Y + 3 < 3 - Y = 1 - x`): `(x, z)` lies in the triangle
-   `T = {x ≥ 0, z ≥ 0, x + 3z ≤ 1}`. Also `s² - Y < x`, from `s² < 4Y²/9 ≤ 2(Y - 1)`
-   (`(2Y - 3)(Y - 3) ≤ 0`), and `y ≤ x/(1 + x) < 1/2`, so `xy < 1/2` and `3 - xy > 0`;
-   `YY' - 1 - (3 - xy) = 2x + 2y + 2xy ≥ 0`.
-2. **The budget (INV (2.3)).** `R̃ = 0` (`relT`) rearranged:
-   `2(YY' - 1) y (-q) = (Y'(f₀ - q) - Y p)² + 4p(-q) + 2(YY' - 1) x p + 2Y'(3 - xy) f₀`, hence
-   `(YY' - 1) y (-q) ≥ (YY' - 1) x p + Y'(3 - xy) f₀`.
-3. **Identities** (INV (3.1)–(3.3)).
-   (3.1) `Φ(s) = (s - 1) φ(s) + Y' s² f₀ - (Y' s² - 1) q + s² (s² - Y) p`;
-   (3.2) `s² - Y s + B = q + (s - 1) z`; (3.3) `φ(s) + z (Y' s² - 1) = s Q(s)`.
-4. **The bound on `Φ`.** `(3 - xy)(s² - Y) p ≤ (3 - xy) x p ≤ (YY' - 1) x p` (step 1, `p ≥ 0`), so
-   by step 2 `(3 - xy)(Y' s² f₀ + s²(s² - Y) p) ≤ s² (Y'(3 - xy) f₀ + (YY' - 1) x p)
-   ≤ s² (YY' - 1) y (-q)`. By (3.2) and `π(s) ≥ 0`, `0 ≤ -q ≤ (s - 1) z`, and the coefficient
-   `(3 - xy)(Y' s² - 1) + s² (YY' - 1) y` of `-q` is `≥ 0`. With (3.1) and (3.3):
-   `(3 - xy) Φ(s) ≤ (s - 1)[(3 - xy)(φ(s) + z(Y' s² - 1)) + s² y z (YY' - 1)] = (s - 1) P₁`.
-5. **INV (3.4)–(3.5).** In `(x, y, z)` (`Y = 2 + x`, `Y' = 2 + y`, `s = 1 + σ`):
-   `Q = -y(1 + x) - σ(1 + 2x + xy - y) + (3 + 2y) σ²`, and
-   `-P₁ = (3/2) ψ(s) + K`, `K = (3/2)(x + 2z)² + (y/2)(1 + σ) L₁ + y² (1 + σ)² L₂`,
-   `L₁ = 2x³ + 4x²z - 5x² + 2xz² - 18xz - 9z² - 6z + 3`, `L₂ = x(x + z - 1) - 2z`
-   (`P₁ = (3 - xy)(1 + σ) Q + (1 + σ)² y z ((2 + x)(2 + y) - 1)`; `ring`).
-6. **`K ≥ 0`.** On `T`, `x + z ≤ 1`, so `L₂ ≤ 0`: `K = k₀ + k₁ y + k₂ y²` is concave in `y`
-   (`k₂ = (1 + σ)² L₂ ≤ 0`). With `y₁ = x/(1 + x) > 0` and `0 ≤ y ≤ y₁`:
-   `y₁ K(y) = (y₁ - y) K(0) + y K(y₁) + y₁ k₂ y (y - y₁)` (the last term `≥ 0`),
-   `K(0) = (3/2)(x + 2z)² ≥ 0`, and `(1 + x)² K(y₁) = K̃(x, z)` with
-   `K̃ = 2x⁶ + 6x⁵z + (1/2)x⁵ + 6x⁴z² - (13/2)x⁴z - (7/2)x⁴ + 2x³z³ - (25/2)x³z² - (41/2)x³z + x³
-   - (11/2)x²z³ - 18x²z² - (7/2)x²z + (9/2)x² - (9/2)xz³ + (9/2)xz² + (9/2)xz + (3/2)x + 6z²`.
-7. **The Bernstein certificate of `K̃ ≥ 0` on `T`.** With `λ₀ = 1 - x - 3z`, `λ₁ = x`, `λ₂ = 3z`
-   (`λ₀ + λ₁ + λ₂ = 1`, all `≥ 0` on `T`), homogenized to degree 6,
-   `K̃ = Σ_{i+j+k=6} c_{ijk} λ₀^i λ₁^j λ₂^k` with (`ijk:c_{ijk}`; the 2 missing ones, `600`, `501`,
-   are `0`):
-   `006:2/3, 015:6, 024:1069/54, 033:841/27, 042:479/18, 051:46/3, 060:6, 105:8/3, 114:68/3,
-   123:1862/27, 132:883/9, 141:209/3, 150:22, 204:4, 213:100/3, 222:90, 231:302/3, 240:83/2,
-   303:8/3, 312:145/6, 321:317/6, 330:34, 402:2/3, 411:9, 420:12, 510:3/2`.
-   Lean: the expansion is `ring` (substitute `λ₀ + λ₁ + λ₂ = 1` by writing each degree-`< 6`
-   monomial of `K̃` times `(λ₀ + λ₁ + λ₂)^{6 - deg}`), then `positivity`.
-8. `(3 - xy) Φ(s) ≤ (s - 1) P₁ = -(s - 1)((3/2) ψ(s) + K) ≤ 0` and `3 - xy > 0`.
-Margins (numerical, for orientation): `-P₁ ≥ 0.80 (x + y + z)` on the region; the bound is within
-20% of `q_new` at images.
+/-- **Lemma 6.1 (ii)** of the note: under the hypotheses of `q_nonpos_of_relT` except
+`(Y - 2)(Y' - 2) ≤ 3`, `f₀ ≥ q (1 - 1/Y)`, the hypothesis of the exit criterion (Lemma 6.4,
+`arcLeavesStarDomain_of_Y_ge`). -/
+theorem f0_ge_of_relT (hR : a.relT = 0) (hY : 2 ≤ a.Y) (hY' : 2 < a.Y') (h1 : 0 ≤ a.f0)
+    (h4 : 0 ≤ a.p) (hp : 2 * a.p < (2 * a.Y' - 1) * (a.Y' - 2)) :
+    a.q * (1 - 1 / a.Y) ≤ a.f0 :=
+  (relation_sign_test (by unfold relT at hR; linear_combination hR) hY hY' h1 h4 hp).2
 
-In Lean (`Phi_nonpos_unfolded`), steps 2–4 are one identity modulo `R̃ = 0` (`linear_combination`):
-`(s - 1) P₁ - (3 - xy) Φ(s) = C π(s) + (s²/2)((Y'(f₀ - q) - Y p)² - 4pq)
-+ s² p ((YY' - 1) x - (3 - xy)(s² - Y))`, `C = (3 - xy)(Y' s² - 1) + s² y (YY' - 1)`, and each term
-on the right is `≥ 0` by step 1. The `f₀`-terms of the budget cancel in it, so `f₀ ≥ 0` (P1,
-assumed in INV Proposition 3) is not needed, and the statement omits it. -/
-theorem Phi_nonpos (ha : 0 < a.Y - 2) (hb : 0 < a.Y' - 2) (hE : (a.Y - 1) * (a.Y' - 2) ≤ a.Y - 2)
-    (h2 : a.q ≤ 0) (h4 : 0 ≤ a.p) (hR : a.relT = 0) {s : ℝ}
-    (hs1 : a.Y - 1 ≤ s) (hs2 : s < a.Y) (hpi : 0 ≤ s ^ 2 - a.Y * s + a.B)
-    (hpsi : 0 ≤ a.psiE s) : a.Phi s ≤ 0 :=
-  Phi_nonpos_unfolded ha hb hE h2 h4 hR hs1 hs2 hpi hpsi
+/-- **Lemma 6.2** of the note (`p` is small at the next point). If `q ≤ 0`, `s > 1` and
+`Y - 1 ≤ s < Y`, then `2 p_new < (2Y'_new - 1)(Y'_new - 2)`.
 
-/-- **INV Proposition 4** (E fails at the image implies `Y_new ≥ 16/5`). If `Y > 2`, `Y' > 2`,
-`Y - 1 ≤ s < Y` and `ψ(s) < 0`, then `Y_new = (Y' s² - 2s + Y)/(Y - s) ≥ 16/5`.
+Route. `2Y'_new - 1 = (Y + s)/(Y - s)` and `Y'_new - 2 = (2s - Y)/(Y - s)`. With
+`c = s - Y + 1 ∈ [0, 1)`, the numerator of `p_new` is `s² - Y s + B = q + (s - 1) c ≤ (s - 1) c`
+(as `q ≤ 0`), and
+`2(s - 1) c ≤ 2(2s - Y) c < (2s - Y)(Y + s)`, because `s - 1 ≤ 2s - Y`, `2c < Y + s` and
+`2s - Y > 0`. Divide by `(Y - s)²`. -/
+theorem pNew_lt (h2 : a.q ≤ 0) {s : ℝ} (hs1 : 1 < s) (hsY1 : a.Y - 1 ≤ s)
+    (hsY : s < a.Y) : 2 * a.pNew s < (2 * a.YNew' s - 1) * (a.YNew' s - 2) := by
+  have hd : 0 < a.Y - s := by linarith
+  have hd2 : 0 < (a.Y - s) ^ 2 := by positivity
+  have e1 : 2 * a.pNew s = 2 * (s ^ 2 - a.Y * s + a.B) / (a.Y - s) ^ 2 := by
+    unfold pNew; ring
+  have e2 : (2 * a.YNew' s - 1) * (a.YNew' s - 2) =
+      (a.Y + s) * (2 * s - a.Y) / (a.Y - s) ^ 2 := by
+    unfold YNew'
+    field_simp
+    ring
+  rw [e1, e2, div_lt_div_iff_of_pos_right hd2]
+  have hc0 : 0 ≤ s - a.Y + 1 := by linarith
+  have hpos : 0 < (2 * s - a.Y) * (a.Y + s - 2 * (s - a.Y + 1)) :=
+    mul_pos (by linarith) (by linarith)
+  unfold B
+  nlinarith [mul_nonneg hc0 hc0]
 
-Route (INV §4; `x = Y - 2`, `y = Y' - 2`, `N_Y(s) = Y' s² - 2s + Y`). Suppose `Y_new(s) < 16/5`.
+/-- **Lemma 6.2**, second part: `Y_new > 2`. If `Y ≥ 2`, `Y' > 2`, `s > 1` and `Y - 1 ≤ s < Y`, then
+`Y_new - 2 = (Y' s² - Y)/(Y - s) > 0`, since `Y' s² > 2s² ≥ 2(Y - 1)² ≥ Y`
+(`2(Y - 1)² - Y = (2Y - 1)(Y - 2)`). -/
+theorem two_lt_YNew (hY : 2 ≤ a.Y) (hY' : 2 < a.Y') {s : ℝ} (hs1 : 1 < s) (hsY1 : a.Y - 1 ≤ s)
+    (hsY : s < a.Y) : 2 < a.YNew s := by
+  have hd : 0 < a.Y - s := by linarith
+  unfold YNew
+  rw [lt_div_iff₀ hd]
+  have hss : (a.Y - 1) ^ 2 ≤ s ^ 2 := pow_le_pow_left₀ (by linarith) hsY1 2
+  have hs2 : 0 < s ^ 2 := by positivity
+  nlinarith [mul_lt_mul_of_pos_right hY' hs2, mul_nonneg (by linarith : (0:ℝ) ≤ 2 * a.Y - 1)
+    (sub_nonneg.2 hY)]
+
+/-- **Lemma 6.3** of the note (the expansion condition carries over unless `Y_new ≥ 16/5`).
+By `E_new_iff`, the expansion condition fails at the image exactly when `ψ(s) < 0`. If `Y > 2`,
+`Y' > 2`, `Y - 1 ≤ s < Y` and `ψ(s) < 0`, then `Y_new = (Y' s² - 2s + Y)/(Y - s) ≥ 16/5`.
+
+Route (the note, Lemma 6.3; `x = Y - 2`, `y = Y' - 2`, `N_Y(s) = Y' s² - 2s + Y`). Suppose
+`Y_new(s) < 16/5`.
 1. `Y_new` increases on `[1, Y)`: for `1 ≤ s' ≤ s < Y`,
    `N_Y(s)(Y - s') - N_Y(s')(Y - s) = (s - s')(Y'(Y(s + s') - s s') - Y)` and
    `Y'(Y(s + s') - s s') - Y ≥ Y(Y' s - 1) > 0` (`dY_new/ds = (Y' s(2Y - s) - Y)/(Y - s)²`).
@@ -387,7 +298,7 @@ Route (INV §4; `x = Y - 2`, `y = Y' - 2`, `N_Y(s) = Y' s² - 2s + Y`). Suppose 
 6. By step 2 on `[Y - 1, s_χ]`, `ψ(s) ≥ 0`: a contradiction.
 Margin (numerical): the infimum of `Y_new` over `{ψ(s) < 0, s ≥ Y - 1}` is `3.21525` (Fuller corner
 `Y = Y' = 2`, `s = (1 + √7)/3`); `16/5` is used because it exceeds the root `Y_* = 3.16258` of
-`g(Y) = Y log Y - (Y - 1) - (Y - 1)²/Y` (INV Lemma 6).
+`β_Y(Y) = Y log Y - (Y - 1) - (Y - 1)²/Y` (Lemma 6.4).
 
 In Lean (`YNew_ge_unfolded`), step 1 is used through `χ` only: `χ` increases on `[0, ∞)`
 (`χ(v) - χ(u) = (v - u)(Y'(u + v) + 6/5)`), so `χ(Y - 1) ≤ χ(s) < 0` in step 5. The root
@@ -397,6 +308,7 @@ In Lean (`YNew_ge_unfolded`), step 1 is used through `χ` only: `χ` increases o
 theorem YNew_ge (hY : 2 < a.Y) (hY' : 2 < a.Y') {s : ℝ} (hs1 : a.Y - 1 ≤ s) (hs2 : s < a.Y)
     (hpsi : a.psiE s < 0) : 16 / 5 ≤ a.YNew s :=
   YNew_ge_unfolded hY hY' hs1 hs2 hpsi
+
 
 end ArcParams
 

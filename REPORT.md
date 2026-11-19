@@ -20,7 +20,7 @@ equation numbers are the book's; TeX line numbers refer to its source file `chap
 - **Build:** `lake build` succeeds; the only `sorry`s are the three statements of [`Challenge.lean`](Challenge.lean);
   no `axiom`, `admit`, `native_decide` or `decide +kernel`.
 - **Axioms:** [`scripts/Audit.lean`](scripts/Audit.lean), with `import all`, finds only [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and
-  [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound) in all 10,888 declarations of the library and in the three Challenge theorems.
+  [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound) in all 10,863 declarations of the library and in the three Challenge theorems.
 - **Routes:** the route check compares 145 results with the book's proofs: 187 differences, all
   recorded with reasons (Section 8). Comparator accepts the Solution under Lean's kernel and NanoDa.
 - **Review:** independent agents reviewed the statements and the proofs; no person has reviewed the
@@ -386,7 +386,7 @@ route; they use only the three marked "taken".
 | Theorem 14.4.1 | N4's region without the unstable curve, which frees Mahler's First from the stable manifold theorem |
 | `q_out` is not a cluster point | the same region, in place of the hyperbolic box |
 | The two large cofactors of N4 | a cofactor-free device used elsewhere in the proof |
-| Lemma 3.1 of the proof of N4 | a lower bound without derivatives |
+| Lemma 4.2 of the proof of N4 | a lower bound without derivatives |
 | `F(R₀) ⊆ 𝒟₀₀` | contains half of `DOutContracts` |
 | The reading of Theorem 14.4.1 | the second part of the hypothesis is not used |
 | Theorem A.3.1 | the package's form for small neighbourhoods, without the cut-off |

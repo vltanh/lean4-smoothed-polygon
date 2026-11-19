@@ -1,10 +1,11 @@
 """The arc parameters ``(eps, Y, f0, g0, q, p)`` of an ``e2``-arc and the one-step map on them, as
 ``SmoothedPolygons/Ch14/ArcParams.lean`` and ``ArcStepClosed.lean`` define them (``ArcParams``,
-``ArcParams.step``, ``tauSw``, ``stepK``, ``rel``, ``relT``, ``Phi``, ``Psi``, ``psiE``, ``YNew``,
-``YNew'``, ``f0New``, ``pNew``, ``qNew``), and the region ``arcRegion`` (``G*``,
+``ArcParams.step``, ``tauSw``, ``stepK``, ``rel``, ``relT``, ``Psi``, ``psiE``, ``YNew``,
+``YNew'``, ``f0New``, ``pNew``; also ``Phi``, ``qNew``, the closed form of ``q_new``, which the
+Lean proof does not need), and the region ``arcRegion`` (``G*``,
 ``Ch14/ArcConditions.lean``). Generic in the number type (``reinhardt.MP`` or ``reinhardt.ARB``).
 
-Along the arc, with ``tau = t/eps`` (Theorem 1.3, ``arc_normalForm``):
+Along the arc, with ``tau = t/eps`` (Theorem 2.3 of ``docs/unstable-curve.pdf``, ``arc_normalForm``):
 ``f(tau) = -1 + A e^{-tau} + B e^{-2 tau} + Y tau e^{-tau}``, ``B = Y - 1 + q``, ``A = 1 + f0 - B``;
 ``g(tau) = -1 + A' e^{tau} + B' e^{2 tau} - Y' tau e^{tau}``, ``B' = Y' - 1 + p``,
 ``A' = 1 + g0 - B'``; ``Y' = (1 + eps^2)/(eps^2 Y)``. ``F = e^tau f`` has
@@ -89,7 +90,7 @@ class AP:
         return ((-b - sD) / (2 * a), (-b + sD) / (2 * a))
 
     def relT(self):
-        """``R~`` (INV (2.2)); ``rel = Y^2 eps^4 R~`` (``rel_eq``)"""
+        """``R~`` ((3.1) of the note); ``rel = Y^2 eps^4 R~`` (``rel_eq``)"""
         Y, Yp, f0, q, p = self.Y, self.Yp, self.f0, self.q, self.p
         x, y = Y - 2, Yp - 2
         return ((Yp * (f0 - q) - Y * p) ** 2 - 4 * p * q + 2 * (Y * Yp - 1) * (y * q + x * p)
@@ -223,8 +224,8 @@ class AP:
 
     # the map
     def step(self):
-        """``ArcParams.step (qNew s)`` (Theorem 2.1, with ``q_new = Phi(s)/(Y - s)^2``,
-        ``arcQ_reinPoincare``), ``s = e^{tauSw}``; requires a switch inside the star domain. Returns
+        """``ArcParams.step (qNew s)`` (Theorem 5.1 of the note, with ``q_new = Phi(s)/(Y - s)^2``
+        computed here), ``s = e^{tauSw}``; requires a switch inside the star domain. Returns
         the image and ``(tauSw, s, k)``."""
         num = self.num
         L = num.log(self.Y)

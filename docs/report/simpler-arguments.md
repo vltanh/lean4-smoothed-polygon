@@ -134,8 +134,8 @@ Part of the [audit report](../../REPORT.md).
   - Remark 14.3.4, which identifies the inverse with the backward Reinhardt–Poincaré map, then
     needs the time reversal of trajectories on its own.
   - The formal proof follows the book's route (E85).
-- **Theorem 14.4.1 without the unstable curve.** The proof of N4 gives more than N4: Lemma 5.1 and
-  [`ArcRegionInvariant.reachesStarBoundary`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L221) show that every chart point with `r > 0` of a
+- **Theorem 14.4.1 without the unstable curve.** The proof of N4 gives more than N4: Lemma 7.1 and
+  [`ArcRegionInvariant.reachesStarBoundary`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L187) show that every chart point with `r > 0` of a
   neighbourhood `V` of `(0, x̃_out)` reaches the boundary of the star domain.
   - With this form, the second step of [`theorem14_4_1_out`](../../SmoothedPolygons/Ch14/NoReturnProof.lean#L95) needs only that the rotated
     switching points of the arc out of `q_out` eventually lie in `V` with `r > 0`, the convergence
@@ -161,11 +161,10 @@ Part of the [audit report](../../REPORT.md).
     [`SmoothedPolygons/Ch14/ArcPoincareMap.lean`](../../SmoothedPolygons/Ch14/ArcPoincareMap.lean) uses (the frame components divided by `√3`, then
     `field_simp; ring`) applies to the relation ([`arcParams_rel_identity`](../../SmoothedPolygons/Ch14/ArcRelation.lean#L180)) and to the `N₂₃`
     half of the normal form ([`arc_normalForm`](../../SmoothedPolygons/Ch14/ArcNormalForm.lean#L225)) as well.
-  - The three Bernstein lists would then be the only certificates of the proof that a computer
-    found.
-- **Lemma 3.1 of the proof of N4 without derivatives.** With `G(0) = 0`,
+  - The proof of N4 would then use no certificate that a computer found.
+- **Lemma 4.2 of the proof of N4 without derivatives.** With `G(0) = 0`,
   `G(τ) = (1 - e^{-τ}) - (e^τ - 1) + Y′(e^τ - 1 - τ) + p(e^τ - 1)`, and `Y′ ≥ 2` gives
-  `G(τ) ≥ 2 sinh τ - 2τ + p(e^τ - 1) > 0` for `τ > 0`. The formal proof ([`ArcParams.g_pos`](../../SmoothedPolygons/Ch14/ArcParams.lean#L353)) shows
+  `G(τ) ≥ 2 sinh τ - 2τ + p(e^τ - 1) > 0` for `τ > 0`. The formal proof ([`ArcParams.g_pos`](../../SmoothedPolygons/Ch14/ArcParams.lean#L349)) shows
   that `G` increases, from the sign of `G′`.
 - **`F(R₀) ⊆ 𝒟₀₀` (Table 16.1).** The lemma that the proof of `CellTwoEntersDOut` proves for the
   region `R₀ = {0 < θ₁ < θ₂ ≤ π}` ([`TriFuller.CellTwoAnalytic.poincareAngZero_mem_of_regionR0`](../../SmoothedPolygons/Ch16/CellOneToDOut.lean#L219)) contains the first half of

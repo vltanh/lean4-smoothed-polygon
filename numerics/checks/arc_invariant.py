@@ -9,8 +9,9 @@ reference; the Lean proof is by identities and inequalities).
 On the parameters (``ArcParams.lean``, ``ArcStepClosed.lean``): a point of ``G*`` (``arcRegion``) is
 ``(eps, Y, f0, g0 = 0, q, p)`` with ``Y' = (1 + eps^2)/(eps^2 Y)``, the relation ``rel = 0`` (2.1),
 ``r = eps (Y' - 2)/2 > 0``, P1 ``f0 > 0``, P2 ``q <= 0``, P4 ``p > 0``, E
-``(Y - 1)(Y' - 2) <= Y - 2``. The image is ``step (qNew s)`` (Theorem 2.1 and
-``arcQ_reinPoincare``: ``q_new = Phi(s)/(Y - s)^2``, ``s = e^{tauSw}``); it exits iff ``f > 0`` and
+``(Y - 1)(Y' - 2) <= Y - 2``. The image is ``step q_new`` (Theorem 5.1 of ``docs/unstable-curve.pdf``,
+with ``q_new = Phi(s)/(Y - s)^2``, ``s = e^{tauSw}``, a closed form computed here that the Lean
+proof does not need); it exits iff ``f > 0`` and
 ``g > 0`` on ``(0, log Y_new)`` (``phaseHam_signs_along_arc``), decided here from the monotone
 pieces of ``F = e^tau f`` and ``G = e^{-tau} g``.
 
@@ -21,9 +22,11 @@ Sampling, in ``x = Y - 2``, ``y = Y' - 2`` (``eps^2 = 1/(Y Y' - 1)``), ``f0``, `
 ``a, b`` down to ``-8``: near P1, P4), on a product grid and at random; how close the switching
 samples come to each face of ``G*`` is reported (``sample: ...``).
 
-Checked at each switching point (``F(log Y) < 0``): (INV); the sharp form (``psi(s) >= 0`` gives
-``F q in G*``, ``psi(s) < 0`` gives ``Y_new >= 16/5`` and the exit); INV Proposition 5
-(``f0_new >= q_new (1 - 1/Y_new)``); ``rel = 0`` at the image (``q_new`` is a root, and which); the
+Checked at each switching point (``F(log Y) < 0``): (INV); the sharp form, Theorem 6.5 of the note
+(``Y_new < 16/5`` gives ``F q in G*``, ``Y_new >= 16/5`` gives the exit); Lemma 6.2
+(``2 p_new < (2Y'_new - 1)(Y'_new - 2)``); Lemma 6.1 (ii) at the image
+(``f0_new >= q_new (1 - 1/Y_new)``); Lemma 6.3 (``psi(s) < 0`` gives ``Y_new >= 16/5``);
+``rel = 0`` at the image (``q_new`` is a root, and which); the
 closed forms of ``step_closed`` against ``step``; and on a subset, the whole map against the
 closed-form flow from the section point with these parameters (``reinhardt.section_from_params``,
 ``Arc``, ``Ad_{R^-1}``, ``arc_params``).
@@ -82,6 +85,8 @@ def check_point(a, num):
     res = dict(m_in=m_in, m_exit=m_exit, inv=max(m_in, m_exit), psi=psi, Ynew=b.Y,
                in_G=b.in_region(), exits=b.exits())
     res['prop5'] = (b.f0 - b.q * (1 - 1 / b.Y)) / b.f0
+    cap = (2 * b.Yp - 1) * (b.Yp - 2)
+    res['lemma62'] = (cap - 2 * b.p) / cap
     # q_new is a root of rel at the image; which one
     rr = b.rel_roots()
     xb, yb = b.Y - 2, b.Yp - 2
@@ -201,19 +206,25 @@ def _work(chunk):
                 upd('image in G*: in-margin', res['m_in'], a)
             if res['exits']:
                 upd('image exits: exit-margin', res['m_exit'], a)
-            if res['psi'] >= 0:
+            if res['Ynew'] < mp.mpf(16) / 5:
                 if not res['in_G']:
                     st['sharp_fail'] += 1
-                upd('psi(s) >= 0: in-margin', res['m_in'], a)
+                upd('Y_new < 16/5: in-margin', res['m_in'], a)
             else:
-                st['psi_neg'] += 1
-                if not (res['Ynew'] >= mp.mpf(16) / 5 and res['exits']):
+                if not res['exits']:
                     st['sharp_fail'] += 1
-                upd('psi(s) < 0: Y_new (>= 16/5)', res['Ynew'], a)
-                upd('psi(s) < 0: exit-margin', res['m_exit'], a)
+                upd('Y_new >= 16/5: exit-margin', res['m_exit'], a)
+            if res['psi'] < 0:
+                st['psi_neg'] += 1
+                if not res['Ynew'] >= mp.mpf(16) / 5:
+                    st['sharp_fail'] += 1
+                upd('psi(s) < 0: Y_new (>= 16/5, Lemma 6.3)', res['Ynew'], a)
+            if res['lemma62'] <= 0:
+                st['sharp_fail'] += 1
+            upd("Lemma 6.2: 1 - 2 p_new/((2Y'_new - 1)(Y'_new - 2))", res['lemma62'], a)
             if res['prop5'] < 0:
                 st['prop5_fail'] += 1
-            upd('INV Prop 5: (f0_new - q_new (1 - 1/Y_new))/f0_new', res['prop5'], a)
+            upd('Lemma 6.1 (ii): (f0_new - q_new (1 - 1/Y_new))/f0_new', res['prop5'], a)
             upd_max('rel at the image (relative)', res['rel_res'], a)
             upd_max('step_closed against step (relative)', res['closed_res'], a)
             key = '%s -> %s' % (root, res['root'])

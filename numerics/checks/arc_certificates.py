@@ -1,28 +1,22 @@
-"""The exact certificates of the Lean proof of N4 and (INV), read off the Lean source and checked
+"""The exact identities of the Lean proof of N4 and (INV), read off the Lean source and checked
 with sympy (exact rational arithmetic): part 3 of the ``unstable`` check. This duplicates what Lean
-checks (``positivity``, ``ring``, ``linear_combination``), as a reference a reader can run.
+checks (``ring``, ``linear_combination``), as a reference a reader can run. The numbering is that
+of ``docs/unstable-curve.pdf``.
 
-Read from ``SmoothedPolygons/Ch14/*.lean`` (statements, hypotheses, the ``linear_combination``
-cofactors and the docstring lists are parsed from the source; the goals of the three flow lemmas
-after their ``rw``/``simp`` steps are rebuilt here, as documented at each check):
+Read from ``SmoothedPolygons/Ch14/*.lean`` (statements, hypotheses and the ``linear_combination``
+cofactors are parsed from the source; the goals of the three flow lemmas after their
+``rw``/``simp`` steps are rebuilt here, as documented at each check):
 
-* **The three Bernstein certificates** (``ArcStepRegion.lean``: ``K~ >= 0`` on the triangle
-  ``T = {x >= 0, z >= 0, x + 3z <= 1}``, 26 nonzero coefficients; ``ArcStepExit.lean``: ``tau_q >= 0``
-  and ``U >= 0`` for ``x, y >= 0``, ``z in [0, 1]``): the Lean Bernstein form expanded has only
-  nonnegative coefficients (what ``positivity`` uses), it agrees with the coefficient lists of the
-  docstrings, and it equals the polynomial it certifies after the substitution
-  (``l0 = 1 - x - 3z``, ``w = 3z``; resp. ``Y = 2 + x``, ``Y' = 2 + y``, ``s = 1 + x + z``,
-  ``w = 1 - z``).
 * **The cofactor identities** ``goal.lhs - goal.rhs - sum c_i (h_i.lhs - h_i.rhs) = 0`` as rational
   functions (``sqrt3`` a free symbol ``s3``, ``h3 : s3^2 = 3``): ``arcParams_rel_identity``
   (``ArcRelation.lean``), the two halves of ``arc_normalForm`` (``ArcNormalForm.lean``, with
-  ``huv : u v = 1``, ``u = e^{-t/eps}``, ``v = e^{t/eps}``), the three components of
-  ``frame_reducedCostate``, and ``Phi_identity_mod_rel`` (``ArcStepRegion.lean``, modulo
-  ``R~ = 0``).
-* **Identities of the (INV) proof**: ``rel_eq`` (``R = Y^2 eps^4 R~``), ``P1_eq_neg_psi_sub_K``,
-  the concavity identity of ``K_nonneg`` and ``K~ = (1 + x)^2 K(x/(1 + x))``, and (5.3) of
-  ``Tb_nonneg_unfolded``: ``s(s + 1) T_b - (s - 1) U = tau_f (s(s + 1) f0 - (s - 1)^2 z)
-  + s tau_q ((s + 1) q + (s - 1) z) + s(s + 1) tau_p p``.
+  ``huv : u v = 1``, ``u = e^{-t/eps}``, ``v = e^{t/eps}``) and the three components of
+  ``frame_reducedCostate``.
+* **Identities of the proof of (INV)** (Section 6 of the note): ``rel_eq`` (``R = Y^2 eps^4 R~``);
+  the rearrangement of ``R~ = 0`` in Lemma 6.1 and the identity for its quantity ``D``; the closed
+  forms of Lemma 6.2 (``2Y'_new - 1``, ``Y'_new - 2``, the numerator of ``p_new``,
+  ``Y_new - 2``); the identity of Lemma 6.3 (``psi``); and, for Lemma 6.4, the derivatives of
+  ``beta_Y(y)`` and of ``G(Y) = beta_Y(Y)`` and the value ``G(16/5)``.
 """
 import os
 import re
@@ -137,67 +131,6 @@ def is_zero(expr):
     return sp.expand(n) == 0
 
 
-# ---- the Bernstein certificates ---------------------------------------------------------------------
-def _nonneg_poly(expr, gens):
-    P = sp.Poly(sp.expand(expr), *gens)
-    coeffs = P.coeffs()
-    return P, all(c >= 0 for c in coeffs), len(coeffs)
-
-
-def check_bernstein(src):
-    out = {}
-    S = {}
-    # K~ on the triangle
-    _, kt_txt, _ = src.parts('Ktilde_nonneg')
-    _, bk_txt, _ = src.parts('Ktilde_bernstein_nonneg')
-    l0, x, w, z, y = (S.setdefault(n, sp.Symbol(n)) for n in ('l0', 'x', 'w', 'z', 'y'))
-    bern = to_sympy(split_rel(bk_txt)[1], S)
-    Kt = to_sympy(split_rel(kt_txt)[1], S)
-    P, nonneg, n = _nonneg_poly(bern, (l0, x, w))
-    # the docstring list `ijk:c`
-    _, doc, _ = src.decl('Phi_nonpos')
-    lst = dict((k, sp.Rational(v)) for k, v in re.findall(r'(\d{3}):(\d+(?:/\d+)?)', doc))
-    from_lean = {'%d%d%d' % m: c for m, c in zip(P.monoms(), P.coeffs())}
-    out['K~ (triangle)'] = dict(
-        coefficients=n, all_nonnegative=nonneg,
-        matches_docstring_list=(from_lean == lst), docstring_list_length=len(lst),
-        min_coefficient=str(min(P.coeffs())),
-        expansion_identity=is_zero(bern.subs({l0: 1 - x - 3 * z, w: 3 * z}, simultaneous=True) - Kt))
-    # tau_q and U: Bernstein in z, w = 1 - z, coefficients of x^i y^j
-    for label, berns, target, docname, key in (
-            ('tau_q', ['tauQ_bernstein_nonneg'], 'tauQ_nonneg', 'qNew_le_f0New', 'τ_q'),
-            ('U', ['U_bernstein_nonneg₀', 'U_bernstein_nonneg₁'], 'U_nonneg', 'qNew_le_f0New',
-             'U')):
-        b = 0
-        for nm in berns:
-            b += to_sympy(split_rel(src.parts(nm)[1])[1], S)
-        P, nonneg, n = _nonneg_poly(b, (x, y, z, w))
-        _, tgt, _ = src.parts(target)
-        Y, Yp, s = (S.setdefault(n_, sp.Symbol(n_)) for n_ in ('Y', 'Yp', 's'))
-        T = to_sympy(split_rel(tgt)[1], S)
-        ident = is_zero(b.subs(w, 1 - z) - T.subs({Y: 2 + x, Yp: 2 + y, s: 1 + x + z},
-                                                    simultaneous=True))
-        # the docstring lists `x^i y^j [b0, ..., bn]`
-        _, doc, _ = src.decl(docname)
-        seg = doc.split('`%s`:' % key, 1)[1] if '`%s`:' % key in doc else ''
-        seg = seg.split('`U`:', 1)[0] if label == 'tau_q' else seg.split('\n6.', 1)[0]
-        lists = re.findall(r'x([⁰¹²³⁴⁵⁶⁷⁸⁹])y([⁰¹²³⁴⁵⁶⁷⁸⁹]) \[([^\]]*)\]', seg)
-        match = True
-        for i_, j_, vals in lists:
-            i_, j_ = int(i_.translate(_SUP)), int(j_.translate(_SUP))
-            beta = [sp.Rational(v.strip()) for v in vals.split(',')]
-            nn = len(beta) - 1
-            poly = sum(sp.binomial(nn, k) * beta[k] * z ** k * w ** (nn - k) for k in range(nn + 1))
-            coeff = sp.Poly(sp.expand(b), x, y).as_dict().get((i_, j_), 0)
-            if sp.expand(coeff - poly) != 0:
-                match = False
-        n_terms = len(sp.Poly(sp.expand(b), x, y).as_dict())
-        out[label] = dict(monomials=n, all_nonnegative=nonneg, docstring_lists=len(lists),
-                          xy_terms=n_terms, matches_docstring_lists=match and len(lists) == n_terms,
-                          expansion_identity=ident)
-    return out
-
-
 # ---- the cofactor identities ------------------------------------------------------------------------
 def _lc(src, name, idx, S, hyps):
     """the ``idx``-th ``linear_combination`` of ``name``, with the hypotheses substituted by
@@ -273,13 +206,6 @@ def check_cofactors(src):
     rhs = -1 + Ap * v + Bp * v ** 2 - Ypp * tau * v
     c = _lc(src, 'arc_normalForm', 1, S, {'hs': hs, 'huv': huv})
     out['arc_normalForm (N23)'] = is_zero(lhs - rhs - c)
-    # Phi_identity_mod_rel, modulo R~ = 0
-    binders, concl, _ = src.parts('Phi_identity_mod_rel')
-    hR = split_rel(binders['hR'], ('=',))
-    hRe = to_sympy(hR[0], S) - to_sympy(hR[1], S)
-    a_, b_, _ = split_rel(concl, ('=',))
-    c = _lc(src, 'Phi_identity_mod_rel', 0, S, {'hR': hRe})
-    out['Phi_identity_mod_rel (modulo R~ = 0)'] = is_zero(to_sympy(a_, S) - to_sympy(b_, S) - c)
     return out
 
 
@@ -300,40 +226,54 @@ def check_identities(src):
     relT = _def_body(src, 'relT', S)
     sub = {Yp: (1 + eps ** 2) / (eps ** 2 * Y)}
     out['rel_eq: R = Y^2 eps^4 R~'] = is_zero((rel - Y ** 2 * eps ** 4 * relT).subs(sub))
-    a_, b_, _ = split_rel(src.parts('P1_eq_neg_psi_sub_K')[1], ('=',))
-    out['P1_eq_neg_psi_sub_K'] = is_zero(to_sympy(a_, S) - to_sympy(b_, S))
-    # the concavity identity of K_nonneg and K~ = (1 + x)^2 K(x/(1 + x))
-    x, y, z = (S.setdefault(n, sp.Symbol(n)) for n in ('x', 'y', 'z'))
-    K = to_sympy(split_rel(src.parts('K_nonneg')[1])[1], S)
-    Kt = to_sympy(split_rel(src.parts('Ktilde_nonneg')[1])[1], S)
-    k0 = sp.Rational(3, 2) * (x + 2 * z) ** 2
-    k2 = (1 + (x + z)) ** 2 * (x * (x + z - 1) - 2 * z)
-    out['K_nonneg: x(1+x)K = (1+x)(x-(1+x)y)k0 + y K~ + x k2 y((1+x)y-x)'] = is_zero(
-        x * (1 + x) * K - ((1 + x) * (x - (1 + x) * y) * k0 + y * Kt
-                           + x * k2 * y * ((1 + x) * y - x)))
-    out['K~ = (1 + x)^2 K(x/(1 + x))'] = is_zero((1 + x) ** 2 * K.subs(y, x / (1 + x)) - Kt)
-    # (5.3) of Tb_nonneg_unfolded
+    a, b = Y - 2, Yp - 2
+    # Lemma 6.1: R~ = 0 rearranged, and the quantity D of part (ii)
+    out['Lemma 6.1: 2Y\'(ab-3)f0 = 2q[(YY\'-1)b-2p] + (Y\'(f0-q)-Yp)^2 + 2(YY\'-1)ap - R~'] = is_zero(
+        2 * Yp * (a * b - 3) * f0 - (2 * q * ((Y * Yp - 1) * b - 2 * p)
+                                     + (Yp * (f0 - q) - Y * p) ** 2 + 2 * (Y * Yp - 1) * a * p)
+        + relT)
+    out['Lemma 6.1: D = Y((2Y\'-1)b-2p) + abY\' + 3Y\'(Y-1)'] = is_zero(
+        Y * ((Y * Yp - 1) * b - 2 * p) - Yp * (Y - 1) * (a * b - 3)
+        - (Y * ((2 * Yp - 1) * b - 2 * p) + a * b * Yp + 3 * Yp * (Y - 1)))
+    # Lemma 6.2 and the identity of Lemma 6.3, with the Lean definitions of the next point
     s = S.setdefault('s', sp.Symbol('s'))
-    Tb = to_sympy(split_rel(src.parts('Tb_nonneg_unfolded')[1])[1], S)
-    U = to_sympy(split_rel(src.parts('U_nonneg')[1])[1], S)
-    tq = to_sympy(split_rel(src.parts('tauQ_nonneg')[1])[1], S)
-    zz = s - Y + 1
-    tf = Yp * s ** 2 * (Yp * s - 2) * (s - Y)
-    tp = Y * s ** 2 * (Y - s) * ((1 + Yp) * s - 2)
-    out['(5.3) of Tb_nonneg_unfolded'] = is_zero(
-        s * (s + 1) * Tb - (s - 1) * U
-        - (tf * (s * (s + 1) * f0 - (s - 1) ** 2 * zz) + s * tq * ((s + 1) * q + (s - 1) * zz)
-           + s * (s + 1) * tp * p))
+    Yn = _def_body(src, 'YNew', S)
+    Ypn = _def_body(src, 'YNew\'', S)
+    pn = _def_body(src, 'pNew', S)
+    psi = _def_body(src, 'psiE', S)
+    B = Y - 1 + q
+    pn = pn.subs(S.get('B', sp.Symbol('B')), B)
+    out["Lemma 6.2: (2Y'_new - 1)(Y'_new - 2) = (Y + s)(2s - Y)/(Y - s)^2"] = is_zero(
+        (2 * Ypn - 1) * (Ypn - 2) - (Y + s) * (2 * s - Y) / (Y - s) ** 2)
+    out['Lemma 6.2: s^2 - Ys + B = q + (s - 1)(s - Y + 1), p_new = that/(Y - s)^2'] = is_zero(
+        s ** 2 - Y * s + B - (q + (s - 1) * (s - Y + 1))) and is_zero(
+        pn - (s ** 2 - Y * s + B) / (Y - s) ** 2)
+    out["Lemma 6.2: Y_new - 2 = (Y's^2 - Y)/(Y - s)"] = is_zero(Yn - 2 - (Yp * s ** 2 - Y) / (Y - s))
+    out["Lemma 6.3: (Y - s)^2 [(Y_new - 2) - (Y_new - 1)(Y'_new - 2)] = psi(s)"] = is_zero(
+        (Y - s) ** 2 * ((Yn - 2) - (Yn - 1) * (Ypn - 2)) - psi)
+    # Lemma 6.4: the derivatives and the value at 16/5
+    yv, tv = sp.symbols('yv tv', positive=True)
+    beta = Y * sp.log(yv) - yv + 2 - Y + (Y - 1) / yv
+    out["Lemma 6.4: beta_Y'(y) = -(y - 1)(y - (Y - 1))/y^2"] = is_zero(
+        sp.diff(beta, yv) + (yv - 1) * (yv - (Y - 1)) / yv ** 2)
+    G = tv * sp.log(tv) - 2 * tv + 3 - 1 / tv
+    out["Lemma 6.4: G(t) = beta_t(t), G'(t) = log t - 1 + 1/t^2"] = is_zero(
+        G - beta.subs(Y, tv).subs(yv, tv)) and is_zero(sp.diff(G, tv) - (sp.log(tv) - 1 + 1 / tv ** 2))
+    c = sp.Rational(16, 5)
+    out['Lemma 6.4: G(16/5) = (16/5)(log(16/5) - 297/256)'] = is_zero(
+        G.subs(tv, c) - c * (sp.log(c) - sp.Rational(297, 256)))
+    out['Lemma 6.4: log(16/5) > 297/256 (4 terms of 2 artanh(11/21))'] = bool(
+        2 * sum(sp.Rational(11, 21) ** (2 * k + 1) / (2 * k + 1) for k in range(4))
+        > sp.Rational(297, 256))
     return out
 
 
 def run(quick=False):
     t0 = time.time()
-    src = LeanSource(['ArcParams.lean', 'ArcStepClosed.lean', 'ArcStepRegion.lean',
-                      'ArcStepExit.lean', 'ArcRelation.lean', 'ArcNormalForm.lean'])
+    src = LeanSource(['ArcParams.lean', 'ArcStepClosed.lean', 'ArcRelation.lean',
+                      'ArcNormalForm.lean'])
     out = {}
-    for label, fn in (('Bernstein certificates', check_bernstein),
-                      ('cofactor identities', check_cofactors),
+    for label, fn in (('cofactor identities', check_cofactors),
                       ('identities of the (INV) proof', check_identities)):
         t1 = time.time()
         try:

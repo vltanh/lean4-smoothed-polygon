@@ -3,22 +3,20 @@ module
 public import SmoothedPolygons.Ch14.ArcParams
 
 /-!
-# Chapter 14, N4: the one-step map in closed form on the parameters (the proof of (INV), I)
+# Chapter 14, the unstable curve: the one-step map in closed form on the parameters
 
-Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
-computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
-computed figure (Figure 14.2, TeX 11951–11991; REPORT.md E88); the formalization proves it from
-the exact structure of the Reinhardt flow along an `e₂`-arc (see
-`SmoothedPolygons/Ch14/ArcParams.lean`) and the invariance of a region, the single-step statement
-(INV) (`ArcRegionInvariant`, `SmoothedPolygons/Ch14/ArcRegionInvariant.lean`, where the numbering
-of the steps is listed), which it proves by explicit identities and inequalities.
+Part of the formalization's proof, without computer assistance, of the fact behind Figure 14.2
+(N4, `UnstableCurveLeavesStarDomain`). **Departure from the paper**, by the user's decision: the
+book reads the fact off a computed figure (Figure 14.2, TeX 11951–11991; REPORT.md E88). The proof
+is written up in `docs/unstable-curve.pdf` (the note);
+`SmoothedPolygons/Ch14/ArcRegionInvariant.lean` lists where each step of the note is.
 
-This file is the real-number part of INV Theorem 1, INV Proposition 2 and INV Corollary 1.2: the
-definitions and the closed forms. INV Propositions 3 and 4 are in
-`SmoothedPolygons/Ch14/ArcStepRegion.lean`, INV Proposition 5 and INV Lemma 6 in
+This file is the real-number part of Theorem 5.1 (the next point in closed form), of
+Proposition 3.1 (the relation in the form `R̃`) and of the identity of Lemma 6.3. Lemmas 6.1–6.3
+are in `SmoothedPolygons/Ch14/ArcStepRegion.lean`, Lemma 6.4 in
 `SmoothedPolygons/Ch14/ArcStepExit.lean`.
 
-## Notation (INV §1)
+## Notation (§5 of the note)
 
 `a : ArcParams` with `g₀ = 0` (a section point), `Y' = (1 + ε²)/(ε² Y)` (`ArcParams.Y'`), and
 `x = Y - 2`, `y = Y' - 2` (not `a`, `b`: here `a` is the structure),
@@ -26,34 +24,33 @@ definitions and the closed forms. INV Propositions 3 and 4 are in
 value of `ArcParams.A'` at `g₀ = 0`, written out below so that no `g₀` appears), `B' = Y' - 1 + p`
 (`ArcParams.B'`), `s = e^{τ_sw}` (the switch, `ArcParams.tauSw`), `π(s) = s² - Y s + B`.
 
-## Definitions (INV (1.2)–(1.4), INV Corollary 1.2, INV (2.2))
+## Definitions
 
-* `lamAlpha`, `lamBeta`, `lamGamma`: the coefficients of the costate along the arc in the moving
-  eigenbasis, INV (1.4): `α = √3 ε (1 + ε²(Y + Y'A - Y B'))`, `β = -(√3/2) ε³ (Y'² - B')`,
-  `γ = 2√3 ε³ (Y² - B)` (`iso_vfΛ₁_one_eq_arcParams`, `SmoothedPolygons/Ch14/ArcPoincareMap.lean`).
-* `Phi`, `Psi`: `Φ(s) = B' s⁴ - 3Y' s³ + (Y'A + YA' + 2YY' + 2) s² - 3Y s + B`,
-  `Ψ(s) = (Y B' - Y') s² + (Y'A + Y A') s + (Y'B - Y)`.
-* `YNew`, `YNew'`, `f0New`, `pNew`, `qNew`: the parameters of the image (INV Theorem 1):
-  `Y_new = (Y' s² - 2s + Y)/(Y - s)`, `Y'_new = Y/(Y - s)`, `f₀,new = s² Ψ(s)/(Y (Y - s)²)`,
-  `p_new = π(s)/(Y - s)²`, `q_new = Φ(s)/(Y - s)²`; also `ε_new = ε (Y - s)/s` (`step_closed`).
-* `psiE`: `ψ(s) = -3Y' s³ + (2YY' + 2) s² - Y²`, E at the image (INV Corollary 1.2, `E_new_iff`).
-* `relT`: `R̃ = (Y'(f₀ - q) - Y p)² - 4pq + 2(YY' - 1)(y q + x p) + 2Y'(3 - xy) f₀` (INV (2.2)),
-  with `R = Y² ε⁴ R̃` (`rel_eq`, INV Proposition 2).
+* `lamAlpha`, `lamBeta`, `lamGamma`: the coefficients of the costate in the eigenbasis of
+  Lemma 2.2 (Proposition 3.1), carried along the arc in (5.4):
+  `α = √3 ε (1 + ε²(Y + Y'A - Y B'))`, `β = -(√3/2) ε³ (Y'² - B')`, `γ = 2√3 ε³ (Y² - B)`
+  (`iso_vfΛ₁_one_eq_arcParams`, `SmoothedPolygons/Ch14/ArcPoincareMap.lean`).
+* `Psi`: `Ψ(s) = (Y B' - Y') s² + (Y'A + Y A') s + (Y'B - Y)`.
+* `YNew`, `YNew'`, `f0New`, `pNew`: the parameters of the next point ((5.1)–(5.2)):
+  `Y_new = (Y' s² - 2s + Y)/(Y - s)`, `Y'_new = Y/(Y - s)`, `f₀,new = s² Ψ(s)/(Y (Y - s)²)`
+  (which is `(s/(Y - s))² g(τ_sw)`), `p_new = π(s)/(Y - s)²`; also `ε_new = ε (Y - s)/s`
+  (`step_closed`).
+* `psiE`: `ψ(s) = -3Y' s³ + (2YY' + 2) s² - Y²`, the expansion condition at the next point
+  (Lemma 6.3, `E_new_iff`).
+* `relT`: `R̃ = (Y'(f₀ - q) - Y p)² - 4pq + 2(YY' - 1)(y q + x p) + 2Y'(3 - xy) f₀` ((3.1)),
+  with `R = Y² ε⁴ R̃` (`rel_eq`, Proposition 3.1).
 
 ## Statements
 
-* `rel_eq` (INV Proposition 2): `R = Y² ε⁴ R̃`.
-* `exp_tauSw_spec` (Lemma 3.2 in the variable `s = e^{τ_sw}`).
+* `rel_eq` (Proposition 3.1): `R = Y² ε⁴ R̃`.
+* `exp_tauSw_spec` (Lemma 4.3 in the variable `s = e^{τ_sw}`).
 * `Y_mul_eq_of_f_eq_zero`, `g_div_sq_eq_f0New`, `neg_fDeriv_div_sq_eq_pNew`: the update rules of
   `f₀` and `p` at a zero of `f` (also used by `arcParams_reinPoincare`).
-* `step_closed` (INV Theorem 1 on the parameters): `step` in closed form.
-* `E_new_iff` (INV Corollary 1.2): E at the image iff `ψ(s) ≥ 0`.
+* `step_closed` (Theorem 5.1 on the parameters): `step` in closed form.
+* `E_new_iff` (Lemma 6.3): the expansion condition at the next point iff `ψ(s) ≥ 0`.
 
-INV Theorem 1 at the phase point (`q_new = Φ(s)/(Y - s)²`, which settles which root of the quadric
-relation (2.1) `q_new` is) is `arcQ_reinPoincare` in `SmoothedPolygons/Ch14/ArcPoincareMap.lean`.
-
-All identities below were also checked exactly with sympy, twice independently and once as
-written in these docstrings; the Lean proofs do not depend on these checks.
+All identities below were also checked exactly with sympy; the Lean proofs do not depend on these
+checks.
 -/
 
 @[expose] public section
@@ -64,80 +61,72 @@ namespace ArcParams
 
 variable (a : ArcParams)
 
-/-! ### The coefficients of the costate along the arc (INV (1.4)) -/
+/-! ### The coefficients of the costate along the arc ((5.4)) -/
 
-/-- INV (1.4): `α = √3 ε (1 + ε²(Y + Y'A - Y B'))`, the coefficient of `X(t) + P` in
+/-- (5.4): `α = √3 ε (1 + ε²(Y + Y'A - Y B'))`, the coefficient of `X(t) + P` in
 `Λ₁(t) = α (X(t) + P) + β u⁻² V_e(t) + γ u² V_f(t)` on a section point
 (`iso_vfΛ₁_one_eq_arcParams`). It is `2ε² ⟨Λ₁(0), X₀ + P⟩`. -/
 noncomputable def lamAlpha : ℝ :=
   √3 * a.eps * (1 + a.eps ^ 2 * (a.Y + a.Y' * a.A - a.Y * a.B'))
 
-/-- INV (1.4): `β = -(√3/2) ε³ (Y'² - B')`, the coefficient of `u⁻² V_e(t)`; it is
+/-- (5.4): `β = -(√3/2) ε³ (Y'² - B')`, the coefficient of `u⁻² V_e(t)`; it is
 `ε² ⟨Λ₁(0), V_f⟩`. -/
 noncomputable def lamBeta : ℝ := -(√3 / 2) * a.eps ^ 3 * (a.Y' ^ 2 - a.B')
 
-/-- INV (1.4): `γ = 2√3 ε³ (Y² - B)`, the coefficient of `u² V_f(t)`; it is
+/-- (5.4): `γ = 2√3 ε³ (Y² - B)`, the coefficient of `u² V_f(t)`; it is
 `ε² ⟨Λ₁(0), V_e⟩`. -/
 noncomputable def lamGamma : ℝ := 2 * √3 * a.eps ^ 3 * (a.Y ^ 2 - a.B)
 
-/-! ### The closed forms of INV Theorem 1 (INV (1.2)–(1.3)) -/
+/-! ### The closed forms of Theorem 5.1 ((5.1)–(2.1)) -/
 
-/-- INV (1.3): `Φ(s) = B' s⁴ - 3Y' s³ + (Y'A + YA' + 2YY' + 2) s² - 3Y s + B`, with
-`A' = 2 - Y' - p` (the value at `g₀ = 0`); `q_new = Φ(s)/(Y - s)²` (`qNew`). `s⁴ Φ(1/s)` is `Φ(s)`
-with `(Y, A, B)` and `(Y', A', B')` exchanged. -/
-noncomputable def Phi (s : ℝ) : ℝ :=
-  a.B' * s ^ 4 - 3 * a.Y' * s ^ 3 +
-    (a.Y' * a.A + a.Y * (2 - a.Y' - a.p) + 2 * a.Y * a.Y' + 2) * s ^ 2 - 3 * a.Y * s + a.B
-
-/-- INV (1.3): `Ψ(s) = (Y B' - Y') s² + (Y'A + Y A') s + (Y'B - Y)`, with `A' = 2 - Y' - p`;
+/-- (5.2): `Ψ(s) = (Y B' - Y') s² + (Y'A + Y A') s + (Y'B - Y)`, with `A' = 2 - Y' - p`;
 `f₀,new = s² Ψ(s)/(Y (Y - s)²)` (`f0New`). -/
 noncomputable def Psi (s : ℝ) : ℝ :=
   (a.Y * a.B' - a.Y') * s ^ 2 + (a.Y' * a.A + a.Y * (2 - a.Y' - a.p)) * s + (a.Y' * a.B - a.Y)
 
-/-- INV Corollary 1.2: `ψ(s) = -3Y' s³ + (2YY' + 2) s² - Y²`; E holds at the image iff
+/-- Lemma 6.3: `ψ(s) = -3Y' s³ + (2YY' + 2) s² - Y²`; E holds at the image iff
 `ψ(s) ≥ 0` (`E_new_iff`). -/
 noncomputable def psiE (s : ℝ) : ℝ := -3 * a.Y' * s ^ 3 + (2 * a.Y * a.Y' + 2) * s ^ 2 - a.Y ^ 2
 
-/-- INV (2.2): `R̃ = (Y'(f₀ - q) - Y p)² - 4pq + 2(YY' - 1)((Y' - 2) q + (Y - 2) p)
+/-- (3.1): `R̃ = (Y'(f₀ - q) - Y p)² - 4pq + 2(YY' - 1)((Y' - 2) q + (Y - 2) p)
 + 2Y'(3 - (Y - 2)(Y' - 2)) f₀`, with `R = Y² ε⁴ R̃` (`rel_eq`). -/
 noncomputable def relT : ℝ :=
   (a.Y' * (a.f0 - a.q) - a.Y * a.p) ^ 2 - 4 * a.p * a.q +
     2 * (a.Y * a.Y' - 1) * ((a.Y' - 2) * a.q + (a.Y - 2) * a.p) +
     2 * a.Y' * (3 - (a.Y - 2) * (a.Y' - 2)) * a.f0
 
-/-- INV (1.2): `Y_new = (Y' s² - 2s + Y)/(Y - s)`. -/
+/-- (5.1): `Y_new = (Y' s² - 2s + Y)/(Y - s)`. -/
 noncomputable def YNew (s : ℝ) : ℝ := (a.Y' * s ^ 2 - 2 * s + a.Y) / (a.Y - s)
 
-/-- INV (1.2): `Y'_new = Y/(Y - s)`. -/
+/-- (5.1): `Y'_new = Y/(Y - s)`. -/
 noncomputable def YNew' (s : ℝ) : ℝ := a.Y / (a.Y - s)
 
-/-- INV (1.3): `f₀,new = s² Ψ(s)/(Y (Y - s)²)`. -/
+/-- (5.2): `f₀,new = s² Ψ(s)/(Y (Y - s)²)`. -/
 noncomputable def f0New (s : ℝ) : ℝ := s ^ 2 * a.Psi s / (a.Y * (a.Y - s) ^ 2)
 
-/-- INV (1.3): `p_new = π(s)/(Y - s)²`, `π(s) = s² - Y s + B`. -/
+/-- (5.2): `p_new = π(s)/(Y - s)²`, `π(s) = s² - Y s + B`. -/
 noncomputable def pNew (s : ℝ) : ℝ := (s ^ 2 - a.Y * s + a.B) / (a.Y - s) ^ 2
 
-/-- INV (1.3): `q_new = Φ(s)/(Y - s)²`. -/
-noncomputable def qNew (s : ℝ) : ℝ := a.Phi s / (a.Y - s) ^ 2
+/-! ### Proposition 3.1, Lemma 4.3 in `s`, Theorem 5.1 on the parameters, Lemma 6.3 -/
 
-/-! ### INV Proposition 2, Lemma 3.2 in `s`, INV Theorem 1 on the parameters, INV Corollary 1.2 -/
-
-/-- **INV Proposition 2** (pure algebra): `R = Y² ε⁴ R̃`, the quadric relation (2.1) (`rel`) in
-the form INV (2.2) (`relT`), in which all terms but `2(YY' - 1) y q` have a sign on `𝒢*` (INV
-Corollary 2.1, the budget used in INV Proposition 3).
+/-- **Proposition 3.1** (pure algebra): `R = Y² ε⁴ R̃`, the relation `R = 0` (`rel`, which is
+`det Λ₁ = 9/4` by `arcParams_rel_identity`) in the form (3.1) of the note (`relT`). Lemma 6.1
+applies it at the next point, where it rearranges to
+`2Y'(xy - 3) f₀ = 2q[(YY' - 1) y - 2p] + (Y'(f₀ - q) - Y p)² + 2(YY' - 1) x p`.
 
 Route: substitute `Y' = (1 + ε²)/(ε² Y)` (so `YY' - 1 = 1/ε²` and `ε² Y Y' = 1 + ε²`); then
-`unfold rel relT Y'`, `field_simp`, `ring` (also checked symbolically, twice). The other form
-INV (2.1),
-`R̃ = (3 - xy + Y'(f₀ - q) - Y p)² + 3(YY' - 1)² - 4(Y² - B)(Y'² - B')`, is `det Λ₁ = 9/4` in the
-basis of INV (1.4): `α² + 4βγ + 9ε² = 3ε² R̃/(YY' - 1)²` (`lamAlpha`, `lamBeta`, `lamGamma`); it is
-not needed here. -/
+`unfold rel relT Y'`, `field_simp`, `ring`. The note derives (3.1) from the eigenbasis expansion
+`Λ₁ = α (X₀ + P) + β V_e + γ V_f` (`lamAlpha`, `lamBeta`, `lamGamma`): `det Λ₁ = 9/4` reads
+`α² + 4βγ + 9ε² = 0`, and `α² + 4βγ + 9ε² = 3ε² R̃/(YY' - 1)²`, which is its form (3.2),
+`(3 - xy + Y'(f₀ - q) - Y p)² + 3(YY' - 1)² = 4(Y² - B)(Y'² - B')`. Lean proves `det Λ₁ = 9/4`
+in the parameters directly in the frame (`arcParams_rel_identity`), the same computation
+organized without the basis. -/
 theorem rel_eq (he : a.eps ≠ 0) (hY : a.Y ≠ 0) : a.rel = a.Y ^ 2 * a.eps ^ 4 * a.relT := by
   unfold rel relT Y'
   field_simp
   ring
 
-/-- **Lemma 3.2 in the variable `s = e^{τ_sw}`** (INV §1, "Switching"). Under P1
+/-- **Lemma 4.3 in the variable `s = e^{τ_sw}`** (§5, "Switching"). Under P1
 (`f₀ > 0`), P2 (`q ≤ 0`), `Y ≥ 1` and `F(log Y) < 0`, the switch `s = e^{τ_sw}` satisfies
 `Y - 1 < s`, `1 < s < Y`, `π(s) = s² - Y s + B > 0` (`s > y₊`) and `F(log s) = 0`.
 
@@ -236,11 +225,12 @@ theorem neg_fDeriv_div_sq_eq_pNew {τ : ℝ} (hf : a.f τ = 0) (hsY : a.Y - Real
   field_simp
   ring
 
-/-- **INV Theorem 1 on the parameters**: the one-step map `step` (Theorem 2.1) in
+/-- **Theorem 5.1 on the parameters**: the one-step map `step` (Theorem 5.1) in
 closed form, with `s = e^{τ_sw}`: `Y_new = (Y' s² - 2s + Y)/(Y - s)`, `Y'_new = Y/(Y - s)`,
 `f₀,new = s² Ψ(s)/(Y (Y - s)²)`, `p_new = π(s)/(Y - s)²`, `ε_new = ε (Y - s)/s`, for every choice
-of `q_new` (the `q` component of `step` is its argument; the closed form of `q_new` is
-`arcQ_reinPoincare`). The `f₀` and `p` components use `f(τ_sw) = 0` to eliminate `τ_sw = log s`.
+of `q_new` (the `q` component of `step` is its argument; the proof of Theorem 6.5 only uses the
+relation at the next point). The `f₀` and `p` components use `f(τ_sw) = 0` to eliminate
+`τ_sw = log s`.
 
 Route. Put `τ = τ_sw`, `s = e^{τ}`; by `exp_tauSw_spec`, `1 < s < Y`, and by `tauSw_spec`
 `f(τ) = 0`. Write `e^{-τ} = 1/s`, `e^{-2τ} = 1/s²`, `e^{2τ} = s²` (`Real.exp_neg`, `Real.exp_add`
@@ -308,14 +298,12 @@ theorem step_closed (he : 0 < a.eps) (hY : 1 < a.Y) (hg0 : a.g0 = 0) (h1 : 0 < a
   · change -a.fDeriv τ / (a.Y * Real.exp (-τ) - 1) ^ 2 = _
     exact a.neg_fDeriv_div_sq_eq_pNew hfτ hYs.ne'
 
-/-- **INV Corollary 1.2** (E at the image): for `s ≠ Y`,
+/-- **Lemma 6.3**, the identity (the expansion condition at the next point): for `s ≠ Y`,
 `(Y_new - 1)(Y'_new - 2) ≤ Y_new - 2` iff `ψ(s) ≥ 0`.
 
 Route: the identity `(Y - s)² [(Y_new - 2) - (Y_new - 1)(Y'_new - 2)] = ψ(s)` (`unfold YNew YNew'
 psiE`, `field_simp`, `ring`), and `(Y - s)² > 0`
-(`mul_nonneg_iff_of_pos_left`, `sub_nonneg`). Used with this companion identity (INV Proposition 3,
-"Range"): `ψ(s) + (Y - s)² = s (Y' s - 1)(2Y - 3s)`, so `ψ(s) ≥ 0`, `s > 0`, `Y' s > 1` give
-`s < 2Y/3`. -/
+(`mul_nonneg_iff_of_pos_left`, `sub_nonneg`). -/
 theorem E_new_iff {s : ℝ} (hs : s ≠ a.Y) :
     (a.YNew s - 1) * (a.YNew' s - 2) ≤ a.YNew s - 2 ↔ 0 ≤ a.psiE s := by
   have hYs : a.Y - s ≠ 0 := sub_ne_zero.2 (Ne.symm hs)
