@@ -1,9 +1,8 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage[margin=1.05in]{geometry}
 \usepackage{amsmath,amssymb,amsthm,mathtools}
-\usepackage{booktabs,tabularx,enumitem,xcolor}
+\usepackage{enumitem,xcolor}
 \usepackage{fontspec}
-\setmonofont{DejaVu Sans Mono}[Scale=0.82]
 \usepackage{microtype}
 \usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black]{hyperref}
 
@@ -18,17 +17,26 @@
 \theoremstyle{remark}
 \newtheorem*{remark}{Remark}
 
-\newcommand{\ip}[2]{\langle #1,#2\rangle}
-\newcommand{\hstar}{\mathfrak h^{\ast}}
-\newcommand{\Ad}{\operatorname{Ad}}
-\newcommand{\G}{\mathcal G}
-\newcommand{\Sec}{\mathcal S}
-\newcommand{\new}{_{\mathrm{new}}}
-\newcommand{\out}{_{\mathrm{out}}}
-\newcommand{\sw}{_{\mathrm{sw}}}
-\newcommand{\lean}[1]{\texttt{#1}}
+% the book's notation
+\newcommand{\bracks}[2]{\left\langle #1,#2\right\rangle}
+\newcommand{\hstar}{\mathfrak{h}^{\star}}
+\newcommand{\h}{\mathfrak{h}}
+\newcommand{\Ad}{\mathrm{Ad}}
+\newcommand{\ad}{\mathrm{ad}}
+\renewcommand{\sl}{\mathfrak{sl}_2}
+\newcommand{\R}{\mathbb{R}}
+\renewcommand{\H}{\mathcal{H}}
+\newcommand{\ep}{\mathbf{e}}
+\newcommand{\rs}{r_{scale}}
+\newcommand{\tr}{\mathrm{trace}}
+% symbols of this note
+\newcommand{\T}{\mathcal{T}}
+\newcommand{\cl}{\bar\chi}
+\newcommand{\nw}{^{\mathrm{new}}}
+\newcommand{\sw}{_{sw}}
+\newcommand{\tex}{t_{\mathrm{exit}}}
 
-\title{The unstable curve at $q\out$ reaches the boundary of the star domain\\[4pt]
+\title{The unstable curve at $q_{out}$ reaches the boundary of the star domain\\[4pt]
 \large A proof without computation, for \S14.4 of \emph{Packings of Smoothed Polygons}}
 \author{}
 \date{November 2026}
@@ -38,731 +46,820 @@
 
 \noindent
 This note is written for the authors of \emph{Packings of Smoothed Polygons} (T.~Hales and
-K.~Vajjha). In \S14.4 the book computes the unstable curve $W^u(q\out)$ of the
+K.~Vajjha). In \S14.4 the book computes the unstable curve $W^u(q_{out})$ of the
 Reinhardt-Poincar\'e map in Mathematica (Figure~14.2) and reads two facts off the computation:
-along the curve the switching is cyclic, $3\to2\to1\to3\to\cdots$, and a trajectory starting on
-the curve eventually reaches the boundary of the star domain before its next switch. The proof of
-Theorem~14.4.1 rests on the second fact. The book remarks that the computation could be repeated
-with interval arithmetic. This note proves both facts with no numerical computation. Every step is
-checked in the Lean formalization of the book (\S9).
+along the curve the switching sequence is always cyclical, $3\mapsto2\mapsto1\mapsto3\mapsto\cdots$,
+and a Reinhardt trajectory starting on the curve eventually reaches the boundary of the star domain
+before the next switching time. The proof of Theorem~14.4.1 rests on the second fact. The book
+remarks that the computation might be repeated with more rigorous numerical methods such as
+interval arithmetic. This note proves both facts with no numerical computation.
+
+The notation is the book's. The symbols that this note introduces are defined where they first
+appear. Numbers with three parts (Theorem~14.4.1) refer to the book, and numbers with two parts
+(Lemma~6.1) refer to this note.
 
 \section*{Summary: is the book's numerical argument correct?}
 
 Yes. Both facts that the book reads off Figure~14.2 are true, and Theorem~A below proves them. An
-independent computation in ball arithmetic, along 500 orbits of the unstable curve, also
-reproduces the book's numbers. It places the threshold, beyond which a trajectory on the curve
-exits before it switches, at $r^\ast\approx0.0649$ (the book says ``about $0.065$''), and the
-curve of switching points ends at $(r,\tilde x_{21})\approx(0.2098,\,-3.0333)$ (the book gives
-$(0.21,\,-3.03)$).
+independent computation in interval (ball) arithmetic along 500 orbits of the unstable curve also
+reproduces the book's numbers. It places the value of $r$ beyond which a trajectory on the curve
+reaches the boundary of the star domain before switching at $r\approx0.0649$ (the book says
+``about $0.065$''), and it finds that the unstable curve reaches the boundary of the star domain
+near $(r,\tilde x_{21})\approx(0.2098,\,-3.0333)$ (the book gives $(0.21,\,-3.03)$).
 
 The argument's only weakness is that it was not certified. Figure~14.2 joins 434 computed points
 by a piecewise linear curve, and, as the book notes, the computation was not repeated with
-rigorous numerics. The surrounding proofs also have three gaps of exposition. The proof of Theorem~14.4.1 uses, without citing them,
-the time reversal of the second part of Theorem~16.4.1 and Lemma~8.3.4. Theorem~14.3.3 states
-without argument that near the fixed point the local stable manifold is the exceptional divisor.
-Section~8 fills all three. None of this changes a conclusion of the book.
+rigorous numerics. The surrounding proofs also have three gaps of exposition. The proof of
+Theorem~14.4.1 uses, without citing them, the time reversal of the second part of
+Theorem~16.4.1 and Lemma~8.3.4. Theorem~14.3.3 states without argument that near the fixed point
+the local stable manifold is the exceptional divisor. Section~8 fills all three. None of this
+changes a conclusion of the book.
 
 \section*{The idea of the proof}
 
-We must show the following. Start at a point of the Poincar\'e section near $q\out$, off the
-exceptional divisor ($r>0$), and iterate the Reinhardt-Poincar\'e map $F$: follow the control
-$e_2$ until $e_1$ takes over, then rotate. The orbit keeps switching in the cyclic order, and
-after finitely many steps an arc runs out of the star domain before it can switch.
+We must show the following. Start at a point of the Poincar\'e section near the fixed point
+$(0,\tilde x_{out})$, off the exceptional divisor ($r>0$), and iterate the Reinhardt-Poincar\'e
+map $F$: follow the constant control $Z_{010}$ until the switching function $\chi_{21}$ vanishes,
+then rotate by $\Ad_{R^{-1}}$. The switching sequence stays cyclical, and after finitely many steps
+a trajectory reaches the boundary of the star domain before it can switch.
 
-A computation along the curve cannot settle this alone. Near the divisor the map stretches $r$ by
-about $r_{\mathrm{scale}}\approx6.27$ per step, so an orbit that starts at radius $r$ needs about
-$\log(1/r)/\log r_{\mathrm{scale}}$ steps to get away from the divisor. That number is unbounded,
-so any computation must stop somewhere and hand over to a separate argument near the fixed point.
-Each step also involves a switching time, the root of a transcendental equation.
+A computation along the curve cannot settle this alone. Near the exceptional divisor the map
+multiplies $r$ by about $\rs\approx6.27$ per step, so an orbit that starts at a small $r$ needs
+about $\log(1/r)/\log\rs$ steps to get away from the divisor. That number is unbounded, so any
+computation must stop somewhere and hand over to a separate argument near the fixed point. Each
+step also involves a switching time, the root of a transcendental equation.
 
 The proof avoids both problems with four ingredients.
 
 \begin{enumerate}[leftmargin=*,itemsep=3pt]
-\item \emph{One arc is explicit} (\S2). With the control fixed at $e_2$, the state, the costate
-and the switching functions have closed forms. The arc leaves the star domain at an explicit
-time, and each switching function is a sum of four exponential terms.
-\item \emph{A point of the section is a few numbers} (\S\S2--5). Six numbers, tied by two
-relations, describe a point of the section, and each has a meaning: a distance to a side of the
-star domain, the gap between two Hamiltonians, or the slope of a switching function. One step of
-$F$ becomes an explicit rule for updating them. The rule involves one more number, $s$, which
-records when the switch happens.
-\item \emph{A budget} (\S5). The distance $\varepsilon=\rho_1$ drops by exactly $2r$ at each
-step. If the radii of the switching points never decrease, an orbit starting at radius $r_0$ can
-take at most $\varepsilon/(2r_0)$ steps.
+\item \emph{One constant control solution is explicit} (\S2). For the control $Z_{010}$ the
+solutions of Chapter~7 take a simple form. The trajectory reaches the boundary of the star domain
+at an explicit time, and each switching function, with its denominators cleared, is a sum of four
+exponential terms.
+\item \emph{A point of the Poincar\'e section is a few numbers} (\S\S2--5). Six numbers, tied by
+two relations, describe a point of the section. Each has a meaning: a ratio of star functions,
+the gap between two Hamiltonians, or the slope of a switching function. One step of $F$ becomes an
+explicit rule for updating them. The rule involves one more number, $\eta$, which records when the
+switch happens.
+\item \emph{A budget} (\S5). The star function $\rho_1$ drops by exactly $2r$ at each step. If
+the values of $r$ at the switching points never decrease, an orbit starting at $r_0>0$ can take
+at most $\rho_1/(2r_0)$ steps.
 \item \emph{A trapping region} (\S\S6--7). Five sign conditions on the six numbers define a
-region $\G$ of the section. It contains every point near $q\out$ with $r>0$, and in it the radius
-grows at each step. One step from $\G$ either stays in $\G$ or reaches an arc that leaves the
-star domain. With the budget, every orbit from $\G$ ends with such an arc.
+region $\T$ of the section. It contains every point near $(0,\tilde x_{out})$ with $r>0$, and in
+it $r$ grows at each step. One step from $\T$ either stays in $\T$ or reaches a trajectory that
+reaches the boundary of the star domain before switching. With the budget, every orbit from $\T$
+ends with such a trajectory.
 \end{enumerate}
 
-The unstable curve is never located. The argument covers every point near $q\out$ with $r>0$,
-on the curve or not.
+The unstable curve is never located. The argument covers every point near $(0,\tilde x_{out})$
+with $r>0$, on the curve or not.
 
-Most of the work is to show that $\G$ is kept. Three of its five conditions carry over to the
-next point by themselves; the other two need an argument, and it is short. The relation
-$\det\Lambda_1=9/4$ can be rearranged so that $q>0$ is impossible while $p$ is small, and at the
-next point $p$ is small because the arc crossed the switching wall before reaching the side of the
-star domain. When the next point lies too far from the singular state for this, its arc runs into
-a cusp of the star domain and leaves it.
+Most of the work is to show that $\T$ is kept. Three of its five conditions carry over to the
+next point by themselves; the other two need an argument, and it is short. The condition
+$\det(\Lambda_1)=9/4$ can be rearranged so that one of the six numbers ($k_2$ below) cannot be
+positive while another ($k_3$) is small, and at the next point $k_3$ is small because the
+trajectory switched before it reached the boundary of the star domain. When the next point lies
+too far from $X=J$ for this, its trajectory runs into an ideal vertex of the star domain and
+reaches the boundary before switching.
 
 \section{Setting and result}
 
-\paragraph{Notation.} We write $\ip AB=\operatorname{tr}(AB)$, so that $\det A=-\tfrac12\ip AA$
-for traceless $A$. For a traceless matrix $X$ with entries $x_{ij}$, the star functions of
-Corollary~3.1.6 are
+\paragraph{The book's notation.} As in \S3.3, $\bracks XY=\tr(XY)$; for traceless $X$ we have
+$\det X=-\frac12\bracks XX$. For $X=\left(\begin{smallmatrix}a&b\\c&-a\end{smallmatrix}\right)$ the
+star functions of Corollary~3.1.6 are
 \[
-\rho_0=\frac{x_{21}+\sqrt3\,x_{11}}{\sqrt3},\qquad
-\rho_1=\frac{x_{21}-\sqrt3\,x_{11}}{\sqrt3},\qquad
-\rho_2=-\frac{3x_{12}+x_{21}}{2\sqrt3}.
+\rho_0(X)=\frac{c+\sqrt3\,a}{\sqrt3},\qquad\rho_1(X)=\frac{c-\sqrt3\,a}{\sqrt3},\qquad
+\rho_2(X)=\frac{-(3b+c)}{2\sqrt3},
 \]
-The star domain $\hstar$ is the set where $\det X=1$ and all three are positive. Its three sides
-are $\rho_i=0$, and on $\det X=1$ the star functions satisfy
-$\rho_0\rho_1+\rho_1\rho_2+\rho_2\rho_0=1$. At the singular state $X=J$ all three equal
-$1/\sqrt3$.
+and the star inequalities are $\rho_i(X)>0$. When $\det X=1$ we have
+$\rho_0\rho_1+\rho_1\rho_2+\rho_2\rho_0=1$, and the star inequalities say that $X$ lies over the
+star domain $\hstar$, an ideal triangle in the upper half-plane whose three sides are
+$\rho_i=0$. At $X=J$ all three star functions equal $1/\sqrt3$.
 
-We write $Z_1,Z_2,Z_3$ for the control matrices $Z_{100},Z_{010},Z_{001}$ of the vertices
-$e_1,e_2,e_3$. Each pairing with a control matrix is a star function:
+The vertices of the control set $U_T$ (Definition~3.3.3) are $\ep_1=(1,0,0)$, $\ep_2=(0,1,0)$,
+$\ep_3=(0,0,1)$, with control matrices $Z_{\ep_1}=Z_{100}$, $Z_{\ep_2}=Z_{010}$,
+$Z_{\ep_3}=Z_{001}$. By the identity in the proof of Lemma~3.3.4, for traceless $X$
 \begin{equation}\tag{1.1}
-\ip X{Z_1}=-\tfrac{2}{\sqrt3}\,\rho_2,\qquad
-\ip X{Z_2}=-\tfrac{2}{\sqrt3}\,\rho_1,\qquad
-\ip X{Z_3}=-\tfrac{2}{\sqrt3}\,\rho_0 .
+\bracks X{Z_{\ep_1}}=-\tfrac{2}{\sqrt3}\,\rho_2(X),\qquad
+\bracks X{Z_{\ep_2}}=-\tfrac{2}{\sqrt3}\,\rho_1(X),\qquad
+\bracks X{Z_{\ep_3}}=-\tfrac{2}{\sqrt3}\,\rho_0(X) .
 \end{equation}
-With $\lambda_{\mathrm{cost}}=-1$ and $\hat\Lambda=\Lambda_1+\tfrac32J$, the Hamiltonian of the
-vertex $e_j$ is
+The Hamiltonian is that of \S6.4 with $\lambda_{cost}=-1$:
 \[
-H_j=\ip{\hat\Lambda}X-\frac{\ip{\Lambda_R}{Z_j}}{\ip X{Z_j}},
+\H(Z_u)=\H(\Lambda_1,\Lambda_R,X;Z_u)=\H_1(\Lambda_1,X)-\frac{\bracks{\Lambda_R}{Z_u}}{\bracks X{Z_u}},
+\qquad \H_1(\Lambda_1,X)=\bracks{\Lambda_1+\tfrac32J}{X}.
 \]
-and $\chi_{ij}=H_i-H_j$. The switching function $\chi_{ij}$ has a pole on a side of $\hstar$, so we
-clear the denominators:
+The switching functions are those of \S7.5: $\chi_{ij}=\H(Z_{\ep_i})-\H(Z_{\ep_j})$. Since
+$\chi_{ij}$ has a pole on a side of $\hstar$, we also use the cleared switching functions
 \[
-N_{ij}=\chi_{ij}\,\ip X{Z_i}\ip X{Z_j}
-=\ip{\Lambda_R}{Z_j}\ip X{Z_i}-\ip{\Lambda_R}{Z_i}\ip X{Z_j}.
+\cl_{ij}:=\chi_{ij}\,\bracks X{Z_{\ep_i}}\bracks X{Z_{\ep_j}}
+=\bracks{\Lambda_R}{Z_{\ep_j}}\bracks X{Z_{\ep_i}}-\bracks{\Lambda_R}{Z_{\ep_i}}\bracks X{Z_{\ep_j}} .
 \]
-Inside $\hstar$ the factor $\ip X{Z_i}\ip X{Z_j}$ is positive by (1.1), so $N_{ij}$ has the sign
-of $\chi_{ij}$.
+Under the star inequalities the factor $\bracks X{Z_{\ep_i}}\bracks X{Z_{\ep_j}}$ is positive by
+(1.1), so $\cl_{ij}$ has the sign of $\chi_{ij}$.
 
-\paragraph{The section.} Let $\Sec$ be the set of triples $w=(X,\Lambda_1,\Lambda_R)$ with
-$X\in\hstar$, $\Lambda_1$ and $\Lambda_R$ traceless, $\det\Lambda_1=9/4$, $\ip X{\Lambda_R}=0$ and
-$H_2=H_3=0$. These are the states an extremal can have at the moment it switches from $e_3$ to
-$e_2$: the two vertices tie, and the maximized Hamiltonian is $0$. The chart $(r,\tilde x)$ of
-\S14.1 parametrizes $\Sec$, and the radius $r=x_{11}=(\rho_0-\rho_1)/2$ measures the distance
-from the singular state.
+\paragraph{The Poincar\'e section and the map.} As in \S7.7 (with $d=9/4$ and the wall
+$\chi_{23}=0$), we consider the points $q=(X,\Lambda_1,\Lambda_R)$ of $\sl(\R)^3$ with
+\[
+\det X=1,\qquad\bracks X{\Lambda_R}=0,\qquad\det(\Lambda_1)=9/4,\qquad
+\H(Z_{010})=\chi_{23}=0,
+\]
+and we require moreover that $X$ satisfies the star inequalities. We write $N_{9/4}$ for this set.
+Its points are the states of an extremal at the moment it switches from $Z_{001}$ to $Z_{010}$:
+the two controls tie, and the maximized Hamiltonian is $0$. The coordinates $(r,\tilde x)\in H^*$
+of \S14.1 parametrize $N_{9/4}$, and $r=a=(\rho_0-\rho_1)/2$ measures the distance from $X=J$.
 
-\paragraph{The map.} From $w\in\Sec$ follow the control $e_2$. If $\chi_{21}$ vanishes for a first
-time $t\sw>0$ while $X$ is still in $\hstar$, put $F(w)=\Ad_{R^{-1}}\,w(t\sw)$. At $t\sw$ the
-vertex $e_1$ ties with $e_2$. The rotation relabels the vertices ($e_1\to e_2$, $e_2\to e_3$), so
-$F(w)$ is again a point where an $e_3$-arc gives way to an $e_2$-arc. This is the
-Reinhardt-Poincar\'e map of \S14.3; Lemma~14.3.1 extends it analytically to a neighbourhood of
-the fixed point $(0,\tilde x\out)$.
+From $q\in N_{9/4}$ follow the constant control $Z_{010}$. If $\chi_{21}$ vanishes for a first
+time $t\sw>0$ while the star inequalities still hold, the Reinhardt-Poincar\'e map of \S14.3 is
+$F(q)=\Ad_{R^{-1}}q(t\sw)$. At $t\sw$ the control $Z_{100}$ ties with $Z_{010}$. The rotation
+relabels the vertices ($\ep_1\to\ep_2$, $\ep_2\to\ep_3$), so $F(q)$ is again a point where
+$Z_{001}$ gives way to $Z_{010}$. Lemma~14.3.1 extends $F$ analytically to a neighbourhood of the
+fixed point $(0,\tilde x_{out})$.
 
 \begin{theoremA}
-There is a neighbourhood $U$ of $(0,\tilde x\out)$ with the following property. For every chart
-point of $U$ with $r>0$, with section point $w_0$, there is $K\ge0$ such that the iterates
-$w_j=F^j(w_0)$ satisfy:
+There is a neighbourhood $U$ of $(0,\tilde x_{out})$ with the following property. For every
+point of $U$ with $r>0$, with corresponding $q_0\in N_{9/4}$, there is $k\ge0$ such that the
+iterates $q_j=F^j(q_0)$ satisfy:
 \begin{enumerate}[label=\textup{(\arabic*)},itemsep=1pt]
-\item for $j\le K$, the control after the switch at $w_j$ is $e_2$: $H_1<H_2$ at $w_j$, and
-$H_3<H_2$ just after $w_j$ along the $e_3$-flow;
-\item for $j<K$, along the $e_2$-arc from $w_j$ the vertex $e_2$ is the strict maximizer of
-$H_1,H_2,H_3$ on $(0,t\sw)$, and $H_1>H_2$ at times arbitrarily close after $t\sw$;
-\item the $e_2$-arc from $w_K$ reaches the boundary of $\hstar$ at some time $T$, with $e_2$ the
-strict maximizer on $(0,T)$.
+\item for $j\le k$, the first control at $q_j$ is $\ep_2$: $\H(Z_{100})<\H(Z_{010})$ at $q_j$, and
+$\H(Z_{001})<\H(Z_{010})$ just after $q_j$ along the constant control $Z_{001}$ solution;
+\item for $j<k$, along the constant control $Z_{010}$ solution from $q_j$, $\ep_2$ is the strict
+maximizer of $\H(Z_{\ep_1}),\H(Z_{\ep_2}),\H(Z_{\ep_3})$ on $(0,t\sw)$, and
+$\H(Z_{100})>\H(Z_{010})$ at times arbitrarily close after $t\sw$;
+\item the constant control $Z_{010}$ solution from $q_k$ reaches the boundary of the star domain
+at some time $\tex$, with $\ep_2$ the strict maximizer on $(0,\tex)$.
 \end{enumerate}
 \end{theoremA}
 
-Items (1) and (2) say that the switching is cyclic. Item (3) says that the next step of $F$ is not
-defined, because the trajectory leaves the star domain first. The proof of Theorem~14.4.1 needs
-this for the points of the local unstable curve (\S8).
+Items (1) and (2) say that the switching sequence is cyclical. Item (3) says that the next step of
+$F$ is not defined, because the trajectory reaches the boundary of the star domain first. The
+proof of Theorem~14.4.1 needs this for the points of the local unstable curve (\S8).
 
-\section{One arc in closed form}
+\section{The constant control solution in closed form}
 
-Everything below rests on the closed-form solutions of Chapter~7. Two features make the
-$e_2$-arc simple: the pairing $\ip X{Z_2}$ stays constant along it, and the two matrix
-exponentials in the solution grow at the same rate. A few numbers read off the starting point
-then determine the whole arc.
+Everything below rests on the solutions of \S7.1 for constant control. For the control $Z_{010}$
+two features make them simple: $\bracks X{Z_{010}}$ is a constant of motion (Lemma~7.1.1), and
+$P_0$ and $X_0+P_0$ have the same eigenvalues (Lemma~7.1.3). A few numbers read off the initial
+point then determine the whole trajectory.
 
 \subsection*{The state}
 
-For $X_0\in\hstar$ we put
+Throughout this section $X_0=X(0)$ satisfies the star inequalities, $\det X_0=1$, and $\rho_i$
+denotes $\rho_i(X_0)$. We put
 \[
-\varepsilon=\rho_1(X_0),\qquad Y=1+\frac{\rho_2(X_0)}{\varepsilon},\qquad
-Y'=1+\frac{\rho_0(X_0)}{\varepsilon},\qquad a=Y-2,\qquad b=Y'-2 .
+\mu_2=1+\frac{\rho_2}{\rho_1},\qquad \mu_0=1+\frac{\rho_0}{\rho_1}.
 \]
-Here $\varepsilon$ is the distance to the side $\rho_1=0$, which stays constant along the arc, and
-$Y$ measures the distance $\rho_2$ to the side through which the arc will leave, relative to
-$\varepsilon$. At the singular state $Y=Y'=2$, so $a$ and $b$ measure the displacement from it;
-near the fixed point both are of order $r$. The relation among the star functions becomes
+Both exceed $1$, and both equal $2$ at $X=J$, so $\mu_2-2$ and $\mu_0-2$ measure the distance from
+$X=J$; near the fixed point they are of order $r$. The ratio $\mu_2$ measures the distance $\rho_2$
+to the side $\rho_2=0$ of $\hstar$, through which the trajectory will leave, in units of $\rho_1$.
+The relation among the star functions becomes
 \begin{equation}\tag{2.1}
-\varepsilon^2\,YY'=1+\varepsilon^2,
+\rho_1^2\,\mu_2\mu_0=1+\rho_1^2,
 \end{equation}
-so $(\varepsilon,Y)$ determine $Y'$, and $Y,Y'>1$. The radius is $r=\varepsilon b/2$.
+so $\rho_1$ and $\mu_2$ determine $\mu_0$, and $r=\rho_1(\mu_0-2)/2$.
 
-\begin{proposition}[the state]
-With the control $e_2$ the state is $X(t)=e^{tP}X_0e^{-tP}$ with $P=Z_2/\ip{Z_2}{X_0}$
-(Chapter~7). With $\tau=t/\varepsilon$,
+\begin{proposition}
+Along the constant control $Z_{010}$ solution, $X(t)=\Ad_{\exp(tP_0)}X_0$ with
+$P_0=Z_{010}/\bracks{Z_{010}}{X_0}$ (\S7.1). With $\vartheta:=t/\rho_1$,
 \[
-\rho_1(t)=\varepsilon,\qquad \rho_2(t)=\varepsilon\,(Ye^{-\tau}-1),\qquad
-\rho_0(t)=\varepsilon\,(Y'e^{\tau}-1).
+\rho_1(X(t))=\rho_1,\qquad \rho_2(X(t))=\rho_1\,(\mu_2e^{-\vartheta}-1),\qquad
+\rho_0(X(t))=\rho_1\,(\mu_0e^{\vartheta}-1).
 \]
-So the arc stays in $\hstar$ for $0\le t<T:=\varepsilon\log Y$, and it leaves through the side
-$\rho_2=0$ at $T$, transversally, with $d\rho_2/dt=-1$ there.
+So the star inequalities hold for $0\le t<\tex:=\rho_1\log\mu_2$, and at $\tex$ the trajectory
+reaches the boundary of the star domain through the side $\rho_2=0$, transversally:
+$\frac{d}{dt}\rho_2=-1$ there.
 \end{proposition}
 
-In the upper half-plane the state slides along a Euclidean ray toward the cusp $1/\sqrt3$ of the
-ideal triangle $\hstar$ and crosses the side $\rho_2=0$. The exit time has a closed form; on an
-arc, the only time without one is the switching time.
+In the upper half-plane, $z(t)$ slides along a Euclidean ray toward the ideal vertex $1/\sqrt3$ of
+$\hstar$ and crosses the side $\rho_2=0$. The time at which the trajectory reaches the boundary
+has a closed form; the switching time is the only time without one.
 
 \begin{proof}
-A frame diagonalizes $P$. Let $S=\left(\begin{smallmatrix}1&1\\0&\sqrt3\end{smallmatrix}\right)$,
-$D=\operatorname{diag}(1,-1)$, and let $E_+$, $E_-$ be the elementary matrices with a $1$ in
-position $(1,2)$, respectively $(2,1)$. Write a traceless matrix as
-$M=S(m_0D+m_+E_++m_-E_-)S^{-1}$, briefly $M=(m_0,m_+,m_-)$. Then
-$\ip MN=2m_0n_0+m_+n_-+m_-n_+$, and direct multiplication gives
-\begin{equation}\tag{2.2}
-Z_1=\tfrac1{\sqrt3}(-1,0,1),\qquad Z_2=\tfrac1{\sqrt3}(1,0,0),\qquad
-Z_3=\tfrac1{\sqrt3}(-1,-4,0),\qquad J=\tfrac1{\sqrt3}(-1,-4,1).
-\end{equation}
-By (1.1) and (2.2),
+A change of basis diagonalizes $P_0$. Let $S=\left(\begin{smallmatrix}1&1\\0&\sqrt3\end{smallmatrix}\right)$,
+and for traceless $M$ write
 \[
-\rho_1=-x_0,\qquad \rho_2=x_0-\tfrac12x_+,\qquad \rho_0=x_0+2x_- .
+S^{-1}MS=\begin{pmatrix}m_0&m_+\\m_-&-m_0\end{pmatrix},\qquad\text{briefly } M=(m_0,m_+,m_-).
 \]
-So $X_0=(-\varepsilon,x_+,x_-)$ with $x_+=-2\varepsilon Y$ and $x_-=\varepsilon Y'/2$, and
-$x_+x_-=-(1+\varepsilon^2)$ by (2.1). Also $P=(-1/(2\varepsilon),0,0)$, so $\Ad_{e^{tP}}$ fixes
-$D$ and multiplies $E_\pm$ by $e^{\mp\tau}$.
+Then $\bracks MN=2m_0n_0+m_+n_-+m_-n_+$, and direct multiplication gives
+\begin{equation}\tag{2.2}
+\begin{gathered}
+Z_{100}=\tfrac1{\sqrt3}(-1,0,1),\qquad Z_{010}=\tfrac1{\sqrt3}(1,0,0),\\
+Z_{001}=\tfrac1{\sqrt3}(-1,-4,0),\qquad J=\tfrac1{\sqrt3}(-1,-4,1).
+\end{gathered}
+\end{equation}
+By (1.1) and (2.2), $\rho_1=-m_0$, $\rho_2=m_0-\frac12m_+$ and $\rho_0=m_0+2m_-$ for $M=X$. So
+\[
+X_0=\rho_1\Bigl(-1,\;-2\mu_2,\;\tfrac12\mu_0\Bigr),\qquad
+P_0=-\frac{1}{2\rho_1}\,(1,0,0),
+\]
+and $\Ad_{\exp(tP_0)}$ fixes the first coordinate and multiplies the other two by $e^{-\vartheta}$ and
+$e^{\vartheta}$.
 \end{proof}
 
 \subsection*{The switching functions}
 
-The costate also evolves by matrix exponentials. By Chapter~7,
+By \S7.1, $\Lambda_1(t)=\Ad_{g(t)^{-1}}\Lambda_1(0)$ with
+$g(t)=\exp(t(X_0+P_0))\exp(-tP_0)$, so
 \[
-\Lambda_1(t)=\Ad_{e^{tP}}\,\Ad_{e^{-t\Omega}}\,\Lambda_1(0),\qquad \Omega=X_0+P .
+\Ad_{\exp(-tP_0)}\Lambda_1(t)=\Ad_{\exp(-t(X_0+P_0))}\Lambda_1(0).
 \]
-A basis of eigenvectors of $\operatorname{ad}\Omega$ makes this explicit.
+A basis of eigenvectors of $\ad(X_0+P_0)$ makes this explicit.
 
 \begin{lemma}[an eigenbasis]
 The nilpotent matrices
 \[
-V_+=\Bigl(x_+,\;-\frac{x_+^2}{\varepsilon},\;\varepsilon\Bigr),\qquad
-V_-=\Bigl(x_-,\;\varepsilon,\;-\frac{x_-^2}{\varepsilon}\Bigr)
+E_+=\rho_1\bigl(-2\mu_2,\;-4\mu_2^2,\;1\bigr),\qquad E_-=\rho_1\Bigl(\tfrac12\mu_0,\;1,\;-\tfrac14\mu_0^2\Bigr)
 \]
-satisfy $[\Omega,V_+]=-\varepsilon^{-1}V_+$ and $[\Omega,V_-]=\varepsilon^{-1}V_-$. In the basis
-$\Omega,V_+,V_-$ the only nonzero pairings are
+satisfy $[X_0+P_0,E_+]=-\rho_1^{-1}E_+$ and $[X_0+P_0,E_-]=\rho_1^{-1}E_-$. In the basis
+$X_0+P_0,E_+,E_-$ of $\sl(\R)$ the only nonzero pairings are
 \[
-\ip\Omega\Omega=\frac1{2\varepsilon^2},\qquad \ip{V_+}{V_-}=\frac1{\varepsilon^2}.
+\bracks{X_0+P_0}{X_0+P_0}=\frac1{2\rho_1^2},\qquad \bracks{E_+}{E_-}=\frac1{\rho_1^2}.
 \]
 \end{lemma}
 
 \begin{proof}
-A direct computation, using $x_+x_-=-(1+\varepsilon^2)$.
+A direct computation in the coordinates of (2.2), using (2.1).
 \end{proof}
 
-The eigenvalues $\pm1/\varepsilon$ of $\operatorname{ad}\Omega$ are the rates of $\Ad_{e^{tP}}$
-on $E_\pm$. This coincidence, which amounts to $\det\Omega=\det P$, produces a resonant term
-$\tau e^{\mp\tau}$ below.
+The eigenvalues $\pm1/\rho_1$ of $\ad(X_0+P_0)$ are also the rates of $\Ad_{\exp(tP_0)}$ on the
+last two coordinates; this is Lemma~7.1.3 at work. The coincidence produces a resonant term
+$\vartheta e^{\mp\vartheta}$ below.
 
-At a point $w\in\Sec$ we define three costate numbers,
+At $q\in N_{9/4}$ we define three numbers from the costate:
 \begin{equation}\tag{2.3}
-f_0=\frac{\sqrt3}{8\varepsilon^3}\,N_{21}(w),\qquad
-q=-\frac{\sqrt3}{6\varepsilon}\,\ip{\hat\Lambda}{V_+},\qquad
-p=\frac{2}{\sqrt3\,\varepsilon}\,\ip{\hat\Lambda}{V_-},
+k_1=\frac{\sqrt3}{8\rho_1^3}\,\cl_{21}(q),\qquad
+k_2=-\frac{\sqrt3}{6\rho_1}\,\bracks{\Lambda_1+\tfrac32J}{E_+},\qquad
+k_3=\frac{2}{\sqrt3\,\rho_1}\,\bracks{\Lambda_1+\tfrac32J}{E_-}.
 \end{equation}
-and the abbreviations
-\[
-B=Y-1+q,\qquad A=1+f_0-B,\qquad B'=Y'-1+p,\qquad A'=1-B' .
-\]
 
 \begin{theorem}[normal form]
-Let $w\in\Sec$. Along the $e_2$-arc from $w$, with $\tau=t/\varepsilon$,
+Let $q\in N_{9/4}$. Along the constant control $Z_{010}$ solution from $q$, with
+$\vartheta=t/\rho_1$,
 \begin{align*}
-\frac{\sqrt3}{8\varepsilon^3}N_{21}(t)&=f(\tau):=-1+Ae^{-\tau}+Be^{-2\tau}+Y\tau e^{-\tau},\\
-\frac{\sqrt3}{8\varepsilon^3}N_{23}(t)&=g(\tau):=-1+A'e^{\tau}+B'e^{2\tau}-Y'\tau e^{\tau}.
+\frac{\sqrt3}{8\rho_1^3}\,\cl_{21}(t)&=\varphi_{21}(\vartheta):=
+-1+(2-\mu_2+k_1-k_2)\,e^{-\vartheta}+(\mu_2-1+k_2)\,e^{-2\vartheta}+\mu_2\,\vartheta e^{-\vartheta},\\
+\frac{\sqrt3}{8\rho_1^3}\,\cl_{23}(t)&=\varphi_{23}(\vartheta):=
+-1+(2-\mu_0-k_3)\,e^{\vartheta}+(\mu_0-1+k_3)\,e^{2\vartheta}-\mu_0\,\vartheta e^{\vartheta}.
 \end{align*}
 Moreover
 \begin{equation}\tag{2.4}
-f_0=-\frac{\sqrt3}{3\varepsilon^3Y'}\,\ip{\hat\Lambda}{X_0}.
+k_1=-\frac{\sqrt3}{3\rho_1^3\mu_0}\,\H_1(\Lambda_1,X_0).
 \end{equation}
 \end{theorem}
 
-So once the state is known, three numbers decide how $e_1$ and $e_3$ compete with $e_2$ along the
-whole arc.
+So once the state is known, three numbers decide how $Z_{100}$ and $Z_{001}$ compete with
+$Z_{010}$ along the whole trajectory.
 \begin{itemize}[itemsep=1pt]
-\item $f_0=f(0)$ is the initial lead of $e_2$ over $e_1$. By (2.4) it is positive exactly when the
-reduced Hamiltonian $\ip{\hat\Lambda}X$ is negative at $w$.
-\item $p=g'(0)$ is the rate at which $e_2$ pulls ahead of $e_3$ right after $w$. (We have
-$g(0)=0$, since $e_2$ and $e_3$ tie at $w$.)
-\item $q$ shapes $f$ beyond its initial value. When $q\le0$, the lead of $e_2$ over $e_1$ first
-grows and then shrinks, so it vanishes exactly once (Lemma~4.3).
+\item $k_1=\varphi_{21}(0)$ is the initial lead of $Z_{010}$ over $Z_{100}$. By (2.4) it is
+positive exactly when $\H_1(\Lambda_1,X)<0$ at $q$.
+\item $k_3=\varphi_{23}'(0)$ is the rate at which $Z_{010}$ pulls ahead of $Z_{001}$ right after
+$q$. (We have $\varphi_{23}(0)=0$, since the two controls tie at $q$.)
+\item $k_2$ shapes $\varphi_{21}$ beyond its initial value. When $k_2\le0$, the lead of $Z_{010}$
+over $Z_{100}$ first grows and then shrinks, so it vanishes exactly once (Lemma~4.3).
 \end{itemize}
-Near the fixed point $f_0$ is of order $r^3$ and $q,p$ are of order $r^2$, the scalings of the
-blow-up.
+Near the fixed point $k_1$ is of order $r^3$ and $k_2,k_3$ are of order $r^2$, the scalings of
+\S14.1.
 
 \begin{proof}[Proof sketch]
-By Chapter~7, $\Lambda_R(t)$ is given by a quadrature. Put
-$M=\Ad_{e^{-tP}}\hat\Lambda(t)$, $\tilde\Lambda=\Ad_{e^{-tP}}\Lambda_R(t)$ and
-$c=\ip{\Lambda_R}P$, and let $\Theta_\pm=\tilde\Lambda_\pm-x_\pm c$ in frame coordinates. Since
-$\ip{\Lambda_R}{Z_2}=c\,\ip X{Z_2}$, (2.2) gives
+By \S7.1, $\Lambda_R(t)=\Ad_{\exp(tP_0)}\tilde\Lambda_R(t)$, where $\tilde\Lambda_R(t)$ is
+given by the two quadratures $\Psi$ and $\psi$ of that section. Since
+$\bracks{\Lambda_R}{Z_{010}}=\bracks{\Lambda_R}{P_0}\bracks X{Z_{010}}$ and
+$\bracks{\Lambda_R}{P_0}=\bracks{\tilde\Lambda_R}{P_0}$, the definition of $\cl_{ij}$ and (2.2)
+give
 \[
-N_{21}=-\tfrac{2\varepsilon}{3}\,e^{-\tau}\,\Theta_+,\qquad
-N_{23}=\tfrac{8\varepsilon}{3}\,e^{\tau}\,\Theta_- .
+\cl_{21}(t)=-\tfrac{2\rho_1}{3}\,e^{-\vartheta}\,w_+(t),\qquad
+\cl_{23}(t)=\tfrac{8\rho_1}{3}\,e^{\vartheta}\,w_-(t),
 \]
-Using $x_+x_-=-(1+\varepsilon^2)$ and $H_2\equiv0$, the equations for $\Lambda_R$ and $c$ reduce
-to
+where $w_\pm$ are the last two coordinates of
+$W(t)=\tilde\Lambda_R(t)-\bracks{\tilde\Lambda_R(t)}{P_0}X_0$. The costate equation for
+$\Lambda_R$ and $\H(Z_{010})\equiv0$ give
 \[
-\Theta_+'=-2\ip M{V_+},\qquad \Theta_-'=2\ip M{V_-}.
+w_+'=-2\bracks{\Ad_{\exp(-tP_0)}\bigl(\Lambda_1(t)+\tfrac32J\bigr)}{E_+},\qquad
+w_-'=2\bracks{\Ad_{\exp(-tP_0)}\bigl(\Lambda_1(t)+\tfrac32J\bigr)}{E_-}.
 \]
-By Lemma~2.2,
-$\ip{M(t)}{V_+}=e^{-\tau}\ip{\Lambda_1(0)}{V_+}+\tfrac32\ip J{\Ad_{e^{tP}}V_+}$, which is explicit by
-(2.2). Integrating gives the four terms. The constant term is $-1$ and the coefficient of
-$\tau e^{-\tau}$ is $Y$. The other two coefficients are fixed by $f(0)=f_0$ and by the definition
-of $q$, using $\ip J{V_+}=-\frac{4\varepsilon}{\sqrt3}(Y^2-Y+1)$. The computation for $N_{23}$ is
-the same, with $\ip J{V_-}=\frac{\varepsilon}{\sqrt3}(Y'^2-Y'+1)$. On $\Sec$, $g(0)=0$ because
-$\chi_{23}=0$.
+By Lemma~2.2 and the formula for $\Ad_{\exp(-tP_0)}\Lambda_1(t)$ above,
+\[
+\bracks{\Ad_{\exp(-tP_0)}\Lambda_1(t)}{E_+}=e^{-\vartheta}\,\bracks{\Lambda_1(0)}{E_+},
+\]
+and the $J$ term, $\bracks{J}{\Ad_{\exp(tP_0)}E_+}$, is explicit by (2.2). Integrating gives the
+four terms. The constant term is $-1$ and the coefficient of $\vartheta e^{-\vartheta}$ is
+$\mu_2$. The other two coefficients are fixed by $\varphi_{21}(0)=k_1$ and by the definition of
+$k_2$. The computation for $\cl_{23}$ is the same. Both use
+\[
+\bracks J{E_+}=-\frac{4\rho_1}{\sqrt3}\,(\mu_2^2-\mu_2+1),\qquad
+\bracks J{E_-}=\frac{\rho_1}{\sqrt3}\,(\mu_0^2-\mu_0+1).
+\]
+Finally $\varphi_{23}(0)=0$ because $\chi_{23}=0$ on $N_{9/4}$.
 \end{proof}
 
-\section{The relation \texorpdfstring{$\det\Lambda_1=9/4$}{det Lambda1 = 9/4}}
+\section{The condition \texorpdfstring{$\det(\Lambda_1)=9/4$}{det(Lambda1) = 9/4}}
 
-The section is four-dimensional (the chart $(r,\tilde x)$), but $\varepsilon,Y,f_0,q,p$ are five
-numbers, so one relation remains. It comes from $\det\Lambda_1=9/4$, and it is the main tool of
-\S6.
+The section $N_{9/4}$ is four-dimensional (the coordinates $(r,\tilde x)$), but
+$\rho_1,\mu_2,k_1,k_2,k_3$ are five numbers ($\mu_0$ is determined by (2.1)). One relation
+remains. It comes from $\det(\Lambda_1)=9/4$, and it is the main tool of \S6.
 
 \begin{proposition}
-On $\Sec$,
-\begin{equation}\tag{3.1}
-\bigl[Y'(f_0-q)-Yp\bigr]^2-4pq+2(YY'-1)(bq+ap)+2Y'(3-ab)f_0=0 .
-\end{equation}
+On $N_{9/4}$,
+\begin{multline}\tag{3.1}
+\bigl[\mu_0(k_1-k_2)-\mu_2k_3\bigr]^2-4k_2k_3
++2(\mu_2\mu_0-1)\bigl((\mu_0-2)k_2+(\mu_2-2)k_3\bigr)\\
++2\mu_0\bigl(3-(\mu_2-2)(\mu_0-2)\bigr)k_1=0 .
+\end{multline}
 \end{proposition}
 
-Read (3.1) as a budget. Near the singular state $a$ and $b$ are small, so $3-ab>0$. When $q\le0$
-and $f_0,p\ge0$, every term is then nonnegative except $2(YY'-1)bq$. A positive $q$ would have to
-be balanced by the term $-4pq$, so it requires $p$ to be large compared with $b$. Lemma~6.1 makes
-this precise.
+Read (3.1) as a budget. Near $X=J$ the numbers $\mu_2-2$ and $\mu_0-2$ are small, so
+$3-(\mu_2-2)(\mu_0-2)>0$. When $k_2\le0$ and $k_1,k_3\ge0$, every term is then nonnegative except
+$2(\mu_2\mu_0-1)(\mu_0-2)k_2$. A positive $k_2$ would have to be balanced by the term $-4k_2k_3$,
+so it requires $k_3$ to be large compared with $\mu_0-2$. Lemma~6.1 makes this precise.
 
 \begin{proof}
-The three numbers (2.3), (2.4) are pairings of $\hat\Lambda$ with $V_+,V_-,X_0$, so they determine
-$\Lambda_1$. In the basis of Lemma~2.2,
+The numbers (2.3) and (2.4) are the pairings of $\Lambda_1+\frac32J$ with $E_+$, $E_-$ and $X_0$,
+so they determine $\Lambda_1$. In the basis of Lemma~2.2 write
 \[
-\Lambda_1=\alpha\,\Omega+\beta V_++\gamma V_-,
+\Lambda_1=\gamma_0\,(X_0+P_0)+\gamma_+E_++\gamma_-E_- .
 \]
-and the pairings of that lemma give $\alpha=2\varepsilon^2\ip{\Lambda_1}\Omega$,
-$\beta=\varepsilon^2\ip{\Lambda_1}{V_-}$ and $\gamma=\varepsilon^2\ip{\Lambda_1}{V_+}$. With
-(2.3), (2.4) and the values of $\ip J{V_\pm}$,
+The pairings of Lemma~2.2 give $\gamma_0=2\rho_1^2\bracks{\Lambda_1}{X_0+P_0}$,
+$\gamma_+=\rho_1^2\bracks{\Lambda_1}{E_-}$ and $\gamma_-=\rho_1^2\bracks{\Lambda_1}{E_+}$. With
+(2.3), (2.4) and the values of $\bracks J{E_\pm}$,
 \[
-\alpha=\sqrt3\,\varepsilon\bigl(1+\varepsilon^2(Y+Y'A-YB')\bigr),\qquad
-\beta=-\tfrac{\sqrt3}{2}\,\varepsilon^3(Y'^2-B'),\qquad
-\gamma=2\sqrt3\,\varepsilon^3(Y^2-B).
+\gamma_0=\sqrt3\,\rho_1^3\bigl(3-(\mu_2-2)(\mu_0-2)+\mu_0(k_1-k_2)-\mu_2k_3\bigr),
 \]
-By Lemma~2.2 again, $\det\Lambda_1=-\tfrac12\ip{\Lambda_1}{\Lambda_1}=-(\alpha^2+4\beta\gamma)/(4\varepsilon^2)$.
-Using $\varepsilon^2(YY'-1)=1$, the equation $\det\Lambda_1=9/4$ becomes
+\[
+\gamma_+=-\tfrac{\sqrt3}{2}\,\rho_1^3\,(\mu_0^2-\mu_0+1-k_3),\qquad
+\gamma_-=2\sqrt3\,\rho_1^3\,(\mu_2^2-\mu_2+1-k_2).
+\]
+By Lemma~2.2 again,
+$\det(\Lambda_1)=-\frac12\bracks{\Lambda_1}{\Lambda_1}=-(\gamma_0^2+4\gamma_+\gamma_-)/(4\rho_1^2)$.
+Using $\rho_1^2(\mu_2\mu_0-1)=1$, the equation $\det(\Lambda_1)=9/4$ becomes
 \begin{equation}\tag{3.2}
-\bigl(3-ab+Y'(f_0-q)-Yp\bigr)^2+3(YY'-1)^2=4(Y^2-B)(Y'^2-B'),
+\bigl(3-(\mu_2-2)(\mu_0-2)+\mu_0(k_1-k_2)-\mu_2k_3\bigr)^2+3(\mu_2\mu_0-1)^2
+=4(\mu_2^2-\mu_2+1-k_2)(\mu_0^2-\mu_0+1-k_3),
 \end{equation}
 and expanding gives (3.1).
 \end{proof}
 
-\section{One arc: switch or exit}
+\section{One step: switch or reach the boundary}
 
-Three things can happen along the $e_2$-arc from a point of the section. The vertex $e_1$ may
-catch up with $e_2$ inside the star domain; this is a switch, and the orbit continues. The state
-may reach the boundary of the star domain first; this is an exit. Or $e_3$ may come back above
-$e_2$, which would break the cyclic order. This section shows that the signs of $f_0,q,p$ and of
-one more number decide which of these happens. We start with a tool that is also used in \S5.
+Three things can happen along the constant control $Z_{010}$ solution from a point of
+$N_{9/4}$. The control $Z_{100}$ may catch up with $Z_{010}$ while the star inequalities hold;
+this is a switch, and the orbit continues. The trajectory may reach the boundary of the star domain
+first. Or $Z_{001}$ may come back above $Z_{010}$, which would break the cyclical switching
+sequence. This section shows that the signs of $k_1,k_2,k_3$ and of one more number decide which
+of these happens. We start with a tool that is also used in \S5.
 
 \begin{lemma}[Poisson brackets]
-Write $L_uH_v$ for the derivative of $H_v$ along the $e_u$-flow, and $P_u=Z_u/\ip X{Z_u}$. Then
+For vertices $\ep_i,\ep_j$ write $\mathcal L_i\H(Z_{\ep_j})$ for the derivative of
+$\H(Z_{\ep_j})$ along the constant control $Z_{\ep_i}$ solution, and
+$P_i=Z_{\ep_i}/\bracks{Z_{\ep_i}}{X}$. Then
 \[
-L_uH_v=\ip{\hat\Lambda}{[P_u-P_v,X]}+\ip{\Lambda_R}{[P_u,P_v]}
--\bigl(\ip{\Lambda_R}{P_u}+\ip{\Lambda_R}{P_v}\bigr)\ip X{[P_u,P_v]} .
+\mathcal L_i\H(Z_{\ep_j})=\bracks{\Lambda_1+\tfrac32J}{[P_i-P_j,X]}+\bracks{\Lambda_R}{[P_i,P_j]}
+-\bigl(\bracks{\Lambda_R}{P_i}+\bracks{\Lambda_R}{P_j}\bigr)\bracks X{[P_i,P_j]} .
 \]
 \end{lemma}
 
-The right side is antisymmetric in $u$ and $v$, so $L_uH_u=0$ and $L_uH_v=-L_vH_u$: this is the
-antisymmetry of the Poisson bracket of the vertex Hamiltonians. In particular each $H_u$ is
-constant along its own flow, and $H_2\equiv0$ along the $e_2$-arc from a point of $\Sec$.
+The right side is antisymmetric in $i$ and $j$, so $\mathcal L_i\H(Z_{\ep_i})=0$ and
+$\mathcal L_i\H(Z_{\ep_j})=-\mathcal L_j\H(Z_{\ep_i})$: this is the antisymmetry of the Poisson
+bracket of the Hamiltonians of two vertices. In particular each $\H(Z_{\ep_i})$ is constant along
+its own constant control solution, and $\H(Z_{010})\equiv0$ along the $Z_{010}$ solution from a
+point of $N_{9/4}$.
 
 The next lemma rules out the third outcome.
 
-\begin{lemma}[$e_3$ never comes back]
-If $p>0$ and $Y'\ge2$, then $g>0$ on $(0,\infty)$.
+\begin{lemma}[$Z_{001}$ never comes back]
+If $k_3>0$ and $\mu_0\ge2$, then $\varphi_{23}>0$ on $(0,\infty)$.
 \end{lemma}
 
 \begin{proof}
-Put $\gamma(y)=g(\log y)/y=-1/y+A'+B'y-Y'\log y$. Then $\gamma(1)=0$ and
-$y^2\gamma'(y)=B'y^2-Y'y+1$, which equals $p>0$ at $y=1$. For $y\ge1$ its derivative is
-$2B'y-Y'\ge2B'-Y'=Y'-2+2p>0$. So $\gamma$ increases on $[1,\infty)$.
-\end{proof}
-
-To follow the competition with $e_1$ it helps to measure time by $y=e^\tau$, which runs from $1$
-at the start of the arc to $Y$ at the exit, and to look at
-\begin{equation}\tag{4.1}
-\varphi(y):=y\,f(\log y)=f_0+\beta_Y(y)-q\,\frac{y-1}{y},\qquad
-\beta_Y(y):=Y\log y-(y-1)-(Y-1)\,\frac{y-1}{y}.
-\end{equation}
-The function $\varphi$ has the sign of the lead of $e_2$ over $e_1$. Its part $\beta_Y$ does not
-involve the costate: it is the lead that the geometry of the arc alone produces when $f_0=q=0$.
-
-\begin{lemma}[$e_1$ catches up at most once]
-Suppose $f_0>0$ and $q\le0$, and let $y_+$ be the larger root of $y^2-Yy+B$. Then $\varphi$
-increases on $[1,y_+]$ and decreases on $[y_+,\infty)$ to $-\infty$. So $f$ has exactly one zero
-$\tau\sw>0$, where it changes sign, and $s:=e^{\tau\sw}$ satisfies
+For $\omega\ge1$ consider
 \[
-s>y_+\ge\max(1,\,Y-1),\qquad s^2-Ys+B>0 .
+\frac{\varphi_{23}(\log\omega)}{\omega}=-\frac1\omega+(2-\mu_0-k_3)+(\mu_0-1+k_3)\,\omega-\mu_0\log\omega .
 \]
-The switch comes before the exit ($s<Y$) exactly when $\varphi(Y)<0$. If $\varphi(Y)\ge0$, then
-$f>0$ on $(0,\log Y)$.
-\end{lemma}
-
-So the sign of $\varphi(Y)$ decides the race between the switch and the exit. When the switch
-happens, it falls in the last stretch $Y-1<y<Y$ of the arc.
-
-\begin{proof}
-We have $\varphi'(y)=-(y^2-Yy+B)/y^2$. At $y=1$ the quadratic equals $q\le0$, so $1$ lies between
-its roots, and $\varphi(1)=f_0>0$. Also $y_+=\tfrac12\bigl(Y+\sqrt{(Y-2)^2-4q}\bigr)\ge\tfrac12(Y+|Y-2|)$.
+This function vanishes at $\omega=1$, and $\omega^2$ times its derivative is the quadratic
+$(\mu_0-1+k_3)\,\omega^2-\mu_0\,\omega+1$. At $\omega=1$ the quadratic equals $k_3>0$, and for
+$\omega\ge1$ its derivative is at least $\mu_0-2+2k_3>0$. So the function increases on
+$[1,\infty)$.
 \end{proof}
 
-\begin{proposition}[one arc]
-Let $w\in\Sec$ with $r>0$, $f_0>0$ and $p>0$.
+To follow the competition with $Z_{100}$ it helps to measure time by $\omega=e^{\vartheta}$, which
+runs from $1$ at $q$ to $\mu_2$ when the trajectory reaches the boundary, and to look at
+\begin{align}
+\Theta(\omega)&:=\omega\,\varphi_{21}(\log\omega)=k_1+\Theta_0(\omega)-k_2\,\frac{\omega-1}{\omega},
+\tag{4.1}\\
+\Theta_0(\omega)&:=\mu_2\log\omega-(\omega-1)-(\mu_2-1)\,\frac{\omega-1}{\omega}.\notag
+\end{align}
+The function $\Theta$ has the sign of the lead of $Z_{010}$ over $Z_{100}$. Its part $\Theta_0$
+does not involve the costate: it is the lead that the state alone produces when $k_1=k_2=0$.
+
+\begin{lemma}[$Z_{100}$ catches up at most once]
+Suppose $k_1>0$ and $k_2\le0$, and let $\omega_+$ be the larger root of
+$\omega^2-\mu_2\omega+\mu_2-1+k_2$. Then $\Theta$ increases on $[1,\omega_+]$ and decreases on
+$[\omega_+,\infty)$ to $-\infty$. So $\varphi_{21}$ has exactly one zero $\vartheta\sw>0$, where it
+changes sign, and $\eta:=e^{\vartheta\sw}$ satisfies
+\[
+\eta>\omega_+\ge\max(1,\,\mu_2-1),\qquad \eta^2-\mu_2\eta+\mu_2-1+k_2>0 .
+\]
+The switch comes before the trajectory reaches the boundary ($\eta<\mu_2$) exactly when
+$\Theta(\mu_2)<0$. If $\Theta(\mu_2)\ge0$, then $\varphi_{21}>0$ on $(0,\log\mu_2)$.
+\end{lemma}
+
+So the sign of $\Theta(\mu_2)$ decides the race between the switch and the boundary. When the
+switch happens, it falls in the last stretch $\mu_2-1<\omega<\mu_2$ of the trajectory.
+
+\begin{proof}
+We have $\Theta'(\omega)=-(\omega^2-\mu_2\omega+\mu_2-1+k_2)/\omega^2$. At $\omega=1$ the quadratic
+equals $k_2\le0$, so $1$ lies between its roots, and $\Theta(1)=k_1>0$. Also
+$\omega_+=\frac12\bigl(\mu_2+\sqrt{(\mu_2-2)^2-4k_2}\bigr)\ge\frac12(\mu_2+|\mu_2-2|)$.
+\end{proof}
+
+\begin{proposition}[one step]
+Let $q\in N_{9/4}$ with $r>0$, $k_1>0$ and $k_3>0$.
 \begin{enumerate}[label=\textup{(\arabic*)},itemsep=1pt]
-\item The control after $w$ is $e_2$ \textup{(}item \textup{(1)} of Theorem~A\textup{)}.
-\item If $q\le0$ and $\varphi(Y)<0$, the arc from $w$ switches to $e_1$ at
-$t\sw=\varepsilon\tau\sw<T$ \textup{(}item \textup{(2)}\textup{)}.
-\item If $q\le0$ and $\varphi(Y)\ge0$, the arc from $w$ leaves $\hstar$ at $T=\varepsilon\log Y$
-before any switch \textup{(}item \textup{(3)}\textup{)}.
+\item The first control at $q$ is $\ep_2$ \textup{(}item \textup{(1)} of Theorem~A\textup{)}.
+\item If $k_2\le0$ and $\Theta(\mu_2)<0$, the solution from $q$ switches to $Z_{100}$ at
+$t\sw=\rho_1\vartheta\sw<\tex$ \textup{(}item \textup{(2)}\textup{)}.
+\item If $k_2\le0$ and $\Theta(\mu_2)\ge0$, the solution from $q$ reaches the boundary of the star
+domain at $\tex=\rho_1\log\mu_2$ before any switch \textup{(}item \textup{(3)}\textup{)}.
 \end{enumerate}
 \end{proposition}
 
 \begin{proof}
-Inside $\hstar$, $\chi_{21}$ has the sign of $f$ and $\chi_{23}$ that of $g$. For (1): $H_1<H_2$ at
-$w$ is $f_0>0$. By Lemma~4.1 the slope of $H_3-H_2$ along the $e_3$-flow at $w$ is
-$L_3(H_3-H_2)=L_2H_3$, the slope of $-\chi_{23}$ along the $e_2$-flow. Since $\chi_{23}(w)=0$ and
-$\frac{d}{dt}N_{23}(0)=\frac{8\varepsilon^2}{\sqrt3}\,p$, this slope is $-2\sqrt3\,p/(Y'-1)<0$.
-Parts (2) and (3) follow from Lemmas~4.2 and~4.3 (note that $r>0$ means $Y'>2$) and
-Proposition~2.1.
+While the star inequalities hold, $\chi_{21}$ has the sign of $\varphi_{21}$ and $\chi_{23}$ that
+of $\varphi_{23}$. For (1): $\H(Z_{100})<\H(Z_{010})$ at $q$ is $k_1>0$. By Lemma~4.1 the slope of
+$\H(Z_{001})-\H(Z_{010})$ along the $Z_{001}$ solution at $q$ equals $\mathcal L_2\H(Z_{001})$, the
+slope of $-\chi_{23}$ along the $Z_{010}$ solution. Since $\chi_{23}(q)=0$ and
+$\frac{d}{dt}\cl_{23}(0)=\frac{8\rho_1^2}{\sqrt3}\,k_3$, this slope is
+$-2\sqrt3\,k_3/(\mu_0-1)<0$. Parts (2) and (3) follow from Lemmas~4.2 and~4.3 ($r>0$ means
+$\mu_0>2$) and Proposition~2.1.
 \end{proof}
 
-\section{One step of the map}
+\section{One step of the Reinhardt-Poincar\'e map}
 
 We now follow a point through one switch and the rotation, and read off the numbers of the next
-point. The update is explicit in terms of $s=e^{\tau\sw}$. Since $Y-1<s<Y$, the number $s$ records
-where in the last stretch of the arc the switch happens.
+point. The update is explicit in terms of $\eta=e^{\vartheta\sw}$. Since $\mu_2-1<\eta<\mu_2$, the
+number $\eta$ records where in the last stretch of the trajectory the switch happens. A superscript
+``new'' marks the numbers of $F(q)$.
 
 \begin{theorem}[the map]
-Let $w\in\Sec$ with $r>0$, $f_0>0$, $q\le0$, $p>0$ and $\varphi(Y)<0$. Then $F(w)\in\Sec$, and its
-numbers are
+Let $q\in N_{9/4}$ with $r>0$, $k_1>0$, $k_2\le0$, $k_3>0$ and $\Theta(\mu_2)<0$. Then
+$F(q)\in N_{9/4}$, and its numbers are
 \begin{equation}\tag{5.1}
-\varepsilon\new=\frac{\varepsilon(Y-s)}{s},\qquad
-Y'\new=\frac{Y}{Y-s},\qquad
-Y\new=\frac{Y's^2-2s+Y}{Y-s},
+\rho_1\nw=\frac{\rho_1(\mu_2-\eta)}{\eta},\qquad
+\mu_0\nw=\frac{\mu_2}{\mu_2-\eta},\qquad
+\mu_2\nw=\frac{\mu_0\eta^2-2\eta+\mu_2}{\mu_2-\eta},
 \end{equation}
 \begin{equation}\tag{5.2}
-f_{0,\mathrm{new}}=\Bigl(\frac{s}{Y-s}\Bigr)^2g(\tau\sw),\qquad
-p\new=-\Bigl(\frac{s}{Y-s}\Bigr)^2f'(\tau\sw)=\frac{s^2-Ys+B}{(Y-s)^2}.
+k_1\nw=\Bigl(\frac{\eta}{\mu_2-\eta}\Bigr)^2\varphi_{23}(\vartheta\sw),\qquad
+k_3\nw=-\Bigl(\frac{\eta}{\mu_2-\eta}\Bigr)^2\varphi_{21}'(\vartheta\sw)
+=\frac{\eta^2-\mu_2\eta+\mu_2-1+k_2}{(\mu_2-\eta)^2}.
 \end{equation}
-The radius of $F(w)$ is $r\new=(\varepsilon-\varepsilon\new)/2$.
+The value of $r$ at $F(q)$ is $r\nw=(\rho_1-\rho_1\nw)/2$.
 \end{theorem}
 
-The formulas have a direct meaning. The rotation turns the exit side $\rho_2=0$ into the side
-$\rho_1=0$, so $\varepsilon\new$ is the distance to the exit side at the moment of the switch. A
-switch close to the exit ($s$ near $Y$) gives a next point close to a side, with $\varepsilon\new$
-small and $Y\new$, $Y'\new$ large. By (5.2), $f_{0,\mathrm{new}}$ is the lead of $e_2$ over $e_3$
-at the switch and $p\new$ is the rate at which $e_1$ overtook $e_2$, both rescaled.
+The formulas have a direct meaning. The rotation turns the side $\rho_2=0$ into the side
+$\rho_1=0$, so $\rho_1\nw$ is the distance $\rho_2$ at the moment of the switch. A switch close to
+the boundary ($\eta$ near $\mu_2$) gives a next point close to a side of $\hstar$, with
+$\rho_1\nw$ small and $\mu_2\nw$, $\mu_0\nw$ large. By (5.2), $k_1\nw$ is the lead of $Z_{010}$
+over $Z_{001}$ at the switch, and $k_3\nw$ is the rate at which $Z_{100}$ overtook $Z_{010}$, both
+rescaled.
 
 \begin{proof}
-Since $\ip{\Ad_{R^{-1}}M}{Z_j}=\ip M{Z_{j-1}}$ (indices mod 3) and $\ip{\hat\Lambda}X$ is
-$\Ad_R$-invariant, the rotation sends $H_j$ to $H_{j-1}$, $N_{ij}$ to $N_{i-1,j-1}$, and
-$(\rho_0,\rho_1,\rho_2)$ to $(\rho_1,\rho_2,\rho_0)$. Along the arc $H_2\equiv0$, and $H_1=H_2$ at
-$t\sw$, so the new $H_2$ and $H_3$ vanish. The quantities $\det\Lambda_1$ and $\ip X{\Lambda_R}$
-are conserved and $\Ad$-invariant, and $X(t\sw)\in\hstar$. So $F(w)\in\Sec$. Proposition~2.1 at
-$\tau\sw=\log s$ gives (5.1) and $r\new=(\rho_0-\rho_1)\new/2=(\varepsilon-\varepsilon\new)/2$.
+Since $\bracks{\Ad_{R^{-1}}M}{Z_{\ep_j}}=\bracks M{Z_{\ep_{j-1}}}$ (indices mod 3) and
+$\H_1(\Lambda_1,X)$ is $\Ad_R$-invariant, the rotation sends $\H(Z_{\ep_j})$ to
+$\H(Z_{\ep_{j-1}})$, $\cl_{ij}$ to $\cl_{i-1,j-1}$, and $(\rho_0,\rho_1,\rho_2)$ to
+$(\rho_1,\rho_2,\rho_0)$. Along the solution $\H(Z_{010})\equiv0$, and
+$\H(Z_{100})=\H(Z_{010})$ at $t\sw$, so the new $\H(Z_{010})$ and $\H(Z_{001})$ vanish. The
+quantities $\det(\Lambda_1)$ and $\bracks X{\Lambda_R}$ are conserved and $\Ad$-invariant, and the
+star inequalities hold at $t\sw$. So $F(q)\in N_{9/4}$. Proposition~2.1 at $\vartheta\sw=\log\eta$
+gives (5.1) and $r\nw=(\rho_0\nw-\rho_1\nw)/2=(\rho_1-\rho_1\nw)/2$.
 
-For (5.2) we need $\Lambda_1(t\sw)$, since by (2.3) and (2.4) the numbers $f_{0,\mathrm{new}}$ and
-$p\new$ are pairings of $\hat\Lambda$ with matrices built from the new state. The expansion
-$\Lambda_1(0)=\alpha\Omega+\beta V_++\gamma V_-$ of \S3 can be carried along the arc. The map
-$\Ad_{e^{-t\Omega}}$ multiplies $\Omega,V_+,V_-$ by $1,e^{\tau},e^{-\tau}$ (Lemma~2.2), and
-$\Ad_{e^{tP}}$ sends $\Omega$ to $X(t)+P$ and $V_\pm$ to $e^{\pm\tau}V_\pm(X(t))$, where
-$V_\pm(X)$ denotes the matrices of Lemma~2.2 built from $X$ in place of $X_0$. Hence
+For (5.2) we need $\Lambda_1(t\sw)$, since by (2.3) and (2.4) the numbers $k_1\nw$ and $k_3\nw$
+are pairings of $\Lambda_1+\frac32J$ with matrices built from the new state. The expansion
+$\Lambda_1(0)=\gamma_0(X_0+P_0)+\gamma_+E_++\gamma_-E_-$ of \S3 can be carried along the
+trajectory. The map $\Ad_{\exp(-t(X_0+P_0))}$ multiplies $X_0+P_0,E_+,E_-$ by
+$1,e^{\vartheta},e^{-\vartheta}$ (Lemma~2.2), and $\Ad_{\exp(tP_0)}$ sends $X_0+P_0$ to
+$X(t)+P_0$ and $E_\pm$ to $e^{\pm\vartheta}E_\pm(X(t))$, where $E_\pm(X)$ denotes the matrices of
+Lemma~2.2 built from $X$ in place of $X_0$. Hence
 \begin{equation}\tag{5.4}
-\Lambda_1(t)=\alpha\bigl(X(t)+P\bigr)+\beta e^{2\tau}\,V_+(X(t))+\gamma e^{-2\tau}\,V_-(X(t)) .
+\Lambda_1(t)=\gamma_0\bigl(X(t)+P_0\bigr)+\gamma_+e^{2\vartheta}\,E_+(X(t))
++\gamma_-e^{-2\vartheta}\,E_-(X(t)) .
 \end{equation}
-Pairing (5.4) at $t=t\sw$, after the rotation, with the new state and with $V_-$ of the new state
-gives $p\new=(s^2-Ys+B)/(Y-s)^2$ and an expression for $f_{0,\mathrm{new}}$ that is rational in
-$s$. Eliminating $\tau\sw$ with $f(\tau\sw)=0$, which reads $Y\tau\sw=s-A-B/s$, turns these into
-the two expressions in terms of $g(\tau\sw)$ and $f'(\tau\sw)$.
+Pairing (5.4) at $t=t\sw$, after the rotation, with the new state and with $E_-$ of the new state
+gives the second expression for $k_3\nw$ in (5.2) and an expression for $k_1\nw$ that is rational
+in $\eta$. Eliminating $\vartheta\sw$ with $\varphi_{21}(\vartheta\sw)=0$, which reads
+$\mu_2\vartheta\sw=\eta-(2-\mu_2+k_1-k_2)-(\mu_2-1+k_2)/\eta$, turns these into the expressions in
+terms of $\varphi_{23}(\vartheta\sw)$ and $\varphi_{21}'(\vartheta\sw)$.
 \end{proof}
 
-Three of the conditions we need carry over to the next point by themselves, and the radius grows
-by an explicit factor.
+Three of the conditions we need carry over to the next point by themselves, and $r$ grows by an
+explicit factor.
 
 \begin{corollary}
-Under the hypotheses of Theorem~5.1, $F(w)$ has $r>0$, $f_0>0$ and $p>0$, so the control after
-$F(w)$ is $e_2$ \textup{(}Proposition~4.4\textup{)}. If $Y\ge2$, then
+Under the hypotheses of Theorem~5.1, $F(q)$ has $r>0$, $k_1>0$ and $k_3>0$, so the first control
+at $F(q)$ is $\ep_2$ \textup{(}Proposition~4.4\textup{)}. If $\mu_2\ge2$, then
 \begin{equation}\tag{5.3}
-\frac{r(F(w))}{r(w)}>\frac{Y-2}{(Y-1)(Y'-2)} .
+\frac{r\nw}{r}>\frac{\mu_2-2}{(\mu_2-1)(\mu_0-2)} .
 \end{equation}
 \end{corollary}
 
 \begin{proof}
-$g(\tau\sw)>0$ by Lemma~4.2, and $s^2-Ys+B>0$ by Lemma~4.3. The radius $r\new$ is positive when
-$\varepsilon\new<\varepsilon$, that is, when $s>Y/2$, which holds since $s>\max(1,Y-1)$. For
-(5.3), write $r\new=\frac\varepsilon2\bigl(1-\frac{Y-s}{s}\bigr)$ and use $\frac{Y-s}{s}<\frac1{Y-1}$,
-which holds because $s>Y-1$; also $r=\varepsilon(Y'-2)/2$.
+$\varphi_{23}(\vartheta\sw)>0$ by Lemma~4.2, and $\eta^2-\mu_2\eta+\mu_2-1+k_2>0$ by Lemma~4.3.
+The value $r\nw$ is positive when $\rho_1\nw<\rho_1$, that is, when $\eta>\mu_2/2$, which holds
+since $\eta>\max(1,\mu_2-1)$. For (5.3), write
+$r\nw=\frac{\rho_1}2\bigl(1-\frac{\mu_2-\eta}{\eta}\bigr)$ and use
+$\frac{\mu_2-\eta}{\eta}<\frac1{\mu_2-1}$, which holds because $\eta>\mu_2-1$; also
+$r=\rho_1(\mu_0-2)/2$.
 \end{proof}
 
-Near the fixed point the right side of (5.3) tends to about $2.57$, while the true stretching
-factor is $r_{\mathrm{scale}}\approx6.27$. The bound is crude, but it is all we need. The last
-ingredient of this section is the budget.
+Near the fixed point the right side of (5.3) tends to about $2.57$, while $\rs\approx6.27$. The
+bound is crude, but it is all we need. The last ingredient of this section is the budget.
 
 \begin{corollary}[the budget]
-If $w_0,\ w_1=F(w_0),\ \dots,\ w_n$ are defined, then
+If $q_0,\ q_1=F(q_0),\ \dots,\ q_n$ are defined, then
 \[
-\sum_{j=1}^n r(w_j)=\tfrac12\bigl(\rho_1(w_0)-\rho_1(w_n)\bigr)<\tfrac12\,\rho_1(w_0).
+\sum_{j=1}^n r(q_j)=\tfrac12\bigl(\rho_1(q_0)-\rho_1(q_n)\bigr)<\tfrac12\,\rho_1(q_0).
 \]
 \end{corollary}
 
 \begin{proof}
-$\rho_1(w_{j+1})=\varepsilon\new=\rho_1(w_j)-2r(w_{j+1})$ by Theorem~5.1, and $\rho_1>0$.
+$\rho_1(q_{j+1})=\rho_1(q_j)-2r(q_{j+1})$ by Theorem~5.1, and $\rho_1>0$.
 \end{proof}
 
-Each step pays for its radius out of $\varepsilon$. If the radii never decrease, the orbit stops
-after at most $\rho_1(w_0)/(2r(w_0))$ steps. This replaces following the curve.
+Each step pays for its value of $r$ out of $\rho_1$. If these values never decrease, the orbit
+stops after at most $\rho_1(q_0)/(2r(q_0))$ steps. This replaces following the curve.
 
 \section{The trapping region}
 
 \begin{definition}
-$\G$ is the set of $w\in\Sec$ that satisfy the five conditions
+$\T$ is the set of $q\in N_{9/4}$ that satisfy the five conditions
 \[
-r>0,\qquad f_0>0,\qquad p>0,\qquad q\le0,\qquad (Y-1)(Y'-2)\le Y-2 .
+r>0,\qquad k_1>0,\qquad k_3>0,\qquad k_2\le0,\qquad (\mu_2-1)(\mu_0-2)\le\mu_2-2 .
 \]
 \end{definition}
 
-The first condition says that $w$ is off the exceptional divisor. The next two say that $e_1$
-starts below $e_2$ and that $e_3$ falls behind $e_2$. The condition $q\le0$ makes $e_1$ catch up
-at most once (Lemma~4.3). The last one, the \emph{expansion condition}, says that the radius
-grows, by (5.3); with $r>0$ it forces $Y>2$ (so $a>0$) and $b<1$.
+The first condition says that $q$ is off the exceptional divisor. The next two say that the first
+control at $q$ is $\ep_2$ (Proposition~4.4). The condition $k_2\le0$ makes $Z_{100}$ catch up at
+most once (Lemma~4.3). The last one, which we call the \emph{expansion condition}, says that $r$
+grows, by (5.3); with $r>0$ it forces $\mu_2>2$ and $\mu_0<3$.
 
 By Corollary~5.2, the first three conditions hold at the next point automatically. The whole
 difficulty lies in the last two, and the plan is as follows. Lemma~6.1 turns the budget reading of
-(3.1) into a sign test: when $p$ is small, $q$ cannot be positive. Lemma~6.2 shows that $p$ is
-always small at the next point. Lemma~6.3 shows that the expansion condition carries over unless
-the next point is far from the singular state ($Y\new\ge16/5$), and Lemma~6.4 shows that a point
-that far out exits on its next arc.
+(3.1) into a sign test: when $k_3$ is small, $k_2$ cannot be positive. Lemma~6.2 shows that $k_3$
+is always small at the next point. Lemma~6.3 shows that the expansion condition carries over
+unless the next point is far from $X=J$ ($\mu_2\nw\ge16/5$), and Lemma~6.4 shows that from a point
+that far out the trajectory reaches the boundary of the star domain before switching.
 
-\begin{lemma}[the relation as a sign test]
-Let $w\in\Sec$ with $Y\ge2$, $Y'>2$, $f_0\ge0$, $p\ge0$ and
+\begin{lemma}[the condition $\det(\Lambda_1)=9/4$ as a sign test]
+Let $q\in N_{9/4}$ with $\mu_2\ge2$, $\mu_0>2$, $k_1\ge0$, $k_3\ge0$ and
 \begin{equation}\tag{6.1}
-2p<(2Y'-1)(Y'-2).
+2k_3<(2\mu_0-1)(\mu_0-2).
 \end{equation}
-Then: \textup{(i)} if $(Y-2)(Y'-2)\le3$, then $q\le0$; \textup{(ii)} in any case
-$f_0\ge q\,(1-1/Y)$.
+Then: \textup{(i)} if $(\mu_2-2)(\mu_0-2)\le3$, then $k_2\le0$; \textup{(ii)} in any case
+$k_1\ge k_2\,(1-1/\mu_2)$.
 \end{lemma}
 
-Part (i) is the precise form of the budget: with $p$ small, the relation leaves no room for
-$q>0$. Part (ii) also holds far from the singular state, and Lemma~6.4 uses it there.
+Part (i) is the precise form of the budget: with $k_3$ small, (3.1) leaves no room for $k_2>0$.
+Part (ii) also holds far from $X=J$, and Lemma~6.4 uses it there.
 
 \begin{proof}
 Rearrange (3.1) as
-\begin{equation}\tag{6.2}
-2Y'(ab-3)\,f_0=2q\bigl[(YY'-1)b-2p\bigr]+\bigl[Y'(f_0-q)-Yp\bigr]^2+2(YY'-1)\,ap .
-\end{equation}
-Since $Y\ge2$, (6.1) gives $(YY'-1)b\ge(2Y'-1)b>2p$, so the bracket in the first term on the right
-is positive. If $q\le0$, part (ii) is clear. Suppose $q>0$. Then the right side of (6.2) is
-positive, so $ab>3$, which proves (i). Dropping the last two terms of (6.2) gives
-$Y'(ab-3)f_0\ge q\bigl[(YY'-1)b-2p\bigr]$, and therefore
+\begin{multline}\tag{6.2}
+2\mu_0\bigl((\mu_2-2)(\mu_0-2)-3\bigr)k_1
+=2k_2\bigl[(\mu_2\mu_0-1)(\mu_0-2)-2k_3\bigr]\\
++\bigl[\mu_0(k_1-k_2)-\mu_2k_3\bigr]^2+2(\mu_2\mu_0-1)(\mu_2-2)\,k_3 .
+\end{multline}
+Since $\mu_2\ge2$, (6.1) gives $(\mu_2\mu_0-1)(\mu_0-2)\ge(2\mu_0-1)(\mu_0-2)>2k_3$, so the bracket
+in the first term on the right is positive. If $k_2\le0$, part (ii) is clear. Suppose $k_2>0$. Then
+the right side of (6.2) is positive, so $(\mu_2-2)(\mu_0-2)>3$, which proves (i). Dropping the last
+two terms of (6.2) gives
 \[
-YY'(ab-3)\Bigl[f_0-q\Bigl(1-\frac1Y\Bigr)\Bigr]\ \ge\ q\,D,\qquad
-D=Y\bigl[(YY'-1)b-2p\bigr]-Y'(Y-1)(ab-3).
+\mu_0\bigl((\mu_2-2)(\mu_0-2)-3\bigr)\,k_1\ \ge\ k_2\bigl[(\mu_2\mu_0-1)(\mu_0-2)-2k_3\bigr],
 \]
-With $a=Y-2$ one checks that
+and therefore
+\begin{multline*}
+\mu_2\mu_0\bigl((\mu_2-2)(\mu_0-2)-3\bigr)\Bigl[k_1-k_2\Bigl(1-\frac1{\mu_2}\Bigr)\Bigr]\\
+\ge\ k_2\Bigl(\mu_2\bigl[(\mu_2\mu_0-1)(\mu_0-2)-2k_3\bigr]
+-\mu_0(\mu_2-1)\bigl((\mu_2-2)(\mu_0-2)-3\bigr)\Bigr).
+\end{multline*}
+The large bracket on the right equals
 \[
-D=Y\bigl[(2Y'-1)b-2p\bigr]+abY'+3Y'(Y-1),
+\mu_2\bigl[(2\mu_0-1)(\mu_0-2)-2k_3\bigr]+\mu_0(\mu_2-2)(\mu_0-2)+3\mu_0(\mu_2-1),
 \]
 which is positive by (6.1). This proves (ii).
 \end{proof}
 
-Why is $p$ small at the next point? By (5.2), $p\new$ is the rescaled rate at which $e_1$
-overtook $e_2$, and the overtaking happens in the last stretch of the arc, before the exit. There
-the rate is limited by how far into that stretch the switch falls, the number $c=s-(Y-1)<1$. The
-displacement $b\new$ of the next point has no such limit.
+Why is $k_3$ small at the next point? By (5.2), $k_3\nw$ is the rescaled rate at which $Z_{100}$
+overtook $Z_{010}$, and the overtaking happens in the last stretch of the trajectory, before it
+reaches the boundary. There the rate is limited by how far into that stretch the switch falls,
+that is, by $\eta-(\mu_2-1)<1$. The quantity $\mu_0\nw-2$ has no such limit.
 
-\begin{lemma}[$p$ is small at the next point]
-Let $w\in\G$ with $\varphi(Y)<0$. Then $F(w)$ satisfies \textup{(6.1)}, and $Y\new>2$.
+\begin{lemma}[$k_3$ is small at the next point]
+Let $q\in\T$ with $\Theta(\mu_2)<0$. Then $F(q)$ satisfies \textup{(6.1)}, and $\mu_2\nw>2$.
 \end{lemma}
 
 \begin{proof}
 By (5.1),
 \[
-2Y'\new-1=\frac{Y+s}{Y-s},\qquad Y'\new-2=\frac{2s-Y}{Y-s}.
+2\mu_0\nw-1=\frac{\mu_2+\eta}{\mu_2-\eta},\qquad \mu_0\nw-2=\frac{2\eta-\mu_2}{\mu_2-\eta}.
 \]
-Put $c=s-Y+1$; by Lemma~4.3, $0\le c<1$ and $s>1$. Since $q\le0$, the numerator of $p\new$
-satisfies
+By Lemma~4.3, $0\le\eta-\mu_2+1<1$ and $\eta>1$. Since $k_2\le0$, the numerator of $k_3\nw$ in
+(5.2) satisfies
 \[
-s^2-Ys+B=q+(s-1)c\ \le\ (s-1)c .
+\eta^2-\mu_2\eta+\mu_2-1+k_2=k_2+(\eta-1)(\eta-\mu_2+1)\ \le\ (\eta-1)(\eta-\mu_2+1).
 \]
-Now $s-1\le2s-Y$ (their difference is $c$) and $2c<Y+s$, so
+Now $\eta-1\le2\eta-\mu_2$ (their difference is $\eta-\mu_2+1\ge0$) and
+$2(\eta-\mu_2+1)<2<\mu_2+\eta$, so
 \[
-2(s^2-Ys+B)\ \le\ 2(s-1)c\ \le\ 2c\,(2s-Y)\ <\ (2s-Y)(Y+s).
+2(\eta^2-\mu_2\eta+\mu_2-1+k_2)\ \le\ 2(\eta-1)(\eta-\mu_2+1)\ \le\ 2(2\eta-\mu_2)(\eta-\mu_2+1)
+\ <\ (2\eta-\mu_2)(\mu_2+\eta).
 \]
-Dividing by $(Y-s)^2$ gives (6.1) at $F(w)$. Finally $Y\new-2=(Y's^2-Y)/(Y-s)>0$, because
-$Y's^2>2s^2\ge2(Y-1)^2\ge Y$ for $Y\ge2$.
+Dividing by $(\mu_2-\eta)^2$ gives (6.1) at $F(q)$. Finally
+$\mu_2\nw-2=(\mu_0\eta^2-\mu_2)/(\mu_2-\eta)>0$, because
+$\mu_0\eta^2>2\eta^2\ge2(\mu_2-1)^2\ge\mu_2$ for $\mu_2\ge2$.
 \end{proof}
 
 So Lemma~6.1 applies at the next point. Part (ii) always holds there, and part (i) gives
-$q\new\le0$ provided the next point is not too far from the singular state. The expansion
-condition behaves the same way.
+$k_2\nw\le0$ provided the next point is not too far from $X=J$. The expansion condition behaves the
+same way.
 
-\begin{lemma}[the expansion condition carries over unless $Y\new\ge16/5$]
-Let $Y>2$, $Y'>2$ and $Y-1\le s<Y$, and define $Y\new$ and $Y'\new$ by \textup{(5.1)}. Then
+\begin{lemma}[the expansion condition carries over unless $\mu_2\nw\ge16/5$]
+Let $\mu_2>2$, $\mu_0>2$ and $\mu_2-1\le\eta<\mu_2$, and define $\mu_2\nw$ and $\mu_0\nw$ by
+\textup{(5.1)}. Then
 \[
-(Y-s)^2\bigl[(Y\new-2)-(Y\new-1)(Y'\new-2)\bigr]=\psi(s):=-3Y's^3+(2YY'+2)s^2-Y^2,
+(\mu_2-\eta)^2\bigl[(\mu_2\nw-2)-(\mu_2\nw-1)(\mu_0\nw-2)\bigr]
+=\Upsilon(\eta):=-3\mu_0\eta^3+(2\mu_2\mu_0+2)\eta^2-\mu_2^2,
 \]
-and if $Y\new<16/5$, then $\psi(s)\ge0$: the expansion condition holds at the next point.
+and if $\mu_2\nw<16/5$, then $\Upsilon(\eta)\ge0$: the expansion condition holds at the next
+point.
 \end{lemma}
 
 \begin{proof}
-The identity is an expansion. Suppose $\psi(s)<0$ and $Y\new<16/5$; we derive a contradiction in
-five steps.
+The identity is an expansion. Suppose $\Upsilon(\eta)<0$ and $\mu_2\nw<16/5$; we derive a
+contradiction in five steps.
 \begin{enumerate}[itemsep=2pt]
-\item $Y\new$ increases in $s$ on $[1,Y)$: its derivative is
-$\bigl(Y's(2Y-s)-Y\bigr)/(Y-s)^2$, and $Y's(2Y-s)>YY's>Y$.
-\item $\psi'(s)=s(4YY'+4-9Y's)$, so $\psi$ increases and then decreases on $(0,\infty)$; on any
-interval its minimum is at an endpoint.
-\item The function $\chi(s)=Y's^2+\tfrac65s-\tfrac{11}5Y=(Y-s)(Y\new-\tfrac{16}5)$ increases on
-$(0,\infty)$, is negative at $0$ and positive at $Y$, so it has one root $s_\chi\in(0,Y)$. Since
-$Y\new<16/5$, we have $Y-1\le s<s_\chi$.
-\item At $s_\chi$ we have $Y\new=16/5$, and the expansion condition at the next point reads
-$Y'\new\le28/11$, that is, $s_\chi\le\frac{17}{28}Y$, that is,
-$\chi\bigl(\tfrac{17}{28}Y\bigr)=Y\bigl[\tfrac{289}{784}YY'-\tfrac{103}{70}\bigr]\ge0$, that is,
-$YY'\ge\frac{5768}{1445}=3.9917\ldots$ This holds since $YY'>4$. So $\psi(s_\chi)\ge0$.
-\item At $s=Y-1$, step~1 gives $Y\new(Y-1)=2+3a+2a^2+b(1+a)^2\le Y\new(s)<\frac{16}5$, which
-forces $a<\frac13$. Then $\psi(Y-1)=a(2-a-2a^2)+b(1+a)^2(1-a)>0$.
+\item $\mu_2\nw$ increases in $\eta$ on $[1,\mu_2)$: its derivative is
+$\bigl(\mu_0\eta(2\mu_2-\eta)-\mu_2\bigr)/(\mu_2-\eta)^2$, and
+$\mu_0\eta(2\mu_2-\eta)>\mu_2\mu_0\eta>\mu_2$.
+\item $\Upsilon'(\eta)=\eta(4\mu_2\mu_0+4-9\mu_0\eta)$, so $\Upsilon$ increases and then decreases on
+$(0,\infty)$; on any interval its minimum is at an endpoint.
+\item Consider the quadratic
+\[
+Q(\eta)=\mu_0\eta^2+\tfrac65\eta-\tfrac{11}5\mu_2=(\mu_2-\eta)\bigl(\mu_2\nw-\tfrac{16}5\bigr).
+\]
+It increases on $(0,\infty)$, is negative at $0$ and positive at $\mu_2$, so it has one root
+$\eta_Q\in(0,\mu_2)$. Since $\mu_2\nw<16/5$, we have $\mu_2-1\le\eta<\eta_Q$.
+\item At $\eta_Q$ we have $\mu_2\nw=16/5$, and there the expansion condition reads
+$\mu_0\nw\le28/11$, that is, $\eta_Q\le\frac{17}{28}\mu_2$. Since $Q$ increases, this holds when
+\[
+Q\bigl(\tfrac{17}{28}\mu_2\bigr)=\mu_2\Bigl(\tfrac{289}{784}\,\mu_2\mu_0-\tfrac{103}{70}\Bigr)\ge0,
+\]
+that is, when $\mu_2\mu_0\ge5768/1445=3.9917\ldots$, which is true since $\mu_2\mu_0>4$. So
+$\Upsilon(\eta_Q)\ge0$.
+\item At $\eta=\mu_2-1$, step~1 gives
+\[
+\mu_2\nw(\mu_2-1)=2+3(\mu_2-2)+2(\mu_2-2)^2+(\mu_0-2)(\mu_2-1)^2<\tfrac{16}5,
+\]
+which forces $\mu_2-2<\frac13$. Then
+\[
+\Upsilon(\mu_2-1)=(\mu_2-2)\bigl(2-(\mu_2-2)-2(\mu_2-2)^2\bigr)+(\mu_0-2)(\mu_2-1)^2(3-\mu_2)>0 .
+\]
 \end{enumerate}
-By step~2, $\psi\ge0$ on $[Y-1,s_\chi]$, which contains $s$. This is a contradiction.
+By step~2, $\Upsilon\ge0$ on $[\mu_2-1,\eta_Q]$, which contains $\eta$. This is a contradiction.
 \end{proof}
 
-It remains to deal with next points far from the singular state. A large $Y\new$ means that the
-switch came just before the exit, so the new arc starts close to a side and runs into a cusp of
-$\hstar$. On such an arc the geometric part $\beta_Y$ of the switching function stays nonnegative
-until the exit. A switch could then come only from the costate terms, and Lemma~6.1(ii) rules
-that out.
+It remains to deal with next points far from $X=J$. A large $\mu_2\nw$ means that the switch came
+just before the trajectory reached the boundary, so the new trajectory starts close to a side of
+$\hstar$ and runs into an ideal vertex. On such a trajectory the part $\Theta_0$ of the switching
+function stays nonnegative until the boundary is reached. A switch could then come only from the
+costate terms, and Lemma~6.1(ii) rules that out.
 
-\begin{lemma}[far points exit]
-Let $w\in\Sec$ with $r>0$, $f_0>0$, $p>0$, $Y\ge16/5$ and $f_0\ge q(1-1/Y)$. Then the $e_2$-arc
-from $w$ leaves $\hstar$ at $T=\varepsilon\log Y$, with $e_2$ the strict maximizer on $(0,T)$.
+\begin{lemma}[far points reach the boundary]
+Let $q\in N_{9/4}$ with $r>0$, $k_1>0$, $k_3>0$, $\mu_2\ge16/5$ and $k_1\ge k_2(1-1/\mu_2)$. Then
+the constant control $Z_{010}$ solution from $q$ reaches the boundary of the star domain at
+$\tex=\rho_1\log\mu_2$, with $\ep_2$ the strict maximizer on $(0,\tex)$.
 \end{lemma}
 
 \begin{proof}
-First, $G(Y):=\beta_Y(Y)=Y\log Y-(Y-1)-(Y-1)^2/Y$ is positive for $Y\ge16/5$. Its derivative,
-$G'(Y)=\log Y-1+1/Y^2$, is positive there, since $\log Y\ge\log\frac{16}{5}>1$. At $Y=16/5$,
+First, $\Gamma(\mu_2):=\Theta_0(\mu_2)=\mu_2\log\mu_2-(\mu_2-1)-(\mu_2-1)^2/\mu_2$ is positive for
+$\mu_2\ge16/5$. As a function of $\mu_2$, its derivative $\log\mu_2-1+1/\mu_2^2$ is positive
+there, since $\log\mu_2\ge\log\frac{16}{5}>1$. At $\mu_2=16/5$,
 \[
-G\bigl(\tfrac{16}5\bigr)=\tfrac{16}{5}\Bigl(\log\tfrac{16}{5}-\tfrac{297}{256}\Bigr),
+\Gamma\bigl(\tfrac{16}5\bigr)=\tfrac{16}{5}\Bigl(\log\tfrac{16}{5}-\tfrac{297}{256}\Bigr),
 \]
 and
 \[
-\log\tfrac{16}{5}=2\operatorname{artanh}\tfrac{11}{21}
+\log\tfrac{16}{5}=2\,\mathrm{artanh}\tfrac{11}{21}
 >2\Bigl(x+\frac{x^3}3+\frac{x^5}5+\frac{x^7}7\Bigr)\Big|_{x=11/21}>1.162>\tfrac{297}{256}
 \]
-since the series of $\operatorname{artanh}$ has positive terms. Next,
-$\beta_Y'(y)=-(y-1)\bigl(y-(Y-1)\bigr)/y^2$, so $\beta_Y$ increases on $[1,Y-1]$ and decreases on
-$[Y-1,Y]$. Since $\beta_Y(1)=0$ and $\beta_Y(Y)=G(Y)>0$, we get $\beta_Y\ge0$ on $[1,Y]$.
+since the series of $\mathrm{artanh}$ has positive terms. Next,
+$\Theta_0'(\omega)=-(\omega-1)\bigl(\omega-(\mu_2-1)\bigr)/\omega^2$, so $\Theta_0$ increases on
+$[1,\mu_2-1]$ and decreases on $[\mu_2-1,\mu_2]$. Since $\Theta_0(1)=0$ and
+$\Theta_0(\mu_2)=\Gamma(\mu_2)>0$, we get $\Theta_0\ge0$ on $[1,\mu_2]$.
 
-Now let $y\in(1,Y)$. If $q\le0$, then $\varphi(y)\ge f_0>0$ by (4.1). If $q>0$, then
+Now let $\omega\in(1,\mu_2)$. If $k_2\le0$, then $\Theta(\omega)\ge k_1>0$ by (4.1). If $k_2>0$,
+then
 \[
-\varphi(y)\ \ge\ f_0-q\,\frac{y-1}{y}\ >\ f_0-q\Bigl(1-\frac1Y\Bigr)\ \ge\ 0 .
+\Theta(\omega)\ \ge\ k_1-k_2\,\frac{\omega-1}{\omega}\ >\ k_1-k_2\Bigl(1-\frac1{\mu_2}\Bigr)\ \ge\ 0 .
 \]
-So $f>0$ on $(0,\log Y)$. Lemma~4.2 gives $g>0$, and Proposition~2.1 gives the exit at $T$.
+So $\varphi_{21}>0$ on $(0,\log\mu_2)$. Lemma~4.2 gives $\varphi_{23}>0$, and Proposition~2.1 gives
+the boundary at $\tex$.
 \end{proof}
 
-The value $16/5$ matters only through $G(Y)>0$, which holds from $Y_\ast\approx3.163$ on; $16/5$
-is a convenient rational number above $Y_\ast$.
+The value $16/5$ matters only through $\Gamma(\mu_2)>0$, which holds from about $3.163$ on;
+$16/5$ is a convenient rational number above it.
 
-\begin{theorem}[one step]
-Let $w\in\G$ with $\varphi(Y)<0$. Then $F(w)$ is defined, the control after $F(w)$ is $e_2$,
-$r(F(w))>r(w)$, and:
+\begin{theorem}[one step from the region]
+Let $q\in\T$ with $\Theta(\mu_2)<0$. Then $F(q)$ is defined, the first control at $F(q)$ is $\ep_2$,
+$r\nw>r$, and:
 \begin{itemize}[itemsep=1pt]
-\item if $Y\new\ge16/5$, the arc from $F(w)$ leaves $\hstar$ before switching;
-\item if $Y\new<16/5$, then $F(w)\in\G$.
+\item if $\mu_2\nw\ge16/5$, the solution from $F(q)$ reaches the boundary of the star domain before
+switching;
+\item if $\mu_2\nw<16/5$, then $F(q)\in\T$.
 \end{itemize}
 \end{theorem}
 
 \begin{proof}
-By Proposition~4.4, Theorem~5.1 and Corollary~5.2, $F(w)\in\Sec$ has $r>0$, $f_0>0$ and $p>0$,
-and the control after it is $e_2$. By (5.3) and the expansion condition at $w$,
-$r(F(w))>r(w)$. By Lemma~6.2, Lemma~6.1 applies at $F(w)$.
+By Proposition~4.4, Theorem~5.1 and Corollary~5.2, $F(q)\in N_{9/4}$ has $r>0$, $k_1>0$ and
+$k_3>0$, and the first control at it is $\ep_2$. By (5.3) and the expansion condition at $q$,
+$r\nw>r$. By Lemma~6.2, Lemma~6.1 applies at $F(q)$.
 
-If $Y\new\ge16/5$: Lemma~6.1(ii) gives $f_{0,\mathrm{new}}\ge q\new(1-1/Y\new)$, and Lemma~6.4
-gives the exit.
+If $\mu_2\nw\ge16/5$: Lemma~6.1(ii) gives $k_1\nw\ge k_2\nw(1-1/\mu_2\nw)$, and Lemma~6.4 applies.
 
-If $Y\new<16/5$: Lemma~6.3 gives the expansion condition at $F(w)$. That condition gives
-$Y'\new-2<1$, and $Y\new-2<6/5$, so $(Y\new-2)(Y'\new-2)<3$. Lemma~6.1(i) gives $q\new\le0$,
-and so $F(w)\in\G$.
+If $\mu_2\nw<16/5$: Lemma~6.3 gives the expansion condition at $F(q)$. That condition gives
+$\mu_0\nw-2<1$, and $\mu_2\nw-2<6/5$, so $(\mu_2\nw-2)(\mu_0\nw-2)<3$. Lemma~6.1(i) gives
+$k_2\nw\le0$, and so $F(q)\in\T$.
 \end{proof}
 
 \section{Near the fixed point, and the proof of Theorem A}
 
-The region $\G$ is useful only if the orbits we care about start in it. Near the divisor the five
-conditions become, after rescaling by the natural powers of $r$, sign conditions on linear forms
-in $\tilde x$. At the fixed point $\tilde x\out$ of the Fuller system these signs are right, with
-room to spare.
+The region $\T$ is useful only if the orbits we care about start in it. Near the exceptional
+divisor the five conditions become, after division by the natural powers of $r$, sign conditions
+on linear forms in $\tilde x$. At $\tilde x_{out}$ these signs are right, with room to spare.
 
 \begin{lemma}
-There is a neighbourhood $U$ of $(0,\tilde x\out)$ such that every chart point of $U$ with $r>0$
-lies in $\G$.
+There is a neighbourhood $U$ of $(0,\tilde x_{out})$ such that every point of $U$ with $r>0$ lies
+in $\T$.
 \end{lemma}
 
 \begin{proof}
-Write $\tilde x=(\tilde x_{21},\tilde\ell_{11},\tilde\ell_{21})$. For small $r>0$ the chart point
-lies in $\Sec$, since $X\to J$ and the star functions of $J$ equal $1/\sqrt3$. The quantities
+Write $\tilde x=(\tilde x_{21},\tilde\ell_{11},\tilde\ell_{21})$ as in \S14.2. For small $r>0$ the
+point lies in $N_{9/4}$, since $X\to J$ and the star functions of $J$ equal $1/\sqrt3$. The
+quantities
 \[
-\frac{f_0}{r^3},\qquad \frac{q}{r^2},\qquad \frac{p}{r^2},\qquad \frac{Y-2}{r},\qquad
-\frac{Y'-2}{r}
+\frac{k_1}{r^3},\qquad \frac{k_2}{r^2},\qquad \frac{k_3}{r^2},\qquad \frac{\mu_2-2}{r},\qquad
+\frac{\mu_0-2}{r}
 \]
 are rational functions of $(r,\tilde x)$ whose denominators do not vanish at $r=0$. (The factor
-$r^3$ in $f_0$ comes from $\det\Lambda_1=9/4$, which makes $\ip{\tilde\Lambda_1}J$ of order $r^2$.)
-Their values at $r=0$ are
+$r^3$ in $k_1$ comes from $\det(\Lambda_1)=9/4$, which makes $\bracks{\tilde\Lambda_1}J$ of order
+$r^2$.) Their values at $r=0$ are
 \[
 -3(\tilde\ell_{11}+\tilde\ell_{21}\tilde x_{21}),\qquad
 \sqrt3\,\tilde\ell_{11}+\tilde\ell_{21},\qquad
 -2\tilde\ell_{21},\qquad
 \sqrt3-3\tilde x_{21},\qquad 2\sqrt3,
 \]
-and the expansion condition, divided by $r$, tends to $-\sqrt3-3\tilde x_{21}$. Remark~14.2.1
-locates the fixed point within $0.01$ of $\tilde x\out=(-2.39,\,-4.90,\,-1.12)$. There these
-limits are about $6.63$, $-9.62$, $2.25$, $8.90$, $3.46$ and $5.44$, so the four linear forms have
-the required signs, with margins of at least $1.1$. By continuity the five conditions hold near
-$(0,\tilde x\out)$ for $r>0$.
+and the expansion condition, divided by $r$, tends to $-\sqrt3-3\tilde x_{21}$. The positivity of
+the first and third limits is the pair of conditions $\tilde\ell_{11}+\tilde\ell_{21}\tilde x_{21}<0$,
+$\tilde\ell_{21}<0$ under which \S14.2 states that the first control is $\ep_2$. At
+$\tilde x_{out}\approx(-2.39,\,-4.90,\,-1.12)$, known to within $0.01$ (Remark~14.2.1), the limits
+are about $6.63$, $-9.62$, $2.25$, $8.90$, $3.46$ and $5.44$, so the four linear forms have the
+required signs, with margins of at least $1.1$. By continuity the five conditions hold near
+$(0,\tilde x_{out})$ for $r>0$.
 \end{proof}
 
 \begin{proof}[Proof of Theorem A]
-Take $U$ from Lemma~7.1 and a chart point of $U$ with $r>0$, so that $w_0\in\G$. Item (1) holds
-at $w_0$ by Proposition~4.4. Now suppose that $w_j\in\G$.
+Take $U$ from Lemma~7.1 and a point of $U$ with $r>0$, so that $q_0\in\T$. Item (1) holds at
+$q_0$ by Proposition~4.4. Now suppose that $q_j\in\T$.
 \begin{itemize}[itemsep=1pt]
-\item If $\varphi(Y)\ge0$ at $w_j$, Proposition~4.4(3) gives item (3) with $K=j$.
-\item If $\varphi(Y)<0$ at $w_j$, Proposition~4.4(2) gives item (2) at $w_j$. By Theorem~6.5, item
-(1) holds at $w_{j+1}$, and either the arc from $w_{j+1}$ exits (item (3) with $K=j+1$) or
-$w_{j+1}\in\G$ with $r(w_{j+1})>r(w_j)$.
+\item If $\Theta(\mu_2)\ge0$ at $q_j$, Proposition~4.4(3) gives item (3) with $k=j$.
+\item If $\Theta(\mu_2)<0$ at $q_j$, Proposition~4.4(2) gives item (2) at $q_j$. By Theorem~6.5,
+item (1) holds at $q_{j+1}$, and either the solution from $q_{j+1}$ reaches the boundary before
+switching (item (3) with $k=j+1$) or $q_{j+1}\in\T$ with $r(q_{j+1})>r(q_j)$.
 \end{itemize}
-While this continues the radii increase, so Corollary~5.3 gives $j\,r(w_0)<\rho_1(w_0)/2$. The
-process therefore stops after fewer than $\rho_1(w_0)/(2r(w_0))$ steps, and it can stop only with
-item (3).
+While this continues the values of $r$ increase, so Corollary~5.3 gives
+$j\,r(q_0)<\rho_1(q_0)/2$. The process therefore stops after fewer than $\rho_1(q_0)/(2r(q_0))$
+steps, and it can stop only with item (3).
 \end{proof}
 
 \begin{remark}
-Theorem~A holds for every section point near the fixed point with $r>0$, so the location of the
+Theorem~A holds for every point near $(0,\tilde x_{out})$ with $r>0$, so the location of the
 unstable curve is never used.
 \end{remark}
 
 \begin{remark}
-The two ways to exit match the book's description. If the switch would come after the exit, the
-arc exits at once ($\varphi(Y)\ge0$); along the curve this is the regime beyond $r\approx0.065$.
-Otherwise the switch may come just before the exit. The next point is then close to a side of
-$\hstar$, with $Y\new$ large, and its arc runs into a cusp and exits (Lemma~6.4).
+The two ways of reaching the boundary match the book's description. If the switch would come
+after the boundary is reached, the trajectory reaches it at once ($\Theta(\mu_2)\ge0$); along the
+curve this is the regime ``once $r$ is at least about $0.065$''. Otherwise the switch may come
+just before the boundary. The next point is then close to a side of $\hstar$, with $\mu_2\nw$
+large, and its trajectory runs into an ideal vertex and reaches the boundary (Lemma~6.4).
 \end{remark}
 
 \begin{remark}
-A reference computation in ball arithmetic (python-flint/Arb), which the proof does not use,
-follows 500 orbits of the curve. It finds the threshold $r^\ast\approx0.06495$ (the book says
-about $0.065$; a comment in its \TeX\ source gives $0.0641$), and the curve of switching points
-ends at $(r,\tilde x_{21})\approx(0.209847,\,-3.033319)$, against the book's $(0.21,\,-3.03)$.
-From $r=10^{-6}$ on the curve the orbit has seven switching arcs; at the seventh $Y\new\approx38.2$,
-and the next arc exits.
+The computation in ball arithmetic mentioned in the summary is not used in the proof. It places
+the threshold at $r\approx0.06495$ (a comment in the \TeX\ source of the book gives $0.0641$), and
+the unstable curve reaches the boundary of the star domain near
+$(r,\tilde x_{21})\approx(0.209847,\,-3.033319)$. From $r=10^{-6}$ on the curve the orbit switches
+seven times; at the seventh switch $\mu_2\nw\approx38.2$, and the next trajectory reaches the
+boundary before switching.
 \end{remark}
 
 \section{Theorem 14.4.1 and the local analysis of \S14.3}
@@ -770,74 +867,41 @@ and the next arc exits.
 \paragraph{Theorem 14.4.1.} The book's proof has four sentences. With Theorem~A they become a
 complete proof.
 \begin{enumerate}[itemsep=1pt]
-\item The switching points of a trajectory that emanates from $q\out$ eventually lie on the local
-unstable curve, hence in $U$ with $r>0$. This is the time reversal of the second part of
-Theorem~16.4.1, which the book does not cite here.
-\item A trajectory that returns to the singular locus must chatter into it. This is Lemma~8.3.4,
-applied at the first return; the book does not cite it here either.
-\item As long as the switching is cyclic, the switching points follow $F$. By Theorem~A the
-trajectory reaches an arc that leaves the star domain, which contradicts the state constraint.
+\item The switching points of a trajectory that emanates from the fixed point $(0,\tilde x_{out})$
+eventually lie on the local unstable curve, hence in $U$ with $r>0$. This is the time reversal of
+the second part of Theorem~16.4.1, which the book does not cite here.
+\item A trajectory that returns to the singular locus must chatter. This is Lemma~8.3.4, applied
+at the first return; the book does not cite it here either.
+\item As long as the switching sequence is cyclical, the switching points follow $F$. By Theorem~A
+the trajectory reaches the boundary of the star domain, which contradicts the state constraint.
 \item The second statement follows by time reversal.
 \end{enumerate}
 
 \paragraph{Theorem 14.3.3.} Its three claims are proved as follows.
 \begin{itemize}[itemsep=1pt]
-\item The fixed point is hyperbolic, by the three facts the book names: the Fuller-Poincar\'e map
-contracts on the exceptional divisor, $r_{\mathrm{scale}}\approx6.27>1$, and the divisor is
-invariant.
-\item The local unstable curve is $C^\infty$ by Irwin's stable manifold theorem (Appendix~A.3),
-which is proved in full in a separate Lean package.
+\item The fixed point is hyperbolic, by the three facts the proof in the book names: the
+Fuller-Poincar\'e map is a contraction on the exceptional divisor near the fixed point, $\rs>1$,
+and the exceptional divisor is invariant.
+\item The local unstable curve is $C^\infty$, by the stable manifold theorem recalled in
+Appendix~A.3.
 \item The book states without argument that near the fixed point the local stable manifold is the
-exceptional divisor. This is proved directly. Near the fixed point
-$|F_1(r,\tilde x)|\ge|r|$, by the mean value theorem with $\partial_rF_1>1$ and $F_1(0,\cdot)=0$,
-so no orbit with $r\ne0$ tends to the fixed point. And the divisor has a forward-invariant
-neighbourhood of $\tilde x\out$ in which every orbit tends to it (linearized stability).
+exceptional divisor. This can be proved directly. Write $F_1$ for the $r$-component of $F$. Near
+the fixed point $|F_1(r,\tilde x)|\ge|r|$, by the mean value theorem, since $\partial_rF_1>1$ and
+$F_1(0,\cdot)=0$; so no orbit with $r\ne0$ tends to the fixed point. And on the exceptional
+divisor a neighbourhood of $\tilde x_{out}$ is forward invariant, with every orbit in it tending
+to $\tilde x_{out}$ (linearized stability).
 \end{itemize}
-Remark~14.3.4 at $q_{\mathrm{in}}$ follows by time reversal, $F_{\mathrm{in}}=\tau F^{-1}\tau$.
-The analytic extension of Lemma~14.3.1 is proved by the book's route, including the backward map
-and analytic continuation.
+Remark~14.3.4 at $q_{in}$ follows by time reversal, $F_{in}=\tau F^{-1}\tau$. The analytic extension
+of Lemma~14.3.1 can be proved by the book's route, including the backward map and analytic
+continuation.
 
-\section{Where each step is checked}
+\section{Verification}
 
-The formalization\footnote{\url{https://github.com/vltanh/lean4-smoothed-polygon}} proves
-Theorem~14.4.1 and Mahler's First conjecture using only the standard axioms of Lean:
-\texttt{propext}, \texttt{Classical.choice} and \texttt{Quot.sound}. Its proof of the fact behind
-Figure~14.2 is the proof of this note, step by step and with the same numbering. The table below
-lists the main Lean declarations. They are in the folder \texttt{SmoothedPolygons/Ch14/} unless
-stated otherwise, and the docstring of \texttt{ArcRegionInvariant.lean} lists every step.
-
-\medskip
-{\small
-\noindent
-\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X@{}}
-\toprule
-Step & Lean \\
-\midrule
-Theorem A (curve form) & \lean{UnstableCurveLeavesStarDomain}, proved as \lean{unstableCurveLeavesStarDomain} \\
-Proposition 2.1 & \lean{ρ\_iso\_vfX\_one}, \lean{isStarState\_iso\_vfX\_one\_iff} (\lean{ArcFrame.lean}) \\
-Lemma 2.2, Theorem 2.3 & \lean{commutator\_arcVe}, \lean{arc\_normalForm}, \lean{arcF0\_pos\_iff} \\
-Proposition 3.1 & \lean{arcParams\_rel}, \lean{ArcParams.rel\_eq} \\
-Lemma 4.1 & \lean{phaseHamSlope\_eq}, \lean{phaseHamSlope\_add\_swap} \\
-Lemmas 4.2, 4.3 & \lean{ArcParams.g\_pos}, \lean{ArcParams.tauSw\_spec}, \lean{ArcParams.tauSw\_lt\_log\_iff} \\
-Proposition 4.4 & \lean{switchEntersE2\_of\_arc}, \lean{arcSwitchesToE1\_of\_arc}, \lean{arcLeavesStarDomain\_of\_arc} \\
-Theorem 5.1, (5.4) & \lean{arcParams\_reinPoincare}, \lean{ArcParams.step\_closed}, \lean{iso\_vfΛ₁\_one\_eq\_arcParams} \\
-Corollaries 5.2, 5.3 & \lean{arc\_propagation}, \lean{sum\_radius\_reinPoincare\_iterate\_lt} \\
-The region $\G$ & \lean{arcRegion} \\
-Lemma 6.1 & \lean{ArcParams.q\_nonpos\_of\_relT}, \lean{ArcParams.f0\_ge\_of\_relT} \\
-Lemma 6.2 & \lean{ArcParams.pNew\_lt}, \lean{ArcParams.two\_lt\_YNew} \\
-Lemma 6.3 & \lean{ArcParams.E\_new\_iff}, \lean{ArcParams.YNew\_ge} \\
-Lemma 6.4 & \lean{ArcParams.f\_pos\_of\_Y\_ge}, \lean{arcLeavesStarDomain\_of\_Y\_ge}; \lean{Real.log\_sixteen\_div\_five\_gt} \\
-Theorem 6.5 & \lean{arcRegionInvariant\_sharp} \\
-Lemma 7.1 & \lean{exists\_nhds\_lieChart\_mem\_arcRegion} \\
-Proof of Theorem A & \lean{ArcRegionInvariant.reachesStarBoundary} \\
-Theorem 14.4.1 & \lean{theorem14\_4\_1\_unconditional} (\lean{Ch16/MahlerFirstArcRegion.lean}), \lean{theorem14\_4\_1} \\
-Theorem 14.3.3, A.3.1 & \lean{theorem14\_3\_3}, \lean{remark14\_3\_4}, \lean{theoremA\_3\_1} \\
-\bottomrule
-\end{tabularx}}
-
-\medskip
-The relation of Proposition~3.1 is checked in Lean by a direct computation in the frame
-(\lean{arcParams\_rel\_identity}); the eigenbasis expansion in the proof above is the same
-computation, organized to explain where the relation comes from.
+Every step of this proof, and the completed proofs of Theorems~14.3.3 and~14.4.1 in \S8, have been
+checked in the Lean~4 proof assistant, as part of a formalization of the book that uses the
+numbering of this note.\footnote{\url{https://github.com/vltanh/lean4-smoothed-polygon}} The
+formal proof uses only the standard axioms of Lean. Two computations that this note only sketches
+(the integration in the proof of Theorem~2.3 and the pairings in the proof of Theorem~5.1) are
+carried out there in full.
 
 \end{document}

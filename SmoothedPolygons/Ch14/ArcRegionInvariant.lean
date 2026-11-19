@@ -21,6 +21,14 @@ the Reinhardt–Poincaré map on an explicit region `𝒢*` of the section (`arc
 
 ## Where the steps of the note are
 
+The note uses the book's notation, and these modules use their own names. The note's section
+`N_{9/4}` is `IsArcSectionPt`, and its points `q` are phase points. Its numbers `ρ₁`, `μ₂`, `μ₀`,
+`k₁`, `k₂`, `k₃` are `arcEps`, `arcY`, `arcY'`, `arcF0`, `arcQ`, `arcP` (the fields `eps`, `Y`,
+`Y'`, `f0`, `q`, `p` of `ArcParams`). Its eigenvectors `E₊`, `E₋` are `arcVe`, `arcVf`; its time
+`ϑ = t/ρ₁` is `τ`; its switch value `η = e^{ϑ_sw}` is `s`; its region `𝒯` is `arcRegion` (`𝒢*`).
+Its functions `φ₂₁`, `φ₂₃` are `ArcParams.f`, `ArcParams.g`; `Θ` is `ArcParams.F` in the variable
+`log ω`; `Υ` is `ArcParams.psiE`; and `χ̄_ij` is `switchingNum`.
+
 All files are in `SmoothedPolygons/Ch14/`.
 * §2, one arc in closed form: (1.1), (2.1), (2.2) and **Proposition 2.1** (the state, the exit time
   `T = ε log Y`), `ArcFrame.lean`; **Lemma 2.2** (the eigenvectors `V_e = V₊`, `V_f = V₋` of

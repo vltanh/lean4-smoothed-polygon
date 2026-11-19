@@ -135,7 +135,7 @@ Part of the [audit report](../../REPORT.md).
     needs the time reversal of trajectories on its own.
   - The formal proof follows the book's route (E85).
 - **Theorem 14.4.1 without the unstable curve.** The proof of N4 gives more than N4: Lemma 7.1 and
-  [`ArcRegionInvariant.reachesStarBoundary`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L187) show that every chart point with `r > 0` of a
+  [`ArcRegionInvariant.reachesStarBoundary`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L195) show that every chart point with `r > 0` of a
   neighbourhood `V` of `(0, x̃_out)` reaches the boundary of the star domain.
   - With this form, the second step of [`theorem14_4_1_out`](../../SmoothedPolygons/Ch14/NoReturnProof.lean#L95) needs only that the rotated
     switching points of the arc out of `q_out` eventually lie in `V` with `r > 0`, the convergence

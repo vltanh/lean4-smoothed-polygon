@@ -1958,7 +1958,7 @@ methods such as interval arithmetic", which they have not done (TeX 11951–1195
   which the running text reads off the computation (TeX 11983–11991).
 
 **Here:** by the user's decision the formalization proves the computed fact instead of computing
-it: N4 ([`UnstableCurveLeavesStarDomain`](../../SmoothedPolygons/Ch14/UnstableCurve.lean#L174), Section 6) is [`unstableCurveLeavesStarDomain`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L330), proved
+it: N4 ([`UnstableCurveLeavesStarDomain`](../../SmoothedPolygons/Ch14/UnstableCurve.lean#L174), Section 6) is [`unstableCurveLeavesStarDomain`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L338), proved
 without locating the curve.
 
 - Along an `e₂`-arc `ρ₁ = ε` is constant and the flow is hyperbolic with rate `1/(2ε)`, so the
@@ -1968,7 +1968,7 @@ without locating the curve.
 - An explicit region `𝒢*` of section points, which contains every chart point near the fixed
   point, is kept by that step until an arc leaves the star domain, while `r` grows and `ρ₁` drops
   by `2r` at each step.
-- So every orbit in `𝒢*` leaves the star domain ([`arcRegionInvariant`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L318): the relation
+- So every orbit in `𝒢*` leaves the star domain ([`arcRegionInvariant`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L326): the relation
   `det Λ₁ = 9/4` at the next point forbids `q > 0` there, and monotonicity with
   `log(16/5) > 297/256` gives the exit; Section 7). The proof is written up for the book's authors
   in [docs/unstable-curve.pdf](../unstable-curve.pdf).
