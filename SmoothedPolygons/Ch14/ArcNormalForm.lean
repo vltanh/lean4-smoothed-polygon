@@ -4,7 +4,7 @@ public import SmoothedPolygons.Ch14.ArcCostate
 import SmoothedPolygons.Ch7.Isolated.VertexFlow
 
 /-!
-# Chapter 14, N4: the normal form of the cleared switching numerators (Theorem 1.3)
+# Chapter 14, N4: the normal form of the cleared switching numerators (Theorem 2.3)
 
 Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
 computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
@@ -13,13 +13,13 @@ the exact structure of the Reinhardt flow along an `e₂`-arc and an invariant r
 `SmoothedPolygons/Ch14/ArcParams.lean`, and `SmoothedPolygons/Ch14/ArcRegionInvariant.lean` for
 the numbering of the steps).
 
-This file is §1.3: along the `e₂`-arc from a phase point with `X₀ ∈ 𝔥*` and `H(e₂) = 0`, each
+This file is §2: along the `e₂`-arc from a phase point with `X₀ ∈ 𝔥*` and `H(e₂) = 0`, each
 cleared switching numerator is an exponential sum with exactly four terms and three universal
 coefficients, in the time `τ = t/ε`:
 `(√3/(8ε³)) N₂₁(t) = f(τ) = -1 + A e^{-τ} + B e^{-2τ} + Y τ e^{-τ}`,
 `(√3/(8ε³)) N₂₃(t) = g(τ) = -1 + A' e^{τ} + B' e^{2τ} - Y' τ e^{τ}`,
 with `B = Y - 1 + q`, `A = 1 + f₀ - B`, `B' = Y' - 1 + p`, `A' = 1 + g₀ - B'` (`ArcParams.f`,
-`ArcParams.g`). On a section point `g₀ = 0` and `f₀ = -(√3/(3ε³Y')) ⟨Λ̂₀, X₀⟩` (1.5).
+`ArcParams.g`). On a section point `g₀ = 0` and `f₀ = -(√3/(3ε³Y')) ⟨Λ̂₀, X₀⟩` (2.4).
 
 ## Statements
 
@@ -27,17 +27,17 @@ with `B = Y - 1 + q`, `A = 1 + f₀ - B`, `B' = Y' - 1 + p`, `A' = 1 + g₀ - B'
   (`f₀ = (√3/(8ε³)) N₂₁(q)`, `g₀ = (√3/(8ε³)) N₂₃(q)`, `q = -(√3/(6ε)) ⟨Λ̂₀, V_e⟩`,
   `p = (2/(√3 ε)) ⟨Λ̂₀, V_f⟩`, `Λ̂₀ = Λ₁(0) + (3/2) J`).
 * `arcParams_Y'` (`Y'` of the parameters is `1 + ρ₀/ε`), `arcParams_radius` (`r = X₁₁`).
-* **Theorem 1.3** (`arc_normalForm`). Equivalently (1.4) (`ArcParams.f_eq`, `ArcParams.g_eq`).
-* **(1.5)** on section points: `frame_section_costateR` (`Λ_R` in the frame:
+* **Theorem 2.3** (`arc_normalForm`). Equivalently (4.1) (`ArcParams.f_eq`, `ArcParams.g_eq`).
+* **(2.4)** on section points: `frame_section_costateR` (`Λ_R` in the frame:
   `m_h = -ε h₀`, `m_f = h₀ x_f`, `m_e = h₀ (1 - ε²)/x_f`, `h₀ = ⟨Λ̂₀, X₀⟩`), `arcG0_eq_zero`,
   `arcF0_eq_reducedHam`, `arcParams_A'` (`A' = 2 - Y' - p`), `arcF0_pos_iff` (P1, `f₀ > 0`, says
   that the reduced Hamiltonian `⟨Λ₁ + (3/2) J, X⟩` is negative at the section point).
 
-## Proofs (the route, §1.3)
+## Proofs (the route, §2)
 
-1. `arcParams_Y'`: (1.3) (`arcEps_sq_mul_arcY_mul_arcY'`). `arcParams_radius`:
+1. `arcParams_Y'`: (2.1) (`arcEps_sq_mul_arcY_mul_arcY'`). `arcParams_radius`:
    `X00_eq_arcRadius`.
-2. Theorem 1.3. By `switchingNum_iso_vertexFlow_one`, `(√3/(8ε³)) N₂₁(t) = -(√3/(12ε²)) u φ_e(t)`
+2. Theorem 2.3. By `switchingNum_iso_vertexFlow_one`, `(√3/(8ε³)) N₂₁(t) = -(√3/(12ε²)) u φ_e(t)`
    with `u = e^{-t/ε}`. By `hasDerivAt_arcPhi`, `traceForm_iso_vfM_arcVe` and the fundamental
    theorem of calculus, with `L_e = ⟨Λ₁(0), V_e⟩`,
    `φ_e(t) = φ_e(0) - 2ε(1 - u) L_e + √3(2x_e t + x_e²(1 - u) + 4ε²(u⁻¹ - 1))`
@@ -46,7 +46,7 @@ with `B = Y - 1 + q`, `A = 1 + f₀ - B`, `B' = Y' - 1 + p`, `A' = 1 + g₀ - B'
    the constant `-1`, the term `-(x_e/(2ε²)) t u = Y τ u` (`x_e = -2εY`), a `u²` and a `u` term.
    At `t = 0` the sum is `f₀` (definition of `arcF0`), so the `u` coefficient is `1 + f₀ - B`
    once the `u²` coefficient is `B`; the `u²` coefficient is `-(√3/(6ε))(L_e - √3 x_e²/(2ε))`,
-   and with `Λ₁(0) = Λ̂₀ - (3/2) J` and `⟨J, V_e⟩ = -(4ε/√3)(Y² - Y + 1)` (from (1.2),
+   and with `Λ₁(0) = Λ̂₀ - (3/2) J` and `⟨J, V_e⟩ = -(4ε/√3)(Y² - Y + 1)` (from (2.2),
    `traceForm_ofFrame`, `x_e = -2εY`) it is `Y - 1 + q`. The `N₂₃` computation is the same with
    `φ_f`, `V_f`, `u⁻¹`, `⟨J, V_f⟩ = (ε/√3)(Y'² - Y' + 1)`; `g(0) = g₀` fixes the `e^{τ}`
    coefficient. All coefficient identities are polynomial in `ε, Y, Y', x_e, x_f` modulo
@@ -54,17 +54,17 @@ with `B = Y - 1 + q`, `A = 1 + f₀ - B`, `B' = Y' - 1 + p`, `A' = 1 + g₀ - B'
    identities is one `linear_combination` of `√3² = 3` and `u u⁻¹ = 1` with rational cofactors
    (found by polynomial division, checked by `field_simp; ring`). The statement does not assume
    `Λ₁(0)` traceless: the closed forms of `φ_e`, `φ_f` use only `X₀`, `Λ_R(0)` and `H(e₂) = 0`.
-3. (1.5): on a section point the three linear conditions `⟨X, Λ_R⟩ = 0`,
+3. (2.4): on a section point the three linear conditions `⟨X, Λ_R⟩ = 0`,
    `⟨Λ_R, Z_{e₂}⟩ = ⟨X, Z_{e₂}⟩ h₀`, `⟨Λ_R, Z_{e₃}⟩ = ⟨X, Z_{e₃}⟩ h₀` (`H(e₂) = H(e₃) = 0`,
    `hamiltonian_eq_traceForm_sub`; `H(e₂) = H(e₃) - χ₂₃`, `hamiltonian_sub_eq_switchingFn`) read
    `-2ε m_h + x_e m_f + x_f m_e = 0`, `m_h = -ε h₀`, `2m_h + 4m_f = (-2ε + 4x_f) h₀` in the frame,
    whence `frame_section_costateR`. Then `N₂₁(q) = -(2/3)(ε m_e + x_e m_h) = -8h₀/(3Y')`
-   (`x_e x_f = -(1 + ε²)`), which is (1.5); `N₂₃(q) = χ₂₃ ⟨X, Z_{e₂}⟩⟨X, Z_{e₃}⟩ = 0`.
+   (`x_e x_f = -(1 + ε²)`), which is (2.4); `N₂₃(q) = χ₂₃ ⟨X, Z_{e₂}⟩⟨X, Z_{e₃}⟩ = 0`.
    `A' = 1 + g₀ - B' = 2 - Y' - p`.
 
 Also checked numerically, while the statements were written, against a literal model of the Lean
 definitions: the normal form to `10⁻¹⁷` at several times on a chart point near `W^u` and on a
-generic phase point with `H(e₂) = 0`; (1.5) and the frame of `Λ_R` on the chart point. The proofs
+generic phase point with `H(e₂) = 0`; (2.4) and the frame of `Λ_R` on the chart point. The proofs
 do not depend on these checks.
 -/
 
@@ -74,21 +74,21 @@ namespace SmoothedPolygons
 
 open Set Filter Topology
 
-/-- `f₀ = (√3/(8ε³)) N₂₁(q)`, the value at `τ = 0` of the normalized `N₂₁` (Theorem 1.3). -/
+/-- `f₀ = (√3/(8ε³)) N₂₁(q)`, the value at `τ = 0` of the normalized `N₂₁` (Theorem 2.3). -/
 noncomputable def arcF0 (q : iso_PhasePt) : ℝ := √3 / (8 * arcEps q ^ 3) * switchingNum 1 0 q
 
 /-- `g₀ = (√3/(8ε³)) N₂₃(q)`, the value at `τ = 0` of the normalized `N₂₃`; `0` on the section. -/
 noncomputable def arcG0 (q : iso_PhasePt) : ℝ := √3 / (8 * arcEps q ^ 3) * switchingNum 1 2 q
 
-/-- `q = -(√3/(6ε)) ⟨Λ̂₀, V_e⟩`, `Λ̂₀ = Λ₁(0) + (3/2) J` (Theorem 1.3): `B = Y - 1 + q`. -/
+/-- `q = -(√3/(6ε)) ⟨Λ̂₀, V_e⟩`, `Λ̂₀ = Λ₁(0) + (3/2) J` (Theorem 2.3): `B = Y - 1 + q`. -/
 noncomputable def arcQ (q : iso_PhasePt) : ℝ :=
   -(√3 / (6 * arcEps q)) * traceForm (q.2.1 + (3 / 2 : ℝ) • J) (arcVe q.1)
 
-/-- `p = (2/(√3 ε)) ⟨Λ̂₀, V_f⟩` (Theorem 1.3): `B' = Y' - 1 + p`. -/
+/-- `p = (2/(√3 ε)) ⟨Λ̂₀, V_f⟩` (Theorem 2.3): `B' = Y' - 1 + p`. -/
 noncomputable def arcP (q : iso_PhasePt) : ℝ :=
   2 / (√3 * arcEps q) * traceForm (q.2.1 + (3 / 2 : ℝ) • J) (arcVf q.1)
 
-/-- **The arc parameters** `(ε, Y, f₀, g₀, q, p)` of a phase point (§1.3, §2.1). -/
+/-- **The arc parameters** `(ε, Y, f₀, g₀, q, p)` of a phase point (§2, §3). -/
 noncomputable def arcParams (q : iso_PhasePt) : ArcParams :=
   ⟨arcEps q, arcY q, arcF0 q, arcG0 q, arcQ q, arcP q⟩
 
@@ -109,14 +109,14 @@ private lemma traceForm_comm (A B : Mat2) : traceForm A B = traceForm B A := by
   simp only [traceForm]
   exact Matrix.trace_mul_comm A B
 
-/-- `⟨J, V_e⟩` in the frame ((1.2)). -/
+/-- `⟨J, V_e⟩` in the frame ((2.2)). -/
 private lemma traceForm_J_arcVe (q : iso_PhasePt) :
     traceForm J (arcVe q.1) = 2 * -(1 / √3) * frameE q.1 + -(4 / √3) * arcEps q +
       1 / √3 * (-frameE q.1 ^ 2 / arcEps q) := by
   rw [frame_controlMatrix.2.2.2]
   exact traceForm_ofFrame _ _ _ _ _ _
 
-/-- `⟨J, V_f⟩` in the frame ((1.2)). -/
+/-- `⟨J, V_f⟩` in the frame ((2.2)). -/
 private lemma traceForm_J_arcVf (q : iso_PhasePt) :
     traceForm J (arcVf q.1) = 2 * -(1 / √3) * frameF q.1 +
       -(4 / √3) * (-frameF q.1 ^ 2 / arcEps q) + 1 / √3 * arcEps q := by
@@ -131,7 +131,7 @@ private lemma hasDerivAt_exp_neg_div (ε t : ℝ) :
     HasDerivAt (fun t ↦ Real.exp (-t / ε)) (-(Real.exp (-t / ε) / ε)) t := by
   exact (((hasDerivAt_neg' t).div_const ε).exp).congr_deriv (by ring)
 
-/-- **`φ_e` in closed form** (proof of Theorem 1.3): by `hasDerivAt_arcPhi` and
+/-- **`φ_e` in closed form** (proof of Theorem 2.3): by `hasDerivAt_arcPhi` and
 `traceForm_iso_vfM_arcVe`, `φ_e(t) = φ_e(0) - 2ε(1 - u) L_e + √3(2x_e t + x_e²(1 - u) +
 4ε²(u⁻¹ - 1))`, `u = e^{-t/ε}`, `L_e = ⟨Λ₁(0), V_e⟩` (the fundamental theorem of calculus: the
 difference has derivative `0`). -/
@@ -168,7 +168,7 @@ private lemma arcPhiE_eq (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) = 0)
   simp only [D] at this
   linarith
 
-/-- **`φ_f` in closed form** (proof of Theorem 1.3): `φ_f(t) = φ_f(0) + 2ε(u⁻¹ - 1) L_f +
+/-- **`φ_f` in closed form** (proof of Theorem 2.3): `φ_f(t) = φ_f(0) + 2ε(u⁻¹ - 1) L_f +
 √3(-2x_f t + ε²(1 - u) + 4x_f²(u⁻¹ - 1))`, `L_f = ⟨Λ₁(0), V_f⟩`. -/
 private lemma arcPhiF_eq (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) = 0) (t : ℝ) :
     arcPhiF q t = arcPhiF q 0 + 2 * arcEps q * (Real.exp (t / arcEps q) - 1) *
@@ -203,7 +203,7 @@ private lemma arcPhiF_eq (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) = 0)
   simp only [D] at this
   linarith
 
-/-- `Y'` of the parameters is `1 + ρ₀(X₀)/ε` ((1.3)). -/
+/-- `Y'` of the parameters is `1 + ρ₀(X₀)/ε` ((2.1)). -/
 theorem arcParams_Y' (hX : IsStarState q.1) : (arcParams q).Y' = arcY' q := by
   have he := arcEps_pos hX
   have hY := one_lt_arcY hX
@@ -217,7 +217,7 @@ theorem arcParams_radius (hX : IsStarState q.1) : (arcParams q).radius = q.1 0 0
   rw [X00_eq_arcRadius (arcEps_pos hX).ne', ArcParams.radius, arcParams_Y' hX]
   rfl
 
-/-- **Theorem 1.3** (the normal form). Let `q` be a phase point with `X₀` a star state, `Λ_R(0)`
+/-- **Theorem 2.3** (the normal form). Let `q` be a phase point with `X₀` a star state, `Λ_R(0)`
 traceless and `H(e₂)(q) = 0`. Along the `e₂`-flow from `q`, with `τ = t/ε`,
 `(√3/(8ε³)) N₂₁(t) = f(τ) = -1 + A e^{-τ} + B e^{-2τ} + Y τ e^{-τ}` and
 `(√3/(8ε³)) N₂₃(t) = g(τ) = -1 + A' e^{τ} + B' e^{2τ} - Y' τ e^{τ}`, with `B = Y - 1 + q`,
@@ -276,7 +276,7 @@ theorem arc_normalForm (hX : IsStarState q.1) (hR : q.2.2.trace = 0)
     field_simp
     ring
 
-/-- **`Λ_R` on a section point, in the frame** (§1.3, before (1.5)): with
+/-- **`Λ_R` on a section point, in the frame** (§2, before (2.4)): with
 `h₀ = ⟨Λ̂₀, X₀⟩` (`reducedHam`), `m_h = -ε h₀`, `m_f = h₀ x_f`, `m_e = h₀ (1 - ε²)/x_f`. -/
 theorem frame_section_costateR (hq : IsArcSectionPt q) :
     frameH q.2.2 = -arcEps q * reducedHam q.2.1 q.1 ∧
@@ -341,12 +341,12 @@ theorem frame_section_costateR (hq : IsArcSectionPt q) :
   rw [eq_div_iff (by positivity)]
   linear_combination hXR + 2 * arcEps q * E1 + 2 * arcEps q * arcY q * E2 + h₀ * hrel
 
-/-- **(1.5)**: on a section point `g₀ = 0` (`χ₂₃ = 0`). -/
+/-- **(2.4)**: on a section point `g₀ = 0` (`χ₂₃ = 0`). -/
 theorem arcG0_eq_zero (hq : IsArcSectionPt q) : arcG0 q = 0 := by
   have h := (switchingFn_eq_zero_iff 1 2 hq.2).1 hq.1.1.2.2.2.2.2.2
   simp [arcG0, h]
 
-/-- **(1.5)**: on a section point `f₀ = -(√3/(3ε³Y')) ⟨Λ̂₀, X₀⟩`. -/
+/-- **(2.4)**: on a section point `f₀ = -(√3/(3ε³Y')) ⟨Λ̂₀, X₀⟩`. -/
 theorem arcF0_eq_reducedHam (hq : IsArcSectionPt q) :
     arcF0 q = -(√3 / (3 * arcEps q ^ 3 * arcY' q)) * reducedHam q.2.1 q.1 := by
   obtain ⟨E1, E2, E3⟩ := frame_section_costateR hq
@@ -376,13 +376,13 @@ theorem arcF0_eq_reducedHam (hq : IsArcSectionPt q) :
   field_simp
   ring
 
-/-- **(1.5)**: on a section point `A' = 2 - Y' - p`. -/
+/-- **(2.4)**: on a section point `A' = 2 - Y' - p`. -/
 theorem arcParams_A' (hq : IsArcSectionPt q) : (arcParams q).A' = 2 - arcY' q - arcP q := by
   simp only [ArcParams.A', ArcParams.B', arcParams_Y' hq.2]
   simp only [arcParams, arcG0_eq_zero hq]
   ring
 
-/-- **(1.5)**: P1 (`f₀ > 0`) says that the reduced Hamiltonian `⟨Λ₁ + (3/2) J, X⟩` is negative at
+/-- **(2.4)**: P1 (`f₀ > 0`) says that the reduced Hamiltonian `⟨Λ₁ + (3/2) J, X⟩` is negative at
 the section point. -/
 theorem arcF0_pos_iff (hq : IsArcSectionPt q) : 0 < arcF0 q ↔ reducedHam q.2.1 q.1 < 0 := by
   rw [arcF0_eq_reducedHam hq]

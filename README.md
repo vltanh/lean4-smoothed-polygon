@@ -62,8 +62,9 @@ The first three are the Palomar Challenge ([`Challenge.lean`](Challenge.lean));
 
 The book reads four facts off Mathematica computations that it did not certify. By the user's
 decision they are proved without computer assistance, by exact structure and a few explicit
-inequalities, with no enumeration of boxes; the few certificates found by computer (Bernstein
-coefficients, polynomial cofactors) are checked by Lean.
+inequalities, with no enumeration of boxes; the few certificates found by computer (polynomial
+cofactors, products for `nlinarith`) are checked by Lean. The proof for Figure 14.2 is written up
+for the book's authors in [docs/unstable-curve.pdf](docs/unstable-curve.pdf).
 
 | Fact | What it says | How it is proved |
 | --- | --- | --- |
@@ -106,7 +107,7 @@ sketches, or, for the computed facts, by the user's decision, are listed in
 ## Trust
 
 - No `sorry` outside the statements of [`Challenge.lean`](Challenge.lean); no `axiom`, `native_decide` or `decide +kernel`.
-- `lake env lean scripts/Audit.lean` checks, with `import all`, that every declaration (10,888) depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext),
+- `lake env lean scripts/Audit.lean` checks, with `import all`, that every declaration (10,863) depends only on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext),
   [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound).
 - A route check compares each proof with the results the book's proof cites; every difference is
   recorded in [`docs/route_differences.tsv`](docs/route_differences.tsv).

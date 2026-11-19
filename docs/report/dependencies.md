@@ -67,7 +67,7 @@ Every declaration depends only on [`propext`](https://leanprover-community.githu
 
 - it imports every module of the library with `import all`, so that the proofs of module files are
   visible;
-- it reports "Checked 10888 declarations of the library: all use only the standard axioms";
+- it reports "Checked 10863 declarations of the library: all use only the standard axioms";
 - it checks the axioms of each numbered result, through the packages it uses, and of the three
   Challenge theorems.
 

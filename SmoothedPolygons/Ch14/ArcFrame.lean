@@ -5,23 +5,23 @@ public import SmoothedPolygons.Ch14.ArcParams
 import SmoothedPolygons.Ch7.Isolated.VertexFlow
 
 /-!
-# Chapter 14, N4: the eigenframe of an `e₂`-arc and the state along it (Proposition 1.1)
+# Chapter 14, N4: the eigenframe of an `e₂`-arc and the state along it (Proposition 2.1)
 
 Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
 computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
 computed figure (Figure 14.2, TeX 11951–11991; REPORT.md E88); the formalization proves it from
 the exact structure of the Reinhardt flow along an `e₂`-arc and an invariant region (see
 `SmoothedPolygons/Ch14/ArcParams.lean`, and `SmoothedPolygons/Ch14/ArcRegionInvariant.lean` for
-the numbering of the steps). This file is its first part, §1.1–§1.2: the frame in which
+the numbering of the steps). This file is its first part, §2: the frame in which
 `P = Z_{e₂}/⟨Z_{e₂}, X₀⟩` is diagonal, the star functions in it, and the state `X(t)` of the
 `e₂`-flow (`iso_vfX 1`) in closed form.
 
 ## Vocabulary
 
-* The frame (§1.1): `S = [[1, 1], [0, √3]]` (`arcFrameS`), `H = diag(1, -1)`, `E = e₁₂`,
+* The frame (§2): `S = [[1, 1], [0, √3]]` (`arcFrameS`), `H = diag(1, -1)`, `E = e₁₂`,
   `F = e₂₁`; a traceless matrix is `S (h H + e E + f F) S⁻¹ = ofFrame h e f`, with components
   `frameH`, `frameE`, `frameF`. In the frame `⟨M, N⟩ = 2 m_h n_h + m_e n_f + m_f n_e`,
-  `[H, E] = 2E`, `[H, F] = -2F`, `[E, F] = H`, and (1.2):
+  `[H, E] = 2E`, `[H, F] = -2F`, `[E, F] = H`, and (2.2):
   `Z_{e₁} = (F - H)/√3`, `Z_{e₂} = H/√3`, `Z_{e₃} = -(H + 4E)/√3`, `J = (-H - 4E + F)/√3`.
 * (1.1): for traceless `X`, `⟨X, Z_{e₁}⟩ = -(2/√3) ρ₂`, `⟨X, Z_{e₂}⟩ = -(2/√3) ρ₁`,
   `⟨X, Z_{e₃}⟩ = -(2/√3) ρ₀`, `Z_{e₁} + Z_{e₂} + Z_{e₃} = J`, `ρ₀ρ₁ + ρ₁ρ₂ + ρ₂ρ₀ = det X`.
@@ -38,16 +38,16 @@ the numbering of the steps). This file is its first part, §1.1–§1.2: the fra
 
 ## Statements
 
-* §1.1: `ofFrame_eq_conj`, `ofFrame_frame`, `frameH_ofFrame` …, `trace_ofFrame`,
+* §2: `ofFrame_eq_conj`, `ofFrame_frame`, `frameH_ofFrame` …, `trace_ofFrame`,
   `det_ofFrame`, `traceForm_ofFrame`, `ofFrame_mul_sub`, the linear algebra `ofFrame_add`,
   `ofFrame_sub`, `smul_ofFrame`, `ofFrame_zero`, the star functions `ρ_ofFrame`,
-  `frame_controlMatrix` (1.2), `traceForm_controlMatrix_vertex` and `controlMatrix_vertex_add`
+  `frame_controlMatrix` (2.2), `traceForm_controlMatrix_vertex` and `controlMatrix_vertex_add`
   (1.1), `ρ_mul_add`.
-* (1.3) and the frame of `X₀`: `arcEps_pos`, `one_lt_arcY`, `one_lt_arcY'`,
+* (2.1) and the frame of `X₀`: `arcEps_pos`, `one_lt_arcY`, `one_lt_arcY'`,
   `arcEps_sq_mul_arcY_mul_arcY'` (`ε² Y Y' = 1 + ε²`), `frame_state` (`X₀ = -ε H + x_e E + x_f F`,
   `x_e = -2εY`, `x_f = εY'/2`, `x_e x_f = -(1 + ε²)`; `state_eq_ofFrame`), `X00_eq_arcRadius`
   (`r = X₁₁ = ε(Y' - 2)/2`).
-* **Proposition 1.1** (1): `iso_vfP_one_eq` (`P = -ω H`, `ω = 1/(2ε)`), `iso_vfP_one_mul_self`
+* **Proposition 2.1** (1): `iso_vfP_one_eq` (`P = -ω H`, `ω = 1/(2ε)`), `iso_vfP_one_mul_self`
   (`P² = ω² I`), `det_iso_vfP_one` (`det P = -1/(4ε²) = det(X₀ + P)`), `exp_smul_iso_vfP_one`
   (`e^{tP} = cosh(ωt) I + ω⁻¹ sinh(ωt) P`), `exp_conj_ofFrame` (`Ad e^{tP}` fixes `H` and scales
   `E`, `F` by `u = e^{-t/ε}`, `u⁻¹`).
@@ -58,17 +58,17 @@ the numbering of the steps). This file is its first part, §1.1–§1.2: the fra
   (4): `iso_vfX_one_Φ` (in the upper half-plane, `z(t) - 1/√3 = e^{-t/ε}(z(0) - 1/√3)`: the state
   runs along a Euclidean ray into the cusp `1/√3` of the ideal triangle `𝔥*`).
 
-## Proofs (the route, §1.1–§1.2)
+## Proofs (the route, §2)
 
 1. The frame identities: `ofFrame h e f = [[h + f, (e - 2h - f)/√3], [√3 f, -(h + f)]]` is
    `S [[h, e], [f, -h]] S⁻¹` (`Matrix.inv_def`, `det S = √3`); the components invert it on
-   traceless matrices. `traceForm_ofFrame`, `ofFrame_mul_sub`, `det_ofFrame`, (1.2), (1.1),
+   traceless matrices. `traceForm_ofFrame`, `ofFrame_mul_sub`, `det_ofFrame`, (2.2), (1.1),
    `ρ_mul_add`: entrywise (`Matrix.trace_fin_two`, `Matrix.det_fin_two`, `Matrix.mul_apply`,
    `Fin.sum_univ_two`), `field_simp`, `ring`, `Real.sq_sqrt`.
-2. (1.3): `ε² (1 + ρ₂/ε)(1 + ρ₀/ε) = (ε + ρ₂)(ε + ρ₀) = ε² + (ρ₀ρ₁ + ρ₁ρ₂ + ρ₂ρ₀) = ε² + 1`.
-   `frame_state`: compare (1.2) with (1.1): `x_h = -ε`, `x_e = -2(ρ₂ + ε)`, `x_f = (ρ₀ + ε)/2`;
+2. (2.1): `ε² (1 + ρ₂/ε)(1 + ρ₀/ε) = (ε + ρ₂)(ε + ρ₀) = ε² + (ρ₀ρ₁ + ρ₁ρ₂ + ρ₂ρ₀) = ε² + 1`.
+   `frame_state`: compare (2.2) with (1.1): `x_h = -ε`, `x_e = -2(ρ₂ + ε)`, `x_f = (ρ₀ + ε)/2`;
    `det X₀ = 1` reads `x_e x_f = -(1 + ε²)` (`det_ofFrame`).
-3. Proposition 1.1 (1): `iso_vfP 1 q = controlP (vertex 1) q.1 = ⟨Z_{e₂}, X₀⟩⁻¹ Z_{e₂}` with
+3. Proposition 2.1 (1): `iso_vfP 1 q = controlP (vertex 1) q.1 = ⟨Z_{e₂}, X₀⟩⁻¹ Z_{e₂}` with
    `⟨Z_{e₂}, X₀⟩ = -(2/√3) ε` and `Z_{e₂} = ofFrame (1/√3) 0 0`. `P² = ω² I` from the frame; `det`
    from `det_ofFrame`; `det(X₀ + P) = det P` (Lemma 7.1.3, `lemma7_1_3`) is read off the frame:
    `X₀ + P = -(ε + ω) H + x_e E + x_f F`, so `det(X₀ + P) = -((ε + ω)² + x_e x_f) =
@@ -79,7 +79,7 @@ the numbering of the steps). This file is its first part, §1.1–§1.2: the fra
 4. (2): `iso_vfX 1 q t = e^{tP} X₀ e^{-tP}` (`constControlX`) and steps 2–3; the `ρ`'s from the
    components (`ρ₁ = -x_h`, `ρ₂ = -x_e/2 - ρ₁`, `ρ₀ = 2 x_f - ρ₁`).
 5. (3): `ρ₁(t) = ε > 0`, `ρ₀(t) ≥ ρ₀(0) > 0` for `t ≥ 0` (`Y' e^{t/ε} ≥ Y' > 1`); `X(t)` is
-   traceless, and `det X(t) = -(ε² - ε² Y Y') = 1` by `det_ofFrame` and (1.3) (the factors `u`,
+   traceless, and `det X(t) = -(ε² - ε² Y Y') = 1` by `det_ofFrame` and (2.1) (the factors `u`,
    `u⁻¹` cancel); `ρ₂(t) > 0 ⟺ e^{-t/ε} > 1/Y ⟺ t < ε log Y`
    (`Y > 1`). `ρ₂(T) = ε(Y/Y - 1) = 0`; `ρ₂'(t) = -Y e^{-t/ε} = -1` at `t = T`.
 6. (4): with `X₀ = Φ(x, y)` (`y > 0`), `iso_vfX_one_eq` and the entries of `Φ`: both sides are
@@ -97,9 +97,9 @@ namespace SmoothedPolygons
 
 open Set Filter Topology
 
-/-! ### The frame (§1.1) -/
+/-! ### The frame (§2) -/
 
-/-- The frame matrix `S = [[1, 1], [0, √3]]` (§1.1): `S⁻¹ Z_{e₂} S = H/√3`. -/
+/-- The frame matrix `S = [[1, 1], [0, √3]]` (§2): `S⁻¹ Z_{e₂} S = H/√3`. -/
 noncomputable def arcFrameS : Mat2 := !![1, 1; 0, √3]
 
 /-- The traceless matrix with frame components `(h, e, f)`: `S (h H + e E + f F) S⁻¹`
@@ -116,13 +116,13 @@ noncomputable def frameE (M : Mat2) : ℝ := √3 * M 0 1 + 2 * M 0 0 - M 1 0 / 
 /-- The `F`-component of a traceless matrix in the frame. -/
 noncomputable def frameF (M : Mat2) : ℝ := M 1 0 / √3
 
-/-- **A section point** (§1.1): a point of Chapter 7's Poincaré section `N_{9/4}`
+/-- **A section point** (§2): a point of Chapter 7's Poincaré section `N_{9/4}`
 (`X, Λ₁, Λ_R` traceless, `det X = 1`, `⟨X, Λ_R⟩ = 0`, `H(e₃) = 0`, `χ₂₃ = 0`, `det Λ₁ = 9/4`) whose
 state is a star state. On it `H(e₂) = H(e₃) = 0`. -/
 def IsArcSectionPt (q : iso_PhasePt) : Prop := q ∈ iso_sectionN (9 / 4) ∧ IsStarState q.1
 
 /-- **The cleared switching numerator** `N_ij = ⟨Λ_R, Z_j⟩⟨X, Z_i⟩ - ⟨Λ_R, Z_i⟩⟨X, Z_j⟩`
-(§1.1), `Z_k = Z_{e_k}`; it is `χ_ij ⟨X, Z_i⟩⟨X, Z_j⟩` (`switchingNum_eq`). -/
+(§2), `Z_k = Z_{e_k}`; it is `χ_ij ⟨X, Z_i⟩⟨X, Z_j⟩` (`switchingNum_eq`). -/
 noncomputable def switchingNum (i j : Fin 3) (q : iso_PhasePt) : ℝ :=
   traceForm q.2.2 (controlMatrix (vertex j)) * traceForm q.1 (controlMatrix (vertex i)) -
     traceForm q.2.2 (controlMatrix (vertex i)) * traceForm q.1 (controlMatrix (vertex j))
@@ -130,16 +130,16 @@ noncomputable def switchingNum (i j : Fin 3) (q : iso_PhasePt) : ℝ :=
 /-- `ε = ρ₁(X₀)`, the constant value of `ρ₁` along the `e₂`-arc from `q`. -/
 noncomputable def arcEps (q : iso_PhasePt) : ℝ := ρ₁ q.1
 
-/-- `Y = 1 + ρ₂(X₀)/ε` ((1.3)). -/
+/-- `Y = 1 + ρ₂(X₀)/ε` ((2.1)). -/
 noncomputable def arcY (q : iso_PhasePt) : ℝ := 1 + ρ₂ q.1 / ρ₁ q.1
 
-/-- `Y' = 1 + ρ₀(X₀)/ε` ((1.3)). -/
+/-- `Y' = 1 + ρ₀(X₀)/ε` ((2.1)). -/
 noncomputable def arcY' (q : iso_PhasePt) : ℝ := 1 + ρ₀ q.1 / ρ₁ q.1
 
-/-- **The exit time** `T = ε log Y` of the `e₂`-arc from `q` (Proposition 1.1 (3)). -/
+/-- **The exit time** `T = ε log Y` of the `e₂`-arc from `q` (Proposition 2.1 (3)). -/
 noncomputable def arcExitTime (q : iso_PhasePt) : ℝ := ρ₁ q.1 * Real.log (arcY q)
 
-/-! ### Frame identities, (1.1) and (1.2) -/
+/-! ### Frame identities, (1.1) and (2.2) -/
 
 private lemma sqrt_three_pos : (0 : ℝ) < √3 := Real.sqrt_pos.2 (by norm_num)
 private lemma sqrt_three_ne_zero : (√3 : ℝ) ≠ 0 := sqrt_three_pos.ne'
@@ -231,7 +231,7 @@ theorem ρ_ofFrame (h e f : ℝ) :
   · linear_combination (e - 2 * h - f) * h3
   · ring
 
-/-- **(1.2)**: `Z_{e₁} = (F - H)/√3`, `Z_{e₂} = H/√3`, `Z_{e₃} = -(H + 4E)/√3`,
+/-- **(2.2)**: `Z_{e₁} = (F - H)/√3`, `Z_{e₂} = H/√3`, `Z_{e₃} = -(H + 4E)/√3`,
 `J = (-H - 4E + F)/√3` in the frame. -/
 theorem frame_controlMatrix :
     controlMatrix (vertex 0) = ofFrame (-(1 / √3)) 0 (1 / √3) ∧
@@ -333,7 +333,7 @@ theorem switchingFn_eq_zero_iff (i j : Fin 3) {q : iso_PhasePt} (hX : IsStarStat
   obtain ⟨he, hp⟩ := switchingNum_eq_switchingFn_mul_pos i j hX
   rw [he, mul_eq_zero, or_iff_left hp.ne']
 
-/-! ### (1.3) and the frame of the initial state -/
+/-! ### (2.1) and the frame of the initial state -/
 
 variable {q : iso_PhasePt}
 
@@ -355,7 +355,7 @@ private lemma arcEps_mul_arcY_and_arcY' (hε : ρ₁ q.1 ≠ 0) :
   unfold arcEps arcY arcY'
   constructor <;> field_simp
 
-/-- **(1.3)**: `ε² Y Y' = 1 + ε²`. -/
+/-- **(2.1)**: `ε² Y Y' = 1 + ε²`. -/
 theorem arcEps_sq_mul_arcY_mul_arcY' (hX : IsStarState q.1) :
     arcEps q ^ 2 * arcY q * arcY' q = 1 + arcEps q ^ 2 := by
   obtain ⟨h1, h2⟩ := arcEps_mul_arcY_and_arcY' hX.2.2.2.1.ne'
@@ -366,7 +366,7 @@ theorem arcEps_sq_mul_arcY_mul_arcY' (hX : IsStarState q.1) :
   unfold arcEps
   linear_combination hd
 
-/-- **The initial state in the frame** (Proposition 1.1 (1)): `X₀ = -ε H + x_e E + x_f F` with
+/-- **The initial state in the frame** (Proposition 2.1 (1)): `X₀ = -ε H + x_e E + x_f F` with
 `x_e = -2εY`, `x_f = εY'/2`, and `x_e x_f = -(1 + ε²)` (`det X₀ = 1`). -/
 theorem frame_state (hX : IsStarState q.1) :
     frameH q.1 = -arcEps q ∧ frameE q.1 = -2 * arcEps q * arcY q ∧
@@ -385,7 +385,7 @@ theorem frame_state (hX : IsStarState q.1) :
   rw [ofFrame_frame hX.1, hX.2.1, hH] at hd
   linear_combination hd
 
-/-- **The chart radius** `r = X₁₁ = (ρ₀ - ρ₁)/2 = ε (Y' - 2)/2` (Theorem 2.1), for every matrix
+/-- **The chart radius** `r = X₁₁ = (ρ₀ - ρ₁)/2 = ε (Y' - 2)/2` (Theorem 5.1), for every matrix
 `X₀` with `ρ₁(X₀) ≠ 0` (`ρ₀ - ρ₁ = 2 X₁₁` needs no trace condition). -/
 theorem X00_eq_arcRadius (hε : ρ₁ q.1 ≠ 0) :
     q.1 0 0 = arcEps q * (arcY' q - 2) / 2 := by
@@ -396,7 +396,7 @@ theorem X00_eq_arcRadius (hε : ρ₁ q.1 ≠ 0) :
   field_simp
   ring
 
-/-! ### Proposition 1.1: the state along the `e₂`-arc -/
+/-! ### Proposition 2.1: the state along the `e₂`-arc -/
 
 /-- **The initial state in the frame**: `X₀ = ofFrame (-ε) (-2εY) (εY'/2)` (`frame_state`). -/
 theorem state_eq_ofFrame (hX : IsStarState q.1) :
@@ -404,7 +404,7 @@ theorem state_eq_ofFrame (hX : IsStarState q.1) :
   obtain ⟨hH, hE, hF, -⟩ := frame_state hX
   rw [← hH, ← hE, ← hF, ofFrame_frame hX.1]
 
-/-- **Proposition 1.1 (1)**: `P = Z_{e₂}/⟨Z_{e₂}, X₀⟩ = -ω H`, `ω = 1/(2ε)`. -/
+/-- **Proposition 2.1 (1)**: `P = Z_{e₂}/⟨Z_{e₂}, X₀⟩ = -ω H`, `ω = 1/(2ε)`. -/
 theorem iso_vfP_one_eq (hX : IsStarState q.1) :
     iso_vfP 1 q = ofFrame (-(1 / (2 * arcEps q))) 0 0 := by
   have hε := (arcEps_pos hX).ne'
@@ -417,14 +417,14 @@ theorem iso_vfP_one_eq (hX : IsStarState q.1) :
   · field_simp
   all_goals simp
 
-/-- **Proposition 1.1 (1)**: `P² = ω² I`. -/
+/-- **Proposition 2.1 (1)**: `P² = ω² I`. -/
 theorem iso_vfP_one_mul_self (hX : IsStarState q.1) :
     iso_vfP 1 q * iso_vfP 1 q = (1 / (2 * arcEps q)) ^ 2 • (1 : Mat2) := by
   have := sqrt_three_ne_zero
   rw [iso_vfP_one_eq hX]
   ext i j; fin_cases i <;> fin_cases j <;> simp [ofFrame, Matrix.mul_apply] <;> ring
 
-/-- **Proposition 1.1 (1)**: `det P = -1/(4ρ₁²)` and `det(X₀ + P) = det P`. -/
+/-- **Proposition 2.1 (1)**: `det P = -1/(4ρ₁²)` and `det(X₀ + P) = det P`. -/
 theorem det_iso_vfP_one (hX : IsStarState q.1) :
     (iso_vfP 1 q).det = -1 / (4 * arcEps q ^ 2) ∧
       (q.1 + iso_vfP 1 q).det = (iso_vfP 1 q).det := by
@@ -439,7 +439,7 @@ theorem det_iso_vfP_one (hX : IsStarState q.1) :
   field_simp
   ring
 
-/-- **Proposition 1.1 (1)**: `e^{tP} = cosh(ωt) I + ω⁻¹ sinh(ωt) P`, `ω = 1/(2ε)`. -/
+/-- **Proposition 2.1 (1)**: `e^{tP} = cosh(ωt) I + ω⁻¹ sinh(ωt) P`, `ω = 1/(2ε)`. -/
 theorem exp_smul_iso_vfP_one (hX : IsStarState q.1) (t : ℝ) :
     NormedSpace.exp (t • iso_vfP 1 q) =
       Real.cosh (t / (2 * arcEps q)) • (1 : Mat2) +
@@ -467,7 +467,7 @@ private lemma exp_smul_iso_vfP_one_eq_entries (hX : IsStarState q.1) (t : ℝ) :
   rw [exp_smul_iso_vfP_one hX, iso_vfP_one_eq hX, Real.cosh_eq, Real.sinh_eq]
   ext i j; fin_cases i <;> fin_cases j <;> simp [ofFrame] <;> field_simp <;> ring
 
-/-- **Proposition 1.1 (1)**: `Ad e^{tP}` in the frame fixes `H` and multiplies `E`, `F` by
+/-- **Proposition 2.1 (1)**: `Ad e^{tP}` in the frame fixes `H` and multiplies `E`, `F` by
 `u = e^{-t/ε}` and `u⁻¹`. -/
 theorem exp_conj_ofFrame (hX : IsStarState q.1) (t h e f : ℝ) :
     NormedSpace.exp (t • iso_vfP 1 q) * ofFrame h e f * NormedSpace.exp (-t • iso_vfP 1 q) =
@@ -486,14 +486,14 @@ theorem exp_conj_ofFrame (hX : IsStarState q.1) (t h e f : ℝ) :
   ext i j; fin_cases i <;> fin_cases j <;>
     simp [ofFrame, Matrix.mul_apply, Fin.sum_univ_two] <;> field_simp <;> ring_nf
 
-/-- **Proposition 1.1 (2)**: `X(t) = -ε H + x_e u E + x_f u⁻¹ F`, `u = e^{-t/ε}`. -/
+/-- **Proposition 2.1 (2)**: `X(t) = -ε H + x_e u E + x_f u⁻¹ F`, `u = e^{-t/ε}`. -/
 theorem iso_vfX_one_eq (hX : IsStarState q.1) (t : ℝ) :
     iso_vfX 1 q t = ofFrame (-arcEps q) (-2 * arcEps q * arcY q * Real.exp (-t / arcEps q))
       (arcEps q * arcY' q / 2 * Real.exp (t / arcEps q)) := by
   rw [iso_vfX, constControlX, state_eq_ofFrame hX, exp_conj_ofFrame hX]
   congr 1 <;> ring
 
-/-- **Proposition 1.1 (2)**: `ρ₁(t) = ε`, `ρ₂(t) = ε(Y e^{-t/ε} - 1)`, `ρ₀(t) = ε(Y' e^{t/ε} - 1)`
+/-- **Proposition 2.1 (2)**: `ρ₁(t) = ε`, `ρ₂(t) = ε(Y e^{-t/ε} - 1)`, `ρ₀(t) = ε(Y' e^{t/ε} - 1)`
 along the `e₂`-arc. -/
 theorem ρ_iso_vfX_one (hX : IsStarState q.1) (t : ℝ) :
     ρ₁ (iso_vfX 1 q t) = arcEps q ∧
@@ -509,7 +509,7 @@ theorem ρ_iso_vfX_one (hX : IsStarState q.1) (t : ℝ) :
 theorem arcExitTime_pos (hX : IsStarState q.1) : 0 < arcExitTime q :=
   mul_pos hX.2.2.2.1 (Real.log_pos (one_lt_arcY hX))
 
-/-- **Proposition 1.1 (3)**: for `t ≥ 0`, `X(t)` is a star state iff `t < T = ε log Y`: the arc
+/-- **Proposition 2.1 (3)**: for `t ≥ 0`, `X(t)` is a star state iff `t < T = ε log Y`: the arc
 leaves `𝔥*` exactly at `T`, through `ρ₂ = 0` (`ρ₁` is constant and `ρ₀` increases). -/
 theorem isStarState_iso_vfX_one_iff (hX : IsStarState q.1) {t : ℝ} (ht : 0 ≤ t) :
     IsStarState (iso_vfX 1 q t) ↔ t < arcExitTime q := by
@@ -539,7 +539,7 @@ theorem isStarState_iso_vfX_one_iff (hX : IsStarState q.1) {t : ℝ} (ht : 0 ≤
   rw [← hρ₂]
   exact ⟨fun h ↦ h.2.2.2.2, fun h ↦ ⟨htr, hdet, hρ₀, h1 ▸ hε, h⟩⟩
 
-/-- **Proposition 1.1 (3)**: `ρ₂(X(T)) = 0`. -/
+/-- **Proposition 2.1 (3)**: `ρ₂(X(T)) = 0`. -/
 theorem ρ₂_iso_vfX_one_arcExitTime (hX : IsStarState q.1) :
     ρ₂ (iso_vfX 1 q (arcExitTime q)) = 0 := by
   have hε : ρ₁ q.1 ≠ 0 := (arcEps_pos hX).ne'
@@ -549,7 +549,7 @@ theorem ρ₂_iso_vfX_one_arcExitTime (hX : IsStarState q.1) :
       unfold arcEps; field_simp,
     Real.exp_neg, Real.exp_log hY0, mul_inv_cancel₀ hY0.ne', sub_self, mul_zero]
 
-/-- **Proposition 1.1 (3)**: `ρ₂'(T) = -1` (the transversal exit, the "`-1.000`" of the numerical
+/-- **Proposition 2.1 (3)**: `ρ₂'(T) = -1` (the transversal exit, the "`-1.000`" of the numerical
 check). -/
 theorem hasDerivAt_ρ₂_iso_vfX_one (hX : IsStarState q.1) :
     HasDerivAt (fun t ↦ ρ₂ (iso_vfX 1 q t)) (-1) (arcExitTime q) := by
@@ -567,7 +567,7 @@ theorem hasDerivAt_ρ₂_iso_vfX_one (hX : IsStarState q.1) :
   unfold arcEps
   field_simp
 
-/-- **Proposition 1.1 (4)**: in the upper half-plane (`X₀ = Φ(z)`, `z = x + iy`),
+/-- **Proposition 2.1 (4)**: in the upper half-plane (`X₀ = Φ(z)`, `z = x + iy`),
 `z(t) - 1/√3 = e^{-t/ε} (z(0) - 1/√3)`: the state runs along a Euclidean ray into the cusp `1/√3`
 of the ideal triangle `𝔥*`, at the angle fixed by `ρ₁ = ε`. -/
 theorem iso_vfX_one_Φ (hX : IsStarState q.1) {x y : ℝ} (hy : 0 < y) (hq : q.1 = Φ x y) (t : ℝ) :

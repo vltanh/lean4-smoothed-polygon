@@ -4,7 +4,7 @@ public import SmoothedPolygons.Ch14.ArcFrame
 import SmoothedPolygons.Ch7.Isolated.VertexFlow
 
 /-!
-# Chapter 14, N4: the costate along an `e₂`-arc (Lemma 1.2 and the quadratures)
+# Chapter 14, N4: the costate along an `e₂`-arc (Lemma 2.2 and the quadratures)
 
 Part of the formalization's proof of N4 (`UnstableCurveLeavesStarDomain`, Figure 14.2) without
 computer assistance. **Departure from the paper**, by the user's decision: the book reads N4 off a
@@ -13,11 +13,11 @@ the exact structure of the Reinhardt flow along an `e₂`-arc and an invariant r
 `SmoothedPolygons/Ch14/ArcParams.lean`, and `SmoothedPolygons/Ch14/ArcRegionInvariant.lean` for
 the numbering of the steps).
 
-This file is §1.3, first half: the nilpotent eigenvectors `V_e`, `V_f` of `ad(X₀ + P)`
-(Lemma 1.2), the closed form of `M(t)` and `c(t)` (`iso_vfM`, `iso_vfC`), and the two scalar
+This file is §2, first half: the nilpotent eigenvectors `V_e`, `V_f` of `ad(X₀ + P)`
+(Lemma 2.2), the closed form of `M(t)` and `c(t)` (`iso_vfM`, `iso_vfC`), and the two scalar
 functions `φ_e`, `φ_f` whose derivatives are pairings of `M(t)` with `V_e`, `V_f`. The normal form
-of the cleared switching numerators (Theorem 1.3, `SmoothedPolygons/Ch14/ArcNormalForm.lean`)
-integrates these. It also holds INV (1.4), the costate in a moving eigenbasis
+of the cleared switching numerators (Theorem 2.3, `SmoothedPolygons/Ch14/ArcNormalForm.lean`)
+integrates these. It also holds (5.4), the costate in a moving eigenbasis
 (`iso_vfΛ₁_one_eq`).
 
 ## Notation
@@ -31,7 +31,7 @@ integrates these. It also holds INV (1.4), the costate in a moving eigenbasis
 
 ## Statements
 
-* **Lemma 1.2** (`arcVe`, `arcVf`, `trace_arcVe`, `det_arcVe`, …, `commutator_arcVe`,
+* **Lemma 2.2** (`arcVe`, `arcVf`, `trace_arcVe`, `det_arcVe`, …, `commutator_arcVe`,
   `commutator_arcVf`, `exp_conj_arcVe`, `exp_conj_arcVf`): the nilpotent matrices
   `V_e = x_e H - 2ω x_e² E + ε F`, `V_f = x_f H + ε E - 2ω x_f² F` satisfy `[A, V_e] = -2ω V_e`,
   `[A, V_f] = 2ω V_f`, hence `e^{tA} V_e e^{-tA} = u V_e`, `e^{tA} V_f e^{-tA} = u⁻¹ V_f`.
@@ -44,16 +44,16 @@ integrates these. It also holds INV (1.4), the costate in a moving eigenbasis
 * `traceForm_iso_vfM_arcVe`, `traceForm_iso_vfM_arcVf`:
   `⟨M(t), V_e⟩ = u ⟨Λ₁(0), V_e⟩ - (√3/2)(2x_e + x_e² u/ε + 4ε/u)` and
   `⟨M(t), V_f⟩ = u⁻¹ ⟨Λ₁(0), V_f⟩ + (√3/2)(-2x_f + ε u + 4x_f²/(ε u))`.
-* `iso_vfΛ₁_one_eq` (INV (1.4), the first step of INV Theorem 1): the costate has
+* `iso_vfΛ₁_one_eq` ((5.4), the first step of Theorem 5.1): the costate has
   constant coefficients in the moving eigenbasis,
   `Λ₁(t) = α (X(t) + P) + β u⁻² V_e(X(t)) + γ u² V_f(X(t))`, `α = 2ε² ⟨Λ₁(0), X₀ + P⟩`,
   `β = ε² ⟨Λ₁(0), V_f⟩`, `γ = ε² ⟨Λ₁(0), V_e⟩`. On a section point the coefficients are explicit
   in the parameters (`iso_vfΛ₁_one_eq_arcParams`, `SmoothedPolygons/Ch14/ArcPoincareMap.lean`);
-  this gives the parameters of the image without the quadratures and without Lemma 2.3.
+  this gives the parameters of the image without the quadratures and without Lemma 4.1.
 
-## Proofs (the route, §1.3)
+## Proofs (the route, §2)
 
-1. Lemma 1.2: `A = -(ε + ω) H + x_e E + x_f F` (`iso_vfP_one_eq`, `frame_state`); by
+1. Lemma 2.2: `A = -(ε + ω) H + x_e E + x_f F` (`iso_vfP_one_eq`, `frame_state`); by
    `ofFrame_mul_sub` the `H`, `E`, `F` coefficients of `[A, V_e]` are
    `ε x_e + 2ω x_e² x_f = -2ω x_e`,
    `2x_e²(2ω(ε + ω) - 1) = 4ω² x_e²`, `2(x_e x_f + ε(ε + ω)) = -1 = -2ωε`, using
@@ -71,7 +71,7 @@ integrates these. It also holds INV (1.4), the costate in a moving eigenbasis
    invariance of the trace form); `⟨Λ_R(t), P⟩ = c(t)` (`ivf_vfC_eq`).
 4. `switchingNum_iso_vertexFlow_one`: `⟨X(t), Z_{e₂}⟩ = ⟨X₀, Z_{e₂}⟩ = -2ε/√3`, and
    `⟨Λ_R, Z_{e₂}⟩ = c ⟨X, Z_{e₂}⟩`, so `N₂₁ = ⟨X, Z_{e₂}⟩ (⟨Λ_R, Z_{e₁}⟩ - c ⟨X, Z_{e₁}⟩)`. By
-   `exp_conj_ofFrame` and (1.2), `e^{-tP} Z_{e₁} e^{tP} = (u F - H)/√3`, and
+   `exp_conj_ofFrame` and (2.2), `e^{-tP} Z_{e₁} e^{tP} = (u F - H)/√3`, and
    `c = ⟨Λ̃, P⟩ = -2ω Λ̃_h`; with `X(t) = -εH + x_e u E + x_f u⁻¹ F` this gives
    `⟨Λ_R, Z_{e₁}⟩ - c⟨X, Z_{e₁}⟩ = (1/√3)(u Λ̃_e - 2Λ̃_h + 2ω Λ̃_h(x_e u + 2ε)) = (u/√3) φ_e`.
    Likewise `e^{-tP} Z_{e₃} e^{tP} = -(H + 4u⁻¹ E)/√3` and
@@ -87,12 +87,12 @@ integrates these. It also holds INV (1.4), the costate in a moving eigenbasis
    `c = ⟨M, X₀⟩ = -2ε m_h + x_f m_e + x_e m_f`. Substituting and using `x_e x_f = -(1 + ε²)`,
    `2ωε = 1`, everything collapses to `φ_e' = -4x_e m_h - 2ε m_e + 4ω x_e² m_f = -2⟨M, V_e⟩`;
    the same computation gives `φ_f' = 2⟨M, V_f⟩`. (Without `H(e₂) = 0` there is an extra term
-   `-2ω x_e H(e₂)`: the four-term form of Theorem 1.3 survives but not its universal coefficients.)
+   `-2ω x_e H(e₂)`: the four-term form of Theorem 2.3 survives but not its universal coefficients.)
 6. `traceForm_iso_vfM_arcVe`: step 2 and step 1: `⟨e^{-tA} Λ₁(0) e^{tA}, V_e⟩ =
    ⟨Λ₁(0), e^{tA} V_e e^{-tA}⟩ = u ⟨Λ₁(0), V_e⟩`; `e^{tP} V_e e^{-tP} = x_e H - 2ω x_e² u E +
-   ε u⁻¹ F` (`exp_conj_ofFrame`), and `⟨J, a H + b E + c F⟩ = (-2a + b - 4c)/√3` ((1.2),
+   ε u⁻¹ F` (`exp_conj_ofFrame`), and `⟨J, a H + b E + c F⟩ = (-2a + b - 4c)/√3` ((2.2),
    `traceForm_ofFrame`). The same for `V_f` (`e^{tP} V_f e^{-tP} = x_f H + ε u E - 2ω x_f² u⁻¹ F`).
-7. `iso_vfΛ₁_one_eq` (INV Theorem 1 (i)): see its docstring.
+7. `iso_vfΛ₁_one_eq` (Theorem 5.1 (i)): see its docstring.
 
 All of these were also checked numerically, while the statements were written, against a literal
 model of the Lean definitions (matrix exponentials, the quadratures of `iso_vfC` and `iso_vfΛR`
@@ -105,11 +105,11 @@ namespace SmoothedPolygons
 
 open Set Filter Topology
 
-/-- **`V_e`** (Lemma 1.2): `x_e H - 2ω x_e² E + ε F` in the frame of `X₀`, `ω = 1/(2ε)`,
+/-- **`V_e`** (Lemma 2.2): `x_e H - 2ω x_e² E + ε F` in the frame of `X₀`, `ω = 1/(2ε)`,
 `x_e = frameE X₀`, `ε = ρ₁(X₀)`. -/
 noncomputable def arcVe (X : Mat2) : Mat2 := ofFrame (frameE X) (-(frameE X) ^ 2 / ρ₁ X) (ρ₁ X)
 
-/-- **`V_f`** (Lemma 1.2): `x_f H + ε E - 2ω x_f² F` in the frame of `X₀`, `x_f = frameF X₀`. -/
+/-- **`V_f`** (Lemma 2.2): `x_f H + ε E - 2ω x_f² F` in the frame of `X₀`, `x_f = frameF X₀`. -/
 noncomputable def arcVf (X : Mat2) : Mat2 := ofFrame (frameF X) (ρ₁ X) (-(frameF X) ^ 2 / ρ₁ X)
 
 /-- `Λ̃(t) = e^{-tP} Λ_R(t) e^{tP}`, `P = iso_vfP 1 q`: the costate `Λ_R` of the `e₂`-flow in the
@@ -117,11 +117,11 @@ frame rotating with `e^{tP}`. -/
 noncomputable def arcLamTilde (q : iso_PhasePt) (t : ℝ) : Mat2 :=
   NormedSpace.exp (-t • iso_vfP 1 q) * iso_vfΛR 1 q t * NormedSpace.exp (t • iso_vfP 1 q)
 
-/-- `φ_e(t) = Λ̃_e(t) - x_e c(t)` (proof of Theorem 1.3): `N₂₁(t) = -(2ε/3) u φ_e(t)`. -/
+/-- `φ_e(t) = Λ̃_e(t) - x_e c(t)` (proof of Theorem 2.3): `N₂₁(t) = -(2ε/3) u φ_e(t)`. -/
 noncomputable def arcPhiE (q : iso_PhasePt) (t : ℝ) : ℝ :=
   frameE (arcLamTilde q t) - frameE q.1 * iso_vfC 1 q t
 
-/-- `φ_f(t) = Λ̃_f(t) - x_f c(t)` (proof of Theorem 1.3): `N₂₃(t) = (8ε/3) u⁻¹ φ_f(t)`. -/
+/-- `φ_f(t) = Λ̃_f(t) - x_f c(t)` (proof of Theorem 2.3): `N₂₃(t) = (8ε/3) u⁻¹ φ_f(t)`. -/
 noncomputable def arcPhiF (q : iso_PhasePt) (t : ℝ) : ℝ :=
   frameF (arcLamTilde q t) - frameF q.1 * iso_vfC 1 q t
 
@@ -179,7 +179,7 @@ private lemma traceForm_add_smul_one (N Y : Mat2) (d : ℝ) :
   simp only [traceForm, Matrix.add_mul, Matrix.trace_add, Matrix.smul_mul, Matrix.one_mul,
     Matrix.trace_smul, smul_eq_mul]
 
-/-- `(3/2) ⟨J, h H + e E + f F⟩ = (√3/2)(-2h + e - 4f)` ((1.2)). -/
+/-- `(3/2) ⟨J, h H + e E + f F⟩ = (√3/2)(-2h + e - 4f)` ((2.2)). -/
 private lemma three_halves_mul_traceForm_J_ofFrame (h e f : ℝ) :
     (3 / 2 : ℝ) * traceForm J (ofFrame h e f) = √3 / 2 * (-2 * h + e - 4 * f) := by
   have h3 : √3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
@@ -269,7 +269,7 @@ private lemma exp_neg_conj_ofFrame (hX : IsStarState q.1) (t h e f : ℝ) :
   simp only [neg_neg] at this
   exact this
 
-/-! ### Lemma 1.2 -/
+/-! ### Lemma 2.2 -/
 
 /-- `V_e` is nilpotent: traceless with determinant `0`. -/
 theorem trace_arcVe (X : Mat2) : (arcVe X).trace = 0 := trace_ofFrame _ _ _
@@ -307,21 +307,21 @@ private lemma commutator_arcVf_ofFrame {ε xe xf : ℝ} (hε : ε ≠ 0) (hd : x
   rw [ofFrame_mul_sub, smul_ofFrame]
   congr 1 <;> field_simp <;> ring
 
-/-- **Lemma 1.2**: `[X₀ + P, V_e] = -2ω V_e = -(1/ε) V_e`. -/
+/-- **Lemma 2.2**: `[X₀ + P, V_e] = -2ω V_e = -(1/ε) V_e`. -/
 theorem commutator_arcVe (hX : IsStarState q.1) :
     (q.1 + iso_vfP 1 q) * arcVe q.1 - arcVe q.1 * (q.1 + iso_vfP 1 q) =
       -(1 / arcEps q) • arcVe q.1 := by
   rw [state_add_iso_vfP_one_eq_ofFrame hX]
   exact commutator_arcVe_ofFrame (arcEps_pos hX).ne' (frame_state hX).2.2.2
 
-/-- **Lemma 1.2**: `[X₀ + P, V_f] = 2ω V_f = (1/ε) V_f`. -/
+/-- **Lemma 2.2**: `[X₀ + P, V_f] = 2ω V_f = (1/ε) V_f`. -/
 theorem commutator_arcVf (hX : IsStarState q.1) :
     (q.1 + iso_vfP 1 q) * arcVf q.1 - arcVf q.1 * (q.1 + iso_vfP 1 q) =
       (1 / arcEps q) • arcVf q.1 := by
   rw [state_add_iso_vfP_one_eq_ofFrame hX]
   exact commutator_arcVf_ofFrame (arcEps_pos hX).ne' (frame_state hX).2.2.2
 
-/-- **Lemma 1.2**: `e^{tA} V_e e^{-tA} = u V_e`, `A = X₀ + P`, `u = e^{-t/ε}`. -/
+/-- **Lemma 2.2**: `e^{tA} V_e e^{-tA} = u V_e`, `A = X₀ + P`, `u = e^{-t/ε}`. -/
 theorem exp_conj_arcVe (hX : IsStarState q.1) (t : ℝ) :
     NormedSpace.exp (t • (q.1 + iso_vfP 1 q)) * arcVe q.1 *
         NormedSpace.exp (-t • (q.1 + iso_vfP 1 q)) =
@@ -330,7 +330,7 @@ theorem exp_conj_arcVe (hX : IsStarState q.1) (t : ℝ) :
   congr 2
   ring
 
-/-- **Lemma 1.2**: `e^{tA} V_f e^{-tA} = u⁻¹ V_f`. -/
+/-- **Lemma 2.2**: `e^{tA} V_f e^{-tA} = u⁻¹ V_f`. -/
 theorem exp_conj_arcVf (hX : IsStarState q.1) (t : ℝ) :
     NormedSpace.exp (t • (q.1 + iso_vfP 1 q)) * arcVf q.1 *
         NormedSpace.exp (-t • (q.1 + iso_vfP 1 q)) =
@@ -364,7 +364,7 @@ private lemma iso_vfΛ₁_eq_conj (m : Fin 3) (q : iso_PhasePt) (t : ℝ) :
   unfold iso_vfG constControlG
   simp only [Matrix.mul_assoc]
 
-/-- `M(t) = e^{-tA} Λ₁(0) e^{tA} + (3/2) e^{-tP} J e^{tP}`, `A = X₀ + P` (§1.3), for every vertex
+/-- `M(t) = e^{-tA} Λ₁(0) e^{tA} + (3/2) e^{-tP} J e^{tP}`, `A = X₀ + P` (§2), for every vertex
 control. -/
 theorem iso_vfM_eq (m : Fin 3) (q : iso_PhasePt) (t : ℝ) :
     iso_vfM m q t =
@@ -376,7 +376,7 @@ theorem iso_vfM_eq (m : Fin 3) (q : iso_PhasePt) (t : ℝ) :
     conj_cancel_of_mul_eq_one (Matrix.exp_neg_smul_mul_exp_smul _ t)]
 
 /-- `c(t) = ⟨M(t), X₀⟩ - H(e_m)(q)` along the `e_m`-flow (conservation of `H(e_m)`); on
-`H(e₂) = 0` this is the identity `c = ⟨M, X₀⟩` of §1.3. -/
+`H(e₂) = 0` this is the identity `c = ⟨M, X₀⟩` of §2. -/
 theorem iso_vfC_eq_sub (m : Fin 3) (q : iso_PhasePt) (t : ℝ) :
     iso_vfC m q t = traceForm (iso_vfM m q t) q.1 - phaseHam q (vertex m) := by
   have h := hamiltonian_vertexFlow m q t
@@ -426,7 +426,7 @@ private lemma trace_arcLamTilde (q : iso_PhasePt) (t : ℝ) :
   rw [← intervalIntegral.integral_add (hi 0 0) (hi 1 1)]
   simp only [hz, intervalIntegral.integral_zero, sub_zero]
 
-/-- **The cleared numerators through `φ_e`, `φ_f`** (proof of Theorem 1.3):
+/-- **The cleared numerators through `φ_e`, `φ_f`** (proof of Theorem 2.3):
 `N₂₁(t) = -(2ε/3) e^{-t/ε} φ_e(t)` and `N₂₃(t) = (8ε/3) e^{t/ε} φ_f(t)` along the `e₂`-flow. -/
 theorem switchingNum_iso_vertexFlow_one (hX : IsStarState q.1) (hR : q.2.2.trace = 0) (t : ℝ) :
     switchingNum 1 0 (iso_vertexFlow 1 q t) =
@@ -495,7 +495,7 @@ private lemma arcPhiF_deriv_identity (M X : Mat2) {ε xe xf : ℝ} (hε : ε ≠
   field_simp
   ring
 
-/-- **The derivatives of `φ_e`, `φ_f`** (proof of Theorem 1.3), on `H(e₂) = 0`:
+/-- **The derivatives of `φ_e`, `φ_f`** (proof of Theorem 2.3), on `H(e₂) = 0`:
 `φ_e' = -2⟨M, V_e⟩` and `φ_f' = 2⟨M, V_f⟩`. -/
 theorem hasDerivAt_arcPhi (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) = 0) (t : ℝ) :
     HasDerivAt (arcPhiE q) (-2 * traceForm (iso_vfM 1 q t) (arcVe q.1)) t ∧
@@ -536,7 +536,7 @@ theorem hasDerivAt_arcPhi (hX : IsStarState q.1) (hH : phaseHam q (vertex 1) = 0
   · rw [hcM, iso_vfP_one_eq hX]
     exact arcPhiF_deriv_identity _ _ hε hq1
 
-/-- **`⟨M(t), V_e⟩` in closed form** (proof of Theorem 1.3):
+/-- **`⟨M(t), V_e⟩` in closed form** (proof of Theorem 2.3):
 `u ⟨Λ₁(0), V_e⟩ - (√3/2)(2x_e + x_e² u/ε + 4ε/u)`, `u = e^{-t/ε}`. -/
 theorem traceForm_iso_vfM_arcVe (hX : IsStarState q.1) (t : ℝ) :
     traceForm (iso_vfM 1 q t) (arcVe q.1) =
@@ -548,7 +548,7 @@ theorem traceForm_iso_vfM_arcVe (hX : IsStarState q.1) (t : ℝ) :
     exp_conj_ofFrame hX, three_halves_mul_traceForm_J_ofFrame]
   ring
 
-/-- **`⟨M(t), V_f⟩` in closed form** (proof of Theorem 1.3):
+/-- **`⟨M(t), V_f⟩` in closed form** (proof of Theorem 2.3):
 `u⁻¹ ⟨Λ₁(0), V_f⟩ + (√3/2)(-2x_f + ε u + 4x_f²/(ε u))`. -/
 theorem traceForm_iso_vfM_arcVf (hX : IsStarState q.1) (t : ℝ) :
     traceForm (iso_vfM 1 q t) (arcVf q.1) =
@@ -560,7 +560,7 @@ theorem traceForm_iso_vfM_arcVf (hX : IsStarState q.1) (t : ℝ) :
     exp_conj_ofFrame hX, three_halves_mul_traceForm_J_ofFrame]
   ring
 
-/-! ### The costate in the moving eigenbasis (INV (1.4)) -/
+/-! ### The costate in the moving eigenbasis ((5.4)) -/
 
 /-- A traceless matrix in the basis `A = X₀ + P`, `V_e`, `V_f` (dual to itself up to the pairings
 `⟨A, A⟩ = 1/(2ε²)`, `⟨V_e, V_f⟩ = 1/ε²`, the others `0`). -/
@@ -584,14 +584,14 @@ private lemma exp_smul_conj_self (B : Mat2) (t : ℝ) :
   rw [← (Matrix.commute_exp_smul B t).eq, Matrix.mul_assoc, Matrix.exp_smul_mul_exp_neg_smul,
     Matrix.mul_one]
 
-/-- **INV (1.4): the costate along the `e₂`-arc in the moving eigenbasis** (INV Theorem 1 (i)).
+/-- **(5.4): the costate along the `e₂`-arc in the moving eigenbasis** (Theorem 5.1 (i)).
 For `X₀` a star state and `Λ₁(0)` traceless, with `u = e^{-t/ε}`, `A = X₀ + P`,
 `Λ₁(t) = α (X(t) + P) + β u⁻² V_e(X(t)) + γ u² V_f(X(t))`, where `α = 2ε² ⟨Λ₁(0), A⟩`,
 `β = ε² ⟨Λ₁(0), V_f⟩` and `γ = ε² ⟨Λ₁(0), V_e⟩`. No quadrature and no logarithm: the costate is
 an algebraic function of `u`. On a section point `α, β, γ` are explicit in the parameters
 (`iso_vfΛ₁_one_eq_arcParams`, `SmoothedPolygons/Ch14/ArcPoincareMap.lean`).
 
-Route (INV §1, proof of INV Theorem 1 (i)):
+Route (§5, proof of Theorem 5.1 (i)):
 1. *The basis.* In the frame `A = ofFrame (-ε - ω) x_e x_f` (`frame_state`, `iso_vfP_one_eq`,
    `ω = 1/(2ε)`), `V_e = ofFrame x_e (-x_e²/ε) ε`, `V_f = ofFrame x_f ε (-x_f²/ε)`; with
    `x_e x_f = -(1 + ε²)` and `traceForm_ofFrame`: `⟨A, A⟩ = 1/(2ε²)`, `⟨V_e, V_f⟩ = 1/ε²`, and

@@ -1958,7 +1958,7 @@ methods such as interval arithmetic", which they have not done (TeX 11951–1195
   which the running text reads off the computation (TeX 11983–11991).
 
 **Here:** by the user's decision the formalization proves the computed fact instead of computing
-it: N4 ([`UnstableCurveLeavesStarDomain`](../../SmoothedPolygons/Ch14/UnstableCurve.lean#L174), Section 6) is [`unstableCurveLeavesStarDomain`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L338), proved
+it: N4 ([`UnstableCurveLeavesStarDomain`](../../SmoothedPolygons/Ch14/UnstableCurve.lean#L174), Section 6) is [`unstableCurveLeavesStarDomain`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L330), proved
 without locating the curve.
 
 - Along an `e₂`-arc `ρ₁ = ε` is constant and the flow is hyperbolic with rate `1/(2ε)`, so the
@@ -1968,9 +1968,10 @@ without locating the curve.
 - An explicit region `𝒢*` of section points, which contains every chart point near the fixed
   point, is kept by that step until an arc leaves the star domain, while `r` grows and `ρ₁` drops
   by `2r` at each step.
-- So every orbit in `𝒢*` leaves the star domain ([`arcRegionInvariant`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L326), by polynomial identities,
-  three Bernstein certificates with nonnegative rational coefficients and inequalities for `log`;
-  Section 7).
+- So every orbit in `𝒢*` leaves the star domain ([`arcRegionInvariant`](../../SmoothedPolygons/Ch14/ArcRegionInvariant.lean#L318): the relation
+  `det Λ₁ = 9/4` at the next point forbids `q > 0` there, and monotonicity with
+  `log(16/5) > 297/256` gives the exit; Section 7). The proof is written up for the book's authors
+  in [docs/unstable-curve.pdf](../unstable-curve.pdf).
 - The uncited steps are proved ([`IsChatteringArcOutOf.eventually_mem_localUnstableSet`](../../SmoothedPolygons/Ch16/ClusterPoint.lean#L921), which
   needs no numerical fact, and [`exists_isChatteringArcInto`](../../SmoothedPolygons/Ch16/ClusterCoordinates.lean#L376)).
 - With N4 the book's proof gives Theorem 14.4.1 ([`theorem14_4_1`](../../SmoothedPolygons/Ch14/NoReturnProof.lean#L170),
@@ -2131,7 +2132,7 @@ numerical facts of Theorem 16.1.1 suffice (Section 7).
   (TeX 11931–11932).
 - **Here:** the formalization needs neither: N4 is stated on the local curve, for the forward
   orbits of the Reinhardt–Poincaré map, and its proof shows that `r` increases along every orbit in
-  `𝒢*` ([`radius_lt_of_mem_arcRegion`](../../SmoothedPolygons/Ch14/ArcConditions.lean#L409); E88).
+  `𝒢*` ([`radius_lt_of_mem_arcRegion`](../../SmoothedPolygons/Ch14/ArcConditions.lean#L399); E88).
 
 ### E94
 
@@ -2309,6 +2310,6 @@ states them:
   support of `f` and the convexity hypotheses.
 
 The lemmas of the proof of N4 (E88), which are not results of the book, are stated without the
-hypotheses that their proofs turned out not to need: for instance INV Proposition 3
-([`ArcParams.Phi_nonpos`](../../SmoothedPolygons/Ch14/ArcStepRegion.lean#L361)), whose written proof assumes `f₀ ≥ 0`, needs no sign of `f₀`, since the
-terms in `f₀` cancel in its identity (Section 7).
+hypotheses that their proofs turned out not to need: for instance Lemma 6.2 of
+[docs/unstable-curve.pdf](../unstable-curve.pdf) ([`ArcParams.pNew_lt`](../../SmoothedPolygons/Ch14/ArcStepRegion.lean#L245)) is stated without `Y ≥ 2`, which its
+proof does not use (Section 7).

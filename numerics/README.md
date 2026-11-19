@@ -58,7 +58,7 @@ bound). Coordinates are `(r2, psi, theta2)`.
 | `BoxSubclaims` (seven boxes) | **proved** | 6,392 | 111 s | see below | > 0 |
 | `CellTwoEntersDOut` | **not finished**: proved on 74.2% of the closed cell (volume) | 140,107 | 29 min (time limit 120 s per root box) | 0.789 on the grid; 0.373 in the unproved part; 1.1 - π/3 = 0.0528 is the infimum (a corner limit, earlier report) | > 0 where proved |
 | `remark15_3_1`, `remark15_3_1_segment` | **true**: the 14 numerical claims, and the fixed points | (points) | < 1 s | | |
-| `UnstableCurveLeavesStarDomain` (Ch14; proved in Lean without computation) | **true** on 500 orbits of `W^u`; (INV) true at 63,530 sampled switching points of `G*`; the certificates hold exactly (see the N4 section) | 500 orbits (4,182 arcs); 68,875 points of `G*` | 36 s | exit arcs on `W^u`: `min F = 1.55e-4` at `r = 0.06497` (next to the threshold); (INV) `0.0417` at the corner `x = y = 1e-9` of `G*` | every sign on the 500 orbits (Arb) |
+| `UnstableCurveLeavesStarDomain` (Ch14; proved in Lean without computation) | **true** on 500 orbits of `W^u`; (INV) true at 63,530 sampled switching points of `G*`; the identities of its proof hold exactly (see the N4 section) | 500 orbits (4,182 arcs); 68,875 points of `G*` | 36 s | exit arcs on `W^u`: `min F = 1.55e-4` at `r = 0.06497` (next to the threshold); (INV) `0.0417` at the corner `x = y = 1e-9` of `G*` | every sign on the 500 orbits (Arb) |
 
 `DOutContracts`, the second conjunct, for three choices of witnesses (`B = Icc lo hi`; every stage is
 one step `F(X) ⊆ Y` from all of `X`; `κ` bounds the sup-norm row sums of the Jacobian of the branch
@@ -195,15 +195,16 @@ proves N4 without computation (`unstableCurveLeavesStarDomain`, through (INV), `
 This is the reference for it. The dynamical system is the Reinhardt system in the chart of
 Chapter 14, not the Fuller system, so `boxmap` plays no part: every `e2`-arc is a closed-form
 exponential polynomial (`reinhardt.py`), and the Poincaré map is an explicit map of the arc
-parameters (`arcmap.py`). Run of 2026-11-15, `--jobs 12`, 36 s; the results were written to
+parameters (`arcmap.py`). The numbering is that of `docs/unstable-curve.pdf`. Run of 2026-11-18,
+`--jobs 12`, 37 s; the results were written to
 `notes/n4num/results.json` (log `notes/n4num/run_unstable.log`); the default `--out` merges them into
 `notes/ref/results.json`.
 
 | part | arithmetic | what is computed | result |
 | --- | --- | --- | --- |
 | 1 `checks/unstable_curve.py` (`wucurve`, 15 s) | mpmath, 110 digits (the curve), **Arb, 512 bits** (the orbits), mpmath, 60 digits (the threshold) | `W^u` by the graph transform and its Taylor data. 500 seeds on a fundamental domain `[1e-7, 6.27e-7)`, followed to the exit; per arc the switching time, the exit time `eps log Y`, the signs of `SwitchEntersE2`, `ArcSwitchesToE1`, `ArcLeavesStarDomain`, and `K`. The threshold `s*` by bisection | all 500 orbits switch cyclically and then exit, with every sign decided in balls. Rigorous for each seed phase point; the seeds lie on `W^u` only to about `1e-26` (not certified) |
-| 2 `checks/arc_invariant.py` (`arcinv`, 20 s) | mpmath, 60 digits (sampled, not rigorous) | (INV) on 45,760 samples (a grid and random points, down to `r = 3e-10`, and to within `1e-10` to `3e-8` of the faces E, P1, P2, P4 of `G*` in the natural scales), both roots `q` of (2.1); the sharp form, INV Prop. 5, `rel = 0` at the image; 400 images against the closed-form flow | 0 failures among 63,530 switching points: 57,811 images in `G*`, 7,621 exit, 1,902 both |
-| 3 `checks/arc_certificates.py` (`arccert`, 1 s) | sympy, exact | the 3 Bernstein certificates (`K~`: 26 coefficients; `tau_q`: 12 lists; `U`: 18 lists) and 12 identities (7 `linear_combination` cofactors, 5 polynomial identities), read off the Lean source | all hold |
+| 2 `checks/arc_invariant.py` (`arcinv`, 20 s) | mpmath, 60 digits (sampled, not rigorous) | (INV) on 45,760 samples (a grid and random points, down to `r = 3e-10`, and to within `1e-10` to `3e-8` of the faces E, P1, P2, P4 of `G*` in the natural scales), both roots `q` of (3.1); the sharp form (Theorem 6.5), Lemmas 6.1 (ii), 6.2 and 6.3, `rel = 0` at the image; 400 images against the closed-form flow | 0 failures among 63,530 switching points: 57,811 images in `G*`, 7,621 exit, 1,902 both |
+| 3 `checks/arc_certificates.py` (`arccert`, 1 s) | sympy, exact | 4 `linear_combination` cofactor identities read off the Lean source, `rel_eq`, and the identities of §6 of the note (the rearranged relation and `D` of Lemma 6.1, the closed forms of Lemma 6.2, `psi` of Lemma 6.3, the derivatives and `G(16/5)` of Lemma 6.4), some with the Lean definitions of `YNew`, `YNew'`, `pNew`, `psiE` | all hold |
 
 The figure's numbers:
 
@@ -220,14 +221,15 @@ Margins. On `W^u`, at `r < 0.01` in the natural scales: `f0/r^3 >= 6.63`, `p/r^2
 `min F on [0, log Y] = 1.55e-4`, attained next to the threshold. There the switch and the exit
 coincide, and `F(log Y)` is linear in `log s` with slope `0.3731`. Below `s*` the next arc is a cusp
 arc (`eps = 2.5e-4, 2.5e-9, 2.5e-17` at `s*(1 - delta)`, `delta = 1e-3, 1e-8, 1e-16`) and it exits.
-Each exit arc is also covered by a Lean lemma: Proposition 3.4 (3) (451 of 500), the cusp criterion
-(50), INV Lemma 6 (440). In (INV), the smallest `max(in, exit)` margin is `0.0417`, at the corner
-`x = y = 1e-9`, `f0/y^3 = p/y^2 = 1e-8` (on the smaller root, `q = -1.5 y`). Where `psi(s) < 0`,
-`Y_new >= 3.2853` (`>= 16/5`). INV Prop. 5 holds with `(f0 - q(1 - 1/Y))/f0 >= 0.498` at the image.
-The closed forms agree with `step` and with the flow to `1e-34`.
+Each exit arc is also covered by a Lean lemma: Proposition 4.4 (3) (451 of 500), Lemma 6.4 (440).
+In (INV), the smallest `max(in, exit)` margin is `0.0417`, at the corner `x = y = 1e-9`,
+`f0/y^3 = p/y^2 = 1e-8` (on the smaller root, `q = -1.5 y`). Where `psi(s) < 0`,
+`Y_new >= 3.2853` (`>= 16/5`, Lemma 6.3). At the images, Lemma 6.2 holds with
+`1 - 2 p_new/((2Y'_new - 1)(Y'_new - 2)) >= 0.784`, and Lemma 6.1 (ii) with
+`(f0 - q(1 - 1/Y))/f0 >= 0.498`. The closed forms agree with `step` and with the flow to `1e-34`.
 
 Findings: no disagreement with the Lean statements. At every sampled image of `G*`, `q_new` is the
 larger root of `R = 0` (63,530 of 63,530, whichever root the point itself was on), as the review
-found on 72 points (`ArcPoincareMap.lean`). The four-term normal form (Theorem 1.3), the section
-conditions at the images, the slope `-2 sqrt3 p/(Y' - 1)` and Theorem 2.1 with
-`q_new = Phi(s)/(Y - s)^2` all hold along the orbits within the balls (radii `<= 4e-65`).
+found on 72 points (`ArcPoincareMap.lean`); the Lean proof does not need to know which. The
+four-term normal form (Theorem 2.3), the section conditions at the images, the slope
+`-2 sqrt3 p/(Y' - 1)` and Theorem 5.1 with `q_new = Phi(s)/(Y - s)^2` (computed here) all hold along the orbits within the balls (radii `<= 4e-65`).

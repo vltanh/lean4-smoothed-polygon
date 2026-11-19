@@ -9,8 +9,9 @@ How this formalization was made, from the run log and the session transcript.
   formula by the Leibniz expansion instead of the book's argument, and proving Theorem 3.1.4(3)
   with the hypothesis that the tangents are Lipschitz (E13). The later rounds' decisions are listed
   under each round below.
-- **Formalization:** Claude Opus 5.5 (`claude-opus-5-5`) in Claude Code 2.1.318 and 2.1.323 (VS Code
-  extension, Claude Agent SDK), in one session, with sub-agents of the same model. There was no
+- **Formalization:** Claude Opus 5.5 (`claude-opus-5-5`) in Claude Code 2.1.318, 2.1.323 and 2.1.327
+  (VS Code extension, Claude Agent SDK), in one session (a second one for the twelfth round), with
+  sub-agents of the same model. There was no
   earlier draft; the project was written from scratch.
 - **Procedure:** the [formalize-math-paper](https://github.com/vltanh/formalize-math-paper) skill
   (local copy dated 17 October 2026; versions 3.0.1 to 3.2.5 of its repository in the fourth
@@ -551,3 +552,35 @@ that completes this round's documents (17:56 CST), from the session transcript:
 For the whole project (eleven rounds, to the same time): 243.8 hours elapsed (including the
 stops), 261 sub-agents (240 on the formalization and its three packages; at most 13 at once), 116.1
 hours of sub-agent work, 21,528 tool calls by sub-agents and 2,181 by the main session.
+
+## Twelfth round (18 November 2026)
+
+The user asked whether the book's computed unstable curve (Figure 14.2) had been replaced by a
+rigorous argument, and then for a write-up of that proof for the book's authors. The user decided:
+- the write-up is a PDF for the book's authors ([docs/unstable-curve.pdf](docs/unstable-curve.pdf)): a
+  verdict on the book's numerical argument first, then the strategy, then each step with its
+  motivation, in the book's terms rather than the formalization's internal names;
+- the Bernstein certificates of the one-step statement (INV) are replaced by an argument a reader
+  can follow, and the Lean proof is changed to match the write-up.
+
+How it was made (the main session only, no sub-agents):
+
+- **The certificate-free argument:** the relation `det Λ₁ = 9/4` at the next point forbids `q > 0`
+  there because `p` is small (Lemmas 6.1–6.2 of the note). It was found by hand and checked by
+  computer algebra and on about 46,000 sampled points before it was formalized.
+- **The Lean port:** Lemmas 6.1–6.2 and Theorem 6.5 on the new route, and the exit criterion by
+  monotonicity. The certificates, the closed form of `q_new` and an unused cusp criterion were
+  removed, and the N4 modules were renumbered to the note.
+- **The numerical reference** was updated to the new route and run again, and the documents were
+  updated.
+
+Figures, from the session transcript (18 November 2026, 17:07 to 18:12 CST):
+
+- elapsed time: 1.1 hours;
+- sub-agents: none;
+- tool calls: 147 by the main session;
+- tokens: 0.37M output, 0.67M input (uncached input and cache writes), 58M cache reads;
+- model calls: `claude-opus-5-5` only, 139; Claude Code 2.1.327.
+
+For the whole project (twelve rounds): 261 sub-agents, 116.1 hours of sub-agent work, 21,528 tool
+calls by sub-agents and 2,328 by the main sessions.

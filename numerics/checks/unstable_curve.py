@@ -27,20 +27,20 @@ This module (part 1 of the ``unstable`` check; parts 2 and 3 are ``arc_invariant
    every sign below is decided by ball arithmetic (an undecided sign is reported, never guessed):
    ``rho_0, rho_1, rho_2 > 0`` (a star state), P1 ``f0 > 0``, P4 ``p > 0``, ``r > 0`` at every
    point, and ``SwitchEntersE2`` directly (``H(e1) < H(e2)``, and the slope of ``H(e3) - H(e2)``
-   along the ``e3``-flow, from the vector field, is ``< 0``; also Proposition 3.4 (1),
+   along the ``e3``-flow, from the vector field, is ``< 0``; also Proposition 4.4 (1),
    ``switchEntersE2_of_arc``, from P1 and P4); on a switching arc P2 ``q <= 0`` and
-   ``F(log Y) < 0`` (Proposition 3.4 (2), ``arcSwitchesToE1_of_arc``: ``ArcSwitchesToE1``), the
+   ``F(log Y) < 0`` (Proposition 4.4 (2), ``arcSwitchesToE1_of_arc``: ``ArcSwitchesToE1``), the
    switching root ``tau_sw`` isolated in a ball (``F`` is monotone between its explicit critical
    points), ``f'(tau_sw) < 0``, ``g > 0`` on ``(0, tau_sw]``; on the last arc ``f > 0`` on
    ``[0, log Y]`` and ``g > 0`` on ``(0, log Y]`` directly from the monotone pieces
-   (``ArcLeavesStarDomain`` with ``T = eps log Y``, through the signs of Theorem 1.3), and which
-   Lean lemma also covers it (Proposition 3.4 (3), the cusp criterion, INV Lemma 6). The next point
+   (``ArcLeavesStarDomain`` with ``T = eps log Y``, through the signs of Theorem 2.3), and which
+   Lean lemma also covers it (Proposition 4.4 (3), Lemma 6.4). The next point
    is ``Ad_{R^-1}`` of the state at ``t_sw = eps tau_sw``, in balls. Per arc also: the switching and
-   exit times, the residuals of the four-term normal form (Theorem 1.3: the computed exponential
+   exit times, the residuals of the four-term normal form (Theorem 2.3: the computed exponential
    polynomials of ``N21``, ``N23`` against ``f``, ``g``), of the section conditions, of
-   ``Theorem 2.1`` + ``q_new = Phi(s)/(Y - s)^2`` against the flow, and the ``e3``-slope against
+   Theorem 5.1 + ``q_new = Phi(s)/(Y - s)^2`` (computed here) against the flow, and the ``e3``-slope against
    ``-2 sqrt3 p/(Y' - 1)`` (``hasDerivAt_e3_sub_e2``). Rigorous modulo the correctness of this code,
-   python-flint, and the Lean theorems that turn these signs into the predicates (Theorem 1.3 and
+   python-flint, and the Lean theorems that turn these signs into the predicates (Theorem 2.3 and
    ``phaseHam_signs_along_arc``: the switching functions have the signs of ``f``, ``g`` on
    ``[0, T)``;
    ``reinSwitchTime_eq_tauSw``, ``rho_2_iso_vfX_one_arcExitTime``: ``t_sw = eps tau_sw``, the exit at
@@ -133,7 +133,7 @@ def arc_record(q, num, C):
     ch = rh.lie_chart_inv(q, num)
     rec['x'] = [_f(num, v) for v in ch[1]]
     rec.update({k: _f(num, d[k]) for k in ('eps', 'Y', 'Yp', 'f0', 'q', 'p')})
-    # the signs at the point (Proposition 3.4 (1): SwitchEntersE2)
+    # the signs at the point (Proposition 4.4 (1): SwitchEntersE2)
     rec['star'] = all(sg(v) > 0 for v in d['rho'])      # IsStarState (det X = 1 by the chart)
     rec['P1'] = sg(d['f0']) > 0
     rec['P4'] = sg(d['p']) > 0
@@ -141,7 +141,7 @@ def arc_record(q, num, C):
     rec['P2'] = sg(-d['q']) >= 0
     rec['E'] = sg(a.region_margins()['E']) >= 0
     rec['in G*'] = rec['P1'] and rec['P4'] and rec['r>0'] and rec['P2'] and rec['E']
-    # residuals: section conditions; Theorem 1.3 (the four-term normal form)
+    # residuals: section conditions; Theorem 2.3 (the four-term normal form)
     res = rh.section_residuals(q, C, num)
     rec['res_section'] = max(abs(_f(num, v)) + num.rad(v) for v in res.values())
     nrm = 8 * eps ** 3 / s3
@@ -195,13 +195,11 @@ def arc_record(q, num, C):
                                   and sg(em['G']) > 0 and sg(em['G0slope']) > 0)
     lem = []
     if rec['P1'] and rec['P2'] and rec['P4'] and rec['r>0']:
-        lem.append('Prop 3.4 (3)')
+        lem.append('Prop 4.4 (3)')
     try:
-        if rec['P4'] and rec['r>0'] and sg(a.A + (a.B if sg(a.B) < 0 else num.zero) - a.Y) > 0:
-            lem.append('cusp criterion')
         if (rec['P1'] and rec['P4'] and rec['r>0'] and sg(a.Y - num.mk(16) / 5) >= 0
                 and sg(a.f0 - a.q * (1 - 1 / a.Y)) >= 0):
-            lem.append('INV Lemma 6')
+            lem.append('Lemma 6.4')
     except Undecided:
         lem.append('(undecided)')
     rec['Lean lemmas'] = lem
@@ -328,10 +326,10 @@ def run(quick=False):
     from . import arc_invariant, arc_certificates
     out = {'1. W^u and N4 along its orbits': run_curve(quick)}
     out['2. (INV) sampled (mpmath)'] = arc_invariant.run(quick)
-    out['3. the certificates, exactly (sympy)'] = arc_certificates.run(quick)
+    out['3. the identities, exactly (sympy)'] = arc_certificates.run(quick)
     o = out['1. W^u and N4 along its orbits']['orbits (Arb)']
     out['ok'] = (o['undecided_or_failed'] == 0 and out['2. (INV) sampled (mpmath)']['ok']
-                 and out['3. the certificates, exactly (sympy)']['ok'])
+                 and out['3. the identities, exactly (sympy)']['ok'])
     return out
 
 

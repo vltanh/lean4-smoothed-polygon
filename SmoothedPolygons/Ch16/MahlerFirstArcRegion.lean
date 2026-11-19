@@ -29,7 +29,7 @@ curve numerically (Figure 14.2, TeX 11951–11991); the formalization proves N4 
   (`SmoothedPolygons/Ch16/MahlerFirst.lean`), from Theorem 14.4.1 and Table 16.1.
 * `theorem16_3_1_unconditional`: Mahler's First conjecture,
   `theorem16_3_1_of_unstableCurveLeavesStarDomain` applied to N4.
-* `theorem16_3_1_of_arcRegionInvariant`: the form conditional on (INV) alone (Theorem 5.2 of the
+* `theorem16_3_1_of_arcRegionInvariant`: the form conditional on (INV) alone (Theorem A of the
   N4 proof, `unstableCurveLeavesStarDomain_of_arcRegionInvariant`); (INV) is now proved, so it is
   a corollary.
 -/
@@ -65,7 +65,7 @@ theorem noChatteringIntoSingularLocus : NoChatteringIntoSingularLocus :=
 bang-bang solution with finitely many switches, and the minimizer `K_min` is a finite-sided
 smoothed polygon with rounded hyperbolic arcs at each corner of the sort described by Reinhardt and
 Mahler. (INV) is proved (`arcRegionInvariant`), so this is a corollary of
-`theorem16_3_1_unconditional`; it records the reduction of N4 to (INV) (Theorem 5.2,
+`theorem16_3_1_unconditional`; it records the reduction of N4 to (INV) (Theorem A,
 `unstableCurveLeavesStarDomain_of_arcRegionInvariant`). -/
 theorem theorem16_3_1_of_arcRegionInvariant (h : ArcRegionInvariant) :
     (∀ (T : ℝ) (u : ℝ → Fin 3 → ℝ) (g X : ℝ → Mat2), IsReinhardtMinimizer T u g X →

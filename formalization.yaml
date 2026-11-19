@@ -34,9 +34,10 @@ project:
     Table 16.1 and the global unstable curve of Figure 14.2. By the user's decision they are proved
     without computer assistance, by the exact structure of the maps and a few explicit
     inequalities (for the curve, a closed form of the Reinhardt flow along an arc and an explicit
-    region that one step of the Poincare map keeps until an arc leaves the star domain). The
-    certificates that a computer found (Bernstein coefficients, polynomial cofactors) are checked by
-    Lean tactics, with no enumeration of boxes. A
+    region that one step of the Poincare map keeps until an arc leaves the star domain; written up
+    for the book's authors in docs/unstable-curve.pdf). The few certificates that a computer found
+    (polynomial cofactors, products for nlinarith) are checked by Lean tactics, with no enumeration
+    of boxes. A
     Python reference in ball arithmetic checks the facts numerically.
 
 
@@ -881,14 +882,11 @@ fidelity:
     switching functions are explicit (exponential sums with four terms), one step of the
     Reinhardt-Poincare map is an explicit map of four parameters, and an explicit region of section
     points that contains every chart point near the fixed point is kept by it until an arc leaves
-    the star domain ((INV), by polynomial identities, three Bernstein certificates with nonnegative
-    rational coefficients and inequalities for the logarithm). No proof enumerates boxes; the
-    certificates found by computer (Bernstein coefficients, cofactors for linear_combination,
-    products for nlinarith chosen by a linear program) are checked by Lean
-    tactics. The Lean proof of N4 departs from its written proof in three places with the same
-    statements (one lemma by inequalities for the logarithm instead of monotonicity, three steps as
-    one identity, and the update rules of the map from a closed form of the costate instead of
-    Poisson brackets). The second clause of Proposition 15.3.2, read off Figure 15.3, is proved by
+    the star domain ((INV): the relation det Lambda_1 = 9/4 at the next point forbids q > 0 there,
+    because p is small, and monotonicity with log(16/5) > 297/256 gives the exit). No proof
+    enumerates boxes; the certificates found by computer (cofactors for linear_combination,
+    products for nlinarith chosen by a linear program) are checked by Lean tactics. The Lean proof
+    of N4 follows its write-up for the book's authors, docs/unstable-curve.pdf, step by step. The second clause of Proposition 15.3.2, read off Figure 15.3, is proved by
     an exact deformation (E72). Theorem 14.4.1 follows the book's proof from N4, with the steps it
     does not cite proved (E88).
     Every other proof follows the book's argument; the remaining
@@ -971,9 +969,10 @@ review:
     agent confirmed the written proof of the single-step statement (INV) and assembled it in Lean
     from the statements; another compared Theorem 14.4.1 and the proofs of the three facts of Table
     16.1 with the book and found an interval chain described as written by hand (corrected); and
-    another checked the proof of N4: it re-derived every certificate exactly with sympy, checked the
+    another checked the proof of N4: it re-derived its identities exactly with sympy, checked the
     axioms with every module imported with import all, and found no wrong statement and nothing
-    unsound or vacuous. For Sections 9.0-9.1, one agent reviewed the statements against the TeX
+    unsound or vacuous. The one-step statement (INV) was later given a shorter proof (Lemmas
+    6.1-6.2 of docs/unstable-curve.pdf), checked by Lean. For Sections 9.0-9.1, one agent reviewed the statements against the TeX
     source and Sussmann's paper, with its own numerical model of the dynamics, the lift of the
     costate and the conservation law, and another compared the finished proofs with the book's,
     step by step, and found every difference recorded and no false statement. No person has
