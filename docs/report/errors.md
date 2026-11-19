@@ -2132,7 +2132,7 @@ numerical facts of Theorem 16.1.1 suffice (Section 7).
   (TeX 11931–11932).
 - **Here:** the formalization needs neither: N4 is stated on the local curve, for the forward
   orbits of the Reinhardt–Poincaré map, and its proof shows that `r` increases along every orbit in
-  `𝒢*` ([`radius_lt_of_mem_arcRegion`](../../SmoothedPolygons/Ch14/ArcConditions.lean#L399); E88).
+  `𝒢*` ([`radius_lt_of_mem_arcRegion`](../../SmoothedPolygons/Ch14/ArcConditions.lean#L400); E88).
 
 ### E94
 
