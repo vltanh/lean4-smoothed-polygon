@@ -54,9 +54,9 @@ before the next switching time. The proof of Theorem~14.4.1 rests on the second 
 remarks that the computation might be repeated with more rigorous numerical methods such as
 interval arithmetic. This note proves both facts with no numerical computation.
 
-The notation is the book's. The symbols that this note introduces are defined where they first
-appear. Numbers with three parts (Theorem~14.4.1) refer to the book, and numbers with two parts
-(Lemma~6.1) refer to this note.
+We use the book's notation and define each new symbol where it first appears. Numbers with
+three parts (Theorem~14.4.1) refer to the book, and numbers with two parts (Lemma~6.1) to this
+note.
 
 \section*{Summary: is the book's numerical argument correct?}
 
@@ -67,21 +67,21 @@ reaches the boundary of the star domain before switching at $r\approx0.0649$ (th
 ``about $0.065$''), and it finds that the unstable curve reaches the boundary of the star domain
 near $(r,\tilde x_{21})\approx(0.2098,\,-3.0333)$ (the book gives $(0.21,\,-3.03)$).
 
-The argument's only weakness is that it was not certified. Figure~14.2 joins 434 computed points
-by a piecewise linear curve, and, as the book notes, the computation was not repeated with
+The only weakness is that the computation was not certified. Figure~14.2 joins 434 computed
+points by a piecewise linear curve, and, as the book notes, the computation was not repeated with
 rigorous numerics. The surrounding proofs also have three gaps of exposition. The proof of
 Theorem~14.4.1 uses, without citing them, the time reversal of the second part of
-Theorem~16.4.1 and Lemma~8.3.4. Theorem~14.3.3 states without argument that near the fixed point
-the local stable manifold is the exceptional divisor. Section~8 fills all three. None of this
-changes a conclusion of the book.
+Theorem~16.4.1 and Lemma~8.3.4, and Theorem~14.3.3 states without argument that near the fixed
+point the local stable manifold is the exceptional divisor. Section~8 fills all three; none of
+them affects a conclusion of the book.
 
 \section*{The idea of the proof}
 
-We must show the following. Start at a point of the Poincar\'e section near the fixed point
-$(0,\tilde x_{out})$, off the exceptional divisor ($r>0$), and iterate the Reinhardt-Poincar\'e
-map $F$: follow the constant control $Z_{010}$ until the switching function $\chi_{21}$ vanishes,
-then rotate by $\Ad_{R^{-1}}$. The switching sequence stays cyclical, and after finitely many steps
-a trajectory reaches the boundary of the star domain before it can switch.
+Start at a point of the Poincar\'e section near the fixed point $(0,\tilde x_{out})$, off the
+exceptional divisor ($r>0$), and iterate the Reinhardt-Poincar\'e map $F$: follow the constant
+control $Z_{010}$ until the switching function $\chi_{21}$ vanishes, then rotate by $\Ad_{R^{-1}}$.
+We must show that the switching sequence stays cyclical and that after finitely many steps a
+trajectory reaches the boundary of the star domain before it can switch.
 
 A computation along the curve cannot settle this alone. Near the exceptional divisor the map
 multiplies $r$ by about $\rs\approx6.27$ per step, so an orbit that starts at a small $r$ needs
@@ -97,25 +97,25 @@ solutions of Chapter~7 take a simple form. The trajectory reaches the boundary o
 at an explicit time, and each switching function, with its denominators cleared, is a sum of four
 exponential terms.
 \item \emph{A point of the Poincar\'e section is a few numbers} (\S\S2--5). Six numbers, tied by
-two relations, describe a point of the section. Each has a meaning: a ratio of star functions,
-the gap between two Hamiltonians, or the slope of a switching function. One step of $F$ becomes an
-explicit rule for updating them. The rule involves one more number, $\eta$, which records when the
-switch happens.
+two relations, describe a point of the section. Three describe the state ($\rho_1$ and two ratios
+of star functions), and three describe the costate (the gap between two Hamiltonians at the point,
+and slopes of switching functions). One step of $F$ becomes an explicit rule for updating them.
+The rule involves one more number, $\eta$, which records when the switch happens.
 \item \emph{A budget} (\S5). The star function $\rho_1$ drops by exactly $2r$ at each step. If
 the values of $r$ at the switching points never decrease, an orbit starting at $r_0>0$ can take
 at most $\rho_1/(2r_0)$ steps.
 \item \emph{A trapping region} (\S\S6--7). Five sign conditions on the six numbers define a
 region $\T$ of the section. It contains every point near $(0,\tilde x_{out})$ with $r>0$, and in
-it $r$ grows at each step. One step from $\T$ either stays in $\T$ or reaches a trajectory that
-reaches the boundary of the star domain before switching. With the budget, every orbit from $\T$
-ends with such a trajectory.
+it $r$ grows at each step. From a point of $\T$, one step of $F$ lands either in $\T$ again or on a
+point whose trajectory reaches the boundary of the star domain before switching. With the budget,
+every orbit from $\T$ ends at such a point.
 \end{enumerate}
 
 The unstable curve is never located. The argument covers every point near $(0,\tilde x_{out})$
 with $r>0$, on the curve or not.
 
 Most of the work is to show that $\T$ is kept. Three of its five conditions carry over to the
-next point by themselves; the other two need an argument, and it is short. The condition
+next point by themselves, and the other two need a short argument. The condition
 $\det(\Lambda_1)=9/4$ can be rearranged so that one of the six numbers ($k_2$ below) cannot be
 positive while another ($k_3$) is small, and at the next point $k_3$ is small because the
 trajectory switched before it reached the boundary of the star domain. When the next point lies
@@ -282,7 +282,7 @@ A direct computation in the coordinates of (2.2), using (2.1).
 \end{proof}
 
 The eigenvalues $\pm1/\rho_1$ of $\ad(X_0+P_0)$ are also the rates of $\Ad_{\exp(tP_0)}$ on the
-last two coordinates; this is Lemma~7.1.3 at work. The coincidence produces a resonant term
+last two coordinates; this is Lemma~7.1.3. The coincidence produces a resonant term
 $\vartheta e^{\mp\vartheta}$ below.
 
 At $q\in N_{9/4}$ we define three numbers from the costate:
@@ -515,8 +515,8 @@ k_3\nw=-\Bigl(\frac{\eta}{\mu_2-\eta}\Bigr)^2\varphi_{21}'(\vartheta\sw)
 The value of $r$ at $F(q)$ is $r\nw=(\rho_1-\rho_1\nw)/2$.
 \end{theorem}
 
-The formulas have a direct meaning. The rotation turns the side $\rho_2=0$ into the side
-$\rho_1=0$, so $\rho_1\nw$ is the distance $\rho_2$ at the moment of the switch. A switch close to
+The rotation turns the side $\rho_2=0$ into the side $\rho_1=0$, so $\rho_1\nw$ is the value of
+$\rho_2$ at the moment of the switch. A switch close to
 the boundary ($\eta$ near $\mu_2$) gives a next point close to a side of $\hstar$, with
 $\rho_1\nw$ small and $\mu_2\nw$, $\mu_0\nw$ large. By (5.2), $k_1\nw$ is the lead of $Z_{010}$
 over $Z_{001}$ at the switch, and $k_3\nw$ is the rate at which $Z_{100}$ overtook $Z_{010}$, both
@@ -570,8 +570,8 @@ $\frac{\mu_2-\eta}{\eta}<\frac1{\mu_2-1}$, which holds because $\eta>\mu_2-1$; a
 $r=\rho_1(\mu_0-2)/2$.
 \end{proof}
 
-Near the fixed point the right side of (5.3) tends to about $2.57$, while $\rs\approx6.27$. The
-bound is crude, but it is all we need. The last ingredient of this section is the budget.
+Near the fixed point the right side of (5.3) tends to about $2.57$, while $\rs\approx6.27$; the
+bound is crude, but it is enough.
 
 \begin{corollary}[the budget]
 If $q_0,\ q_1=F(q_0),\ \dots,\ q_n$ are defined, then
@@ -584,8 +584,9 @@ If $q_0,\ q_1=F(q_0),\ \dots,\ q_n$ are defined, then
 $\rho_1(q_{j+1})=\rho_1(q_j)-2r(q_{j+1})$ by Theorem~5.1, and $\rho_1>0$.
 \end{proof}
 
-Each step pays for its value of $r$ out of $\rho_1$. If these values never decrease, the orbit
-stops after at most $\rho_1(q_0)/(2r(q_0))$ steps. This replaces following the curve.
+Each step pays for its value of $r$ out of $\rho_1$, so if these values never decrease, the
+orbit stops after at most $\rho_1(q_0)/(2r(q_0))$ steps. This bound on the number of steps is what
+replaces following the curve.
 
 \section{The trapping region}
 
@@ -601,8 +602,8 @@ control at $q$ is $\ep_2$ (Proposition~4.4). The condition $k_2\le0$ makes $Z_{1
 most once (Lemma~4.3). The last one, which we call the \emph{expansion condition}, says that $r$
 grows, by (5.3); with $r>0$ it forces $\mu_2>2$ and $\mu_0<3$.
 
-By Corollary~5.2, the first three conditions hold at the next point automatically. The whole
-difficulty lies in the last two, and the plan is as follows. Lemma~6.1 turns the budget reading of
+By Corollary~5.2, the first three conditions hold at the next point automatically. The last two
+need the four lemmas below. Lemma~6.1 turns the budget reading of
 (3.1) into a sign test: when $k_3$ is small, $k_2$ cannot be positive. Lemma~6.2 shows that $k_3$
 is always small at the next point. Lemma~6.3 shows that the expansion condition carries over
 unless the next point is far from $X=J$ ($\mu_2\nw\ge16/5$), and Lemma~6.4 shows that from a point
@@ -618,7 +619,7 @@ $k_1\ge k_2\,(1-1/\mu_2)$.
 \end{lemma}
 
 Part (i) is the precise form of the budget: with $k_3$ small, (3.1) leaves no room for $k_2>0$.
-Part (ii) also holds far from $X=J$, and Lemma~6.4 uses it there.
+Part (ii) holds even far from $X=J$, where Lemma~6.4 uses it.
 
 \begin{proof}
 Rearrange (3.1) as
@@ -647,10 +648,10 @@ The large bracket on the right equals
 which is positive by (6.1). This proves (ii).
 \end{proof}
 
-Why is $k_3$ small at the next point? By (5.2), $k_3\nw$ is the rescaled rate at which $Z_{100}$
-overtook $Z_{010}$, and the overtaking happens in the last stretch of the trajectory, before it
-reaches the boundary. There the rate is limited by how far into that stretch the switch falls,
-that is, by $\eta-(\mu_2-1)<1$. The quantity $\mu_0\nw-2$ has no such limit.
+The next lemma says that $k_3$ is small at the next point. By (5.2), $k_3\nw$ is the rescaled
+rate at which $Z_{100}$ overtook $Z_{010}$, and the overtaking happens in the last stretch of the
+trajectory, before it reaches the boundary. There the rate is limited by how far into that stretch
+the switch falls, that is, by $\eta-(\mu_2-1)<1$, while $\mu_0\nw-2$ has no such limit.
 
 \begin{lemma}[$k_3$ is small at the next point]
 Let $q\in\T$ with $\Theta(\mu_2)<0$. Then $F(q)$ satisfies \textup{(6.1)}, and $\mu_2\nw>2$.
